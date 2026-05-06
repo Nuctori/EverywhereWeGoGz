@@ -213,7 +213,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_2",
@@ -315,7 +315,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_3",
@@ -417,7 +417,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_4",
@@ -520,7 +520,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_5",
@@ -636,7 +636,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_6",
@@ -752,7 +752,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_7",
@@ -868,7 +868,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_8",
@@ -984,7 +984,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_9",
@@ -1100,7 +1100,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_10",
@@ -1202,7 +1202,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_11",
@@ -1317,7 +1317,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_12",
@@ -1433,7 +1433,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_13",
@@ -1549,7 +1549,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_14",
@@ -1665,7 +1665,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_15",
@@ -1782,7 +1782,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_16",
@@ -1898,7 +1898,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_17",
@@ -2014,7 +2014,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_18",
@@ -2116,7 +2116,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_19",
@@ -2233,7 +2233,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_20",
@@ -2364,7 +2364,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.414933",
-    "updatedAt": "2026-05-07T03:49:58.414933"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_21",
@@ -2480,7 +2480,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_22",
@@ -2596,7 +2596,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_23",
@@ -2698,7 +2698,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_24",
@@ -2814,7 +2814,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_25",
@@ -2916,7 +2916,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_26",
@@ -3032,7 +3032,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_27",
@@ -3148,7 +3148,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_28",
@@ -3279,7 +3279,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_29",
@@ -3395,7 +3395,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_30",
@@ -3512,7 +3512,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_31",
@@ -3629,7 +3629,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_32",
@@ -3746,7 +3746,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_33",
@@ -3862,7 +3862,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_34",
@@ -3979,7 +3979,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_35",
@@ -4096,7 +4096,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_36",
@@ -4213,7 +4213,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_37",
@@ -4330,7 +4330,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_38",
@@ -4432,7 +4432,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_39",
@@ -4534,7 +4534,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_40",
@@ -4636,7 +4636,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_41",
@@ -4738,7 +4738,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_42",
@@ -4840,7 +4840,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_43",
@@ -4956,7 +4956,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_44",
@@ -5072,7 +5072,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_45",
@@ -5174,7 +5174,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_46",
@@ -5290,7 +5290,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_47",
@@ -5392,7 +5392,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_48",
@@ -5494,7 +5494,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.415934",
-    "updatedAt": "2026-05-07T03:49:58.415934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_49",
@@ -5596,7 +5596,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_50",
@@ -5698,7 +5698,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_51",
@@ -5814,7 +5814,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_52",
@@ -5916,7 +5916,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_53",
@@ -6032,7 +6032,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_54",
@@ -6148,7 +6148,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_55",
@@ -6250,7 +6250,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_56",
@@ -6366,7 +6366,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_57",
@@ -6482,7 +6482,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_58",
@@ -6598,7 +6598,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_59",
@@ -6700,7 +6700,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_60",
@@ -6802,7 +6802,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_61",
@@ -6918,7 +6918,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_62",
@@ -7034,7 +7034,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_63",
@@ -7150,7 +7150,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_64",
@@ -7252,7 +7252,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_65",
@@ -7354,7 +7354,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_66",
@@ -7470,7 +7470,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_67",
@@ -7586,7 +7586,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_68",
@@ -7702,7 +7702,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_69",
@@ -7804,7 +7804,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_70",
@@ -7934,7 +7934,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_71",
@@ -8037,7 +8037,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_72",
@@ -8153,7 +8153,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_73",
@@ -8269,7 +8269,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_74",
@@ -8385,7 +8385,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_75",
@@ -8487,7 +8487,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_76",
@@ -8603,7 +8603,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_77",
@@ -8719,7 +8719,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_78",
@@ -8850,7 +8850,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.416934",
-    "updatedAt": "2026-05-07T03:49:58.416934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_79",
@@ -8966,7 +8966,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_80",
@@ -9096,7 +9096,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_81",
@@ -9212,7 +9212,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_82",
@@ -9329,7 +9329,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_83",
@@ -9431,7 +9431,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_84",
@@ -9547,7 +9547,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_85",
@@ -9663,7 +9663,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_86",
@@ -9779,7 +9779,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_87",
@@ -9895,7 +9895,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_88",
@@ -9997,7 +9997,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_89",
@@ -10112,7 +10112,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_90",
@@ -10214,7 +10214,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_91",
@@ -10315,7 +10315,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_92",
@@ -10417,7 +10417,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_93",
@@ -10532,7 +10532,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_94",
@@ -10648,7 +10648,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_95",
@@ -10751,7 +10751,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_96",
@@ -10853,7 +10853,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_97",
@@ -10955,7 +10955,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_98",
@@ -11071,7 +11071,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_99",
@@ -11187,7 +11187,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_100",
@@ -11304,7 +11304,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_101",
@@ -11420,7 +11420,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_102",
@@ -11522,7 +11522,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_103",
@@ -11624,7 +11624,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_104",
@@ -11784,7 +11784,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_105",
@@ -11931,7 +11931,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_106",
@@ -12077,7 +12077,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.417935",
-    "updatedAt": "2026-05-07T03:49:58.417935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_107",
@@ -12237,7 +12237,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_108",
@@ -12397,7 +12397,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_109",
@@ -12557,7 +12557,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_110",
@@ -12717,7 +12717,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_111",
@@ -12863,7 +12863,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_112",
@@ -13024,7 +13024,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_113",
@@ -13157,7 +13157,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_114",
@@ -13303,7 +13303,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_115",
@@ -13449,7 +13449,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_116",
@@ -13609,7 +13609,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_117",
@@ -13727,7 +13727,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_118",
@@ -13845,7 +13845,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_119",
@@ -14005,7 +14005,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_120",
@@ -14138,7 +14138,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_121",
@@ -14283,7 +14283,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_122",
@@ -14429,7 +14429,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_123",
@@ -14589,7 +14589,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_124",
@@ -14721,7 +14721,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_125",
@@ -14881,7 +14881,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_126",
@@ -15053,7 +15053,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_127",
@@ -15185,7 +15185,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_128",
@@ -15332,7 +15332,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_129",
@@ -15492,7 +15492,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_130",
@@ -15638,7 +15638,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.418934",
-    "updatedAt": "2026-05-07T03:49:58.418934"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_131",
@@ -15784,7 +15784,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_132",
@@ -15916,7 +15916,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_133",
@@ -16090,7 +16090,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_134",
@@ -16250,7 +16250,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_135",
@@ -16366,7 +16366,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_136",
@@ -16526,7 +16526,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_137",
@@ -16686,7 +16686,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_138",
@@ -16846,7 +16846,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_139",
@@ -17006,7 +17006,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_140",
@@ -17166,7 +17166,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_141",
@@ -17296,7 +17296,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_142",
@@ -17412,7 +17412,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_143",
@@ -17530,7 +17530,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_144",
@@ -17690,7 +17690,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_145",
@@ -17836,7 +17836,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.419935",
-    "updatedAt": "2026-05-07T03:49:58.419935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_146",
@@ -18010,7 +18010,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_147",
@@ -18141,7 +18141,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_148",
@@ -18301,7 +18301,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_149",
@@ -18419,7 +18419,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_150",
@@ -18579,7 +18579,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_151",
@@ -18695,7 +18695,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_152",
@@ -18811,7 +18811,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_153",
@@ -18957,7 +18957,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_154",
@@ -19103,7 +19103,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_155",
@@ -19250,7 +19250,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_156",
@@ -19397,7 +19397,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_157",
@@ -19571,7 +19571,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_158",
@@ -19717,7 +19717,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_159",
@@ -19863,7 +19863,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_160",
@@ -20009,7 +20009,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_161",
@@ -20170,7 +20170,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_162",
@@ -20331,7 +20331,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_163",
@@ -20478,7 +20478,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_164",
@@ -20624,7 +20624,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_165",
@@ -20841,7 +20841,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_166",
@@ -20959,7 +20959,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_167",
@@ -21105,7 +21105,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_168",
@@ -21236,7 +21236,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_169",
@@ -21368,7 +21368,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_170",
@@ -21514,7 +21514,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_171",
@@ -21660,7 +21660,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_172",
@@ -21790,7 +21790,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.420935",
-    "updatedAt": "2026-05-07T03:49:58.420935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_173",
@@ -21906,7 +21906,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_174",
@@ -22037,7 +22037,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_175",
@@ -22154,7 +22154,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_176",
@@ -22300,7 +22300,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_177",
@@ -22431,7 +22431,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_178",
@@ -22564,7 +22564,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_179",
@@ -22681,7 +22681,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_180",
@@ -22798,7 +22798,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_181",
@@ -22945,7 +22945,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_182",
@@ -23105,7 +23105,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_183",
@@ -23265,7 +23265,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_184",
@@ -23411,7 +23411,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_185",
@@ -23571,7 +23571,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_186",
@@ -23731,7 +23731,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_187",
@@ -23891,7 +23891,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_188",
@@ -24051,7 +24051,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_189",
@@ -24197,7 +24197,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_190",
@@ -24344,7 +24344,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_191",
@@ -24490,7 +24490,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_192",
@@ -24637,7 +24637,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_193",
@@ -24798,7 +24798,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_194",
@@ -24945,7 +24945,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_195",
@@ -25092,7 +25092,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_196",
@@ -25239,7 +25239,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_197",
@@ -25386,7 +25386,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_198",
@@ -25545,7 +25545,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.421935",
-    "updatedAt": "2026-05-07T03:49:58.421935"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_199",
@@ -25692,7 +25692,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_200",
@@ -25839,7 +25839,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_201",
@@ -26000,7 +26000,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_202",
@@ -26161,7 +26161,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_203",
@@ -26322,7 +26322,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_204",
@@ -26483,7 +26483,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_205",
@@ -26644,7 +26644,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_206",
@@ -26791,7 +26791,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_207",
@@ -26952,7 +26952,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_208",
@@ -27113,7 +27113,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_209",
@@ -27246,7 +27246,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_210",
@@ -27393,7 +27393,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_211",
@@ -27540,7 +27540,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_212",
@@ -27687,7 +27687,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_213",
@@ -27834,7 +27834,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_214",
@@ -28037,7 +28037,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_215",
@@ -28140,7 +28140,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_216",
@@ -28242,7 +28242,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_217",
@@ -28358,7 +28358,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_218",
@@ -28475,7 +28475,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_219",
@@ -28592,7 +28592,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_220",
@@ -28709,7 +28709,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.422936",
-    "updatedAt": "2026-05-07T03:49:58.422936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_221",
@@ -28898,7 +28898,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_222",
@@ -29013,7 +29013,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_223",
@@ -29129,7 +29129,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_224",
@@ -29231,7 +29231,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_225",
@@ -29334,7 +29334,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_226",
@@ -29450,7 +29450,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_227",
@@ -29597,7 +29597,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_228",
@@ -29714,7 +29714,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_229",
@@ -29903,7 +29903,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_230",
@@ -30019,7 +30019,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_231",
@@ -30136,7 +30136,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_232",
@@ -30253,7 +30253,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_233",
@@ -30400,7 +30400,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T03:49:58.423936",
-    "updatedAt": "2026-05-07T03:49:58.423936"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_234",
@@ -30501,7 +30501,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_235",
@@ -30589,7 +30589,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_236",
@@ -30677,7 +30677,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_237",
@@ -30765,7 +30765,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_238",
@@ -30853,7 +30853,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_239",
@@ -30954,7 +30954,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_240",
@@ -31042,7 +31042,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_241",
@@ -31144,7 +31144,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_242",
@@ -31232,7 +31232,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_243",
@@ -31333,7 +31333,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_244",
@@ -31435,7 +31435,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_245",
@@ -31537,7 +31537,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_246",
@@ -31639,7 +31639,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_247",
@@ -31741,7 +31741,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_248",
@@ -31843,7 +31843,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_249",
@@ -31945,7 +31945,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_250",
@@ -32047,7 +32047,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_251",
@@ -32149,7 +32149,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_252",
@@ -32251,7 +32251,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_253",
@@ -32354,7 +32354,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_254",
@@ -32472,7 +32472,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_255",
@@ -32591,7 +32591,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_256",
@@ -32751,7 +32751,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_257",
@@ -32880,7 +32880,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.280548",
-    "updatedAt": "2026-05-07T02:42:29.280548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_258",
@@ -33054,7 +33054,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_259",
@@ -33242,7 +33242,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_260",
@@ -33388,7 +33388,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_261",
@@ -33575,7 +33575,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_262",
@@ -33790,7 +33790,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_263",
@@ -34019,7 +34019,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_264",
@@ -34179,7 +34179,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_265",
@@ -34353,7 +34353,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_266",
@@ -34526,7 +34526,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_267",
@@ -34687,7 +34687,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_268",
@@ -34848,7 +34848,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_269",
@@ -34994,7 +34994,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_270",
@@ -35126,7 +35126,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_271",
@@ -35272,7 +35272,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_272",
@@ -35419,7 +35419,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_273",
@@ -35566,7 +35566,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_274",
@@ -35712,7 +35712,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_275",
@@ -35858,7 +35858,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_276",
@@ -36005,7 +36005,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_277",
@@ -36138,7 +36138,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_278",
@@ -36226,7 +36226,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_279",
@@ -36314,7 +36314,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.281547",
-    "updatedAt": "2026-05-07T02:42:29.281547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_280",
@@ -36415,7 +36415,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_281",
@@ -36516,7 +36516,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_282",
@@ -36632,7 +36632,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_283",
@@ -36733,7 +36733,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_284",
@@ -36834,7 +36834,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_285",
@@ -36922,7 +36922,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_286",
@@ -37026,7 +37026,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_287",
@@ -37130,7 +37130,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_288",
@@ -37245,7 +37245,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_289",
@@ -37333,7 +37333,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_290",
@@ -37434,7 +37434,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_291",
@@ -37549,7 +37549,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_292",
@@ -37650,7 +37650,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_293",
@@ -37765,7 +37765,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_294",
@@ -37867,7 +37867,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_295",
@@ -37969,7 +37969,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_296",
@@ -38057,7 +38057,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_297",
@@ -38174,7 +38174,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_298",
@@ -38276,7 +38276,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_299",
@@ -38378,7 +38378,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_300",
@@ -38480,7 +38480,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_301",
@@ -38596,7 +38596,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_302",
@@ -38712,7 +38712,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_303",
@@ -38828,7 +38828,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_304",
@@ -38944,7 +38944,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_305",
@@ -39046,7 +39046,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.282547",
-    "updatedAt": "2026-05-07T02:42:29.282547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_306",
@@ -39162,7 +39162,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_307",
@@ -39278,7 +39278,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_308",
@@ -39393,7 +39393,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_309",
@@ -39509,7 +39509,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_310",
@@ -39625,7 +39625,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_311",
@@ -39727,7 +39727,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_312",
@@ -39828,7 +39828,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_313",
@@ -39943,7 +39943,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_314",
@@ -40058,7 +40058,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_315",
@@ -40173,7 +40173,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_316",
@@ -40275,7 +40275,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_317",
@@ -40376,7 +40376,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_318",
@@ -40477,7 +40477,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_319",
@@ -40579,7 +40579,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_320",
@@ -40666,7 +40666,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_321",
@@ -40770,7 +40770,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_322",
@@ -40886,7 +40886,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_323",
@@ -40990,7 +40990,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.283547",
-    "updatedAt": "2026-05-07T02:42:29.283547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_324",
@@ -41092,7 +41092,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_325",
@@ -41180,7 +41180,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_326",
@@ -41282,7 +41282,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_327",
@@ -41370,7 +41370,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_328",
@@ -41458,7 +41458,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_329",
@@ -41561,7 +41561,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_330",
@@ -41663,7 +41663,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_331",
@@ -41765,7 +41765,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_332",
@@ -41867,7 +41867,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_333",
@@ -41985,7 +41985,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_334",
@@ -42101,7 +42101,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_335",
@@ -42203,7 +42203,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_336",
@@ -42318,7 +42318,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_337",
@@ -42419,7 +42419,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_338",
@@ -42520,7 +42520,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_339",
@@ -42621,7 +42621,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_340",
@@ -42723,7 +42723,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.284547",
-    "updatedAt": "2026-05-07T02:42:29.284547"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_341",
@@ -42838,7 +42838,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_342",
@@ -42953,7 +42953,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_343",
@@ -43068,7 +43068,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_344",
@@ -43183,7 +43183,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_345",
@@ -43314,7 +43314,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_346",
@@ -43429,7 +43429,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_347",
@@ -43544,7 +43544,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_348",
@@ -43632,7 +43632,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_349",
@@ -43748,7 +43748,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_350",
@@ -43863,7 +43863,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_351",
@@ -43965,7 +43965,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_352",
@@ -44066,7 +44066,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_353",
@@ -44182,7 +44182,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_354",
@@ -44297,7 +44297,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_355",
@@ -44413,7 +44413,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_356",
@@ -44529,7 +44529,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_357",
@@ -44645,7 +44645,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_358",
@@ -44747,7 +44747,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.285548",
-    "updatedAt": "2026-05-07T02:42:29.285548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_359",
@@ -44849,7 +44849,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_360",
@@ -44952,7 +44952,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_361",
@@ -45040,7 +45040,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_362",
@@ -45142,7 +45142,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_363",
@@ -45258,7 +45258,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_364",
@@ -45360,7 +45360,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_365",
@@ -45448,7 +45448,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_366",
@@ -45536,7 +45536,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_367",
@@ -45640,7 +45640,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_368",
@@ -45786,7 +45786,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_369",
@@ -45960,7 +45960,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_370",
@@ -46106,7 +46106,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_371",
@@ -46252,7 +46252,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_372",
@@ -46398,7 +46398,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_373",
@@ -46502,7 +46502,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_374",
@@ -46648,7 +46648,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_375",
@@ -46752,7 +46752,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_376",
@@ -46898,7 +46898,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_377",
@@ -47058,7 +47058,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_378",
@@ -47232,7 +47232,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_379",
@@ -47392,7 +47392,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_380",
@@ -47538,7 +47538,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_381",
@@ -47698,7 +47698,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.286549",
-    "updatedAt": "2026-05-07T02:42:29.286549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_382",
@@ -47858,7 +47858,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_383",
@@ -48004,7 +48004,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_384",
@@ -48165,7 +48165,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_385",
@@ -48325,7 +48325,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_386",
@@ -48486,7 +48486,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_387",
@@ -48631,7 +48631,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_388",
@@ -48777,7 +48777,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_389",
@@ -48937,7 +48937,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_390",
@@ -49096,7 +49096,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_391",
@@ -49228,7 +49228,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_392",
@@ -49373,7 +49373,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_393",
@@ -49519,7 +49519,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_394",
@@ -49664,7 +49664,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_395",
@@ -49810,7 +49810,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_396",
@@ -49956,7 +49956,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_397",
@@ -50116,7 +50116,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_398",
@@ -50374,7 +50374,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_399",
@@ -50632,7 +50632,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_400",
@@ -50792,7 +50792,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_401",
@@ -50952,7 +50952,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_402",
@@ -51112,7 +51112,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_403",
@@ -51272,7 +51272,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_404",
@@ -51432,7 +51432,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_405",
@@ -51592,7 +51592,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.287548",
-    "updatedAt": "2026-05-07T02:42:29.287548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_406",
@@ -51738,7 +51738,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_407",
@@ -51853,7 +51853,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_408",
@@ -51968,7 +51968,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_409",
@@ -52098,7 +52098,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_410",
@@ -52213,7 +52213,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_411",
@@ -52329,7 +52329,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_412",
@@ -52444,7 +52444,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_413",
@@ -52560,7 +52560,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_414",
@@ -52675,7 +52675,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_415",
@@ -52920,7 +52920,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_416",
@@ -53080,7 +53080,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_417",
@@ -53240,7 +53240,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_418",
@@ -53400,7 +53400,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_419",
@@ -53560,7 +53560,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_420",
@@ -53721,7 +53721,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_421",
@@ -53881,7 +53881,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_422",
@@ -54027,7 +54027,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_423",
@@ -54173,7 +54173,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_424",
@@ -54277,7 +54277,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_425",
@@ -54423,7 +54423,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_426",
@@ -54555,7 +54555,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_427",
@@ -54687,7 +54687,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_428",
@@ -54833,7 +54833,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_429",
@@ -54979,7 +54979,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_430",
@@ -55125,7 +55125,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.288549",
-    "updatedAt": "2026-05-07T02:42:29.288549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_431",
@@ -55243,7 +55243,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_432",
@@ -55359,7 +55359,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_433",
@@ -55489,7 +55489,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_434",
@@ -55605,7 +55605,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_435",
@@ -55707,7 +55707,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_436",
@@ -55809,7 +55809,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_437",
@@ -55926,7 +55926,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_438",
@@ -56042,7 +56042,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_439",
@@ -56159,7 +56159,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_440",
@@ -56306,7 +56306,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_441",
@@ -56494,7 +56494,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_442",
@@ -56682,7 +56682,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_443",
@@ -56870,7 +56870,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_444",
@@ -57058,7 +57058,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_445",
@@ -57246,7 +57246,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_446",
@@ -57575,7 +57575,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_447",
@@ -57721,7 +57721,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_448",
@@ -57881,7 +57881,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_449",
@@ -58041,7 +58041,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_450",
@@ -58202,7 +58202,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_451",
@@ -58307,7 +58307,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_452",
@@ -58411,7 +58411,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_453",
@@ -58571,7 +58571,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_454",
@@ -58731,7 +58731,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.289548",
-    "updatedAt": "2026-05-07T02:42:29.289548"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_455",
@@ -58891,7 +58891,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_456",
@@ -59037,7 +59037,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_457",
@@ -59183,7 +59183,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_458",
@@ -59330,7 +59330,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_459",
@@ -59476,7 +59476,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_460",
@@ -59664,7 +59664,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_461",
@@ -59810,7 +59810,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_462",
@@ -59970,7 +59970,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_463",
@@ -60130,7 +60130,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_464",
@@ -60276,7 +60276,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_465",
@@ -60436,7 +60436,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_466",
@@ -60638,7 +60638,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_467",
@@ -60798,7 +60798,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_468",
@@ -61056,7 +61056,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.290549",
-    "updatedAt": "2026-05-07T02:42:29.290549"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_469",
@@ -61315,7 +61315,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_470",
@@ -61644,7 +61644,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_471",
@@ -62099,7 +62099,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_472",
@@ -62554,7 +62554,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_473",
@@ -62827,7 +62827,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_474",
@@ -63002,7 +63002,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_475",
@@ -63386,7 +63386,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_476",
@@ -63658,7 +63658,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_477",
@@ -63987,7 +63987,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_478",
@@ -64314,7 +64314,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_479",
@@ -64543,7 +64543,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_480",
@@ -64703,7 +64703,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_481",
@@ -64863,7 +64863,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_482",
@@ -65024,7 +65024,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_483",
@@ -65184,7 +65184,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_484",
@@ -65344,7 +65344,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_485",
@@ -65504,7 +65504,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_486",
@@ -65664,7 +65664,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_487",
@@ -65824,7 +65824,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_488",
@@ -65984,7 +65984,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.291450",
-    "updatedAt": "2026-05-07T02:42:29.291450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_489",
@@ -66144,7 +66144,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_490",
@@ -66304,7 +66304,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_491",
@@ -66464,7 +66464,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_492",
@@ -66568,7 +66568,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_493",
@@ -66672,7 +66672,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_494",
@@ -66833,7 +66833,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_495",
@@ -67049,7 +67049,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_496",
@@ -67364,7 +67364,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_497",
@@ -67608,7 +67608,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_498",
@@ -67909,7 +67909,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_499",
@@ -68210,7 +68210,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_500",
@@ -68467,7 +68467,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_501",
@@ -68697,7 +68697,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_502",
@@ -68942,7 +68942,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_503",
@@ -69047,7 +69047,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_504",
@@ -69319,7 +69319,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_505",
@@ -69534,7 +69534,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_506",
@@ -69806,7 +69806,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.292445",
-    "updatedAt": "2026-05-07T02:42:29.292445"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_507",
@@ -70022,7 +70022,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_508",
@@ -70127,7 +70127,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_509",
@@ -70216,7 +70216,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_510",
@@ -70319,7 +70319,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_511",
@@ -70436,7 +70436,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_512",
@@ -70541,7 +70541,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_513",
@@ -70645,7 +70645,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_514",
@@ -70734,7 +70734,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_515",
@@ -70837,7 +70837,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_516",
@@ -70954,7 +70954,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_517",
@@ -71072,7 +71072,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_518",
@@ -71191,7 +71191,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.293446",
-    "updatedAt": "2026-05-07T02:42:29.293446"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_519",
@@ -71294,7 +71294,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_520",
@@ -71411,7 +71411,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_521",
@@ -71514,7 +71514,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_522",
@@ -71633,7 +71633,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_523",
@@ -71766,7 +71766,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_524",
@@ -71884,7 +71884,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_525",
@@ -71989,7 +71989,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_526",
@@ -72094,7 +72094,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_527",
@@ -72197,7 +72197,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_528",
@@ -72299,7 +72299,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_529",
@@ -72401,7 +72401,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_530",
@@ -72503,7 +72503,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.295448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_531",
@@ -72605,7 +72605,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.295448",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_532",
@@ -72707,7 +72707,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_533",
@@ -72809,7 +72809,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_534",
@@ -72911,7 +72911,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_535",
@@ -73013,7 +73013,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_536",
@@ -73115,7 +73115,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_537",
@@ -73217,7 +73217,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_538",
@@ -73318,7 +73318,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_539",
@@ -73421,7 +73421,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_540",
@@ -73523,7 +73523,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_541",
@@ -73625,7 +73625,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_542",
@@ -73727,7 +73727,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_543",
@@ -73830,7 +73830,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_544",
@@ -73933,7 +73933,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_545",
@@ -74035,7 +74035,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_546",
@@ -74137,7 +74137,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_547",
@@ -74240,7 +74240,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_548",
@@ -74343,7 +74343,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_549",
@@ -74446,7 +74446,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_550",
@@ -74549,7 +74549,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_551",
@@ -74651,7 +74651,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.296447",
-    "updatedAt": "2026-05-07T02:42:29.296447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_552",
@@ -74753,7 +74753,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_553",
@@ -74856,7 +74856,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_554",
@@ -74958,7 +74958,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_555",
@@ -75061,7 +75061,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_556",
@@ -75163,7 +75163,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_557",
@@ -75264,7 +75264,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_558",
@@ -75366,7 +75366,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_559",
@@ -75468,7 +75468,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_560",
@@ -75570,7 +75570,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_561",
@@ -75672,7 +75672,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_562",
@@ -75774,7 +75774,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_563",
@@ -75876,7 +75876,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_564",
@@ -75978,7 +75978,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_565",
@@ -76080,7 +76080,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_566",
@@ -76182,7 +76182,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_567",
@@ -76284,7 +76284,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_568",
@@ -76389,7 +76389,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_569",
@@ -76494,7 +76494,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_570",
@@ -76599,7 +76599,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_571",
@@ -76704,7 +76704,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_572",
@@ -76809,7 +76809,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_573",
@@ -76914,7 +76914,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_574",
@@ -77019,7 +77019,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.297448",
-    "updatedAt": "2026-05-07T02:42:29.297448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_575",
@@ -77124,7 +77124,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_576",
@@ -77229,7 +77229,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_577",
@@ -77334,7 +77334,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_578",
@@ -77439,7 +77439,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_579",
@@ -77544,7 +77544,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_580",
@@ -77649,7 +77649,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_581",
@@ -77752,7 +77752,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_582",
@@ -77855,7 +77855,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_583",
@@ -77958,7 +77958,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_584",
@@ -78060,7 +78060,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_585",
@@ -78163,7 +78163,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_586",
@@ -78268,7 +78268,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_587",
@@ -78373,7 +78373,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_588",
@@ -78475,7 +78475,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_589",
@@ -78580,7 +78580,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_590",
@@ -78685,7 +78685,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_591",
@@ -78790,7 +78790,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_592",
@@ -78895,7 +78895,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_593",
@@ -79000,7 +79000,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_594",
@@ -79105,7 +79105,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_595",
@@ -79210,7 +79210,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_596",
@@ -79315,7 +79315,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_597",
@@ -79420,7 +79420,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_598",
@@ -79525,7 +79525,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_599",
@@ -79630,7 +79630,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_600",
@@ -79733,7 +79733,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_601",
@@ -79838,7 +79838,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.298447",
-    "updatedAt": "2026-05-07T02:42:29.298447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_602",
@@ -79943,7 +79943,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_603",
@@ -80048,7 +80048,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_604",
@@ -80056,16 +80056,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 13,
     "price": 37399,
     "originalPrice": 43998,
     "priceUnit": "人",
     "departureDate": "2026-06-23",
-    "returnDate": "2026-06-25",
+    "returnDate": "2026-07-06",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -80079,8 +80079,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -80093,8 +80093,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -80153,7 +80307,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_605",
@@ -80161,16 +80315,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 13,
     "price": 39999,
     "originalPrice": 48779,
     "priceUnit": "人",
     "departureDate": "2026-07-04",
-    "returnDate": "2026-07-06",
+    "returnDate": "2026-07-17",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -80184,8 +80338,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -80198,8 +80352,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -80258,7 +80566,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_606",
@@ -80266,16 +80574,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 20999,
     "originalPrice": 22104,
     "priceUnit": "人",
     "departureDate": "2026-06-29",
-    "returnDate": "2026-07-01",
+    "returnDate": "2026-07-09",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -80289,8 +80597,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -80303,8 +80611,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -80363,7 +80783,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_607",
@@ -80371,16 +80791,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 13,
     "price": 34499,
     "originalPrice": 42071,
     "priceUnit": "人",
     "departureDate": "2026-06-02",
-    "returnDate": "2026-06-04",
+    "returnDate": "2026-06-15",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -80394,8 +80814,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -80408,8 +80828,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -80468,7 +81042,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_608",
@@ -80476,16 +81050,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "加拿大",
-    "duration": 2,
+    "duration": 13,
     "price": 53800,
     "originalPrice": 67250,
     "priceUnit": "人",
     "departureDate": "2026-05-11",
-    "returnDate": "2026-05-13",
+    "returnDate": "2026-05-24",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -80499,8 +81073,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往加拿大，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -80513,8 +81087,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束加拿大的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -80573,7 +81301,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_609",
@@ -80581,16 +81309,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 24999,
     "originalPrice": 26594,
     "priceUnit": "人",
     "departureDate": "2026-05-29",
-    "returnDate": "2026-05-31",
+    "returnDate": "2026-06-08",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -80604,8 +81332,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -80618,8 +81346,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -80678,7 +81518,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_610",
@@ -80686,16 +81526,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 15999,
     "originalPrice": 19275,
     "priceUnit": "人",
     "departureDate": "2026-06-09",
-    "returnDate": "2026-06-11",
+    "returnDate": "2026-06-19",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 5,
@@ -80709,8 +81549,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -80723,8 +81563,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -80783,7 +81735,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_611",
@@ -80791,16 +81743,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 18,
     "price": 48099,
     "originalPrice": 59381,
     "priceUnit": "人",
     "departureDate": "2026-06-19",
-    "returnDate": "2026-06-21",
+    "returnDate": "2026-07-07",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "18早餐17正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -80814,8 +81766,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -80828,8 +81780,232 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "第13天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 14,
+        "title": "第14天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 15,
+        "title": "第15天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 16,
+        "title": "第16天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 17,
+        "title": "第17天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 18,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -80888,7 +82064,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_612",
@@ -80896,16 +82072,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "美国",
-    "duration": 2,
+    "duration": 13,
     "price": 34499,
     "originalPrice": 38762,
     "priceUnit": "人",
     "departureDate": "2026-05-18",
-    "returnDate": "2026-05-20",
+    "returnDate": "2026-05-31",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -80919,8 +82095,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往美国，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -80933,8 +82109,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束美国的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -80993,7 +82323,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_613",
@@ -81001,16 +82331,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "美国",
-    "duration": 2,
+    "duration": 13,
     "price": 26999,
     "originalPrice": 29346,
     "priceUnit": "人",
     "departureDate": "2026-05-15",
-    "returnDate": "2026-05-17",
+    "returnDate": "2026-05-28",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81024,8 +82354,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往美国，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81038,8 +82368,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束美国的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -81098,7 +82582,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_614",
@@ -81106,16 +82590,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "美国",
-    "duration": 2,
+    "duration": 13,
     "price": 24999,
     "originalPrice": 27172,
     "priceUnit": "人",
     "departureDate": "2026-05-15",
-    "returnDate": "2026-05-17",
+    "returnDate": "2026-05-28",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81129,8 +82613,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往美国，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81143,8 +82627,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束美国的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -81203,7 +82841,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_615",
@@ -81211,16 +82849,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 13,
     "price": 32999,
     "originalPrice": 35868,
     "priceUnit": "人",
     "departureDate": "2026-05-23",
-    "returnDate": "2026-05-25",
+    "returnDate": "2026-06-05",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81234,8 +82872,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81248,8 +82886,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -81308,7 +83100,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_616",
@@ -81316,16 +83108,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "美国",
-    "duration": 2,
+    "duration": 13,
     "price": 29999,
     "originalPrice": 31577,
     "priceUnit": "人",
     "departureDate": "2026-06-21",
-    "returnDate": "2026-06-23",
+    "returnDate": "2026-07-04",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81339,8 +83131,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往美国，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81353,8 +83145,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束美国的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -81413,7 +83359,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_617",
@@ -81421,16 +83367,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "美国",
-    "duration": 2,
+    "duration": 13,
     "price": 22999,
     "originalPrice": 24467,
     "priceUnit": "人",
     "departureDate": "2026-06-26",
-    "returnDate": "2026-06-28",
+    "returnDate": "2026-07-09",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81444,8 +83390,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往美国，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81458,8 +83404,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束美国的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -81518,7 +83618,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_618",
@@ -81526,16 +83626,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 52999,
     "originalPrice": 63094,
     "priceUnit": "人",
     "departureDate": "2026-07-06",
-    "returnDate": "2026-07-08",
+    "returnDate": "2026-07-16",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81549,8 +83649,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81563,8 +83663,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -81623,7 +83835,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_619",
@@ -81631,16 +83843,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 92999,
     "originalPrice": 113413,
     "priceUnit": "人",
     "departureDate": "2026-05-17",
-    "returnDate": "2026-05-19",
+    "returnDate": "2026-05-27",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81654,8 +83866,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81668,8 +83880,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -81728,7 +84052,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_620",
@@ -81736,16 +84060,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 13,
     "price": 45999,
     "originalPrice": 55420,
     "priceUnit": "人",
     "departureDate": "2026-06-09",
-    "returnDate": "2026-06-11",
+    "returnDate": "2026-06-22",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81759,8 +84083,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81773,8 +84097,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -81833,7 +84311,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_621",
@@ -81841,16 +84319,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 59999,
     "originalPrice": 71427,
     "priceUnit": "人",
     "departureDate": "2026-07-06",
-    "returnDate": "2026-07-08",
+    "returnDate": "2026-07-16",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81864,8 +84342,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81878,8 +84356,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -81938,7 +84528,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_622",
@@ -81946,16 +84536,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 18,
     "price": 82999,
     "originalPrice": 103748,
     "priceUnit": "人",
     "departureDate": "2026-06-16",
-    "returnDate": "2026-06-18",
+    "returnDate": "2026-07-04",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "18早餐17正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -81969,8 +84559,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -81983,8 +84573,232 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "第13天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 14,
+        "title": "第14天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 15,
+        "title": "第15天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 16,
+        "title": "第16天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 17,
+        "title": "第17天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 18,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82043,7 +84857,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_623",
@@ -82051,16 +84865,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 18,
     "price": 92999,
     "originalPrice": 102196,
     "priceUnit": "人",
     "departureDate": "2026-05-20",
-    "returnDate": "2026-05-22",
+    "returnDate": "2026-06-07",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "18早餐17正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -82074,8 +84888,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -82088,8 +84902,232 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "第13天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 14,
+        "title": "第14天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 15,
+        "title": "第15天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 16,
+        "title": "第16天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 17,
+        "title": "第17天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 18,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82148,7 +85186,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_624",
@@ -82156,16 +85194,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 18,
     "price": 99999,
     "originalPrice": 120480,
     "priceUnit": "人",
     "departureDate": "2026-05-12",
-    "returnDate": "2026-05-14",
+    "returnDate": "2026-05-30",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "18早餐17正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -82179,8 +85217,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -82193,8 +85231,232 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "第13天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 14,
+        "title": "第14天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 15,
+        "title": "第15天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 16,
+        "title": "第16天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 17,
+        "title": "第17天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 18,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82253,7 +85515,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_625",
@@ -82261,16 +85523,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 18,
     "price": 99999,
     "originalPrice": 114941,
     "priceUnit": "人",
     "departureDate": "2026-06-17",
-    "returnDate": "2026-06-19",
+    "returnDate": "2026-07-05",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "18早餐17正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -82284,8 +85546,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -82298,8 +85560,232 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "第13天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 14,
+        "title": "第14天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 15,
+        "title": "第15天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 16,
+        "title": "第16天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 17,
+        "title": "第17天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 18,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82358,7 +85844,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_626",
@@ -82366,16 +85852,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "邮轮",
-    "duration": 2,
+    "duration": 10,
     "price": 48000,
     "originalPrice": 57142,
     "priceUnit": "人",
     "departureDate": "2026-07-02",
-    "returnDate": "2026-07-04",
+    "returnDate": "2026-07-12",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -82389,8 +85875,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往邮轮，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -82403,8 +85889,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束邮轮的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82463,7 +86061,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_627",
@@ -82471,16 +86069,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "北京",
-    "duration": 2,
+    "duration": 10,
     "price": 55999,
     "originalPrice": 60868,
     "priceUnit": "人",
     "departureDate": "2026-05-31",
-    "returnDate": "2026-06-02",
+    "returnDate": "2026-06-10",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -82493,8 +86091,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往北京",
-        "description": "从广州出发，前往北京，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -82507,8 +86105,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别北京，返回温馨的家",
-        "description": "结束北京的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82567,7 +86277,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.299447",
-    "updatedAt": "2026-05-07T02:42:29.299447"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_628",
@@ -82575,16 +86285,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "北京",
-    "duration": 2,
+    "duration": 10,
     "price": 49999,
     "originalPrice": 60239,
     "priceUnit": "人",
     "departureDate": "2026-06-25",
-    "returnDate": "2026-06-27",
+    "returnDate": "2026-07-05",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -82597,8 +86307,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往北京",
-        "description": "从广州出发，前往北京，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -82611,8 +86321,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别北京，返回温馨的家",
-        "description": "结束北京的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82671,7 +86493,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_629",
@@ -82679,16 +86501,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "邮轮",
-    "duration": 2,
+    "duration": 10,
     "price": 76799,
     "originalPrice": 91427,
     "priceUnit": "人",
     "departureDate": "2026-05-19",
-    "returnDate": "2026-05-21",
+    "returnDate": "2026-05-29",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -82702,8 +86524,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往邮轮，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -82716,8 +86538,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束邮轮的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82776,7 +86710,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_630",
@@ -82784,16 +86718,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 18499,
     "originalPrice": 20785,
     "priceUnit": "人",
     "departureDate": "2026-06-23",
-    "returnDate": "2026-06-25",
+    "returnDate": "2026-07-05",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -82807,8 +86741,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -82821,8 +86755,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82881,7 +86955,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_631",
@@ -82889,16 +86963,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 21799,
     "originalPrice": 24493,
     "priceUnit": "人",
     "departureDate": "2026-06-23",
-    "returnDate": "2026-06-25",
+    "returnDate": "2026-07-05",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -82912,8 +86986,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -82926,8 +87000,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -82986,7 +87200,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_632",
@@ -82994,16 +87208,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 31499,
     "originalPrice": 34614,
     "priceUnit": "人",
     "departureDate": "2026-05-08",
-    "returnDate": "2026-05-10",
+    "returnDate": "2026-05-20",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -83017,8 +87231,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -83031,8 +87245,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -83091,7 +87445,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_633",
@@ -83099,16 +87453,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 17499,
     "originalPrice": 19229,
     "priceUnit": "人",
     "departureDate": "2026-05-08",
-    "returnDate": "2026-05-10",
+    "returnDate": "2026-05-20",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -83122,8 +87476,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -83136,8 +87490,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -83196,7 +87690,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_634",
@@ -83204,16 +87698,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 7,
     "price": 12299,
     "originalPrice": 13976,
     "priceUnit": "人",
     "departureDate": "2026-05-23",
-    "returnDate": "2026-05-25",
+    "returnDate": "2026-05-30",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "7早餐6正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 8,
@@ -83227,8 +87721,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -83241,8 +87735,78 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -83301,7 +87865,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_635",
@@ -83309,16 +87873,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "土耳其",
-    "duration": 2,
+    "duration": 10,
     "price": 11999,
     "originalPrice": 13185,
     "priceUnit": "人",
     "departureDate": "2026-05-12",
-    "returnDate": "2026-05-14",
+    "returnDate": "2026-05-22",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 9,
@@ -83332,8 +87896,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往土耳其，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -83346,8 +87910,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束土耳其的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -83406,7 +88082,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_636",
@@ -83581,7 +88257,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_637",
@@ -83589,16 +88265,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "土耳其",
-    "duration": 2,
+    "duration": 10,
     "price": 7399,
     "originalPrice": 8313,
     "priceUnit": "人",
     "departureDate": "2026-05-10",
-    "returnDate": "2026-05-12",
+    "returnDate": "2026-05-20",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 13,
@@ -83612,8 +88288,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往土耳其，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -83626,8 +88302,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束土耳其的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -83685,7 +88473,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_638",
@@ -83693,16 +88481,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "北欧",
-    "duration": 2,
+    "duration": 12,
     "price": 8699,
     "originalPrice": 9353,
     "priceUnit": "人",
     "departureDate": "2026-05-18",
-    "returnDate": "2026-05-20",
+    "returnDate": "2026-05-30",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 12,
@@ -83716,8 +88504,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往北欧，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -83730,8 +88518,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束北欧的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -83790,7 +88718,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_639",
@@ -83798,16 +88726,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 11999,
     "originalPrice": 12902,
     "priceUnit": "人",
     "departureDate": "2026-06-03",
-    "returnDate": "2026-06-05",
+    "returnDate": "2026-06-15",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 9,
@@ -83821,8 +88749,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -83835,8 +88763,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -83895,7 +88963,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_640",
@@ -83903,16 +88971,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 29799,
     "originalPrice": 33482,
     "priceUnit": "人",
     "departureDate": "2026-05-18",
-    "returnDate": "2026-05-20",
+    "returnDate": "2026-05-30",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -83926,8 +88994,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -83940,8 +89008,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84000,7 +89208,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_641",
@@ -84008,16 +89216,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 21799,
     "originalPrice": 26912,
     "priceUnit": "人",
     "departureDate": "2026-06-23",
-    "returnDate": "2026-06-25",
+    "returnDate": "2026-07-05",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -84031,8 +89239,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84045,8 +89253,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84105,7 +89453,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_642",
@@ -84113,16 +89461,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "欧洲",
-    "duration": 2,
+    "duration": 12,
     "price": 18499,
     "originalPrice": 21763,
     "priceUnit": "人",
     "departureDate": "2026-07-05",
-    "returnDate": "2026-07-07",
+    "returnDate": "2026-07-17",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -84136,8 +89484,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往欧洲，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84150,8 +89498,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束欧洲的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84210,7 +89698,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_643",
@@ -84218,16 +89706,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 7,
     "price": 8999,
     "originalPrice": 10842,
     "priceUnit": "人",
     "departureDate": "2026-05-16",
-    "returnDate": "2026-05-18",
+    "returnDate": "2026-05-23",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "7早餐6正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 12,
@@ -84241,8 +89729,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84255,8 +89743,78 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84315,7 +89873,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_644",
@@ -84323,16 +89881,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "北欧",
-    "duration": 2,
+    "duration": 12,
     "price": 43999,
     "originalPrice": 47310,
     "priceUnit": "人",
     "departureDate": "2026-06-07",
-    "returnDate": "2026-06-09",
+    "returnDate": "2026-06-19",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -84346,8 +89904,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往北欧，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84360,8 +89918,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束北欧的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84419,7 +90117,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_645",
@@ -84427,16 +90125,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "北欧",
-    "duration": 2,
+    "duration": 12,
     "price": 17999,
     "originalPrice": 21175,
     "priceUnit": "人",
     "departureDate": "2026-06-07",
-    "returnDate": "2026-06-09",
+    "returnDate": "2026-06-19",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -84450,8 +90148,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往北欧，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84464,8 +90162,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束北欧的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84524,7 +90362,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_646",
@@ -84532,16 +90370,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 12999,
     "originalPrice": 14771,
     "priceUnit": "人",
     "departureDate": "2026-06-16",
-    "returnDate": "2026-06-18",
+    "returnDate": "2026-06-28",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 8,
@@ -84555,8 +90393,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84569,8 +90407,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84629,7 +90607,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_647",
@@ -84637,16 +90615,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 13999,
     "originalPrice": 16090,
     "priceUnit": "人",
     "departureDate": "2026-06-21",
-    "returnDate": "2026-06-23",
+    "returnDate": "2026-07-03",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 7,
@@ -84660,8 +90638,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84674,8 +90652,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84734,7 +90852,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_648",
@@ -84742,16 +90860,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 19799,
     "originalPrice": 21289,
     "priceUnit": "人",
     "departureDate": "2026-05-30",
-    "returnDate": "2026-06-01",
+    "returnDate": "2026-06-09",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -84765,8 +90883,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84779,8 +90897,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84839,7 +91069,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_649",
@@ -84847,16 +91077,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 10999,
     "originalPrice": 12358,
     "priceUnit": "人",
     "departureDate": "2026-06-11",
-    "returnDate": "2026-06-13",
+    "returnDate": "2026-06-23",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 10,
@@ -84870,8 +91100,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84884,8 +91114,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -84944,7 +91314,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_650",
@@ -84952,16 +91322,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 14999,
     "originalPrice": 18517,
     "priceUnit": "人",
     "departureDate": "2026-05-10",
-    "returnDate": "2026-05-12",
+    "returnDate": "2026-05-22",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 6,
@@ -84975,8 +91345,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -84989,8 +91359,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -85049,7 +91559,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_651",
@@ -85057,16 +91567,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 12,
     "price": 13999,
     "originalPrice": 17282,
     "priceUnit": "人",
     "departureDate": "2026-05-10",
-    "returnDate": "2026-05-12",
+    "returnDate": "2026-05-22",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "12早餐11正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 7,
@@ -85080,8 +91590,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -85094,8 +91604,148 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -85154,7 +91804,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_652",
@@ -85162,16 +91812,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 13,
     "price": 37799,
     "originalPrice": 41085,
     "priceUnit": "人",
     "departureDate": "2026-05-23",
-    "returnDate": "2026-05-25",
+    "returnDate": "2026-06-05",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -85185,8 +91835,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -85199,8 +91849,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -85259,7 +92063,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_653",
@@ -85267,16 +92071,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "澳洲",
-    "duration": 2,
+    "duration": 10,
     "price": 17999,
     "originalPrice": 20223,
     "priceUnit": "人",
     "departureDate": "2026-05-14",
-    "returnDate": "2026-05-16",
+    "returnDate": "2026-05-24",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -85290,8 +92094,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往澳洲，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -85304,8 +92108,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束澳洲的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -85364,7 +92280,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.300448",
-    "updatedAt": "2026-05-07T02:42:29.300448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_654",
@@ -85372,16 +92288,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 21999,
     "originalPrice": 24717,
     "priceUnit": "人",
     "departureDate": "2026-05-30",
-    "returnDate": "2026-06-01",
+    "returnDate": "2026-06-09",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -85395,8 +92311,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -85409,8 +92325,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -85469,7 +92497,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_655",
@@ -85477,16 +92505,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "澳洲",
-    "duration": 2,
+    "duration": 10,
     "price": 18299,
     "originalPrice": 21784,
     "priceUnit": "人",
     "departureDate": "2026-06-28",
-    "returnDate": "2026-06-30",
+    "returnDate": "2026-07-08",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -85500,8 +92528,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往澳洲，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -85514,8 +92542,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束澳洲的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -85574,7 +92714,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_656",
@@ -85582,16 +92722,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "澳洲",
-    "duration": 2,
+    "duration": 10,
     "price": 24699,
     "originalPrice": 29057,
     "priceUnit": "人",
     "departureDate": "2026-06-07",
-    "returnDate": "2026-06-09",
+    "returnDate": "2026-06-17",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -85605,8 +92745,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往澳洲，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -85619,8 +92759,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束澳洲的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -85679,7 +92931,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_657",
@@ -85687,16 +92939,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "新西兰",
-    "duration": 2,
+    "duration": 10,
     "price": 24899,
     "originalPrice": 27665,
     "priceUnit": "人",
     "departureDate": "2026-06-06",
-    "returnDate": "2026-06-08",
+    "returnDate": "2026-06-16",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -85710,8 +92962,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往新西兰，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -85724,8 +92976,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束新西兰的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -85784,7 +93148,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_658",
@@ -85887,7 +93251,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_659",
@@ -85895,16 +93259,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "新西兰",
-    "duration": 2,
+    "duration": 10,
     "price": 25699,
     "originalPrice": 28240,
     "priceUnit": "人",
     "departureDate": "2026-05-24",
-    "returnDate": "2026-05-26",
+    "returnDate": "2026-06-03",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -85918,8 +93282,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往新西兰，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -85932,8 +93296,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束新西兰的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -85992,7 +93468,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_660",
@@ -86000,16 +93476,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "新西兰",
-    "duration": 2,
+    "duration": 10,
     "price": 26999,
     "originalPrice": 30335,
     "priceUnit": "人",
     "departureDate": "2026-06-03",
-    "returnDate": "2026-06-05",
+    "returnDate": "2026-06-13",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -86023,8 +93499,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往新西兰，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -86037,8 +93513,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束新西兰的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -86097,7 +93685,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_661",
@@ -86105,16 +93693,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 13,
     "price": 37799,
     "originalPrice": 44998,
     "priceUnit": "人",
     "departureDate": "2026-06-12",
-    "returnDate": "2026-06-14",
+    "returnDate": "2026-06-25",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "13早餐12正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -86128,8 +93716,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -86142,8 +93730,162 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "第10天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 11,
+        "title": "第11天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 12,
+        "title": "第12天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 13,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -86202,7 +93944,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_662",
@@ -86210,16 +93952,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 21999,
     "originalPrice": 24174,
     "priceUnit": "人",
     "departureDate": "2026-07-03",
-    "returnDate": "2026-07-05",
+    "returnDate": "2026-07-13",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -86233,8 +93975,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -86247,8 +93989,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -86307,7 +94161,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_663",
@@ -86315,16 +94169,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 19999,
     "originalPrice": 23808,
     "priceUnit": "人",
     "departureDate": "2026-06-08",
-    "returnDate": "2026-06-10",
+    "returnDate": "2026-06-18",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -86338,8 +94192,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -86352,8 +94206,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -86412,7 +94378,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_664",
@@ -86517,7 +94483,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_665",
@@ -86622,7 +94588,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_666",
@@ -86727,7 +94693,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_667",
@@ -86735,16 +94701,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 5,
     "price": 7379,
     "originalPrice": 9109,
     "priceUnit": "人",
     "departureDate": "2026-05-18",
-    "returnDate": "2026-05-20",
+    "returnDate": "2026-05-23",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 13,
@@ -86758,8 +94724,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -86772,8 +94738,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -86832,7 +94840,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_668",
@@ -86840,16 +94848,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 7,
     "price": 9999,
     "originalPrice": 12498,
     "priceUnit": "人",
     "departureDate": "2026-05-23",
-    "returnDate": "2026-05-25",
+    "returnDate": "2026-05-30",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "7早餐6正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 11,
@@ -86863,8 +94871,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -86877,8 +94885,78 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -86937,7 +95015,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_669",
@@ -86945,16 +95023,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 5,
     "price": 6279,
     "originalPrice": 6825,
     "priceUnit": "人",
     "departureDate": "2026-05-31",
-    "returnDate": "2026-06-02",
+    "returnDate": "2026-06-05",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 14,
@@ -86968,8 +95046,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -86982,8 +95060,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -87042,7 +95162,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_670",
@@ -87050,16 +95170,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 5,
     "price": 7099,
     "originalPrice": 7472,
     "priceUnit": "人",
     "departureDate": "2026-06-29",
-    "returnDate": "2026-07-01",
+    "returnDate": "2026-07-04",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 13,
@@ -87073,8 +95193,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -87087,8 +95207,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -87147,7 +95309,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_671",
@@ -87155,16 +95317,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 5,
     "price": 5399,
     "originalPrice": 6277,
     "priceUnit": "人",
     "departureDate": "2026-05-17",
-    "returnDate": "2026-05-19",
+    "returnDate": "2026-05-22",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 15,
@@ -87178,8 +95340,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -87192,8 +95354,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -87252,7 +95456,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_672",
@@ -87260,16 +95464,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "日本",
-    "duration": 2,
+    "duration": 6,
     "price": 8299,
     "originalPrice": 9020,
     "priceUnit": "人",
     "departureDate": "2026-05-27",
-    "returnDate": "2026-05-29",
+    "returnDate": "2026-06-02",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "6早餐5正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 12,
@@ -87283,8 +95487,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往日本，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -87297,8 +95501,64 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束日本的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -87357,7 +95617,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_673",
@@ -87365,16 +95625,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "日本",
-    "duration": 2,
+    "duration": 6,
     "price": 6499,
     "originalPrice": 7830,
     "priceUnit": "人",
     "departureDate": "2026-05-16",
-    "returnDate": "2026-05-18",
+    "returnDate": "2026-05-22",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "6早餐5正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 14,
@@ -87388,8 +95648,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往日本，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -87402,8 +95662,64 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束日本的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -87462,7 +95778,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_674",
@@ -87470,16 +95786,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "日本",
-    "duration": 2,
+    "duration": 6,
     "price": 5599,
     "originalPrice": 6587,
     "priceUnit": "人",
     "departureDate": "2026-05-10",
-    "returnDate": "2026-05-12",
+    "returnDate": "2026-05-16",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "6早餐5正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 15,
@@ -87493,8 +95809,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往日本，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -87507,8 +95823,64 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束日本的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -87567,7 +95939,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_675",
@@ -87575,16 +95947,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 10,
     "price": 20999,
     "originalPrice": 25608,
     "priceUnit": "人",
     "departureDate": "2026-06-22",
-    "returnDate": "2026-06-24",
+    "returnDate": "2026-07-02",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "10早餐9正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 3,
@@ -87598,8 +95970,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -87612,8 +95984,120 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -87672,7 +96156,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_676",
@@ -87777,7 +96261,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_677",
@@ -87882,7 +96366,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_678",
@@ -87890,16 +96374,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "韩国",
-    "duration": 2,
+    "duration": 5,
     "price": 5099,
     "originalPrice": 6295,
     "priceUnit": "人",
     "departureDate": "2026-05-10",
-    "returnDate": "2026-05-12",
+    "returnDate": "2026-05-15",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 15,
@@ -87913,8 +96397,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往韩国，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -87927,8 +96411,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束韩国的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -87987,7 +96513,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_679",
@@ -87995,16 +96521,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "韩国",
-    "duration": 2,
+    "duration": 5,
     "price": 5499,
     "originalPrice": 6788,
     "priceUnit": "人",
     "departureDate": "2026-05-10",
-    "returnDate": "2026-05-12",
+    "returnDate": "2026-05-15",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 15,
@@ -88018,8 +96544,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往韩国，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -88032,8 +96558,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束韩国的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -88092,7 +96660,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.301448",
-    "updatedAt": "2026-05-07T02:42:29.301448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_680",
@@ -88197,7 +96765,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_681",
@@ -88302,7 +96870,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_682",
@@ -88407,7 +96975,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_683",
@@ -88415,16 +96983,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 5,
     "price": 6199,
     "originalPrice": 7468,
     "priceUnit": "人",
     "departureDate": "2026-06-25",
-    "returnDate": "2026-06-27",
+    "returnDate": "2026-06-30",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 14,
@@ -88438,8 +97006,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -88452,8 +97020,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -88512,7 +97122,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_684",
@@ -88520,16 +97130,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "韩国",
-    "duration": 2,
+    "duration": 5,
     "price": 5499,
     "originalPrice": 5912,
     "priceUnit": "人",
     "departureDate": "2026-06-03",
-    "returnDate": "2026-06-05",
+    "returnDate": "2026-06-08",
     "transportType": "大巴往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 824,
     "singleSupplementNote": "单人出行需补单房差￥824",
     "availableSeats": 15,
@@ -88543,8 +97153,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往韩国，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -88557,8 +97167,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束韩国的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -88617,7 +97269,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_685",
@@ -88625,16 +97277,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "韩国",
-    "duration": 2,
+    "duration": 5,
     "price": 5699,
     "originalPrice": 6127,
     "priceUnit": "人",
     "departureDate": "2026-06-03",
-    "returnDate": "2026-06-05",
+    "returnDate": "2026-06-08",
     "transportType": "大巴往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 854,
     "singleSupplementNote": "单人出行需补单房差￥854",
     "availableSeats": 15,
@@ -88648,8 +97300,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往韩国，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -88662,8 +97314,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束韩国的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -88722,7 +97416,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_686",
@@ -88730,16 +97424,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 5,
     "price": 6599,
     "originalPrice": 7950,
     "priceUnit": "人",
     "departureDate": "2026-06-25",
-    "returnDate": "2026-06-27",
+    "returnDate": "2026-06-30",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 14,
@@ -88753,8 +97447,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -88767,8 +97461,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -88827,7 +97563,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_687",
@@ -88835,16 +97571,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 5,
     "price": 5799,
     "originalPrice": 6903,
     "priceUnit": "人",
     "departureDate": "2026-06-04",
-    "returnDate": "2026-06-06",
+    "returnDate": "2026-06-09",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 15,
@@ -88858,8 +97594,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -88872,8 +97608,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -88932,7 +97710,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_688",
@@ -88940,16 +97718,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "其他",
-    "duration": 2,
+    "duration": 5,
     "price": 6199,
     "originalPrice": 7379,
     "priceUnit": "人",
     "departureDate": "2026-06-04",
-    "returnDate": "2026-06-06",
+    "returnDate": "2026-06-09",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 14,
@@ -88963,8 +97741,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往其他，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -88977,8 +97755,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束其他的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -89037,7 +97857,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_689",
@@ -89142,7 +97962,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_690",
@@ -89247,7 +98067,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_691",
@@ -89352,7 +98172,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_692",
@@ -89457,7 +98277,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_693",
@@ -89562,7 +98382,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_694",
@@ -89666,7 +98486,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_695",
@@ -89771,7 +98591,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_696",
@@ -89875,7 +98695,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_697",
@@ -89980,7 +98800,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_698",
@@ -90085,7 +98905,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_699",
@@ -90190,7 +99010,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_700",
@@ -90295,7 +99115,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_701",
@@ -90400,7 +99220,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_702",
@@ -90505,7 +99325,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_703",
@@ -90609,7 +99429,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.302448",
-    "updatedAt": "2026-05-07T02:42:29.302448"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_704",
@@ -90714,7 +99534,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_705",
@@ -90816,7 +99636,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_706",
@@ -90920,7 +99740,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_707",
@@ -91024,7 +99844,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_708",
@@ -91128,7 +99948,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_709",
@@ -91232,7 +100052,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_710",
@@ -91336,7 +100156,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_711",
@@ -91438,7 +100258,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_712",
@@ -91543,7 +100363,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_713",
@@ -91648,7 +100468,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_714",
@@ -91753,7 +100573,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_715",
@@ -91858,7 +100678,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_716",
@@ -91962,7 +100782,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_717",
@@ -92067,7 +100887,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_718",
@@ -92172,7 +100992,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_719",
@@ -92277,7 +101097,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_720",
@@ -92382,7 +101202,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.303449",
-    "updatedAt": "2026-05-07T02:42:29.303449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_721",
@@ -92487,7 +101307,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_722",
@@ -92592,7 +101412,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_723",
@@ -92697,7 +101517,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_724",
@@ -92802,7 +101622,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_725",
@@ -92906,7 +101726,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_726",
@@ -93011,7 +101831,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_727",
@@ -93116,7 +101936,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_728",
@@ -93221,7 +102041,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_729",
@@ -93326,7 +102146,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_730",
@@ -93431,7 +102251,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_731",
@@ -93536,7 +102356,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_732",
@@ -93640,7 +102460,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_733",
@@ -93744,7 +102564,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_734",
@@ -93752,16 +102572,16 @@ export const tours: Tour[] = [
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
     "destination": "吉林",
-    "duration": 2,
+    "duration": 5,
     "price": 5999,
     "originalPrice": 6450,
     "priceUnit": "人",
     "departureDate": "2026-06-23",
-    "returnDate": "2026-06-25",
+    "returnDate": "2026-06-28",
     "transportType": "飞机往返",
     "accommodationLevel": "奢华型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 0,
     "singleSupplementNote": "本产品无需单房差",
     "availableSeats": 15,
@@ -93775,8 +102595,8 @@ export const tours: Tour[] = [
     "itinerary": [
       {
         "day": 1,
-        "title": "出发前往其他",
-        "description": "从广州出发，前往吉林，开启愉快的2天旅程。",
+        "title": "出发前往目的地",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐",
           "午餐"
@@ -93789,8 +102609,50 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "结束吉林的美好行程，返回广州。",
+        "title": "第2天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：精彩行程",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "返回温馨的家",
+        "description": "今日安排精彩活动，感受当地独特魅力。",
         "meals": [
           "早餐"
         ],
@@ -93848,7 +102710,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_735",
@@ -93953,7 +102815,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_736",
@@ -94058,7 +102920,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_737",
@@ -94163,7 +103025,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.304449",
-    "updatedAt": "2026-05-07T02:42:29.304449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_738",
@@ -94268,7 +103130,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_739",
@@ -94373,7 +103235,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_740",
@@ -94478,7 +103340,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_741",
@@ -94583,7 +103445,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_742",
@@ -94688,7 +103550,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_743",
@@ -94793,7 +103655,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_744",
@@ -94898,7 +103760,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_745",
@@ -95003,7 +103865,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_746",
@@ -95108,7 +103970,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_747",
@@ -95213,7 +104075,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_748",
@@ -95318,7 +104180,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_749",
@@ -95423,7 +104285,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_750",
@@ -95528,7 +104390,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_751",
@@ -95633,7 +104495,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_752",
@@ -95738,7 +104600,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_753",
@@ -95843,7 +104705,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_754",
@@ -95948,7 +104810,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.305450",
-    "updatedAt": "2026-05-07T02:42:29.305450"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_755",
@@ -96051,7 +104913,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306449",
-    "updatedAt": "2026-05-07T02:42:29.306449"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_756",
@@ -96156,7 +105018,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_757",
@@ -96260,7 +105122,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_758",
@@ -96365,7 +105227,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_759",
@@ -96470,7 +105332,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_760",
@@ -96575,7 +105437,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_761",
@@ -96679,7 +105541,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_762",
@@ -96783,7 +105645,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_763",
@@ -96888,7 +105750,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_764",
@@ -96992,7 +105854,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_765",
@@ -97097,7 +105959,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_766",
@@ -97201,7 +106063,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.306510",
-    "updatedAt": "2026-05-07T02:42:29.306510"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_767",
@@ -97306,7 +106168,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307022",
-    "updatedAt": "2026-05-07T02:42:29.307022"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_768",
@@ -97411,7 +106273,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307022",
-    "updatedAt": "2026-05-07T02:42:29.307022"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_769",
@@ -97516,7 +106378,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307022",
-    "updatedAt": "2026-05-07T02:42:29.307022"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_770",
@@ -97621,7 +106483,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307022",
-    "updatedAt": "2026-05-07T02:42:29.307022"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_771",
@@ -97726,7 +106588,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307022",
-    "updatedAt": "2026-05-07T02:42:29.307022"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_772",
@@ -97831,7 +106693,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307022",
-    "updatedAt": "2026-05-07T02:42:29.307022"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_773",
@@ -97936,7 +106798,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307022",
-    "updatedAt": "2026-05-07T02:42:29.307022"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_774",
@@ -98041,7 +106903,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307022",
-    "updatedAt": "2026-05-07T02:42:29.307022"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_775",
@@ -98146,7 +107008,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_776",
@@ -98251,7 +107113,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_777",
@@ -98356,7 +107218,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_778",
@@ -98459,7 +107321,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_779",
@@ -98562,7 +107424,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_780",
@@ -98651,7 +107513,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_781",
@@ -98740,7 +107602,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_782",
@@ -98857,7 +107719,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_783",
@@ -98974,7 +107836,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_784",
@@ -99090,7 +107952,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_785",
@@ -99206,7 +108068,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_786",
@@ -99323,7 +108185,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_787",
@@ -99440,7 +108302,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_788",
@@ -99557,7 +108419,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_789",
@@ -99674,7 +108536,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_790",
@@ -99791,7 +108653,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_791",
@@ -99894,7 +108756,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.307533",
-    "updatedAt": "2026-05-07T02:42:29.307533"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_792",
@@ -99996,7 +108858,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_793",
@@ -100113,7 +108975,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_794",
@@ -100215,7 +109077,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_795",
@@ -100332,7 +109194,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_796",
@@ -100435,7 +109297,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_797",
@@ -100538,7 +109400,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_798",
@@ -100641,7 +109503,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_799",
@@ -100758,7 +109620,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_800",
@@ -100861,7 +109723,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_801",
@@ -100964,7 +109826,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_802",
@@ -101081,7 +109943,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_803",
@@ -101198,7 +110060,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_804",
@@ -101315,7 +110177,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_805",
@@ -101431,7 +110293,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_806",
@@ -101547,7 +110409,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_807",
@@ -101650,7 +110512,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.308526",
-    "updatedAt": "2026-05-07T02:42:29.308526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_808",
@@ -101753,7 +110615,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_809",
@@ -101870,7 +110732,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_810",
@@ -101987,7 +110849,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_811",
@@ -102076,7 +110938,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_812",
@@ -102193,7 +111055,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_813",
@@ -102310,7 +111172,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_814",
@@ -102427,7 +111289,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_815",
@@ -102530,7 +111392,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_816",
@@ -102633,7 +111495,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_817",
@@ -102735,7 +111597,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_818",
@@ -102837,7 +111699,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_819",
@@ -102939,7 +111801,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_820",
@@ -103028,7 +111890,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_821",
@@ -103131,7 +111993,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_822",
@@ -103234,7 +112096,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_823",
@@ -103336,7 +112198,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_824",
@@ -103425,7 +112287,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_825",
@@ -103528,7 +112390,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.309527",
-    "updatedAt": "2026-05-07T02:42:29.309527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_826",
@@ -103617,7 +112479,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_827",
@@ -103705,7 +112567,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_828",
@@ -103794,7 +112656,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_829",
@@ -103897,7 +112759,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_830",
@@ -104000,7 +112862,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_831",
@@ -104089,7 +112951,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_832",
@@ -104192,7 +113054,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_833",
@@ -104295,7 +113157,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_834",
@@ -104384,7 +113246,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_835",
@@ -104487,7 +113349,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_836",
@@ -104590,7 +113452,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_837",
@@ -104693,7 +113555,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_838",
@@ -104796,7 +113658,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_839",
@@ -104898,7 +113760,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_840",
@@ -105001,7 +113863,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_841",
@@ -105103,7 +113965,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_842",
@@ -105206,7 +114068,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_843",
@@ -105323,7 +114185,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.310526",
-    "updatedAt": "2026-05-07T02:42:29.310526"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_844",
@@ -105425,7 +114287,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_845",
@@ -105528,7 +114390,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_846",
@@ -105631,7 +114493,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_847",
@@ -105733,7 +114595,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_848",
@@ -105836,7 +114698,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_849",
@@ -105938,7 +114800,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_850",
@@ -106041,7 +114903,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_851",
@@ -106144,7 +115006,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_852",
@@ -106263,7 +115125,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_853",
@@ -106366,7 +115228,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_854",
@@ -106469,7 +115331,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_855",
@@ -106572,7 +115434,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_856",
@@ -106675,7 +115537,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_857",
@@ -106778,7 +115640,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_858",
@@ -106881,7 +115743,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_859",
@@ -106984,7 +115846,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_860",
@@ -107087,7 +115949,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_861",
@@ -107189,7 +116051,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_862",
@@ -107292,7 +116154,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.311528",
-    "updatedAt": "2026-05-07T02:42:29.311528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_863",
@@ -107394,7 +116256,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_864",
@@ -107496,7 +116358,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_865",
@@ -107599,7 +116461,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_866",
@@ -107701,7 +116563,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_867",
@@ -107803,7 +116665,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_868",
@@ -107922,7 +116784,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_869",
@@ -108024,7 +116886,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_870",
@@ -108127,7 +116989,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_871",
@@ -108230,7 +117092,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_872",
@@ -108332,7 +117194,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_873",
@@ -108478,7 +117340,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_874",
@@ -108611,7 +117473,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_875",
@@ -108730,7 +117592,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_876",
@@ -108919,7 +117781,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_877",
@@ -109035,7 +117897,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_878",
@@ -109195,7 +118057,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_879",
@@ -109355,7 +118217,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.312527",
-    "updatedAt": "2026-05-07T02:42:29.312527"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_880",
@@ -109515,7 +118377,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_881",
@@ -109717,7 +118579,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_882",
@@ -109877,7 +118739,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_883",
@@ -110023,7 +118885,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_884",
@@ -110183,7 +119045,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_885",
@@ -110299,7 +119161,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_886",
@@ -110446,7 +119308,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_887",
@@ -110606,7 +119468,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_888",
@@ -110739,7 +119601,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_889",
@@ -110928,7 +119790,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_890",
@@ -111116,7 +119978,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_891",
@@ -111262,7 +120124,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_892",
@@ -111409,7 +120271,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_893",
@@ -111555,7 +120417,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_894",
@@ -111715,7 +120577,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_895",
@@ -111847,7 +120709,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_896",
@@ -111993,7 +120855,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.313528",
-    "updatedAt": "2026-05-07T02:42:29.313528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_897",
@@ -112125,7 +120987,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_898",
@@ -112299,7 +121161,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_899",
@@ -112445,7 +121307,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_900",
@@ -112591,7 +121453,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_901",
@@ -112751,7 +121613,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_902",
@@ -112897,7 +121759,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_903",
@@ -113043,7 +121905,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_904",
@@ -113175,7 +122037,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_905",
@@ -113321,7 +122183,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_906",
@@ -113481,7 +122343,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_907",
@@ -113613,7 +122475,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_908",
@@ -113773,7 +122635,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_909",
@@ -113919,7 +122781,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_910",
@@ -114079,7 +122941,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_911",
@@ -114267,7 +123129,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_912",
@@ -114427,7 +123289,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_913",
@@ -114545,7 +123407,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.314528",
-    "updatedAt": "2026-05-07T02:42:29.314528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_914",
@@ -114706,7 +123568,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_915",
@@ -114866,7 +123728,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_916",
@@ -115012,7 +123874,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_917",
@@ -115158,7 +124020,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_918",
@@ -115346,7 +124208,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_919",
@@ -115506,7 +124368,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_920",
@@ -115666,7 +124528,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_921",
@@ -115826,7 +124688,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_922",
@@ -115958,7 +124820,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_923",
@@ -116119,7 +124981,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_924",
@@ -116279,7 +125141,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_925",
@@ -116496,7 +125358,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_926",
@@ -116741,7 +125603,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_927",
@@ -116901,7 +125763,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_928",
@@ -117062,7 +125924,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.315528",
-    "updatedAt": "2026-05-07T02:42:29.315528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_929",
@@ -117250,7 +126112,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_930",
@@ -117494,7 +126356,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_931",
@@ -117641,7 +126503,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_932",
@@ -117830,7 +126692,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_933",
@@ -118046,7 +126908,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_934",
@@ -118262,7 +127124,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_935",
@@ -118507,7 +127369,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_936",
@@ -118667,7 +127529,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_937",
@@ -118869,7 +127731,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_938",
@@ -119071,7 +127933,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_939",
@@ -119287,7 +128149,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_940",
@@ -119489,7 +128351,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_941",
@@ -119691,7 +128553,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_942",
@@ -119852,7 +128714,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.316528",
-    "updatedAt": "2026-05-07T02:42:29.316528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_943",
@@ -119998,7 +128860,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_944",
@@ -120145,7 +129007,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_945",
@@ -120459,7 +129321,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_946",
@@ -120619,7 +129481,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_947",
@@ -120836,7 +129698,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_948",
@@ -120982,7 +129844,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_949",
@@ -121129,7 +129991,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_950",
@@ -121388,7 +130250,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_951",
@@ -121647,7 +130509,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_952",
@@ -121849,7 +130711,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_953",
@@ -122051,7 +130913,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_954",
@@ -122253,7 +131115,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_955",
@@ -122414,7 +131276,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_956",
@@ -122659,7 +131521,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.317528",
-    "updatedAt": "2026-05-07T02:42:29.317528"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_957",
@@ -122820,7 +131682,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.318464",
-    "updatedAt": "2026-05-07T02:42:29.318464"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_958",
@@ -123008,7 +131870,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.318464",
-    "updatedAt": "2026-05-07T02:42:29.318464"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_959",
@@ -123210,7 +132072,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.318464",
-    "updatedAt": "2026-05-07T02:42:29.318464"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_960",
@@ -123370,7 +132232,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.318464",
-    "updatedAt": "2026-05-07T02:42:29.318464"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_961",
@@ -123587,7 +132449,7 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.318464",
-    "updatedAt": "2026-05-07T02:42:29.318464"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   },
   {
     "id": "tour_962",
@@ -123775,6 +132637,6 @@ export const tours: Tour[] = [
     "season": "全年",
     "language": "中文导游",
     "createdAt": "2026-05-07T02:42:29.318464",
-    "updatedAt": "2026-05-07T02:42:29.318464"
+    "updatedAt": "2026-05-07T04:33:19.668541"
   }
 ];
