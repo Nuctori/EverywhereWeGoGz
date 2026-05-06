@@ -38,22 +38,37 @@ jobs:
       - name: Run crawler
         run: python scripts/crawler.py
 
+      - name: Check if data changed
+        id: check_changes
+        run: |
+          git add src/data/tours.ts
+          if git diff --cached --quiet; then
+            echo "Data unchanged, skipping build and deploy"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "Data changed, proceeding with build and deploy"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build
+        if: steps.check_changes.outputs.changed == 'true'
         run: npm run build
 
       - name: Commit data changes
+        if: steps.check_changes.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add src/data/tours.ts
-          git diff --cached --quiet || git commit -m "chore: update tour data [$(date +%Y-%m-%d)]"
+          git commit -m "chore: update tour data [$(date +%Y-%m-%d)]"
           git push
         continue-on-error: true
 
       - name: Upload artifact
+        if: steps.check_changes.outputs.changed == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./dist
 
       - name: Deploy to GitHub Pages
+        if: steps.check_changes.outputs.changed == 'true'
         uses: actions/deploy-pages@v4
