@@ -121,16 +121,16 @@ export function TourCard({ tour, onClick }: TourCardProps) {
           <span className="text-xs text-slate-400">({tour.reviewCount}条评价)</span>
         </div>
 
-        {/* 单房差透明提示 */}
+        {/* 单房差提示（估算值） */}
         <div className={`rounded-lg p-2.5 mb-3 flex items-start gap-2 ${tour.singleSupplement > 0 ? 'bg-amber-50 border border-amber-200' : 'bg-green-50 border border-green-200'}`}>
           <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${tour.singleSupplement > 0 ? 'text-amber-500' : 'text-green-500'}`} />
           <div>
             <p className={`text-xs font-medium ${tour.singleSupplement > 0 ? 'text-amber-800' : 'text-green-800'}`}>
-              {tour.singleSupplement > 0 ? '单房差透明' : '无单房差'}
+              {tour.singleSupplement > 0 ? '单房差参考' : '无单房差'}
             </p>
             <p className={`text-xs mt-0.5 ${tour.singleSupplement > 0 ? 'text-amber-700' : 'text-green-700'}`}>
               {tour.singleSupplement > 0 
-                ? <>单人出行需补 <span className="font-semibold">￥{tour.singleSupplement}</span></>
+                ? <>单人出行约补 <span className="font-semibold">￥{tour.singleSupplement}</span>（以预订为准）</>
                 : '本产品无需补单房差，单人出行同价'}
             </p>
           </div>

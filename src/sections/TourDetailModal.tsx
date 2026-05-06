@@ -137,19 +137,19 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
               )}
             </div>
 
-            {/* 单房差高亮提示 */}
+            {/* 单房差参考提示 */}
             <div className="bg-amber-100 border border-amber-300 rounded-lg p-4 flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div>
                 <h4 className="font-semibold text-amber-800 text-sm mb-1">
-                  ⚠️ 单房差透明提示 — OTA不会告诉你的真相
+                  ⚠️ 单房差参考（以实际预订为准）
                 </h4>
                 <p className="text-sm text-amber-700 leading-relaxed">
-                  {tour.singleSupplementNote}
+                  {tour.singleSupplementNote}。单房差金额由各旅行社根据酒店实际报价确定，以上仅为参考估算。
                 </p>
                 <div className="mt-2 flex items-center gap-4 text-sm text-amber-800">
                   <span className="font-semibold">
-                    单人出行总成本 = 团费 ￥{tour.price} + 单房差 ￥{tour.singleSupplement} = ￥
+                    单人出行预估 = 团费 ￥{tour.price} + 单房差约 ￥{tour.singleSupplement} = ￥
                     {tour.price + tour.singleSupplement}
                   </span>
                 </div>
