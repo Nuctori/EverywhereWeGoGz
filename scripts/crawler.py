@@ -267,93 +267,158 @@ class Jrt365Spider:
 
 class GzqlxSpider:
     BASE_URL = "http://gzqlx.360jlb.cn"
+    # 赛会通SaaS平台，需要Selenium渲染页面
 
     def fetch(self):
         print("[广州去旅行] 抓取中...")
-        resp = safe_request(self.BASE_URL + "/m/events")
-        if not resp:
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.edge.options import Options
+
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
+
+            driver = webdriver.Edge(options=options)
+            all_items = []
+
+            # 尝试多个mid分类
+            mids = [48629, 48631, 73687, 48632, 73685, 48630]
+            for mid in mids:
+                try:
+                    driver.get(f'{self.BASE_URL}/m/events?mid={mid}')
+                    time.sleep(2)
+                    page_text = driver.find_element('tag name', 'body').text
+                    lines = [l.strip() for l in page_text.split('\n') if l.strip()]
+
+                    # 解析结构：标题、地点、日期、价格、空行
+                    i = 0
+                    while i < len(lines):
+                        # 找价格行
+                        price_m = re.search(r'¥(\d+)', lines[i])
+                        if price_m and i >= 3:
+                            price = float(price_m.group(1))
+                            title = lines[i - 3] if i >= 3 else ""
+                            location = lines[i - 2] if i >= 2 else ""
+                            date_range = lines[i - 1] if i >= 1 else ""
+
+                            # 过滤掉非活动条目
+                            if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定']):
+                                all_items.append({
+                                    "source": "广州去旅行",
+                                    "title": title,
+                                    "price": price,
+                                    "url": f'{self.BASE_URL}/m/events?mid={mid}',
+                                    "days": extract_days(title),
+                                    "destination": location.replace('广东·', '') if location else "",
+                                })
+                        i += 1
+                except Exception as e:
+                    print(f"  mid={mid} error: {e}")
+
+            driver.quit()
+            return all_items
+        except Exception as e:
+            print(f"  Selenium error: {e}")
             return []
-        items = []
-        text = resp.text
-        lines = [l.strip() for l in text.split("\\") if l.strip()]
-        i = 0
-        while i < len(lines):
-            line = lines[i]
-            price_m = re.search(r"¥(\d+(?:\.\d+)?)", line)
-            if price_m and i >= 2:
-                price = float(price_m.group(1))
-                title = ""
-                for j in range(max(0, i - 6), i):
-                    cand = lines[j]
-                    if len(cand) > 8 and any(k in cand for k in ("天", "日", "团", "纯玩", "徒步", "高铁", "飞机")):
-                        title = cand
-                if title:
-                    items.append({"source": "广州去旅行", "title": title, "price": price, "url": self.BASE_URL, "days": extract_days(title)})
-            i += 1
-        return items
 
 
 class KanghuiSpider:
-    ENTRIES = ["http://m.cctpage.com", "http://www.cct.cn", "http://www.gzcct.com"]
+    BASE_URL = "http://m.cctpage.com"
 
     def fetch(self):
         print("[康辉] 抓取中...")
-        for entry in self.ENTRIES:
-            resp = safe_request(entry)
-            if resp and len(resp.text) > 500:
-                items = []
-                soup = BeautifulSoup(resp.text, "lxml")
-                for card in soup.find_all(["div", "a", "li"]):
-                    txt = card.get_text(" ", strip=True)
-                    if "¥" not in txt:
-                        continue
-                    price_m = re.search(r"[¥￥](\d+)", txt)
-                    if not price_m:
-                        continue
-                    price = float(price_m.group(1))
-                    title = ""
-                    for part in txt.split():
-                        if len(part) > len(title) and any(k in part for k in ("天", "游", "团")):
-                            title = part
-                    if title and len(title) > 5:
-                        items.append({"source": "康辉", "title": title, "price": price, "url": entry, "days": extract_days(title)})
-                return items
-        return []
+        resp = safe_request(self.BASE_URL)
+        if not resp:
+            return []
+
+        items = []
+        text = resp.text
+
+        # 解析页面中嵌入的 malldata JSON
+        maldatas = re.findall(r'malldata\.(\w+)\s*=\s*(\[.*?\]);', text, re.DOTALL)
+        for name, data in maldatas:
+            try:
+                parsed = json.loads(data)
+                for category in parsed:
+                    prod_list = category.get('list', [])
+                    for p in prod_list:
+                        name_field = p.get('name', '')
+                        price = p.get('price', 0)
+                        if name_field and price > 0:
+                            items.append({
+                                "source": "康辉",
+                                "title": name_field,
+                                "price": price,
+                                "url": self.BASE_URL + p.get('url', ''),
+                                "days": extract_days(name_field),
+                            })
+            except Exception as e:
+                print(f"  Parse error: {e}")
+
+        return items
 
 
 class BaozoucunSpider:
-    ENTRIES = [
-        {"name": "暴走村", "base": "http://gftblm.360jlb.cn", "path": "/m"},
-        {"name": "暴走团", "base": "http://wx.gzbzt.com", "path": "/events"},
-    ]
+    BASE_URL = "http://gftblm.360jlb.cn"
+    # 赛会通SaaS平台，需要Selenium渲染页面
 
     def fetch(self):
         print("[暴走村] 抓取中...")
-        all_items = []
-        for entry in self.ENTRIES:
-            url = entry["base"] + entry["path"]
-            resp = safe_request(url)
-            if not resp:
-                continue
-            text = resp.text
-            lines = [l.strip() for l in text.split("\\") if l.strip()]
-            for i, line in enumerate(lines):
-                price_m = re.search(r"¥(\d+(?:\.\d+)?)", line)
-                if price_m:
-                    price = float(price_m.group(1))
-                    title = ""
-                    for j in range(max(0, i - 8), i):
-                        cand = lines[j]
-                        if len(cand) > 8 and "【" in cand and "】" in cand:
-                            title = cand
-                        elif len(cand) > 10 and any(k in cand for k in ("公里", "徒步", "登山", "穿越")):
-                            if not title:
-                                title = cand
-                    if title:
-                        all_items.append({"source": entry["name"], "title": title, "price": price, "url": url, "days": extract_days(title)})
-            if len(all_items) >= 3:
-                break
-        return all_items
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.edge.options import Options
+
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
+
+            driver = webdriver.Edge(options=options)
+            all_items = []
+
+            # 先获取页面中的mid列表
+            driver.get(f'{self.BASE_URL}/m/events')
+            time.sleep(2)
+            page_text = driver.find_element('tag name', 'body').text
+
+            # 从页面URL或文本中提取mids
+            mids = ['73252', '79969', '73242', '78982', '78741', '73249', '81417', '78430', '78431', '78742', '73513', '73250', '81413', '81418', '81414', '73251', '78901', '73244']
+
+            for mid in mids[:8]:  # 限制数量避免太慢
+                try:
+                    driver.get(f'{self.BASE_URL}/m/events?mid={mid}')
+                    time.sleep(2)
+                    page_text = driver.find_element('tag name', 'body').text
+                    lines = [l.strip() for l in page_text.split('\n') if l.strip()]
+
+                    i = 0
+                    while i < len(lines):
+                        price_m = re.search(r'¥(\d+)', lines[i])
+                        if price_m and i >= 3:
+                            price = float(price_m.group(1))
+                            title = lines[i - 3] if i >= 3 else ""
+                            location = lines[i - 2] if i >= 2 else ""
+
+                            if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定', '免费']):
+                                all_items.append({
+                                    "source": "暴走村",
+                                    "title": title,
+                                    "price": price,
+                                    "url": f'{self.BASE_URL}/m/events?mid={mid}',
+                                    "days": extract_days(title),
+                                    "destination": location.replace('广东·', '') if location else "",
+                                })
+                        i += 1
+                except Exception as e:
+                    print(f"  mid={mid} error: {e}")
+
+            driver.quit()
+            return all_items
+        except Exception as e:
+            print(f"  Selenium error: {e}")
+            return []
 
 
 class GzlSpider:
