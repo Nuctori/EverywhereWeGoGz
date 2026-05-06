@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import {
   Search,
   Filter,
@@ -297,25 +296,16 @@ export function TourList() {
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1.5 block">
                   <Calendar className="w-3.5 h-3.5 inline mr-1" />
-                  出发日期
+                  出发时间
                 </label>
-                <Input
-                  type="date"
-                  value={filters.departureDate}
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => {
-                    setFilters({ ...filters, departureDate: e.target.value });
-                  }}
-                  className="mb-2"
-                />
                 {/* 快捷日期按钮 */}
                 <div className="flex gap-1.5 flex-wrap">
                   {[
-                    { label: '全部', value: '' },
-                    { label: '今天', value: new Date().toISOString().split('T')[0] },
-                    { label: '3天内', value: (() => { const d = new Date(); d.setDate(d.getDate() + 3); return d.toISOString().split('T')[0]; })() },
-                    { label: '7天内', value: (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split('T')[0]; })() },
-                    { label: '30天内', value: (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0]; })() },
+                    { label: '全部', value: '', mode: 'all' },
+                    { label: '今天', value: new Date().toISOString().split('T')[0], mode: 'today' },
+                    { label: '3天内', value: (() => { const d = new Date(); d.setDate(d.getDate() + 3); return d.toISOString().split('T')[0]; })(), mode: 'within' },
+                    { label: '7天内', value: (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split('T')[0]; })(), mode: 'within' },
+                    { label: '30天内', value: (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0]; })(), mode: 'within' },
                   ].map((opt) => (
                     <button
                       key={opt.label}
@@ -330,6 +320,14 @@ export function TourList() {
                     </button>
                   ))}
                 </div>
+                {/* 显示当前筛选状态 */}
+                {filters.departureDate && (
+                  <p className="text-xs text-slate-500 mt-1.5">
+                    显示 {filters.departureDate === new Date().toISOString().split('T')[0] 
+                      ? '今天出发' 
+                      : `至 ${filters.departureDate} 前出发`} 的产品
+                  </p>
+                )}
               </div>
 
               <div className="sm:col-span-2">

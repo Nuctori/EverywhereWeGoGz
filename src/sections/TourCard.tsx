@@ -46,6 +46,8 @@ export function TourCard({ tour, onClick }: TourCardProps) {
             alt={tour.title}
             className="absolute inset-0 w-full h-full object-cover"
             onError={() => setImgError(true)}
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100" />
