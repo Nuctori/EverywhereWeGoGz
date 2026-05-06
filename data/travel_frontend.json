@@ -1,0 +1,2101 @@
+[
+  {
+    "id": "tour_1",
+    "title": "张家界6日冰雪世界·品质之选",
+    "source": "康辉",
+    "sourceLogo": "/icons/kanghui.png",
+    "destination": "张家界",
+    "duration": 6,
+    "price": 3055,
+    "priceUnit": "人",
+    "departureDate": "2026-05-22",
+    "returnDate": "2026-07-06",
+    "transportType": "大巴往返",
+    "accommodationLevel": "高档型",
+    "accommodationStars": 2,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 763,
+    "singleSupplementNote": "单人出行需补单房差￥763，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 25,
+    "totalSeats": 30,
+    "highlights": [
+      "张家界特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 87,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "冰雪世界",
+      "纯玩"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "冰雪世界",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.880Z",
+    "updatedAt": "2026-05-06T15:36:25.880Z"
+  },
+  {
+    "id": "tour_2",
+    "title": "桂林5日自然风光·纯玩无购物",
+    "source": "暴走村",
+    "sourceLogo": "/icons/baozou.png",
+    "destination": "桂林",
+    "duration": 5,
+    "price": 1709,
+    "priceUnit": "人",
+    "departureDate": "2026-06-07",
+    "returnDate": "2026-05-17",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 2,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 427,
+    "singleSupplementNote": "单人出行需补单房差￥427，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 23,
+    "totalSeats": 30,
+    "highlights": [
+      "桂林特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4,
+    "reviewCount": 241,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "50人大团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "适中",
+    "season": "春季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.880Z",
+    "updatedAt": "2026-05-06T15:36:25.880Z"
+  },
+  {
+    "id": "tour_3",
+    "title": "三亚2日古镇文化·品质之选",
+    "source": "广之旅",
+    "sourceLogo": "/icons/gzl.png",
+    "destination": "三亚",
+    "duration": 2,
+    "price": 2744,
+    "priceUnit": "人",
+    "departureDate": "2026-05-30",
+    "returnDate": "2026-06-18",
+    "transportType": "大巴往返",
+    "accommodationLevel": "高档型",
+    "accommodationStars": 3,
+    "meals": "2早餐正餐",
+    "singleSupplement": 686,
+    "singleSupplementNote": "单人出行需补单房差￥686，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 3,
+    "totalSeats": 30,
+    "highlights": [
+      "三亚特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.7,
+    "reviewCount": 405,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "古镇文化",
+      "纯玩"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "discountRate": 19,
+    "groupSize": "15人精品团",
+    "theme": "古镇文化",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "夏季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.880Z",
+    "updatedAt": "2026-05-06T15:36:25.880Z"
+  },
+  {
+    "id": "tour_4",
+    "title": "张家界4日民族风情·品质之选",
+    "source": "品途",
+    "sourceLogo": "/icons/pintu.png",
+    "destination": "张家界",
+    "duration": 4,
+    "price": 2340,
+    "priceUnit": "人",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-06-30",
+    "transportType": "飞机往返",
+    "accommodationLevel": "经济型",
+    "accommodationStars": 4,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 585,
+    "singleSupplementNote": "单人出行需补单房差￥585，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 7,
+    "totalSeats": 30,
+    "highlights": [
+      "张家界特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4,
+    "reviewCount": 148,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "民族风情",
+      "特价"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 7,
+    "groupSize": "50人大团",
+    "theme": "民族风情",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "冬季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.880Z",
+    "updatedAt": "2026-05-06T15:36:25.880Z"
+  },
+  {
+    "id": "tour_5",
+    "title": "九寨沟4日美食之旅·网红打卡",
+    "source": "暴走村",
+    "sourceLogo": "/icons/baozou.png",
+    "destination": "九寨沟",
+    "duration": 4,
+    "price": 882,
+    "priceUnit": "人",
+    "departureDate": "2026-06-18",
+    "returnDate": "2026-05-16",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 220,
+    "singleSupplementNote": "单人出行需补单房差￥220，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 16,
+    "totalSeats": 30,
+    "highlights": [
+      "九寨沟特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 309,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "美食之旅",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "discountRate": 14,
+    "groupSize": "50人大团",
+    "theme": "美食之旅",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "挑战",
+    "season": "冬季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.880Z",
+    "updatedAt": "2026-05-06T15:36:25.880Z"
+  },
+  {
+    "id": "tour_6",
+    "title": "丽江2日亲子游·网红打卡",
+    "source": "暴走村",
+    "sourceLogo": "/icons/baozou.png",
+    "destination": "丽江",
+    "duration": 2,
+    "price": 3371,
+    "priceUnit": "人",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-05-15",
+    "transportType": "大巴往返",
+    "accommodationLevel": "高档型",
+    "accommodationStars": 3,
+    "meals": "2早餐正餐",
+    "singleSupplement": 842,
+    "singleSupplementNote": "单人出行需补单房差￥842，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 11,
+    "totalSeats": 30,
+    "highlights": [
+      "丽江特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 134,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "亲子游",
+      "特价"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 16,
+    "groupSize": "50人大团",
+    "theme": "亲子游",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "休闲",
+    "season": "冬季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_7",
+    "title": "凤凰古城3日美食之旅·经典线路",
+    "source": "广之旅",
+    "sourceLogo": "/icons/gzl.png",
+    "destination": "凤凰古城",
+    "duration": 3,
+    "price": 904,
+    "priceUnit": "人",
+    "departureDate": "2026-05-10",
+    "returnDate": "2026-06-02",
+    "transportType": "飞机往返",
+    "accommodationLevel": "高档型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 226,
+    "singleSupplementNote": "单人出行需补单房差￥226，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 3,
+    "totalSeats": 30,
+    "highlights": [
+      "凤凰古城特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.6,
+    "reviewCount": 422,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "美食之旅",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": true,
+    "discountRate": 11,
+    "groupSize": "50人大团",
+    "theme": "美食之旅",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "适中",
+    "season": "春季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_8",
+    "title": "桂林5日民族风情·纯玩无购物",
+    "source": "暴走村",
+    "sourceLogo": "/icons/baozou.png",
+    "destination": "桂林",
+    "duration": 5,
+    "price": 1783,
+    "priceUnit": "人",
+    "departureDate": "2026-06-19",
+    "returnDate": "2026-06-18",
+    "transportType": "飞机往返",
+    "accommodationLevel": "豪华型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 445,
+    "singleSupplementNote": "单人出行需补单房差￥445，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 18,
+    "totalSeats": 30,
+    "highlights": [
+      "桂林特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 5,
+    "reviewCount": 67,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "民族风情",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 7,
+    "groupSize": "30人常规团",
+    "theme": "民族风情",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "休闲",
+    "season": "冬季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_9",
+    "title": "张家界3日海岛度假·网红打卡",
+    "source": "广之旅",
+    "sourceLogo": "/icons/gzl.png",
+    "destination": "张家界",
+    "duration": 3,
+    "price": 965,
+    "originalPrice": 1158,
+    "priceUnit": "人",
+    "departureDate": "2026-06-04",
+    "returnDate": "2026-06-26",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 2,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 241,
+    "singleSupplementNote": "单人出行需补单房差￥241，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 15,
+    "totalSeats": 30,
+    "highlights": [
+      "张家界特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 266,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "海岛度假",
+      "特价"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": true,
+    "groupSize": "50人大团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "适中",
+    "season": "夏季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_10",
+    "title": "厦门5日民族风情·经典线路",
+    "source": "暴走村",
+    "sourceLogo": "/icons/baozou.png",
+    "destination": "厦门",
+    "duration": 5,
+    "price": 3243,
+    "priceUnit": "人",
+    "departureDate": "2026-05-12",
+    "returnDate": "2026-05-12",
+    "transportType": "高铁往返",
+    "accommodationLevel": "豪华型",
+    "accommodationStars": 4,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 810,
+    "singleSupplementNote": "单人出行需补单房差￥810，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 11,
+    "totalSeats": 30,
+    "highlights": [
+      "厦门特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 42,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "民族风情",
+      "特价"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "民族风情",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "适中",
+    "season": "秋季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_11",
+    "title": "九寨沟3日自然风光·经典线路",
+    "source": "假日通",
+    "sourceLogo": "/icons/jiari.png",
+    "destination": "九寨沟",
+    "duration": 3,
+    "price": 874,
+    "originalPrice": 1048,
+    "priceUnit": "人",
+    "departureDate": "2026-06-13",
+    "returnDate": "2026-06-21",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 2,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 218,
+    "singleSupplementNote": "单人出行需补单房差￥218，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 22,
+    "totalSeats": 30,
+    "highlights": [
+      "九寨沟特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 80,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "轻松",
+    "season": "春季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_12",
+    "title": "张家界4日亲子游·品质之选",
+    "source": "广东中旅",
+    "sourceLogo": "/icons/gdzl.png",
+    "destination": "张家界",
+    "duration": 4,
+    "price": 3418,
+    "originalPrice": 4101,
+    "priceUnit": "人",
+    "departureDate": "2026-05-16",
+    "returnDate": "2026-06-17",
+    "transportType": "飞机往返",
+    "accommodationLevel": "高档型",
+    "accommodationStars": 2,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 854,
+    "singleSupplementNote": "单人出行需补单房差￥854，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 7,
+    "totalSeats": 30,
+    "highlights": [
+      "张家界特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.7,
+    "reviewCount": 301,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "亲子游",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "15人精品团",
+    "theme": "亲子游",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "休闲",
+    "season": "春季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_13",
+    "title": "三亚5日亲子游·经典线路",
+    "source": "广之旅",
+    "sourceLogo": "/icons/gzl.png",
+    "destination": "三亚",
+    "duration": 5,
+    "price": 1910,
+    "originalPrice": 2292,
+    "priceUnit": "人",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-05-14",
+    "transportType": "高铁往返",
+    "accommodationLevel": "经济型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 477,
+    "singleSupplementNote": "单人出行需补单房差￥477，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 26,
+    "totalSeats": 30,
+    "highlights": [
+      "三亚特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 130,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "亲子游",
+      "特价"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "15人精品团",
+    "theme": "亲子游",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "休闲",
+    "season": "夏季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_14",
+    "title": "凤凰古城3日民族风情·品质之选",
+    "source": "康辉",
+    "sourceLogo": "/icons/kanghui.png",
+    "destination": "凤凰古城",
+    "duration": 3,
+    "price": 2323,
+    "originalPrice": 2787,
+    "priceUnit": "人",
+    "departureDate": "2026-05-08",
+    "returnDate": "2026-06-26",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 580,
+    "singleSupplementNote": "单人出行需补单房差￥580，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 11,
+    "totalSeats": 30,
+    "highlights": [
+      "凤凰古城特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 225,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "民族风情",
+      "纯玩"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "民族风情",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "挑战",
+    "season": "冬季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_15",
+    "title": "西藏拉萨4日古镇文化·品质之选",
+    "source": "广之旅",
+    "sourceLogo": "/icons/gzl.png",
+    "destination": "西藏拉萨",
+    "duration": 4,
+    "price": 820,
+    "priceUnit": "人",
+    "departureDate": "2026-05-31",
+    "returnDate": "2026-06-09",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 4,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 205,
+    "singleSupplementNote": "单人出行需补单房差￥205，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 12,
+    "totalSeats": 30,
+    "highlights": [
+      "西藏拉萨特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4,
+    "reviewCount": 60,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "古镇文化",
+      "特价"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "古镇文化",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "适中",
+    "season": "春季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_16",
+    "title": "桂林2日自然风光·经典线路",
+    "source": "广东中旅",
+    "sourceLogo": "/icons/gdzl.png",
+    "destination": "桂林",
+    "duration": 2,
+    "price": 1836,
+    "priceUnit": "人",
+    "departureDate": "2026-05-07",
+    "returnDate": "2026-06-08",
+    "transportType": "大巴往返",
+    "accommodationLevel": "豪华型",
+    "accommodationStars": 4,
+    "meals": "2早餐正餐",
+    "singleSupplement": 459,
+    "singleSupplementNote": "单人出行需补单房差￥459，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 12,
+    "totalSeats": 30,
+    "highlights": [
+      "桂林特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.5,
+    "reviewCount": 455,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "特价"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "15人精品团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "挑战",
+    "season": "秋季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_17",
+    "title": "云南大理4日冰雪世界·品质之选",
+    "source": "康辉",
+    "sourceLogo": "/icons/kanghui.png",
+    "destination": "云南大理",
+    "duration": 4,
+    "price": 2539,
+    "priceUnit": "人",
+    "departureDate": "2026-05-24",
+    "returnDate": "2026-06-13",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 2,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 634,
+    "singleSupplementNote": "单人出行需补单房差￥634，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 16,
+    "totalSeats": 30,
+    "highlights": [
+      "云南大理特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 318,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "冰雪世界",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "15人精品团",
+    "theme": "冰雪世界",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "适中",
+    "season": "冬季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_18",
+    "title": "九寨沟3日古镇文化·网红打卡",
+    "source": "假日通",
+    "sourceLogo": "/icons/jiari.png",
+    "destination": "九寨沟",
+    "duration": 3,
+    "price": 2161,
+    "priceUnit": "人",
+    "departureDate": "2026-06-02",
+    "returnDate": "2026-06-14",
+    "transportType": "飞机往返",
+    "accommodationLevel": "经济型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 540,
+    "singleSupplementNote": "单人出行需补单房差￥540，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 16,
+    "totalSeats": 30,
+    "highlights": [
+      "九寨沟特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4,
+    "reviewCount": 347,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "古镇文化",
+      "纯玩"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "50人大团",
+    "theme": "古镇文化",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_19",
+    "title": "西藏拉萨6日自然风光·经典线路",
+    "source": "假日通",
+    "sourceLogo": "/icons/jiari.png",
+    "destination": "西藏拉萨",
+    "duration": 6,
+    "price": 2457,
+    "priceUnit": "人",
+    "departureDate": "2026-06-01",
+    "returnDate": "2026-05-17",
+    "transportType": "飞机往返",
+    "accommodationLevel": "经济型",
+    "accommodationStars": 4,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 614,
+    "singleSupplementNote": "单人出行需补单房差￥614，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "西藏拉萨特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 465,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "特价"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "挑战",
+    "season": "夏季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_20",
+    "title": "桂林2日冰雪世界·纯玩无购物",
+    "source": "假日通",
+    "sourceLogo": "/icons/jiari.png",
+    "destination": "桂林",
+    "duration": 2,
+    "price": 2644,
+    "priceUnit": "人",
+    "departureDate": "2026-06-11",
+    "returnDate": "2026-06-07",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 4,
+    "meals": "2早餐正餐",
+    "singleSupplement": 661,
+    "singleSupplementNote": "单人出行需补单房差￥661，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 7,
+    "totalSeats": 30,
+    "highlights": [
+      "桂林特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 96,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "冰雪世界",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "50人大团",
+    "theme": "冰雪世界",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "春季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_21",
+    "title": "张家界5日美食之旅·品质之选",
+    "source": "广东中旅",
+    "sourceLogo": "/icons/gdzl.png",
+    "destination": "张家界",
+    "duration": 5,
+    "price": 3417,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-05-22",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 854,
+    "singleSupplementNote": "单人出行需补单房差￥854，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 24,
+    "totalSeats": 30,
+    "highlights": [
+      "张家界特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 218,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "美食之旅",
+      "纯玩"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "50人大团",
+    "theme": "美食之旅",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "适中",
+    "season": "春季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_22",
+    "title": "厦门4日冰雪世界·品质之选",
+    "source": "广之旅",
+    "sourceLogo": "/icons/gzl.png",
+    "destination": "厦门",
+    "duration": 4,
+    "price": 2938,
+    "priceUnit": "人",
+    "departureDate": "2026-05-11",
+    "returnDate": "2026-05-19",
+    "transportType": "高铁往返",
+    "accommodationLevel": "豪华型",
+    "accommodationStars": 2,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 734,
+    "singleSupplementNote": "单人出行需补单房差￥734，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "厦门特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 157,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "冰雪世界",
+      "特价"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "15人精品团",
+    "theme": "冰雪世界",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "轻松",
+    "season": "冬季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_23",
+    "title": "三亚2日亲子游·网红打卡",
+    "source": "暴走村",
+    "sourceLogo": "/icons/baozou.png",
+    "destination": "三亚",
+    "duration": 2,
+    "price": 2925,
+    "priceUnit": "人",
+    "departureDate": "2026-05-20",
+    "returnDate": "2026-06-11",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 4,
+    "meals": "2早餐正餐",
+    "singleSupplement": 731,
+    "singleSupplementNote": "单人出行需补单房差￥731，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 9,
+    "totalSeats": 30,
+    "highlights": [
+      "三亚特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 424,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "亲子游",
+      "纯玩"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "亲子游",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "休闲",
+    "season": "冬季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_24",
+    "title": "凤凰古城5日自然风光·经典线路",
+    "source": "品途",
+    "sourceLogo": "/icons/pintu.png",
+    "destination": "凤凰古城",
+    "duration": 5,
+    "price": 1707,
+    "priceUnit": "人",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-05-12",
+    "transportType": "高铁往返",
+    "accommodationLevel": "豪华型",
+    "accommodationStars": 4,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 426,
+    "singleSupplementNote": "单人出行需补单房差￥426，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 21,
+    "totalSeats": 30,
+    "highlights": [
+      "凤凰古城特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 390,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "纯玩"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": true,
+    "groupSize": "15人精品团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "轻松",
+    "season": "冬季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_25",
+    "title": "凤凰古城2日古镇文化·经典线路",
+    "source": "康辉",
+    "sourceLogo": "/icons/kanghui.png",
+    "destination": "凤凰古城",
+    "duration": 2,
+    "price": 2593,
+    "priceUnit": "人",
+    "departureDate": "2026-06-13",
+    "returnDate": "2026-05-13",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 2,
+    "meals": "2早餐正餐",
+    "singleSupplement": 648,
+    "singleSupplementNote": "单人出行需补单房差￥648，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 22,
+    "totalSeats": 30,
+    "highlights": [
+      "凤凰古城特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.7,
+    "reviewCount": 16,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "古镇文化",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "古镇文化",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "轻松",
+    "season": "夏季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_26",
+    "title": "丽江2日古镇文化·网红打卡",
+    "source": "广州去旅行",
+    "sourceLogo": "/icons/qu.png",
+    "destination": "丽江",
+    "duration": 2,
+    "price": 1684,
+    "priceUnit": "人",
+    "departureDate": "2026-06-21",
+    "returnDate": "2026-05-30",
+    "transportType": "大巴往返",
+    "accommodationLevel": "豪华型",
+    "accommodationStars": 2,
+    "meals": "2早餐正餐",
+    "singleSupplement": 421,
+    "singleSupplementNote": "单人出行需补单房差￥421，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 19,
+    "totalSeats": 30,
+    "highlights": [
+      "丽江特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 244,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "古镇文化",
+      "特价"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "50人大团",
+    "theme": "古镇文化",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "适中",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_27",
+    "title": "西藏拉萨3日冰雪世界·网红打卡",
+    "source": "暴走村",
+    "sourceLogo": "/icons/baozou.png",
+    "destination": "西藏拉萨",
+    "duration": 3,
+    "price": 2583,
+    "priceUnit": "人",
+    "departureDate": "2026-05-15",
+    "returnDate": "2026-05-15",
+    "transportType": "大巴往返",
+    "accommodationLevel": "高档型",
+    "accommodationStars": 2,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 645,
+    "singleSupplementNote": "单人出行需补单房差￥645，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "西藏拉萨特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 387,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "冰雪世界",
+      "特价"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "冰雪世界",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "休闲",
+    "season": "春季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_28",
+    "title": "丽江6日民族风情·经典线路",
+    "source": "广州去旅行",
+    "sourceLogo": "/icons/qu.png",
+    "destination": "丽江",
+    "duration": 6,
+    "price": 3484,
+    "priceUnit": "人",
+    "departureDate": "2026-06-03",
+    "returnDate": "2026-06-15",
+    "transportType": "大巴往返",
+    "accommodationLevel": "经济型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 871,
+    "singleSupplementNote": "单人出行需补单房差￥871，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 15,
+    "totalSeats": 30,
+    "highlights": [
+      "丽江特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.6,
+    "reviewCount": 456,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "民族风情",
+      "纯玩"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "50人大团",
+    "theme": "民族风情",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "休闲",
+    "season": "夏季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_29",
+    "title": "三亚6日自然风光·品质之选",
+    "source": "假日通",
+    "sourceLogo": "/icons/jiari.png",
+    "destination": "三亚",
+    "duration": 6,
+    "price": 1092,
+    "priceUnit": "人",
+    "departureDate": "2026-05-12",
+    "returnDate": "2026-06-06",
+    "transportType": "飞机往返",
+    "accommodationLevel": "经济型",
+    "accommodationStars": 4,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 273,
+    "singleSupplementNote": "单人出行需补单房差￥273，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 13,
+    "totalSeats": 30,
+    "highlights": [
+      "三亚特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 288,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "纯玩"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": true,
+    "discountRate": 5,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "休闲",
+    "season": "秋季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  },
+  {
+    "id": "tour_30",
+    "title": "九寨沟2日亲子游·纯玩无购物",
+    "source": "暴走村",
+    "sourceLogo": "/icons/baozou.png",
+    "destination": "九寨沟",
+    "duration": 2,
+    "price": 2003,
+    "priceUnit": "人",
+    "departureDate": "2026-05-09",
+    "returnDate": "2026-05-09",
+    "transportType": "大巴往返",
+    "accommodationLevel": "豪华型",
+    "accommodationStars": 3,
+    "meals": "2早餐正餐",
+    "singleSupplement": 500,
+    "singleSupplementNote": "单人出行需补单房差￥500，确保单人参团也能享受独立私密空间。",
+    "availableSeats": 7,
+    "totalSeats": 30,
+    "highlights": [
+      "九寨沟特色景点游览",
+      "当地美食品尝",
+      "专业导游服务"
+    ],
+    "itinerary": [],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 168,
+    "bookingUrl": "#",
+    "images": [],
+    "tags": [
+      "亲子游",
+      "纯玩"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "50人大团",
+    "theme": "亲子游",
+    "suitableFor": [
+      "亲子"
+    ],
+    "difficulty": "适中",
+    "season": "春季",
+    "language": "中文导游",
+    "createdAt": "2026-05-06T15:36:25.881Z",
+    "updatedAt": "2026-05-06T15:36:25.881Z"
+  }
+]
