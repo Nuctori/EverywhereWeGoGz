@@ -27,13 +27,13 @@ options.add_argument('--window-size=1400,900')
 driver = webdriver.Edge(options=options)
 
 driver.get(f'http://localhost:{PORT}/')
-time.sleep(2)
+time.sleep(5)  # 增加等待时间让图片加载
 driver.save_screenshot('screenshot-home.png')
 print('Home screenshot saved')
 
 # Scroll to tour list
 driver.execute_script("document.getElementById('tour-list').scrollIntoView()")
-time.sleep(1)
+time.sleep(3)  # 等待图片加载
 driver.save_screenshot('screenshot-tours.png')
 print('Tours screenshot saved')
 

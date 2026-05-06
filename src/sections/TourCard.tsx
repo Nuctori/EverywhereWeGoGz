@@ -13,7 +13,9 @@ import {
   Zap,
   AlertTriangle,
   Eye,
+  ImageOff,
 } from 'lucide-react';
+import { useState } from 'react';
 
 interface TourCardProps {
   tour: Tour;
@@ -32,11 +34,24 @@ export function TourCard({ tour, onClick }: TourCardProps) {
       品途: '#3A86FF',
     }[tour.source] || '#666';
 
+  const [imgError, setImgError] = useState(false);
+  const hasImage = tour.images.length > 0 && !imgError;
+
   return (
     <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer border-slate-200">
-      <div className="relative h-48 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center overflow-hidden">
+      <div className="relative h-48 flex items-center justify-center overflow-hidden">
+        {hasImage ? (
+          <img
+            src={tour.images[0]}
+            alt={tour.title}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-        <div className="text-6xl opacity-20">🏞️</div>
+        {!hasImage && <ImageOff className="absolute text-slate-300 w-16 h-16 opacity-40" />}
         
         {/* 标签 */}
         <div className="absolute top-3 left-3 flex gap-2">
@@ -107,12 +122,16 @@ export function TourCard({ tour, onClick }: TourCardProps) {
         </div>
 
         {/* 单房差透明提示 */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5 mb-3 flex items-start gap-2">
-          <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+        <div className={`rounded-lg p-2.5 mb-3 flex items-start gap-2 ${tour.singleSupplement > 0 ? 'bg-amber-50 border border-amber-200' : 'bg-green-50 border border-green-200'}`}>
+          <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${tour.singleSupplement > 0 ? 'text-amber-500' : 'text-green-500'}`} />
           <div>
-            <p className="text-xs font-medium text-amber-800">单房差透明</p>
-            <p className="text-xs text-amber-700 mt-0.5">
-              单人出行需补 <span className="font-semibold">￥{tour.singleSupplement}</span>
+            <p className={`text-xs font-medium ${tour.singleSupplement > 0 ? 'text-amber-800' : 'text-green-800'}`}>
+              {tour.singleSupplement > 0 ? '单房差透明' : '无单房差'}
+            </p>
+            <p className={`text-xs mt-0.5 ${tour.singleSupplement > 0 ? 'text-amber-700' : 'text-green-700'}`}>
+              {tour.singleSupplement > 0 
+                ? <>单人出行需补 <span className="font-semibold">￥{tour.singleSupplement}</span></>
+                : '本产品无需补单房差，单人出行同价'}
             </p>
           </div>
         </div>

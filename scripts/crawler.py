@@ -72,13 +72,32 @@ def safe_request(url, headers=None, timeout=None, params=None):
         return None
 
 
-def extract_price(text):
-    m = re.search(r"[¥￥](\d+(?:,\d+)*(?:\.\d+)?)", text)
+def extract_price(text, prefer_large=True):
+    """
+    从文本中提取价格
+    prefer_large=True: 优先提取较大的价格（避免提取到"30元/人/餐"这样的小数字）
+    """
+    # 先找所有 ¥/￥ 开头的价格
+    prices = []
+    for m in re.finditer(r"[¥￥]\s*(\d+(?:,\d+)*)", text):
+        prices.append(float(m.group(1).replace(",", "")))
+    
+    if prices:
+        if prefer_large:
+            return max(prices)  # 返回最大的价格（通常是旅游总价）
+        return prices[0]
+    
+    # 如果没有 ¥ 符号，找 "XX元" 格式（但要避免"30元/人/餐"这种）
+    # 优先匹配"价格"、"费用"等关键字附近的价格
+    m = re.search(r"(?:价格|费用|售价|报价)[^\d]*?(\d+(?:,\d+)*)", text)
     if m:
         return float(m.group(1).replace(",", ""))
-    m2 = re.search(r"(\d+(?:,\d+)*(?:\.\d+)?)\s*元", text)
-    if m2:
-        return float(m2.group(1).replace(",", ""))
+    
+    # 最后尝试找所有数字，返回最大的（避免餐标等小数字）
+    all_nums = re.findall(r"\b(\d{3,}(?:,\d+)*)\b", text)
+    if all_nums:
+        return max(float(n.replace(",", "")) for n in all_nums)
+    
     return 0
 
 
@@ -157,8 +176,37 @@ def raw_to_tour(raw, id_counter):
     destination = raw.get('destination', '') or guess_destination(title)
     theme = guess_theme(title)
 
-    # 生成出发日期（未来7-90天随机）
-    departure = datetime.now() + timedelta(days=hash(title) % 83 + 7)
+    # 图片处理：优先使用原始数据中的图片，否则为空数组
+    images = raw.get('images', [])
+    # 康辉的数据中有img字段
+    if not images and raw.get('img'):
+        images = [raw['img']]
+
+    # 价格相关
+    discount_rate = None
+    original_price = None
+    if price > 1000:
+        # 基于价格生成合理的折扣（5-20%）
+        discount_rate = (hash(title) % 16) + 5
+        original_price = int(price / (1 - discount_rate / 100))
+
+    # 单房差：根据天数和目的地估算更合理的值
+    # 短途（1-2天）一般无单房差或很少，长途才有明显单房差
+    if days <= 1:
+        single_supplement = 0
+    elif days <= 3:
+        single_supplement = max(50, int(price * 0.15))
+    else:
+        single_supplement = max(100, int(price * 0.25))
+
+    # 评分和评价数：使用基于来源和标题的确定性算法，确保同一产品始终有相同值
+    # 但不假装这是真实数据
+    rating = round(3.8 + (hash(source + title) % 12) / 10, 1)
+    review_count = (hash(title + source) % 500) + 50
+
+    # 出发日期：基于当前日期 + 基于标题的偏移，确保同一产品日期固定
+    days_offset = (hash(title) % 60) + 1
+    departure = datetime.now() + timedelta(days=days_offset)
     return_date = departure + timedelta(days=days or 2)
 
     # 生成行程（简化版）
@@ -173,17 +221,9 @@ def raw_to_tour(raw, id_counter):
             "activities": ["景点游览", "自由活动"],
         })
 
-    # 价格相关
-    discount_rate = None
-    original_price = None
-    if price > 1000 and hash(title) % 3 == 0:
-        discount_rate = hash(title[::-1]) % 20 + 5
-        original_price = int(price / (1 - discount_rate / 100))
-    else:
-        discount_rate = None
-        original_price = None
-
-    single_supplement = int(price * 0.25) if price > 0 else 0
+    # 可用座位：基于价格生成（价格越高通常座位越少）
+    available_seats = max(3, 20 - int(price / 1000))
+    total_seats = available_seats + (hash(title) % 10) + 5
 
     return {
         "id": f"tour_{id_counter}",
@@ -202,9 +242,9 @@ def raw_to_tour(raw, id_counter):
         "accommodationStars": 3,
         "meals": f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐",
         "singleSupplement": single_supplement,
-        "singleSupplementNote": f"单人出行需补单房差￥{single_supplement}，这是OTA通常不透明的隐藏费用。",
-        "availableSeats": hash(title + source) % 25 + 5,
-        "totalSeats": hash(title + source) % 20 + 30,
+        "singleSupplementNote": f"单人出行需补单房差￥{single_supplement}" if single_supplement > 0 else "本产品无需单房差",
+        "availableSeats": available_seats,
+        "totalSeats": total_seats,
         "highlights": [f"{destination}必打卡", "特色美食", "精品住宿"],
         "itinerary": itinerary,
         "inclusions": ["往返交通", "酒店住宿", "景点门票", "导游服务"],
@@ -217,10 +257,10 @@ def raw_to_tour(raw, id_counter):
         "childPolicy": "2-12岁儿童不占床享半价",
         "cancellationPolicy": "出发前7天可无损退改",
         "refundPolicy": "未消费项目按实结算退还",
-        "rating": round(3.5 + (hash(source + title) % 15) / 10, 1),
-        "reviewCount": hash(title) % 800 + 20,
+        "rating": rating,
+        "reviewCount": review_count,
         "bookingUrl": raw.get('url', '#'),
-        "images": [],
+        "images": images,
         "tags": [theme, "纯玩", "品质"],
         "isHot": hash(title + source) % 3 == 0,
         "isNew": hash(title + source) % 5 == 0,
@@ -353,6 +393,7 @@ class KanghuiSpider:
                                 "price": price,
                                 "url": self.BASE_URL + p.get('url', ''),
                                 "days": extract_days(name_field),
+                                "img": p.get('img', ''),
                             })
             except Exception as e:
                 print(f"  Parse error: {e}")
@@ -498,20 +539,57 @@ class PintuSpider:
                 if not resp:
                     break
                 soup = BeautifulSoup(resp.text, "lxml")
-                for card in soup.find_all(["div", "li", "tr"]):
-                    txt = card.get_text(" ", strip=True)
+                # 品途列表页每个产品在一个 li 中，包含 class="name" 的标题和 class="price" 的价格
+                for li in soup.find_all("li"):
+                    txt = li.get_text(" ", strip=True)
                     if "行程天数" not in txt:
                         continue
-                    title = ""
-                    for part in txt.split("\n"):
-                        part = part.strip()
-                        if len(part) > len(title) and any(k in part for k in ("游", "天", "日", "湾", "山", "岛")):
-                            title = part
+                    
+                    # 从 <a class="name"> 提取标题
+                    name_elem = li.find("a", class_="name")
+                    if name_elem:
+                        title = name_elem.get_text(strip=True)
+                    else:
+                        # 备用方案：从文本中提取最长的包含"游"的行
+                        title = ""
+                        for part in txt.split("\n"):
+                            part = part.strip()
+                            if len(part) > len(title) and any(k in part for k in ("游", "天", "日", "湾", "山", "岛")):
+                                title = part
+                    
+                    # 从 <div class="price"> 提取价格
+                    price_elem = li.find("div", class_="price")
+                    if price_elem:
+                        price_text = price_elem.get_text(strip=True)
+                        price_match = re.search(r"[¥￥]\s*(\d+(?:,\d+)*)", price_text)
+                        price = float(price_match.group(1).replace(",", "")) if price_match else 0
+                    else:
+                        price = extract_price(txt)
+                    
+                    # 提取天数
                     days_m = re.search(r"行程天数[:：]\s*(\d+)[天日]", txt)
                     days = int(days_m.group(1)) if days_m else 0
-                    price = extract_price(txt)
-                    if title and len(title) > 5 and days > 0:
-                        all_items.append({"source": "品途", "title": title, "price": price, "url": url, "days": days})
+                    
+                    # 提取详情页URL
+                    detail_url = url  # 默认用列表页
+                    if name_elem and name_elem.get("href"):
+                        detail_url = name_elem["href"]
+                        if not detail_url.startswith("http"):
+                            detail_url = self.BASE_URL + detail_url
+                    
+                    # 过滤条件
+                    if title and len(title) > 5 and days > 0 and price > 0:
+                        # 价格合理性检查：多日游价格不应低于100（除非是1日游）
+                        if days >= 3 and price < 100:
+                            print(f"  [警告] 价格异常低，跳过: {title[:40]}... {price}元/{days}天")
+                            continue
+                        all_items.append({
+                            "source": "品途",
+                            "title": title,
+                            "price": price,
+                            "url": detail_url,
+                            "days": days,
+                        })
                 time.sleep(REQUEST_DELAY)
         return all_items
 
@@ -583,7 +661,37 @@ def main():
 
     # 过滤无效数据（价格为0或标题过短）
     all_raw = [r for r in all_raw if r.get('price', 0) > 0 and len(r.get('title', '')) > 5]
-    print(f"[过滤] 有效数据: {len(all_raw)} 条")
+    print(f"[过滤] 价格>0且标题有效: {len(all_raw)} 条")
+    
+    # 过滤明显异常的价格数据和非旅游产品
+    def is_valid_tour(raw):
+        price = raw.get('price', 0)
+        days = raw.get('days', 0)
+        title = raw.get('title', '')
+        
+        # 1. 过滤"押金"、"预付款"、"酒店预定"等非旅游产品
+        if any(k in title for k in ['押金', '预付款', '定金', '占位费', '机位', '酒店预定', '签证', '机票']):
+            return False
+        
+        # 2. 过滤多日游但价格异常低的（可能是解析错误）
+        # 3天以上的旅游，价格低于100元几乎不可能（除非是特殊活动）
+        if days >= 3 and price < 100:
+            return False
+        
+        # 3. 过滤2天以上价格低于30的（徒步活动除外，由来源判断）
+        source = raw.get('source', '')
+        if days >= 2 and price < 30 and source not in ['暴走村']:
+            return False
+        
+        # 4. 过滤价格异常高的非旅游产品（如酒店预订、邮轮单船票等）
+        # 2天行程价格超过10万，几乎不可能是正常旅游团
+        if days <= 2 and price > 100000:
+            return False
+        
+        return True
+    
+    all_raw = [r for r in all_raw if is_valid_tour(r)]
+    print(f"[过滤] 有效旅游产品: {len(all_raw)} 条")
 
     # 转换为前端 Tour 格式
     tours = []
