@@ -1,0 +1,77 @@
+name: Update Tour Data
+
+on:
+  # 定时触发：每天凌晨 3 点（UTC）
+  schedule:
+    - cron: '0 3 * * *'
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      data_source:
+        description: '数据来源标识'
+        required: false
+        default: 'manual'
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ========================================
+      # 数据更新步骤（在此添加你的数据获取逻辑）
+      # ========================================
+      # 示例：从 API 获取数据并写入 src/data/tours.ts
+      # - name: Fetch tour data
+      #   run: node scripts/fetch-data.js
+      #   env:
+      #     API_KEY: ${{ secrets.API_KEY }}
+      #
+      # 示例：从远程 JSON 文件下载
+      # - name: Download data
+      #   run: curl -o src/data/tours.json ${{ secrets.DATA_URL }}
+      #
+      # 示例：运行 Python 爬虫
+      # - name: Setup Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.11'
+      # - name: Run crawler
+      #   run: |
+      #     pip install requests beautifulsoup4
+      #     python scripts/crawler.py
+      # ========================================
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit data changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/
+          git diff --cached --quiet || git commit -m "chore: update tour data [$(date +%Y-%m-%d)]"
+          git push
+        continue-on-error: true
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

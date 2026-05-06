@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useCrawlStatus } from '@/hooks/use-tours';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import {
   AlertCircle,
   BarChart3,
@@ -10,38 +9,19 @@ import {
   CheckCircle,
   Clock,
   Database,
-  Play,
-  RefreshCw,
   Server,
 } from 'lucide-react';
 
-function readErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : '未知错误';
-}
-
 export default function Admin() {
-  const { status, loading, fetchStatus, triggerCrawl, generateMock } = useCrawlStatus();
+  const { status } = useCrawlStatus();
   const [message, setMessage] = useState<string | null>(null);
 
   const handleTriggerCrawl = async () => {
-    try {
-      setMessage('正在启动爬虫...');
-      await triggerCrawl();
-      setMessage('爬虫已启动，请稍后刷新查看结果。');
-    } catch (error: unknown) {
-      setMessage(readErrorMessage(error));
-    }
+    setMessage('静态站点不支持爬虫功能，请直接修改 src/data/tours.ts 更新数据。');
   };
 
   const handleGenerateMock = async () => {
-    try {
-      setMessage('正在生成模拟数据...');
-      await generateMock(100);
-      setMessage('模拟数据已生成。');
-      fetchStatus();
-    } catch (error: unknown) {
-      setMessage(readErrorMessage(error));
-    }
+    setMessage('静态站点不支持生成模拟数据，请直接修改 src/data/tours.ts 更新数据。');
   };
 
   const formatTime = (iso: string | null | undefined) => {
@@ -95,13 +75,11 @@ export default function Admin() {
               <Server className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800">爬虫管理后台</h1>
-              <p className="text-xs text-slate-500">旅行团数据聚合与监控</p>
+              <h1 className="text-lg font-bold text-slate-800">数据概览</h1>
+              <p className="text-xs text-slate-500">旅行团静态数据状态</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => (window.location.href = '/')}>
-            返回首页
-          </Button>
+          <Button variant="outline" size="sm" onClick={() => (window.location.href = '/')}>返回首页</Button>
         </div>
       </header>
 
@@ -123,16 +101,10 @@ export default function Admin() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">爬虫状态</p>
+                  <p className="text-sm text-slate-500">数据状态</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <div
-                      className={`w-2.5 h-2.5 rounded-full ${
-                        status?.isCrawling ? 'bg-blue-500 animate-pulse' : statusColor(status?.lastCrawlStatus)
-                      }`}
-                    />
-                    <span className="text-sm font-medium">
-                      {status?.isCrawling ? '运行中' : statusLabel(status?.lastCrawlStatus)}
-                    </span>
+                    <div className={`w-2.5 h-2.5 rounded-full ${statusColor(status?.lastCrawlStatus)}`} />
+                    <span className="text-sm font-medium">{statusLabel(status?.lastCrawlStatus)}</span>
                   </div>
                 </div>
                 <Bug className="w-8 h-8 text-purple-500" />
@@ -156,7 +128,7 @@ export default function Admin() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">缓存大小</p>
+                  <p className="text-sm text-slate-500">数据大小</p>
                   <p className="text-2xl font-bold text-slate-800">{formatSize(status?.cacheSize || 0)}</p>
                 </div>
                 <BarChart3 className="w-8 h-8 text-green-500" />
@@ -167,43 +139,40 @@ export default function Admin() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">爬虫控制</CardTitle>
+            <CardTitle className="text-base">静态站点说明</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-700 space-y-2">
+              <p className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                当前为纯静态站点，所有数据来自 src/data/tours.ts
+              </p>
+              <p className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                如需更新数据，请直接修改 tours.ts 文件后重新构建
+              </p>
+              <p className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                筛选、排序等功能均在浏览器端完成，无需后端服务器
+              </p>
+            </div>
+
             <div className="flex gap-3 flex-wrap">
-              <Button onClick={handleTriggerCrawl} disabled={loading || status?.isCrawling} className="gap-2">
-                <Play className="w-4 h-4" />
-                {status?.isCrawling ? '爬虫运行中...' : '启动爬虫'}
+              <Button onClick={handleTriggerCrawl} variant="outline" className="gap-2" disabled>
+                <Bug className="w-4 h-4" />
+                启动爬虫（不可用）
               </Button>
 
-              <Button variant="outline" onClick={handleGenerateMock} disabled={loading} className="gap-2">
+              <Button variant="outline" onClick={handleGenerateMock} disabled className="gap-2">
                 <Database className="w-4 h-4" />
-                生成模拟数据
-              </Button>
-
-              <Button variant="ghost" onClick={fetchStatus} disabled={loading} className="gap-2">
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                刷新状态
+                生成模拟数据（不可用）
               </Button>
             </div>
 
             {message && (
-              <div
-                className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
-                  message.includes('失败') || message.includes('错误')
-                    ? 'bg-red-50 text-red-700 border border-red-200'
-                    : 'bg-blue-50 text-blue-700 border border-blue-200'
-                }`}
-              >
-                {message.includes('失败') ? <AlertCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />}
+              <div className="p-3 rounded-lg text-sm flex items-center gap-2 bg-amber-50 text-amber-700 border border-amber-200">
+                <AlertCircle className="w-4 h-4" />
                 {message}
-              </div>
-            )}
-
-            {status?.isCrawling && (
-              <div className="space-y-2">
-                <p className="text-sm text-slate-500">爬虫正在运行，请勿重复启动。</p>
-                <Progress value={undefined} className="animate-pulse" />
               </div>
             )}
           </CardContent>

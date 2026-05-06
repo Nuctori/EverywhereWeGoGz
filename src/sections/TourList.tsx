@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import type { Tour, FilterState } from '@/types/tour';
-import { useTours } from '@/hooks/use-tours';
 import { TourCard } from './TourCard';
 import { TourDetailModal } from './TourDetailModal';
 import { Button } from '@/components/ui/button';
@@ -24,11 +23,8 @@ import {
   Flame,
   Sparkles,
   Star,
-  RefreshCw,
-  WifiOff,
 } from 'lucide-react';
 
-// 回退到本地数据
 import { tours as localTours, sources, destinations, themes } from '@/data/tours';
 
 export function TourList() {
@@ -44,22 +40,10 @@ export function TourList() {
     theme: '',
     sortBy: 'hot',
   });
-  const [useApi, setUseApi] = useState(true);
 
-  const { tours: apiTours, loading, error, total, fetchTours } = useTours();
-
-  // 首次加载API数据
-  useEffect(() => {
-    if (useApi) {
-      fetchTours(filters);
-    }
-  }, [useApi]);
-
-  // 当筛选条件变化时重新获取
   const maxPriceAll = useMemo(() => {
-    const data = useApi && apiTours.length > 0 ? apiTours : localTours;
-    return Math.max(...data.map((t) => t.price), 5000);
-  }, [apiTours, useApi]);
+    return Math.max(...localTours.map((t) => t.price), 5000);
+  }, []);
 
   const [priceRange, setPriceRange] = useState<number[]>([0, maxPriceAll]);
 
@@ -69,10 +53,6 @@ export function TourList() {
   }, [maxPriceAll]);
 
   const displayTours = useMemo(() => {
-    if (useApi && apiTours.length > 0) {
-      return apiTours;
-    }
-    // 本地筛选
     let result = localTours.filter((tour) => {
       if (filters.destination && !tour.destination.includes(filters.destination)) return false;
       if (filters.source && tour.source !== filters.source) return false;
@@ -102,7 +82,7 @@ export function TourList() {
     }
 
     return result;
-  }, [useApi, apiTours, filters, priceRange]);
+  }, [filters, priceRange]);
 
   const activeFilterCount = [
     filters.destination,
@@ -115,46 +95,6 @@ export function TourList() {
 
   return (
     <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      {/* 数据模式切换 */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {error && useApi && (
-            <Badge variant="outline" className="gap-1 text-amber-600 border-amber-300 bg-amber-50">
-              <WifiOff className="w-3 h-3" />
-              API 不可用，已回退到本地数据
-            </Badge>
-          )}
-          {loading && (
-            <Badge variant="outline" className="gap-1 text-blue-600 border-blue-300 bg-blue-50">
-              <RefreshCw className="w-3 h-3 animate-spin" />
-              加载中...
-            </Badge>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-500">数据来源:</span>
-          <button
-            onClick={() => setUseApi(!useApi)}
-            className={`text-xs px-2 py-1 rounded-full transition-colors ${
-              useApi
-                ? 'bg-blue-100 text-blue-700'
-                : 'bg-slate-100 text-slate-600'
-            }`}
-          >
-            {useApi ? 'API实时' : '本地静态'}
-          </button>
-          {useApi && (
-            <button
-              onClick={() => fetchTours(filters)}
-              className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
-            >
-              <RefreshCw className="w-3 h-3 inline mr-1" />
-              刷新
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* 筛选栏 */}
       <div className="mb-6">
         <div className="flex items-center gap-3 flex-wrap mb-4">
@@ -177,9 +117,7 @@ export function TourList() {
             <Select
               value={filters.sortBy}
               onValueChange={(v) => {
-                const newFilters = { ...filters, sortBy: v as FilterState['sortBy'] };
-                setFilters(newFilters);
-                if (useApi) fetchTours(newFilters);
+                setFilters({ ...filters, sortBy: v as FilterState['sortBy'] });
               }}
             >
               <SelectTrigger className="w-[140px]">
@@ -224,7 +162,7 @@ export function TourList() {
                 size="sm"
                 className="text-slate-500"
                 onClick={() => {
-                  const reset: FilterState = {
+                  setFilters({
                     destination: '',
                     minPrice: null,
                     maxPrice: null,
@@ -233,10 +171,8 @@ export function TourList() {
                     departureDate: '',
                     theme: '',
                     sortBy: 'hot',
-                  };
-                  setFilters(reset);
+                  });
                   setPriceRange([0, maxPriceAll]);
-                  if (useApi) fetchTours(reset);
                 }}
               >
                 <X className="w-4 h-4 mr-1" />
@@ -253,9 +189,7 @@ export function TourList() {
                 <Select
                   value={filters.destination || 'all'}
                   onValueChange={(v) => {
-                    const newFilters = { ...filters, destination: v === 'all' ? '' : v };
-                    setFilters(newFilters);
-                    if (useApi) fetchTours(newFilters);
+                    setFilters({ ...filters, destination: v === 'all' ? '' : v });
                   }}
                 >
                   <SelectTrigger>
@@ -280,9 +214,7 @@ export function TourList() {
                 <Select
                   value={filters.source || 'all'}
                   onValueChange={(v) => {
-                    const newFilters = { ...filters, source: v === 'all' ? '' : v };
-                    setFilters(newFilters);
-                    if (useApi) fetchTours(newFilters);
+                    setFilters({ ...filters, source: v === 'all' ? '' : v });
                   }}
                 >
                   <SelectTrigger>
@@ -308,9 +240,7 @@ export function TourList() {
                 <Select
                   value={filters.theme || 'all'}
                   onValueChange={(v) => {
-                    const newFilters = { ...filters, theme: v === 'all' ? '' : v };
-                    setFilters(newFilters);
-                    if (useApi) fetchTours(newFilters);
+                    setFilters({ ...filters, theme: v === 'all' ? '' : v });
                   }}
                 >
                   <SelectTrigger>
@@ -336,9 +266,7 @@ export function TourList() {
                   type="date"
                   value={filters.departureDate}
                   onChange={(e) => {
-                    const newFilters = { ...filters, departureDate: e.target.value };
-                    setFilters(newFilters);
-                    if (useApi) fetchTours(newFilters);
+                    setFilters({ ...filters, departureDate: e.target.value });
                   }}
                 />
               </div>
@@ -361,12 +289,10 @@ export function TourList() {
                 <Select
                   value={filters.duration?.toString() || 'all'}
                   onValueChange={(v) => {
-                    const newFilters = {
+                    setFilters({
                       ...filters,
                       duration: v === 'all' ? null : parseInt(v),
-                    };
-                    setFilters(newFilters);
-                    if (useApi) fetchTours(newFilters);
+                    });
                   }}
                 >
                   <SelectTrigger>
@@ -390,13 +316,8 @@ export function TourList() {
       {/* 结果统计 */}
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-slate-500">
-          共找到 <span className="font-semibold text-slate-800">{useApi ? total : displayTours.length}</span> 个旅行团
-          {useApi && apiTours.length > 0 && (
-            <span className="text-xs text-slate-400 ml-2">(API数据)</span>
-          )}
-          {!useApi && (
-            <span className="text-xs text-slate-400 ml-2">(本地静态数据)</span>
-          )}
+          共找到 <span className="font-semibold text-slate-800">{displayTours.length}</span> 个旅行团
+          <span className="text-xs text-slate-400 ml-2">(本地静态数据)</span>
         </p>
         {activeFilterCount > 0 && (
           <div className="flex gap-2 flex-wrap">
@@ -405,11 +326,7 @@ export function TourList() {
                 {filters.destination}
                 <X
                   className="w-3 h-3 cursor-pointer"
-                  onClick={() => {
-                    const newFilters = { ...filters, destination: '' };
-                    setFilters(newFilters);
-                    if (useApi) fetchTours(newFilters);
-                  }}
+                  onClick={() => setFilters({ ...filters, destination: '' })}
                 />
               </Badge>
             )}
@@ -418,11 +335,7 @@ export function TourList() {
                 {filters.source}
                 <X
                   className="w-3 h-3 cursor-pointer"
-                  onClick={() => {
-                    const newFilters = { ...filters, source: '' };
-                    setFilters(newFilters);
-                    if (useApi) fetchTours(newFilters);
-                  }}
+                  onClick={() => setFilters({ ...filters, source: '' })}
                 />
               </Badge>
             )}
