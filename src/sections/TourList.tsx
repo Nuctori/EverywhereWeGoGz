@@ -41,8 +41,22 @@ export function TourList() {
     sortBy: 'hot',
   });
 
-  const maxPriceAll = useMemo(() => {
-    return Math.max(...localTours.map((t) => t.price), 5000);
+  // 计算价格分布，设置合理的Slider上限（P95或最高价的合理上限）
+  const { maxPriceAll, priceStats } = useMemo(() => {
+    const prices = localTours.map((t) => t.price).sort((a, b) => a - b);
+    const max = Math.max(...prices);
+    // Slider上限设为P95或10000的倍数，取较小值，避免极端高价拉长Slider
+    const p95 = prices[Math.floor(prices.length * 0.95)] || max;
+    const sliderMax = Math.min(Math.ceil(p95 / 1000) * 1000, Math.ceil(max / 1000) * 1000);
+    return {
+      maxPriceAll: sliderMax,
+      priceStats: {
+        min: prices[0],
+        max: prices[prices.length - 1],
+        p50: prices[Math.floor(prices.length * 0.5)],
+        p95: p95,
+      }
+    };
   }, []);
 
   const [priceRange, setPriceRange] = useState<number[]>([0, maxPriceAll]);
@@ -274,14 +288,42 @@ export function TourList() {
               <div className="sm:col-span-2">
                 <label className="text-sm font-medium text-slate-700 mb-1.5 block">
                   价格区间：￥{priceRange[0]} - ￥{priceRange[1]}
+                  {priceStats.max > maxPriceAll && (
+                    <span className="text-xs text-slate-400 ml-2">
+                      (最高￥{priceStats.max.toLocaleString()})
+                    </span>
+                  )}
                 </label>
                 <Slider
                   value={priceRange}
                   max={maxPriceAll}
-                  step={50}
+                  step={100}
                   onValueChange={setPriceRange}
                   className="mt-2"
                 />
+                {/* 快捷价格区间按钮 */}
+                <div className="flex gap-2 mt-3 flex-wrap">
+                  {[
+                    { label: '全部', min: 0, max: maxPriceAll },
+                    { label: '￥500以下', min: 0, max: 500 },
+                    { label: '￥500-2000', min: 500, max: 2000 },
+                    { label: '￥2000-5000', min: 2000, max: 5000 },
+                    { label: '￥5000-10000', min: 5000, max: 10000 },
+                    { label: '￥10000以上', min: 10000, max: maxPriceAll },
+                  ].map((range) => (
+                    <button
+                      key={range.label}
+                      onClick={() => setPriceRange([range.min, range.max])}
+                      className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                        priceRange[0] === range.min && priceRange[1] === range.max
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'
+                      }`}
+                    >
+                      {range.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
