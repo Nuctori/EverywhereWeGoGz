@@ -284,65 +284,177 @@ class Jrt365Spider:
 
     def fetch(self):
         print("[假日通] 抓取中...")
-        resp = safe_request(self.BASE_URL + "/")
-        if not resp:
+        try:
+            from selenium import webdriver
+            from selenium.webdriver.edge.options import Options
+            from selenium.webdriver.common.by import By
+
+            options = Options()
+            options.add_argument('--headless')
+            options.add_argument('--no-sandbox')
+            options.add_argument('--disable-dev-shm-usage')
+
+            driver = webdriver.Edge(options=options)
+            all_items = []
+
+            # 定义各分类的目的地
+            categories = [
+                ('/tourgroup/tourgroup_list_sn.aspx',
+                 ['粤北', '粤西', '粤东及广州周边', '广州及珠三角'],
+                 '省内旅游'),
+                ('/tourgroup/tourgroup_list_gn.aspx',
+                 ['华东', '华中', '华北及东北', '华南', '西北及西南'],
+                 '国内旅游'),
+                ('/tourgroup/tourgroup_list_cj.aspx',
+                 ['东南亚', '中东非', '日本及韩国', '欧洲', '澳洲及新西兰', '美国及加拿大'],
+                 '出境旅游'),
+            ]
+
+            for path, mudidi_list, cat_name in categories:
+                for mudidi in mudidi_list:
+                    try:
+                        driver.get(self.BASE_URL + path)
+                        time.sleep(2)
+
+                        # 修改表单并提交，切换到指定目的地
+                        driver.execute_script(f'document.getElementById("id_mudidi").value = "{mudidi}";')
+                        driver.execute_script('document.getElementById("id_tjform").submit();')
+                        time.sleep(3)
+
+                        # 获取总页数
+                        total_pages = 1
+                        try:
+                            elems = driver.find_elements(By.XPATH, "//*[contains(text(), '共：')]")
+                            for elem in elems:
+                                text = elem.text
+                                m = re.search(r'共：\s*(\d+)\s*页', text)
+                                if m:
+                                    total_pages = int(m.group(1))
+                                    break
+                        except:
+                            pass
+
+                        for page in range(1, total_pages + 1):
+                            if page > 1:
+                                try:
+                                    driver.execute_script(f'changepage({page})')
+                                    time.sleep(2)
+                                except:
+                                    break
+
+                            # 解析产品列表
+                            lis = driver.find_elements(By.CSS_SELECTOR, '#ctl00_ContentPlaceHolder_htmlform_id_list > ul > li')
+                            for li in lis:
+                                try:
+                                    html = li.get_attribute('outerHTML')
+                                    # 提取链接
+                                    href_m = re.search(r'href=["\']([^"\']*groupno=[^"\']*)["\']', html)
+                                    # 提取标题
+                                    title_m = re.search(r'>([^<]+)</a></p>', html)
+                                    # 提取价格
+                                    price_m = re.search(r'<div class="t4_price[^"]*">.*?(\d+(?:\.\d+)?)<', html, re.S)
+                                    # 提取图片
+                                    img_m = re.search(r'src=["\']([^"\']*HOLIDAY/[^"\']*)["\']', html)
+
+                                    if href_m and title_m:
+                                        href = href_m.group(1)
+                                        if not href.startswith('http'):
+                                            href = self.BASE_URL + '/tourgroup/' + href
+                                        title = title_m.group(1).strip()
+                                        price = float(price_m.group(1)) if price_m else 0
+                                        img_url = img_m.group(1) if img_m else ''
+
+                                        item = {
+                                            "source": "假日通",
+                                            "title": title,
+                                            "price": price,
+                                            "url": href,
+                                            "days": extract_days(title),
+                                        }
+                                        if img_url:
+                                            if img_url.startswith('http'):
+                                                item["img"] = img_url
+                                            else:
+                                                item["img"] = self.BASE_URL + img_url
+                                        all_items.append(item)
+                                except:
+                                    pass
+                    except Exception as e:
+                        print(f"  {cat_name}/{mudidi} error: {e}")
+
+            # 港澳、热销、自由行（不指定目的地）
+            simple_categories = [
+                ('/tourgroup/tourgroup_list_ga.aspx', '港澳旅游'),
+                ('/tourgroup/tourgroup_list_cty.aspx', '热销'),
+                ('/tourgroup/tourgroup_list_zyx.aspx', '自由行'),
+            ]
+
+            for path, name in simple_categories:
+                try:
+                    driver.get(self.BASE_URL + path)
+                    time.sleep(2)
+
+                    total_pages = 1
+                    try:
+                        elems = driver.find_elements(By.XPATH, "//*[contains(text(), '共：')]")
+                        for elem in elems:
+                            text = elem.text
+                            m = re.search(r'共：\s*(\d+)\s*页', text)
+                            if m:
+                                total_pages = int(m.group(1))
+                                break
+                    except:
+                        pass
+
+                    for page in range(1, total_pages + 1):
+                        if page > 1:
+                            try:
+                                driver.execute_script(f'changepage({page})')
+                                time.sleep(2)
+                            except:
+                                break
+
+                        lis = driver.find_elements(By.CSS_SELECTOR, '#ctl00_ContentPlaceHolder_htmlform_id_list > ul > li')
+                        for li in lis:
+                            try:
+                                html = li.get_attribute('outerHTML')
+                                href_m = re.search(r'href=["\']([^"\']*groupno=[^"\']*)["\']', html)
+                                title_m = re.search(r'>([^<]+)</a></p>', html)
+                                price_m = re.search(r'<div class="t4_price[^"]*">.*?(\d+(?:\.\d+)?)<', html, re.S)
+                                img_m = re.search(r'src=["\']([^"\']*HOLIDAY/[^"\']*)["\']', html)
+
+                                if href_m and title_m:
+                                    href = href_m.group(1)
+                                    if not href.startswith('http'):
+                                        href = self.BASE_URL + '/tourgroup/' + href
+                                    title = title_m.group(1).strip()
+                                    price = float(price_m.group(1)) if price_m else 0
+                                    img_url = img_m.group(1) if img_m else ''
+
+                                    item = {
+                                        "source": "假日通",
+                                        "title": title,
+                                        "price": price,
+                                        "url": href,
+                                        "days": extract_days(title),
+                                    }
+                                    if img_url:
+                                        if img_url.startswith('http'):
+                                            item["img"] = img_url
+                                        else:
+                                            item["img"] = self.BASE_URL + img_url
+                                    all_items.append(item)
+                            except:
+                                pass
+                except Exception as e:
+                    print(f"  {name} error: {e}")
+
+            driver.quit()
+            print(f"[假日通] 抓取完成: {len(all_items)} 条")
+            return dedup_items(all_items)
+        except Exception as e:
+            print(f"[假日通] Selenium error: {e}")
             return []
-        items = []
-        soup = BeautifulSoup(resp.text, "lxml")
-        
-        # 假日通的列表项通常在包含价格信息的父元素中
-        # 尝试从包含价格的元素向上查找，找到可能包含图片的卡片
-        for elem in soup.find_all(string=True):
-            text = elem.strip()
-            price_m = re.search(r"¥(\d+(?:\.\d+)?)", text)
-            if not price_m:
-                continue
-            price = float(price_m.group(1))
-            parent = elem.parent
-            full_text = parent.get_text(" ", strip=True) if parent else text
-            title = full_text.replace(price_m.group(0), "").strip(" -\\/¥")
-            if len(title) < 5 and parent and parent.parent:
-                title = parent.parent.get_text(" ", strip=True).replace(price_m.group(0), "").strip(" -\\/¥")
-            if len(title) >= 5 and any(k in title for k in ("天", "游", "温泉", "酒店", "度假", "纯玩", "日")):
-                # 尝试从父元素或兄弟元素中提取图片
-                img_url = ""
-                detail_url = self.BASE_URL  # 默认用首页
-                search_elem = parent
-                for _ in range(4):  # 向上查找4层
-                    if not search_elem:
-                        break
-                    # 提取图片
-                    if not img_url:
-                        img = search_elem.find("img")
-                        if img:
-                            img_src = img.get("src") or img.get("data-original") or img.get("data-src")
-                            if img_src and not img_src.endswith('.gif'):
-                                # 处理相对路径
-                                if img_src.startswith(".."):
-                                    img_url = self.BASE_URL + img_src[2:]
-                                elif img_src.startswith("/"):
-                                    img_url = self.BASE_URL + img_src
-                                elif img_src.startswith("http"):
-                                    img_url = img_src
-                                else:
-                                    img_url = self.BASE_URL + "/" + img_src
-                    # 提取详情页URL - 查找包含show_td.aspx的链接
-                    if detail_url == self.BASE_URL:
-                        a_tag = search_elem.find("a", href=True)
-                        if a_tag:
-                            href = a_tag["href"]
-                            if "show_td.aspx" in href or "tournameno" in href:
-                                if href.startswith("http"):
-                                    detail_url = href
-                                else:
-                                    detail_url = self.BASE_URL + "/" + href.lstrip("/")
-                    search_elem = search_elem.parent
-                
-                item = {"source": "假日通", "title": title, "price": price, "url": detail_url, "days": extract_days(title)}
-                if img_url:
-                    item["img"] = img_url
-                items.append(item)
-        return dedup_items(items)
 
 
 class GzqlxSpider:

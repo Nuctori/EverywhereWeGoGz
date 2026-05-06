@@ -66,12 +66,35 @@ export function TourList() {
     setPriceRange([0, maxPriceAll]);
   }, [maxPriceAll]);
 
+  // 解析日期筛选条件
+  const dateFilter = useMemo(() => {
+    if (!filters.departureDate) return null;
+    // 判断是"N天内"快捷筛选还是具体日期
+    const today = new Date().toISOString().split('T')[0];
+    const selected = filters.departureDate;
+    if (selected === today) {
+      // "今天" - 只显示今天出发的
+      return { mode: 'exact' as const, date: today };
+    }
+    if (selected > today) {
+      // 未来日期 - 表示"N天内出发"（<= 选中日期）
+      return { mode: 'within' as const, date: selected };
+    }
+    // 过去的具体日期（不太可能，但兼容处理）- 表示"最早出发"
+    return { mode: 'after' as const, date: selected };
+  }, [filters.departureDate]);
+
   const displayTours = useMemo(() => {
     let result = localTours.filter((tour) => {
       if (filters.destination && !tour.destination.includes(filters.destination)) return false;
       if (filters.source && tour.source !== filters.source) return false;
       if (filters.theme && tour.theme !== filters.theme) return false;
-      if (filters.departureDate && tour.departureDate < filters.departureDate) return false;
+      // 日期筛选
+      if (dateFilter) {
+        if (dateFilter.mode === 'exact' && tour.departureDate !== dateFilter.date) return false;
+        if (dateFilter.mode === 'within' && tour.departureDate > dateFilter.date) return false;
+        if (dateFilter.mode === 'after' && tour.departureDate < dateFilter.date) return false;
+      }
       if (tour.price < priceRange[0] || tour.price > priceRange[1]) return false;
       if (filters.duration && tour.duration !== filters.duration) return false;
       return true;
@@ -96,7 +119,7 @@ export function TourList() {
     }
 
     return result;
-  }, [filters, priceRange]);
+  }, [filters, priceRange, dateFilter]);
 
   const activeFilterCount = [
     filters.destination,
@@ -274,15 +297,39 @@ export function TourList() {
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1.5 block">
                   <Calendar className="w-3.5 h-3.5 inline mr-1" />
-                  最早出发
+                  出发日期
                 </label>
                 <Input
                   type="date"
                   value={filters.departureDate}
+                  min={new Date().toISOString().split('T')[0]}
                   onChange={(e) => {
                     setFilters({ ...filters, departureDate: e.target.value });
                   }}
+                  className="mb-2"
                 />
+                {/* 快捷日期按钮 */}
+                <div className="flex gap-1.5 flex-wrap">
+                  {[
+                    { label: '全部', value: '' },
+                    { label: '今天', value: new Date().toISOString().split('T')[0] },
+                    { label: '3天内', value: (() => { const d = new Date(); d.setDate(d.getDate() + 3); return d.toISOString().split('T')[0]; })() },
+                    { label: '7天内', value: (() => { const d = new Date(); d.setDate(d.getDate() + 7); return d.toISOString().split('T')[0]; })() },
+                    { label: '30天内', value: (() => { const d = new Date(); d.setDate(d.getDate() + 30); return d.toISOString().split('T')[0]; })() },
+                  ].map((opt) => (
+                    <button
+                      key={opt.label}
+                      onClick={() => setFilters({ ...filters, departureDate: opt.value })}
+                      className={`text-xs px-2 py-0.5 rounded-full border transition-colors ${
+                        filters.departureDate === opt.value
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300 hover:text-blue-600'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="sm:col-span-2">

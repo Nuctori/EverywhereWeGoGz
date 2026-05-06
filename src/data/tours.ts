@@ -69,237 +69,21 @@ export const themes = [
 export const tours: Tour[] = [
   {
     "id": "tour_1",
-    "title": "惠州双湾盐洲岛温泉联游3天 【占床小童】-1.2米以下小童，只含车位，其余不含\n【不占床小童】-1.2-1.5米小童，含2早+温泉+车位，其余自理",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 3,
-    "price": 399,
-    "priceUnit": "人",
-    "departureDate": "2026-06-10",
-    "returnDate": "2026-06-13",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 59,
-    "singleSupplementNote": "单人出行需补单房差￥59",
-    "availableSeats": 20,
-    "totalSeats": 28,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.4,
-    "reviewCount": 348,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S42259353HOLIDAY&tournameno=2642331001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260403_880466.png"
-    ],
-    "tags": [
-      "海岛度假",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": true,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "海岛度假",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
-  },
-  {
-    "id": "tour_2",
-    "title": "佛冈聚龙湾2天(食2餐) 【含餐：1早餐+1晚餐】【不占床】-1.2米以下，只含车位，其余不含",
+    "title": "新丰云天海温泉2天（含餐）",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 2,
-    "price": 299,
+    "price": 229,
     "priceUnit": "人",
-    "departureDate": "2026-05-19",
-    "returnDate": "2026-05-21",
+    "departureDate": "2026-05-28",
+    "returnDate": "2026-05-30",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
     "meals": "2早餐1正餐",
     "singleSupplement": 50,
     "singleSupplementNote": "单人出行需补单房差￥50",
-    "availableSeats": 20,
-    "totalSeats": 26,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.4,
-    "reviewCount": 95,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264J61575529HOLIDAY&tournameno=248P787001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_185199.png"
-    ],
-    "tags": [
-      "自然风光",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": true,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "自然风光",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
-  },
-  {
-    "id": "tour_3",
-    "title": "龙门云顶温泉3天(雅泡) 【直通车赠送入住当天自助午餐简餐】\n【占床小孩】-1.2米以下只占车位，产生费用自理  \n【不占床小孩】：1.2-1.5(含)米小孩：只含车位+早+温泉+D1午餐简餐",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 3,
-    "price": 489,
-    "priceUnit": "人",
-    "departureDate": "2026-06-17",
-    "returnDate": "2026-06-20",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 73,
-    "singleSupplementNote": "单人出行需补单房差￥73",
     "availableSeats": 20,
     "totalSeats": 25,
     "highlights": [
@@ -324,20 +108,6 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
         "title": "告别其他，返回温馨的家",
         "description": "今日安排其他精彩活动，感受当地独特魅力。",
         "meals": [
@@ -372,20 +142,20 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.0,
-    "reviewCount": 340,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264838611999HOLIDAY&tournameno=239Q919001",
+    "rating": 4.7,
+    "reviewCount": 121,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263H85742465HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_420227.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_459045.jpg"
     ],
     "tags": [
       "海岛度假",
       "纯玩",
       "品质"
     ],
-    "isHot": true,
-    "isNew": true,
-    "isFlashSale": true,
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
     "groupSize": "30人常规团",
     "theme": "海岛度假",
     "suitableFor": [
@@ -395,12 +165,214 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_2",
+    "title": "美林湖温泉度假2天(双园)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 379,
+    "priceUnit": "人",
+    "departureDate": "2026-07-01",
+    "returnDate": "2026-07-03",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 56,
+    "singleSupplementNote": "单人出行需补单房差￥56",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 374,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S44335965HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_573615.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_3",
+    "title": "清远恒大酒店2天(双自助餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-09",
+    "returnDate": "2026-06-11",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 209,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S91965377HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260214_507111.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
   },
   {
     "id": "tour_4",
-    "title": "从化卓思道2天(食2餐) 【专场日限量免升泡池房】【不占床小孩】- 只含车位，其余不含；",
+    "title": "佛冈聚龙湾2天(食2餐)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
@@ -473,11 +445,11 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.6,
-    "reviewCount": 111,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B263K72216286HOLIDAY&tournameno=257L866001",
+    "rating": 4.7,
+    "reviewCount": 168,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264J61575529HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_991885.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_185199.png"
     ],
     "tags": [
       "自然风光",
@@ -496,20 +468,595 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
   },
   {
     "id": "tour_5",
-    "title": "清远恒大酒店2天(双自助餐) 【不占床】-1.2米以下，只含车位，其余不含",
+    "title": "英德宝墩湖温泉3天(食6餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-07",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 447,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264D86441265HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_27953.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_6",
+    "title": "新丰雅致温德姆双泉联游3天(含餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 589,
+    "priceUnit": "人",
+    "departureDate": "2026-06-27",
+    "returnDate": "2026-06-30",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 88,
+    "singleSupplementNote": "单人出行需补单房差￥88",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 108,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265192611372HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260113_309467.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_7",
+    "title": "韶关蓝山源温泉3天(食3餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-05-12",
+    "returnDate": "2026-05-15",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 236,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I85001HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240314_209950.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_8",
+    "title": "爽爽云冰连州温德姆3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-06-24",
+    "returnDate": "2026-06-27",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 352,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265558467741HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260227_383643.png"
+    ],
+    "tags": [
+      "冰雪世界",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "冰雪世界",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_9",
+    "title": "韶关丰源温泉3天(专场)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 559,
+    "priceUnit": "人",
+    "departureDate": "2026-06-22",
+    "returnDate": "2026-06-25",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 83,
+    "singleSupplementNote": "单人出行需补单房差￥83",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 485,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264228714523HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240511_926362.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_10",
+    "title": "新丰雅致酒店2天(含餐)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 2,
-    "price": 299,
+    "price": 249,
     "priceUnit": "人",
-    "departureDate": "2026-05-24",
-    "returnDate": "2026-05-26",
+    "departureDate": "2026-07-03",
+    "returnDate": "2026-07-05",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -574,11 +1121,11 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 3.9,
-    "reviewCount": 60,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S28271443HOLIDAY&tournameno=2564787001",
+    "rating": 4.1,
+    "reviewCount": 245,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265485299281HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260214_507111.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260113_309467.png"
     ],
     "tags": [
       "自然风光",
@@ -587,7 +1134,7 @@ export const tours: Tour[] = [
     ],
     "isHot": false,
     "isNew": true,
-    "isFlashSale": true,
+    "isFlashSale": false,
     "groupSize": "30人常规团",
     "theme": "自然风光",
     "suitableFor": [
@@ -597,28 +1144,28 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
   },
   {
-    "id": "tour_6",
-    "title": "美林湖温泉度假2天(双园) 【逢周日至四入住，赠送退房日简易午餐~】【不占床小童】-1.2米以下，只含车位，其余不含(温泉和用餐免)",
+    "id": "tour_11",
+    "title": "粤北舌尖上的美食联游3天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
-    "duration": 2,
-    "price": 379,
+    "duration": 3,
+    "price": 469,
     "priceUnit": "人",
-    "departureDate": "2026-05-13",
-    "returnDate": "2026-05-15",
+    "departureDate": "2026-05-18",
+    "returnDate": "2026-05-21",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
-    "meals": "2早餐1正餐",
-    "singleSupplement": 56,
-    "singleSupplementNote": "单人出行需补单房差￥56",
+    "meals": "3早餐2正餐",
+    "singleSupplement": 70,
+    "singleSupplementNote": "单人出行需补单房差￥70",
     "availableSeats": 20,
-    "totalSeats": 30,
+    "totalSeats": 25,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -641,6 +1188,135 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 340,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264N89426446HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260423_236373.png"
+    ],
+    "tags": [
+      "美食之旅",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "美食之旅",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_12",
+    "title": "英德天鹅湖温泉3天(含早)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-05-25",
+    "returnDate": "2026-05-28",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
         "title": "告别其他，返回温馨的家",
         "description": "今日安排其他精彩活动，感受当地独特魅力。",
         "meals": [
@@ -675,9 +1351,469 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.9,
-    "reviewCount": 281,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S55347962HOLIDAY&tournameno=238T239001",
+    "rating": 4.2,
+    "reviewCount": 362,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264G42881649HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_595608.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_13",
+    "title": "英德英石园石头酒店3天(食4餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-22",
+    "returnDate": "2026-06-25",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 362,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265271261833HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251006_824678.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_14",
+    "title": "韶关龙泰翁山源嬉水3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-07",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 328,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264R44781968HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250715_225358.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_15",
+    "title": "新丰云天海3天（含餐）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-06-06",
+    "returnDate": "2026-06-09",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 34,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 360,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265120001HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251021_656843.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_16",
+    "title": "美林湖温泉度假3天(食4餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 699,
+    "priceUnit": "人",
+    "departureDate": "2026-05-31",
+    "returnDate": "2026-06-03",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 104,
+    "singleSupplementNote": "单人出行需补单房差￥104",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 209,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265633281456HOLIDAY",
     "images": [
       "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_573615.jpg"
     ],
@@ -698,20 +1834,135 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
   },
   {
-    "id": "tour_7",
-    "title": "龙门云顶2天(威士忌畔山) 【直通车赠送入住当天自助午餐简餐】\n【占床小孩】-1.2米以下只占车位，产生费用自理  \n【不占床小孩】：1.2-1.5(含)米小孩：只含车位+早餐+温泉+D1午餐简餐",
+    "id": "tour_17",
+    "title": "清远恒大酒店3天(食4餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-07-02",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 423,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P44996838HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260214_107204.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_18",
+    "title": "新丰江源温泉2天(食2餐)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 2,
-    "price": 299,
+    "price": 199,
     "priceUnit": "人",
-    "departureDate": "2026-06-15",
-    "returnDate": "2026-06-17",
+    "departureDate": "2026-05-08",
+    "returnDate": "2026-05-10",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -719,7 +1970,7 @@ export const tours: Tour[] = [
     "singleSupplement": 50,
     "singleSupplementNote": "单人出行需补单房差￥50",
     "availableSeats": 20,
-    "totalSeats": 33,
+    "totalSeats": 25,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -777,10 +2028,369 @@ export const tours: Tour[] = [
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
     "rating": 4.8,
-    "reviewCount": 175,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264812476351HOLIDAY&tournameno=229K787002",
+    "reviewCount": 166,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264D15835719HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_329245.jpg"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250206_684546.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_19",
+    "title": "佛冈聚龙湾3天(食4餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-05-22",
+    "returnDate": "2026-05-25",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 313,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264J15216995HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_185199.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_20",
+    "title": "新丰云天海4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 569,
+    "priceUnit": "人",
+    "departureDate": "2026-05-11",
+    "returnDate": "2026-05-15",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 142,
+    "singleSupplementNote": "单人出行需补单房差￥142",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 384,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263H82588242HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251006_4012.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.414933",
+    "updatedAt": "2026-05-07T03:49:58.414933"
+  },
+  {
+    "id": "tour_21",
+    "title": "新丰江源温泉3天(食4餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-07-02",
+    "returnDate": "2026-07-05",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 455,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264D69511913HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250206_236934.png"
     ],
     "tags": [
       "海岛度假",
@@ -799,20 +2409,567 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
   },
   {
-    "id": "tour_8",
-    "title": "双月湾度假村3天 【不占床小童】-只含车位，其他自理",
+    "id": "tour_22",
+    "title": "清远新银盏3天(食4餐)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
-    "price": 259,
+    "price": 389,
     "priceUnit": "人",
-    "departureDate": "2026-05-17",
-    "returnDate": "2026-05-20",
+    "departureDate": "2026-05-26",
+    "returnDate": "2026-05-29",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 58,
+    "singleSupplementNote": "单人出行需补单房差￥58",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 330,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265393939941HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_843045.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_23",
+    "title": "韶关醉美丹霞山2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 199,
+    "priceUnit": "人",
+    "departureDate": "2026-06-20",
+    "returnDate": "2026-06-22",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 206,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265163595254HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_144575.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_24",
+    "title": "韶关经律论3天(含早)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-06-27",
+    "returnDate": "2026-06-30",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 272,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264R43185593HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250730_91279.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_25",
+    "title": "新丰温德姆花园酒店2天(含餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-06-06",
+    "returnDate": "2026-06-08",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 34,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 114,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S31789393HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250121_486327.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_26",
+    "title": "玉林璟象九龙温泉星级3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 599,
+    "priceUnit": "人",
+    "departureDate": "2026-06-07",
+    "returnDate": "2026-06-10",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 89,
+    "singleSupplementNote": "单人出行需补单房差￥89",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 466,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q82344658HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260329_830370.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_27",
+    "title": "台山那琴纯玩3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 339,
+    "priceUnit": "人",
+    "departureDate": "2026-06-26",
+    "returnDate": "2026-06-29",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -891,11 +3048,370 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.7,
-    "reviewCount": 221,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B265165972528HOLIDAY&tournameno=236H866001",
+    "rating": 4.3,
+    "reviewCount": 110,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S99212388HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_444896.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_835528.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_28",
+    "title": "粤西三湾一泉荔枝节4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 699,
+    "priceUnit": "人",
+    "departureDate": "2026-06-04",
+    "returnDate": "2026-06-08",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 174,
+    "singleSupplementNote": "单人出行需补单房差￥174",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 145,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S99142442HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250428_822537.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_29",
+    "title": "茂名十星荔枝节3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 599,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-07",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 89,
+    "singleSupplementNote": "单人出行需补单房差￥89",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 280,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S66764862HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260428_161560.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_30",
+    "title": "粤西双湾荔枝节3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-07-05",
+    "returnDate": "2026-07-08",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 226,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S73226521HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250428_822537.png"
     ],
     "tags": [
       "自然风光",
@@ -914,17 +3430,3933 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
   },
   {
-    "id": "tour_9",
-    "title": "玉林璟象九龙温泉星级3天 【不占床】—1.2米以下，只含车位，其余自理",
+    "id": "tour_31",
+    "title": "沙扒湾3天（晓港湾）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 199,
+    "priceUnit": "人",
+    "departureDate": "2026-06-08",
+    "returnDate": "2026-06-11",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 306,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264969378731HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_517848.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_32",
+    "title": "沙扒湾3天（镇上民居）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 189,
+    "priceUnit": "人",
+    "departureDate": "2026-06-04",
+    "returnDate": "2026-06-07",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 63,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M58177674HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_517848.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_33",
+    "title": "阳西咸水矿温泉3天（含早)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-05-28",
+    "returnDate": "2026-05-31",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 303,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M93895493HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240530_12862.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_34",
+    "title": "沙扒湾君临3天（山景）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 259,
+    "priceUnit": "人",
+    "departureDate": "2026-07-03",
+    "returnDate": "2026-07-06",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 31,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 133,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P25587535HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_517848.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_35",
+    "title": "沙扒湾海悦3天（海景）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 279,
+    "priceUnit": "人",
+    "departureDate": "2026-06-27",
+    "returnDate": "2026-06-30",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 259,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P59427524HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_517848.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_36",
+    "title": "沙扒湾君临3天（海景）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 289,
+    "priceUnit": "人",
+    "departureDate": "2026-05-08",
+    "returnDate": "2026-05-11",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 395,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P73175148HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_517848.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_37",
+    "title": "沙扒湾海悦3天（山景）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 249,
+    "priceUnit": "人",
+    "departureDate": "2026-06-11",
+    "returnDate": "2026-06-14",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 205,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P11693252HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_517848.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_38",
+    "title": "广东赤坎古镇黑沙滩2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "广东",
+    "duration": 2,
+    "price": 369,
+    "priceUnit": "人",
+    "departureDate": "2026-05-24",
+    "returnDate": "2026-05-26",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 55,
+    "singleSupplementNote": "单人出行需补单房差￥55",
+    "availableSeats": 20,
+    "totalSeats": 31,
+    "highlights": [
+      "广东必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往广东",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别广东，返回温馨的家",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 433,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q22965664HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260426_118043.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_39",
+    "title": "新兴象窝酒店2天（含早）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-07-01",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 235,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I73727791HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_365611.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_40",
+    "title": "新兴翔顺龙山温泉2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 199,
+    "priceUnit": "人",
+    "departureDate": "2026-06-26",
+    "returnDate": "2026-06-28",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 34,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 52,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264F25822753HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_674112.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_41",
+    "title": "金水台温泉2天（带池）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-05-24",
+    "returnDate": "2026-05-26",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 31,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 314,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264F44146245HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_516713.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_42",
+    "title": "金水台温泉2天（纯）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 239,
+    "priceUnit": "人",
+    "departureDate": "2026-06-11",
+    "returnDate": "2026-06-13",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 266,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264F11645959HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_111188.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_43",
+    "title": "新兴翔顺龙山温泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-07-02",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 283,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264D22982812HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_50312.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_44",
+    "title": "新兴龙山温泉3天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
     "price": 599,
+    "priceUnit": "人",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-06-08",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 89,
+    "singleSupplementNote": "单人出行需补单房差￥89",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 212,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M18647113HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_685153.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_45",
+    "title": "新兴龙山温泉2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 339,
+    "priceUnit": "人",
+    "departureDate": "2026-05-28",
+    "returnDate": "2026-05-30",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 100,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M75135283HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_56025.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_46",
+    "title": "新兴禅域小镇3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 278,
+    "priceUnit": "人",
+    "departureDate": "2026-06-24",
+    "returnDate": "2026-06-27",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 297,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M69719831HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_396990.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_47",
+    "title": "新兴禅域小镇2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 178,
+    "priceUnit": "人",
+    "departureDate": "2026-05-19",
+    "returnDate": "2026-05-21",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 425,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M29989598HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_714403.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_48",
+    "title": "新兴禅域小镇2天(雅途)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 249,
+    "priceUnit": "人",
+    "departureDate": "2026-05-17",
+    "returnDate": "2026-05-19",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 34,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 64,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M38692446HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_714403.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.415934",
+    "updatedAt": "2026-05-07T03:49:58.415934"
+  },
+  {
+    "id": "tour_49",
+    "title": "金水台温泉2天（含晚）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 329,
+    "priceUnit": "人",
+    "departureDate": "2026-05-21",
+    "returnDate": "2026-05-23",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 186,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264F71678399HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_111188.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_50",
+    "title": "新兴禅泉2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 539,
+    "priceUnit": "人",
+    "departureDate": "2026-07-01",
+    "returnDate": "2026-07-03",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 80,
+    "singleSupplementNote": "单人出行需补单房差￥80",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 208,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M27882411HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_765272.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_51",
+    "title": "新兴悦天下温泉3天.",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 439,
+    "priceUnit": "人",
+    "departureDate": "2026-05-20",
+    "returnDate": "2026-05-23",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 65,
+    "singleSupplementNote": "单人出行需补单房差￥65",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 123,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264L49424872HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_267531.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_52",
+    "title": "新兴悦天下温泉2天.",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 239,
+    "priceUnit": "人",
+    "departureDate": "2026-05-30",
+    "returnDate": "2026-06-01",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 350,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264L67451745HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_267531.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_53",
+    "title": "新兴禅泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 999,
+    "priceUnit": "人",
+    "departureDate": "2026-05-28",
+    "returnDate": "2026-05-31",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 149,
+    "singleSupplementNote": "单人出行需补单房差￥149",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 498,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M88271845HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_765272.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_54",
+    "title": "新兴象窝酒店3天（含早）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 459,
+    "priceUnit": "人",
+    "departureDate": "2026-06-16",
+    "returnDate": "2026-06-19",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 68,
+    "singleSupplementNote": "单人出行需补单房差￥68",
+    "availableSeats": 20,
+    "totalSeats": 34,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 424,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I67426992HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_936480.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_55",
+    "title": "新兴三页温泉2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 239,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-06",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 130,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264L61847322HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260313_38737.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_56",
+    "title": "新兴三页温泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-06-13",
+    "returnDate": "2026-06-16",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 31,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 368,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264L84937217HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260313_38737.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_57",
+    "title": "金水台温泉3天带池（食4餐）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 619,
+    "priceUnit": "人",
+    "departureDate": "2026-06-09",
+    "returnDate": "2026-06-12",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 92,
+    "singleSupplementNote": "单人出行需补单房差￥92",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 505,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P95473782HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_572565.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_58",
+    "title": "金水台温泉3天(食4餐）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-06-17",
+    "returnDate": "2026-06-20",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 199,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P28437199HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_984828.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_59",
+    "title": "颐和温泉2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 249,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-06",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 341,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264883713523HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_666156.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_60",
+    "title": "喜运来温泉2天(1号楼)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 199,
+    "priceUnit": "人",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-06-07",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 475,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263J65785542HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_771262.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_61",
+    "title": "颐和温泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-05-24",
+    "returnDate": "2026-05-27",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 31,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 270,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264891332233HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_613739.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_62",
+    "title": "喜运来温泉3天(1号楼)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-07-02",
+    "returnDate": "2026-07-05",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 175,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263J13843122HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_106378.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_63",
+    "title": "台山泽汇温泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 269,
+    "priceUnit": "人",
+    "departureDate": "2026-06-25",
+    "returnDate": "2026-06-28",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 378,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I87248828HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240713_160536.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_64",
+    "title": "台山泽汇温泉2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 179,
+    "priceUnit": "人",
+    "departureDate": "2026-05-21",
+    "returnDate": "2026-05-23",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 343,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I63215527HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240713_731785.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_65",
+    "title": "喜运来温泉2天（至尊房）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 229,
+    "priceUnit": "人",
+    "departureDate": "2026-05-08",
+    "returnDate": "2026-05-10",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 321,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263J26462768HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_975535.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_66",
+    "title": "喜运来温泉3天（至尊房）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 379,
+    "priceUnit": "人",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-06-08",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 56,
+    "singleSupplementNote": "单人出行需补单房差￥56",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 510,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263J58942385HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_975535.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_67",
+    "title": "康桥温泉3天(别墅-食3餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 479,
     "priceUnit": "人",
     "departureDate": "2026-05-31",
     "returnDate": "2026-06-03",
@@ -932,8 +7364,8 @@ export const tours: Tour[] = [
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
     "meals": "3早餐2正餐",
-    "singleSupplement": 89,
-    "singleSupplementNote": "单人出行需补单房差￥89",
+    "singleSupplement": 71,
+    "singleSupplementNote": "单人出行需补单房差￥71",
     "availableSeats": 20,
     "totalSeats": 28,
     "highlights": [
@@ -1006,11 +7438,126 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.0,
-    "reviewCount": 100,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264Q82344658HOLIDAY&tournameno=263T654001",
+    "rating": 4.6,
+    "reviewCount": 195,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264K41654719HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260329_830370.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_267930.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_68",
+    "title": "康桥温泉3天(主楼-食3餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-06-08",
+    "returnDate": "2026-06-11",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 50,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I88843349HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_267930.jpg"
     ],
     "tags": [
       "海岛度假",
@@ -1029,20 +7576,20 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
   },
   {
-    "id": "tour_10",
-    "title": "龙门温德姆温泉2天(新) 【不占床小孩】-1.2-1.5米含早+车位+多次温泉，超高自理\n【占床小孩】-1.2米以下只占车位，产生费用自理",
+    "id": "tour_69",
+    "title": "康桥温泉2天(主楼-含餐)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 2,
-    "price": 299,
+    "price": 259,
     "priceUnit": "人",
-    "departureDate": "2026-06-28",
-    "returnDate": "2026-06-30",
+    "departureDate": "2026-06-21",
+    "returnDate": "2026-06-23",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -1050,7 +7597,683 @@ export const tours: Tour[] = [
     "singleSupplement": 50,
     "singleSupplementNote": "单人出行需补单房差￥50",
     "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 427,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I63144635HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_267930.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_70",
+    "title": "康桥温泉4天(食4餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 539,
+    "priceUnit": "人",
+    "departureDate": "2026-06-30",
+    "returnDate": "2026-07-04",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 134,
+    "singleSupplementNote": "单人出行需补单房差￥134",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 466,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265297177172HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_267930.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_71",
+    "title": "恩平山泉湾温泉2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 249,
+    "priceUnit": "人",
+    "departureDate": "2026-06-25",
+    "returnDate": "2026-06-27",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 319,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I96826748HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_883685.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_72",
+    "title": "新兴天露山3天(含早)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-08",
+    "returnDate": "2026-06-11",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
     "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 151,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264E87959671HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_720539.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_73",
+    "title": "金水台温泉3天带池（食3餐）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 589,
+    "priceUnit": "人",
+    "departureDate": "2026-06-26",
+    "returnDate": "2026-06-29",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 88,
+    "singleSupplementNote": "单人出行需补单房差￥88",
+    "availableSeats": 20,
+    "totalSeats": 34,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 513,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264F61418749HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_572565.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_74",
+    "title": "金水台温泉3天(食3餐）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 479,
+    "priceUnit": "人",
+    "departureDate": "2026-07-01",
+    "returnDate": "2026-07-04",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 71,
+    "singleSupplementNote": "单人出行需补单房差￥71",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 419,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264F81735769HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_984828.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_75",
+    "title": "新兴温德姆温泉2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-05-31",
+    "returnDate": "2026-06-02",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 28,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -1107,18 +8330,18 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.5,
-    "reviewCount": 313,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264828247541HOLIDAY&tournameno=235Q517001",
+    "rating": 4.2,
+    "reviewCount": 108,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264L38373651HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_118869.jpg"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250525_337329.jpg"
     ],
     "tags": [
       "海岛度假",
       "纯玩",
       "品质"
     ],
-    "isHot": true,
+    "isHot": false,
     "isNew": false,
     "isFlashSale": false,
     "groupSize": "30人常规团",
@@ -1130,20 +8353,135 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
   },
   {
-    "id": "tour_11",
-    "title": "英德宝墩湖温泉3天(食6餐) 【食足6餐（2正2早2下午茶）】\n【不占床】-1.2米以下只占车位，其余自理",
+    "id": "tour_76",
+    "title": "新兴温德姆温泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 699,
+    "priceUnit": "人",
+    "departureDate": "2026-05-09",
+    "returnDate": "2026-05-12",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 104,
+    "singleSupplementNote": "单人出行需补单房差￥104",
+    "availableSeats": 20,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 315,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264L56384764HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250525_337329.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
+  },
+  {
+    "id": "tour_77",
+    "title": "新兴天露山无忧谷3天(食3餐)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
     "price": 399,
     "priceUnit": "人",
-    "departureDate": "2026-07-01",
-    "returnDate": "2026-07-04",
+    "departureDate": "2026-05-12",
+    "returnDate": "2026-05-15",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -1223,21 +8561,21 @@ export const tours: Tour[] = [
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
     "rating": 3.8,
-    "reviewCount": 409,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264D86441265HOLIDAY&tournameno=263S866001",
+    "reviewCount": 93,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264E87441455HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_27953.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_720539.png"
     ],
     "tags": [
-      "海岛度假",
+      "自然风光",
       "纯玩",
       "品质"
     ],
-    "isHot": true,
+    "isHot": false,
     "isNew": false,
     "isFlashSale": false,
     "groupSize": "30人常规团",
-    "theme": "海岛度假",
+    "theme": "自然风光",
     "suitableFor": [
       "亲子",
       "情侣"
@@ -1245,28 +8583,28 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.277559",
-    "updatedAt": "2026-05-07T02:42:29.277559"
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
   },
   {
-    "id": "tour_12",
-    "title": "新丰雅致温德姆双泉联游3天(含餐) 【含餐：2早+1晚+2宵夜+1下午茶】【不占床】-1.2米以下，只含车位，其余不含；",
+    "id": "tour_78",
+    "title": "恩平山泉湾温泉4天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
-    "duration": 3,
+    "duration": 4,
     "price": 589,
     "priceUnit": "人",
-    "departureDate": "2026-05-24",
-    "returnDate": "2026-05-27",
-    "transportType": "大巴往返",
+    "departureDate": "2026-05-25",
+    "returnDate": "2026-05-29",
+    "transportType": "高铁往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 88,
-    "singleSupplementNote": "单人出行需补单房差￥88",
+    "meals": "4早餐3正餐",
+    "singleSupplement": 147,
+    "singleSupplementNote": "单人出行需补单房差￥147",
     "availableSeats": 20,
-    "totalSeats": 31,
+    "totalSeats": 32,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -1303,6 +8641,20 @@ export const tours: Tour[] = [
       },
       {
         "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
         "title": "告别其他，返回温馨的家",
         "description": "今日安排其他精彩活动，感受当地独特魅力。",
         "meals": [
@@ -1333,26 +8685,26 @@ export const tours: Tour[] = [
     "visaRequirements": "无需签证（国内游）",
     "travelInsurance": true,
     "tourGuideService": true,
-    "freeWiFi": true,
+    "freeWiFi": false,
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.5,
-    "reviewCount": 541,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B265192611372HOLIDAY&tournameno=2651383001",
+    "rating": 4.1,
+    "reviewCount": 420,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I81981629HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260113_309467.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_907683.png"
     ],
     "tags": [
-      "自然风光",
+      "海岛度假",
       "纯玩",
       "品质"
     ],
-    "isHot": true,
-    "isNew": false,
-    "isFlashSale": false,
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
     "groupSize": "30人常规团",
-    "theme": "自然风光",
+    "theme": "海岛度假",
     "suitableFor": [
       "亲子",
       "情侣"
@@ -1360,17 +8712,17 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.416934",
+    "updatedAt": "2026-05-07T03:49:58.416934"
   },
   {
-    "id": "tour_13",
-    "title": "台山那琴纯玩3天 【此团60岁以上长者更优惠】\n【占床小孩】-1.2米以下只占车位，其余不含\n【不占床小孩】-1.2-1.49米只含车位+景点门票，其余不含",
+    "id": "tour_79",
+    "title": "金水台温泉3天(含早）",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
-    "price": 339,
+    "price": 419,
     "priceUnit": "人",
     "departureDate": "2026-06-21",
     "returnDate": "2026-06-24",
@@ -1378,8 +8730,8 @@ export const tours: Tour[] = [
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
     "meals": "3早餐2正餐",
-    "singleSupplement": 50,
-    "singleSupplementNote": "单人出行需补单房差￥50",
+    "singleSupplement": 62,
+    "singleSupplementNote": "单人出行需补单房差￥62",
     "availableSeats": 20,
     "totalSeats": 29,
     "highlights": [
@@ -1452,22 +8804,22 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.8,
-    "reviewCount": 155,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S99212388HOLIDAY&tournameno=264S787002",
+    "rating": 4.3,
+    "reviewCount": 372,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264F32356558HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_835528.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_984828.png"
     ],
     "tags": [
-      "自然风光",
+      "海岛度假",
       "纯玩",
       "品质"
     ],
     "isHot": false,
-    "isNew": true,
+    "isNew": false,
     "isFlashSale": false,
     "groupSize": "30人常规团",
-    "theme": "自然风光",
+    "theme": "海岛度假",
     "suitableFor": [
       "亲子",
       "情侣"
@@ -1475,26 +8827,270 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
   },
   {
-    "id": "tour_14",
-    "title": "汕尾红海湾3天 【不占床】-只含车位+餐，不含床位",
+    "id": "tour_80",
+    "title": "喜运来温泉4天(1号楼)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 439,
+    "priceUnit": "人",
+    "departureDate": "2026-06-01",
+    "returnDate": "2026-06-05",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 109,
+    "singleSupplementNote": "单人出行需补单房差￥109",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 132,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265563781839HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_106378.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_81",
+    "title": "新会古兜温泉3天(含早)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
-    "price": 368,
+    "price": 319,
     "priceUnit": "人",
-    "departureDate": "2026-05-29",
-    "returnDate": "2026-06-01",
+    "departureDate": "2026-06-20",
+    "returnDate": "2026-06-23",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
     "meals": "3早餐2正餐",
-    "singleSupplement": 55,
-    "singleSupplementNote": "单人出行需补单房差￥55",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 132,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264812831938HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_347992.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_82",
+    "title": "富丽湾温泉3天(含早)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 248,
+    "priceUnit": "人",
+    "departureDate": "2026-06-08",
+    "returnDate": "2026-06-11",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
     "availableSeats": 20,
     "totalSeats": 26,
     "highlights": [
@@ -1567,11 +9163,572 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.8,
-    "reviewCount": 381,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B265547231653HOLIDAY&tournameno=244C787001",
+    "rating": 4.9,
+    "reviewCount": 246,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264835413922HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_922696.jpg"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_491583.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_83",
+    "title": "颐和温泉2天(豪华套房)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-04",
+    "returnDate": "2026-06-06",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 467,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264825717122HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_666156.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_84",
+    "title": "肇庆奇石河蓝钟温泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-05-10",
+    "returnDate": "2026-05-13",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 95,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I93224742HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251208_561426.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_85",
+    "title": "恩平锦江温泉3天(食3餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-06-08",
+    "returnDate": "2026-06-11",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 422,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I92136989HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_947475.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_86",
+    "title": "乐天温泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 599,
+    "priceUnit": "人",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-06-08",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 89,
+    "singleSupplementNote": "单人出行需补单房差￥89",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 446,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264T23493592HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250622_936142.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_87",
+    "title": "佛山樵玥度假酒店3天（食4餐）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-06-01",
+    "returnDate": "2026-06-04",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 423,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q60001HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260412_479288.png"
     ],
     "tags": [
       "自然风光",
@@ -1590,12 +9747,5701 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
   },
   {
-    "id": "tour_15",
-    "title": "尊品恩施（湖北）双飞5天 真纯玩•独家策划•含门票:总价值661元/人\n舒适旅程：2晚豪华酒店+1晚住在风景里+1晚升级超豪华酒店",
+    "id": "tour_88",
+    "title": "从化卓思道2天(食2餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-17",
+    "returnDate": "2026-06-19",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 447,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263K72216286HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_991885.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_89",
+    "title": "深圳大鹏双月都喜天丽联游3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "广东",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-05-10",
+    "returnDate": "2026-05-13",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "广东必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往广东",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：广东游览",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别广东，返回温馨的家",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 346,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264N74954438HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250602_756314.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_90",
+    "title": "从化圣托利温泉庄园2天(含晚)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-05-10",
+    "returnDate": "2026-05-12",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 237,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M88723896HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_850687.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_91",
+    "title": "广东温泉宾馆2天(食3餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "广东",
+    "duration": 2,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-06-15",
+    "returnDate": "2026-06-17",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "广东必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往广东",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别广东，返回温馨的家",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 500,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264J12954959HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240726_675055.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_92",
+    "title": "增城合汇温泉2天(专场)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 389,
+    "priceUnit": "人",
+    "departureDate": "2026-06-09",
+    "returnDate": "2026-06-11",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 58,
+    "singleSupplementNote": "单人出行需补单房差￥58",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 547,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q67482546HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_930886.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_93",
+    "title": "广东温泉宾馆3天(食6餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "广东",
+    "duration": 3,
+    "price": 799,
+    "priceUnit": "人",
+    "departureDate": "2026-05-26",
+    "returnDate": "2026-05-29",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 119,
+    "singleSupplementNote": "单人出行需补单房差￥119",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "广东必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往广东",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：广东游览",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别广东，返回温馨的家",
+        "description": "今日安排广东精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 502,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264J52494181HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240726_675055.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_94",
+    "title": "从化卓思道3天(食3餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-06-06",
+    "returnDate": "2026-06-09",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 34,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 354,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263K37844995HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_991885.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_95",
+    "title": "增城高滩温泉2天(含早）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 199,
+    "priceUnit": "人",
+    "departureDate": "2026-05-10",
+    "returnDate": "2026-05-12",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 325,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M98578854HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251025_723935.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_96",
+    "title": "白水寨嘉华温泉2天(双自助餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 439,
+    "priceUnit": "人",
+    "departureDate": "2026-06-04",
+    "returnDate": "2026-06-06",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 65,
+    "singleSupplementNote": "单人出行需补单房差￥65",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 345,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q49001HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_328590.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_97",
+    "title": "三英温泉2天(含晚)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 389,
+    "priceUnit": "人",
+    "departureDate": "2026-06-12",
+    "returnDate": "2026-06-14",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 58,
+    "singleSupplementNote": "单人出行需补单房差￥58",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 203,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O59001HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_34508.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_98",
+    "title": "增城三英温泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 539,
+    "priceUnit": "人",
+    "departureDate": "2026-06-24",
+    "returnDate": "2026-06-27",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 80,
+    "singleSupplementNote": "单人出行需补单房差￥80",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 242,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q29728839HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_34508.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_99",
+    "title": "增城合汇温泉3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 779,
+    "priceUnit": "人",
+    "departureDate": "2026-05-19",
+    "returnDate": "2026-05-22",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 116,
+    "singleSupplementNote": "单人出行需补单房差￥116",
+    "availableSeats": 20,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 398,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q96686965HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_930886.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_100",
+    "title": "增城高滩温泉3天.",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 329,
+    "priceUnit": "人",
+    "departureDate": "2026-05-28",
+    "returnDate": "2026-05-31",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 125,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M93721937HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251025_723935.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_101",
+    "title": "从化圣托利温泉庄园3天(含餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 529,
+    "priceUnit": "人",
+    "departureDate": "2026-06-24",
+    "returnDate": "2026-06-27",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 79,
+    "singleSupplementNote": "单人出行需补单房差￥79",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 451,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M12292441HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_784335.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_102",
+    "title": "增城三英温泉2天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-01",
+    "returnDate": "2026-06-03",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 411,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q92371138HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_34508.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_103",
+    "title": "桥头赏荷三正半山2天（食3餐）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 368,
+    "priceUnit": "人",
+    "departureDate": "2026-06-20",
+    "returnDate": "2026-06-22",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 55,
+    "singleSupplementNote": "单人出行需补单房差￥55",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 429,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q42928412HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240729_857673.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_104",
+    "title": "劲爆深坑（华东）双飞6天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2339,
+    "originalPrice": 2887,
+    "priceUnit": "人",
+    "departureDate": "2026-06-27",
+    "returnDate": "2026-07-03",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 584,
+    "singleSupplementNote": "单人出行需补单房差￥584",
+    "availableSeats": 18,
+    "totalSeats": 23,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 541,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P79573249HOLIDAY",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 19,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_105",
+    "title": "奢享山东半岛双飞5天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3539,
+    "originalPrice": 4067,
+    "priceUnit": "人",
+    "departureDate": "2026-05-16",
+    "returnDate": "2026-05-21",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 884,
+    "singleSupplementNote": "单人出行需补单房差￥884",
+    "availableSeats": 17,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 518,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264959855159HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250428_218136.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 13,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_106",
+    "title": "五星江西（庐山三清山）高铁5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2599,
+    "originalPrice": 2920,
+    "priceUnit": "人",
+    "departureDate": "2026-05-30",
+    "returnDate": "2026-06-04",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 649,
+    "singleSupplementNote": "单人出行需补单房差￥649",
+    "availableSeats": 18,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 440,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S18985379HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_351843.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.417935",
+    "updatedAt": "2026-05-07T03:49:58.417935"
+  },
+  {
+    "id": "tour_107",
+    "title": "顶奢江南（华东）双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3239,
+    "originalPrice": 3902,
+    "priceUnit": "人",
+    "departureDate": "2026-05-24",
+    "returnDate": "2026-05-30",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 809,
+    "singleSupplementNote": "单人出行需补单房差￥809",
+    "availableSeats": 17,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 96,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O37792272HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250725_301085.jpeg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 17,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_108",
+    "title": "华东（零钱旅游）双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3839,
+    "originalPrice": 4570,
+    "priceUnit": "人",
+    "departureDate": "2026-06-12",
+    "returnDate": "2026-06-18",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 959,
+    "singleSupplementNote": "单人出行需补单房差￥959",
+    "availableSeats": 17,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 133,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P55856981HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251112_138339.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 16,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_109",
+    "title": "巅峰江南（华东）双飞6天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 4339,
+    "originalPrice": 5291,
+    "priceUnit": "人",
+    "departureDate": "2026-06-02",
+    "returnDate": "2026-06-08",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 1084,
+    "singleSupplementNote": "单人出行需补单房差￥1084",
+    "availableSeats": 16,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 174,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263P21828636HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240909_278893.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 18,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_110",
+    "title": "纯玩江南（华东）双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2339,
+    "originalPrice": 2818,
+    "priceUnit": "人",
+    "departureDate": "2026-06-01",
+    "returnDate": "2026-06-07",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 584,
+    "singleSupplementNote": "单人出行需补单房差￥584",
+    "availableSeats": 18,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 357,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O73938724HOLIDAY",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 17,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_111",
+    "title": "直飞浙东南双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2439,
+    "originalPrice": 2938,
+    "priceUnit": "人",
+    "departureDate": "2026-05-12",
+    "returnDate": "2026-05-17",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 609,
+    "singleSupplementNote": "单人出行需补单房差￥609",
+    "availableSeats": 18,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 493,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263L58745144HOLIDAY",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 17,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_112",
+    "title": "华东（连住三晚月亮湾）双飞6天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3139,
+    "originalPrice": 3411,
+    "priceUnit": "人",
+    "departureDate": "2026-06-24",
+    "returnDate": "2026-06-30",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 784,
+    "singleSupplementNote": "单人出行需补单房差￥784",
+    "availableSeats": 17,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 82,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263L47287477HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251006_746448.jpeg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 8,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_113",
+    "title": "多彩东山岛(福建)动车4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 2099,
+    "originalPrice": 2281,
+    "priceUnit": "人",
+    "departureDate": "2026-06-12",
+    "returnDate": "2026-06-16",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 524,
+    "singleSupplementNote": "单人出行需补单房差￥524",
+    "availableSeats": 18,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 494,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263R89848281HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_675932.gif"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 8,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_114",
+    "title": "黄山之夜双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3239,
+    "originalPrice": 3998,
+    "priceUnit": "人",
+    "departureDate": "2026-05-22",
+    "returnDate": "2026-05-27",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 809,
+    "singleSupplementNote": "单人出行需补单房差￥809",
+    "availableSeats": 17,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 131,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S29228942HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250223_788568.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 19,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_115",
+    "title": "纯净江南（华东）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2739,
+    "originalPrice": 3148,
+    "priceUnit": "人",
+    "departureDate": "2026-05-08",
+    "returnDate": "2026-05-13",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 684,
+    "singleSupplementNote": "单人出行需补单房差￥684",
+    "availableSeats": 18,
+    "totalSeats": 23,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 522,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O83535221HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260123_894435.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 13,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_116",
+    "title": "特惠华东双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 1639,
+    "originalPrice": 1841,
+    "priceUnit": "人",
+    "departureDate": "2026-07-05",
+    "returnDate": "2026-07-11",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 409,
+    "singleSupplementNote": "单人出行需补单房差￥409",
+    "availableSeats": 19,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 328,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P19977419HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_888633.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_117",
+    "title": "海陆空全景厦门动车3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "厦门",
+    "duration": 3,
+    "price": 1499,
+    "originalPrice": 1703,
+    "priceUnit": "人",
+    "departureDate": "2026-07-06",
+    "returnDate": "2026-07-09",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 224,
+    "singleSupplementNote": "单人出行需补单房差￥224",
+    "availableSeats": 19,
+    "totalSeats": 33,
+    "highlights": [
+      "厦门必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往厦门",
+        "description": "今日安排厦门精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：厦门游览",
+        "description": "今日安排厦门精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别厦门，返回温馨的家",
+        "description": "今日安排厦门精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 333,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263R14983936HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_114834.gif"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 12,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_118",
+    "title": "直飞九华山双飞3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 2239,
+    "originalPrice": 2573,
+    "priceUnit": "人",
+    "departureDate": "2026-05-16",
+    "returnDate": "2026-05-19",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 335,
+    "singleSupplementNote": "单人出行需补单房差￥335",
+    "availableSeats": 18,
+    "totalSeats": 31,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 161,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263P69382656HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_64113.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 13,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_119",
+    "title": "福建全景 动车6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 1899,
+    "originalPrice": 2208,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-10",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 474,
+    "singleSupplementNote": "单人出行需补单房差￥474",
+    "availableSeats": 19,
+    "totalSeats": 31,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 298,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263R62858678HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240503_963454.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 14,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_120",
+    "title": "海丝绮梦（追泪平潭）动车4天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 1999,
+    "originalPrice": 2271,
+    "priceUnit": "人",
+    "departureDate": "2026-06-12",
+    "returnDate": "2026-06-16",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 499,
+    "singleSupplementNote": "单人出行需补单房差￥499",
+    "availableSeats": 19,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 203,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263R58154899HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250420_120123.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 12,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_121",
+    "title": "乌镇夜未央 双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3239,
+    "originalPrice": 3810,
+    "priceUnit": "人",
+    "departureDate": "2026-05-22",
+    "returnDate": "2026-05-27",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 809,
+    "singleSupplementNote": "单人出行需补单房差￥809",
+    "availableSeats": 17,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 284,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S68594796HOLIDAY",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_122",
+    "title": "寻访景德镇双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2788,
+    "originalPrice": 3063,
+    "priceUnit": "人",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-07-04",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 697,
+    "singleSupplementNote": "单人出行需补单房差￥697",
+    "availableSeats": 18,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 272,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264A87985196HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250223_788568.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 9,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_123",
+    "title": "福建（闽东之旅）动车6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2599,
+    "originalPrice": 3057,
+    "priceUnit": "人",
+    "departureDate": "2026-07-01",
+    "returnDate": "2026-07-07",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 649,
+    "singleSupplementNote": "单人出行需补单房差￥649",
+    "availableSeats": 18,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 293,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263243853714HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_933453.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_124",
+    "title": "泉新福地（秘境平潭）动车4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 1398,
+    "originalPrice": 1570,
+    "priceUnit": "人",
+    "departureDate": "2026-06-23",
+    "returnDate": "2026-06-27",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 349,
+    "singleSupplementNote": "单人出行需补单房差￥349",
+    "availableSeats": 19,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 196,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263Q31819468HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260115_316006.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_125",
+    "title": "扬州明月夜（华东）双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3339,
+    "originalPrice": 3669,
+    "priceUnit": "人",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-06-11",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 834,
+    "singleSupplementNote": "单人出行需补单房差￥834",
+    "availableSeats": 17,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 172,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264U71438654HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260407_925099.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 9,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_126",
+    "title": "游遍江西 高铁7天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 7,
+    "price": 599,
+    "priceUnit": "人",
+    "departureDate": "2026-06-07",
+    "returnDate": "2026-06-14",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "7早餐6正餐",
+    "singleSupplement": 149,
+    "singleSupplementNote": "单人出行需补单房差￥149",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 328,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263Q54538718HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240403_451865.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_127",
+    "title": "想你的风吹到了杭州 双飞4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 3839,
+    "originalPrice": 4084,
+    "priceUnit": "人",
+    "departureDate": "2026-05-09",
+    "returnDate": "2026-05-13",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 959,
+    "singleSupplementNote": "单人出行需补单房差￥959",
+    "availableSeats": 17,
+    "totalSeats": 23,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 374,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264728621342HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260407_801239.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 6,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_128",
+    "title": "山海画境（行摄霞浦）动车5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2999,
+    "originalPrice": 3156,
+    "priceUnit": "人",
+    "departureDate": "2026-06-01",
+    "returnDate": "2026-06-06",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 749,
+    "singleSupplementNote": "单人出行需补单房差￥749",
+    "availableSeats": 18,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 517,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264921253431HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_947653.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 5,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_129",
+    "title": "深居奇境（希遇江南）双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3039,
+    "originalPrice": 3414,
+    "priceUnit": "人",
+    "departureDate": "2026-06-27",
+    "returnDate": "2026-07-03",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 759,
+    "singleSupplementNote": "单人出行需补单房差￥759",
+    "availableSeats": 17,
+    "totalSeats": 22,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 348,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P23147423HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260405_179056.jpeg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_130",
+    "title": "秘境浙东南双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3139,
+    "originalPrice": 3650,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-09",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 784,
+    "singleSupplementNote": "单人出行需补单房差￥784",
+    "availableSeats": 17,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 390,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264K73318743HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260420_660414.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 14,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.418934",
+    "updatedAt": "2026-05-07T03:49:58.418934"
+  },
+  {
+    "id": "tour_131",
+    "title": "尊品恩施（湖北）双飞5天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
@@ -1603,8 +15449,8 @@ export const tours: Tour[] = [
     "price": 2939,
     "originalPrice": 3628,
     "priceUnit": "人",
-    "departureDate": "2026-06-03",
-    "returnDate": "2026-06-08",
+    "departureDate": "2026-05-14",
+    "returnDate": "2026-05-19",
     "transportType": "高铁往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -1711,9 +15557,9 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.0,
-    "reviewCount": 287,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B263D46527518HOLIDAY&tournameno=263D787002",
+    "rating": 4.6,
+    "reviewCount": 370,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263D46527518HOLIDAY",
     "images": [
       "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_300883.jpg"
     ],
@@ -1722,7 +15568,1062 @@ export const tours: Tour[] = [
       "纯玩",
       "品质"
     ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 19,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_132",
+    "title": "尊品全景湖南高铁4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 1799,
+    "originalPrice": 1893,
+    "priceUnit": "人",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-06-09",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 449,
+    "singleSupplementNote": "单人出行需补单房差￥449",
+    "availableSeats": 19,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 242,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264D77854739HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240827_460665.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 5,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_133",
+    "title": "春韵山东大连双飞7天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 7,
+    "price": 2939,
+    "originalPrice": 3194,
+    "priceUnit": "人",
+    "departureDate": "2026-05-27",
+    "returnDate": "2026-06-03",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "7早餐6正餐",
+    "singleSupplement": 734,
+    "singleSupplementNote": "单人出行需补单房差￥734",
+    "availableSeats": 18,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 121,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S68499963HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260428_28351.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
     "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 8,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_134",
+    "title": "五星齐鲁（璀璨山东）双飞6天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3339,
+    "originalPrice": 3514,
+    "priceUnit": "人",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-07-05",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 834,
+    "singleSupplementNote": "单人出行需补单房差￥834",
+    "availableSeats": 17,
+    "totalSeats": 24,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 256,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264T21939997HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260325_831400.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 5,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_135",
+    "title": "网红郴州高铁3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 899,
+    "priceUnit": "人",
+    "departureDate": "2026-05-27",
+    "returnDate": "2026-05-30",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 134,
+    "singleSupplementNote": "单人出行需补单房差￥134",
+    "availableSeats": 20,
+    "totalSeats": 34,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 451,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263R65855269HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_258663.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_136",
+    "title": "尊享河南双飞6天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2539,
+    "originalPrice": 2852,
+    "priceUnit": "人",
+    "departureDate": "2026-05-30",
+    "returnDate": "2026-06-05",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 634,
+    "singleSupplementNote": "单人出行需补单房差￥634",
+    "availableSeats": 18,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 193,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264H55783618HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250414_342224.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_137",
+    "title": "精品河南双飞6天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 1639,
+    "originalPrice": 1743,
+    "priceUnit": "人",
+    "departureDate": "2026-06-26",
+    "returnDate": "2026-07-02",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 409,
+    "singleSupplementNote": "单人出行需补单房差￥409",
+    "availableSeats": 19,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 467,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264H87212296HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20241208_121202.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 6,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_138",
+    "title": "惊艳河南双飞6天2",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3699,
+    "originalPrice": 4566,
+    "priceUnit": "人",
+    "departureDate": "2026-06-19",
+    "returnDate": "2026-06-25",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 924,
+    "singleSupplementNote": "单人出行需补单房差￥924",
+    "availableSeats": 17,
+    "totalSeats": 24,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 147,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264H64919423HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20241208_394767.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
     "isNew": false,
     "isFlashSale": false,
     "discountRate": 19,
@@ -1735,29 +16636,346 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
   },
   {
-    "id": "tour_16",
-    "title": "尊品全景湖南高铁4天 不占床小童：（身高1.2-1.39米）：含往返高铁/动车票二等座半票（限年满6周岁且未满14周岁）、当地车位、半价餐、导服、首道门票半票（身高1.4米[含]起超高），不含床位，超高产生任何费用，请自理。 备注：儿童如需按成人价报名，不退任何优惠。   \n\n婴儿：（身高0-1.19米）含当地车位、导服，不含往返高铁/动车票、不占床位、不含餐、不含门票，产生费用请自理。",
+    "id": "tour_139",
+    "title": "全景河南双飞6天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3539,
+    "originalPrice": 4115,
+    "priceUnit": "人",
+    "departureDate": "2026-06-30",
+    "returnDate": "2026-07-06",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 884,
+    "singleSupplementNote": "单人出行需补单房差￥884",
+    "availableSeats": 17,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 193,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S23424764HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250107_738775.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 14,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_140",
+    "title": "五星齐鲁（璀璨山东）双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3339,
+    "originalPrice": 3669,
+    "priceUnit": "人",
+    "departureDate": "2026-06-25",
+    "returnDate": "2026-07-01",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 834,
+    "singleSupplementNote": "单人出行需补单房差￥834",
+    "availableSeats": 17,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 523,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263V36446989HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260325_831400.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 9,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_141",
+    "title": "爆款湖南高铁4天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 4,
-    "price": 1799,
-    "originalPrice": 1998,
+    "price": 799,
     "priceUnit": "人",
-    "departureDate": "2026-05-13",
-    "returnDate": "2026-05-17",
+    "departureDate": "2026-05-31",
+    "returnDate": "2026-06-04",
     "transportType": "高铁往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
     "meals": "4早餐3正餐",
-    "singleSupplement": 449,
-    "singleSupplementNote": "单人出行需补单房差￥449",
-    "availableSeats": 19,
-    "totalSeats": 29,
+    "singleSupplement": 199,
+    "singleSupplementNote": "单人出行需补单房差￥199",
+    "availableSeats": 20,
+    "totalSeats": 28,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -1842,14 +17060,1012 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 3.8,
-    "reviewCount": 94,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264D77854739HOLIDAY&tournameno=263N645001",
+    "rating": 4.6,
+    "reviewCount": 258,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264U45367794HOLIDAY",
     "images": [
       "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240827_460665.jpg"
     ],
     "tags": [
-      "亲子游",
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_142",
+    "title": "纯净郴州高铁3天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 799,
+    "priceUnit": "人",
+    "departureDate": "2026-06-08",
+    "returnDate": "2026-06-11",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 119,
+    "singleSupplementNote": "单人出行需补单房差￥119",
+    "availableSeats": 20,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 187,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264N37631268HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250222_245788.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_143",
+    "title": "漫游长沙高铁3天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 1499,
+    "originalPrice": 1743,
+    "priceUnit": "人",
+    "departureDate": "2026-05-13",
+    "returnDate": "2026-05-16",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 224,
+    "singleSupplementNote": "单人出行需补单房差￥224",
+    "availableSeats": 19,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 414,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P73365149HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260207_877597.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 14,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_144",
+    "title": "诗画神恩（湖北）高铁6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2599,
+    "originalPrice": 3169,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-10",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 649,
+    "singleSupplementNote": "单人出行需补单房差￥649",
+    "availableSeats": 18,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 443,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264668255958HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240511_33658.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 18,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_145",
+    "title": "全景恩施双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2839,
+    "originalPrice": 3020,
+    "priceUnit": "人",
+    "departureDate": "2026-06-18",
+    "returnDate": "2026-06-23",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 709,
+    "singleSupplementNote": "单人出行需补单房差￥709",
+    "availableSeats": 18,
+    "totalSeats": 24,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 190,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O64616427HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_886866.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 6,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.419935",
+    "updatedAt": "2026-05-07T03:49:58.419935"
+  },
+  {
+    "id": "tour_146",
+    "title": "全景山东（中朝边境）双飞7天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 7,
+    "price": 3939,
+    "originalPrice": 4146,
+    "priceUnit": "人",
+    "departureDate": "2026-06-25",
+    "returnDate": "2026-07-02",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "7早餐6正餐",
+    "singleSupplement": 984,
+    "singleSupplementNote": "单人出行需补单房差￥984",
+    "availableSeats": 17,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 137,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264163969531HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251017_271766.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 5,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_147",
+    "title": "梦幻张家界高铁4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "张家界",
+    "duration": 4,
+    "price": 1899,
+    "originalPrice": 2064,
+    "priceUnit": "人",
+    "departureDate": "2026-07-06",
+    "returnDate": "2026-07-10",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 474,
+    "singleSupplementNote": "单人出行需补单房差￥474",
+    "availableSeats": 19,
+    "totalSeats": 33,
+    "highlights": [
+      "张家界必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往张家界",
+        "description": "今日安排张家界精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：张家界游览",
+        "description": "今日安排张家界精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：张家界游览",
+        "description": "今日安排张家界精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别张家界，返回温馨的家",
+        "description": "今日安排张家界精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 228,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P46444337HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240209_833894.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 8,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_148",
+    "title": "星际雅典娜号（宜昌重庆上水）动高6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 4599,
+    "originalPrice": 5110,
+    "priceUnit": "人",
+    "departureDate": "2026-05-25",
+    "returnDate": "2026-05-31",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 1149,
+    "singleSupplementNote": "单人出行需补单房差￥1149",
+    "availableSeats": 16,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 381,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263552378418HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240227_787761.jpg"
+    ],
+    "tags": [
+      "自然风光",
       "纯玩",
       "品质"
     ],
@@ -1858,7 +18074,7 @@ export const tours: Tour[] = [
     "isFlashSale": false,
     "discountRate": 10,
     "groupSize": "30人常规团",
-    "theme": "亲子游",
+    "theme": "自然风光",
     "suitableFor": [
       "亲子",
       "情侣"
@@ -1866,21 +18082,10313 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
   },
   {
-    "id": "tour_17",
-    "title": "云洛甘南 双飞8天 【精选住宿】升级2晚4钻网评酒店。\n【画卷甘南】碧水丹霞、飞瀑流泉、原始森林…每一步都像走在油画里。",
+    "id": "tour_149",
+    "title": "全景郴州高铁3天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 1599,
+    "originalPrice": 1881,
+    "priceUnit": "人",
+    "departureDate": "2026-07-01",
+    "returnDate": "2026-07-04",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 239,
+    "singleSupplementNote": "单人出行需补单房差￥239",
+    "availableSeats": 19,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 58,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263R17753898HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_258663.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_150",
+    "title": "山东全景（樱你而来）双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3039,
+    "originalPrice": 3706,
+    "priceUnit": "人",
+    "departureDate": "2026-06-14",
+    "returnDate": "2026-06-20",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 759,
+    "singleSupplementNote": "单人出行需补单房差￥759",
+    "availableSeats": 17,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 94,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263R46888795HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260207_971940.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 18,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_151",
+    "title": "寻雾小东江（郴州）高铁3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 499,
+    "priceUnit": "人",
+    "departureDate": "2026-05-21",
+    "returnDate": "2026-05-24",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 74,
+    "singleSupplementNote": "单人出行需补单房差￥74",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 521,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P93593525HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_258663.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_152",
+    "title": "豪叹小东江（郴州）高铁3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 799,
+    "priceUnit": "人",
+    "departureDate": "2026-05-18",
+    "returnDate": "2026-05-21",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 119,
+    "singleSupplementNote": "单人出行需补单房差￥119",
+    "availableSeats": 20,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 155,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265118001HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_258663.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_153",
+    "title": "春摄神农架高铁5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2199,
+    "originalPrice": 2339,
+    "priceUnit": "人",
+    "departureDate": "2026-05-17",
+    "returnDate": "2026-05-22",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 549,
+    "singleSupplementNote": "单人出行需补单房差￥549",
+    "availableSeats": 18,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 540,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P86653172HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250411_601090.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 6,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_154",
+    "title": "楚峡悬味（湖北）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3039,
+    "originalPrice": 3575,
+    "priceUnit": "人",
+    "departureDate": "2026-06-15",
+    "returnDate": "2026-06-20",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 759,
+    "singleSupplementNote": "单人出行需补单房差￥759",
+    "availableSeats": 17,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 205,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264673741123HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260406_899187.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_155",
+    "title": "渤海湾之恋（山东半岛大连）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2939,
+    "originalPrice": 3584,
+    "priceUnit": "人",
+    "departureDate": "2026-05-29",
+    "returnDate": "2026-06-03",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 734,
+    "singleSupplementNote": "单人出行需补单房差￥734",
+    "availableSeats": 18,
+    "totalSeats": 24,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 299,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264T86546637HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251017_271766.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 18,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_156",
+    "title": "胶东半岛（中朝边境）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2339,
+    "originalPrice": 2542,
+    "priceUnit": "人",
+    "departureDate": "2026-05-31",
+    "returnDate": "2026-06-05",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 584,
+    "singleSupplementNote": "单人出行需补单房差￥584",
+    "availableSeats": 18,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 298,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264T23543478HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251017_271766.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 8,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_157",
+    "title": "锦绣山东大连双飞7天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 7,
+    "price": 3239,
+    "originalPrice": 3680,
+    "priceUnit": "人",
+    "departureDate": "2026-05-23",
+    "returnDate": "2026-05-30",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "7早餐6正餐",
+    "singleSupplement": 809,
+    "singleSupplementNote": "单人出行需补单房差￥809",
+    "availableSeats": 17,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 336,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S51862894HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260428_726826.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 12,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_158",
+    "title": "朕都有（北京）双飞5天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "北京",
+    "duration": 5,
+    "price": 2799,
+    "originalPrice": 3498,
+    "priceUnit": "人",
+    "departureDate": "2026-05-23",
+    "returnDate": "2026-05-28",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 699,
+    "singleSupplementNote": "单人出行需补单房差￥699",
+    "availableSeats": 18,
+    "totalSeats": 28,
+    "highlights": [
+      "北京必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往北京",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别北京，返回温馨的家",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 507,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O27351577HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_587302.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 20,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_159",
+    "title": "纯享北京（晚对晚）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "北京",
+    "duration": 5,
+    "price": 3399,
+    "originalPrice": 3952,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-09",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 849,
+    "singleSupplementNote": "单人出行需补单房差￥849",
+    "availableSeats": 17,
+    "totalSeats": 29,
+    "highlights": [
+      "北京必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往北京",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别北京，返回温馨的家",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 413,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264K59212436HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260210_459686.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 14,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_160",
+    "title": "纯享北京（早对晚）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "北京",
+    "duration": 5,
+    "price": 3699,
+    "originalPrice": 4566,
+    "priceUnit": "人",
+    "departureDate": "2026-06-19",
+    "returnDate": "2026-06-24",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 924,
+    "singleSupplementNote": "单人出行需补单房差￥924",
+    "availableSeats": 17,
+    "totalSeats": 24,
+    "highlights": [
+      "北京必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往北京",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别北京，返回温馨的家",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 338,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265555499936HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260210_716834.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 19,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_161",
+    "title": "牧野呼伦（内蒙）双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 4139,
+    "originalPrice": 4757,
+    "priceUnit": "人",
+    "departureDate": "2026-06-21",
+    "returnDate": "2026-06-27",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 1034,
+    "singleSupplementNote": "单人出行需补单房差￥1034",
+    "availableSeats": 16,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 75,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264U93379257HOLIDAY",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "discountRate": 13,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_162",
+    "title": "云端呼伦（内蒙）双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2739,
+    "originalPrice": 3222,
+    "priceUnit": "人",
+    "departureDate": "2026-06-19",
+    "returnDate": "2026-06-25",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 684,
+    "singleSupplementNote": "单人出行需补单房差￥684",
+    "availableSeats": 18,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 502,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264U11126716HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250421_642122.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_163",
+    "title": "仙螺跨海（坝上）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3239,
+    "originalPrice": 4048,
+    "priceUnit": "人",
+    "departureDate": "2026-05-23",
+    "returnDate": "2026-05-28",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 809,
+    "singleSupplementNote": "单人出行需补单房差￥809",
+    "availableSeats": 17,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 440,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264H88493621HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250605_218613.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 20,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_164",
+    "title": "不带银两游北京(升级）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "北京",
+    "duration": 5,
+    "price": 4299,
+    "originalPrice": 4776,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-09",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 1074,
+    "singleSupplementNote": "单人出行需补单房差￥1074",
+    "availableSeats": 16,
+    "totalSeats": 28,
+    "highlights": [
+      "北京必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往北京",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：北京游览",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别北京，返回温馨的家",
+        "description": "今日安排北京精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.6,
+    "reviewCount": 271,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I88887329HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240314_312051.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 10,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_165",
+    "title": "千年华夏（四省联游）动卧10天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 10,
+    "price": 3099,
+    "originalPrice": 3779,
+    "priceUnit": "人",
+    "departureDate": "2026-06-18",
+    "returnDate": "2026-06-28",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "10早餐9正餐",
+    "singleSupplement": 774,
+    "singleSupplementNote": "单人出行需补单房差￥774",
+    "availableSeats": 17,
+    "totalSeats": 23,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "第9天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 10,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 442,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P57001HOLIDAY",
+    "images": [],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 18,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_166",
+    "title": "仙境桂林动车3天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "桂林",
+    "duration": 3,
+    "price": 1199,
+    "originalPrice": 1275,
+    "priceUnit": "人",
+    "departureDate": "2026-06-14",
+    "returnDate": "2026-06-17",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 179,
+    "singleSupplementNote": "单人出行需补单房差￥179",
+    "availableSeats": 19,
+    "totalSeats": 31,
+    "highlights": [
+      "桂林必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往桂林",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：桂林游览",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别桂林，返回温馨的家",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 135,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264Q88221967HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_418963.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "discountRate": 6,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_167",
+    "title": "海南（足迹海花岛）双飞5天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "三亚",
+    "duration": 5,
+    "price": 2799,
+    "originalPrice": 3180,
+    "priceUnit": "人",
+    "departureDate": "2026-05-15",
+    "returnDate": "2026-05-20",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 699,
+    "singleSupplementNote": "单人出行需补单房差￥699",
+    "availableSeats": 18,
+    "totalSeats": 30,
+    "highlights": [
+      "三亚必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往三亚",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别三亚，返回温馨的家",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 150,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264815362312HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_552350.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 12,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_168",
+    "title": "网红柳州动车4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 699,
+    "priceUnit": "人",
+    "departureDate": "2026-06-02",
+    "returnDate": "2026-06-06",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 174,
+    "singleSupplementNote": "单人出行需补单房差￥174",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 357,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M29249145HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250608_385892.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_169",
+    "title": "仙境桂林动车4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "桂林",
+    "duration": 4,
+    "price": 1399,
+    "originalPrice": 1727,
+    "priceUnit": "人",
+    "departureDate": "2026-05-30",
+    "returnDate": "2026-06-03",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 349,
+    "singleSupplementNote": "单人出行需补单房差￥349",
+    "availableSeats": 19,
+    "totalSeats": 26,
+    "highlights": [
+      "桂林必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往桂林",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：桂林游览",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：桂林游览",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别桂林，返回温馨的家",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 256,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264U24324766HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_22068.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 19,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_170",
+    "title": "海南（一路向海）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "三亚",
+    "duration": 5,
+    "price": 2199,
+    "originalPrice": 2339,
+    "priceUnit": "人",
+    "departureDate": "2026-05-21",
+    "returnDate": "2026-05-26",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 549,
+    "singleSupplementNote": "单人出行需补单房差￥549",
+    "availableSeats": 18,
+    "totalSeats": 26,
+    "highlights": [
+      "三亚必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往三亚",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别三亚，返回温馨的家",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 380,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264861176862HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20241126_616132.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 6,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_171",
+    "title": "海南（足迹海花岛）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "三亚",
+    "duration": 5,
+    "price": 2799,
+    "originalPrice": 3217,
+    "priceUnit": "人",
+    "departureDate": "2026-06-13",
+    "returnDate": "2026-06-18",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 699,
+    "singleSupplementNote": "单人出行需补单房差￥699",
+    "availableSeats": 18,
+    "totalSeats": 29,
+    "highlights": [
+      "三亚必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往三亚",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别三亚，返回温馨的家",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 173,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264825336273HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_182386.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 13,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_172",
+    "title": "梦幻金秀（柳州桂林）动车4天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "桂林",
+    "duration": 4,
+    "price": 899,
+    "priceUnit": "人",
+    "departureDate": "2026-07-01",
+    "returnDate": "2026-07-05",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 224,
+    "singleSupplementNote": "单人出行需补单房差￥224",
+    "availableSeats": 20,
+    "totalSeats": 29,
+    "highlights": [
+      "桂林必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往桂林",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：桂林游览",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：桂林游览",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别桂林，返回温馨的家",
+        "description": "今日安排桂林精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 444,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M56776475HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250404_923920.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.420935",
+    "updatedAt": "2026-05-07T03:49:58.420935"
+  },
+  {
+    "id": "tour_173",
+    "title": "梦境黄姚（西溪温泉）动车3天2",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 759,
+    "priceUnit": "人",
+    "departureDate": "2026-05-13",
+    "returnDate": "2026-05-16",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 113,
+    "singleSupplementNote": "单人出行需补单房差￥113",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 94,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M25959721HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250318_880225.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_174",
+    "title": "避暑南山（湘桂秘境）动车4天2",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 899,
+    "priceUnit": "人",
+    "departureDate": "2026-05-16",
+    "returnDate": "2026-05-20",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 224,
+    "singleSupplementNote": "单人出行需补单房差￥224",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 411,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265284234833HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260502_647430.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_175",
+    "title": "德天鹅泉动车3天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 959,
+    "priceUnit": "人",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-06-08",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 143,
+    "singleSupplementNote": "单人出行需补单房差￥143",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.8,
+    "reviewCount": 200,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P46889123HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240917_141442.jpeg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_176",
+    "title": "飞天入海（海南）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "三亚",
+    "duration": 5,
+    "price": 2899,
+    "originalPrice": 3410,
+    "priceUnit": "人",
+    "departureDate": "2026-06-11",
+    "returnDate": "2026-06-16",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 724,
+    "singleSupplementNote": "单人出行需补单房差￥724",
+    "availableSeats": 18,
+    "totalSeats": 27,
+    "highlights": [
+      "三亚必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往三亚",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：三亚游览",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别三亚，返回温馨的家",
+        "description": "今日安排三亚精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 416,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264T46001HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_182386.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_177",
+    "title": "环游三门海(广西)动车4天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 999,
+    "priceUnit": "人",
+    "departureDate": "2026-06-03",
+    "returnDate": "2026-06-07",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 249,
+    "singleSupplementNote": "单人出行需补单房差￥249",
+    "availableSeats": 20,
+    "totalSeats": 31,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 455,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O18579399HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240416_316872.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_178",
+    "title": "深度涠洲岛动车4天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 1399,
+    "originalPrice": 1571,
+    "priceUnit": "人",
+    "departureDate": "2026-05-22",
+    "returnDate": "2026-05-26",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 349,
+    "singleSupplementNote": "单人出行需补单房差￥349",
+    "availableSeats": 19,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 99,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264795236788HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240315_847460.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_179",
+    "title": "初夏海岛爱在涠洲（广西）动车3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 999,
+    "priceUnit": "人",
+    "departureDate": "2026-05-25",
+    "returnDate": "2026-05-28",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 149,
+    "singleSupplementNote": "单人出行需补单房差￥149",
+    "availableSeats": 20,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 406,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264D64939458HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240315_847460.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_180",
+    "title": "梦境柳江（悬崖书店）动车3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 899,
+    "priceUnit": "人",
+    "departureDate": "2026-06-15",
+    "returnDate": "2026-06-18",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 134,
+    "singleSupplementNote": "单人出行需补单房差￥134",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 321,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264N36153581HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260423_472539.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_181",
+    "title": "天边草原（秀美川河盖）动车5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 1159,
+    "originalPrice": 1396,
+    "priceUnit": "人",
+    "departureDate": "2026-05-16",
+    "returnDate": "2026-05-21",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 289,
+    "singleSupplementNote": "单人出行需补单房差￥289",
+    "availableSeats": 19,
+    "totalSeats": 32,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 87,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O17321882HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250204_136508.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 17,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_182",
+    "title": "云南（花游记）双飞6天2",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "云南",
+    "duration": 6,
+    "price": 3539,
+    "originalPrice": 4021,
+    "priceUnit": "人",
+    "departureDate": "2026-05-27",
+    "returnDate": "2026-06-02",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 884,
+    "singleSupplementNote": "单人出行需补单房差￥884",
+    "availableSeats": 17,
+    "totalSeats": 31,
+    "highlights": [
+      "云南必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往云南",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别云南，返回温馨的家",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 388,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O61763457HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240224_136255.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 12,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_183",
+    "title": "金典云南双飞6天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "云南",
+    "duration": 6,
+    "price": 2899,
+    "originalPrice": 3117,
+    "priceUnit": "人",
+    "departureDate": "2026-05-18",
+    "returnDate": "2026-05-24",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 724,
+    "singleSupplementNote": "单人出行需补单房差￥724",
+    "availableSeats": 18,
+    "totalSeats": 23,
+    "highlights": [
+      "云南必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往云南",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别云南，返回温馨的家",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 232,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264829251745HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240803_894597.jpeg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 7,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_184",
+    "title": "遇见腾冲（云南）双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "云南",
+    "duration": 5,
+    "price": 3899,
+    "originalPrice": 4380,
+    "priceUnit": "人",
+    "departureDate": "2026-05-22",
+    "returnDate": "2026-05-27",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 974,
+    "singleSupplementNote": "单人出行需补单房差￥974",
+    "availableSeats": 17,
+    "totalSeats": 26,
+    "highlights": [
+      "云南必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往云南",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别云南，返回温馨的家",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 366,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264846558328HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260223_345427.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_185",
+    "title": "贵州（梵天净土）动车6天2",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "贵州",
+    "duration": 6,
+    "price": 2499,
+    "originalPrice": 2776,
+    "priceUnit": "人",
+    "departureDate": "2026-05-21",
+    "returnDate": "2026-05-27",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 624,
+    "singleSupplementNote": "单人出行需补单房差￥624",
+    "availableSeats": 18,
+    "totalSeats": 26,
+    "highlights": [
+      "贵州必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往贵州",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：贵州游览",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：贵州游览",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：贵州游览",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：贵州游览",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别贵州，返回温馨的家",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 405,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264U51998587HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20241024_476555.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "discountRate": 10,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_186",
+    "title": "金典云南双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "云南",
+    "duration": 6,
+    "price": 3099,
+    "originalPrice": 3689,
+    "priceUnit": "人",
+    "departureDate": "2026-05-11",
+    "returnDate": "2026-05-17",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 774,
+    "singleSupplementNote": "单人出行需补单房差￥774",
+    "availableSeats": 17,
+    "totalSeats": 25,
+    "highlights": [
+      "云南必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往云南",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别云南，返回温馨的家",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 234,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264871868435HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240803_894597.jpeg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 16,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_187",
+    "title": "网红云南双飞6天K",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "云南",
+    "duration": 6,
+    "price": 2739,
+    "originalPrice": 2883,
+    "priceUnit": "人",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-06-11",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 684,
+    "singleSupplementNote": "单人出行需补单房差￥684",
+    "availableSeats": 18,
+    "totalSeats": 31,
+    "highlights": [
+      "云南必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往云南",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别云南，返回温馨的家",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 203,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265163139223HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240224_136255.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 5,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_188",
+    "title": "贵州（梵天净土）动车6天k",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "贵州",
+    "duration": 6,
+    "price": 2499,
+    "originalPrice": 2716,
+    "priceUnit": "人",
+    "departureDate": "2026-07-06",
+    "returnDate": "2026-07-12",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 624,
+    "singleSupplementNote": "单人出行需补单房差￥624",
+    "availableSeats": 18,
+    "totalSeats": 32,
+    "highlights": [
+      "贵州必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往贵州",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：贵州游览",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：贵州游览",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：贵州游览",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：贵州游览",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别贵州，返回温馨的家",
+        "description": "今日安排贵州精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 491,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264T12946436HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240818_912184.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 8,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_189",
+    "title": "尊品腾冲（云南）双飞5天2",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "云南",
+    "duration": 5,
+    "price": 3539,
+    "originalPrice": 4163,
+    "priceUnit": "人",
+    "departureDate": "2026-05-10",
+    "returnDate": "2026-05-15",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 884,
+    "singleSupplementNote": "单人出行需补单房差￥884",
+    "availableSeats": 17,
+    "totalSeats": 24,
+    "highlights": [
+      "云南必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往云南",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：云南游览",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别云南，返回温馨的家",
+        "description": "今日安排云南精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 434,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263V28299476HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20241210_10279.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_190",
+    "title": "深度重庆动车5天2",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 1999,
+    "originalPrice": 2467,
+    "priceUnit": "人",
+    "departureDate": "2026-06-03",
+    "returnDate": "2026-06-08",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 499,
+    "singleSupplementNote": "单人出行需补单房差￥499",
+    "availableSeats": 19,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 485,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263M37336582HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_805993.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": false,
+    "discountRate": 19,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_191",
+    "title": "奢华版纳双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3239,
+    "originalPrice": 4048,
+    "priceUnit": "人",
+    "departureDate": "2026-06-16",
+    "returnDate": "2026-06-21",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 809,
+    "singleSupplementNote": "单人出行需补单房差￥809",
+    "availableSeats": 17,
+    "totalSeats": 31,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 409,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M67252882HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20251006_733687.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 20,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_192",
+    "title": "【越出色】越南河内+下龙湾纯玩双动5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 1199,
+    "originalPrice": 1462,
+    "priceUnit": "人",
+    "departureDate": "2026-05-21",
+    "returnDate": "2026-05-26",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 299,
+    "singleSupplementNote": "单人出行需补单房差￥299",
+    "availableSeats": 19,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 204,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264E12672535HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20241207_93785.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 18,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_193",
+    "title": "【探秘老挝】万象+万荣+琅勃拉邦双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2299,
+    "originalPrice": 2612,
+    "priceUnit": "人",
+    "departureDate": "2026-06-24",
+    "returnDate": "2026-06-30",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 574,
+    "singleSupplementNote": "单人出行需补单房差￥574",
+    "availableSeats": 18,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 370,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M11746514HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240501_1914.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 12,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_194",
+    "title": "一价全含【越南越美】河内+下龙湾纯玩双动5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2499,
+    "originalPrice": 2872,
+    "priceUnit": "人",
+    "departureDate": "2026-06-21",
+    "returnDate": "2026-06-26",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 624,
+    "singleSupplementNote": "单人出行需补单房差￥624",
+    "availableSeats": 18,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 241,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264R22525821HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20241207_93785.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 13,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_195",
+    "title": "【精明新马】新加坡+马来西亚双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2799,
+    "originalPrice": 3455,
+    "priceUnit": "人",
+    "departureDate": "2026-06-03",
+    "returnDate": "2026-06-08",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 699,
+    "singleSupplementNote": "单人出行需补单房差￥699",
+    "availableSeats": 18,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 293,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265578237128HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240426_983665.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 19,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_196",
+    "title": "马入新出【纯享新马】新加坡+马来西亚纯玩双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 5599,
+    "originalPrice": 6362,
+    "priceUnit": "人",
+    "departureDate": "2026-05-23",
+    "returnDate": "2026-05-28",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 1399,
+    "singleSupplementNote": "单人出行需补单房差￥1399",
+    "availableSeats": 15,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 192,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M54377583HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250110_428953.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 12,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_197",
+    "title": "【豪华越南】河内+下龙湾纯玩双动5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 1999,
+    "originalPrice": 2498,
+    "priceUnit": "人",
+    "departureDate": "2026-05-19",
+    "returnDate": "2026-05-24",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 499,
+    "singleSupplementNote": "单人出行需补单房差￥499",
+    "availableSeats": 19,
+    "totalSeats": 25,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 470,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264R16481455HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20241207_93785.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 20,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_198",
+    "title": "【浪漫越南】胡志明+美奈+芽庄纯玩双飞6天（不走回头路）",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3990,
+    "originalPrice": 4694,
+    "priceUnit": "人",
+    "departureDate": "2026-06-03",
+    "returnDate": "2026-06-09",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 997,
+    "singleSupplementNote": "单人出行需补单房差￥997",
+    "availableSeats": 17,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 248,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263O42479299HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240130_590116.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.421935",
+    "updatedAt": "2026-05-07T03:49:58.421935"
+  },
+  {
+    "id": "tour_199",
+    "title": "【探秘沙巴】马穆迪岛+马奴干岛纯玩双飞5天半自由行",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 4299,
+    "originalPrice": 4672,
+    "priceUnit": "人",
+    "departureDate": "2026-05-15",
+    "returnDate": "2026-05-20",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 1074,
+    "singleSupplementNote": "单人出行需补单房差￥1074",
+    "availableSeats": 16,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 430,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263298449769HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250409_13624.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 8,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_200",
+    "title": "精彩仙本那+沙巴纯玩四飞5天半自助游",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 5190,
+    "originalPrice": 6034,
+    "priceUnit": "人",
+    "departureDate": "2026-06-26",
+    "returnDate": "2026-07-01",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 1297,
+    "singleSupplementNote": "单人出行需补单房差￥1297",
+    "availableSeats": 15,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 281,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265643125447HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250314_700236.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 14,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_201",
+    "title": "【泰经典】泰国曼谷芭提雅双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 1399,
+    "originalPrice": 1571,
+    "priceUnit": "人",
+    "departureDate": "2026-06-19",
+    "returnDate": "2026-06-25",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 349,
+    "singleSupplementNote": "单人出行需补单房差￥349",
+    "availableSeats": 19,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 263,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263I51793533HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240216_145962.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_202",
+    "title": "【越南三城记】越南胡志明+美奈+芽庄双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2980,
+    "originalPrice": 3590,
+    "priceUnit": "人",
+    "departureDate": "2026-06-21",
+    "returnDate": "2026-06-27",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 745,
+    "singleSupplementNote": "单人出行需补单房差￥745",
+    "availableSeats": 18,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 401,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264E99471457HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250320_128203.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 17,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_203",
+    "title": "【志明与美芽】越南胡志明+美奈+芽庄双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2599,
+    "originalPrice": 2764,
+    "priceUnit": "人",
+    "departureDate": "2026-06-22",
+    "returnDate": "2026-06-28",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 649,
+    "singleSupplementNote": "单人出行需补单房差￥649",
+    "availableSeats": 18,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 281,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264E39835127HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250320_128203.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 6,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_204",
+    "title": "【千姿百泰】泰国曼谷芭堤雅纯玩双飞6天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 2599,
+    "originalPrice": 3094,
+    "priceUnit": "人",
+    "departureDate": "2026-06-08",
+    "returnDate": "2026-06-14",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 649,
+    "singleSupplementNote": "单人出行需补单房差￥649",
+    "availableSeats": 18,
+    "totalSeats": 24,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 366,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264521966642HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240216_477088.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 16,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_205",
+    "title": "【纯享水上屋】仙本那双飞6天4晚半自由行",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 4699,
+    "originalPrice": 5401,
+    "priceUnit": "人",
+    "departureDate": "2026-07-03",
+    "returnDate": "2026-07-09",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 1174,
+    "singleSupplementNote": "单人出行需补单房差￥1174",
+    "availableSeats": 16,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.9,
+    "reviewCount": 524,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264O85278756HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250206_140373.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 13,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_206",
+    "title": "【五星普吉】泰国普吉岛双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3799,
+    "originalPrice": 4469,
+    "priceUnit": "人",
+    "departureDate": "2026-06-03",
+    "returnDate": "2026-06-08",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 949,
+    "singleSupplementNote": "单人出行需补单房差￥949",
+    "availableSeats": 17,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 497,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264512125893HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260405_327857.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 15,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_207",
+    "title": "【love巴厘】纯玩双飞6天5晚",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 4499,
+    "originalPrice": 5171,
+    "priceUnit": "人",
+    "departureDate": "2026-06-25",
+    "returnDate": "2026-07-01",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 1124,
+    "singleSupplementNote": "单人出行需补单房差￥1124",
+    "availableSeats": 16,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 240,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B262S16563178HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_325534.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": true,
+    "discountRate": 13,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_208",
+    "title": "【蓝调艇好】泰国曼谷+芭提雅纯玩双飞6天1",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 6,
+    "price": 3088,
+    "originalPrice": 3812,
+    "priceUnit": "人",
+    "departureDate": "2026-05-26",
+    "returnDate": "2026-06-01",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "6早餐5正餐",
+    "singleSupplement": 772,
+    "singleSupplementNote": "单人出行需补单房差￥772",
+    "availableSeats": 17,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.0,
+    "reviewCount": 297,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B263C68135655HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240901_374528.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 19,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_209",
+    "title": "【闺蜜之旅】韩国济州岛双飞4天半自助游",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 4,
+    "price": 3499,
+    "originalPrice": 3762,
+    "priceUnit": "人",
+    "departureDate": "2026-06-07",
+    "returnDate": "2026-06-11",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "4早餐3正餐",
+    "singleSupplement": 874,
+    "singleSupplementNote": "单人出行需补单房差￥874",
+    "availableSeats": 17,
+    "totalSeats": 22,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.4,
+    "reviewCount": 139,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264A68685671HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250203_837482.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 7,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_210",
+    "title": "【韩国花语】首尔双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3999,
+    "originalPrice": 4254,
+    "priceUnit": "人",
+    "departureDate": "2026-07-04",
+    "returnDate": "2026-07-09",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 999,
+    "singleSupplementNote": "单人出行需补单房差￥999",
+    "availableSeats": 17,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 469,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M49864938HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240806_757130.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 6,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_211",
+    "title": "【潮玩韩都】韩国首尔双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2699,
+    "originalPrice": 3138,
+    "priceUnit": "人",
+    "departureDate": "2026-05-29",
+    "returnDate": "2026-06-03",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 674,
+    "singleSupplementNote": "单人出行需补单房差￥674",
+    "availableSeats": 18,
+    "totalSeats": 24,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 129,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264G26118747HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240806_757130.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 14,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_212",
+    "title": "【初樱首尔】韩国首尔双飞5天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 2699,
+    "originalPrice": 3032,
+    "priceUnit": "人",
+    "departureDate": "2026-05-18",
+    "returnDate": "2026-05-23",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 674,
+    "singleSupplementNote": "单人出行需补单房差￥674",
+    "availableSeats": 18,
+    "totalSeats": 23,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.7,
+    "reviewCount": 135,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264116963176HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240806_757130.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": true,
+    "isFlashSale": false,
+    "discountRate": 11,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_213",
+    "title": "【闺蜜之旅】韩国济州岛双飞5天半自助游",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 5,
+    "price": 3699,
+    "originalPrice": 4510,
+    "priceUnit": "人",
+    "departureDate": "2026-06-14",
+    "returnDate": "2026-06-19",
+    "transportType": "高铁往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "5早餐4正餐",
+    "singleSupplement": 924,
+    "singleSupplementNote": "单人出行需补单房差￥924",
+    "availableSeats": 17,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.2,
+    "reviewCount": 499,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264F39767144HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250204_977697.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 18,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_214",
+    "title": "【情迷俄罗斯】莫斯科+圣彼得堡双飞9天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 9,
+    "price": 5999,
+    "originalPrice": 7315,
+    "priceUnit": "人",
+    "departureDate": "2026-06-26",
+    "returnDate": "2026-07-05",
+    "transportType": "飞机往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "9早餐8正餐",
+    "singleSupplement": 1499,
+    "singleSupplementNote": "单人出行需补单房差￥1499",
+    "availableSeats": 15,
+    "totalSeats": 29,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "第3天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 4,
+        "title": "第4天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 5,
+        "title": "第5天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 6,
+        "title": "第6天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 7,
+        "title": "第7天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 8,
+        "title": "第8天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 9,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 507,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264M57598238HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240501_642656.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "discountRate": 18,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_215",
+    "title": "龙门云顶2天(威士忌畔山)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-26",
+    "returnDate": "2026-06-28",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 34,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 477,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264892661328HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_329245.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_216",
+    "title": "龙门温德姆温泉2天(新)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 2,
+    "price": 299,
+    "priceUnit": "人",
+    "departureDate": "2026-06-30",
+    "returnDate": "2026-07-02",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 28,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 333,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264834524466HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_118869.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_217",
+    "title": "龙门云顶温泉3天(雅泡)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 489,
+    "priceUnit": "人",
+    "departureDate": "2026-05-23",
+    "returnDate": "2026-05-26",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 73,
+    "singleSupplementNote": "单人出行需补单房差￥73",
+    "availableSeats": 20,
+    "totalSeats": 30,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.9,
+    "reviewCount": 404,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264881155874HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_420227.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_218",
+    "title": "双月湾度假村3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 259,
+    "priceUnit": "人",
+    "departureDate": "2026-05-19",
+    "returnDate": "2026-05-22",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 50,
+    "singleSupplementNote": "单人出行需补单房差￥50",
+    "availableSeats": 20,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.5,
+    "reviewCount": 163,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265165972528HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_444896.png"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": true,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_219",
+    "title": "惠州双湾盐洲岛温泉联游3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-07-02",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 27,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 3.8,
+    "reviewCount": 104,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S42259353HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260403_880466.png"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_220",
+    "title": "汕尾红海湾3天",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 368,
+    "priceUnit": "人",
+    "departureDate": "2026-06-28",
+    "returnDate": "2026-07-01",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 55,
+    "singleSupplementNote": "单人出行需补单房差￥55",
+    "availableSeats": 20,
+    "totalSeats": 26,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": false,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.1,
+    "reviewCount": 476,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265547231653HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_922696.jpg"
+    ],
+    "tags": [
+      "自然风光",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "自然风光",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.422936",
+    "updatedAt": "2026-05-07T03:49:58.422936"
+  },
+  {
+    "id": "tour_221",
+    "title": "云洛甘南 双飞8天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 8,
     "price": 3999,
-    "originalPrice": 4650,
+    "originalPrice": 4346,
     "priceUnit": "人",
-    "departureDate": "2026-06-10",
-    "returnDate": "2026-06-18",
+    "departureDate": "2026-05-31",
+    "returnDate": "2026-06-08",
     "transportType": "飞机往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -2029,9 +28537,9 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.1,
-    "reviewCount": 89,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264H19837659HOLIDAY&tournameno=2543866003",
+    "rating": 3.8,
+    "reviewCount": 407,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264H19837659HOLIDAY",
     "images": [
       "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250609_975414.jpg"
     ],
@@ -2040,10 +28548,10 @@ export const tours: Tour[] = [
       "纯玩",
       "品质"
     ],
-    "isHot": false,
+    "isHot": true,
     "isNew": false,
     "isFlashSale": false,
-    "discountRate": 14,
+    "discountRate": 8,
     "groupSize": "30人常规团",
     "theme": "自然风光",
     "suitableFor": [
@@ -2053,573 +28561,26 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_18",
-    "title": "新丰云天海温泉2天（含餐） 【含餐：1早+1简易午餐+赠送1宵夜】【不占床小童】-1.3米(含)-1.5米以下含车位+早+多次门票；【占床小童】-1.3米以下只含车位，其余不含",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 2,
-    "price": 229,
-    "priceUnit": "人",
-    "departureDate": "2026-06-16",
-    "returnDate": "2026-06-18",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "2早餐1正餐",
-    "singleSupplement": 50,
-    "singleSupplementNote": "单人出行需补单房差￥50",
-    "availableSeats": 20,
-    "totalSeats": 34,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 3.9,
-    "reviewCount": 73,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B263H98561347HOLIDAY&tournameno=201I577001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_459045.jpg"
-    ],
-    "tags": [
-      "海岛度假",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "海岛度假",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
-  },
-  {
-    "id": "tour_19",
-    "title": "佛山樵玥度假酒店3天（食4餐） 【不占床】-1.2米以下，只含车位，其余不含",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 3,
-    "price": 399,
-    "priceUnit": "人",
-    "departureDate": "2026-06-22",
-    "returnDate": "2026-06-25",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 59,
-    "singleSupplementNote": "单人出行需补单房差￥59",
-    "availableSeats": 20,
-    "totalSeats": 30,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 3.9,
-    "reviewCount": 256,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B265594749323HOLIDAY&tournameno=264C239001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260412_479288.png"
-    ],
-    "tags": [
-      "自然风光",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "自然风光",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
-  },
-  {
-    "id": "tour_20",
-    "title": "赣州双古城江茂漫谷联游3天 【不占床小孩】-1.2-1.4米，只含车位+2早1正+温泉门票，其余自理。 \n【占床小孩】-1.2米以下，只占车位，其余自理。",
+    "id": "tour_222",
+    "title": "赣州双古城江茂漫谷联游3天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
     "price": 499,
     "priceUnit": "人",
-    "departureDate": "2026-07-02",
-    "returnDate": "2026-07-05",
+    "departureDate": "2026-06-13",
+    "returnDate": "2026-06-16",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
     "meals": "3早餐2正餐",
     "singleSupplement": 74,
     "singleSupplementNote": "单人出行需补单房差￥74",
-    "availableSeats": 20,
-    "totalSeats": 30,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.5,
-    "reviewCount": 152,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264N57853794HOLIDAY&tournameno=263G517001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260303_109665.png"
-    ],
-    "tags": [
-      "海岛度假",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "海岛度假",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
-  },
-  {
-    "id": "tour_21",
-    "title": "中山国际江门美食2天(含餐) 【不占床】-1.1米以下，只含车位，早餐和晚餐免；",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 2,
-    "price": 399,
-    "priceUnit": "人",
-    "departureDate": "2026-05-18",
-    "returnDate": "2026-05-20",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "2早餐1正餐",
-    "singleSupplement": 59,
-    "singleSupplementNote": "单人出行需补单房差￥59",
-    "availableSeats": 20,
-    "totalSeats": 25,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": true,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.3,
-    "reviewCount": 452,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B265616001HOLIDAY&tournameno=264Q331002",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260204_641086.png"
-    ],
-    "tags": [
-      "美食之旅",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "美食之旅",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
-  },
-  {
-    "id": "tour_22",
-    "title": "汝城双五星温泉3天(食4餐). 【不占床小孩】-1.2米以下，只含车位，其余自理。",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 3,
-    "price": 599,
-    "priceUnit": "人",
-    "departureDate": "2026-07-05",
-    "returnDate": "2026-07-08",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 89,
-    "singleSupplementNote": "单人出行需补单房差￥89",
-    "availableSeats": 20,
-    "totalSeats": 33,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": true,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.8,
-    "reviewCount": 166,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264P29001HOLIDAY&tournameno=25BO239001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240407_553110.png"
-    ],
-    "tags": [
-      "海岛度假",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "海岛度假",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
-  },
-  {
-    "id": "tour_23",
-    "title": "穿越惠州摄海五星2天(食4餐) 【占床小童】-1.2米以下小童，只占车位，其余自理\n【不占床小童】-1.2-1.4米小童，含2正1早1宵夜+车位，其余不含",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 2,
-    "price": 399,
-    "priceUnit": "人",
-    "departureDate": "2026-05-24",
-    "returnDate": "2026-05-26",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "2早餐1正餐",
-    "singleSupplement": 59,
-    "singleSupplementNote": "单人出行需补单房差￥59",
     "availableSeats": 20,
     "totalSeats": 31,
     "highlights": [
@@ -2644,6 +28605,20 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
         "title": "告别其他，返回温馨的家",
         "description": "今日安排其他精彩活动，感受当地独特魅力。",
         "meals": [
@@ -2678,22 +28653,22 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.6,
-    "reviewCount": 301,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264T86935624HOLIDAY&tournameno=264T919001",
+    "rating": 3.9,
+    "reviewCount": 255,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264N57853794HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260429_308245.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260303_109665.png"
     ],
     "tags": [
-      "户外徒步",
+      "古镇文化",
       "纯玩",
       "品质"
     ],
     "isHot": true,
-    "isNew": false,
+    "isNew": true,
     "isFlashSale": false,
     "groupSize": "30人常规团",
-    "theme": "户外徒步",
+    "theme": "古镇文化",
     "suitableFor": [
       "亲子",
       "情侣"
@@ -2701,29 +28676,28 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_24",
-    "title": "天边草原（秀美川河盖）动车5天 520感恩钜献！安排红军换装体验！走进60-70那个年代主题街区•重温峥嵘岁月！\n全景网红深度游！悬崖温泉+茶峒边城+星空川河盖！",
+    "id": "tour_223",
+    "title": "汝城双五星温泉3天(食4餐).",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
-    "duration": 5,
-    "price": 1159,
-    "originalPrice": 1396,
+    "duration": 3,
+    "price": 599,
     "priceUnit": "人",
-    "departureDate": "2026-05-16",
-    "returnDate": "2026-05-21",
-    "transportType": "高铁往返",
+    "departureDate": "2026-06-19",
+    "returnDate": "2026-06-22",
+    "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
-    "meals": "5早餐4正餐",
-    "singleSupplement": 289,
-    "singleSupplementNote": "单人出行需补单房差￥289",
-    "availableSeats": 19,
-    "totalSeats": 32,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 89,
+    "singleSupplementNote": "单人出行需补单房差￥89",
+    "availableSeats": 20,
+    "totalSeats": 27,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -2760,34 +28734,6 @@ export const tours: Tour[] = [
       },
       {
         "day": 3,
-        "title": "第3天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 4,
-        "title": "第4天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 5,
         "title": "告别其他，返回温馨的家",
         "description": "今日安排其他精彩活动，感受当地独特魅力。",
         "meals": [
@@ -2822,21 +28768,20 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 3.8,
-    "reviewCount": 187,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264O17321882HOLIDAY&tournameno=264O866001",
+    "rating": 4.9,
+    "reviewCount": 538,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264P29001HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250204_136508.jpg"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240407_553110.png"
     ],
     "tags": [
       "海岛度假",
       "纯玩",
       "品质"
     ],
-    "isHot": true,
+    "isHot": false,
     "isNew": false,
     "isFlashSale": false,
-    "discountRate": 17,
     "groupSize": "30人常规团",
     "theme": "海岛度假",
     "suitableFor": [
@@ -2846,28 +28791,27 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_25",
-    "title": "【越出色】越南河内+下龙湾纯玩双动5天 【该产品为非即时确认产品，下单后客服会核实是否有位，核实无误后即可支付】\n【系统价格未含签小680元/人】",
+    "id": "tour_224",
+    "title": "中山国际江门美食2天(含餐)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
-    "duration": 5,
-    "price": 1199,
-    "originalPrice": 1332,
+    "duration": 2,
+    "price": 399,
     "priceUnit": "人",
-    "departureDate": "2026-06-22",
-    "returnDate": "2026-06-27",
-    "transportType": "高铁往返",
+    "departureDate": "2026-05-12",
+    "returnDate": "2026-05-14",
+    "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
-    "meals": "5早餐4正餐",
-    "singleSupplement": 299,
-    "singleSupplementNote": "单人出行需补单房差￥299",
-    "availableSeats": 19,
+    "meals": "2早餐1正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
     "totalSeats": 29,
     "highlights": [
       "其他必打卡",
@@ -2891,48 +28835,6 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "第3天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 4,
-        "title": "第4天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 5,
         "title": "告别其他，返回温馨的家",
         "description": "今日安排其他精彩活动，感受当地独特魅力。",
         "meals": [
@@ -2963,27 +28865,26 @@ export const tours: Tour[] = [
     "visaRequirements": "无需签证（国内游）",
     "travelInsurance": true,
     "tourGuideService": true,
-    "freeWiFi": false,
+    "freeWiFi": true,
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.8,
-    "reviewCount": 282,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264E12672535HOLIDAY&tournameno=257P383002",
+    "rating": 4.4,
+    "reviewCount": 549,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265616001HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20241207_93785.jpg"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260204_641086.png"
     ],
     "tags": [
-      "自然风光",
+      "美食之旅",
       "纯玩",
       "品质"
     ],
     "isHot": false,
     "isNew": false,
     "isFlashSale": false,
-    "discountRate": 10,
     "groupSize": "30人常规团",
-    "theme": "自然风光",
+    "theme": "美食之旅",
     "suitableFor": [
       "亲子",
       "情侣"
@@ -2991,28 +28892,28 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_26",
-    "title": "韶关蓝山源温泉3天(食3餐) 【食3餐=含酒店1正+2自助早】\n【不占床小孩】-1.1-1.4米含车位+2早1正，其余不含   \n【占床小孩】-1.1米以下只占车位，其余不含",
+    "id": "tour_225",
+    "title": "穿越惠州摄海五星2天(食4餐)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
-    "duration": 3,
-    "price": 499,
+    "duration": 2,
+    "price": 399,
     "priceUnit": "人",
-    "departureDate": "2026-05-17",
-    "returnDate": "2026-05-20",
+    "departureDate": "2026-06-29",
+    "returnDate": "2026-07-01",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 74,
-    "singleSupplementNote": "单人出行需补单房差￥74",
+    "meals": "2早餐1正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
     "availableSeats": 20,
-    "totalSeats": 34,
+    "totalSeats": 27,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -3035,20 +28936,6 @@ export const tours: Tour[] = [
       },
       {
         "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
         "title": "告别其他，返回温馨的家",
         "description": "今日安排其他精彩活动，感受当地独特魅力。",
         "meals": [
@@ -3079,26 +28966,26 @@ export const tours: Tour[] = [
     "visaRequirements": "无需签证（国内游）",
     "travelInsurance": true,
     "tourGuideService": true,
-    "freeWiFi": false,
+    "freeWiFi": true,
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.3,
-    "reviewCount": 432,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S35983155HOLIDAY&tournameno=2457958001",
+    "rating": 4.0,
+    "reviewCount": 414,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264T86935624HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240314_209950.jpg"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260429_308245.png"
     ],
     "tags": [
-      "海岛度假",
+      "户外徒步",
       "纯玩",
       "品质"
     ],
-    "isHot": true,
+    "isHot": false,
     "isNew": false,
     "isFlashSale": false,
     "groupSize": "30人常规团",
-    "theme": "海岛度假",
+    "theme": "户外徒步",
     "suitableFor": [
       "亲子",
       "情侣"
@@ -3106,20 +28993,20 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_27",
-    "title": "莽山森林温泉3天 【不占床】-1.2-1.4米，含车位+1正2早+温泉门票，其余不含\n【占床】-1.2米以下，含车位+餐，温泉门票免费，其余不含",
+    "id": "tour_226",
+    "title": "莽山森林温泉3天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
     "price": 699,
     "priceUnit": "人",
-    "departureDate": "2026-07-03",
-    "returnDate": "2026-07-06",
+    "departureDate": "2026-06-23",
+    "returnDate": "2026-06-26",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -3198,9 +29085,9 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.5,
-    "reviewCount": 83,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264R28001HOLIDAY&tournameno=21AQ239001",
+    "rating": 3.8,
+    "reviewCount": 161,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264R28001HOLIDAY",
     "images": [
       "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250620_211858.png"
     ],
@@ -3221,136 +29108,21 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_28",
-    "title": "爽爽云冰连州温德姆3天 【不占床】-1.2米以下，只含车位，其余不含",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 3,
-    "price": 499,
-    "priceUnit": "人",
-    "departureDate": "2026-06-26",
-    "returnDate": "2026-06-29",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 74,
-    "singleSupplementNote": "单人出行需补单房差￥74",
-    "availableSeats": 20,
-    "totalSeats": 34,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.2,
-    "reviewCount": 161,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B265558467741HOLIDAY&tournameno=2655866001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260227_383643.png"
-    ],
-    "tags": [
-      "冰雪世界",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": true,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "冰雪世界",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
-  },
-  {
-    "id": "tour_29",
-    "title": "泉暖温汤旅居纯玩高铁5天 不占床小童：（年满6周岁--未满14周岁）含当地旅游车位、往返高铁票二等座半票、半价餐、导服、首道门票半票（身高1.4米[含]起超高），不含床位，超高产生任何费用，请自理。 婴儿：（6周岁以下）含当地车位、导服、半价正餐，不含往返高铁票、不占床位、不含早餐、不含门票，产生费用请自理。",
+    "id": "tour_227",
+    "title": "泉暖温汤旅居纯玩高铁5天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 5,
     "price": 2099,
-    "originalPrice": 2591,
+    "originalPrice": 2440,
     "priceUnit": "人",
-    "departureDate": "2026-07-05",
-    "returnDate": "2026-07-10",
+    "departureDate": "2026-06-18",
+    "returnDate": "2026-06-23",
     "transportType": "高铁往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -3358,7 +29130,7 @@ export const tours: Tour[] = [
     "singleSupplement": 524,
     "singleSupplementNote": "单人出行需补单房差￥524",
     "availableSeats": 18,
-    "totalSeats": 31,
+    "totalSeats": 24,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -3453,13 +29225,13 @@ export const tours: Tour[] = [
     "visaRequirements": "无需签证（国内游）",
     "travelInsurance": true,
     "tourGuideService": true,
-    "freeWiFi": true,
+    "freeWiFi": false,
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.9,
-    "reviewCount": 269,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264D45757114HOLIDAY&tournameno=261D958001",
+    "rating": 4.1,
+    "reviewCount": 217,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264D45757114HOLIDAY",
     "images": [
       "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250605_998476.jpg"
     ],
@@ -3468,10 +29240,10 @@ export const tours: Tour[] = [
       "纯玩",
       "品质"
     ],
-    "isHot": true,
+    "isHot": false,
     "isNew": false,
     "isFlashSale": false,
-    "discountRate": 19,
+    "discountRate": 14,
     "groupSize": "30人常规团",
     "theme": "自然风光",
     "suitableFor": [
@@ -3481,20 +29253,20 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_30",
-    "title": "韶关丹霞山溪里颂温泉3天 【不占床小孩】-1.2-1.49米只占车位+2早2正，其余自理   \n【占床小孩】-1.2米以下，只占车位，其余自理",
+    "id": "tour_228",
+    "title": "韶关丹霞山溪里颂温泉3天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
     "price": 399,
     "priceUnit": "人",
-    "departureDate": "2026-06-23",
-    "returnDate": "2026-06-26",
+    "departureDate": "2026-06-05",
+    "returnDate": "2026-06-08",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -3502,7 +29274,7 @@ export const tours: Tour[] = [
     "singleSupplement": 59,
     "singleSupplementNote": "单人出行需补单房差￥59",
     "availableSeats": 20,
-    "totalSeats": 31,
+    "totalSeats": 33,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -3573,9 +29345,9 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 3.9,
-    "reviewCount": 205,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B265637001HOLIDAY&tournameno=2651787002",
+    "rating": 4.1,
+    "reviewCount": 296,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265637001HOLIDAY",
     "images": [
       "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250319_540486.jpg"
     ],
@@ -3585,7 +29357,7 @@ export const tours: Tour[] = [
       "品质"
     ],
     "isHot": false,
-    "isNew": true,
+    "isNew": false,
     "isFlashSale": false,
     "groupSize": "30人常规团",
     "theme": "海岛度假",
@@ -3596,21 +29368,21 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.278546",
-    "updatedAt": "2026-05-07T02:42:29.278546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_31",
-    "title": "丝路甘青（西北秘境）双飞8天 外籍、台湾不收！港澳正常收！\n成人：30-70周岁（同组不能超过10人[含]）\n长者：71-74周岁（先询，后报）",
+    "id": "tour_229",
+    "title": "丝路甘青（西北秘境）双飞8天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 8,
     "price": 3339,
-    "originalPrice": 3669,
+    "originalPrice": 3710,
     "priceUnit": "人",
-    "departureDate": "2026-05-08",
-    "returnDate": "2026-05-16",
+    "departureDate": "2026-05-21",
+    "returnDate": "2026-05-29",
     "transportType": "飞机往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -3618,7 +29390,7 @@ export const tours: Tour[] = [
     "singleSupplement": 834,
     "singleSupplementNote": "单人出行需补单房差￥834",
     "availableSeats": 17,
-    "totalSeats": 22,
+    "totalSeats": 25,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -3755,13 +29527,13 @@ export const tours: Tour[] = [
     "visaRequirements": "无需签证（国内游）",
     "travelInsurance": true,
     "tourGuideService": true,
-    "freeWiFi": true,
+    "freeWiFi": false,
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.8,
-    "reviewCount": 547,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264E99148557HOLIDAY&tournameno=2645239001",
+    "rating": 3.9,
+    "reviewCount": 127,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264E99148557HOLIDAY",
     "images": [
       "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260405_936665.jpg"
     ],
@@ -3773,7 +29545,7 @@ export const tours: Tour[] = [
     "isHot": true,
     "isNew": false,
     "isFlashSale": false,
-    "discountRate": 9,
+    "discountRate": 10,
     "groupSize": "30人常规团",
     "theme": "自然风光",
     "suitableFor": [
@@ -3783,17 +29555,132 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_32",
-    "title": "安远三百山热泉河温泉3天 【不占床小孩】-1.2米以上，只含车位+2早，其余自理。 \n【占床小孩】-1.2米以下，只占车位，其余自理。",
+    "id": "tour_230",
+    "title": "安远三百山热泉河温泉3天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
     "price": 399,
+    "priceUnit": "人",
+    "departureDate": "2026-05-26",
+    "returnDate": "2026-05-29",
+    "transportType": "大巴往返",
+    "accommodationLevel": "舒适型",
+    "accommodationStars": 3,
+    "meals": "3早餐2正餐",
+    "singleSupplement": 59,
+    "singleSupplementNote": "单人出行需补单房差￥59",
+    "availableSeats": 20,
+    "totalSeats": 33,
+    "highlights": [
+      "其他必打卡",
+      "特色美食",
+      "精品住宿"
+    ],
+    "itinerary": [
+      {
+        "day": 1,
+        "title": "出发前往其他",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 2,
+        "title": "第2天：其他游览",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐",
+          "午餐"
+        ],
+        "accommodation": "当地酒店",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      },
+      {
+        "day": 3,
+        "title": "告别其他，返回温馨的家",
+        "description": "今日安排其他精彩活动，感受当地独特魅力。",
+        "meals": [
+          "早餐"
+        ],
+        "accommodation": "温馨的家",
+        "activities": [
+          "景点游览",
+          "自由活动"
+        ]
+      }
+    ],
+    "inclusions": [
+      "往返交通",
+      "酒店住宿",
+      "景点门票",
+      "导游服务"
+    ],
+    "exclusions": [
+      "个人消费",
+      "单房差",
+      "自费项目"
+    ],
+    "importantNotes": [
+      "请携带有效身份证件",
+      "行程可能因天气调整"
+    ],
+    "visaRequirements": "无需签证（国内游）",
+    "travelInsurance": true,
+    "tourGuideService": true,
+    "freeWiFi": true,
+    "childPolicy": "2-12岁儿童不占床享半价",
+    "cancellationPolicy": "出发前7天可无损退改",
+    "refundPolicy": "未消费项目按实结算退还",
+    "rating": 4.3,
+    "reviewCount": 297,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264L98127934HOLIDAY",
+    "images": [
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250429_395554.jpg"
+    ],
+    "tags": [
+      "海岛度假",
+      "纯玩",
+      "品质"
+    ],
+    "isHot": false,
+    "isNew": false,
+    "isFlashSale": false,
+    "groupSize": "30人常规团",
+    "theme": "海岛度假",
+    "suitableFor": [
+      "亲子",
+      "情侣"
+    ],
+    "difficulty": "轻松",
+    "season": "全年",
+    "language": "中文导游",
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
+  },
+  {
+    "id": "tour_231",
+    "title": "赣州古城江茂漫谷温泉3天(食4餐)",
+    "source": "假日通",
+    "sourceLogo": "/icons/假日通.png",
+    "destination": "其他",
+    "duration": 3,
+    "price": 699,
     "priceUnit": "人",
     "departureDate": "2026-06-13",
     "returnDate": "2026-06-16",
@@ -3801,8 +29688,8 @@ export const tours: Tour[] = [
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
     "meals": "3早餐2正餐",
-    "singleSupplement": 59,
-    "singleSupplementNote": "单人出行需补单房差￥59",
+    "singleSupplement": 104,
+    "singleSupplementNote": "单人出行需补单房差￥104",
     "availableSeats": 20,
     "totalSeats": 31,
     "highlights": [
@@ -3875,843 +29762,9 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.6,
-    "reviewCount": 148,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264L98127934HOLIDAY&tournameno=20AP331001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250429_395554.jpg"
-    ],
-    "tags": [
-      "海岛度假",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "海岛度假",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
-  },
-  {
-    "id": "tour_33",
-    "title": "劲爆深坑（华东）双飞6天1 成人：31-70周岁\n占床小童：12-30周岁",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 6,
-    "price": 2339,
-    "originalPrice": 2887,
-    "priceUnit": "人",
-    "departureDate": "2026-06-27",
-    "returnDate": "2026-07-03",
-    "transportType": "飞机往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "6早餐5正餐",
-    "singleSupplement": 584,
-    "singleSupplementNote": "单人出行需补单房差￥584",
-    "availableSeats": 18,
-    "totalSeats": 23,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "第3天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 4,
-        "title": "第4天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 5,
-        "title": "第5天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 6,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": true,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.6,
-    "reviewCount": 159,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264P83932223HOLIDAY&tournameno=259Q239001",
-    "images": [],
-    "tags": [
-      "自然风光",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": true,
-    "isNew": false,
-    "isFlashSale": false,
-    "discountRate": 19,
-    "groupSize": "30人常规团",
-    "theme": "自然风光",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
-  },
-  {
-    "id": "tour_34",
-    "title": "春韵山东大连双飞7天 ☆【特别安排】升级1晚豪华酒店、游轮升级4人间！\n☆【特色美食】济南饺子宴、青岛锅贴宴、胶东宴、大连特色铁锅炖！",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 7,
-    "price": 2939,
-    "originalPrice": 3160,
-    "priceUnit": "人",
-    "departureDate": "2026-06-27",
-    "returnDate": "2026-07-04",
-    "transportType": "飞机往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "7早餐6正餐",
-    "singleSupplement": 734,
-    "singleSupplementNote": "单人出行需补单房差￥734",
-    "availableSeats": 18,
-    "totalSeats": 23,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "第3天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 4,
-        "title": "第4天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 5,
-        "title": "第5天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 6,
-        "title": "第6天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 7,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": true,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.5,
-    "reviewCount": 390,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S68499963HOLIDAY&tournameno=253K239001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260428_28351.jpg"
-    ],
-    "tags": [
-      "美食之旅",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": true,
-    "isFlashSale": true,
-    "discountRate": 7,
-    "groupSize": "30人常规团",
-    "theme": "美食之旅",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
-  },
-  {
-    "id": "tour_35",
-    "title": "奢享山东半岛双飞5天1 2晚国际五钻 • 2晚网评四钻 •  0购物0自费\n◆舌尖美食：全程400元/围餐标：岛城风味、胶东风味、蓬莱八仙风味、老青岛家常菜、石岛风味\n◆独家赠送：无人机航拍。",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 5,
-    "price": 3539,
-    "originalPrice": 4067,
-    "priceUnit": "人",
-    "departureDate": "2026-06-05",
-    "returnDate": "2026-06-10",
-    "transportType": "高铁往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "5早餐4正餐",
-    "singleSupplement": 884,
-    "singleSupplementNote": "单人出行需补单房差￥884",
-    "availableSeats": 17,
-    "totalSeats": 30,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "第3天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 4,
-        "title": "第4天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 5,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": true,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.6,
-    "reviewCount": 174,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264959855159HOLIDAY&tournameno=2649919001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250428_218136.jpg"
-    ],
-    "tags": [
-      "美食之旅",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "discountRate": 13,
-    "groupSize": "30人常规团",
-    "theme": "美食之旅",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
-  },
-  {
-    "id": "tour_36",
-    "title": "粤西三湾一泉荔枝节4天 【不占床小童】-1.2米以下，只含车位，其余自理",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 4,
-    "price": 699,
-    "priceUnit": "人",
-    "departureDate": "2026-06-12",
-    "returnDate": "2026-06-16",
-    "transportType": "高铁往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "4早餐3正餐",
-    "singleSupplement": 174,
-    "singleSupplementNote": "单人出行需补单房差￥174",
-    "availableSeats": 20,
-    "totalSeats": 30,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "第3天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 4,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
     "rating": 4.0,
-    "reviewCount": 261,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S99142442HOLIDAY&tournameno=264S331001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250428_822537.png"
-    ],
-    "tags": [
-      "自然风光",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "自然风光",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
-  },
-  {
-    "id": "tour_37",
-    "title": "粤西双湾荔枝节3天 【不占床小童】-1.2米以下，只含车位，其余自理",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 3,
-    "price": 399,
-    "priceUnit": "人",
-    "departureDate": "2026-06-28",
-    "returnDate": "2026-07-01",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 59,
-    "singleSupplementNote": "单人出行需补单房差￥59",
-    "availableSeats": 20,
-    "totalSeats": 26,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.8,
-    "reviewCount": 360,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S73226521HOLIDAY&tournameno=264S239001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250428_822537.png"
-    ],
-    "tags": [
-      "自然风光",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": true,
-    "isFlashSale": true,
-    "groupSize": "30人常规团",
-    "theme": "自然风光",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
-  },
-  {
-    "id": "tour_38",
-    "title": "赣州古城江茂漫谷温泉3天(食4餐) 【不占床小童】-1.2米-1.4米含车+餐+温泉票，其余自理\n【占床小孩】-1.2米以下只占车位，其余不含",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 3,
-    "price": 699,
-    "priceUnit": "人",
-    "departureDate": "2026-06-09",
-    "returnDate": "2026-06-12",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 104,
-    "singleSupplementNote": "单人出行需补单房差￥104",
-    "availableSeats": 20,
-    "totalSeats": 27,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": true,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 3.8,
-    "reviewCount": 153,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S55935784HOLIDAY&tournameno=262R787001",
+    "reviewCount": 302,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264S55935784HOLIDAY",
     "images": [
       "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250422_539738.png"
     ],
@@ -4732,20 +29785,20 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_39",
-    "title": "贺州西溪3天(悦泉居-食4餐) 【食4餐：酒店2正(围)+2自助早餐】\n\n【不占床】-1.2-1.4米，含车位+2正2早+多次温泉门票，其余不含\n【占床】-1.2米以下，只含车位，其余不含",
+    "id": "tour_232",
+    "title": "贺州西溪3天(悦泉居-食4餐)",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
     "duration": 3,
     "price": 799,
     "priceUnit": "人",
-    "departureDate": "2026-05-25",
-    "returnDate": "2026-05-28",
+    "departureDate": "2026-05-26",
+    "returnDate": "2026-05-29",
     "transportType": "大巴往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
@@ -4753,7 +29806,7 @@ export const tours: Tour[] = [
     "singleSupplement": 119,
     "singleSupplementNote": "单人出行需补单房差￥119",
     "availableSeats": 20,
-    "totalSeats": 32,
+    "totalSeats": 33,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -4790,265 +29843,6 @@ export const tours: Tour[] = [
       },
       {
         "day": 3,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.8,
-    "reviewCount": 332,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264I87516248HOLIDAY&tournameno=24A2654001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240615_621405.png"
-    ],
-    "tags": [
-      "海岛度假",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "海岛度假",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
-  },
-  {
-    "id": "tour_40",
-    "title": "深圳大鹏双月都喜天丽联游3天 【不占床小童】-1.2-1.4米，含早餐+车位，其余不含；【占床小童】-1.2米以下，只含车位",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "广东",
-    "duration": 3,
-    "price": 499,
-    "priceUnit": "人",
-    "departureDate": "2026-06-04",
-    "returnDate": "2026-06-07",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 74,
-    "singleSupplementNote": "单人出行需补单房差￥74",
-    "availableSeats": 20,
-    "totalSeats": 32,
-    "highlights": [
-      "广东必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往广东",
-        "description": "今日安排广东精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：广东游览",
-        "description": "今日安排广东精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "告别广东，返回温馨的家",
-        "description": "今日安排广东精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.7,
-    "reviewCount": 246,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264N28938162HOLIDAY&tournameno=2642517001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20250602_756314.jpg"
-    ],
-    "tags": [
-      "自然风光",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "groupSize": "30人常规团",
-    "theme": "自然风光",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
-  },
-  {
-    "id": "tour_41",
-    "title": "纯玩泸沽湖 双飞5天 ◆精选航班：南航直飞攀枝花，省去舟车劳顿！\n★唯美旅拍：泸沽湖走婚桥、旅拍体验高端旅拍-每人赠送 1个7寸水晶摆台 1个+1张精修照片\n◆住宿升级：西昌2晚网评四钻酒店+连住2晚泸沽湖精品民宿\n★舌尖美食：蒸汽石锅鱼+铜锅菌汤鸡+摩梭民族餐+凉山“西”餐+阳光下午茶多款特色美食；",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 5,
-    "price": 3339,
-    "originalPrice": 3751,
-    "priceUnit": "人",
-    "departureDate": "2026-05-30",
-    "returnDate": "2026-06-04",
-    "transportType": "高铁往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "5早餐4正餐",
-    "singleSupplement": 834,
-    "singleSupplementNote": "单人出行需补单房差￥834",
-    "availableSeats": 17,
-    "totalSeats": 24,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "第3天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 4,
-        "title": "第4天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 5,
         "title": "告别其他，返回温馨的家",
         "description": "今日安排其他精彩活动，感受当地独特魅力。",
         "meals": [
@@ -5083,127 +29877,11 @@ export const tours: Tour[] = [
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.4,
-    "reviewCount": 138,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264A42001HOLIDAY&tournameno=263J659001",
+    "rating": 4.1,
+    "reviewCount": 280,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264I87516248HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_856599.jpg"
-    ],
-    "tags": [
-      "美食之旅",
-      "纯玩",
-      "品质"
-    ],
-    "isHot": false,
-    "isNew": false,
-    "isFlashSale": false,
-    "discountRate": 11,
-    "groupSize": "30人常规团",
-    "theme": "美食之旅",
-    "suitableFor": [
-      "亲子",
-      "情侣"
-    ],
-    "difficulty": "轻松",
-    "season": "全年",
-    "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
-  },
-  {
-    "id": "tour_42",
-    "title": "茂名十星荔枝节3天 【不占床】-1.2-1.4米，只含车位+2早2正+莲花庄园门票\n【占床】-1.2米以下只含车位，其余自理",
-    "source": "假日通",
-    "sourceLogo": "/icons/假日通.png",
-    "destination": "其他",
-    "duration": 3,
-    "price": 599,
-    "priceUnit": "人",
-    "departureDate": "2026-05-21",
-    "returnDate": "2026-05-24",
-    "transportType": "大巴往返",
-    "accommodationLevel": "舒适型",
-    "accommodationStars": 3,
-    "meals": "3早餐2正餐",
-    "singleSupplement": 89,
-    "singleSupplementNote": "单人出行需补单房差￥89",
-    "availableSeats": 20,
-    "totalSeats": 28,
-    "highlights": [
-      "其他必打卡",
-      "特色美食",
-      "精品住宿"
-    ],
-    "itinerary": [
-      {
-        "day": 1,
-        "title": "出发前往其他",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 2,
-        "title": "第2天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 3,
-        "title": "告别其他，返回温馨的家",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐"
-        ],
-        "accommodation": "温馨的家",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      }
-    ],
-    "inclusions": [
-      "往返交通",
-      "酒店住宿",
-      "景点门票",
-      "导游服务"
-    ],
-    "exclusions": [
-      "个人消费",
-      "单房差",
-      "自费项目"
-    ],
-    "importantNotes": [
-      "请携带有效身份证件",
-      "行程可能因天气调整"
-    ],
-    "visaRequirements": "无需签证（国内游）",
-    "travelInsurance": true,
-    "tourGuideService": true,
-    "freeWiFi": false,
-    "childPolicy": "2-12岁儿童不占床享半价",
-    "cancellationPolicy": "出发前7天可无损退改",
-    "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.7,
-    "reviewCount": 120,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264S45848361HOLIDAY&tournameno=264S787001",
-    "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260428_161560.png"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240615_621405.png"
     ],
     "tags": [
       "自然风光",
@@ -5222,29 +29900,29 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_43",
-    "title": "五星齐鲁（璀璨山东）双飞6天1 长者线路。不足60周岁，当地现补门票。\n☆ 【奢享住宿】全程网评5钻酒店，2晚国际品牌五星酒店，呵护每一晚睡眠\n☆ 【体验升级】16(含)人以上当地安排2+1空调大巴",
+    "id": "tour_233",
+    "title": "纯玩泸沽湖 双飞5天",
     "source": "假日通",
     "sourceLogo": "/icons/假日通.png",
     "destination": "其他",
-    "duration": 6,
+    "duration": 5,
     "price": 3339,
-    "originalPrice": 3514,
+    "originalPrice": 3710,
     "priceUnit": "人",
-    "departureDate": "2026-05-24",
-    "returnDate": "2026-05-30",
-    "transportType": "飞机往返",
+    "departureDate": "2026-06-30",
+    "returnDate": "2026-07-05",
+    "transportType": "高铁往返",
     "accommodationLevel": "舒适型",
     "accommodationStars": 3,
-    "meals": "6早餐5正餐",
+    "meals": "5早餐4正餐",
     "singleSupplement": 834,
     "singleSupplementNote": "单人出行需补单房差￥834",
     "availableSeats": 17,
-    "totalSeats": 28,
+    "totalSeats": 25,
     "highlights": [
       "其他必打卡",
       "特色美食",
@@ -5309,20 +29987,6 @@ export const tours: Tour[] = [
       },
       {
         "day": 5,
-        "title": "第5天：其他游览",
-        "description": "今日安排其他精彩活动，感受当地独特魅力。",
-        "meals": [
-          "早餐",
-          "午餐"
-        ],
-        "accommodation": "当地酒店",
-        "activities": [
-          "景点游览",
-          "自由活动"
-        ]
-      },
-      {
-        "day": 6,
         "title": "告别其他，返回温馨的家",
         "description": "今日安排其他精彩活动，感受当地独特魅力。",
         "meals": [
@@ -5353,25 +30017,25 @@ export const tours: Tour[] = [
     "visaRequirements": "无需签证（国内游）",
     "travelInsurance": true,
     "tourGuideService": true,
-    "freeWiFi": true,
+    "freeWiFi": false,
     "childPolicy": "2-12岁儿童不占床享半价",
     "cancellationPolicy": "出发前7天可无损退改",
     "refundPolicy": "未消费项目按实结算退还",
-    "rating": 4.4,
-    "reviewCount": 111,
-    "bookingUrl": "http://www.jrt365.com/show_td.aspx?groupno=B264T99863815HOLIDAY&tournameno=264T958001",
+    "rating": 3.9,
+    "reviewCount": 162,
+    "bookingUrl": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B264A42001HOLIDAY",
     "images": [
-      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20260325_831400.jpg"
+      "http://jrttp.jrt365.com:8066/images/HOLIDAY/20240119_856599.jpg"
     ],
     "tags": [
       "自然风光",
       "纯玩",
       "品质"
     ],
-    "isHot": true,
+    "isHot": false,
     "isNew": false,
     "isFlashSale": false,
-    "discountRate": 5,
+    "discountRate": 10,
     "groupSize": "30人常规团",
     "theme": "自然风光",
     "suitableFor": [
@@ -5381,11 +30045,11 @@ export const tours: Tour[] = [
     "difficulty": "轻松",
     "season": "全年",
     "language": "中文导游",
-    "createdAt": "2026-05-07T02:42:29.279546",
-    "updatedAt": "2026-05-07T02:42:29.279546"
+    "createdAt": "2026-05-07T03:49:58.423936",
+    "updatedAt": "2026-05-07T03:49:58.423936"
   },
   {
-    "id": "tour_44",
+    "id": "tour_234",
     "title": "5.10清野活动 广佛出发【绿色梅子坪古道15公里】打卡广东版墨石公园，徒步千年古道，深入喀斯特峰林，体会山村徒步乐趣 广东·清远 05/07-05/16  ( ¥89) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -5486,7 +30150,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.279546"
   },
   {
-    "id": "tour_45",
+    "id": "tour_235",
     "title": "海岸线 广佛出发 每周六/日【深圳盐田栈道1天休闲徒步】 广东·深圳 05/10-05/16  ( ¥89)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -5573,7 +30237,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.279546"
   },
   {
-    "id": "tour_46",
+    "id": "tour_236",
     "title": "海岸线 广佛出发 每周六/日【穿越东西冲1天徒步】走进“中国最美八大海岸”之一，打卡网红天文台，穿越最美海岸线 广东·深圳 05/10-05/16  ( ¥88)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -5660,7 +30324,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.279546"
   },
   {
-    "id": "tour_47",
+    "id": "tour_237",
     "title": "5.10清野活动 广佛出发 每周六/日【西樵山探洞】佛山西樵山探洞，追一场耶稣光盛宴1天 广东·佛山 05/10-05/16  ( ¥68)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -5747,7 +30411,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.279546"
   },
   {
-    "id": "tour_48",
+    "id": "tour_238",
     "title": "5.10清野活动 广佛出发 每周四/六/日【黑排角徒步1天】徒步海岸奇观黑排角，彩石滩拍大片 广东·惠州 05/10-05/16  ( ¥99)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -5834,7 +30498,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.279546"
   },
   {
-    "id": "tour_49",
+    "id": "tour_239",
     "title": "5.10清野活动 广佛出发 每周六/日【行摄莫六公】登顶莫六公瞰清远最美山脊一天徒步 广东·清远 05/10-05/16  ( ¥98)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -5935,7 +30599,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_50",
+    "id": "tour_240",
     "title": "5.10清野活动 广佛出发 每周六/日【千泷沟穿越1天】徒步穿越千泷沟大瀑布，行摄万亩竹海 广东·广州 05/10-05/16  ( ¥78) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6022,7 +30686,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_51",
+    "id": "tour_241",
     "title": "5.10清野活动 广佛出发 每周六/日【徒步从化星溪线】徒步穿越十里竹海 感受最美乡村小径 广东·广州 05/10-05/16  ( ¥58) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6123,7 +30787,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_52",
+    "id": "tour_242",
     "title": "5.10清野活动 广佛出发 每周六/日【广州第一峰天堂顶】 登广州最高峰：天堂顶1天活动 广东·广州 05/10-05/16  ( ¥68)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6210,7 +30874,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_53",
+    "id": "tour_243",
     "title": "5.10清野活动 每周六/日【阳山秦汉古道】 徒步古道10公里，探寻历史记忆，感受古道之秋 广东·清远 05/10-05/16  ( ¥98)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6311,7 +30975,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_54",
+    "id": "tour_244",
     "title": "全年每周三/周六发团【轻装徒步香港麦理浩径2天】露营/民宿 香港 05/09-05/14  ( ¥289) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6412,7 +31076,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_55",
+    "id": "tour_245",
     "title": "每周三/周六 /节假日发团【竹篙岛露营2日】海边草坪扎营，海景视野无敌 广东·深圳 04/05-05/10  ( ¥338) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6513,7 +31177,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_56",
+    "id": "tour_246",
     "title": "周末/节假日【网红潮汕2天】寻味美食聚集地潮州古城，美拍《四海》取景地南澳岛，畅玩“东方夏威夷”青澳湾 广东·潮州 05/16-05/17  ( ¥408)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6614,7 +31278,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_57",
+    "id": "tour_247",
     "title": "【惠州“小塞班”】秘境盐洲岛+海螺湾：入住海景房、旅拍彩石滩+西虎岛赶海、快艇登海螺湾&amp;浮潜&amp;桨板、扬帆出海+磨子石公园 广东·惠州 05/01-05/10  ( ¥438)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6715,7 +31379,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_58",
+    "id": "tour_248",
     "title": "每周六/节假日出发【浪漫惠汕2天】入住海景房、游玩绝秘沙滩体验浮潜、赶海、冲浪，摄影南海寺&amp;网红碉堡，打卡汕尾天空之城 广东·汕尾 05/13-05/17  ( ¥388)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6816,7 +31480,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_59",
+    "id": "tour_249",
     "title": "每周三/六/节假日出发【惠州“马尔代夫”2天】堪称广东马尔代夫，沙滩露营，浮潜、冲浪、浆板、赶海，满足你对海边所有幻想X 广东·惠州 05/16-05/17  ( ¥318) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -6917,7 +31581,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_60",
+    "id": "tour_250",
     "title": "每周三/六出发【浪漫惠州2天】入住一线海景房，打卡广东马尔代夫、体验海边冲浪、SUP板、皮划艇、浮潜、沙滩赶海、海边烧烤 广东·惠州 05/16-06/20  ( ¥388) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -7018,7 +31682,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_61",
+    "id": "tour_251",
     "title": "全年发团【江门赤坎古镇2天纯玩】每周六/节假日出发 广东·江门 05/16-06/20  ( ¥448)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -7119,7 +31783,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_62",
+    "id": "tour_252",
     "title": "每周末/端午【汽车·郴州2天】行摄飞天山九龙水寨、雾漫小东江、夜游裕后街~ 湖南·郴州 05/16-06/20  ( ¥358)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -7220,7 +31884,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_63",
+    "id": "tour_253",
     "title": "周末/端午【大美莽山2天】漫步悬空栈道、观莽山云海、行摄碧水丹霞高椅岭 湖南·郴州 05/16-06/21  ( ¥358)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -7321,7 +31985,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_64",
+    "id": "tour_254",
     "title": "【中国大陆最南端，湛江高铁3日】广东省内游、住南极村、行摄菠萝的海，探访硇洲岛、珊瑚保护区、打卡湖光岩、赤坎老街、灯楼角 广东·湛江 05/01-12/13  ( ¥1579) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -7438,7 +32102,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_65",
+    "id": "tour_255",
     "title": "每周五/五一假期 动车往返【涠洲岛3天2晚 】《中国国家地理》力荐！私藏的“火山海岛盲盒”！ 广西·北海 04/30-05/10  ( ¥1270) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -7555,7 +32219,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_66",
+    "id": "tour_256",
     "title": "天天发团 广深直飞丽江【丽江香格里拉 虎跳峡 稻城亚丁 玛那茶金 泸沽湖6天纯玩小团】 云南·丽江 05/02-05/07  ( ¥4950)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -7714,7 +32378,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_67",
+    "id": "tour_257",
     "title": "【庐山恋4日，火车卧铺往返，精品4-8人小团】每周五晚精品小团，冬天里的浪漫情愫，相约游庐山 江西·九江 01/21-05/11  ( ¥860) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -7843,7 +32507,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.280548"
   },
   {
-    "id": "tour_68",
+    "id": "tour_258",
     "title": "全年发团【大美稻亚 川西大环线四姑娘山+稻城亚丁7天纯玩】4.18日/4.30日/5.16日/5.23日/5.30日…… 四川·成都 04/18-11/21  ( ¥3150) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -8016,7 +32680,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_69",
+    "id": "tour_259",
     "title": "全年发团【大美色稻 全景川西大环线色达+稻城亚丁8天纯玩】4.18日/4.30日/5.9日/5.16日/5.23日…… 四川·成都 04/18-11/21  ( ¥3650) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -8203,7 +32867,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_70",
+    "id": "tour_260",
     "title": "8人小团【洱听风吟 大理 丽江 泸沽湖5天纯玩】4.11日/4.18日/4.25日/5.1日/5.9日/5.16日…… 云南·丽江 04/11-12/30  ( ¥2850) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -8348,7 +33012,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_71",
+    "id": "tour_261",
     "title": "昆明集合【秘境沧源 哀崂山 西双版纳8天纯玩】4.4日/4.11日/4.18日/4.25日/5.1日/5.9日/5.16 云南·西双版纳 2026/04/04-2027/01/02  ( ¥3450) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -8535,7 +33199,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_72",
+    "id": "tour_262",
     "title": "拉萨集散【西藏珠峰大本营 冈仁波齐转山10天纯玩】4.26日/5.15日/6.5日/6.19日/7.10日…… 西藏·拉萨 04/26-10/09  ( ¥9950)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -8750,7 +33414,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_73",
+    "id": "tour_263",
     "title": "全年发团【318川藏线+稻城亚丁11天纯玩 16人小团】4.17日/5.1日/5.15日/5.29日/6.5日 西藏·拉萨 04/17-11/02  ( ¥6550) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -8979,7 +33643,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_74",
+    "id": "tour_264",
     "title": "成都集散【大美九寨沟 黄龙6天纯玩 8人小团】每周五成都集合 四川·成都 04/01-11/25  ( ¥2950) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -9138,7 +33802,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_75",
+    "id": "tour_265",
     "title": "成都集散【经典川西大环线 稻城亚丁7天纯玩】4.18日/4.30日/5.16日/5.23日/5.30日…… 四川·成都 04/18-11/20  ( ¥3150) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -9311,7 +33975,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_76",
+    "id": "tour_266",
     "title": "拉萨集散【下一站西藏 拉萨 林芝 羊卓雍错7天纯玩】全年发团 西藏·拉萨 05/01-10/23  ( ¥3950) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -9484,7 +34148,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_77",
+    "id": "tour_267",
     "title": "太原集散【山西五台山 大同6天纯玩】3.7日/3.21日/4.4日/4.18日/5.1日/5.9日/5.16日 山西·太原 03/07-10/22  ( ¥2950) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -9643,7 +34307,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_78",
+    "id": "tour_268",
     "title": "太原集散 特惠1580元【穿越秦晋 波浪谷 平遥古城 壶口瀑布6天户外纯玩】5.15-5.20日成团 山西·太原 05/15-05/20  ( ¥1550)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -9802,7 +34466,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_79",
+    "id": "tour_269",
     "title": "石家庄集散 特惠1780元【穿越北太行 蚕姑坨 白石山 狼牙山 涞源长城5天徒步】 河北·石家庄 05/01-06/23  ( ¥1750)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -9947,7 +34611,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_80",
+    "id": "tour_270",
     "title": "2380元【徒步华夏.腾格里沙漠4天徒步】5.1日/6.19日/9.25日/10.1日/10.2日 均发团 内蒙古·阿拉善 05/01-10/07  ( ¥2350)",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -10078,7 +34742,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_81",
+    "id": "tour_271",
     "title": "全年发团【山西明长城 雁门关 杀虎口 云冈石窟5天徒步】4.4日/4.18日/5.1日/5.16日/5.27日/6.6日 山西·大同 04/04-10/21  ( ¥2650) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -10223,7 +34887,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_82",
+    "id": "tour_272",
     "title": "全年发团【黄河蛇曲古道 壶口瀑布 山西古建5天徒步】4.4日/4.18日/4.30日/5.16日/5.23日…… 山西·运城 04/04-11/11  ( ¥2950) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -10368,7 +35032,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_83",
+    "id": "tour_273",
     "title": "全年发团【山西五台山大朝台5天徒步】4.4日/4.18日/5.1日/5.20日/6.3日/6.17日…… 山西·太原 04/04-10/18  ( ¥2650) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -10513,7 +35177,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_84",
+    "id": "tour_274",
     "title": "【滇秘境 高黎贡山5天徒步】4.4日/4.18日/5.1日/5.16日/5.27日/6.6日/6.19日成团 云南·保山 04/04-10/21  ( ¥2350) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -10658,7 +35322,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_85",
+    "id": "tour_275",
     "title": "桂林集散【漓江徒步5日】十大经典徒步漓江徒步，探秘原生态喀斯特溶洞，步入现实版的千里江山图 广西·桂林 2026/04/02-2027/01/04  ( ¥2270) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -10803,7 +35467,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_86",
+    "id": "tour_276",
     "title": "南宁集散【徒步广西4/5天】徒步打卡剑龙山-浩坤湖-天坑地心穿越-观德天跨国瀑布-游峒那屿湾田园风光 广西·南宁 2026/04/03-2027/01/04  ( ¥1670) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -10948,7 +35612,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_87",
+    "id": "tour_277",
     "title": "恩施集散【经典恩施朝东岩 清江古河床 恩施大峡谷4天徒步】4.18日/4.30日/5.1日/5.9日/5.16日成团 湖北·恩施 03/28-12/22  ( ¥1850) 起",
     "source": "广州去旅行",
     "sourceLogo": "/icons/广州去.png",
@@ -11079,7 +35743,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_88",
+    "id": "tour_278",
     "title": "<坐车上桥登蓝海豚岛>港珠澳大桥+珠海全景探秘1天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -11166,7 +35830,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_89",
+    "id": "tour_279",
     "title": "<特惠游>醉美珠海纯玩1天 畅游淇澳岛 探寻圆明新园 漫步情侣路",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -11253,7 +35917,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.281547"
   },
   {
-    "id": "tour_90",
+    "id": "tour_280",
     "title": "【龙门.直通车】广州往返惠州龙门林丰温泉纯玩2天1晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -11354,7 +36018,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_91",
+    "id": "tour_281",
     "title": "<佛冈.直通车>广州往返清远佛冈森波拉温泉~森林酒店2天1晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -11455,7 +36119,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_92",
+    "id": "tour_282",
     "title": "【新丰.直通车】广州往返韶关新丰云天海原始森林度假村纯玩3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -11570,7 +36234,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_93",
+    "id": "tour_283",
     "title": "【增城.直通车】（官方主楼）广州往返增城金叶子温泉2天半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -11671,7 +36335,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_94",
+    "id": "tour_284",
     "title": "【增城.直通车】广州往返增城 三英温泉2天半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -11772,7 +36436,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_95",
+    "id": "tour_285",
     "title": "<穿越港珠澳大桥>船游海上看港珠澳大桥+打卡珠海地标日月贝+珠海渔女1日游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -11859,7 +36523,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_96",
+    "id": "tour_286",
     "title": "<广深珠港澳>广州出发广深港澳珠（五市联游）五天游，铁发天天出发（官网专用）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -11962,7 +36626,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_97",
+    "id": "tour_287",
     "title": "<广深珠港澳>广州出发广港澳珠（四市联游）四天，铁发天天出发（官网专用）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12065,7 +36729,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_98",
+    "id": "tour_288",
     "title": "【清远.直通车】<夏日水世界+温泉>广州往返清远美林湖温泉3天、叹主题自助晚餐",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12180,7 +36844,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_99",
+    "id": "tour_289",
     "title": "【笔架山·漂流WD】广州出发.清远笔架山漂流+真人CS纯玩1天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12267,7 +36931,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_100",
+    "id": "tour_290",
     "title": "【清远.直通车】<夏日水世界+温泉>广州往返清远美林湖温泉2天、叹主题自助晚餐",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12368,7 +37032,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_101",
+    "id": "tour_291",
     "title": "【清远.直通车】<无限次温泉+自助早>广州往返清远新银盏温泉度假村纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12483,7 +37147,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_102",
+    "id": "tour_292",
     "title": "【清远.直通车】<无限次温泉+自助早>广州往返清远新银盏温泉度假村纯玩2天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12584,7 +37248,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_103",
+    "id": "tour_293",
     "title": "【清远.直通车】广州往返清远瞻云度假酒店纯玩3天2晚，吃足4餐，无限次鱼窝汤泉",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12699,7 +37363,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_104",
+    "id": "tour_294",
     "title": "<佛冈.直通车>广州往返清远佛冈森波拉松鼠酒店2天1晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12800,7 +37464,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_105",
+    "id": "tour_295",
     "title": "<佛冈.直通车>广州往返清远佛冈聚龙湾温泉度假村2天半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12901,7 +37565,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_106",
+    "id": "tour_296",
     "title": "【潇洒行】<赏花+钓虾逗宠>广州往返清远玄真云溪九瀑··品尝农家柴火宴纯玩1天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -12988,7 +37652,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_107",
+    "id": "tour_297",
     "title": "<潇洒行>【周末不加收 食足4餐】阳江沙扒湾沙滩 3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -13103,7 +37767,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_108",
+    "id": "tour_298",
     "title": "【闸坡直通车】广州往返 碧珠楼（原平舟大酒店）（不含早）2天1晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -13204,7 +37868,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_109",
+    "id": "tour_299",
     "title": "【闸坡直通车】广州往返 海陵岛希际酒店（不含早）2天1晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -13305,7 +37969,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_110",
+    "id": "tour_300",
     "title": "【闸坡直通车】广州往返 海陵岛北洛秘境度假酒店（含早）2天1晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -13406,7 +38070,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_111",
+    "id": "tour_301",
     "title": "【闸坡直通车】广州往返 海陵岛碧珠楼（原平舟大酒店）（不含早）3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -13521,7 +38185,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_112",
+    "id": "tour_302",
     "title": "【闸坡直通车】广州往返 海陵岛希际酒店（不含早）3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -13636,7 +38300,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_113",
+    "id": "tour_303",
     "title": "【闸坡直通车】广州往返 海陵岛北洛秘境度假酒店（含早）3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -13751,7 +38415,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_114",
+    "id": "tour_304",
     "title": "【阳西直通车】广州往返 阳西月亮湾沙滩直通车（不含早）纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -13866,7 +38530,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_115",
+    "id": "tour_305",
     "title": "【闸坡直通车】广州往返 海陵岛冠华大酒店（不含早）2天1晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -13967,7 +38631,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.282547"
   },
   {
-    "id": "tour_116",
+    "id": "tour_306",
     "title": "【闸坡直通车】广州往返 海陵岛冠华大酒店（不含早）3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -14082,7 +38746,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_117",
+    "id": "tour_307",
     "title": "广州往返 韶关风水鸡 遇上大地大地伤痕纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -14197,7 +38861,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_118",
+    "id": "tour_308",
     "title": "<韶关温泉>广州往返韶关经律论温泉文化小镇纯玩3天，入住2晚经律论森林驿站",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -14312,7 +38976,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_119",
+    "id": "tour_309",
     "title": "<潇洒行>（品味粤湘赣）广州往返韶关丹霞丰源温泉酒店轻奢度假3天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -14427,7 +39091,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_120",
+    "id": "tour_310",
     "title": "<潇洒行>广州往返连住2晚韶关溪里颂艺术酒店  南华寺 纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -14542,7 +39206,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_121",
+    "id": "tour_311",
     "title": "<潇洒行>广州往返初夏邂逅绣球花海，打卡新丰岭南红叶世界2天，入住网红星空玻璃房",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -14643,7 +39307,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_122",
+    "id": "tour_312",
     "title": "<韶关温泉>广州往返连住2晚韶关经律论温泉酒店主楼",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -14744,7 +39408,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_123",
+    "id": "tour_313",
     "title": "<韶关温泉>广州往返韶关全新溪里颂温泉艺术酒店3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -14859,7 +39523,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_124",
+    "id": "tour_314",
     "title": " <韶关温泉>广州往返韶关曹溪温泉度假村3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -14974,7 +39638,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_125",
+    "id": "tour_315",
     "title": "【新丰.直通车】广州往返新丰江源温泉度假山庄纯玩3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -15089,7 +39753,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_126",
+    "id": "tour_316",
     "title": "<潇洒行>广州往返  增城森林海水上乐园 入住从化卓思道泡世界珍稀温泉纯玩2天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -15190,7 +39854,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_127",
+    "id": "tour_317",
     "title": "【从化.直通车】广州往返从化新财富温泉酒店2天1晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -15291,7 +39955,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_128",
+    "id": "tour_318",
     "title": "【增城.直通车】广州往返增城白水寨嘉华温泉2天半自助游，纯玩无自费，享用3餐",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -15392,7 +40056,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_129",
+    "id": "tour_319",
     "title": "【增城.直通车】（美食）广州往返增城 三英温泉纯玩2天半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -15493,7 +40157,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_130",
+    "id": "tour_320",
     "title": "广州往返从化天适樱花悠乐园赏绣球花+溪头村纯玩1天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -15580,7 +40244,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_131",
+    "id": "tour_321",
     "title": "【互联网】单订增城锦绣香江温泉城酒店",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -15683,7 +40347,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_132",
+    "id": "tour_322",
     "title": "<火热爆款>广州出发 珠深惠深度3日游：领略多元湾区魅力",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -15798,7 +40462,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_133",
+    "id": "tour_323",
     "title": "<广深珠>广州深圳珠海三日游（含游艇），铁发天天出发（官网专用）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -15901,7 +40565,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.283547"
   },
   {
-    "id": "tour_134",
+    "id": "tour_324",
     "title": "<广深珠>广州出发深圳一天游，纯玩品质团，天天出发（铁发）（官网专用）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16002,7 +40666,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_135",
+    "id": "tour_325",
     "title": "【广州往返】魅力中英街纯玩1天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16089,7 +40753,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_136",
+    "id": "tour_326",
     "title": "<火热爆款>广州出发 深圳大梅沙、中英街、观澜版画小镇入住格兰云天酒店2天纯玩",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16190,7 +40854,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_137",
+    "id": "tour_327",
     "title": "<纯玩特惠>广州出发深中通道·中英街·大梅沙纯玩1天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16277,7 +40941,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_138",
+    "id": "tour_328",
     "title": "【康辉户外俱乐部】深圳漫步山海连城1日游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16364,7 +41028,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_139",
+    "id": "tour_329",
     "title": "中英街一金色海岸-盐田海滨栈道一大梅沙海滨公园地王观光一世界之窗",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16465,7 +41129,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_140",
+    "id": "tour_330",
     "title": "【母亲节限定】广州出发 深圳海边纯玩2天 入住五洲山海湾酒店",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16566,7 +41230,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_141",
+    "id": "tour_331",
     "title": "<广深珠>广州出发深圳珠海二天游（未含游艇），铁发天天出发（官网专用）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16667,7 +41331,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_142",
+    "id": "tour_332",
     "title": "<广深珠>广州出发珠海一天游，天天出发，纯玩（含游轮珠澳海湾游船票）（官网专用）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16768,7 +41432,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_143",
+    "id": "tour_333",
     "title": "【珠海直通车】广州出发珠海御温泉3天2晚半自助游（含2晚大餐庙会）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -16885,7 +41549,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_144",
+    "id": "tour_334",
     "title": "【珠海直通车】广州出发 海泉湾维景大酒店3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17000,7 +41664,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_145",
+    "id": "tour_335",
     "title": "【新兴.直通车】广州往返新兴翔顺象窝酒店半自助2天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17101,7 +41765,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_146",
+    "id": "tour_336",
     "title": "【新兴.直通车】广州往返新兴象窝奢华度假养生半自助3天游~连住2晚象窝酒店",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17216,7 +41880,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_147",
+    "id": "tour_337",
     "title": "【新兴.直通车】广州往返新兴悦天下温泉酒店半自助2天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17317,7 +41981,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_148",
+    "id": "tour_338",
     "title": "【新兴.直通车】广州往返新兴金水台温泉小镇半自助2天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17418,7 +42082,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_149",
+    "id": "tour_339",
     "title": "【新兴.直通车】广州往返新兴龙山温泉酒店半自助2天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17519,7 +42183,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_150",
+    "id": "tour_340",
     "title": "【新兴.直通车】广州往返新兴禅泉酒店半自助2天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17620,7 +42284,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.284547"
   },
   {
-    "id": "tour_151",
+    "id": "tour_341",
     "title": "【新兴.直通车】广州往返新兴金水台温泉小镇半自助3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17735,7 +42399,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_152",
+    "id": "tour_342",
     "title": "【新兴.直通车】广州往返新兴翔顺龙山温泉酒店半自助3天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17850,7 +42514,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_153",
+    "id": "tour_343",
     "title": "【新兴.直通车】广州往返新兴龙山温泉酒店半自助3天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -17965,7 +42629,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_154",
+    "id": "tour_344",
     "title": "【新兴.直通车】广州往返新兴悦天下温泉酒店纯玩半自助3天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -18080,7 +42744,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_155",
+    "id": "tour_345",
     "title": "【跨省 陆地头等舱】 世界客都梅州、漳州土楼&古城 漫游福建东山岛纯玩4日",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -18209,7 +42873,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_156",
+    "id": "tour_346",
     "title": "广州往返 梅州+河源联游3天~南福村柚花香·走进客家博物馆·食足5餐",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -18324,7 +42988,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_157",
+    "id": "tour_347",
     "title": "【华南唯一 热矿泥】广州往返 梅州五华热矿泥温泉度假 吃足6餐 汽车3天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -18439,7 +43103,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_158",
+    "id": "tour_348",
     "title": "广州往返德庆悦城龙母祖庙1天游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -18526,7 +43190,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_159",
+    "id": "tour_349",
     "title": "【肇庆直通车】广州往返-肇庆星酒店纯玩3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -18641,7 +43305,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_160",
+    "id": "tour_350",
     "title": "【肇庆直通车】广州往返-肇庆星湖大酒店 轻奢度假3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -18756,7 +43420,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_161",
+    "id": "tour_351",
     "title": "<特惠游>广州往返-<漫游黄金沟>肇庆生态2天  食足4餐",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -18857,7 +43521,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_162",
+    "id": "tour_352",
     "title": "<潇洒行>广州往返【探索肇庆千年紫云谷】肇庆生态度假2天 食足3餐",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -18958,7 +43622,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_163",
+    "id": "tour_353",
     "title": "【肇庆直通车】广州往返-肇庆市七星岩温德姆至尊酒店纯玩3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -19073,7 +43737,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_164",
+    "id": "tour_354",
     "title": "<潇洒行>广州往返--肇庆怀集蓝钟森林温泉酒店 纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -19188,7 +43852,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_165",
+    "id": "tour_355",
     "title": "【肇庆直通车】广州往返-肇庆五星喜来登纯玩半自助3天【含一晚自助晚餐】",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -19303,7 +43967,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_166",
+    "id": "tour_356",
     "title": "【肇庆直通车】广州往返--肇庆白天鹅迎宾馆纯玩3天2晚半自助游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -19418,7 +44082,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_167",
+    "id": "tour_357",
     "title": "【肇庆直通车】广州往返-肇庆五星喜来登纯玩半自助3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -19533,7 +44197,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_168",
+    "id": "tour_358",
     "title": "<生态观光>广州往返五星高明碧桂园+江门三十三墟街 纯玩2天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -19634,7 +44298,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.285548"
   },
   {
-    "id": "tour_169",
+    "id": "tour_359",
     "title": "<一价全包餐> 广州往返肇庆高山森林黄金沟、入住三水凤悦凤凰酒店纯玩2天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -19735,7 +44399,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_170",
+    "id": "tour_360",
     "title": "<登高祈福>西樵山祈福+白天鹅美食纯玩2天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -19836,7 +44500,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_171",
+    "id": "tour_361",
     "title": "<广州出发>佛山高明 南海湾森林公园 休闲1天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -19921,7 +44585,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_172",
+    "id": "tour_362",
     "title": "<爆款推荐>广东千古情 +佛山白天鹅 美食纯玩 2 天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -20022,7 +44686,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_173",
+    "id": "tour_363",
     "title": "<高明直通车>广州往返美的鹭湖入住岭南东方酒店纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -20137,7 +44801,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_174",
+    "id": "tour_364",
     "title": "<高明直通车>广州往返美的鹭湖入住岭南东方酒店纯玩2天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -20238,7 +44902,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_175",
+    "id": "tour_365",
     "title": "<春季爆款>广州往返佛山《广东千古情》+听音湖广场纯玩1天，一生必看的演出",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -20325,7 +44989,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_176",
+    "id": "tour_366",
     "title": "<登高祈福>广州往返 佛山西樵山祈福纯玩1天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -20412,7 +45076,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_177",
+    "id": "tour_367",
     "title": "<特惠>广州往返北京，特惠北京双飞五天，连住4晚舒适酒店",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -20515,7 +45179,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_178",
+    "id": "tour_368",
     "title": "<必发>广州往返北京，劲爆北京 故宫+天坛+八达岭 双飞5天跟团游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -20660,7 +45324,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_179",
+    "id": "tour_369",
     "title": "<特惠>京华初夏千人行 北京故宫+颐和园+恭王府火车广州北京往返7天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -20833,7 +45497,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_180",
+    "id": "tour_370",
     "title": "<精品小团>轻奢北京.北京故宫+恭王府+天坛+颐和园双飞纯玩5天团",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -20978,7 +45642,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_181",
+    "id": "tour_371",
     "title": "<精品小团>一家一团广州北京往返 北京故宫+泡泡玛特+环球影城双飞5天团",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -21123,7 +45787,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_182",
+    "id": "tour_372",
     "title": "<遇见>遇见童趣北京住希尔顿 嗨翻环球影城纯玩双飞5天跟团游，纯玩（广州飞）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -21268,7 +45932,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_183",
+    "id": "tour_373",
     "title": "<特惠>广州飞北京 北京故宫+恭王府双飞五天精明游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -21371,7 +46035,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_184",
+    "id": "tour_374",
     "title": "<特惠>玩转京津 广州天津北京广州 北京故宫+八达岭+天津瓷房子纯玩双飞5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -21516,7 +46180,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_185",
+    "id": "tour_375",
     "title": "<特惠>广州往返北京，乐享北京纯玩双飞五天，连住4晚网评3钻酒店（4-5月）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -21619,7 +46283,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_186",
+    "id": "tour_376",
     "title": "<特惠>京华初夏千人行 北京故宫+颐和园+恭王府双飞广州北京往返5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -21764,7 +46428,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_187",
+    "id": "tour_377",
     "title": "<遇见>遇见四川 黄龙、九寨沟、峨眉、乐山、都江堰双飞双动纯玩6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -21923,7 +46587,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_188",
+    "id": "tour_378",
     "title": "<必发>广州往返成都， 王牌稻亚  墨石公园、木格措、纯玩8人小团双动/双飞7天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -22096,7 +46760,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_189",
+    "id": "tour_379",
     "title": "<特惠> 广州往返成都 特惠九寨 黄龙、熊猫 三星堆双飞+双动6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -22255,7 +46919,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_190",
+    "id": "tour_380",
     "title": "<必发>广州往返四川成都 尊品九寨  黄龙 都江堰/熊猫 【双飞】【双动】5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -22400,7 +47064,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_191",
+    "id": "tour_381",
     "title": "<必发>广州往返成都 逸美九寨  黄龙 九寨 都江堰/熊猫 【双飞】【双动】6日",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -22559,7 +47223,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.286549"
   },
   {
-    "id": "tour_192",
+    "id": "tour_382",
     "title": "<精品小团><一家一团>成都 全景九寨 黄龙 峨眉 乐山【双飞】【双动】6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -22718,7 +47382,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_193",
+    "id": "tour_383",
     "title": "<精品小团><一家一团>轻奢九寨  黄龙 成都 【双飞】/【双动】5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -22863,7 +47527,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_194",
+    "id": "tour_384",
     "title": "<精品小团><一家一团>轻奢九寨 黄龙 三星堆/熊猫/都江堰【双飞】【双动】6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -23022,7 +47686,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_195",
+    "id": "tour_385",
     "title": "<必发>四川天堂洲际品味成都 峨眉 乐山 都江堰 熊猫 三星堆双飞/双动纯玩6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -23181,7 +47845,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_196",
+    "id": "tour_386",
     "title": "WY<秘境滇黔 普者黑荷>双动6天，滇东南+黔西南+桂西南 三省七城联游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -23340,7 +48004,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_197",
+    "id": "tour_387",
     "title": "<聚美贵州>5-6月QG广州出发黄果树+西江千户苗寨+荔波大小七孔双动5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -23485,7 +48149,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_198",
+    "id": "tour_388",
     "title": "<梵间寨叙>5-6月B线广州出发贵州梵净山+乌江寨+茅台镇+镇远古城双动5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -23630,7 +48294,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_199",
+    "id": "tour_389",
     "title": "<经典>5-6月TF广州出发贵州梵天净土黄果树+西江+大小七孔+梵净山双动6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -23789,7 +48453,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_200",
+    "id": "tour_390",
     "title": "<云游梵净山>5-6月QG广州出发贵州黄果树+小七孔+西江千户苗寨双动6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -23948,7 +48612,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_201",
+    "id": "tour_391",
     "title": "<朝圣梵净山>5-6月T3广州出发贵州肇兴侗寨+镇远古城+苗王城双动4天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -24079,7 +48743,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_202",
+    "id": "tour_392",
     "title": "<黔程是景>5-6月QG广州出发贵州黄果树+荔波小七孔+西江千户苗寨双动5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -24224,7 +48888,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_203",
+    "id": "tour_393",
     "title": "<经典>1-2月G1广州出发贵州黔贵秘境梵净山+大小井+天眼+肇兴侗寨双动5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -24369,7 +49033,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_204",
+    "id": "tour_394",
     "title": "<贵州全景>5-6月A线广州出发贵州黄果树瀑布+西江千户苗寨+大小七孔双动5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -24514,7 +49178,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_205",
+    "id": "tour_395",
     "title": "<皇牌>3-4月皇牌贵州，花江大桥+黄果树+西江+大小七孔+青岩古镇纯玩5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -24659,7 +49323,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_206",
+    "id": "tour_396",
     "title": "<经典><遇见腾冲>广州直飞芒市+腾冲+瑞丽双飞5日游*5月直飞芒市YH",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -24804,7 +49468,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_207",
+    "id": "tour_397",
     "title": "<经典><相约腾冲>广州往返芒市+瑞丽+腾冲双飞6日游*5月HX",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -24963,7 +49627,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_208",
+    "id": "tour_398",
     "title": "<臻云南大全景-象往号>广州往返 香格里拉+腾冲+版纳+丽江双卧+专列13天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -25220,7 +49884,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_209",
+    "id": "tour_399",
     "title": "<臻云南大全景-象往号>广州往返 泸沽湖+腾冲+版纳+丽江双卧+专列13天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -25477,7 +50141,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_210",
+    "id": "tour_400",
     "title": "<特惠><邂逅丽大香>广州往返云南丽江、大理、香格里拉、东巴文化体验纯玩双飞6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -25636,7 +50300,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_211",
+    "id": "tour_401",
     "title": "<必发><云端昆大丽>广州往返昆明+大理+丽江纯玩双飞一动/三动6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -25795,7 +50459,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_212",
+    "id": "tour_402",
     "title": "<必发><璀璨云南>广州往返昆明大理、丽江，石林、玉龙雪山双飞一动/三动6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -25954,7 +50618,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_213",
+    "id": "tour_403",
     "title": "<经典><爱尚云南>广州往返昆明+大理+丽江双飞双动/四动6天（晚机）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -26113,7 +50777,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_214",
+    "id": "tour_404",
     "title": "<必发><云南遇上希尔顿>广州往返昆明大理丽江，纯玩双飞/双动6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -26272,7 +50936,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_215",
+    "id": "tour_405",
     "title": "<臻自营遇见><纯真云南>广州直飞云南昆明大理丽江，一车一导，纯玩双飞/双动6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -26431,7 +51095,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.287548"
   },
   {
-    "id": "tour_216",
+    "id": "tour_406",
     "title": "<仙境恩施·醉美湘西>广州往返，恩施大峡谷+屏山峡谷双高5日游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -26576,7 +51240,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_217",
+    "id": "tour_407",
     "title": "【赞.轻奢】【倾情莽山】广州往返郴州“仙山”莽山五指峰.2晚莽山森林温泉酒店3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -26691,7 +51355,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_218",
+    "id": "tour_408",
     "title": "<汝城温泉>广州往返湖南汝城温泉·福泉汤谷度假区纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -26806,7 +51470,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_219",
+    "id": "tour_409",
     "title": "【全景郴州】广州往返“仙山”莽山五指峰，仰天湖南国大草原，东江湖游船纯玩4天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -26935,7 +51599,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_220",
+    "id": "tour_410",
     "title": "<豪叹郴州>广州往返莽山五指峰，连住2晚“郴州圣托里尼”，汽车纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -27050,7 +51714,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_221",
+    "id": "tour_411",
     "title": "<云湖天境>广州往返郴州仰天湖大草原，韶关南华禅寺，过山瑶之乡云门山纯玩3天2晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -27165,7 +51829,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_222",
+    "id": "tour_412",
     "title": "【倾情莽山】广州往返郴州莽山国家森林公园.2晚莽山森林温泉酒店3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -27280,7 +51944,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_223",
+    "id": "tour_413",
     "title": "<永州九嶷山>广州往返湖南国家4A级景区九嶷山美食文化之旅，纯玩汽车3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -27395,7 +52059,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_224",
+    "id": "tour_414",
     "title": "<云上仙境>广州往返永州九嶷山，云冰山，美景文化之旅纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -27510,7 +52174,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_225",
+    "id": "tour_415",
     "title": "<必发>世纪传奇号游轮·江山如此多娇·上海-重庆12天单船票",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -27753,7 +52417,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_226",
+    "id": "tour_416",
     "title": "<特惠>广州往返运城· 锦绣河南  仙境老君山 云台山.地坑院 双飞6日",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -27912,7 +52576,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_227",
+    "id": "tour_417",
     "title": "<特惠>广州往返太原  纯享山西 五台山+壶口瀑布+云冈石窟双飞6天（5-6月）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -28071,7 +52735,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_228",
+    "id": "tour_418",
     "title": "<特惠>广州往返运城  纯享山西 五台山+壶口瀑布+云冈石窟双飞6天（5-6月）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -28230,7 +52894,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_229",
+    "id": "tour_419",
     "title": "<遇见>广州往返太原 全景山西 五台山.平遥古城.云冈石窟双飞6天（一价全含）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -28389,7 +53053,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_230",
+    "id": "tour_420",
     "title": "<特惠>秦晋风云 双西联游  壶口瀑布＊云丘山＊波浪谷＊李家村双飞6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -28548,7 +53212,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_231",
+    "id": "tour_421",
     "title": "<特惠>广州往返运城 全景陕西 兵马俑、华山、明城墙 、壶口瀑布红色延安双飞6天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -28707,7 +53371,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_232",
+    "id": "tour_422",
     "title": "广州双飞海口5天4晚跟团游，四大5A：分界洲岛+大小洞天+天涯海角+神州半岛灯塔",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -28852,7 +53516,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_233",
+    "id": "tour_423",
     "title": "海南纯玩5天·横跨琼州海峡玩转海南！赠送《夜游三亚湾》+《红色娘子军》",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -28997,7 +53661,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_234",
+    "id": "tour_424",
     "title": "五天往返·玩转海南潮人必选①热带雨林河道浆板穿越 ②椰子采摘③港湾游+潮汐赶海 ",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -29100,7 +53764,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_235",
+    "id": "tour_425",
     "title": "<足迹海花岛>广州往返海南、海花岛、天涯海角、蜈支洲岛、南山观音、万宁双飞5天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -29245,7 +53909,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_236",
+    "id": "tour_426",
     "title": "【V2劲爆亚特兰蒂斯】广州海南双飞4天，一单一团，2人铁发",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -29376,7 +54040,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_237",
+    "id": "tour_427",
     "title": "C位亚特纯玩：广州双飞海南4天，亚特水世界/水族馆2选1+蜈支洲岛+南山+槟榔谷",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -29507,7 +54171,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_238",
+    "id": "tour_428",
     "title": "广州海南5天4晚，畅游海南精华大牌景区，赠送特色海鲜餐·美景+美食之旅",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -29652,7 +54316,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_239",
+    "id": "tour_429",
     "title": "广州双飞海南5天4晚跟团游，纯玩0购，赠送《夜游三亚湾》+欣大型表演红色娘子军",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -29797,7 +54461,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_240",
+    "id": "tour_430",
     "title": "广州海南双飞5天4晚跟团游，纯玩0购物0景购0擦边0必消，三亚升级5钻度假酒店",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -29942,7 +54606,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.288549"
   },
   {
-    "id": "tour_241",
+    "id": "tour_431",
     "title": "【西溪直通车】广州往返贺州西溪纯玩3天，连住2晚主楼A/B泡池豪双食足4餐",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -30059,7 +54723,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_242",
+    "id": "tour_432",
     "title": "【西溪直通车】广州往返贺州西溪纯玩3天，连住2晚悦泉居别墅，食足4个自助餐",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -30174,7 +54838,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_243",
+    "id": "tour_433",
     "title": "<惠.休闲>广州往返阳朔西街+月也侗寨+程阳八寨+梧州骑楼城+窑阜古镇 纯玩4天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -30303,7 +54967,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_244",
+    "id": "tour_434",
     "title": "【西溪直通车】广州往返贺州西溪纯玩3天，连住2晚悦泉居泡池豪双（ 悦泉居 4餐）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -30418,7 +55082,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_245",
+    "id": "tour_435",
     "title": "西溪森林温泉度假村-悦泉（949）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -30519,7 +55183,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_246",
+    "id": "tour_436",
     "title": "西溪森林温泉度假村-主楼（949）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -30620,7 +55284,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_247",
+    "id": "tour_437",
     "title": "<惠·休闲>富川神剑石林+神仙湖+虎头村+贺州紫云仙境+鱼鳞坝 纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -30735,7 +55399,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_248",
+    "id": "tour_438",
     "title": "广州往返广西金秀·大瑶山·盘王界、纯玩3天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -30850,7 +55514,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_249",
+    "id": "tour_439",
     "title": "ZM<悬崖书店>双动3天，悬崖书店+大龙潭+棉花天坑+长生洞+窑埠古镇+百里柳江",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -30965,7 +55629,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_250",
+    "id": "tour_440",
     "title": "WY<边关画廊>双动5天，明仕田园+德天瀑布+通灵大峡谷+百鸟岩+巴马长寿村",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -31110,7 +55774,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_251",
+    "id": "tour_441",
     "title": "<特惠>阿勒泰遇上伊犁 广州往返 阿勒泰+喀纳斯+那拉提+禾木+赛湖双飞一动8天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -31297,7 +55961,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_252",
+    "id": "tour_442",
     "title": "<经典>新疆▪疆韵喀纳斯CG 广州往返 乌市+禾木+赛湖+喀纳斯+吐鲁番双飞8天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -31484,7 +56148,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_253",
+    "id": "tour_443",
     "title": "＜经典＞北疆喀伊全景 广州往返 乌市+喀纳斯+禾木+赛里木湖+那拉提双飞一动8天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -31669,7 +56333,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_254",
+    "id": "tour_444",
     "title": "＜特惠＞南疆帕米尔 广州往返 喀什+白沙湖+西极+盘龙古道+班迪尔蓝湖双飞8天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -31854,7 +56518,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_255",
+    "id": "tour_445",
     "title": "<经典>新疆▪疆韵伊犁CG 那拉提+独库公路北段+赛里木湖+天山天池 双飞8天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -32041,7 +56705,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_256",
+    "id": "tour_446",
     "title": "<经典>粤疆辉映（芙蓉号）MX 乌鲁木齐+伊犁+阿勒泰+喀什+吐鲁番 专列18天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -32368,7 +57032,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_257",
+    "id": "tour_447",
     "title": "<必发>广州往返，漫享川西小团  四姑娘山、机场彩虹路、墨石公园 5天2-8人团",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -32513,7 +57177,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_258",
+    "id": "tour_448",
     "title": "【旅展自营SD】<泰非凡> 广州往返泰国曼谷芭提雅星梦岛0自费6天5晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -32672,7 +57336,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_259",
+    "id": "tour_449",
     "title": "【旅展自营SD】<纯玩><泰识叹>潮玩曼谷芭提雅·沙美岛广州往返6天5晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -32831,7 +57495,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_260",
+    "id": "tour_450",
     "title": "<两人成行>【自营SD】<臻享双岛3.0升级版>曼芭星梦岛&曼奈岛纯玩6天5晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -32990,7 +57654,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_261",
+    "id": "tour_451",
     "title": "【自营】<纯玩·泰新马>全景三飞十天联游 畅游泰国+新加坡+马来西亚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -33093,7 +57757,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_262",
+    "id": "tour_452",
     "title": "【旅展自营SD】<泰新马>广州往返泰新马三国全景三飞十天品质联游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -33196,7 +57860,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_263",
+    "id": "tour_453",
     "title": "【自营SD】纯玩><泰识叹>潮玩曼谷芭提雅·沙美岛纯玩6天5晚-广州往返AQ",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -33355,7 +58019,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_264",
+    "id": "tour_454",
     "title": "【旅展自营SD】【citywalk温德姆】广州往返泰国曼谷芭提雅星梦岛6天5晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -33514,7 +58178,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.289548"
   },
   {
-    "id": "tour_265",
+    "id": "tour_455",
     "title": "【自营SD】<纯玩>【泰臻悦】泰国曼谷芭提雅星梦岛6天5晚 广州往返",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -33673,7 +58337,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_266",
+    "id": "tour_456",
     "title": "旅展【自营SD】<纯臻普吉>广州南航往返 泰国普吉珊瑚岛+皇帝岛纯玩5天4晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -33818,7 +58482,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_267",
+    "id": "tour_457",
     "title": "旅展【自营SD】<泰FUNFUN 海岛专家>广州往返泰国普吉岛PP岛5天4晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -33963,7 +58627,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_268",
+    "id": "tour_458",
     "title": "【自营SD】<越·纯享B线>越南芽庄纯美5天*活力出海",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -34108,7 +58772,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_269",
+    "id": "tour_459",
     "title": "<纯美越南>广州往返胡志明美奈芽庄5天4晚跟团游(9C-CZ)",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -34253,7 +58917,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_270",
+    "id": "tour_460",
     "title": "【自营】<全景南北越>广州往返VN三飞胡志明美奈大叻芽庄河内下龙湾8天7晚跟团游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -34440,7 +59104,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_271",
+    "id": "tour_461",
     "title": "--星旅远洋邮轮【鼓浪屿号】 香港-越南真美港-香港 5 天 4 晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -34585,7 +59249,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_272",
+    "id": "tour_462",
     "title": "【自营】<纯享越南> 越航双飞广州往返胡志明美奈芽庄藩朗6天5晚跟团游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -34744,7 +59408,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_273",
+    "id": "tour_463",
     "title": "【自营SD】<山海梦境>南航广州往返芽庄大叻美奈胡志明6天5晚跟团游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -34903,7 +59567,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_274",
+    "id": "tour_464",
     "title": "爱达邮轮【魔都号】深圳-越南顺化-深圳 5天4晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -35048,7 +59712,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_275",
+    "id": "tour_465",
     "title": "爱达邮轮【魔都号】深圳-越南芽庄（过夜）-深圳 6天5晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -35207,7 +59871,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_276",
+    "id": "tour_466",
     "title": "爱达邮轮【魔都号】深圳-亚庇-麻拉-芽庄-香港 9天8晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -35408,7 +60072,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_277",
+    "id": "tour_467",
     "title": "【自营】<甄享越南>越航四飞广州往返越南胡志明富国岛河内6天5晚跟团游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -35567,7 +60231,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_278",
+    "id": "tour_468",
     "title": "<美东人文>美国东海岸深度纯玩13日-CX香港往返-深圳起止4-6",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -35824,7 +60488,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.290549"
   },
   {
-    "id": "tour_279",
+    "id": "tour_469",
     "title": " <美国 >细品黄石美国西部四城+黄石国家公园13日-OZ",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -36081,7 +60745,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_280",
+    "id": "tour_470",
     "title": "【美加墨3国联游】美国东西岸旧金山+加拿大东部4城+墨西哥蒂瓦纳18天3U7-9",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -36408,7 +61072,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_281",
+    "id": "tour_471",
     "title": "【环游大美加】美国东西岸+加拿大东西岸+墨西哥纯玩27天3U6",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -36861,7 +61525,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_282",
+    "id": "tour_472",
     "title": "【十全十美·大美加】美国东西岸+加拿大东西岸纯玩27天CA0623",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -37314,7 +61978,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_283",
+    "id": "tour_473",
     "title": "【美国名城胜景】美国东西岸七大名城+三大国家公园+大瀑布14天CX4-6",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -37585,7 +62249,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_284",
+    "id": "tour_474",
     "title": "【美国·夏威夷】多情夏威夷品质7天KE含23城联运4-10",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -37758,7 +62422,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_285",
+    "id": "tour_475",
     "title": "【北美环游】美国东西海岸+夏威夷+二进黄石国家公园22天（深圳往返）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -38141,7 +62805,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_286",
+    "id": "tour_476",
     "title": "【亲子研学】美东西藤校+博物馆+迪士尼+NASA14天UA0726",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -38412,7 +63076,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_287",
+    "id": "tour_477",
     "title": "<全美黄石纯玩>美东西8大名城+6国家公园秘境+旧金山+大瀑布18天3U4-6",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -38739,7 +63403,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_288",
+    "id": "tour_478",
     "title": "<中俄蒙全景>蒙古俄罗斯双国+西伯利亚大铁路双飞18日游（北京起止XY）(2)",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -39066,7 +63730,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_289",
+    "id": "tour_479",
     "title": "<浪漫双国>蒙古国俄罗斯贝加尔湖单夜卧+双飞11天（北京起止XY）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -39295,7 +63959,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_290",
+    "id": "tour_480",
     "title": "<经典日本>日本本州全景6天游·芝樱季(广州阪东)",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -39454,7 +64118,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_291",
+    "id": "tour_481",
     "title": "<经典日本>日本本州双城双自由纯玩6天·芝樱季（广州阪东）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -39613,7 +64277,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_292",
+    "id": "tour_482",
     "title": "<2026旅展预售>经典日本全景6天游（香港东阪）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -39772,7 +64436,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_293",
+    "id": "tour_483",
     "title": "<2026旅展预售>日本寻味本州全景双飞6天（广州东阪）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -39931,7 +64595,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_294",
+    "id": "tour_484",
     "title": "<2026旅展预售>日本寻味本州全景双飞6天（广州阪东）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -40090,7 +64754,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_295",
+    "id": "tour_485",
     "title": "<畅游日本>旬味日本全餐6天·芝樱季（广州阪东)",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -40249,7 +64913,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_296",
+    "id": "tour_486",
     "title": "<经典日本>嗨fun本州6天全景游（广州阪东）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -40408,7 +65072,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_297",
+    "id": "tour_487",
     "title": "<畅游日本>旬味日本食全食美全餐·芝樱季双飞6天（广州东阪）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -40567,7 +65231,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_298",
+    "id": "tour_488",
     "title": "<奇幻巴厘>广州南航往返巴厘岛纯玩6天5晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -40726,7 +65390,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.291450"
   },
   {
-    "id": "tour_299",
+    "id": "tour_489",
     "title": "<奇幻巴厘>广州南航往返巴厘岛纯玩6天4晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -40885,7 +65549,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_300",
+    "id": "tour_490",
     "title": "【自营SD】<寻梦海豚湾>广州南航往返巴厘岛纯玩6天4晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -41044,7 +65708,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_301",
+    "id": "tour_491",
     "title": "<BB>LOVE 巴厘 广州南航直飞纯玩6天5晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -41203,7 +65867,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_302",
+    "id": "tour_492",
     "title": "B线：塞武瀑布&布罗莫火山&伊真火山&罗威纳追海豚&佩尼达岛-七天六晚广州起止",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -41306,7 +65970,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_303",
+    "id": "tour_493",
     "title": "A线：塞武瀑布&布罗莫火山&罗威纳追海豚&佩尼达岛-七天六晚广州起止（巴进泗出）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -41407,7 +66071,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_304",
+    "id": "tour_494",
     "title": "【自营】<阿雅娜之恋>印尼巴厘6天4晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -41566,7 +66230,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_305",
+    "id": "tour_495",
     "title": "<英国花季>魔法庄园·英格兰+苏格兰+湖区纯玩10天（深圳）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -41781,7 +66445,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_306",
+    "id": "tour_496",
     "title": "诺唯真之星号 穿越北海英伦风情与挪威冰岛自然奇观之旅3国17日英国+挪威+冰岛",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -42094,7 +66758,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_307",
+    "id": "tour_497",
     "title": "<英国+爱尔兰>英爱白崖·湖区+白崖一价全含12天（广州，4-6月）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -42337,7 +67001,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_308",
+    "id": "tour_498",
     "title": "冠达邮轮安妮女王号 英国+爱尔兰环岛巡礼深度2国16天",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -42636,7 +67300,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_309",
+    "id": "tour_499",
     "title": "诺唯真天空号 英爱经典环岛16日英格兰+苏格兰+北爱尔兰+爱尔兰",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -42935,7 +67599,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_310",
+    "id": "tour_500",
     "title": "<中西欧>德法瑞意+铁力士雪山+五渔村13天（深圳往返）-2026年",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -43192,7 +67856,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_311",
+    "id": "tour_501",
     "title": "<中西欧>纯玩法瑞意+少女峰+左岸徒步11天（深圳往返罗马/巴黎）-2026年",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -43421,7 +68085,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_312",
+    "id": "tour_502",
     "title": "0626MSC地中海欧罗巴号西地中海经典12日游",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -43664,7 +68328,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_313",
+    "id": "tour_503",
     "title": "马赛--戛纳接送",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -43767,7 +68431,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_314",
+    "id": "tour_504",
     "title": "<东西欧联游> 十一国全景大联游14天（HU深圳往返维也纳入-布鲁塞尔出）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -44038,7 +68702,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_315",
+    "id": "tour_505",
     "title": "【中西欧】法瑞德3国10天深圳往返(铁力士雪山+奔驰博物馆+巴黎一天自由活动)",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -44253,7 +68917,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_316",
+    "id": "tour_506",
     "title": "<东西欧联游> 十一国全景大联游14天（HU深圳维也纳入-布鲁塞尔出）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -44524,7 +69188,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.292445"
   },
   {
-    "id": "tour_317",
+    "id": "tour_507",
     "title": "<中西欧6国>德法荷比瑞卢+全含餐10天（CZ广州-法兰克福）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -44739,7 +69403,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_318",
+    "id": "tour_508",
     "title": "丽星邮轮【领航星号】香港-公海-香港三天两晚",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -44842,7 +69506,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_319",
+    "id": "tour_509",
     "title": "<优享品质系列>香港市区观光1天游（1线3钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -44929,7 +69593,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_320",
+    "id": "tour_510",
     "title": "<优享品质系列>香港2天（市区观光+自由活动）（3线3钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45030,7 +69694,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_321",
+    "id": "tour_511",
     "title": "<优享品质系列>香港3天（市区观光+自由活动+自由活动）（5线3钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45145,7 +69809,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_322",
+    "id": "tour_512",
     "title": "<优享纯玩DFS系列>香港2天（市区观光+香港海洋公园）（11线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45248,7 +69912,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_323",
+    "id": "tour_513",
     "title": "<优享纯玩DFS系列>香港2天（市区观光+香港迪士尼）（15线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45351,7 +70015,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_324",
+    "id": "tour_514",
     "title": "<优享纯玩系列> 香港市区观光1天游（01线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45438,7 +70102,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_325",
+    "id": "tour_515",
     "title": "<优享纯玩观光系列>香港2天（市区观光+自由活动）（3线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45539,7 +70203,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_326",
+    "id": "tour_516",
     "title": "<优享纯玩观光系列>香港3天（市区观光+自由活动+自由活动）（5线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45654,7 +70318,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_327",
+    "id": "tour_517",
     "title": "<优享纯玩DFS>广州出发香港3天（香港市观光+迪士尼＋海洋公园）（37线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45771,7 +70435,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_328",
+    "id": "tour_518",
     "title": "<优享纯玩DFS> 港澳3天（市区观光+香港海洋公园＋澳门市区）（13线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45888,7 +70552,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.293446"
   },
   {
-    "id": "tour_329",
+    "id": "tour_519",
     "title": "<优享品质系列>港澳2天（香港观光+澳门观光）（7线3钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -45989,7 +70653,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_330",
+    "id": "tour_520",
     "title": "<优享品质系列>港澳3天（香港观光+自由活动+澳门观光）（9线3钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -46104,7 +70768,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_331",
+    "id": "tour_521",
     "title": "<优享纯玩观光系列>港澳2天（香港观光+澳门观光）（7线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -46205,7 +70869,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_332",
+    "id": "tour_522",
     "title": "<优享纯玩观光系列>港澳3天（香港观光+自由+澳门观光（9线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -46322,7 +70986,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_333",
+    "id": "tour_523",
     "title": "<优享品质系列>港澳4天（香港市区+迪士尼＋海洋公园＋澳门市区）（38线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -46453,7 +71117,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_334",
+    "id": "tour_524",
     "title": "<优享纯玩DFS>港澳3天（市区观光+香港迪士尼＋澳门市区）（17线4钻）",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -46570,7 +71234,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_335",
+    "id": "tour_525",
     "title": "【全含餐】香港昂坪360+澳门夜景 港澳观光三日游（港澳各1晚酒店）YA08",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -46673,7 +71337,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_336",
+    "id": "tour_526",
     "title": "【全含餐】香港昂坪360+澳门夜景 港澳观光四日游（香港2晚+澳门1晚）YA13",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -46776,7 +71440,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_337",
+    "id": "tour_527",
     "title": "【45人中团】港澳快活纯玩2天 KG06",
     "source": "康辉",
     "sourceLogo": "/icons/康辉.png",
@@ -46877,7 +71541,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_338",
+    "id": "tour_528",
     "title": "已成团！99元起！耀杰领队！周五5.8【秦汉古道11公里】徒步探秘“最有内涵的古道”-阳山千年秦汉古道 广东·清远 05/08-05/08",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -46978,7 +71642,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_339",
+    "id": "tour_529",
     "title": "已成团！109元起！星玥领队！周五5.8【杜步古道15公里】仰观亚洲第一高架，行走阳山小桂林探寻神秘盆地古村 广东·清远 05/08-05/08",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47079,7 +71743,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_340",
+    "id": "tour_530",
     "title": "即将成团！89元起！张德帅领队！周五5.8【古水河全程22公里】古水河徒步穿越十里竹海，漫步古水画廊~ 广东·肇庆 05/08-05/08",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47180,7 +71844,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.295448"
   },
   {
-    "id": "tour_341",
+    "id": "tour_531",
     "title": "即将成团！79元起！英俊领队！周五5.8【羚羊峡9公里】羚羊峡古栈道徒步，赏峡谷风光，品西江鲜鱼 广东·肇庆 05/08-05/08",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47281,7 +71945,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_342",
+    "id": "tour_532",
     "title": "即将成团！9元起！小刘领队！周五5.8【龙渔线13公里】广州市内经典的徒步拉练路线 广东·广州 05/08-05/08",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47382,7 +72046,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_343",
+    "id": "tour_533",
     "title": "即将成团！109元起！周二5.12【梅子坪古道9公里】阳山沙磅穿英德大湾梅子坪 广东·清远 05/12-05/12",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47483,7 +72147,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_344",
+    "id": "tour_534",
     "title": "即将成团！109元起！周二5.12【秦汉古道11公里】徒步探秘“最有内涵的古道”-阳山千年秦汉古道 广东·清远 05/12-05/12",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47584,7 +72248,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_345",
+    "id": "tour_535",
     "title": "即将成团！79元起！周二5.12【13洞探险7公里】佛山西樵山探洞 广东·佛山 05/12-05/12",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47685,7 +72349,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_346",
+    "id": "tour_536",
     "title": "即将成团！草绿了！109元起！周二5.12【大南山13公里】大南山芦苇草原，广东版\"小武功山\" 广东·惠州 05/12-05/12",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47786,7 +72450,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_347",
+    "id": "tour_537",
     "title": "即将成团！9元起！周二5.12【暹牛线12公里】广州市内经典拉练线路 广东·广州 05/12-05/12",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47887,7 +72551,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_348",
+    "id": "tour_538",
     "title": "成团！周六5.9晚-5.10【虐线黄梅雪后13公里】四峰连穿，粤北天上草原广东十大经典户外线 广东·韶关 05/09-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -47988,7 +72652,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_349",
+    "id": "tour_539",
     "title": "即将成团！草已绿！259元起！周五5.8晚-5.10【武功山精华20公里】穿越云中草原日出云海星空 江西·萍乡 05/08-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48089,7 +72753,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_350",
+    "id": "tour_540",
     "title": "即将成团！特价359元！周六5.9-5.10【三门岛露营】观星空 玩转昔日禁地：浮潜+桨板+赶海 广东·惠州 05/09-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48190,7 +72854,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_351",
+    "id": "tour_541",
     "title": "即将成团！周六5.9-5.10【赤坎古镇2日】沉浸式体验赤坎古镇、百年烟花秀、共赏百年好戏、畅玩黑沙滩 广东·江门 05/09-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48291,7 +72955,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_352",
+    "id": "tour_542",
     "title": "成团！178元起！周六5.9晚-5.10【虐线-龙斗峰15公里】龙斗峰广东第一险峰K2 广东·韶关 05/09-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48392,7 +73056,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_353",
+    "id": "tour_543",
     "title": "即将成团！周六5.9-5.10【东平洲露营】千里江山图/东平洲7公里环岛徒步 香港 05/09-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48493,7 +73157,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_354",
+    "id": "tour_544",
     "title": "即将成团！198元起！周六5.9晚-5.10 【夜登江西齐云山15公里】赣南第一高峰-齐云山登山 江西·赣州 05/09-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48594,7 +73258,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_355",
+    "id": "tour_545",
     "title": "即将成团！5.9晚-5.10【夜爬天堂岭】天鹅塘-雷打石-天堂岭，打卡广东第二高峰“天堂岭” 湖南·郴州 05/09-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48695,7 +73359,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_356",
+    "id": "tour_546",
     "title": "即将成团！特价198元起！周六5.9晚-5.10【特种兵之夜登三官山15公里】粤西“武功山” 观星空 广东·茂名 05/09-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48796,7 +73460,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_357",
+    "id": "tour_547",
     "title": "即将成团！特价238元起！周六5.9-5.10【轻装麦径20公里】破边洲+香港麦径一二段 香港 05/09-05/10",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48897,7 +73561,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_358",
+    "id": "tour_548",
     "title": "即将成团！周六5.16-5.17【汽车·郴州2天】行摄碧水丹霞高椅岭、雾漫小东江、夜游裕后街 湖南·郴州 05/16-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -48998,7 +73662,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_359",
+    "id": "tour_549",
     "title": "即将成团！特价238元起！周六5.16-5.17【轻装麦径20公里】破边洲+香港麦径一二段 香港 05/16-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -49099,7 +73763,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_360",
+    "id": "tour_550",
     "title": "即将成团！周六5.16-5.17【宝藏离岛东龙洲】强推！！香港绝美宝藏离岛，轻装出行，打卡香港第一泳滩 香港 05/16-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -49200,7 +73864,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_361",
+    "id": "tour_551",
     "title": "即将成团！周六5.16-5.17【海陵岛精华游】北洛秘境无边际泳池+马尾岛日落赶海+出海捕鱼 广东·阳江 05/16-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -49301,7 +73965,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.296447"
   },
   {
-    "id": "tour_362",
+    "id": "tour_552",
     "title": "即将成团！178元起！周六5.16晚-5.17【虐线-龙斗峰15公里】龙斗峰广东第一险峰K2 广东·韶关 05/16-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -49402,7 +74066,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_363",
+    "id": "tour_553",
     "title": "即将成团！198元起！周六5.16-5.17【夜登江西齐云山15公里】赣南第一高峰-齐云山登山 江西·赣州 05/16-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -49503,7 +74167,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_364",
+    "id": "tour_554",
     "title": "即将成团！特价158元起！周六5.16晚-5.17【夜爬大南山11公里】日出云海，惠东大南山芦苇草原 广东·惠州 05/16-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -49604,7 +74268,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_365",
+    "id": "tour_555",
     "title": "即将成团！！特价198起！5.16-5.17【虐线—夜登酃峰】登湖南第一峰 看云巅草甸云海 湖南·株洲 05/16-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -49705,7 +74369,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_366",
+    "id": "tour_556",
     "title": "即将成团！339元起！周五5.15晚-5.17【阳朔精华游+黄姚古镇】漓江+老寨山+兴坪古镇+十里画廊 广西·桂林 05/15-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -49806,7 +74470,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_367",
+    "id": "tour_557",
     "title": "即将成团！周六5.16晚-5.17【虐线黄梅雪后13公里】四峰连穿，粤北天上草原广东十大经典户外线 广东·韶关 05/16-05/17",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -49907,7 +74571,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_368",
+    "id": "tour_558",
     "title": "即将成团！79元起！周六5.9【丫髻山10公里】登中山小华山-丫髻山 广东·中山 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50008,7 +74672,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_369",
+    "id": "tour_559",
     "title": "已成团！59元起！周六5.9【增城牛牯嶂11公里】登增城第一峰 广东·广州 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50109,7 +74773,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_370",
+    "id": "tour_560",
     "title": "即将成团！99元起！周六5.9【梅子坪穿江英古道21公里】一次性享受双历史著名古道穿越 广东·清远 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50210,7 +74874,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_371",
+    "id": "tour_561",
     "title": "已成团！89元起！周六5.9【莫六公山8公里】广东醉美山脊线，俯瞰英西峰林之壮美 广东·清远 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50311,7 +74975,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_372",
+    "id": "tour_562",
     "title": "已成团！草绿了！99元起！周六5.9【大南山13公里】大南山芦苇草原，广东版\"小武功山\" 广东·惠州 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50412,7 +75076,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_373",
+    "id": "tour_563",
     "title": "2车已成团！99元起！周六5.9【梅子坪古道9公里】阳山沙磅穿英德大湾梅子坪 广东·清远 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50513,7 +75177,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_374",
+    "id": "tour_564",
     "title": "即将成团！79元起！周六5.9【虎坑徒步17公里】广东小漓江，江风 + 森林 + 古栈道三重治愈 广东·肇庆 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50614,7 +75278,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_375",
+    "id": "tour_565",
     "title": "2车即将成团！79元起！周六5.9【水灵谷】溯溪戏水泡潭、清凉避暑、观瀑 广东·清远 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50715,7 +75379,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_376",
+    "id": "tour_566",
     "title": "即将成团！49元起！周六5.9【星溪线8公里】徒步星溪线+品尝特色竹筒饭 广东·广州 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50816,7 +75480,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_377",
+    "id": "tour_567",
     "title": "即将成团！69元起！周六5.9【增城二龙山环线24公里】穿越二龙山原始生态森林，探寻自然生态景观 广东·广州 05/09-05/09",
     "source": "暴走村",
     "sourceLogo": "/icons/暴走村.png",
@@ -50917,7 +75581,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_378",
+    "id": "tour_568",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51020,7 +75684,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_379",
+    "id": "tour_569",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51123,7 +75787,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_380",
+    "id": "tour_570",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51226,7 +75890,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_381",
+    "id": "tour_571",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51329,7 +75993,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_382",
+    "id": "tour_572",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51432,7 +76096,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_383",
+    "id": "tour_573",
     "title": "【沙巴自由行】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51535,7 +76199,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_384",
+    "id": "tour_574",
     "title": "【仙本那自由行】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51638,7 +76302,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.297448"
   },
   {
-    "id": "tour_385",
+    "id": "tour_575",
     "title": "【尚·经典】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51741,7 +76405,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_386",
+    "id": "tour_576",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51844,7 +76508,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_387",
+    "id": "tour_577",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -51947,7 +76611,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_388",
+    "id": "tour_578",
     "title": "【尚·休闲】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52050,7 +76714,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_389",
+    "id": "tour_579",
     "title": "【尚·博览】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52153,7 +76817,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_390",
+    "id": "tour_580",
     "title": "【周末 Plus】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52256,7 +76920,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_391",
+    "id": "tour_581",
     "title": "【尚·海滩】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52357,7 +77021,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_392",
+    "id": "tour_582",
     "title": "【尚·美食】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52458,7 +77122,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_393",
+    "id": "tour_583",
     "title": "【尚·美食】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52559,7 +77223,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_394",
+    "id": "tour_584",
     "title": "【岭南木棉红·走读广州】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52660,7 +77324,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_395",
+    "id": "tour_585",
     "title": "【典·生态】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52761,7 +77425,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_396",
+    "id": "tour_586",
     "title": "【尚·休闲】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52864,7 +77528,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_397",
+    "id": "tour_587",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -52967,7 +77631,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_398",
+    "id": "tour_588",
     "title": "【尚·温泉】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53068,7 +77732,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_399",
+    "id": "tour_589",
     "title": "【颂·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53171,7 +77835,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_400",
+    "id": "tour_590",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53274,7 +77938,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_401",
+    "id": "tour_591",
     "title": "【颂·全景】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53377,7 +78041,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_402",
+    "id": "tour_592",
     "title": "【尚·全景】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53480,7 +78144,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_403",
+    "id": "tour_593",
     "title": "【尚·深度】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53583,7 +78247,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_404",
+    "id": "tour_594",
     "title": "【畅玩·一家一团】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53686,7 +78350,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_405",
+    "id": "tour_595",
     "title": "【畅玩·一家一团】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53789,7 +78453,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_406",
+    "id": "tour_596",
     "title": "【爆款抢购 ·一家一团】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53892,7 +78556,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_407",
+    "id": "tour_597",
     "title": "【畅玩·一家一团】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -53995,7 +78659,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_408",
+    "id": "tour_598",
     "title": "【轻奢·一家一团】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -54098,7 +78762,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_409",
+    "id": "tour_599",
     "title": "【典·全景】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -54201,7 +78865,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_410",
+    "id": "tour_600",
     "title": "【典·休闲】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -54302,7 +78966,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_411",
+    "id": "tour_601",
     "title": "【福见蓝眼泪】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -54405,7 +79069,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.298447"
   },
   {
-    "id": "tour_412",
+    "id": "tour_602",
     "title": "【畅玩·一家一团】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -54508,7 +79172,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_413",
+    "id": "tour_603",
     "title": "【典·全景】",
     "source": "广之旅",
     "sourceLogo": "/icons/广.png",
@@ -54611,7 +79275,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_414",
+    "id": "tour_604",
     "title": "【东部时光】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -54714,7 +79378,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_415",
+    "id": "tour_605",
     "title": "【十全十美】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -54817,7 +79481,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_416",
+    "id": "tour_606",
     "title": "【全景精华】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -54920,7 +79584,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_417",
+    "id": "tour_607",
     "title": "【全景深度】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55023,7 +79687,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_418",
+    "id": "tour_608",
     "title": "【加拿大·天穹阔】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55126,7 +79790,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_419",
+    "id": "tour_609",
     "title": "【东西岸-CA北起深止-免费全国联运】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55229,7 +79893,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_420",
+    "id": "tour_610",
     "title": "【中旅1号】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55332,7 +79996,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_421",
+    "id": "tour_611",
     "title": "【十全十美·纵览美加】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55435,7 +80099,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_422",
+    "id": "tour_612",
     "title": "【全景美国】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55538,7 +80202,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_423",
+    "id": "tour_613",
     "title": "【全景深度·奇迹黄石】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55641,7 +80305,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_424",
+    "id": "tour_614",
     "title": "【全景深度·奇迹黄石】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55744,7 +80408,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_425",
+    "id": "tour_615",
     "title": "【北美三国联游】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55847,7 +80511,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_426",
+    "id": "tour_616",
     "title": "【美国全景黄石】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -55950,7 +80614,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_427",
+    "id": "tour_617",
     "title": "【探秘黄石 天空之镜】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56053,7 +80717,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_428",
+    "id": "tour_618",
     "title": "【情迷加勒比】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56156,7 +80820,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_429",
+    "id": "tour_619",
     "title": "【情迷加勒比升级版】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56259,7 +80923,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_430",
+    "id": "tour_620",
     "title": "【中旅1号】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56362,7 +81026,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_431",
+    "id": "tour_621",
     "title": "【情迷加勒比】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56465,7 +81129,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_432",
+    "id": "tour_622",
     "title": "【南美五国+智利品酒】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56568,7 +81232,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_433",
+    "id": "tour_623",
     "title": "【南美五国+复活节岛】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56671,7 +81335,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_434",
+    "id": "tour_624",
     "title": "【中南美九国+智利品酒】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56774,7 +81438,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_435",
+    "id": "tour_625",
     "title": "【南美五国】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56877,7 +81541,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_436",
+    "id": "tour_626",
     "title": "【亚马逊探险邮轮】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -56980,7 +81644,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_437",
+    "id": "tour_627",
     "title": "【加勒比-HU北京出发】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -57083,7 +81747,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.299447"
   },
   {
-    "id": "tour_438",
+    "id": "tour_628",
     "title": "【加勒比-HU北京往返】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -57186,7 +81850,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_439",
+    "id": "tour_629",
     "title": "【庞洛邮轮 单船票】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -57289,7 +81953,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_440",
+    "id": "tour_630",
     "title": "【非洲南部】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -57392,7 +82056,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_441",
+    "id": "tour_631",
     "title": "【非洲南部】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -57495,7 +82159,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_442",
+    "id": "tour_632",
     "title": "【非洲东部】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -57598,7 +82262,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_443",
+    "id": "tour_633",
     "title": "【非洲东部】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -57701,7 +82365,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_444",
+    "id": "tour_634",
     "title": "【蓝色童话】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -57804,7 +82468,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_445",
+    "id": "tour_635",
     "title": "【蓝钻土耳其】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -57907,7 +82571,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_446",
+    "id": "tour_636",
     "title": "【格鲁吉亚一地深度7天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -58080,7 +82744,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_447",
+    "id": "tour_637",
     "title": "【浪漫土耳其】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -58183,7 +82847,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_448",
+    "id": "tour_638",
     "title": "【北欧特惠】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -58286,7 +82950,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_449",
+    "id": "tour_639",
     "title": "【南欧 特惠】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -58389,7 +83053,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_450",
+    "id": "tour_640",
     "title": "【西欧 夏季 暑假】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -58492,7 +83156,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_451",
+    "id": "tour_641",
     "title": "【金牌南欧-热情西葡·经典巡游】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -58595,7 +83259,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_452",
+    "id": "tour_642",
     "title": "【西欧 欧洲九国】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -58698,7 +83362,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_453",
+    "id": "tour_643",
     "title": "【盛世精选】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -58801,7 +83465,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_454",
+    "id": "tour_644",
     "title": "【北欧 冰河世纪】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -58904,7 +83568,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_455",
+    "id": "tour_645",
     "title": "【北欧 劲爆双峡湾】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59007,7 +83671,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_456",
+    "id": "tour_646",
     "title": "【东欧 劲爆特价】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59110,7 +83774,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_457",
+    "id": "tour_647",
     "title": "【南欧 劲爆西葡】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59213,7 +83877,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_458",
+    "id": "tour_648",
     "title": "【英爱 醉美英伦】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59316,7 +83980,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_459",
+    "id": "tour_649",
     "title": "【东欧 特价免签巴尔干半岛】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59419,7 +84083,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_460",
+    "id": "tour_650",
     "title": "【南欧特价】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59522,7 +84186,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_461",
+    "id": "tour_651",
     "title": "【南欧特价】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59625,7 +84289,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_462",
+    "id": "tour_652",
     "title": "【6-9月-澳新联游】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59728,7 +84392,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_463",
+    "id": "tour_653",
     "title": "【7-9月澳洲名城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59831,7 +84495,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.300448"
   },
   {
-    "id": "tour_464",
+    "id": "tour_654",
     "title": "【暑假-微研学】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -59934,7 +84598,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_465",
+    "id": "tour_655",
     "title": "【7-9月澳洲双城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60037,7 +84701,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_466",
+    "id": "tour_656",
     "title": "【7-10月澳洲全景】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60140,7 +84804,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_467",
+    "id": "tour_657",
     "title": "【7-10月新西兰牧场游】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60243,7 +84907,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_468",
+    "id": "tour_658",
     "title": "【6-10月新西兰寻鲜季】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60344,7 +85008,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_469",
+    "id": "tour_659",
     "title": "【7-10月新西兰环岛】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60447,7 +85111,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_470",
+    "id": "tour_660",
     "title": "【7-10月新西兰观鲸游】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60550,7 +85214,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_471",
+    "id": "tour_661",
     "title": "【4-6月-澳新联游】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60653,7 +85317,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_472",
+    "id": "tour_662",
     "title": "【5-8月】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60756,7 +85420,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_473",
+    "id": "tour_663",
     "title": "【皇牌玩家】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60859,7 +85523,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_474",
+    "id": "tour_664",
     "title": "【纯臻泰国】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -60962,7 +85626,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_475",
+    "id": "tour_665",
     "title": "【东南亚浪迹三国】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61065,7 +85729,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_476",
+    "id": "tour_666",
     "title": "【超值新马】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61168,7 +85832,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_477",
+    "id": "tour_667",
     "title": "【一起趣野·玩转南洋】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61271,7 +85935,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_478",
+    "id": "tour_668",
     "title": "【双国游.海岛荟萃】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61374,7 +86038,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_479",
+    "id": "tour_669",
     "title": "【双城揽美】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61477,7 +86141,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_480",
+    "id": "tour_670",
     "title": "【悦享 纯玩】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61580,7 +86244,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_481",
+    "id": "tour_671",
     "title": "【马来情缘，榴莲飘香】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61683,7 +86347,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_482",
+    "id": "tour_672",
     "title": "【日本轻井泽】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61786,7 +86450,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_483",
+    "id": "tour_673",
     "title": "【日本乐享九州】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61889,7 +86553,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_484",
+    "id": "tour_674",
     "title": "【日本关东无尽夏】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -61992,7 +86656,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_485",
+    "id": "tour_675",
     "title": "【私享•轻奢海岛】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -62095,7 +86759,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_486",
+    "id": "tour_676",
     "title": "【首尔南怡岛漫游】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -62198,7 +86862,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_487",
+    "id": "tour_677",
     "title": "【首尔潮玩韩都】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -62301,7 +86965,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_488",
+    "id": "tour_678",
     "title": "【韩国·悦玩济州】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -62404,7 +87068,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_489",
+    "id": "tour_679",
     "title": "【韩国·悦玩济州】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -62507,7 +87171,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.301448"
   },
   {
-    "id": "tour_490",
+    "id": "tour_680",
     "title": "【韩国·乐享济州】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -62610,7 +87274,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_491",
+    "id": "tour_681",
     "title": "【韩国·乐享济州】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -62713,7 +87377,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_492",
+    "id": "tour_682",
     "title": "【首尔春川双城时光】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -62816,7 +87480,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_493",
+    "id": "tour_683",
     "title": "【首釜双城仲夏之约】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -62919,7 +87583,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_494",
+    "id": "tour_684",
     "title": "【精品小团·首尔2日自由活动】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63022,7 +87686,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_495",
+    "id": "tour_685",
     "title": "【精品小团·首尔2日自由活动】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63125,7 +87789,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_496",
+    "id": "tour_686",
     "title": "【首釜双城仲夏之约】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63228,7 +87892,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_497",
+    "id": "tour_687",
     "title": "【春拾光韩遇三城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63331,7 +87995,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_498",
+    "id": "tour_688",
     "title": "【春拾光韩遇三城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63434,7 +88098,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_499",
+    "id": "tour_689",
     "title": "【首尔南怡岛漫游】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63537,7 +88201,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_500",
+    "id": "tour_690",
     "title": "【京彩时光-早对晚】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63640,7 +88304,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_501",
+    "id": "tour_691",
     "title": "【舒心游京城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63743,7 +88407,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_502",
+    "id": "tour_692",
     "title": "【仙螺跨海.塞上春来】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63846,7 +88510,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_503",
+    "id": "tour_693",
     "title": "【京彩时光-晚对晚】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -63949,7 +88613,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_504",
+    "id": "tour_694",
     "title": "【不带银两游北京】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64052,7 +88716,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_505",
+    "id": "tour_695",
     "title": "【奢游京城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64155,7 +88819,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_506",
+    "id": "tour_696",
     "title": "【扔掉钱包 游北京】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64258,7 +88922,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_507",
+    "id": "tour_697",
     "title": "【嗨翻环球影城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64361,7 +89025,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_508",
+    "id": "tour_698",
     "title": "【京城时光】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64464,7 +89128,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_509",
+    "id": "tour_699",
     "title": "【环球时光】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64567,7 +89231,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_510",
+    "id": "tour_700",
     "title": "【相约京城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64670,7 +89334,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_511",
+    "id": "tour_701",
     "title": "【京城住二环】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64773,7 +89437,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_512",
+    "id": "tour_702",
     "title": "【漫游京城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64876,7 +89540,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_513",
+    "id": "tour_703",
     "title": "【零钱游北京】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -64979,7 +89643,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.302448"
   },
   {
-    "id": "tour_514",
+    "id": "tour_704",
     "title": "【德巴仙境•深度纯玩】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -65082,7 +89746,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_515",
+    "id": "tour_705",
     "title": "【梦境黄姚•西溪温泉】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -65183,7 +89847,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_516",
+    "id": "tour_706",
     "title": "【醉美大漓江 · 真纯玩】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -65286,7 +89950,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_517",
+    "id": "tour_707",
     "title": "【醉美桂林 · 真纯玩】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -65389,7 +90053,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_518",
+    "id": "tour_708",
     "title": "【醉美大漓江 · 真纯玩】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -65492,7 +90156,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_519",
+    "id": "tour_709",
     "title": "【醉美桂林 · 真纯玩】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -65595,7 +90259,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_520",
+    "id": "tour_710",
     "title": "【纯美大漓江 · 真纯玩】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -65698,7 +90362,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_521",
+    "id": "tour_711",
     "title": "【星光龙脊•晴岚度假】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -65799,7 +90463,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_522",
+    "id": "tour_712",
     "title": "【浸泡苏杭】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -65902,7 +90566,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_523",
+    "id": "tour_713",
     "title": "【全民普陀（佛山飞）】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66005,7 +90669,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_524",
+    "id": "tour_714",
     "title": "【顶奢江南】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66108,7 +90772,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_525",
+    "id": "tour_715",
     "title": "【江南天花板】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66211,7 +90875,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_526",
+    "id": "tour_716",
     "title": "【宝藏浙东南&住进天空之城】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66314,7 +90978,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_527",
+    "id": "tour_717",
     "title": "【零钱旅游&住进风景里】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66417,7 +91081,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_528",
+    "id": "tour_718",
     "title": "【直飞浙东南】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66520,7 +91184,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_529",
+    "id": "tour_719",
     "title": "【从家门到烟雨江南&VIP尊享】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66623,7 +91287,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_530",
+    "id": "tour_720",
     "title": "【江南时光】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66726,7 +91390,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.303449"
   },
   {
-    "id": "tour_531",
+    "id": "tour_721",
     "title": "【臻品山东大连】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66829,7 +91493,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_532",
+    "id": "tour_722",
     "title": "【全民游山东大连】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -66932,7 +91596,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_533",
+    "id": "tour_723",
     "title": "【好客之旅】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67035,7 +91699,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_534",
+    "id": "tour_724",
     "title": "【经典山东】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67138,7 +91802,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_535",
+    "id": "tour_725",
     "title": "【中朝风情】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67241,7 +91905,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_536",
+    "id": "tour_726",
     "title": "【华夏东极】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67344,7 +92008,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_537",
+    "id": "tour_727",
     "title": "【长白•海岸线】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67447,7 +92111,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_538",
+    "id": "tour_728",
     "title": "【春日•邂逅东三省】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67550,7 +92214,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_539",
+    "id": "tour_729",
     "title": "【春日•边境巡礼】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67653,7 +92317,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_540",
+    "id": "tour_730",
     "title": "【丹东大连】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67756,7 +92420,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_541",
+    "id": "tour_731",
     "title": "【草原遇上北极光】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67859,7 +92523,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_542",
+    "id": "tour_732",
     "title": "【风情鸭绿江·中朝边境】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -67962,7 +92626,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_543",
+    "id": "tour_733",
     "title": "【风情鸭绿江·中朝边境】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68065,7 +92729,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_544",
+    "id": "tour_734",
     "title": "【私享·长白山语】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68168,7 +92832,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_545",
+    "id": "tour_735",
     "title": "【联游东三省】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68271,7 +92935,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_546",
+    "id": "tour_736",
     "title": "【长白•春日奇遇】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68374,7 +93038,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_547",
+    "id": "tour_737",
     "title": "【大东北全景】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68477,7 +93141,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.304449"
   },
   {
-    "id": "tour_548",
+    "id": "tour_738",
     "title": "【丹东大连】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68580,7 +93244,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_549",
+    "id": "tour_739",
     "title": "【悦东北•山水间】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68683,7 +93347,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_550",
+    "id": "tour_740",
     "title": "【纵横东三省·沈进哈出】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68786,7 +93450,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_551",
+    "id": "tour_741",
     "title": "【醉美延长线】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68889,7 +93553,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_552",
+    "id": "tour_742",
     "title": "【魅力海参崴】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -68992,7 +93656,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_553",
+    "id": "tour_743",
     "title": "【仙女湖+羊狮慕】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -69095,7 +93759,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_554",
+    "id": "tour_744",
     "title": "【夜宿庐山+婺女洲】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -69198,7 +93862,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_555",
+    "id": "tour_745",
     "title": "【夜宿望仙谷】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -69301,7 +93965,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_556",
+    "id": "tour_746",
     "title": "【仙谷环游记】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -69404,7 +94068,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_557",
+    "id": "tour_747",
     "title": "【秀美江西】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -69507,7 +94171,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_558",
+    "id": "tour_748",
     "title": "【千人放歌•颂长征】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -69610,7 +94274,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_559",
+    "id": "tour_749",
     "title": "【爱尚丽大香】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -69713,7 +94377,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_560",
+    "id": "tour_750",
     "title": "【云起洱畔•丽大泸】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -69816,7 +94480,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_561",
+    "id": "tour_751",
     "title": "【云起洱畔•丽大香】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -69919,7 +94583,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_562",
+    "id": "tour_752",
     "title": "【云起洱畔•丽大香D2】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70022,7 +94686,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_563",
+    "id": "tour_753",
     "title": "【臻品丽大香】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70125,7 +94789,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_564",
+    "id": "tour_754",
     "title": "【臻品丽大泸】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70228,7 +94892,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.305450"
   },
   {
-    "id": "tour_565",
+    "id": "tour_755",
     "title": "【嗨玩大理】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70331,7 +94995,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306449"
   },
   {
-    "id": "tour_566",
+    "id": "tour_756",
     "title": "【嗨玩泸沽湖】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70434,7 +95098,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_567",
+    "id": "tour_757",
     "title": "【嗨玩香格里拉】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70537,7 +95201,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_568",
+    "id": "tour_758",
     "title": "【嗨玩丽香泸】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70640,7 +95304,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_569",
+    "id": "tour_759",
     "title": "【嗨玩丽香泸】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70743,7 +95407,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_570",
+    "id": "tour_760",
     "title": "【云起丽大Z4】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70846,7 +95510,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_571",
+    "id": "tour_761",
     "title": "【直飞丽江 云起丽大Z1】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -70949,7 +95613,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_572",
+    "id": "tour_762",
     "title": "【爱尚云南】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71052,7 +95716,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_573",
+    "id": "tour_763",
     "title": "【昆进丽出 真品昆大丽香】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71155,7 +95819,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_574",
+    "id": "tour_764",
     "title": "【南航 爱在版纳 直飞版纳】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71258,7 +95922,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_575",
+    "id": "tour_765",
     "title": "【云起洱畔•昆大丽】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71361,7 +96025,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_576",
+    "id": "tour_766",
     "title": "【有风云南】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71464,7 +96128,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.306510"
   },
   {
-    "id": "tour_577",
+    "id": "tour_767",
     "title": "【走进楚地·诗画神恩】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71567,7 +96231,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307022"
   },
   {
-    "id": "tour_578",
+    "id": "tour_768",
     "title": "【全景恩施】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71670,7 +96334,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307022"
   },
   {
-    "id": "tour_579",
+    "id": "tour_769",
     "title": "【五星恩施】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71773,7 +96437,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307022"
   },
   {
-    "id": "tour_580",
+    "id": "tour_770",
     "title": "【楚峡悬味】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71876,7 +96540,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307022"
   },
   {
-    "id": "tour_581",
+    "id": "tour_771",
     "title": "【坐升船机游恩施】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -71979,7 +96643,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307022"
   },
   {
-    "id": "tour_582",
+    "id": "tour_772",
     "title": "【三峡升船机】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72082,7 +96746,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307022"
   },
   {
-    "id": "tour_583",
+    "id": "tour_773",
     "title": "【鄂西双壁·寻觅神恩】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72185,7 +96849,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307022"
   },
   {
-    "id": "tour_584",
+    "id": "tour_774",
     "title": "【臻品恩施-精品小团】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72288,7 +96952,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307022"
   },
   {
-    "id": "tour_585",
+    "id": "tour_775",
     "title": "【惠游恩施】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72391,7 +97055,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_586",
+    "id": "tour_776",
     "title": "【船游三峡·杜鹃映九湖】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72494,7 +97158,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_587",
+    "id": "tour_777",
     "title": "【全景恩施】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72597,7 +97261,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_588",
+    "id": "tour_778",
     "title": "【七星岩温德姆】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72698,7 +97362,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_589",
+    "id": "tour_779",
     "title": "【东莞小九寨】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72799,7 +97463,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_590",
+    "id": "tour_780",
     "title": "【增城1天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72886,7 +97550,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_591",
+    "id": "tour_781",
     "title": "【清远1天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -72973,7 +97637,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_592",
+    "id": "tour_782",
     "title": "【定南+河源3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -73088,7 +97752,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_593",
+    "id": "tour_783",
     "title": "【清远天樾王国酒店3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -73203,7 +97867,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_594",
+    "id": "tour_784",
     "title": "【贺州西溪森林温泉3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -73318,7 +97982,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_595",
+    "id": "tour_785",
     "title": "【韶关新丰翁山源温泉城3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -73433,7 +98097,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_596",
+    "id": "tour_786",
     "title": "【韶关坪石金鸡岭纯玩3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -73548,7 +98212,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_597",
+    "id": "tour_787",
     "title": "【新丰云天海温泉度假村3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -73663,7 +98327,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_598",
+    "id": "tour_788",
     "title": "【韶关新丰温德姆花园酒店纯玩3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -73778,7 +98442,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_599",
+    "id": "tour_789",
     "title": "【韶关丹霞山+珠玑古巷3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -73893,7 +98557,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_600",
+    "id": "tour_790",
     "title": "【英德宝墩湖3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74008,7 +98672,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_601",
+    "id": "tour_791",
     "title": "【品·连州连南】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74109,7 +98773,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.307533"
   },
   {
-    "id": "tour_602",
+    "id": "tour_792",
     "title": "【广州出发】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74210,7 +98874,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_603",
+    "id": "tour_793",
     "title": "【阳西沙扒湾直通车3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74325,7 +98989,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_604",
+    "id": "tour_794",
     "title": "【珠海长隆海洋王国2天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74426,7 +99090,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_605",
+    "id": "tour_795",
     "title": "【柳州•罗城•融水三城联游3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74541,7 +99205,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_606",
+    "id": "tour_796",
     "title": "【江门台山那琴半岛2天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74642,7 +99306,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_607",
+    "id": "tour_797",
     "title": "【江门台山赤坎古镇2天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74743,7 +99407,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_608",
+    "id": "tour_798",
     "title": "【佛山白天鹅采奕酒店2天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74844,7 +99508,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_609",
+    "id": "tour_799",
     "title": "【东平+阳江+阳春三地联游3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -74959,7 +99623,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_610",
+    "id": "tour_800",
     "title": "【佛山三水凤悦凤凰酒店2天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -75060,7 +99724,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_611",
+    "id": "tour_801",
     "title": "【阳江海陵岛2天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -75161,7 +99825,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_612",
+    "id": "tour_802",
     "title": "【湛江3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -75276,7 +99940,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_613",
+    "id": "tour_803",
     "title": "【韶关丹霞灵溪度假酒店3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -75391,7 +100055,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_614",
+    "id": "tour_804",
     "title": "【广西贺州纯玩3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -75506,7 +100170,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_615",
+    "id": "tour_805",
     "title": "【肇庆蓝钟森林温泉度假酒店3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -75621,7 +100285,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_616",
+    "id": "tour_806",
     "title": "【惠州龙门温泉直通车3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -75736,7 +100400,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_617",
+    "id": "tour_807",
     "title": "【龙江城戴斯】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -75837,7 +100501,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.308526"
   },
   {
-    "id": "tour_618",
+    "id": "tour_808",
     "title": "【惠州龙门直通车】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -75938,7 +100602,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_619",
+    "id": "tour_809",
     "title": "【惠州巽寮湾3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -76053,7 +100717,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_620",
+    "id": "tour_810",
     "title": "【深度游汕尾3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -76168,7 +100832,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_621",
+    "id": "tour_811",
     "title": "【东莞百花园1天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -76255,7 +100919,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_622",
+    "id": "tour_812",
     "title": "【深度游福建东山岛3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -76370,7 +101034,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_623",
+    "id": "tour_813",
     "title": "【梅州+河源3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -76485,7 +101149,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_624",
+    "id": "tour_814",
     "title": "【深度游惠州3天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -76600,7 +101264,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_625",
+    "id": "tour_815",
     "title": "【四湾两岛深度游】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -76701,7 +101365,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_626",
+    "id": "tour_816",
     "title": "【买一送一】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -76802,7 +101466,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_627",
+    "id": "tour_817",
     "title": "【广州出发】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -76903,7 +101567,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_628",
+    "id": "tour_818",
     "title": "【温泉直通车】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -77004,7 +101668,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_629",
+    "id": "tour_819",
     "title": "【温泉直通车】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -77105,7 +101769,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_630",
+    "id": "tour_820",
     "title": "【东莞美食纯玩1天】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -77192,7 +101856,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_631",
+    "id": "tour_821",
     "title": "【魅影潮汕·南澳岛】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -77293,7 +101957,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_632",
+    "id": "tour_822",
     "title": "【东莞丰泰花园酒店】",
     "source": "广东中旅",
     "sourceLogo": "/icons/广东中旅.png",
@@ -77394,7 +102058,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_633",
+    "id": "tour_823",
     "title": "<广州增城-从化2日游>住从化望谷温泉酒店、带私家温泉泡池、增城大丰门漂流、流溪河国家森林公园",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -77495,7 +102159,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_634",
+    "id": "tour_824",
     "title": "<清远1日游>包含古龙峡全程漂，含船游北江小三峡，千人出游，百人好评贴心服务，纯玩无购物",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -77582,7 +102246,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_635",
+    "id": "tour_825",
     "title": "<清远古龙峡漂流汽车2日游>东莞出发、漂国际漂流主赛道古龙峡漂流、银盏森林温泉、CS野战、农夫庄园看花海",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -77683,7 +102347,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.309527"
   },
   {
-    "id": "tour_636",
+    "id": "tour_826",
     "title": "<清远1日游>东莞往返，体验古龙峡全程漂，游北江小三峡，贴心导游服务，纯玩无购物",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -77770,7 +102434,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_637",
+    "id": "tour_827",
     "title": "<深圳西冲沙滩-杨梅坑1日游>快艇冲浪登情人岛、环海单车、海滨BBQ烧烤",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -77857,7 +102521,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_638",
+    "id": "tour_828",
     "title": "<南澳西冲1日游>八千人出游、好评达9成、快艇环岛、海边BBQ、海边戏水游玩",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -77944,7 +102608,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_639",
+    "id": "tour_829",
     "title": "<惠东2日游>住海滨温泉、温泉任泡、巽寮湾、海之星游艇、双月湾、海龟自然保护区、品一人一只鸡宴、海味霸王鸭",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78045,7 +102709,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_640",
+    "id": "tour_830",
     "title": "<清远2日游>（漂流季）清远黄腾峡勇士漂、新银盏温泉、葡萄任吃、欧风小镇、可升级挑战101米屋顶摩天轮",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78146,7 +102810,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_641",
+    "id": "tour_831",
     "title": "<清远1日游>全国首座空中盘旋1080度龙腾峡空中玻璃漂流、享受落差128米，时速78公里激情漂流",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78233,7 +102897,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_642",
+    "id": "tour_832",
     "title": "<清远2日游>龙腾峡玻璃漂流 首创瀑布玻璃桥漂流 刺激开漂、西班牙小镇屋顶摩天轮、清远鸡火锅任吃、尽享湿身体验",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78334,7 +102998,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_643",
+    "id": "tour_833",
     "title": "<河源巴士2日游>入住五星万绿湖美思威尔顿酒店、巴伐利亚黑森林乐园、镜花缘、美食休闲纯玩",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78435,7 +103099,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_644",
+    "id": "tour_834",
     "title": "<清远1日游>清远古龙峡云天波霸、纯玩无购物、西班牙风情小镇、挑战玻璃大峡谷",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78522,7 +103186,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_645",
+    "id": "tour_835",
     "title": "<西冲2日游>入住酒店、杨梅坑、大鹏所城、农庄趣味活动",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78623,7 +103287,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_646",
+    "id": "tour_836",
     "title": "<清远古龙峡漂流-天子山瀑布2日游>天子山音乐派对、泳池BBQ啤酒任何、古龙峡全程漂流、天子山瀑布、七彩云足浴、葡萄园任吃",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78724,7 +103388,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_647",
+    "id": "tour_837",
     "title": "<清远古龙峡2日游>纯玩无购物，体验清凉刺激的漂流**，享受无限次泡温泉，DIY农家乐，**CS野战，可参加玻璃桥活动",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78825,7 +103489,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_648",
+    "id": "tour_838",
     "title": "<惠州龙门温泉大观园度假村2日游>住南昆山温泉大观园酒店、享无限次温泉、欢乐水世界、昆山峡漂流、空中田园生态园、长津冰雪世界",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -78926,7 +103590,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_649",
+    "id": "tour_839",
     "title": "<清远古龙峡漂流-银盏温泉2日游>古龙峡飞龙全程漂、银盏森林温泉、牛鱼嘴、水晶弹野战、农家乐野炊、深圳东莞出发",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79027,7 +103691,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_650",
+    "id": "tour_840",
     "title": "<清远古龙峡2日游>古龙峡升级全程飞龙漂、挑战三项世界****的玻璃大峡谷云天波霸",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79128,7 +103792,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_651",
+    "id": "tour_841",
     "title": "<韶关云门山玻璃桥-百丈崖漂流2日游>云门山登1638级祥云梯、广东省首座全透明高空玻璃桥、禅景**漂百丈崖漂流、马坝人遗址狮子岩",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79229,7 +103893,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_652",
+    "id": "tour_842",
     "title": "<清远黄腾峡2日游>纯玩无购物，黄腾峡勇士漂流，国际4A级生态旅游区，抖音玻璃桥，泡温泉，CS，农家乐DIY，含矿泉水",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79330,7 +103994,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_653",
+    "id": "tour_843",
     "title": "<惠州亚婆角-融创海湾半岛3日游>住2晚海湾半岛度假酒店180度海景房、30层高空全海景餐厅自助早、十里私家沙滩",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79445,7 +104109,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.310526"
   },
   {
-    "id": "tour_654",
+    "id": "tour_844",
     "title": "<深圳西冲沙滩+较场尾+大鹏所城2日游>住西冲特色客栈、巴士往返",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79546,7 +104210,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_655",
+    "id": "tour_845",
     "title": "<潮州古城-汕头南澳岛动车2日游>游潮州古城、江滨长廊、甲第巷、韩文公祠、汕头南澳岛青澳湾，品正宗潮汕牛肉火锅",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79647,7 +104311,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_656",
+    "id": "tour_846",
     "title": "<清远2日游>玩转清泉湾高空漂流、梦幻水城、惊魂玻璃桥、任摘任食葡萄、入住景源艺术酒店/栢兰德金菱酒店",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79748,7 +104412,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_657",
+    "id": "tour_847",
     "title": "<韶关丹霞山+长老峰+南华寺2日游>世界遗产丹霞山、广东名寺南华寺，升级入住曹溪温泉花园别墅",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79849,7 +104513,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_658",
+    "id": "tour_848",
     "title": "<河源巴伐利亚2日游>巴伐利亚庄园、黑森林乐园泉、黄龙岩溶洞、5玻璃桥、客天下水晶温泉、恐龙水世界",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -79950,7 +104614,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_659",
+    "id": "tour_849",
     "title": "<清远英德宝墩湖湖山温泉度假村2日游>住网红酒店宝墩湖温泉度假村别墅、温泉、山泉水泳道、仙桥地下河溶洞、浈阳坊旅游小镇",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80051,7 +104715,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_660",
+    "id": "tour_850",
     "title": "<清远黄腾峡漂流汽车2日游>漂流霸主 黄腾峡勇士漂流畅玩水上乐园 CS野战、激情越野车 入住云海碱泉温泉酒店",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80152,7 +104816,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_661",
+    "id": "tour_851",
     "title": "<潮汕2日游>入住金德宝凯悦国际温泉酒店温泉激情冲浪浸泡夏日清凉温泉潮州古城韩文公祠地道潮汕牛肉火锅任吃宴动车2天",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80253,7 +104917,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_662",
+    "id": "tour_852",
     "title": "<潮州古城+紫莲森林度假村+汕头南澳岛3日游>动车往返、住南澳岛上海边酒店、潮州紫莲度假村，体验潮汕文化，品尝潮汕特色美食，国庆团期下单立减",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80370,7 +105034,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_663",
+    "id": "tour_853",
     "title": "<增城从化2日游>增城白水寨、从化望谷温泉小镇、独立温泉池、天适樱花园",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80471,7 +105135,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_664",
+    "id": "tour_854",
     "title": "<阳江2日游>阳江海陵岛、十里银滩、渔家乐游船、香家堡梦幻花世界",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80572,7 +105236,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_665",
+    "id": "tour_855",
     "title": "<江门佛山2日游>观凤仪里碉楼油菜花、泡纯真星泉温泉、顺德逢简水乡、南风古灶",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80673,7 +105337,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_666",
+    "id": "tour_856",
     "title": "<江门古兜2日游>恩平锦江温泉、采摘时令水果、凤仪里碉楼、双合油菜花海",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80774,7 +105438,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_667",
+    "id": "tour_857",
     "title": "<佛山2日游>梦里水乡百花园、三水金装卧佛、逢简水乡、清晖园、食滋补火锅宴、十二道锋味大盘鱼",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80875,7 +105539,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_668",
+    "id": "tour_858",
     "title": "<惠州2日游>中午出发懒人行程，宿舒适酒店，海滩夜晚BBQ，篝火晚会烟花秀，出海捕鱼自由活动无约束",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -80976,7 +105640,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_669",
+    "id": "tour_859",
     "title": "<巽寮湾2日游>海之星游艇、一支箭、蜡像馆、永记生态园赏花",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -81077,7 +105741,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_670",
+    "id": "tour_860",
     "title": "<罗浮山2日游>罗浮山、哈斯塔特小镇、那里花开",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -81178,7 +105842,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_671",
+    "id": "tour_861",
     "title": "<清远连州地下河-湟川三峡2日游>观看桃花、探秘5A景区连州地下河（洞中一日，世上千年）、船游湟川三峡瀑布群、品连州风味宴、入住金瑶峰度假村",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -81279,7 +105943,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_672",
+    "id": "tour_862",
     "title": "<清远-英德2日游>入住云海碱性温泉酒店、无限次温泉、无边际泳池、清泉湾花海玻璃桥、天子山瀑布、七彩云足浴、水晶弹野战",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -81380,7 +106044,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.311528"
   },
   {
-    "id": "tour_673",
+    "id": "tour_863",
     "title": "<珠海2日游>长隆海洋王国、大型烟花表演、圆明新园住长隆",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -81481,7 +106145,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_674",
+    "id": "tour_864",
     "title": "<惠州香溪古堡-龙门铁泉-奥地利小镇度假2日游>入住龙门汇都大酒店，浸泡龙门铁泉，含往返交通，含三正一早，游览那里花开主题公园",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -81582,7 +106246,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_675",
+    "id": "tour_865",
     "title": "<河源2日游>住五星万绿湖东方国际酒店、矿物汤泉、泳池、万绿湖镜花缘、万绿谷风景区",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -81683,7 +106347,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_676",
+    "id": "tour_866",
     "title": "<珠海长隆海洋王国2日游>浪漫情侣游，长隆海洋王国、横琴烟花汇演，圆明新园、石景山公园、野狸岛、情侣路",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -81784,7 +106448,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_677",
+    "id": "tour_867",
     "title": "<珠海长隆2日游>纯玩无购物，珠海长隆海洋王国，唯美梦幻海洋街，5D视觉**，烟花汇演， 圆明新园，观港珠澳大桥",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -81885,7 +106549,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_678",
+    "id": "tour_868",
     "title": "高铁韶关B线：云门山玻璃桥、曹角湾古村、小坑水库、经律论文化小镇、翡翠玉观音、花世界、生肖广场、蓝山源岭南东方温泉酒店，双高铁两晚五星温泉美食享受三天团",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -82002,7 +106666,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_679",
+    "id": "tour_869",
     "title": "<清远巴士2日游>九瀑探险森林王国、**CS野战、尽享温泉",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -82103,7 +106767,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_680",
+    "id": "tour_870",
     "title": "<韶关丹霞山-长老峰-曹溪温泉-南华寺2日游>住曹溪温泉度假村，览世界自然遗产（阴阳石），南华禅寺，韶关地标风采楼，",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -82204,7 +106868,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_681",
+    "id": "tour_871",
     "title": "<清远2日游>古龙峡漂流、静山湖大马戏、卡丁车/越野车、灯光节、DIY野炊",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -82305,7 +106969,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_682",
+    "id": "tour_872",
     "title": "<惠州龙门温泉直通车1晚2日游>入住依泉楼",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -82406,7 +107070,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_683",
+    "id": "tour_873",
     "title": "<海南三亚双飞5日游>萌娃/情侣精选0购物，3晚温德姆/红树林等+1晚海棠湾喜来登/万丽/万达文华，游呀诺达&南山&蜈支洲岛，奔驰接机/享私家沙滩",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -82551,7 +107215,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_684",
+    "id": "tour_874",
     "title": "<华东五市-乌镇-苏州园林-西湖双飞4日游>0购物，禅意拈花湾And西栅精品双客栈，50元餐标，舒心出游",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -82682,7 +107346,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_685",
+    "id": "tour_875",
     "title": "<洛阳牡丹-少林寺-龙门石窟高铁3日游>全程0购物店，走进千年古都，穿越牡丹花海",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -82799,7 +107463,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_686",
+    "id": "tour_876",
     "title": "<青海湖+茶卡盐湖+张掖丹霞+敦煌莫高窟双飞7日游>西北30人自营0购物，茶卡超长3H，5月团期车型升级稀缺陆地头等舱，深入祁连，可升级动车",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -82986,7 +107650,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_687",
+    "id": "tour_877",
     "title": "<桂林-阳朔-兴坪漓江-象鼻山-遇龙河-世外桃源-银子岩高铁3日游>深圳往返0自费/遇龙手撑竹筏/精致小团//豪餐盛景",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -83101,7 +107765,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_688",
+    "id": "tour_878",
     "title": "<张家界-天门山-黄龙洞-玻璃栈道-凤凰古城单飞6日游>张家界进长沙出,森林公园二次入园,30元/人高餐标,享牛气冲天宴,长沙住宿升级高端酒店",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -83260,7 +107924,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_689",
+    "id": "tour_879",
     "title": "<云南-昆明-大理-丽江双飞双动车6日游>两晚丽江金茂/1晚温泉酒店/5A石林/玉龙雪山大索/印象丽江/洱海吉普旅拍/省内动车免劳累",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -83419,7 +108083,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.312527"
   },
   {
-    "id": "tour_690",
+    "id": "tour_880",
     "title": "<成都-九寨沟-黄龙-都江堰-熊猫乐园双飞6日游>品途线路发班/品途专属团餐/川主寺升级2晚高标住宿/九寨沟闭园则更换牟尼沟和草原",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -83578,7 +108242,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_691",
+    "id": "tour_881",
     "title": "<新疆天池-可可托海-五彩滩-禾木-喀纳斯-魔鬼城-赛湖双飞9日游>网红双湖30人小团，1晚住禾木守望星空/晨曦，赠赛湖旅拍/享299元民族丝路秀",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -83779,7 +108443,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_692",
+    "id": "tour_882",
     "title": "<北京双飞6日游>誉满京城首游推荐，五星酒店连住，2大免1小，听德云社相声，深度畅游北京20大景点，品正宗宫廷风味宴，24H无忧接送",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -83938,7 +108602,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_693",
+    "id": "tour_883",
     "title": "<北京双飞5日游>（尾货）誉满京城首游推荐，****出游佳选，五星酒店连住2大免1小，听德云社相声品正宗宫廷风味宴，24H无忧接送享别样京城",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -84083,7 +108747,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_694",
+    "id": "tour_884",
     "title": "<云南昆明-大理-丽江三飞6日游>纯玩0购物/JEEP越野/花海旅拍含10张精修照片/雪山大索道/看印象丽江/5A石林/鲜花大床",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -84242,7 +108906,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_695",
+    "id": "tour_885",
     "title": "<郴州3日游>深圳往返，宿市区舒适酒店，一天自由活动，动可徒步登山早赏水雾，静可竹林洗肺船游东江，适合徒步、摄影爱好者，纯玩不进店",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -84357,7 +109021,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_696",
+    "id": "tour_886",
     "title": "<河南-郭亮-云台山-龙门石窟-少林寺-开封双飞5日游>放心爸妈游，25人内精致小团，体验挂壁公路，精选高档酒店，纯玩0购物，24H接机",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -84502,7 +109166,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_697",
+    "id": "tour_887",
     "title": "<云南-昆明-大理-丽江3飞6日游>昆明直飞丽江，两晚丽江金茂/1晚温泉酒店，5A石林/玉龙雪山冰川大索道/印象丽江，轻松出游",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -84661,7 +109325,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_698",
+    "id": "tour_888",
     "title": "<河南-云台山-龙门-少林寺-开封双飞4日游>25人精致小团，全程国际品牌Holiday inn，畅享恒温泳池，纯玩0购爸妈游",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -84792,7 +109456,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_699",
+    "id": "tour_889",
     "title": "<青海湖+茶卡盐湖+张掖+敦煌双飞8日游>纯玩0购/9人内小团，24H接送机/不用等人/自由度高/无忧西北环游**",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -84979,7 +109643,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_700",
+    "id": "tour_890",
     "title": "<成都-新都桥-稻城亚丁-海螺沟双飞8日游>纯玩0购物 入住3晚智选假日酒店/1晚稻城金珠大酒店 33人封顶 2次特色餐圣地祈福",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -85166,7 +109830,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_701",
+    "id": "tour_891",
     "title": "<贵州黄果树瀑布-荔波-西江-花溪湿地高铁5日游>专车专导0购物 观壮美大瀑布 赏世遗风情 探苗家文化",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -85311,7 +109975,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_702",
+    "id": "tour_892",
     "title": "<黄山+宏村+屯溪老街+上海双飞5日游>云海奇松/徽派建筑，1晚山顶双标/观日出，1晚五星，含105元正餐，纯玩0购物",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -85456,7 +110120,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_703",
+    "id": "tour_893",
     "title": "<北京-八达岭-故宫-颐和园-天坛双飞5日游>住连锁酒店 全年365天接送机场 参观华夏魔术城 增加圆明园 漫步老北京胡同 品尝烤鸭餐",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -85601,7 +110265,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_704",
+    "id": "tour_894",
     "title": "<韶山-张家界-百龙电梯-天门山-玻璃栈道-凤凰古城高铁6日游>0购物,宿4晚高端/5星/黄龙洞,宿凤凰/含9景/135元特色餐,周4升航空座椅车型",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -85760,7 +110424,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_705",
+    "id": "tour_895",
     "title": "<海南三亚双飞4日游>17万人出游0购物，180度海景/海立方(供免费挖沙工具)/温德姆(赠欢迎水果)/国光豪生(隔条马路即沙滩)，度假雨林天堂，接机0等待",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -85891,7 +110555,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_706",
+    "id": "tour_896",
     "title": "<海南三亚双飞5日游>17万人出游0购物，180度海景/海立方(供免费挖沙工具)/温德姆(赠欢迎水果)/国光豪生(隔条马路即沙滩)，度假雨林天堂，接机0等待",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -86036,7 +110700,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.313528"
   },
   {
-    "id": "tour_707",
+    "id": "tour_897",
     "title": "<海南三亚双飞4日游>20人精品小团0购物，国际五星温德姆/洲际皇冠假日/国光豪生连住，丰富自助早餐+多房型可选+玩乐设施，蜈支洲畅玩一天，接机0等待",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -86167,7 +110831,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_708",
+    "id": "tour_898",
     "title": "<海南三亚双飞7日游>20人精品小团0购物，国际五星温德姆/洲际皇冠假日/国光豪生连住，丰富自助早餐+多房型可选+玩乐设施，蜈支洲畅玩一天，接机0等待",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -86340,7 +111004,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_709",
+    "id": "tour_899",
     "title": "<海南三亚双飞5日游>错峰甄选0购物，全程连住一线海边酒店，可升海立方/国光/温德姆，呀诺达雨林寻宝&南山观音祈福，奔驰接机/品当地美食",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -86485,7 +111149,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_710",
+    "id": "tour_900",
     "title": "<海南三亚双飞5日游>20人精品小团0购物，国际五星温德姆/洲际皇冠假日/国光豪生连住，丰富自助早餐+多房型可选+玩乐设施，蜈支洲畅玩一天，接机0等待",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -86630,7 +111294,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_711",
+    "id": "tour_901",
     "title": "<海南三亚双飞6日游>20人精品小团0购物，国际五星温德姆/洲际皇冠假日/国光豪生连住，丰富自助早餐+多房型可选+玩乐设施，蜈支洲畅玩一天，接机0等待",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -86789,7 +111453,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_712",
+    "id": "tour_902",
     "title": "<海南三亚双飞6日游>人气&亲子&蜜月，0购物，维景/天通/红树林/康年酒店自选连住，接机0等待，畅享蜈支洲一整天，万人出游甄选",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -86934,7 +111598,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_713",
+    "id": "tour_903",
     "title": "<海南三亚双飞5日游>乐开花爸妈游，纯玩0购物，国际五星国光豪生/康年/天通酒店自选，步行1分钟直达沙滩，蜈支洲一整天，24H接送机",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -87079,7 +111743,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_714",
+    "id": "tour_904",
     "title": "<海南三亚双飞4日游>错峰甄选0购物，全程连住一线海边酒店，可升海立方/国光/温德姆，呀诺达雨林寻宝&南山观音祈福，奔驰接机/品当地美食",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -87210,7 +111874,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_715",
+    "id": "tour_905",
     "title": "<海南三亚双飞5日游>人气&亲子&蜜月，0购物，维景/天通/红树林/康年酒店自选连住，接机0等待，畅享蜈支洲一整天，万人出游甄选",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -87355,7 +112019,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_716",
+    "id": "tour_906",
     "title": "<北京双卧6日游>自营倾情打造/纯玩精品，热销4年超4万人选择，故宫全新深度游3H（含珍宝馆），获奖导游精讲慢游，网红餐厅特色体验，观升旗仪式",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -87514,7 +112178,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_717",
+    "id": "tour_907",
     "title": "<桂林-漓江-遇龙河-银子岩-世外桃源双动4日游>人气热销,一价全含,高档住宿/阳朔两晚连住,星级游船,网红新贵千古情/遇龙河漂流,广州往返",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -87645,7 +112309,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_718",
+    "id": "tour_908",
     "title": "<海南三亚双飞6日游>纯玩0购物，2晚三亚湾住宿，3晚海棠湾酒店，可选呀诺达网红秋千/玻璃栈道，高性价比",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -87804,7 +112468,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_719",
+    "id": "tour_909",
     "title": "<北京双飞5日游>自营倾情打造/纯玩精品，热销4年超4万人选择，故宫全新深度游3H（含珍宝馆），获奖导游精讲慢游，网红餐厅特色体验，观升旗仪式",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -87949,7 +112613,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_720",
+    "id": "tour_910",
     "title": "<北京双高或双动6日游>自营倾情打造/纯玩精品，热销4年超4万人选择，故宫全新深度游3H（含珍宝馆），获奖导游精讲慢游，网红餐厅特色体验，观升旗仪式",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -88108,7 +112772,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_721",
+    "id": "tour_911",
     "title": "<云南-昆明-大理-丽江-香格里拉双飞8日游>自营超4万人出游/5A石林/玉龙雪山大索/印象丽江/双廊旅拍/大理海景房/安宁温泉/洱海骑行",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -88295,7 +112959,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_722",
+    "id": "tour_912",
     "title": "<海南三亚双飞6日游>错峰甄选0购物，全程连住一线海边酒店，可升海立方/国光/温德姆，呀诺达雨林寻宝&南山观音祈福，奔驰接机/品当地美食",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -88454,7 +113118,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_723",
+    "id": "tour_913",
     "title": "<桂林-漓江-阳朔动车3日游>戏耍漓江竹筏 VIP银子岩 爬古东瀑布 花海訾洲 摄影基地相公山 品阳朔啤酒鱼  24h接送 深圳往返",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -88571,7 +113235,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.314528"
   },
   {
-    "id": "tour_724",
+    "id": "tour_914",
     "title": "<昆明+普者黑+弥勒双飞6日游>摄影之旅，高原水乡，三生若梦十里桃花，温泉spa，葡萄美酒，弥勒大佛，2人起订，独立小团",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -88730,7 +113394,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_725",
+    "id": "tour_915",
     "title": "<昆明-大理-丽江双飞6日游>高端酒店/抖音网红酒店，零自费/美食温泉，无人机花海航拍/千古情/洱海骑行/鲜花饼制作，爬西山跃龙门/贵族范",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -88889,7 +113553,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_726",
+    "id": "tour_916",
     "title": "<云南-昆明-大理-丽江双飞6日游>纯玩无购物，玉龙雪山，露天温泉，洱海私人游船，自制鲜花饼体验，亲子蜜月畅游",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -89034,7 +113698,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_727",
+    "id": "tour_917",
     "title": "<云南-大理-丽江双飞5日游>纯玩0购物，揽蓝天入怀，醉饮风花雪月，享温泉时光，俯瞰洱海，三塔祈福，遇见内心深处好的自己",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -89179,7 +113843,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_728",
+    "id": "tour_918",
     "title": "<昆明-大理-丽江-泸沽湖双飞8日游>云南纯玩，昆明进出，神话石林，温泉时光，享视觉**，浅吟五朵金花，格姆女神山，探秘摩梭走婚，全景游",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -89366,7 +114030,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_729",
+    "id": "tour_919",
     "title": "<云南-昆明-大理-丽江-玉龙雪山双飞6日游>雪山大索道登顶，含震撼印象丽江演出，洱海大游船，一晚五星一晚温泉，下单再减600，2人起订",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -89525,7 +114189,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_730",
+    "id": "tour_920",
     "title": "<云南-大理-丽江双飞6日游>纯玩0购物，大理6大网红场景/含十张精修照片，天然温泉/花之城豪生大酒店/古城客栈，15道云南小吃/手抓饭",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -89684,7 +114348,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_731",
+    "id": "tour_921",
     "title": "<昆明-大理-丽江双高6日游>0购物，*系花园客栈，温泉spa，奔驰smart自驾/别克GL8环洱海旅拍，花海BBQ，丽江1天DIY",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -89843,7 +114507,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_732",
+    "id": "tour_922",
     "title": "<成都+西岭雪山+安仁古镇4日游>越野商务车出行，2至6人小团，指定入住锦泰温泉酒店，含花水湾温泉",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -89974,7 +114638,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_733",
+    "id": "tour_923",
     "title": "<泰国曼谷-芭提雅5晚6日游>爸妈舒心游/0购物0自费/专属用车/**导游/黄金屋/人妖秀/大船出海/四面佛/微管家保驾护航",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -90133,7 +114797,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_734",
+    "id": "tour_924",
     "title": "<泰国-普吉岛6日游>深圳直飞，3岛连游含浮潜，网红大自然餐厅 ，神仙半岛醉美日落，体验地道泰式按摩，4晚海边酒店",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -90292,7 +114956,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_735",
+    "id": "tour_925",
     "title": "<德国+法国+瑞士+荷兰4国10日游>海航直飞欧洲，度假胜地琉森，保证拼房，无强制自费，全国联运",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -90507,7 +115171,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_736",
+    "id": "tour_926",
     "title": "<美国东西岸+黄石+羚羊彩穴+夏威夷17-20日游>本土纯玩臻品,保证拼房/拒签无忧,大峡谷/大提顿/大瀑布,圣地亚哥,羚羊彩穴/马蹄湾,部分城市立减千元",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -90750,7 +115414,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_737",
+    "id": "tour_927",
     "title": "<巴厘岛6或7日游>深圳直飞0购物千人出游，RIMAB屋顶天空下午茶，蓝梦岛恶魔眼泪，贝妮达岛浮潜 / 独木舟/海边秋千，精油Spa",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -90909,7 +115573,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_738",
+    "id": "tour_928",
     "title": "<迪拜+阿布扎比6日游>去程A380，全程国五，沙漠冲沙，棕榈岛缆车，火锅餐，阿拉伯餐，阿联酋航空，香港直飞",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -91068,7 +115732,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.315528"
   },
   {
-    "id": "tour_739",
+    "id": "tour_929",
     "title": "<土耳其8-10日游>深圳集合，土航直飞，四飞，全程五星，一晚卡帕多奇亚洞穴酒店，棉花堡温泉酒店，安塔利亚，船游博斯普鲁斯海峡",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -91255,7 +115919,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_740",
+    "id": "tour_930",
     "title": "<土耳其12天游>香港直飞，2晚卡帕，烤鱼餐/瓦罐焖肉，全程车载WIFI，番红花城，图兹盐湖，温泉酒店，伊斯坦布尔一天自由活动，土耳其航空",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -91498,7 +116162,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_741",
+    "id": "tour_931",
     "title": "<日本北海道5日游>当季预售 游童趣哆啦A梦乐园 登别海洋乐园 赏富良野花田 乘花田农耕车 尝薰衣草冰淇淋 品北海道三大蟹 2晚温泉",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -91643,7 +116307,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_742",
+    "id": "tour_932",
     "title": "<土耳其8日游>土航直飞内陆双飞，全程五星，含博斯普鲁斯海峡游船，爱琴**中海海边/特色温泉酒店，洞穴瓦罐餐，烤鱼餐，可提前预定热气球",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -91830,7 +116494,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_743",
+    "id": "tour_933",
     "title": "<澳大利亚凯恩斯墨尔本10日游>深圳直飞澳洲 游船上享用西式晚餐、出海捉泥蟹、观看剪羊毛表演  凯恩斯世界遗产 花园城市墨尔本",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -92045,7 +116709,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_744",
+    "id": "tour_934",
     "title": "<荷兰+比利时+法国11-12日游>广州出发，全程四星，漫画博物馆，风车村，奥塞美术馆，荷兰森林公园，品网红甜品，自由活动，全程wifi",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -92260,7 +116924,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_745",
+    "id": "tour_935",
     "title": "<土耳其12日游>可升热气球/洞穴，特色瓦罐餐/卡帕惬意连住，海底隧道列车，A线长寿之乡，B线番红花城，香港QR",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -92503,7 +117167,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_746",
+    "id": "tour_936",
     "title": "<巴厘岛-新加坡5晚6日游>深圳直飞 全程五星酒店 蓝梦岛金银岛双岛出海 丛林大秋千 网红鸟巢 环球影城 国立大学 牛车水  仅2站购物",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -92662,7 +117326,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_747",
+    "id": "tour_937",
     "title": "<新西兰南北岛9日游>纯净游/深圳直飞/鲁冰花灿烂的季节/指环王取景地/瓦纳卡湖/伊甸山/罗托鲁亚湖/皇后镇/毛利文化村/喂羊驼",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -92863,7 +117527,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_748",
+    "id": "tour_938",
     "title": "<以色列约旦9天游>深圳集合，死海漂浮，巴哈伊空中花园，耶路撒冷，船游加利利湖，车游瓦地伦，特色烤鱼餐",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -93064,7 +117728,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_749",
+    "id": "tour_939",
     "title": "<**全景深度-克鲁克+花园大道10日游>深圳集合，反季出行避暑好去处，花园大道，香槟日落，酒庄酒店，醉美南非",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -93279,7 +117943,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_750",
+    "id": "tour_940",
     "title": "<彩虹之旅花园大道9日游>深圳集合，反季出行避暑好去处，花园大道，香槟日落，酒庄酒店，醉美南非",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -93480,7 +118144,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_751",
+    "id": "tour_941",
     "title": "<南非9日游>深圳集合，含省时内陆飞，人间天路花园大道，特色风情酒店，品南非特色餐，A线信号山品香槟，B线观赏lesidi民俗村",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -93681,7 +118345,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_752",
+    "id": "tour_942",
     "title": "<迪拜-阿布扎比6日游>香港直飞，畅游四个酋长国，迪拜奇迹花园，特别安排亚特兰蒂斯除夕夜安排丰盛跨年大餐",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -93840,7 +118504,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.316528"
   },
   {
-    "id": "tour_753",
+    "id": "tour_943",
     "title": "<新加坡4晚5日半自助游>深圳（香港）直飞 周末我在新加坡  全程四星酒店 纯玩无购物 两天自由活动 鱼尾狮 哈芝巷 滨海湾花园",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -93985,7 +118649,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_754",
+    "id": "tour_944",
     "title": "<新加坡4晚5日美食之旅游>香港直飞  鱼尾狮公园 滨海湾花园 克拉码头游船 乌节路 新加坡金沙*** 空中花园  娘惹体验馆 海洋馆",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -94130,7 +118794,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_755",
+    "id": "tour_945",
     "title": "<美国-加拿大东西海岸17日游>深圳集中 加航直飞 美加东西海岸大环游  史丹利公园 自由女神游船 布查德花园 17里湾 丹麦村",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -94443,7 +119107,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_756",
+    "id": "tour_946",
     "title": "<巴厘岛+新加坡5晚6日游>玩转双城 深圳去港回 蓝梦岛 金银岛双岛游  圣淘沙名胜世界 滨海湾花园 鱼尾狮公园",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -94602,7 +119266,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_757",
+    "id": "tour_947",
     "title": "<以色列约旦10日游>国泰航空/香港直飞/圣城耶路撒冷/杰拉什古城/佩特拉古城/巴哈伊花园/红海/死海升级五星酒店/游船畅游加利利湖",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -94817,7 +119481,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_758",
+    "id": "tour_948",
     "title": "<泰国-曼谷-芭堤雅4晚5日游>深圳往返、含导服费、 龙虎园、大皇宫玉佛寺、芭堤雅出海、海鲜升级、娜通花园餐厅，美食一网打尽",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -94962,7 +119626,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_759",
+    "id": "tour_949",
     "title": "<新加坡双飞4晚5日半自助游>送乳胶枕，全新上线，可联运，2天自由活动，含新加坡游船，滨海湾花园，可配联运，4星酒店",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -95107,7 +119771,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_760",
+    "id": "tour_950",
     "title": "<迪拜-土耳其12日游>香港直飞，谢赫扎耶德大清真寺，地中海，爱琴海双海寻梦，以弗所古城、棉花堡、卡帕多奇亚，热气球",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -95364,7 +120028,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_761",
+    "id": "tour_951",
     "title": "<迪拜-土耳其13日游>迪拜博物馆、圣索非亚大教堂、蓝色清真寺、地中海，爱琴海双海寻梦，天然奇景棉花堡，外星美景卡帕多奇亚",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -95621,7 +120285,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_762",
+    "id": "tour_952",
     "title": "<俄罗斯-莫斯科+圣彼得堡9日游>南航深圳直飞，团队免签，冬宫，彼得保罗要塞，夏宫花园，圣三一教堂",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -95822,7 +120486,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_763",
+    "id": "tour_953",
     "title": "<新西兰南北岛4飞9日游>纯净游/深圳直飞/鲁冰花灿烂的季节/指环王取景地/瓦纳卡湖/伊甸山/罗托鲁亚湖/皇后镇/毛利文化村/喂羊驼",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -96023,7 +120687,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_764",
+    "id": "tour_954",
     "title": "<新西兰纯南岛4飞9日游>美食美景纯玩无购物/深圳直飞/鲁冰花灿烂的季节/好牧羊人教堂/淘金小镇箭镇/米尔福德峡湾/蓝眼企鹅/库克山/特色美食",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -96224,7 +120888,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_765",
+    "id": "tour_955",
     "title": "<天竺韵印度6-8日游>深起港止/全程无自费/不进店/泰姬陵/阿格拉堡/莲花庙/琥珀堡/登纳哈加尔堡俯瞰斋普尔/瑜伽体验/赏歌舞剧",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -96383,7 +121047,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_766",
+    "id": "tour_956",
     "title": "<土耳其12日游>可升热气球/洞穴，特色瓦罐餐/卡帕惬意连住，海底隧道列车，A线长寿之乡，B线番红花城，香港QR",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -96626,7 +121290,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.317528"
   },
   {
-    "id": "tour_767",
+    "id": "tour_957",
     "title": "<日本东京-富士山-京都-大阪6日游>本州赏花 富士山芝樱祭 招财猫圣地 富士急乐园嗨玩 温泉旅馆 日式烤肉 相扑火锅",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -96785,7 +121449,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.318464"
   },
   {
-    "id": "tour_768",
+    "id": "tour_958",
     "title": "<俄罗斯双首都+谢镇9天游>南方航空 正点航班  广州起止 29人小团 爱国者公园 红场 冬宫 巴普诺夫森林公园",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -96972,7 +121636,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.318464"
   },
   {
-    "id": "tour_769",
+    "id": "tour_959",
     "title": "<俄罗斯双城9日游>广州EO直飞，双点进出，不走回头路，冬宫博物馆，夏宫花园，卢日尼基足球场，谢尔盖耶夫镇，莫斯科大学，保证拼房",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -97173,7 +121837,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.318464"
   },
   {
-    "id": "tour_770",
+    "id": "tour_960",
     "title": "<泰国曼谷-芭提雅6日游>乐开花爸妈游，深圳直飞0自费，安排三天午休，建立儿女微信群，大皇宫，水果园，56楼自助餐，东芭乐园，含泰国电话卡",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -97332,7 +121996,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.318464"
   },
   {
-    "id": "tour_771",
+    "id": "tour_961",
     "title": "<北欧丹麦+挪威+芬兰+瑞典10日-13日游>哥本哈根进出童话王国哥本哈根，古老都城奥斯陆，A、B线幸福小镇德拉厄，C线双极光",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
@@ -97547,7 +122211,7 @@ export const tours: Tour[] = [
     "updatedAt": "2026-05-07T02:42:29.318464"
   },
   {
-    "id": "tour_772",
+    "id": "tour_962",
     "title": "<莫斯科+圣彼得堡+双飞6晚8天游>北京直飞、可配联运、金环谢镇、克林姆林宫、俄罗式特色餐、红场、叶宫、夏宫花园",
     "source": "品途",
     "sourceLogo": "/icons/品途.png",
