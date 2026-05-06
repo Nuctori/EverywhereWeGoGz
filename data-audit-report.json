@@ -1,0 +1,1312 @@
+{
+  "totalTours": 962,
+  "missingFields": [],
+  "nullOrEmpty": [],
+  "invalidUrls": [],
+  "zeroPrice": [],
+  "abnormalPrice": [
+    {
+      "index": 930,
+      "id": "tour_931",
+      "source": "品途",
+      "price": 9314
+    },
+    {
+      "index": 569,
+      "id": "tour_570",
+      "source": "广之旅",
+      "price": 9399
+    },
+    {
+      "index": 949,
+      "id": "tour_950",
+      "source": "品途",
+      "price": 9919
+    },
+    {
+      "index": 261,
+      "id": "tour_262",
+      "source": "广州去旅行",
+      "price": 9980
+    },
+    {
+      "index": 320,
+      "id": "tour_321",
+      "source": "康辉",
+      "price": 9999
+    },
+    {
+      "index": 667,
+      "id": "tour_668",
+      "source": "广东中旅",
+      "price": 9999
+    },
+    {
+      "index": 957,
+      "id": "tour_958",
+      "source": "品途",
+      "price": 10069
+    },
+    {
+      "index": 648,
+      "id": "tour_649",
+      "source": "广东中旅",
+      "price": 10999
+    },
+    {
+      "index": 940,
+      "id": "tour_941",
+      "source": "品途",
+      "price": 11318
+    },
+    {
+      "index": 941,
+      "id": "tour_942",
+      "source": "品途",
+      "price": 11531
+    },
+    {
+      "index": 506,
+      "id": "tour_507",
+      "source": "康辉",
+      "price": 11999
+    },
+    {
+      "index": 634,
+      "id": "tour_635",
+      "source": "广东中旅",
+      "price": 11999
+    },
+    {
+      "index": 638,
+      "id": "tour_639",
+      "source": "广东中旅",
+      "price": 11999
+    },
+    {
+      "index": 633,
+      "id": "tour_634",
+      "source": "广东中旅",
+      "price": 12299
+    },
+    {
+      "index": 503,
+      "id": "tour_504",
+      "source": "康辉",
+      "price": 12999
+    },
+    {
+      "index": 505,
+      "id": "tour_506",
+      "source": "康辉",
+      "price": 12999
+    },
+    {
+      "index": 645,
+      "id": "tour_646",
+      "source": "广东中旅",
+      "price": 12999
+    },
+    {
+      "index": 575,
+      "id": "tour_576",
+      "source": "广之旅",
+      "price": 13399
+    },
+    {
+      "index": 932,
+      "id": "tour_933",
+      "source": "品途",
+      "price": 13669
+    },
+    {
+      "index": 946,
+      "id": "tour_947",
+      "source": "品途",
+      "price": 13904
+    },
+    {
+      "index": 928,
+      "id": "tour_929",
+      "source": "品途",
+      "price": 13965
+    },
+    {
+      "index": 646,
+      "id": "tour_647",
+      "source": "广东中旅",
+      "price": 13999
+    },
+    {
+      "index": 650,
+      "id": "tour_651",
+      "source": "广东中旅",
+      "price": 13999
+    },
+    {
+      "index": 649,
+      "id": "tour_650",
+      "source": "广东中旅",
+      "price": 14999
+    },
+    {
+      "index": 574,
+      "id": "tour_575",
+      "source": "广之旅",
+      "price": 15999
+    },
+    {
+      "index": 609,
+      "id": "tour_610",
+      "source": "广东中旅",
+      "price": 15999
+    },
+    {
+      "index": 952,
+      "id": "tour_953",
+      "source": "品途",
+      "price": 16716
+    },
+    {
+      "index": 504,
+      "id": "tour_505",
+      "source": "康辉",
+      "price": 16999
+    },
+    {
+      "index": 938,
+      "id": "tour_939",
+      "source": "品途",
+      "price": 17292
+    },
+    {
+      "index": 632,
+      "id": "tour_633",
+      "source": "广东中旅",
+      "price": 17499
+    },
+    {
+      "index": 939,
+      "id": "tour_940",
+      "source": "品途",
+      "price": 17814
+    },
+    {
+      "index": 644,
+      "id": "tour_645",
+      "source": "广东中旅",
+      "price": 17999
+    },
+    {
+      "index": 652,
+      "id": "tour_653",
+      "source": "广东中旅",
+      "price": 17999
+    },
+    {
+      "index": 654,
+      "id": "tour_655",
+      "source": "广东中旅",
+      "price": 18299
+    },
+    {
+      "index": 478,
+      "id": "tour_479",
+      "source": "康辉",
+      "price": 18300
+    },
+    {
+      "index": 629,
+      "id": "tour_630",
+      "source": "广东中旅",
+      "price": 18499
+    },
+    {
+      "index": 641,
+      "id": "tour_642",
+      "source": "广东中旅",
+      "price": 18499
+    },
+    {
+      "index": 472,
+      "id": "tour_473",
+      "source": "康辉",
+      "price": 18999
+    },
+    {
+      "index": 499,
+      "id": "tour_500",
+      "source": "康辉",
+      "price": 18999
+    },
+    {
+      "index": 571,
+      "id": "tour_572",
+      "source": "广之旅",
+      "price": 18999
+    },
+    {
+      "index": 937,
+      "id": "tour_938",
+      "source": "品途",
+      "price": 19199
+    },
+    {
+      "index": 647,
+      "id": "tour_648",
+      "source": "广东中旅",
+      "price": 19799
+    },
+    {
+      "index": 662,
+      "id": "tour_663",
+      "source": "广东中旅",
+      "price": 19999
+    },
+    {
+      "index": 953,
+      "id": "tour_954",
+      "source": "品途",
+      "price": 20329
+    },
+    {
+      "index": 605,
+      "id": "tour_606",
+      "source": "广东中旅",
+      "price": 20999
+    },
+    {
+      "index": 674,
+      "id": "tour_675",
+      "source": "广东中旅",
+      "price": 20999
+    },
+    {
+      "index": 414,
+      "id": "tour_415",
+      "source": "康辉",
+      "price": 21400
+    },
+    {
+      "index": 925,
+      "id": "tour_926",
+      "source": "品途",
+      "price": 21480
+    },
+    {
+      "index": 630,
+      "id": "tour_631",
+      "source": "广东中旅",
+      "price": 21799
+    },
+    {
+      "index": 640,
+      "id": "tour_641",
+      "source": "广东中旅",
+      "price": 21799
+    },
+    {
+      "index": 653,
+      "id": "tour_654",
+      "source": "广东中旅",
+      "price": 21999
+    },
+    {
+      "index": 661,
+      "id": "tour_662",
+      "source": "广东中旅",
+      "price": 21999
+    },
+    {
+      "index": 944,
+      "id": "tour_945",
+      "source": "品途",
+      "price": 22136
+    },
+    {
+      "index": 473,
+      "id": "tour_474",
+      "source": "康辉",
+      "price": 22800
+    },
+    {
+      "index": 616,
+      "id": "tour_617",
+      "source": "广东中旅",
+      "price": 22999
+    },
+    {
+      "index": 933,
+      "id": "tour_934",
+      "source": "品途",
+      "price": 23053
+    },
+    {
+      "index": 500,
+      "id": "tour_501",
+      "source": "康辉",
+      "price": 23999
+    },
+    {
+      "index": 655,
+      "id": "tour_656",
+      "source": "广东中旅",
+      "price": 24699
+    },
+    {
+      "index": 656,
+      "id": "tour_657",
+      "source": "广东中旅",
+      "price": 24899
+    },
+    {
+      "index": 608,
+      "id": "tour_609",
+      "source": "广东中旅",
+      "price": 24999
+    },
+    {
+      "index": 613,
+      "id": "tour_614",
+      "source": "广东中旅",
+      "price": 24999
+    },
+    {
+      "index": 568,
+      "id": "tour_569",
+      "source": "广之旅",
+      "price": 25399
+    },
+    {
+      "index": 658,
+      "id": "tour_659",
+      "source": "广东中旅",
+      "price": 25699
+    },
+    {
+      "index": 494,
+      "id": "tour_495",
+      "source": "康辉",
+      "price": 25800
+    },
+    {
+      "index": 477,
+      "id": "tour_478",
+      "source": "康辉",
+      "price": 26800
+    },
+    {
+      "index": 612,
+      "id": "tour_613",
+      "source": "广东中旅",
+      "price": 26999
+    },
+    {
+      "index": 659,
+      "id": "tour_660",
+      "source": "广东中旅",
+      "price": 26999
+    },
+    {
+      "index": 496,
+      "id": "tour_497",
+      "source": "康辉",
+      "price": 27800
+    },
+    {
+      "index": 467,
+      "id": "tour_468",
+      "source": "康辉",
+      "price": 27999
+    },
+    {
+      "index": 501,
+      "id": "tour_502",
+      "source": "康辉",
+      "price": 28999
+    },
+    {
+      "index": 936,
+      "id": "tour_937",
+      "source": "品途",
+      "price": 29329
+    },
+    {
+      "index": 639,
+      "id": "tour_640",
+      "source": "广东中旅",
+      "price": 29799
+    },
+    {
+      "index": 615,
+      "id": "tour_616",
+      "source": "广东中旅",
+      "price": 29999
+    },
+    {
+      "index": 631,
+      "id": "tour_632",
+      "source": "广东中旅",
+      "price": 31499
+    },
+    {
+      "index": 469,
+      "id": "tour_470",
+      "source": "康辉",
+      "price": 32999
+    },
+    {
+      "index": 570,
+      "id": "tour_571",
+      "source": "广之旅",
+      "price": 32999
+    },
+    {
+      "index": 614,
+      "id": "tour_615",
+      "source": "广东中旅",
+      "price": 32999
+    },
+    {
+      "index": 606,
+      "id": "tour_607",
+      "source": "广东中旅",
+      "price": 34499
+    },
+    {
+      "index": 611,
+      "id": "tour_612",
+      "source": "广东中旅",
+      "price": 34499
+    },
+    {
+      "index": 476,
+      "id": "tour_477",
+      "source": "康辉",
+      "price": 36999
+    },
+    {
+      "index": 603,
+      "id": "tour_604",
+      "source": "广东中旅",
+      "price": 37399
+    },
+    {
+      "index": 651,
+      "id": "tour_652",
+      "source": "广东中旅",
+      "price": 37799
+    },
+    {
+      "index": 660,
+      "id": "tour_661",
+      "source": "广东中旅",
+      "price": 37799
+    },
+    {
+      "index": 468,
+      "id": "tour_469",
+      "source": "康辉",
+      "price": 37800
+    },
+    {
+      "index": 498,
+      "id": "tour_499",
+      "source": "康辉",
+      "price": 39800
+    },
+    {
+      "index": 475,
+      "id": "tour_476",
+      "source": "康辉",
+      "price": 39999
+    },
+    {
+      "index": 604,
+      "id": "tour_605",
+      "source": "广东中旅",
+      "price": 39999
+    },
+    {
+      "index": 567,
+      "id": "tour_568",
+      "source": "广之旅",
+      "price": 40999
+    },
+    {
+      "index": 643,
+      "id": "tour_644",
+      "source": "广东中旅",
+      "price": 43999
+    },
+    {
+      "index": 502,
+      "id": "tour_503",
+      "source": "康辉",
+      "price": 45560
+    },
+    {
+      "index": 619,
+      "id": "tour_620",
+      "source": "广东中旅",
+      "price": 45999
+    },
+    {
+      "index": 625,
+      "id": "tour_626",
+      "source": "广东中旅",
+      "price": 48000
+    },
+    {
+      "index": 610,
+      "id": "tour_611",
+      "source": "广东中旅",
+      "price": 48099
+    },
+    {
+      "index": 474,
+      "id": "tour_475",
+      "source": "康辉",
+      "price": 49999
+    },
+    {
+      "index": 627,
+      "id": "tour_628",
+      "source": "广东中旅",
+      "price": 49999
+    },
+    {
+      "index": 495,
+      "id": "tour_496",
+      "source": "康辉",
+      "price": 51800
+    },
+    {
+      "index": 617,
+      "id": "tour_618",
+      "source": "广东中旅",
+      "price": 52999
+    },
+    {
+      "index": 607,
+      "id": "tour_608",
+      "source": "广东中旅",
+      "price": 53800
+    },
+    {
+      "index": 497,
+      "id": "tour_498",
+      "source": "康辉",
+      "price": 55999
+    },
+    {
+      "index": 626,
+      "id": "tour_627",
+      "source": "广东中旅",
+      "price": 55999
+    },
+    {
+      "index": 620,
+      "id": "tour_621",
+      "source": "广东中旅",
+      "price": 59999
+    },
+    {
+      "index": 470,
+      "id": "tour_471",
+      "source": "康辉",
+      "price": 64999
+    },
+    {
+      "index": 471,
+      "id": "tour_472",
+      "source": "康辉",
+      "price": 64999
+    },
+    {
+      "index": 628,
+      "id": "tour_629",
+      "source": "广东中旅",
+      "price": 76799
+    },
+    {
+      "index": 621,
+      "id": "tour_622",
+      "source": "广东中旅",
+      "price": 82999
+    },
+    {
+      "index": 618,
+      "id": "tour_619",
+      "source": "广东中旅",
+      "price": 92999
+    },
+    {
+      "index": 622,
+      "id": "tour_623",
+      "source": "广东中旅",
+      "price": 92999
+    },
+    {
+      "index": 623,
+      "id": "tour_624",
+      "source": "广东中旅",
+      "price": 99999
+    },
+    {
+      "index": 624,
+      "id": "tour_625",
+      "source": "广东中旅",
+      "price": 99999
+    }
+  ],
+  "abnormalDuration": [],
+  "invalidDates": [],
+  "pastDates": [],
+  "invalidRatings": [],
+  "duplicateProducts": [],
+  "similarProducts": [
+    {
+      "title": "【尚·深度】",
+      "count": 10,
+      "items": [
+        {
+          "index": 567,
+          "id": "tour_568",
+          "source": "广之旅",
+          "price": 40999
+        },
+        {
+          "index": 568,
+          "id": "tour_569",
+          "source": "广之旅",
+          "price": 25399
+        },
+        {
+          "index": 569,
+          "id": "tour_570",
+          "source": "广之旅",
+          "price": 9399
+        },
+        {
+          "index": 570,
+          "id": "tour_571",
+          "source": "广之旅",
+          "price": 32999
+        },
+        {
+          "index": 571,
+          "id": "tour_572",
+          "source": "广之旅",
+          "price": 18999
+        },
+        {
+          "index": 575,
+          "id": "tour_576",
+          "source": "广之旅",
+          "price": 13399
+        },
+        {
+          "index": 576,
+          "id": "tour_577",
+          "source": "广之旅",
+          "price": 7399
+        },
+        {
+          "index": 586,
+          "id": "tour_587",
+          "source": "广之旅",
+          "price": 1599
+        },
+        {
+          "index": 589,
+          "id": "tour_590",
+          "source": "广之旅",
+          "price": 6999
+        },
+        {
+          "index": 592,
+          "id": "tour_593",
+          "source": "广之旅",
+          "price": 5399
+        }
+      ]
+    },
+    {
+      "title": "【尚·休闲】",
+      "count": 2,
+      "items": [
+        {
+          "index": 577,
+          "id": "tour_578",
+          "source": "广之旅",
+          "price": 7888
+        },
+        {
+          "index": 585,
+          "id": "tour_586",
+          "source": "广之旅",
+          "price": 1399
+        }
+      ]
+    },
+    {
+      "title": "【尚·美食】",
+      "count": 2,
+      "items": [
+        {
+          "index": 581,
+          "id": "tour_582",
+          "source": "广之旅",
+          "price": 499
+        },
+        {
+          "index": 582,
+          "id": "tour_583",
+          "source": "广之旅",
+          "price": 469
+        }
+      ]
+    },
+    {
+      "title": "【畅玩·一家一团】",
+      "count": 4,
+      "items": [
+        {
+          "index": 593,
+          "id": "tour_594",
+          "source": "广之旅",
+          "price": 3999
+        },
+        {
+          "index": 594,
+          "id": "tour_595",
+          "source": "广之旅",
+          "price": 5199
+        },
+        {
+          "index": 596,
+          "id": "tour_597",
+          "source": "广之旅",
+          "price": 3699
+        },
+        {
+          "index": 601,
+          "id": "tour_602",
+          "source": "广之旅",
+          "price": 1999
+        }
+      ]
+    },
+    {
+      "title": "【典·全景】",
+      "count": 2,
+      "items": [
+        {
+          "index": 598,
+          "id": "tour_599",
+          "source": "广之旅",
+          "price": 1899
+        },
+        {
+          "index": 602,
+          "id": "tour_603",
+          "source": "广之旅",
+          "price": 2199
+        }
+      ]
+    },
+    {
+      "title": "【中旅1号】",
+      "count": 2,
+      "items": [
+        {
+          "index": 609,
+          "id": "tour_610",
+          "source": "广东中旅",
+          "price": 15999
+        },
+        {
+          "index": 619,
+          "id": "tour_620",
+          "source": "广东中旅",
+          "price": 45999
+        }
+      ]
+    },
+    {
+      "title": "【全景深度·奇迹黄石】",
+      "count": 2,
+      "items": [
+        {
+          "index": 612,
+          "id": "tour_613",
+          "source": "广东中旅",
+          "price": 26999
+        },
+        {
+          "index": 613,
+          "id": "tour_614",
+          "source": "广东中旅",
+          "price": 24999
+        }
+      ]
+    },
+    {
+      "title": "【情迷加勒比】",
+      "count": 2,
+      "items": [
+        {
+          "index": 617,
+          "id": "tour_618",
+          "source": "广东中旅",
+          "price": 52999
+        },
+        {
+          "index": 620,
+          "id": "tour_621",
+          "source": "广东中旅",
+          "price": 59999
+        }
+      ]
+    },
+    {
+      "title": "【非洲南部】",
+      "count": 2,
+      "items": [
+        {
+          "index": 629,
+          "id": "tour_630",
+          "source": "广东中旅",
+          "price": 18499
+        },
+        {
+          "index": 630,
+          "id": "tour_631",
+          "source": "广东中旅",
+          "price": 21799
+        }
+      ]
+    },
+    {
+      "title": "【非洲东部】",
+      "count": 2,
+      "items": [
+        {
+          "index": 631,
+          "id": "tour_632",
+          "source": "广东中旅",
+          "price": 31499
+        },
+        {
+          "index": 632,
+          "id": "tour_633",
+          "source": "广东中旅",
+          "price": 17499
+        }
+      ]
+    },
+    {
+      "title": "【南欧特价】",
+      "count": 2,
+      "items": [
+        {
+          "index": 649,
+          "id": "tour_650",
+          "source": "广东中旅",
+          "price": 14999
+        },
+        {
+          "index": 650,
+          "id": "tour_651",
+          "source": "广东中旅",
+          "price": 13999
+        }
+      ]
+    },
+    {
+      "title": "【首尔南怡岛漫游】",
+      "count": 2,
+      "items": [
+        {
+          "index": 675,
+          "id": "tour_676",
+          "source": "广东中旅",
+          "price": 3399
+        },
+        {
+          "index": 688,
+          "id": "tour_689",
+          "source": "广东中旅",
+          "price": 3099
+        }
+      ]
+    },
+    {
+      "title": "【韩国·悦玩济州】",
+      "count": 2,
+      "items": [
+        {
+          "index": 677,
+          "id": "tour_678",
+          "source": "广东中旅",
+          "price": 5099
+        },
+        {
+          "index": 678,
+          "id": "tour_679",
+          "source": "广东中旅",
+          "price": 5499
+        }
+      ]
+    },
+    {
+      "title": "【韩国·乐享济州】",
+      "count": 2,
+      "items": [
+        {
+          "index": 679,
+          "id": "tour_680",
+          "source": "广东中旅",
+          "price": 2799
+        },
+        {
+          "index": 680,
+          "id": "tour_681",
+          "source": "广东中旅",
+          "price": 2499
+        }
+      ]
+    },
+    {
+      "title": "【首釜双城仲夏之约】",
+      "count": 2,
+      "items": [
+        {
+          "index": 682,
+          "id": "tour_683",
+          "source": "广东中旅",
+          "price": 6199
+        },
+        {
+          "index": 685,
+          "id": "tour_686",
+          "source": "广东中旅",
+          "price": 6599
+        }
+      ]
+    },
+    {
+      "title": "【精品小团·首尔2日自由活动】",
+      "count": 2,
+      "items": [
+        {
+          "index": 683,
+          "id": "tour_684",
+          "source": "广东中旅",
+          "price": 5499
+        },
+        {
+          "index": 684,
+          "id": "tour_685",
+          "source": "广东中旅",
+          "price": 5699
+        }
+      ]
+    },
+    {
+      "title": "【春拾光韩遇三城】",
+      "count": 2,
+      "items": [
+        {
+          "index": 686,
+          "id": "tour_687",
+          "source": "广东中旅",
+          "price": 5799
+        },
+        {
+          "index": 687,
+          "id": "tour_688",
+          "source": "广东中旅",
+          "price": 6199
+        }
+      ]
+    },
+    {
+      "title": "【醉美大漓江 · 真纯玩】",
+      "count": 2,
+      "items": [
+        {
+          "index": 705,
+          "id": "tour_706",
+          "source": "广东中旅",
+          "price": 2099
+        },
+        {
+          "index": 707,
+          "id": "tour_708",
+          "source": "广东中旅",
+          "price": 1999
+        }
+      ]
+    },
+    {
+      "title": "【醉美桂林 · 真纯玩】",
+      "count": 2,
+      "items": [
+        {
+          "index": 706,
+          "id": "tour_707",
+          "source": "广东中旅",
+          "price": 1799
+        },
+        {
+          "index": 708,
+          "id": "tour_709",
+          "source": "广东中旅",
+          "price": 1699
+        }
+      ]
+    },
+    {
+      "title": "【丹东大连】",
+      "count": 2,
+      "items": [
+        {
+          "index": 729,
+          "id": "tour_730",
+          "source": "广东中旅",
+          "price": 2299
+        },
+        {
+          "index": 737,
+          "id": "tour_738",
+          "source": "广东中旅",
+          "price": 1999
+        }
+      ]
+    },
+    {
+      "title": "【风情鸭绿江·中朝边境】",
+      "count": 2,
+      "items": [
+        {
+          "index": 731,
+          "id": "tour_732",
+          "source": "广东中旅",
+          "price": 2599
+        },
+        {
+          "index": 732,
+          "id": "tour_733",
+          "source": "广东中旅",
+          "price": 2999
+        }
+      ]
+    },
+    {
+      "title": "【嗨玩丽香泸】",
+      "count": 2,
+      "items": [
+        {
+          "index": 757,
+          "id": "tour_758",
+          "source": "广东中旅",
+          "price": 3899
+        },
+        {
+          "index": 758,
+          "id": "tour_759",
+          "source": "广东中旅",
+          "price": 3699
+        }
+      ]
+    },
+    {
+      "title": "【全景恩施】",
+      "count": 2,
+      "items": [
+        {
+          "index": 767,
+          "id": "tour_768",
+          "source": "广东中旅",
+          "price": 2499
+        },
+        {
+          "index": 776,
+          "id": "tour_777",
+          "source": "广东中旅",
+          "price": 2999
+        }
+      ]
+    },
+    {
+      "title": "【广州出发】",
+      "count": 2,
+      "items": [
+        {
+          "index": 791,
+          "id": "tour_792",
+          "source": "广东中旅",
+          "price": 99
+        },
+        {
+          "index": 816,
+          "id": "tour_817",
+          "source": "广东中旅",
+          "price": 319
+        }
+      ]
+    },
+    {
+      "title": "【温泉直通车】",
+      "count": 2,
+      "items": [
+        {
+          "index": 817,
+          "id": "tour_818",
+          "source": "广东中旅",
+          "price": 299
+        },
+        {
+          "index": 818,
+          "id": "tour_819",
+          "source": "广东中旅",
+          "price": 569
+        }
+      ]
+    },
+    {
+      "title": "<土耳其12日游>可升热气球/洞穴，特色瓦罐餐/卡帕惬意连住，海底隧道列车，A线长寿之乡，B线番红花城，香港QR",
+      "count": 2,
+      "items": [
+        {
+          "index": 934,
+          "id": "tour_935",
+          "source": "品途",
+          "price": 6640
+        },
+        {
+          "index": 955,
+          "id": "tour_956",
+          "source": "品途",
+          "price": 6960
+        }
+      ]
+    }
+  ],
+  "sourceStats": {
+    "假日通": {
+      "count": 233,
+      "withImages": 233,
+      "withoutImages": 0,
+      "minPrice": 178,
+      "maxPrice": 5999,
+      "avgPrice": 1531,
+      "totalPrice": 356682,
+      "invalidUrls": 0,
+      "missingFields": 0,
+      "invalidDates": 0,
+      "pastDates": 0,
+      "zeroPrice": 0,
+      "abnormalDuration": 0,
+      "invalidRatings": 0
+    },
+    "品途": {
+      "count": 140,
+      "withImages": 140,
+      "withoutImages": 0,
+      "minPrice": 128,
+      "maxPrice": 29329,
+      "avgPrice": 4135,
+      "totalPrice": 578894,
+      "invalidUrls": 0,
+      "missingFields": 0,
+      "invalidDates": 0,
+      "pastDates": 0,
+      "zeroPrice": 0,
+      "abnormalDuration": 0,
+      "invalidRatings": 0
+    },
+    "广东中旅": {
+      "count": 219,
+      "withImages": 219,
+      "withoutImages": 0,
+      "minPrice": 69,
+      "maxPrice": 99999,
+      "avgPrice": 11010,
+      "totalPrice": 2411171,
+      "invalidUrls": 0,
+      "missingFields": 0,
+      "invalidDates": 0,
+      "pastDates": 0,
+      "zeroPrice": 0,
+      "abnormalDuration": 0,
+      "invalidRatings": 0
+    },
+    "广之旅": {
+      "count": 36,
+      "withImages": 36,
+      "withoutImages": 0,
+      "minPrice": 99,
+      "maxPrice": 40999,
+      "avgPrice": 6786,
+      "totalPrice": 244293,
+      "invalidUrls": 0,
+      "missingFields": 0,
+      "invalidDates": 0,
+      "pastDates": 0,
+      "zeroPrice": 0,
+      "abnormalDuration": 0,
+      "invalidRatings": 0
+    },
+    "广州去旅行": {
+      "count": 44,
+      "withImages": 44,
+      "withoutImages": 0,
+      "minPrice": 68,
+      "maxPrice": 9980,
+      "avgPrice": 1789,
+      "totalPrice": 78703,
+      "invalidUrls": 0,
+      "missingFields": 0,
+      "invalidDates": 0,
+      "pastDates": 0,
+      "zeroPrice": 0,
+      "abnormalDuration": 0,
+      "invalidRatings": 0
+    },
+    "康辉": {
+      "count": 250,
+      "withImages": 250,
+      "withoutImages": 0,
+      "minPrice": 69,
+      "maxPrice": 64999,
+      "avgPrice": 5288,
+      "totalPrice": 1322075,
+      "invalidUrls": 0,
+      "missingFields": 0,
+      "invalidDates": 0,
+      "pastDates": 0,
+      "zeroPrice": 0,
+      "abnormalDuration": 0,
+      "invalidRatings": 0
+    },
+    "暴走村": {
+      "count": 40,
+      "withImages": 40,
+      "withoutImages": 0,
+      "minPrice": 9,
+      "maxPrice": 438,
+      "avgPrice": 168,
+      "totalPrice": 6735,
+      "invalidUrls": 0,
+      "missingFields": 0,
+      "invalidDates": 0,
+      "pastDates": 0,
+      "zeroPrice": 0,
+      "abnormalDuration": 0,
+      "invalidRatings": 0
+    }
+  }
+}
