@@ -306,27 +306,39 @@ class Jrt365Spider:
             if len(title) >= 5 and any(k in title for k in ("天", "游", "温泉", "酒店", "度假", "纯玩", "日")):
                 # 尝试从父元素或兄弟元素中提取图片
                 img_url = ""
+                detail_url = self.BASE_URL  # 默认用首页
                 search_elem = parent
-                for _ in range(3):  # 向上查找3层
+                for _ in range(4):  # 向上查找4层
                     if not search_elem:
                         break
-                    img = search_elem.find("img")
-                    if img:
-                        img_src = img.get("src") or img.get("data-original") or img.get("data-src")
-                        if img_src and not img_src.endswith('.gif'):
-                            # 处理相对路径
-                            if img_src.startswith(".."):
-                                img_url = self.BASE_URL + img_src[2:]
-                            elif img_src.startswith("/"):
-                                img_url = self.BASE_URL + img_src
-                            elif img_src.startswith("http"):
-                                img_url = img_src
-                            else:
-                                img_url = self.BASE_URL + "/" + img_src
-                            break
+                    # 提取图片
+                    if not img_url:
+                        img = search_elem.find("img")
+                        if img:
+                            img_src = img.get("src") or img.get("data-original") or img.get("data-src")
+                            if img_src and not img_src.endswith('.gif'):
+                                # 处理相对路径
+                                if img_src.startswith(".."):
+                                    img_url = self.BASE_URL + img_src[2:]
+                                elif img_src.startswith("/"):
+                                    img_url = self.BASE_URL + img_src
+                                elif img_src.startswith("http"):
+                                    img_url = img_src
+                                else:
+                                    img_url = self.BASE_URL + "/" + img_src
+                    # 提取详情页URL - 查找包含show_td.aspx的链接
+                    if detail_url == self.BASE_URL:
+                        a_tag = search_elem.find("a", href=True)
+                        if a_tag:
+                            href = a_tag["href"]
+                            if "show_td.aspx" in href or "tournameno" in href:
+                                if href.startswith("http"):
+                                    detail_url = href
+                                else:
+                                    detail_url = self.BASE_URL + "/" + href.lstrip("/")
                     search_elem = search_elem.parent
                 
-                item = {"source": "假日通", "title": title, "price": price, "url": self.BASE_URL, "days": extract_days(title)}
+                item = {"source": "假日通", "title": title, "price": price, "url": detail_url, "days": extract_days(title)}
                 if img_url:
                     item["img"] = img_url
                 items.append(item)
@@ -357,48 +369,52 @@ class GzqlxSpider:
                 try:
                     driver.get(f'{self.BASE_URL}/m/events?mid={mid}')
                     time.sleep(2)
-                    page_text = driver.find_element('tag name', 'body').text
-                    lines = [l.strip() for l in page_text.split('\n') if l.strip()]
-
-                    # 解析结构：标题、地点、日期、价格、空行
-                    i = 0
-                    while i < len(lines):
-                        # 找价格行
-                        price_m = re.search(r'¥(\d+)', lines[i])
-                        if price_m and i >= 3:
-                            price = float(price_m.group(1))
-                            title = lines[i - 3] if i >= 3 else ""
-                            location = lines[i - 2] if i >= 2 else ""
-                            date_range = lines[i - 1] if i >= 1 else ""
-
-                            # 过滤掉非活动条目
-                            if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定']):
-                                # 尝试从页面源码中提取图片（赛会通SaaS平台可能有图片）
-                                img_url = ""
-                                try:
-                                    # 查找当前活动对应的图片
-                                    page_source = driver.page_source
-                                    # 赛会通平台的图片通常在活动卡片中
-                                    img_matches = re.findall(r'<img[^>]+src="([^"]+)"[^>]*>', page_source)
-                                    for img in img_matches:
-                                        if img.startswith('http') and not img.endswith('.gif'):
-                                            img_url = img
-                                            break
-                                except:
-                                    pass
-                                
-                                item = {
-                                    "source": "广州去旅行",
-                                    "title": title,
-                                    "price": price,
-                                    "url": f'{self.BASE_URL}/m/events?mid={mid}',
-                                    "days": extract_days(title),
-                                    "destination": location.replace('广东·', '') if location else "",
-                                }
-                                if img_url:
-                                    item["img"] = img_url
-                                all_items.append(item)
-                        i += 1
+                    page_source = driver.page_source
+                    
+                    # 赛会通平台：从页面源码中提取活动卡片
+                    # 活动链接格式: /m/event?id=xxx
+                    # 提取所有包含id=xxx的a标签
+                    event_pattern = r'<a[^>]+href="(/m/event\?id=\d+)"[^>]*>(.*?)</a>'
+                    events = re.findall(event_pattern, page_source, re.DOTALL)
+                    
+                    for href, content in events:
+                        # 提取纯文本标题
+                        text = re.sub(r'<[^>]+>', ' ', content).strip()
+                        text = re.sub(r'\s+', ' ', text)
+                        
+                        # 提取价格
+                        price_m = re.search(r'¥(\d+)', text)
+                        if not price_m:
+                            continue
+                        price = float(price_m.group(1))
+                        
+                        # 清理标题（去掉价格部分）
+                        title = text.replace(price_m.group(0), "").strip()
+                        
+                        if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定']):
+                            detail_url = self.BASE_URL + href
+                            
+                            # 提取图片
+                            img_url = ""
+                            img_match = re.search(r'<img[^>]+src="([^"]+)"[^>]*>', content)
+                            if img_match:
+                                img_src = img_match.group(1)
+                                if img_src.startswith('http'):
+                                    img_url = img_src
+                                elif img_src.startswith('/'):
+                                    img_url = self.BASE_URL + img_src
+                            
+                            item = {
+                                "source": "广州去旅行",
+                                "title": title,
+                                "price": price,
+                                "url": detail_url,
+                                "days": extract_days(title),
+                            }
+                            if img_url:
+                                item["img"] = img_url
+                            all_items.append(item)
+                            
                 except Exception as e:
                     print(f"  mid={mid} error: {e}")
 
@@ -464,11 +480,6 @@ class BaozoucunSpider:
             driver = webdriver.Edge(options=options)
             all_items = []
 
-            # 先获取页面中的mid列表
-            driver.get(f'{self.BASE_URL}/m/events')
-            time.sleep(2)
-            page_text = driver.find_element('tag name', 'body').text
-
             # 从页面URL或文本中提取mids
             mids = ['73252', '79969', '73242', '78982', '78741', '73249', '81417', '78430', '78431', '78742', '73513', '73250', '81413', '81418', '81414', '73251', '78901', '73244']
 
@@ -476,42 +487,50 @@ class BaozoucunSpider:
                 try:
                     driver.get(f'{self.BASE_URL}/m/events?mid={mid}')
                     time.sleep(2)
-                    page_text = driver.find_element('tag name', 'body').text
-                    lines = [l.strip() for l in page_text.split('\n') if l.strip()]
-
-                    i = 0
-                    while i < len(lines):
-                        price_m = re.search(r'¥(\d+)', lines[i])
-                        if price_m and i >= 3:
-                            price = float(price_m.group(1))
-                            title = lines[i - 3] if i >= 3 else ""
-                            location = lines[i - 2] if i >= 2 else ""
-
-                            if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定', '免费']):
-                                # 尝试从页面源码中提取图片
-                                img_url = ""
-                                try:
-                                    page_source = driver.page_source
-                                    img_matches = re.findall(r'<img[^>]+src="([^"]+)"[^>]*>', page_source)
-                                    for img in img_matches:
-                                        if img.startswith('http') and not img.endswith('.gif'):
-                                            img_url = img
-                                            break
-                                except:
-                                    pass
-                                
-                                item = {
-                                    "source": "暴走村",
-                                    "title": title,
-                                    "price": price,
-                                    "url": f'{self.BASE_URL}/m/events?mid={mid}',
-                                    "days": extract_days(title),
-                                    "destination": location.replace('广东·', '') if location else "",
-                                }
-                                if img_url:
-                                    item["img"] = img_url
-                                all_items.append(item)
-                        i += 1
+                    page_source = driver.page_source
+                    
+                    # 赛会通平台：从页面源码中提取活动卡片
+                    event_pattern = r'<a[^>]+href="(/m/event\?id=\d+)"[^>]*>(.*?)</a>'
+                    events = re.findall(event_pattern, page_source, re.DOTALL)
+                    
+                    for href, content in events:
+                        # 提取纯文本标题
+                        text = re.sub(r'<[^>]+>', ' ', content).strip()
+                        text = re.sub(r'\s+', ' ', text)
+                        
+                        # 提取价格
+                        price_m = re.search(r'¥(\d+)', text)
+                        if not price_m:
+                            continue
+                        price = float(price_m.group(1))
+                        
+                        # 清理标题
+                        title = text.replace(price_m.group(0), "").strip()
+                        
+                        if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定', '免费']):
+                            detail_url = self.BASE_URL + href
+                            
+                            # 提取图片
+                            img_url = ""
+                            img_match = re.search(r'<img[^>]+src="([^"]+)"[^>]*>', content)
+                            if img_match:
+                                img_src = img_match.group(1)
+                                if img_src.startswith('http'):
+                                    img_url = img_src
+                                elif img_src.startswith('/'):
+                                    img_url = self.BASE_URL + img_src
+                            
+                            item = {
+                                "source": "暴走村",
+                                "title": title,
+                                "price": price,
+                                "url": detail_url,
+                                "days": extract_days(title),
+                            }
+                            if img_url:
+                                item["img"] = img_url
+                            all_items.append(item)
+                            
                 except Exception as e:
                     print(f"  mid={mid} error: {e}")
 
@@ -534,33 +553,66 @@ class GzlSpider:
             resp = safe_request(url)
             if not resp:
                 continue
-            soup = BeautifulSoup(resp.text, "lxml")
-            for card in soup.find_all(["div", "a", "li"]):
-                txt = card.get_text(" ", strip=True)
-                if "【" not in txt or "￥" not in txt:
+            
+            # 广之旅页面结构：每个产品在一个包含【】和￥的a标签中
+            # 直接从页面源码中提取所有产品链接
+            html = resp.text
+            
+            # 匹配模式：包含【】标题和￥价格的<a>标签
+            # 格式：<a href="xxx.html">...【标题】...￥价格...</a>
+            pattern = r'<a[^>]+href="([^"]*(?:abroad|domestic|around|free|freetour)/[^"/]+\.html)"[^>]*>(.*?)</a>'
+            matches = re.findall(pattern, html, re.DOTALL)
+            
+            seen = set()
+            for href, content in matches:
+                # 提取纯文本
+                text = re.sub(r'<[^>]+>', ' ', content).strip()
+                text = re.sub(r'\s+', ' ', text)
+                
+                # 提取标题（【】中的内容）
+                title_match = re.search(r'【([^】]+)】', text)
+                if not title_match:
                     continue
-                title = ""
-                for part in txt.split("\\"):
-                    part = part.strip()
-                    if "【" in part and "】" in part and len(part) > len(title):
-                        title = part
-                price = extract_price(txt)
-                if title and price > 0:
-                    # 尝试从卡片中提取图片
-                    img_url = ""
-                    img = card.find("img")
-                    if img:
-                        img_src = img.get("src") or img.get("data-original") or img.get("data-src")
-                        if img_src:
-                            if img_src.startswith("http"):
-                                img_url = img_src
-                            elif img_src.startswith("/"):
-                                img_url = self.BASE_URL + img_src
-                    
-                    item = {"source": "广之旅", "title": title, "price": price, "url": url, "days": extract_days(title)}
-                    if img_url:
-                        item["img"] = img_url
-                    all_items.append(item)
+                title = text[text.find('【'):text.find('】')+1]
+                
+                # 提取价格
+                price = extract_price(text)
+                if price <= 0:
+                    continue
+                
+                # 去重
+                key = title + str(price)
+                if key in seen:
+                    continue
+                seen.add(key)
+                
+                # 构建详情页URL
+                if href.startswith("http"):
+                    detail_url = href
+                else:
+                    detail_url = "https://www.gzl.com.cn" + href if href.startswith("/") else "https://www.gzl.com.cn/" + href
+                
+                # 提取图片
+                img_url = ""
+                img_match = re.search(r'<img[^>]+src="([^"]+)"[^>]*>', content)
+                if img_match:
+                    img_src = img_match.group(1)
+                    if img_src.startswith("http"):
+                        img_url = img_src
+                    elif img_src.startswith("/"):
+                        img_url = "https://www.gzl.com.cn" + img_src
+                
+                item = {
+                    "source": "广之旅",
+                    "title": title,
+                    "price": price,
+                    "url": detail_url,
+                    "days": extract_days(title),
+                }
+                if img_url:
+                    item["img"] = img_url
+                all_items.append(item)
+            
             time.sleep(REQUEST_DELAY)
         return all_items
 
@@ -576,34 +628,69 @@ class GdctsSpider:
             resp = safe_request(url)
             if not resp:
                 continue
-            soup = BeautifulSoup(resp.text, "lxml")
-            for card in soup.find_all(["div", "a", "li"]):
-                txt = card.get_text(" ", strip=True)
-                if "【" not in txt:
+            
+            base_url = self.PC_URL if url.startswith(self.PC_URL) else self.MOBILE_URL
+            html = resp.text
+            
+            # 方法：从页面源码中提取所有包含【】和/product/的<a>标签
+            # 先找所有a标签，然后筛选
+            pattern = r'<a[^>]+href="([^"]*product/line/detail/[^"]*)"[^>]*>(.*?)</a>'
+            matches = re.findall(pattern, html, re.DOTALL)
+            
+            seen = set()
+            for href, content in matches:
+                # 提取纯文本
+                text = re.sub(r'<[^>]+>', ' ', content).strip()
+                text = re.sub(r'\s+', ' ', text)
+                
+                # 检查是否包含【】
+                if '【' not in text or '】' not in text:
                     continue
-                title = ""
-                for part in txt.split("\\"):
-                    part = part.strip()
-                    if "【" in part and "】" in part and len(part) > len(title):
-                        title = part
-                price = extract_price(txt)
-                if title and len(title) > 8:
-                    # 尝试从卡片中提取图片
-                    img_url = ""
-                    img = card.find("img")
-                    if img:
-                        img_src = img.get("src") or img.get("data-original") or img.get("data-src")
-                        if img_src:
-                            if img_src.startswith("http"):
-                                img_url = img_src
-                            elif img_src.startswith("/"):
-                                base = self.PC_URL if url.startswith(self.PC_URL) else self.MOBILE_URL
-                                img_url = base + img_src
-                    
-                    item = {"source": "广东中旅", "title": title, "price": price, "url": url, "days": extract_days(title)}
-                    if img_url:
-                        item["img"] = img_url
-                    all_items.append(item)
+                
+                # 提取标题
+                title_match = re.search(r'【([^】]+)】', text)
+                if not title_match:
+                    continue
+                title = '【' + title_match.group(1) + '】'
+                
+                # 提取价格
+                price = extract_price(text)
+                if price <= 0:
+                    continue
+                
+                # 去重
+                key = title + str(price)
+                if key in seen:
+                    continue
+                seen.add(key)
+                
+                # 构建详情页URL
+                if href.startswith("http"):
+                    detail_url = href
+                else:
+                    detail_url = base_url + href if href.startswith("/") else base_url + "/" + href
+                
+                # 提取图片
+                img_url = ""
+                img_match = re.search(r'<img[^>]+src="([^"]+)"[^>]*>', content)
+                if img_match:
+                    img_src = img_match.group(1)
+                    if img_src.startswith("http"):
+                        img_url = img_src
+                    elif img_src.startswith("/"):
+                        img_url = base_url + img_src
+                
+                item = {
+                    "source": "广东中旅",
+                    "title": title,
+                    "price": price,
+                    "url": detail_url,
+                    "days": extract_days(title),
+                }
+                if img_url:
+                    item["img"] = img_url
+                all_items.append(item)
+            
             time.sleep(REQUEST_DELAY)
         return all_items
 
