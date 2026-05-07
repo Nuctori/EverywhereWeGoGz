@@ -538,39 +538,78 @@ class GzqlxSpider:
 
 
 class KanghuiSpider:
-    BASE_URL = "http://m.cctpage.com"
+    BASE_URL = "http://gz.cctpage.com"
+    # 康辉有70+个navid分类，每个约30-50产品，总计2000+产品
+    NAVIDS = [6, 7, 8, 9, 10, 11, 12, 14, 53, 56, 57, 58, 61, 64, 66, 67, 68, 69, 70, 71, 72, 73, 75, 76, 85, 86, 88, 89, 90, 93, 95, 96, 97, 98, 100, 101, 102, 103, 104, 105, 106, 108, 174, 175, 176, 177, 178, 200, 201, 202, 203, 204, 205, 208, 209, 210, 212, 213, 214, 246, 247, 248, 250, 251, 252, 253, 256, 258, 260, 263]
 
     def fetch(self):
         print("[康辉] 抓取中...")
-        resp = safe_request(self.BASE_URL)
-        if not resp:
-            return []
-
         items = []
-        text = resp.text
+        seen = set()
 
-        # 解析页面中嵌入的 malldata JSON
-        maldatas = re.findall(r'malldata\.(\w+)\s*=\s*(\[.*?\]);', text, re.DOTALL)
-        for name, data in maldatas:
+        for navid in self.NAVIDS:
             try:
-                parsed = json.loads(data)
-                for category in parsed:
-                    prod_list = category.get('list', [])
-                    for p in prod_list:
-                        name_field = p.get('name', '')
-                        price = p.get('price', 0)
-                        if name_field and price > 0:
-                            items.append({
-                                "source": "康辉",
-                                "title": name_field,
-                                "price": price,
-                                "url": self.BASE_URL + p.get('url', ''),
-                                "days": extract_days(name_field),
-                                "img": p.get('img', ''),
-                            })
-            except Exception as e:
-                print(f"  Parse error: {e}")
+                url = f"{self.BASE_URL}/PC/Product/ColumnList?navid={navid}"
+                resp = safe_request(url)
+                if not resp:
+                    continue
 
+                html = resp.text
+                # 提取产品卡片：先匹配每个li class="j_item"
+                for li_match in re.finditer(r'<li class="j_item">(.*?)</li>', html, re.DOTALL):
+                    li_html = li_match.group(1)
+                    
+                    # 只处理包含prodcode的（排除热门目的地等）
+                    href_m = re.search(r'href="(/PC/TourLine/Details\?prodcode=[^"]+)"', li_html)
+                    if not href_m:
+                        continue
+                    href = href_m.group(1)
+                    
+                    # 提取标题
+                    title_m = re.search(r'title="([^"]*)"', li_html)
+                    title = title_m.group(1) if title_m else ""
+                    title = title.replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#183;', '·')
+                    title = re.sub(r'<[^>]+>', '', title).strip()
+                    
+                    # 提取价格 - 在li_html中找
+                    price_m = re.search(r'<div class="price">\s*[^\d]*(\d+)', li_html, re.DOTALL)
+                    price = float(price_m.group(1)) if price_m else 0
+                    
+                    if not title or price <= 0:
+                        continue
+                    
+                    # 去重
+                    key = title + str(price)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    
+                    # 提取图片
+                    img_url = ""
+                    img_m = re.search(r'data-original="([^"]+)"', li_html)
+                    if img_m:
+                        img_src = img_m.group(1)
+                        if img_src.startswith('http'):
+                            img_url = img_src
+                        else:
+                            img_url = self.BASE_URL + img_src
+                    
+                    item = {
+                        "source": "康辉",
+                        "title": title,
+                        "price": price,
+                        "url": self.BASE_URL + href,
+                        "days": extract_days(title),
+                    }
+                    if img_url:
+                        item["img"] = img_url
+                    items.append(item)
+
+                time.sleep(0.5)  # 缩短延迟，navid较多
+            except Exception as e:
+                print(f"  navid={navid} error: {e}")
+
+        print(f"[康辉] 抓取完成: {len(items)} 条")
         return items
 
 
@@ -730,80 +769,109 @@ class GzlSpider:
 
 
 class GdctsSpider:
-    PC_URL = "http://www.gdcts.com"
-    MOBILE_URL = "http://m.gdcts.com"
+    BASE_URL = "http://m.gdcts.com"
+    # 广东中旅有9大分类，每个分类下有多个regionalid子分类
+    # 每个子分类有约20-25页，每页20产品
+    # 全抓数据量太大，抽样抓每个子分类的前3页
+    CAT_PATHS = [
+        "/product/category/index/regionalId_1/13/key/0",
+        "/product/category/index/regionalId_1/14/key/2",
+        "/product/category/index/regionalId_1/15/key/1",
+        "/product/category/index/regionalId_1/2/key/8",
+        "/product/category/index/regionalId_1/4/key/3",
+        "/product/category/index/regionalId_1/616/key/5",
+        "/product/category/index/regionalId_1/7/key/4",
+        "/product/category/index/regionalId_1/8/key/6",
+        "/product/category/index/regionalId_1/9/key/7",
+    ]
+    MAX_PAGES_PER_REGIONAL = 3  # 每个子分类最多3页
 
     def fetch(self):
         print("[广东中旅] 抓取中...")
         all_items = []
-        for url in [self.PC_URL + "/", self.MOBILE_URL + "/product/category/index"]:
-            resp = safe_request(url)
-            if not resp:
-                continue
-            
-            base_url = self.PC_URL if url.startswith(self.PC_URL) else self.MOBILE_URL
-            html = resp.text
-            
-            # 方法：从页面源码中提取所有包含【】和/product/的<a>标签
-            # 先找所有a标签，然后筛选
-            pattern = r'<a[^>]+href="([^"]*product/line/detail/[^"]*)"[^>]*>(.*?)</a>'
-            matches = re.findall(pattern, html, re.DOTALL)
-            
-            seen = set()
-            for href, content in matches:
-                # 提取纯文本
-                text = re.sub(r'<[^>]+>', ' ', content).strip()
-                text = re.sub(r'\s+', ' ', text)
-                
-                # 检查是否包含【】
-                if '【' not in text or '】' not in text:
+        seen = set()
+
+        for cat_path in self.CAT_PATHS:
+            try:
+                # 获取分类页面，提取所有regionalid
+                cat_url = self.BASE_URL + cat_path
+                resp = safe_request(cat_url)
+                if not resp:
                     continue
-                
-                # 提取标题
-                title_match = re.search(r'【([^】]+)】', text)
-                if not title_match:
-                    continue
-                title = '【' + title_match.group(1) + '】'
-                
-                # 提取价格
-                price = extract_price(text)
-                if price <= 0:
-                    continue
-                
-                # 去重
-                key = title + str(price)
-                if key in seen:
-                    continue
-                seen.add(key)
-                
-                # 构建详情页URL
-                if href.startswith("http"):
-                    detail_url = href
-                else:
-                    detail_url = base_url + href if href.startswith("/") else base_url + "/" + href
-                
-                # 提取图片
-                img_url = ""
-                img_match = re.search(r'<img[^>]+src="([^"]+)"[^>]*>', content)
-                if img_match:
-                    img_src = img_match.group(1)
-                    if img_src.startswith("http"):
-                        img_url = img_src
-                    elif img_src.startswith("/"):
-                        img_url = base_url + img_src
-                
-                item = {
-                    "source": "广东中旅",
-                    "title": title,
-                    "price": price,
-                    "url": detail_url,
-                    "days": extract_days(title),
-                }
-                if img_url:
-                    item["img"] = img_url
-                all_items.append(item)
-            
-            time.sleep(REQUEST_DELAY)
+
+                regionalids = re.findall(r'regionalid/(\d+)', resp.text)
+                regionalids = sorted(set(regionalids), key=int)
+                print(f"  [广东中旅] {cat_path}: 发现 {len(regionalids)} 个子分类")
+
+                for rid in regionalids:
+                    for page in range(1, self.MAX_PAGES_PER_REGIONAL + 1):
+                        try:
+                            url = f"{self.BASE_URL}/product/line/index/id/69/regionalid/{rid}/page/{page}"
+                            resp = safe_request(url)
+                            if not resp:
+                                break
+
+                            html = resp.text
+                            # 提取产品
+                            pattern = r'<a href="(/product/line/detail/[^"]+)">\s*<div class="pic">.*?<img[^>]+src="([^"]+)"[^>]*>.*?</div>\s*<div class="name">([^<]+)</div>.*?<div class="price">\s*[^\d]*(\d+)'  
+                            matches = re.findall(pattern, html, re.DOTALL)
+
+                            if not matches:
+                                # 尝试简化模式
+                                matches = []
+                                for m in re.findall(r'<a href="(/product/line/detail/[^"]+)">(.*?)</a>', html, re.DOTALL):
+                                    href, content = m
+                                    title_m = re.search(r'<div class="name">([^<]+)</div>', content)
+                                    price_m = re.search(r'(\d+)', re.search(r'<div class="price">(.*?)</div>', content, re.S).group(1) if re.search(r'<div class="price">(.*?)</div>', content, re.S) else '')
+                                    img_m = re.search(r'<img[^>]+src="([^"]+)"', content)
+                                    if title_m and price_m:
+                                        matches.append((href, img_m.group(1) if img_m else '', title_m.group(1), price_m.group(1)))
+
+                            page_items = 0
+                            for href, img_src, title, price_str in matches:
+                                try:
+                                    price = float(price_str)
+                                except:
+                                    continue
+                                if price <= 0 or not title:
+                                    continue
+
+                                title = title.strip()
+                                key = title + str(price)
+                                if key in seen:
+                                    continue
+                                seen.add(key)
+
+                                detail_url = self.BASE_URL + href
+                                img_url = ""
+                                if img_src:
+                                    if img_src.startswith("http"):
+                                        img_url = img_src
+                                    else:
+                                        img_url = self.BASE_URL + img_src
+
+                                item = {
+                                    "source": "广东中旅",
+                                    "title": title,
+                                    "price": price,
+                                    "url": detail_url,
+                                    "days": extract_days(title),
+                                }
+                                if img_url:
+                                    item["img"] = img_url
+                                all_items.append(item)
+                                page_items += 1
+
+                            if page_items == 0:
+                                break
+                            time.sleep(0.3)
+                        except Exception as e:
+                            break
+                    time.sleep(0.5)
+            except Exception as e:
+                print(f"  [广东中旅] {cat_path} error: {e}")
+
+        print(f"[广东中旅] 抓取完成: {len(all_items)} 条")
         return all_items
 
 
@@ -814,38 +882,41 @@ class PintuSpider:
         {"name": "国内游", "path": "/line/list.aspx", "params": {"cid": "guangzhou", "tid": "domestic", "key": "", "page": "1"}},
         {"name": "出境游", "path": "/line/list.aspx", "params": {"cid": "guangzhou", "tid": "abroad", "key": "", "page": "1"}},
     ]
+    MAX_PAGES = 10  # 每分类最多抓10页
 
     def fetch(self):
         print("[品途] 抓取中...")
         all_items = []
+        seen = set()
+
         for cat in self.PATHS:
-            for page in range(1, 3):
+            for page in range(1, self.MAX_PAGES + 1):
                 params = cat["params"].copy()
                 params["page"] = str(page)
                 url = self.BASE_URL + cat["path"]
                 resp = safe_request(url, params=params)
                 if not resp:
                     break
+
                 soup = BeautifulSoup(resp.text, "lxml")
-                # 品途列表页每个产品在一个 li 中，包含 class="name" 的标题和 class="price" 的价格
-                for li in soup.find_all("li"):
+                lis = soup.find_all("li")
+                page_items = 0
+
+                for li in lis:
                     txt = li.get_text(" ", strip=True)
                     if "行程天数" not in txt:
                         continue
-                    
-                    # 从 <a class="name"> 提取标题
+
                     name_elem = li.find("a", class_="name")
                     if name_elem:
                         title = name_elem.get_text(strip=True)
                     else:
-                        # 备用方案：从文本中提取最长的包含"游"的行
                         title = ""
                         for part in txt.split("\n"):
                             part = part.strip()
                             if len(part) > len(title) and any(k in part for k in ("游", "天", "日", "湾", "山", "岛")):
                                 title = part
-                    
-                    # 从 <div class="price"> 提取价格
+
                     price_elem = li.find("div", class_="price")
                     if price_elem:
                         price_text = price_elem.get_text(strip=True)
@@ -853,19 +924,16 @@ class PintuSpider:
                         price = float(price_match.group(1).replace(",", "")) if price_match else 0
                     else:
                         price = extract_price(txt)
-                    
-                    # 提取天数
+
                     days_m = re.search(r"行程天数[:：]\s*(\d+)[天日]", txt)
                     days = int(days_m.group(1)) if days_m else 0
-                    
-                    # 提取详情页URL
-                    detail_url = url  # 默认用列表页
+
+                    detail_url = url
                     if name_elem and name_elem.get("href"):
                         detail_url = name_elem["href"]
                         if not detail_url.startswith("http"):
                             detail_url = self.BASE_URL + detail_url
-                    
-                    # 提取图片
+
                     img_url = ""
                     pic_div = li.find("div", class_="pic")
                     if pic_div:
@@ -879,13 +947,17 @@ class PintuSpider:
                                     img_url = self.BASE_URL + img_src
                                 else:
                                     img_url = self.BASE_URL + "/" + img_src
-                    
-                    # 过滤条件
+
                     if title and len(title) > 5 and days > 0 and price > 0:
-                        # 价格合理性检查：多日游价格不应低于100（除非是1日游）
                         if days >= 3 and price < 100:
-                            print(f"  [警告] 价格异常低，跳过: {title[:40]}... {price}元/{days}天")
                             continue
+
+                        # 去重
+                        key = title + str(price)
+                        if key in seen:
+                            continue
+                        seen.add(key)
+
                         item = {
                             "source": "品途",
                             "title": title,
@@ -896,7 +968,15 @@ class PintuSpider:
                         if img_url:
                             item["img"] = img_url
                         all_items.append(item)
+                        page_items += 1
+
+                print(f"  [品途-{cat['name']}] 第{page}页: {page_items}条")
+                # 如果本页没有数据，说明已到最后一页
+                if page_items == 0:
+                    break
                 time.sleep(REQUEST_DELAY)
+
+        print(f"[品途] 抓取完成: {len(all_items)} 条")
         return all_items
 
 
