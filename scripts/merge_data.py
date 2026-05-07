@@ -209,7 +209,7 @@ def main():
             print(f"[旧数据] 读取失败: {e}")
 
     # 2. 读取新的raw数据
-    raw_files = ["raw_jrt365_full.json", "raw_http_full.json", "raw_saihuitong_full.json"]
+    raw_files = ["raw_jrt365_full.json", "raw_http_full.json", "raw_saihuitong_full.json", "raw_gzl_api.json"]
     for fname in raw_files:
         fpath = os.path.join(data_dir, fname)
         if os.path.exists(fpath):
