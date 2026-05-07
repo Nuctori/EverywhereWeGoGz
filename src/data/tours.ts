@@ -49,6 +49,7 @@ export const destinations = [
   "张家界",
   "新疆",
   "桂林",
+  "西安",
   "西藏",
   "贵州"
 ];
