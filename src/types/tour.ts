@@ -44,6 +44,7 @@ export interface Tour {
   theme: string;
   suitableFor: string[];
   difficulty: string;
+  leisureLevel: 'easy' | 'medium' | 'hard';
   season: string;
   language: string;
   createdAt: string;

@@ -35,6 +35,9 @@ import {
   BarChart3,
   HeartHandshake,
   Plane,
+  Footprints,
+  Mountain,
+  TreePine,
 } from 'lucide-react';
 
 interface TourDetailModalProps {
@@ -172,6 +175,7 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
                 <InfoItem icon={<Utensils className="w-4 h-4" />} label="餐饮安排" value={tour.meals} />
                 <InfoItem icon={<Users className="w-4 h-4" />} label="团队规模" value={tour.groupSize} />
                 <InfoItem icon={<BarChart3 className="w-4 h-4" />} label="难度等级" value={tour.difficulty} />
+                <LeisureLevelItem level={tour.leisureLevel} />
                 <InfoItem icon={<Globe className="w-4 h-4" />} label="出行季节" value={tour.season} />
                 <InfoItem icon={<HeartHandshake className="w-4 h-4" />} label="导游语言" value={tour.language} />
                 <InfoItem icon={<Plane className="w-4 h-4" />} label="签证要求" value={tour.visaRequirements} />
@@ -355,6 +359,24 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
         </ScrollArea>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function LeisureLevelItem({ level }: { level: 'easy' | 'medium' | 'hard' }) {
+  const config = {
+    easy: { icon: <TreePine className="w-4 h-4 text-green-500" />, label: '休闲指数', text: '轻松休闲，适合大多数人', color: 'text-green-700', bg: 'bg-green-50' },
+    medium: { icon: <Footprints className="w-4 h-4 text-amber-500" />, label: '休闲指数', text: '中等强度，需要一定体力', color: 'text-amber-700', bg: 'bg-amber-50' },
+    hard: { icon: <Mountain className="w-4 h-4 text-red-500" />, label: '休闲指数', text: '高强度/有挑战性，适合有户外经验者', color: 'text-red-700', bg: 'bg-red-50' },
+  };
+  const c = config[level];
+  return (
+    <div className={`flex items-start gap-3 rounded-lg p-3 ${c.bg}`}>
+      <div className="shrink-0 mt-0.5">{c.icon}</div>
+      <div>
+        <p className="text-xs text-slate-500">{c.label}</p>
+        <p className={`text-sm font-medium ${c.color}`}>{c.text}</p>
+      </div>
+    </div>
   );
 }
 

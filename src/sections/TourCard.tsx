@@ -2,7 +2,7 @@ import type { Tour } from '@/types/tour';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, Clock, Users, Flame, Sparkles, Zap, Eye, ImageOff } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, Flame, Sparkles, Zap, Eye, ImageOff, Footprints, Mountain } from 'lucide-react';
 import { useState, memo } from 'react';
 
 interface TourCardProps {
@@ -35,6 +35,16 @@ export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps)
         <h3 className="font-semibold text-slate-800 mb-2 line-clamp-2 text-sm leading-relaxed group-hover:text-blue-600 transition-colors">{tour.title}</h3>
         <div className="flex flex-wrap gap-1.5 mb-3">
           {tour.tags?.slice(0, 3).map((tag) => <Badge key={tag} variant="secondary" className="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200">{tag}</Badge>)}
+          {tour.leisureLevel === 'medium' && (
+            <Badge variant="secondary" className="text-xs bg-amber-50 text-amber-700 hover:bg-amber-100 gap-1">
+              <Footprints className="w-3 h-3" />需体力
+            </Badge>
+          )}
+          {tour.leisureLevel === 'hard' && (
+            <Badge variant="secondary" className="text-xs bg-red-50 text-red-700 hover:bg-red-100 gap-1">
+              <Mountain className="w-3 h-3" />高强度
+            </Badge>
+          )}
         </div>
         <div className="space-y-1.5 mb-3">
           <div className="flex items-center text-xs text-slate-500 gap-3">
