@@ -24,6 +24,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 
 import { sources, destinations, themes } from '@/data/tours';
 
@@ -68,7 +70,7 @@ export function TourList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({
     destination: '', minPrice: null, maxPrice: null, duration: null,
-    source: '', departureDate: '', theme: '', sortBy: 'hot',
+    source: '', departureDate: '', departureDateStart: '', departureDateEnd: '', theme: '', sortBy: 'hot',
   });
 
   const { maxPriceAll, priceStats } = useMemo(() => computePriceStats(localTours), [localTours]);
@@ -78,13 +80,21 @@ export function TourList() {
   useEffect(() => { setPriceRange([0, maxPriceAll]); }, [maxPriceAll]);
 
   const dateFilter = useMemo(() => {
+    // 优先使用日期范围
+    if (filters.departureDateStart || filters.departureDateEnd) {
+      return {
+        mode: 'range' as const,
+        start: filters.departureDateStart || null,
+        end: filters.departureDateEnd || null,
+      };
+    }
     if (!filters.departureDate) return null;
     const today = new Date().toISOString().split('T')[0];
     const selected = filters.departureDate;
     if (selected === today) return { mode: 'exact' as const, date: today };
     if (selected > today) return { mode: 'within' as const, date: selected };
     return { mode: 'after' as const, date: selected };
-  }, [filters.departureDate]);
+  }, [filters.departureDate, filters.departureDateStart, filters.departureDateEnd]);
 
   const displayTours = useMemo(() => {
     if (localTours.length === 0) return [];
@@ -96,6 +106,10 @@ export function TourList() {
         if (dateFilter.mode === 'exact' && tour.departureDate !== dateFilter.date) return false;
         if (dateFilter.mode === 'within' && tour.departureDate > dateFilter.date) return false;
         if (dateFilter.mode === 'after' && tour.departureDate < dateFilter.date) return false;
+        if (dateFilter.mode === 'range') {
+          if (dateFilter.start && tour.departureDate < dateFilter.start) return false;
+          if (dateFilter.end && tour.departureDate > dateFilter.end) return false;
+        }
       }
       if (tour.price < debouncedPriceRange[0] || tour.price > debouncedPriceRange[1]) return false;
       if (filters.duration && tour.duration !== filters.duration) return false;
@@ -120,7 +134,9 @@ export function TourList() {
   useEffect(() => { setCurrentPage(1); }, [filters, debouncedPriceRange]);
 
   const activeFilterCount = [
-    filters.destination, filters.source, filters.theme, filters.departureDate, filters.duration,
+    filters.destination, filters.source, filters.theme,
+    filters.departureDate || filters.departureDateStart || filters.departureDateEnd,
+    filters.duration,
     priceRange[0] > 0 || priceRange[1] < maxPriceAll,
   ].filter(Boolean).length;
 
@@ -135,6 +151,8 @@ export function TourList() {
     { label: '15天内', value: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0] },
     { label: '30天内', value: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0] },
   ];
+
+  const [dateRangeOpen, setDateRangeOpen] = useState(false);
 
   return (
     <section className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -195,15 +213,51 @@ export function TourList() {
               <div>
                 <label className="text-sm font-medium text-slate-700 mb-1.5 block"><Calendar className="w-3.5 h-3.5 inline mr-1" />出发日期</label>
                 <div className="text-xs text-slate-500 mb-1.5">
-                  {filters.departureDate ? (filters.departureDate === today ? '今天及之前出发' : `最晚 ${filters.departureDate} 前出发`) : '全部日期'}
+                  {filters.departureDateStart || filters.departureDateEnd
+                    ? `${filters.departureDateStart || '不限'} 至 ${filters.departureDateEnd || '不限'}`
+                    : filters.departureDate
+                      ? (filters.departureDate === today ? '今天及之前出发' : `最晚 ${filters.departureDate} 前出发`)
+                      : '全部日期'}
                 </div>
-                <div className="flex gap-1.5 flex-wrap">
+                <div className="flex gap-1.5 flex-wrap items-center">
                   {dateOptions.map((opt) => (
-                    <button key={opt.label} onClick={() => setFilters({ ...filters, departureDate: opt.value })}
-                      className={`text-xs px-2 py-1 rounded border transition-colors ${filters.departureDate === opt.value ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'}`}>
+                    <button key={opt.label} onClick={() => setFilters({ ...filters, departureDate: opt.value, departureDateStart: '', departureDateEnd: '' })}
+                      className={`text-xs px-2 py-1 rounded border transition-colors ${filters.departureDate === opt.value && !filters.departureDateStart && !filters.departureDateEnd ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'}`}>
                       {opt.label}
                     </button>
                   ))}
+                  <Popover open={dateRangeOpen} onOpenChange={setDateRangeOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        className={`text-xs px-2 py-1 rounded border transition-colors ${filters.departureDateStart || filters.departureDateEnd ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'}`}
+                      >
+                        自定义
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="range"
+                        selected={{
+                          from: filters.departureDateStart ? new Date(filters.departureDateStart) : undefined,
+                          to: filters.departureDateEnd ? new Date(filters.departureDateEnd) : undefined,
+                        }}
+                        onSelect={(range) => {
+                          if (range?.from) {
+                            const start = range.from.toISOString().split('T')[0];
+                            const end = range.to ? range.to.toISOString().split('T')[0] : start;
+                            setFilters({
+                              ...filters,
+                              departureDate: '',
+                              departureDateStart: start,
+                              departureDateEnd: end,
+                            });
+                            if (range.to) setDateRangeOpen(false);
+                          }
+                        }}
+                        numberOfMonths={2}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
               <div className="sm:col-span-2">
@@ -242,7 +296,15 @@ export function TourList() {
             {filters.destination && <Badge variant="outline" className="gap-1"><MapPin className="w-3 h-3" />{filters.destination}<X className="w-3 h-3 cursor-pointer" onClick={() => setFilters({ ...filters, destination: '' })} /></Badge>}
             {filters.theme && <Badge variant="outline" className="gap-1">{filters.theme}<X className="w-3 h-3 cursor-pointer" onClick={() => setFilters({ ...filters, theme: '' })} /></Badge>}
             {(priceRange[0] > 0 || priceRange[1] < maxPriceAll) && <Badge variant="outline" className="gap-1">￥{priceRange[0]}-￥{priceRange[1]}<X className="w-3 h-3 cursor-pointer" onClick={() => setPriceRange([0, maxPriceAll])} /></Badge>}
-            {filters.departureDate && <Badge variant="outline" className="gap-1"><Calendar className="w-3 h-3" />{filters.departureDate === today ? '今天' : `${filters.departureDate}前`}<X className="w-3 h-3 cursor-pointer" onClick={() => setFilters({ ...filters, departureDate: '' })} /></Badge>}
+            {(filters.departureDate || filters.departureDateStart || filters.departureDateEnd) && (
+              <Badge variant="outline" className="gap-1">
+                <Calendar className="w-3 h-3" />
+                {filters.departureDateStart || filters.departureDateEnd
+                  ? `${filters.departureDateStart || '不限'} 至 ${filters.departureDateEnd || '不限'}`
+                  : filters.departureDate === today ? '今天' : `${filters.departureDate}前`}
+                <X className="w-3 h-3 cursor-pointer" onClick={() => setFilters({ ...filters, departureDate: '', departureDateStart: '', departureDateEnd: '' })} />
+              </Badge>
+            )}
             {filters.duration && <Badge variant="outline" className="gap-1">{filters.duration}天<X className="w-3 h-3 cursor-pointer" onClick={() => setFilters({ ...filters, duration: null })} /></Badge>}
             {filters.source && <Badge variant="outline" className="gap-1">{filters.source}<X className="w-3 h-3 cursor-pointer" onClick={() => setFilters({ ...filters, source: '' })} /></Badge>}
           </div>

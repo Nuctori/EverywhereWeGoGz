@@ -109,9 +109,7 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
             <div className="bg-slate-50 rounded-lg p-3 text-center">
               <Star className="w-5 h-5 text-yellow-500 mx-auto mb-1" />
               <p className="text-xs text-slate-500">评分</p>
-              <p className="font-semibold text-sm">
-                {tour.rating} ({tour.reviewCount}条)
-              </p>
+              <p className="font-semibold text-sm text-slate-400">—</p>
             </div>
           </div>
 
@@ -333,7 +331,22 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
 
           <div className="mt-6 flex gap-3">
             <Button className="flex-1" size="lg" onClick={() => window.open(tour.bookingUrl, '_blank')}>
-              立即预订
+              查看产品详情
+            </Button>
+            <Button variant="outline" size="lg" onClick={() => {
+              const searchUrls: Record<string, string> = {
+                '广之旅': 'https://www.gzl.com.cn/search?keyword=',
+                '广东中旅': 'http://m.gdcts.com/search?keyword=',
+                '假日通': 'http://www.jrt365.com/tourgroup/tourgroup_list.aspx?keyword=',
+                '品途': 'http://gz.ptotour.com/search?keyword=',
+                '康辉': 'http://gz.cctpage.com/PC/Search?keyword=',
+                '暴走村': 'http://gftblm.360jlb.cn/m/events?q=',
+                '广州去旅行': 'http://gzqlx.360jlb.cn/m/events?q=',
+              };
+              const searchUrl = searchUrls[tour.source] + encodeURIComponent(tour.title.slice(0, 20));
+              window.open(searchUrl, '_blank');
+            }}>
+              官网搜索
             </Button>
             <Button variant="outline" size="lg" onClick={onClose}>
               关闭

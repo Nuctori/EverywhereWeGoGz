@@ -2,7 +2,7 @@ import type { Tour } from '@/types/tour';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Calendar, Clock, Users, Star, Flame, Sparkles, Zap, Eye, ImageOff } from 'lucide-react';
+import { MapPin, Calendar, Clock, Users, Flame, Sparkles, Zap, Eye, ImageOff } from 'lucide-react';
 import { useState, memo } from 'react';
 
 interface TourCardProps {
@@ -46,15 +46,7 @@ export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps)
             {tour.groupSize && <span className="flex items-center gap-1"><Users className="w-3 h-3" />{tour.groupSize}</span>}
           </div>
         </div>
-        {tour.rating > 0 && (
-          <div className="flex items-center gap-1.5 mb-3">
-            <div className="flex items-center">
-              {Array.from({ length: 5 }).map((_, i) => <Star key={i} className={`w-3.5 h-3.5 ${i < Math.floor(tour.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-slate-200'}`} />)}
-            </div>
-            <span className="text-xs font-medium text-slate-700">{tour.rating}</span>
-            {tour.reviewCount > 0 && <span className="text-xs text-slate-400">({tour.reviewCount}评价)</span>}
-          </div>
-        )}
+        {/* 评价数据为算法生成的伪随机数，暂不展示 */}
         <div className="flex items-end justify-between pt-2 border-t border-slate-100">
           <div>
             <div className="flex items-baseline gap-1.5">

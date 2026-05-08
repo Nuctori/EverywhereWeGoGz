@@ -66,6 +66,8 @@ export type FilterState = {
   duration: number | null;
   source: string;
   departureDate: string;
+  departureDateStart: string;
+  departureDateEnd: string;
   theme: string;
   sortBy: 'price_asc' | 'price_desc' | 'hot' | 'new' | 'rating';
 };
