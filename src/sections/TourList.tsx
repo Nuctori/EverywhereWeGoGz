@@ -33,7 +33,8 @@ function useToursData() {
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    fetch('/data/tours.json')
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    fetch(baseUrl + 'data/tours.json')
       .then((r) => r.json())
       .then((data) => { setTours(data); setLoading(false); })
       .catch(() => { setTours([]); setLoading(false); });
