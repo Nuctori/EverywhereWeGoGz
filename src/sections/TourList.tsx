@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import type { Tour, FilterState } from '@/types/tour';
 import { TourCard } from './TourCard';
 import { TourDetailModal } from './TourDetailModal';
@@ -21,8 +21,7 @@ import {
   Flame,
   Sparkles,
   Star,
-  ChevronLeft,
-  ChevronRight,
+  Loader2,
 } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -63,12 +62,15 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 }
 
 const PAGE_SIZE = 24;
+const INITIAL_LOAD_COUNT = 24;
 
 export function TourList() {
   const { tours: localTours, loading } = useToursData();
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [displayCount, setDisplayCount] = useState(INITIAL_LOAD_COUNT);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterState>({
     destination: '', minPrice: null, maxPrice: null, duration: null,
     source: '', departureDate: '', departureDateStart: '', departureDateEnd: '', theme: '', sortBy: 'hot',
@@ -126,13 +128,35 @@ export function TourList() {
     return result;
   }, [filters, debouncedPriceRange, dateFilter, localTours]);
 
-  const totalPages = Math.ceil(displayTours.length / PAGE_SIZE);
-  const paginatedTours = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return displayTours.slice(start, start + PAGE_SIZE);
-  }, [displayTours, currentPage]);
+  // 瀑布流加载：根据displayCount截取数据
+  const waterfallTours = useMemo(() => {
+    return displayTours.slice(0, displayCount);
+  }, [displayTours, displayCount]);
 
-  useEffect(() => { setCurrentPage(1); }, [filters, debouncedPriceRange]);
+  useEffect(() => { setDisplayCount(INITIAL_LOAD_COUNT); }, [filters, debouncedPriceRange]);
+
+  // Intersection Observer 实现滚动到底部自动加载
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [target] = entries;
+    if (target.isIntersecting && !isLoadingMore && displayCount < displayTours.length) {
+      setIsLoadingMore(true);
+      setTimeout(() => {
+        setDisplayCount((prev) => Math.min(prev + PAGE_SIZE, displayTours.length));
+        setIsLoadingMore(false);
+      }, 300);
+    }
+  }, [isLoadingMore, displayCount, displayTours.length]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: '100px',
+      threshold: 0,
+    });
+    const currentRef = loadMoreRef.current;
+    if (currentRef) observer.observe(currentRef);
+    return () => { if (currentRef) observer.unobserve(currentRef); };
+  }, [handleObserver]);
 
   const activeFilterCount = [
     filters.destination, filters.source, filters.theme,
@@ -315,7 +339,7 @@ export function TourList() {
       {displayTours.length > 0 && (
         <div className="flex items-center justify-between mb-4 text-sm text-slate-500">
           <span>共 {displayTours.length} 条结果</span>
-          {totalPages > 1 && <span>第 {currentPage} / {totalPages} 页</span>}
+          {displayCount < displayTours.length && <span>已加载 {waterfallTours.length} / {displayTours.length}</span>}
         </div>
       )}
 
@@ -333,27 +357,23 @@ export function TourList() {
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {paginatedTours.map((tour) => <TourCard key={tour.id} tour={tour} onClick={() => handleCardClick(tour)} />)}
+            {waterfallTours.map((tour) => <TourCard key={tour.id} tour={tour} onClick={() => handleCardClick(tour)} />)}
           </div>
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
-              <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1}>
-                <ChevronLeft className="w-4 h-4" />上一页
-              </Button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) pageNum = i + 1;
-                  else if (currentPage <= 3) pageNum = i + 1;
-                  else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-                  else pageNum = currentPage - 2 + i;
-                  return <button key={pageNum} onClick={() => setCurrentPage(pageNum)} className={`w-8 h-8 rounded text-sm font-medium transition-colors ${currentPage === pageNum ? 'bg-blue-500 text-white' : 'text-slate-600 hover:bg-slate-100'}`}>{pageNum}</button>;
-                })}
-              </div>
-              <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>
-                下一页<ChevronRight className="w-4 h-4" />
-              </Button>
+          {/* 瀑布流加载触发器和加载状态 */}
+          {displayCount < displayTours.length && (
+            <div ref={loadMoreRef} className="flex items-center justify-center py-8">
+              {isLoadingMore ? (
+                <div className="flex items-center gap-2 text-slate-500">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">加载更多...</span>
+                </div>
+              ) : (
+                <div className="text-sm text-slate-400">向下滚动加载更多</div>
+              )}
             </div>
+          )}
+          {displayCount >= displayTours.length && displayTours.length > INITIAL_LOAD_COUNT && (
+            <div className="text-center py-8 text-sm text-slate-400">已加载全部 {displayTours.length} 条结果</div>
           )}
         </>
       )}
