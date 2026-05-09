@@ -49,6 +49,8 @@ export interface Tour {
   language: string;
   createdAt: string;
   updatedAt: string;
+  departureDates?: string[];
+  hotDepartureDates?: string[];
 }
 
 export interface DayItinerary {
