@@ -1,0 +1,65 @@
+﻿{'cid': 'guangzhou', 'tid': 'domestic', 'page': '1', 'sort': 'price'} -> 50 products, first: ['13898', '24911', '25758']
+python : Traceback (most recent call last):
+At line:1 char:59
++ ... NIOENCODING="utf-8"; python scripts\probe_sort_params.py 2>&1 | Out-F ...
++                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\urllib3\response.py", line 903, in _
+error_catcher
+{'cid': 'guangzhou', 'tid': 'domestic', 'page': '2', 'sort': 'price'} -> 50 products, first: ['13898', '24911', '25758']
+{'cid': 'guangzhou', 'tid': 'domestic', 'page': '1', 'order': 'asc'} -> 50 products, first: ['13898', '24911', '25758']
+    yield
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\urllib3\response.py", line 1049, in 
+_raw_read
+    raise IncompleteRead(self._fp_bytes_read, self.length_remaining)
+urllib3.exceptions.IncompleteRead: IncompleteRead(5868 bytes read, 87216 more expected)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\requests\models.py", line 822, in ge
+nerate
+    yield from self.raw.stream(chunk_size, decode_content=True)
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\urllib3\response.py", line 1257, in 
+stream
+    data = self.read(amt=amt, decode_content=decode_content)
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\urllib3\response.py", line 1149, in 
+read
+    data = self._raw_read(amt)
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\urllib3\response.py", line 1027, in 
+_raw_read
+    with self._error_catcher():
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\contextlib.py", line 153, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\urllib3\response.py", line 927, in _
+error_catcher
+    raise ProtocolError(arg, e) from e
+urllib3.exceptions.ProtocolError: ('Connection broken: IncompleteRead(5868 bytes read, 87216 more expected)', Incomplet
+eRead(5868 bytes read, 87216 more expected))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\react\app\scripts\probe_sort_params.py", line 15, in <module>
+    resp = requests.get('http://gz.ptotour.com/line/list.aspx', params=params, headers={'User-Agent':'Mozilla/5.0'})
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\requests\api.py", line 59, in reques
+t
+    return session.request(method=method, url=url, **kwargs)
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\requests\sessions.py", line 592, in 
+request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\requests\sessions.py", line 749, in 
+send
+    r.content
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\requests\models.py", line 904, in co
+ntent
+    self._content = b"".join(self.iter_content(CONTENT_CHUNK_SIZE)) or b""
+  File "C:\Users\Nuctori\AppData\Local\Programs\Python\Python310\lib\site-packages\requests\models.py", line 824, in ge
+nerate
+    raise ChunkedEncodingError(e)
+requests.exceptions.ChunkedEncodingError: ('Connection broken: IncompleteRead(5868 bytes read, 87216 more expected)', I
+ncompleteRead(5868 bytes read, 87216 more expected))

@@ -1,0 +1,234 @@
+{
+  "success" : true,
+  "code" : null,
+  "desc" : "no",
+  "errorInfo" : null,
+  "responseObject" : {
+    "content" : [ {
+      "groupTitle" : null,
+      "pdId" : null,
+      "dirtCode" : null,
+      "groupCountNum" : 0,
+      "groupSize" : 0,
+      "factResult" : [ {
+        "fieldName" : "pdTagNames",
+        "fieldCountMap" : {
+          "甜蜜侣程" : 1
+        }
+      }, {
+        "fieldName" : "scenicTags",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "promoteTagNames",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "hotSaleTagNames",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "saleTagNames",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "dept_place_name",
+        "fieldCountMap" : {
+          "三亚" : 1
+        }
+      }, {
+        "fieldName" : "seldestNames",
+        "fieldCountMap" : {
+          "西沙群岛" : 1
+        }
+      }, {
+        "fieldName" : "pdcompany",
+        "fieldCountMap" : {
+          "广州广之旅国际旅行社股份有限公司" : 1
+        }
+      }, {
+        "fieldName" : "type",
+        "fieldCountMap" : {
+          "FIXEDFREETRAVEL" : 1
+        }
+      }, {
+        "fieldName" : "bak1",
+        "fieldCountMap" : {
+          "NO_RATING" : 1
+        }
+      }, {
+        "fieldName" : "bak5",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "bedType",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "roomType",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "breakfastType",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "brand",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "hotelFeature",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "bak8",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "location",
+        "fieldCountMap" : { }
+      }, {
+        "fieldName" : "market",
+        "fieldCountMap" : {
+          "4028800c53c8a67b0153cb7710780121" : 1
+        }
+      }, {
+        "fieldName" : "pdtype",
+        "fieldCountMap" : {
+          "90" : 40,
+          "100" : 27,
+          "80" : 1
+        }
+      } ],
+      "allProductList" : [ {
+        "id" : null,
+        "type" : "FIXEDFREETRAVEL",
+        "pdId" : "0F1ACAEBF71A41DDE0532429030A5D63",
+        "title" : "【探秘西沙＊船票套餐】西沙群岛3天2晚＊祥龙岛号＊南海之梦号＊船票代订＜登七连屿＊赵述岛＊多元舱位随心选＊不含往返大交通＊等待确认＊1人起行＞",
+        "deptPlaceName" : "三亚",
+        "b2cMinPrice" : 5480,
+        "b2cMaxPrice" : null,
+        "minPrice" : null,
+        "appDotPrice" : null,
+        "weixinDotPrice" : null,
+        "b2cDotPrice" : "5480.0",
+        "hcptMinPrice" : null,
+        "hcptDotPrice" : null,
+        "resLevel" : "",
+        "appImageVoList" : null,
+        "wechatImageVoList" : null,
+        "images" : [ {
+          "pdId" : "0F1ACAEBF71A41DDE0532429030A5D63",
+          "imageBo" : {
+            "fileId" : "/group1/M00/36/D7/wKkBHl_1mD6AYGMaAABf8qxq9KY780.jpg",
+            "prefix" : "https://file.gzl.cn/group1/M00/36/D7/wKkBHl_1mD6AYGMaAABf8qxq9KY780_",
+            "suffix" : ".jpg"
+          },
+          "isPrimary" : "1",
+          "positionType" : null,
+          "position" : 0,
+          "imageStr" : "https://file.gzl.cn/group1/M00/36/D7/wKkBHl_1mD6AYGMaAABf8qxq9KY780.jpg",
+          "fileId" : "/group1/M00/36/D7/wKkBHl_1mD6AYGMaAABf8qxq9KY780.jpg",
+          "videoUrl" : null,
+          "imageClass" : null,
+          "videoType" : null
+        } ],
+        "defaultImage" : {
+          "pdId" : "0F1ACAEBF71A41DDE0532429030A5D63",
+          "imageBo" : {
+            "fileId" : "/group1/M00/36/D7/wKkBHl_1mD6AYGMaAABf8qxq9KY780.jpg",
+            "prefix" : "https://file.gzl.cn/group1/M00/36/D7/wKkBHl_1mD6AYGMaAABf8qxq9KY780_",
+            "suffix" : ".jpg"
+          },
+          "isPrimary" : "1",
+          "positionType" : null,
+          "position" : 0,
+          "imageStr" : "https://file.gzl.cn/group1/M00/36/D7/wKkBHl_1mD6AYGMaAABf8qxq9KY780.jpg",
+          "fileId" : "/group1/M00/36/D7/wKkBHl_1mD6AYGMaAABf8qxq9KY780.jpg",
+          "videoUrl" : null,
+          "imageClass" : null,
+          "videoType" : null
+        },
+        "pdTagNames" : [ "甜蜜侣程", "甜蜜侣程" ],
+        "scenicTagNames" : null,
+        "promoteTagNames" : null,
+        "hotSaleTagNames" : null,
+        "saleTagNames" : null,
+        "bedType" : null,
+        "roomType" : null,
+        "breakfastType" : null,
+        "isFreeTravel" : null,
+        "pdGroupBrand" : null,
+        "score" : null,
+        "typeOrder" : null,
+        "pdtagSalesOrder" : null,
+        "pdType" : "80",
+        "departureDaysList" : [ "2026-05-11", "2026-05-13", "2026-05-15", "2026-05-19", "2026-05-21", "2026-05-23", "2026-05-25", "2026-05-27", "2026-05-29", "2026-05-31", "2026-06-02", "2026-06-06", "2026-06-10", "2026-06-14", "2026-06-18", "2026-06-22", "2026-06-26", "2026-06-30", "2026-07-01", "2026-07-03", "2026-07-05", "2026-07-07", "2026-07-09", "2026-07-11", "2026-07-13", "2026-07-15", "2026-07-17", "2026-07-19", "2026-07-21", "2026-07-23", "2026-07-25", "2026-07-27", "2026-07-29", "2026-07-31", "2026-08-02", "2026-08-04", "2026-08-06", "2026-08-08", "2026-08-10", "2026-08-12", "2026-08-14", "2026-08-16", "2026-08-18", "2026-08-20", "2026-08-22", "2026-08-24", "2026-08-26", "2026-08-28", "2026-08-30", "2026-09-01", "2026-09-03", "2026-09-05", "2026-09-07", "2026-09-09", "2026-09-11", "2026-09-12", "2026-09-15", "2026-09-17", "2026-09-19", "2026-09-21", "2026-09-23", "2026-09-25", "2026-09-27", "2026-10-01", "2026-10-04", "2026-10-07", "2026-10-09", "2026-10-11", "2026-10-13", "2026-10-15", "2026-10-17", "2026-10-19", "2026-10-21", "2026-10-23", "2026-10-25", "2026-10-27", "2026-10-29", "2026-10-31", "2026-11-01", "2026-11-03", "2026-11-04", "2026-11-06", "2026-11-07", "2026-11-09", "2026-11-10", "2026-11-12", "2026-11-13", "2026-11-15", "2026-11-16", "2026-11-18", "2026-11-19", "2026-11-21", "2026-11-22", "2026-11-24", "2026-11-25", "2026-11-27", "2026-11-28", "2026-11-30", "2026-12-01", "2026-12-03", "2026-12-04", "2026-12-06", "2026-12-07", "2026-12-09", "2026-12-10", "2026-12-12", "2026-12-13", "2026-12-15", "2026-12-16", "2026-12-18", "2026-12-19", "2026-12-21", "2026-12-22", "2026-12-24", "2026-12-25", "2026-12-27", "2026-12-28", "2026-12-30", "2026-12-31" ],
+        "holidaysList" : null,
+        "isSupplierPd" : null,
+        "ecwalkPdType" : null,
+        "dirtCode" : "100101",
+        "dirtCodeDetail" : "100101102",
+        "pdCompanyName" : "广州广之旅国际旅行社股份有限公司",
+        "countNum" : 166,
+        "destName" : null,
+        "productJoinTitle" : null,
+        "code" : "",
+        "position" : null,
+        "isGiveWifi" : "0",
+        "giveRewardPointMultiple" : 1.0,
+        "giveRewardPointMultipleDisplay" : "1",
+        "visaRate" : null,
+        "roundTripInfo" : null,
+        "isTitleConfirmNeed" : null,
+        "primaryImg" : null,
+        "address" : "",
+        "ticketType" : null,
+        "hotelFeature" : null,
+        "commentScore" : "4.8",
+        "commentCount" : 8,
+        "salesAdvice" : null,
+        "isFreeShuttle" : 0,
+        "url" : "/domestic/0F1ACAEBF71A41DDE0532429030A5D63.html",
+        "appUrl" : null,
+        "wxUrl" : null,
+        "pdShortNum" : null,
+        "selfSupport" : "1",
+        "pdLevel" : "NO_RATING",
+        "isHaoQiao" : "0",
+        "cityId" : null,
+        "isNeedInterview" : null,
+        "isPlayTour" : "0",
+        "coordinate" : null,
+        "busSeatNumber" : "0",
+        "saleAdvice" : "",
+        "busUseScopeType" : null,
+        "maxNumHolds" : 0,
+        "stock" : 0,
+        "brand" : "",
+        "ticketTypes" : [ ],
+        "isSolid" : "0",
+        "city" : null,
+        "multiProductVoList" : null,
+        "restaurantTypeNameList" : [ ],
+        "pdKeywords" : null,
+        "distance" : null,
+        "specialPolicy" : "",
+        "productCategory" : "",
+        "localStandards" : "",
+        "market" : "4028800c53c8a67b0153cb7710780121",
+        "travelDays" : 4,
+        "salesVolume" : 684,
+        "interfaceType" : "",
+        "pmRuleDiscount" : null,
+        "categoryIds" : null,
+        "registrationDateStart" : null,
+        "registrationDateEnd" : null,
+        "registrationDateEndStr" : null,
+        "registrationDateEndTip" : null,
+        "raceDateStart" : null,
+        "raceDateEnd" : null
+      } ],
+      "allAppProductList" : null,
+      "withOutCityAppList" : null,
+      "withOutCityList" : null
+    } ],
+    "totalElements" : 1,
+    "totalPages" : 1,
+    "last" : true,
+    "numberOfElements" : 1,
+    "first" : true,
+    "sort" : null,
+    "size" : 20,
+    "number" : 0
+  }
+}

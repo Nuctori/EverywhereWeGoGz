@@ -1,0 +1,12 @@
+﻿http://gz.ptotour.com/line/list-1.aspx?cid=guangzhou&tid=domestic
+  HTTP 404, 0 products, first: []
+http://gz.ptotour.com/line/list-2.aspx?cid=guangzhou&tid=domestic
+  HTTP 404, 0 products, first: []
+http://gz.ptotour.com/line/list_p1.aspx?cid=guangzhou&tid=domestic
+  HTTP 404, 0 products, first: []
+http://gz.ptotour.com/line/list_p2.aspx?cid=guangzhou&tid=domestic
+  HTTP 404, 0 products, first: []
+http://gz.ptotour.com/line/list/guangzhou/domestic/1
+  HTTP 404, 0 products, first: []
+http://gz.ptotour.com/line/list/guangzhou/domestic/2
+  HTTP 404, 0 products, first: []

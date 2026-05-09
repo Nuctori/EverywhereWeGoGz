@@ -1,0 +1,12 @@
+﻿http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=domestic&page=1
+  产品数量: 50
+  前10个ID: ['13898', '24911', '25758', '13754', '8778', '26078', '25943', '16790', '13715', '26103']
+
+http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=domestic&page=2
+  产品数量: 50
+  前10个ID: ['13898', '24911', '25758', '13754', '8778', '26078', '25943', '16790', '13715', '26103']
+
+http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=domestic&page=3
+  产品数量: 50
+  前10个ID: ['13898', '24911', '25758', '13754', '8778', '26078', '25943', '16790', '13715', '26103']
+

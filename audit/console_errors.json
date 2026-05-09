@@ -1,0 +1,7 @@
+{
+  "errors": [],
+  "warnings": [
+    "Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.",
+    "Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}."
+  ]
+}

@@ -1,0 +1,6 @@
+﻿Pager found: True
+Pager HTML: <div class="pager"> </div>
+Total scripts: 5
+--- Script 1 ---
+  $(document).ready(function () {   $("#tid_domestic").addClass("hover");   $("#dpid_").addClass("hover");   $("#did_").addClass("hover");   $("#page_1").addClass("hover");  });  
+

@@ -1,0 +1,5 @@
+﻿http://www.ptotour.com/line/list.aspx?cid=guangzhou&tid=domestic&page=1 -> HTTP 200, text/html, 93036 bytes
+http://api.ptotour.com/line/list?cid=guangzhou&tid=domestic&page=1 -> HTTP 404, text/html; charset=us-ascii, 315 bytes
+http://m.ptotour.com/line/list.aspx?cid=guangzhou&tid=domestic&page=1 -> HTTP 404, text/html; charset=utf-8, 3344 bytes
+http://gz.ptotour.com/api/line/list?cid=guangzhou&tid=domestic -> HTTP 200, text/html, 272304 bytes
+http://gz.ptotour.com/ajax/line/list?cid=guangzhou&tid=domestic -> HTTP 200, text/html, 272304 bytes

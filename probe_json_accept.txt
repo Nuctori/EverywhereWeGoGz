@@ -1,0 +1,4 @@
+﻿Variant 1: text/html, 93073 bytes
+Variant 2: text/html, 93073 bytes
+Variant 3: text/html, 93073 bytes
+Variant 4: text/html, 93073 bytes

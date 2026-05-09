@@ -1,0 +1,3 @@
+﻿Post variant 1: 0 products, first 3: []
+Post variant 2: 0 products, first 3: []
+Post variant 3: 0 products, first 3: []

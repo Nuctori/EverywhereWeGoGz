@@ -1,0 +1,12 @@
+﻿http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=abroad&page=1
+  产品数量: 50
+  有分页元素: True
+
+http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=around&page=1
+  产品数量: 50
+  有分页元素: True
+
+http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=hongkong&page=1
+  产品数量: 50
+  有分页元素: True
+

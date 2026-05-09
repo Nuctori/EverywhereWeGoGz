@@ -54,7 +54,9 @@ export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps)
 
   const [imgError, setImgError] = useState(false);
   const hasImage = tour.images && tour.images.length > 0 && !imgError;
-  const imageSrc = hasImage ? tour.images[0] : getFallbackImage(tour.title);
+  const rawImageSrc = hasImage ? tour.images[0] : getFallbackImage(tour.title);
+  // 自动将 http 升级为 https，避免 Mixed Content 警告
+  const imageSrc = rawImageSrc.startsWith('http://') ? rawImageSrc.replace('http://', 'https://') : rawImageSrc;
 
   // 限制标签数量，来源标签用灰色
   const tags = tour.tags?.slice(0, 2) || [];

@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" />
+    <meta name="description" content="北京最佳路线报价,全国百强第二、广东第一，“易起行”首个传统旅行社电商平台，提供出境游、国内游、周边游、自由行、酒店门票查询预订等一站式服务。天天特价！官网预订即享专人服务！抢购及咨询热线:400-863-8888"/>
+    <meta name="keywords" content="北京旅游价格,北京旅游路线,北京旅游报价,北京旅游最佳路线"/>
+    <title>北京旅游-北京旅游价格-北京旅游最佳路线-广州</title>
+    <link href="/static/css/header.css?v=20260417100047" type="text/css" rel="stylesheet" />    
+    <link href="/static/css/page-tag.css?v=20260417100047" type="text/css" rel="stylesheet" />
+    <link href="/staticpc/css/homepage.css?v=20260417100047" type="text/css" rel="stylesheet" />   
+    
+    <link rel="stylesheet" href="/staticpc/css/common.css?v=20260417100047" />
+    <link rel="stylesheet" href="/staticpc/css/template/calendar/calendar.css?v=20260417100047" />
+    <link rel="stylesheet" href="/staticpc/css/idangerous.swiper.css?v=20260417100047" />
+    <link href="/staticpc/css/search/searchList.css?v=20260417100047" type="text/css" rel="stylesheet" />
+    <link href="/staticpc/css/search/invoiceList.css?v=20260417100047" type="text/css" rel="stylesheet" />
+    
+    <script type="text/javascript" src="https://js.ecwalk.com/js/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" src="/staticpc/js/common.js?v=20260417100047"></script>
+    <script type="text/javascript" src="https://js.ecwalk.com/js/jquery.queryObject.js"></script>
+    <script type="text/javascript" src="/static/js/common/jquery.b2cDatePicker.js?v=20260417100047"></script>
+    <script type="text/javascript" src="/staticpc/js/common/showSite.js?v=20260417100047"></script>
+    <script type="text/javascript" src="https://js.ecwalk.com/js/qrcode/jquery.qrcode.min.js"></script>
+	<script type="text/javascript" src="/staticpc/js/qrcode/makecode.js?v=20260417100047"></script>
+  	<script type="text/javascript">
+  		var yqgUrl = "https://ecwalkmall.gzl.cn";
+  		var wxUrl = "weixin.gzl.cn";
+    	var isUseGroup = true;
+    	var IsSearchListPage = '1';
+    	var returnDestName = $("#returnDestName").val();
+        var pageParam={ ctx:"",wwwSiteUrl:"https://www.gzl.com.cn",site:""}
+        var webParams={ ctx:"",site:"gz"}
+        var b2cDate = $().b2web.b2cDate();
+		var typeArr = new Array();
+		var keyListPdIds = new Array();
+		var allListPdIds = new Array();
+		var pageIndex = 1;     //页面索引初始值   
+		var pageSize = 10;     //每页显示条数初始化，修改显示条数，修改这里即可  
+		var pageCount = 10;   //总页数
+		var goodsListPdIds = new Array();
+		var brandsDict = {}
+		var featureDict = {}
+		var breakfastDict = {}
+		
+    
+    brandsDict['LN_HOTEL']='岭南酒店集团'
+    
+    brandsDict['DISNEY']='迪士尼'
+    
+    brandsDict['HILTON']='希尔顿'
+    
+    brandsDict['WYNDHAM']='温德姆'
+    
+    brandsDict['MARRIOTT']='万豪'
+    
+    brandsDict['ACCOR']='雅高'
+    
+    brandsDict['SHANGRI-LA']='香格里拉'
+    
+    brandsDict['STARWOOD']='喜达屋'
+    
+    brandsDict['KEMPINSKI']='凯宾斯基'
+    
+    brandsDict['FOUR_SEASONS']='四季'
+    
+    brandsDict['HARBOR_PLAZA']='海逸'
+    
+    brandsDict['IHG']='洲际'
+    
+    brandsDict['HYATT']='凯悦'
+    
+    brandsDict['BANYAN_TREE']='悦榕庄'
+    
+    brandsDict['PENINSULA']='半岛'
+    
+    brandsDict['MANDARIN_ORIENTAL']='文华东方'
+    
+    brandsDict['BEST_WESTERN']='最佳西方'
+    
+    featureDict['XMW']='小木屋'
+    
+    featureDict['SW']='树屋'
+    
+    featureDict['RSLD']='日式旅店'
+    
+    featureDict['CW']='船屋'
+    
+    featureDict['SRDJZZ']='私人度假住宅'
+    
+    featureDict['SJXW']='山间小屋'
+    
+    featureDict['BS']='别墅'
+    
+    featureDict['NCZFW']='农场主房屋'
+    
+    featureDict['ZDS']='招待所'
+    
+    featureDict['GY']='公寓'
+    
+    featureDict['DJJD']='度假酒店'
+    
+    featureDict['LG']='旅馆'
+    
+    featureDict['MS']='民宿'
+    
+    featureDict['KZ']='客栈'
+    
+    featureDict['ZP']='帐篷'
+    
+    featureDict['QCLG']='汽车旅馆'
+    
+    featureDict['MGB']='蒙古包'
+    
+    breakfastDict['23']='2份早餐+2份午餐+2份晚餐'
+    
+    breakfastDict['99']='其他'
+    
+    breakfastDict['22']='2份早餐+2份晚餐'
+    
+    breakfastDict['21']='2份晚餐'
+    
+    breakfastDict['10']='10份早餐'
+    
+    breakfastDict['5']='5份早餐'
+    
+    breakfastDict['7']='7份早餐'
+    
+    breakfastDict['9']='9份早餐'
+    
+    breakfastDict['11']='11份早餐'
+    
+    breakfastDict['13']='13份早餐'
+    
+    breakfastDict['15']='1份午餐'
+    
+    breakfastDict['17']='2份午餐'
+    
+    breakfastDict['18']='2份早餐+2份午餐'
+    
+    breakfastDict['20']='1份早餐+1份晚餐'
+    
+    breakfastDict['14']='14份早餐'
+    
+    breakfastDict['16']='1份早餐+1份午餐'
+    
+    breakfastDict['8']='8份早餐'
+    
+    breakfastDict['3']='3份早餐'
+    
+    breakfastDict['4']='4份早餐'
+    
+    breakfastDict['6']='6份早餐'
+    
+    breakfastDict['12']='12份早餐'
+    
+    breakfastDict['19']='1份晚餐'
+    
+    breakfastDict['2']='无早餐'
+    
+    breakfastDict['0']='1份早餐'
+    
+    breakfastDict['1']='2份早餐'
+    </script>
+</head>
+<body>
+<link href="/staticpc/css/common.css?v=20260417100047" type="text/css" rel="stylesheet"/>
+<script type="text/javascript">
+var Top_Path = {webRoot: "",wwwSiteUrl:"https://www.gzl.com.cn",newMemberUrl:"https://member.gzl.com.cn"};
+var ctx = '';
+var defaultKeyWord='';
+var isOrderPage=0;
+var hideSearch=0;
+
+var webParams1 = {
+        rCode:"",
+        horizontal:"",
+        vertical:"",
+        minPictureSrc:"",
+        maxPictureSrc:""
+    }
+</script>
+<script type="text/javascript" src="https://js.ecwalk.com/js/jquery.cookie.js"></script>
+<script src="/staticpc/js/common-components/mobileSliderValid.js"></script>
+<script type="text/javascript" src="/staticpc/js/common/top.js?v=20260417100047"></script>
+<script type="text/javascript" src="https://js.ecwalk.com/js/jquery.md5.js"></script>
+<script type="text/javascript" src="/staticpc/js/common-components/login.js?v=20260417100047"></script>
+<script type="text/javascript" src="https://js.ecwalk.com/js/qrcode/jquery.qrcode.min.js"></script>
+<script type="text/javascript" src="/staticpc/js/qrcode/makecode.js?v=20260417100047"></script>
+    
+<!-- 右侧栏 -->
+<script type="text/javascript" src="/staticpc/js/common/jquery.rotate.min.js?v=20260417100047"></script>
+<link href="/staticpc/css/app_bar.css?v=20260417100047" type="text/css" rel="stylesheet"/>
+<link href="/staticpc/css/sidebar.css?v=20260417100047" type="text/css" rel="stylesheet"/>
+
+ <script>
+//默认图
+//var adLink = 'http://activity.gzl.com.cn/zt/20190228_YCT_PC/index.html'; //右栏专题入口链接（不需要写UTM）
+//var smallImg = 'https://zt.gzl.com.cn/subject/appDownload/ad/G_04b.jpg?v=1'; //右栏专题小图 40x150
+//var bigImg = 'https://zt.gzl.com.cn/subject/appDownload/ad/G_04a.jpg?v=1'; //右栏专题大图 268x235
+var adLink = ''; //右栏专题入口链接（不需要写UTM）
+var smallImg = ''; //右栏专题小图 40x150
+var bigImg = ''; //右栏专题大图 268x235
+</script>
+<script>
+	bigImg = 'https://file.gzl.cn/group1/M00/9B/8B/wKkBHmhH8wmANGbhAAIVDnnmu1U666.png'
+	adLink = '#'
+	</script>
+<!--公共部分start-->
+ <!-- header-->
+    <div class="com-header-bar">
+      <div class="com-header-bar-ctx">
+        <div class="com-header-bar-left">
+                <!-- 站点-->
+        <div class="com-header-city" id="showSwitchCityDiv" style="display:none;">
+         <div class="current-city"><i class="main-set-local"></i><span id="siteName">广州</span>
+          </div>
+          <div class="other-city">
+            <ul id="siteListUl">
+
+            </ul>
+          </div>
+        </div>
+        
+            <script type="text/javascript">
+            $(document).ready(function () {
+            if (new Date() < new Date('2020-04-05')) {
+                $("body").append("<style>html{-webkit-filter: grayscale(100%); -moz-filter: grayscale(100%); -ms-filter: grayscale(100%); -o-filter: grayscale(100%); filter: grayscale(100%); filter: gray;}</style>")
+              }
+            });
+            
+            if(!(typeof showSwitchCity ==='undefined')){
+            	$("#showSwitchCityDiv").show();
+            	buildSiteMap();
+            }
+        	//buildSiteMap();
+            function toSite(obj){
+            	var oldHref = window.location.href;
+            	var oldHost = window.location.host;
+            	var newHost = $(obj).attr("site");
+            	if(oldHost==newHost||newHost==''){
+            		return false;
+            	}
+            	var newHref = oldHref.replace(oldHost,newHost);
+                if($.cookie('firstSwitch')!='1'){
+	              var wlhost = window.location.host;
+	              var splitHost = wlhost.split(':');
+	              var onlyHost = '';
+	              if(splitHost.length>0){
+	            	  onlyHost = splitHost[0];
+	              }
+	          	  var indexD = onlyHost.indexOf('.');    	  
+	          	  var cookieDomain = '.gzl.com.cn';
+	      		  if(indexD>0){
+	      			  cookieDomain = onlyHost.substr(indexD);
+	          	  }
+	          	  $.cookie('firstSwitch','1',{domain:cookieDomain});
+               }
+               location.href = newHref;
+          	   return true;
+            }
+            function buildSiteMap(){
+            	var allSiteLi = "";            	
+            	$.ajaxSettings['contentType'] = "application/x-www-form-urlencoded; charset=utf-8";
+                $.ajax({
+                    type: "post",
+                    url:ctx+"/front/getSiteMap.json",
+                    data:{},
+                    async: true,
+                    dataType:"json",
+                    beforeSend:function(){
+                    	
+                    },
+                    success: function(data){ 
+                    	//var htmlLi = '<li><label>@PY</label><div>@ALink</div></li>';
+                    	var htmlLi = '<li><div>@ALink</div></li>';
+                    	var aLink = '<a site="@site" @class onclick="toSite(this)">@SiteName</a>';
+                    	$.each(data.siteList,function(key,value){    
+                    		//console.log("1|"+key+"|"+value);
+                    		var pinYin = key;
+                    		var siteList = value;
+                    		//var eachLi = htmlLi.replace("@PY",key);
+                    		var eachLi=htmlLi;
+                    		//console.log(eachLi);
+                    		var eachALink = "";
+                    		for(var i=0;i<siteList.length;i++){
+                    			var oneSite = siteList[i];
+                    			if(oneSite.siteNameCn=="广州"){
+                    				//eachALink += aLink.replace("@site",oneSite.webSite).replace("@SiteName",oneSite.siteNameCn).replace("@class",'class="active"');
+                    				eachALink = aLink.replace("@site",oneSite.webSite).replace("@SiteName",oneSite.siteNameCn).replace("@class",'class="active"');
+                    			}else{
+                    				//eachALink += aLink.replace("@site",oneSite.webSite).replace("@SiteName",oneSite.siteNameCn).replace("@class",'');
+                    				eachALink = aLink.replace("@site",oneSite.webSite).replace("@SiteName",oneSite.siteNameCn).replace("@class",'');
+                    			}
+                    			//console.log(eachALink);
+                    			allSiteLi += eachLi.replace("@ALink",eachALink);
+                    		}
+                    		//allSiteLi += eachLi.replace("@ALink",eachALink);
+                    		//console.log(allSiteLi);
+                    	});	
+                    	
+                    	$("#siteListUl").append(allSiteLi);
+                    	$(".local_city").hover(function(){
+                           $(".show_city").show();
+                        },function(){
+                           $(".show_city").hide();
+                        });
+                        $(".show_city a").on("click",function(){
+                           $(".show_city a").removeClass("cur");
+                           $(this).addClass("cur");
+                        });
+                    },
+                    error: function (XMLHttpRequest, textStatus) {
+                    	$("#loadingDate").hide();
+                        if (XMLHttpRequest.status == 500) {
+                            alert("排期查询失败！");
+                        }
+                        },
+                    complete:function(XMLHttpRequest, textStatus){
+                    	$("#loadingDate").hide();
+                    }
+                });
+            	}
+        </script>
+        
+          <ul>
+            <li><span id="welcomeText_li"  class="color-g9">A股上市企业岭南控股（000524）旗下旅行社 旅行社业务经营许可证号：L-GD-CJ00004</span></li>
+
+            <div class="clear"></div>
+          </ul>
+        </div>
+        <div class="com-header-bar-right">
+          <ul class="S_rightNav frameEdit" frameInfo="top_memberMenu" frameType="2" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_top_memberMenu" newModuleCode="top_memberMenu" >
+            <li id="login_li" class="headLogin"></li>
+            <li id="reg_li"></li>
+            <li><a href="https://member.gzl.com.cn/member/order/myOrder.html?moduleId=00001" rel="nofollow">我的订单</a></li>
+            <li><a class="S_itemLink S_link_nav01 customer" target="_blank" title="企业客户">企业客户</a></li>
+            <li class="S_navItem">
+            	<a href="/free/index.html"  title="旅游积分卡"
+                    target="_blank" >旅游积分卡</a>
+                </li>
+       		<li class="S_navItem">
+            	<a href="/storeInfo/storeInfo.html"  title="门市网点"
+                    target="_blank" >门市网点</a>
+                </li>
+       		<li class="gzl-weixin"><span class="hover-box"><i class="wechat-icon c-icon"></i></span>
+              <div class="dropdown">
+                <div class="dropdownTop">
+                  <div><img src="/static/image/gzl_fuwuhao.jpg">
+                    <!-- <h3>广之旅:<span>GZL_ONLINE</span></h3> -->
+                    <h3><span>GZL_ONLINE</span></h3>
+                  </div>
+                  <div><img src="/static/image/gzl_dingyue.jpg">
+                    <!-- <h3>广之旅头条:<span>GZLWXDYH</span></h3> -->
+                    <h3><span>GZLWXDYH</span></h3>
+                  </div>
+                </div>
+                <div class="dropdownBottom"><img src="/static/image/wechat_banner.png"></div>
+              </div>
+            </li>
+            <div class="clear"></div>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+      <div class="com-header">
+      <div class="com-header-ctx">
+    	<!-- logo-->
+        <div class="com-header-logo frameEdit" frameInfo="top_logo|173x64" frameType="1" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_top_logo" newModuleCode="top_logo">
+       <!-- 
+        -->
+       	<!-- <a href="https://www.gzl.com.cn/" title="广之旅•易起行官方网站"> -->
+       	<a href="https://www.gzl.com.cn/" title="易起行官方网站">
+       	<img width="285px" src="/staticpc/images/logo.png?v=20260417100047" alt="官网"></a>
+        </div>
+ 
+        
+        
+        <!--搜索栏-->
+        <div class="com-header-search">
+          <div class="search-box">
+                <div class="select-group">
+                  <div class="select"><span class="select-val">全部产品</span><i class="down-arrow-icon"></i></div>
+                  <input type="hidden" id="search_option"  value="ALL"/>
+                  <ul class="select-dropdown">
+                    <li class="active" id="ALL">全部产品</li>
+                    <li id="PRODUCTGROUP">跟团游</li>
+                    <li id="YJYT">一家一团</li>
+                    <li id="FREETRAVEL">自由行</li>
+                    <li id="LOCAL">当地玩乐</li>
+                    <li id="HOTEL">酒店</li>
+                    <li id="TICKET">门票</li>                    
+                    <li id="VISA">签证</li>
+                    <li id="CRUISE">邮轮</li>
+                    <li id="WIFI">WIFI</li>
+                    <!-- <li id="BUS">租车</li> -->
+                    <li id="SOLID">易起购</li>
+                  </ul>
+                </div>
+            <div class="search-input">
+              <input placeholder="请输入关键字" id="searchfield">
+              <!-- 智能搜索 -->
+		      <div class="S_selectList_suggest">
+		           <ul>
+		           </ul>
+		      </div>
+            </div><a class="search-btn" id="search"><i class="search-icon"></i></a>
+          </div>
+        	<ul class="search-hot">
+         	 </ul>
+         	 <ul class="searchBoxList"></ul>
+        </div>
+        <div class="com-header-kf frameEdit" frameInfo="index_kf_img" frameType="1" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="index_kf" newModuleCode="index_kf_img" >
+        <img src="/staticpc/images/contact-info.png" alt="热线电话：4008638888和020-8633888">
+        <a id="a_online_kf" class="kf_link"><i class="kf_icon"></i><span><span class="kf_top">欢迎使用</span>
+        <span class="kf_bottom">在线客服</span></span></a>
+        </div>
+        
+      </div>
+    </div>
+    <input type="hidden" id = "qrCodeUrl" value = "">
+    <input type="hidden" id = "uuId" value = "">
+    <input type="hidden" id = "time" value = "">
+    <input type="hidden" id = "operate" value = "notyet">
+    <!--公共部分end--><div class="searchPage-header-nav-wrap" style="display: none;">
+		<div class="searchPage-back-btn"><a href="https://www.gzl.com.cn"><i class="searchpage-le-icon"></i><span>返回首页</span></a></div>
+      <ul class="searchPage-nav">
+       <li class="searchPage-nav-item nav1"><a href="javascript:void(0)" stype="ALL"><span>全部产品<em></em></span></a></li>
+       <li class="searchPage-nav-item nav2"><a href="javascript:void(0)" stype="PRODUCTGROUP"><span>跟团游<em></em></span></a></li>
+       <li class="searchPage-nav-item nav11"><a href="javascript:void(0)" stype="YJYT"><span>一家一团<em></em></span></a></li>
+       <li class="searchPage-nav-item nav3"><a href="javascript:void(0)" stype="FREETRAVEL"><span>自由行<em></em></span></a></li>
+       <li class="searchPage-nav-item nav4"><a href="javascript:void(0)" stype="LOCAL"><span>当地玩乐<em></em></span></a></li>
+       <li class="searchPage-nav-item nav5"><a href="javascript:void(0)" stype="HOTEL"><span>酒店<em></em></span></a></li>
+       <li class="searchPage-nav-item nav6"><a href="javascript:void(0)" stype="TICKET"><span>门票<em></em></span></a></li>
+       <li class="searchPage-nav-item nav7"><a href="javascript:void(0)" stype="VISA"><span>签证<em></em></span></a></li>
+       <li class="searchPage-nav-item nav8"><a href="javascript:void(0)" stype="CRUISE"><span>邮轮<em></em></span></a></li>
+       <li class="searchPage-nav-item nav9"><a href="javascript:void(0)" stype="WIFI"><span>WiFi<em></em></span></a></li>
+       <!-- <li class="searchPage-nav-item nav10"><a href="javascript:void(0)" stype="BUS"><span>租车<em></em></span></a></li> -->
+       <li class="searchPage-nav-item nav10"><a href="javascript:void(0)" stype="SOLID"><span>易起购<em></em></span></a></li>
+     </ul>
+    </div>
+    
+    <div class="searchDetailPage">
+    
+    <input type="hidden" class="destination" id="destName" placeholder="请输入目的地"  value="北京" />
+    <input type="hidden" class="" id="returnDestName" value="北京"/>
+    
+      <div class="bgfff" style="display: none;">
+      
+		<div class="maxWidthLimit Europe" style="display: none;">
+          <div class="europbanner">
+            <ul>
+              <li class="europbanner-item">        
+                  <a href="http://activity.gzl.com.cn/zt/20190213_Europe_PC/gz_index.html" target="_blank">
+                  <div class="europbanner-item-wrap">
+                    <div class="img-wrap"><img src="/staticpc/images/imgeurop.png" alt=""></div>
+                    <div class="desc">
+                      <div class="stadium">欧洲馆</div>
+                      <div class="msg"> <span class="warp-left">「</span><span class="descrision">典藏全欧洲的人气线路，资深领队，专业中导</span><span class="warp-right">」</span></div>
+                    </div>
+                  </div></a></li>
+            </ul>
+          </div>
+        </div>
+	    
+<div class="maxWidthLimit SoutheastAsia"  style="display: none;">
+          <div class="europbanner">
+            <ul>
+              <li class="europbanner-item">        
+                  <a href="http://activity.gzl.com.cn/zt/20190314_southeastAsia_PC/index.html" target="_blank">
+                  <div class="europbanner-item-wrap">
+                    <div class="img-wrap"><img src="/staticpc/images/southAsia.png" alt=""></div>
+                    <div class="desc">
+                      <div class="stadium">东南亚馆</div>
+                      <div class="msg"> <span class="warp-left">「</span><span class="descrision">东南亚精品线路，丰俭由人，品质如一</span><span class="warp-right">」</span></div>
+                    </div>
+                  </div></a></li>
+            </ul>
+          </div>
+        </div>
+        
+		<div class="maxWidthLimit Africa"  style="display: none;">
+          <div class="europbanner">
+            <ul>
+              <li class="europbanner-item">        
+                  <a href="http://activity.gzl.com.cn/zt/20190214_Africa_PC/index.html" target="_blank">
+                  <div class="europbanner-item-wrap">
+                    <div class="img-wrap"><img src="/staticpc/images/theMiddleEast.png" alt=""></div>
+                    <div class="desc">
+                      <div class="stadium">中东非馆</div>
+                      <div class="msg"> <span class="warp-left">「</span><span class="descrision">非洲中东旅游精品线路，资深领队，专业中导</span><span class="warp-right">」</span></div>
+                    </div>
+                  </div></a></li>
+            </ul>
+          </div>
+        </div>
+            
+        <div class="filter-Condition-wrap maxWidthLimit">
+          <ul class="filterCondition-list">
+            <li class="curIndex">
+              <div class="filterCondition-item tripDays">           
+                <div class="filter-item-right" data-sel="travelDays">行程天数</div>
+                <ul class="filter-item-left">
+                  <li><a href="javascript:void(0)" text="1天" value="1"><span>1天<i></i></span></a></li>
+                  <li><a href="javascript:void(0)" text="2天" value="2"><span>2天<i></i></span></a></li>
+                  <li><a href="javascript:void(0)" text="3天" value="3"><span>3天<i></i></span></a></li>
+                  <li><a href="javascript:void(0)" text="4天" value="4"><span>4天<i></i></span></a></li>
+                  <li><a href="javascript:void(0)" text="5天" value="5"><span>5天<i></i></span></a></li>
+                  <li><a href="javascript:void(0)" text="6天" value="6"><span>6天<i></i></span></a></li>
+                  <li><a href="javascript:void(0)" text="7天" value="7"><span>7天<i></i></span></a></li>
+                  <li><a href="javascript:void(0)" text="8天" value="8"><span>8天<i></i></span></a></li>
+                  <li><a href="javascript:void(0)" text="9天及9天以上" value="9"><span>9天及9天以上<i></i></span></a></li>
+                </ul>
+              <div class="moreChoice"><i class="seachPage-filter-duoxuan"></i><i class="seachPage-drow"></i></div>
+              <div class="filterCondition-sureBtn"><span class="sure">确认</span><span class="cancel">取消</span></div>
+              </div>
+            </li>
+            <li class="curIndex">
+              <div class="filterCondition-item tripGoDate">           
+                <div class="filter-item-right" data-sel="departureMon">出发日期</div>
+                <ul class="filter-item-left">
+                   <li><a href="javascript:void(0)" text="05月" value="05月"><span>05月<i></i></span></a></li>
+                	<li><a href="javascript:void(0)" text="06月" value="06月"><span>06月<i></i></span></a></li>
+                	<li><a href="javascript:void(0)" text="07月" value="07月"><span>07月<i></i></span></a></li>
+                	<li><a href="javascript:void(0)" text="08月" value="08月"><span>08月<i></i></span></a></li>
+                	<li><a href="javascript:void(0)" text="09月" value="09月"><span>09月<i></i></span></a></li>
+                	<li class="tripDateRange">
+	                    <div class="tripDateRange-wrap">
+	                      <input type="text" placeholder="最早出发" class="tripStartDate"><em>&nbsp;&nbsp;&nbsp;─&nbsp;&nbsp;</em>
+	                      <input type="text" placeholder="最晚出发" class="tripBackDate">
+	                    </div>
+	                    <div class="priceLimitSure">确定</div>
+                  	</li>
+                </ul>
+                 <div class="moreChoice"><i class="seachPage-filter-duoxuan"></i><i class="seachPage-drow"></i></div>
+              <div class="filterCondition-sureBtn"><span class="sure">确认</span><span class="cancel">取消</span></div>
+              </div>
+            </li>
+          </ul>
+          <div class="getMoreDetail" style="display: none;"> <span>更多选项</span><i class="seachPage-filter-seeMore"></i></div>
+        </div>
+        <div class="sort-nav">
+          <div class="sort-nav-list">
+            <div orderType="0" class="sort-item sort-synthesize active"><a><span>综合</span></a></div>
+            <div orderType="1" class="sort-item sort-saleNum"><a><span>销量</span><i class="seachPage-filter-range-down"></i></a></div>
+            <div orderType="2" class="sort-item sort-grade"><a><span>评分</span><i class="seachPage-filter-range-down"></i></a></div>
+            <div orderType="3" class="sort-item sort-price"><a><span>价格</span><i class="seachPage-filter-price"></i></a></div>
+            <div class="sort-item sort-price-range-wrap">
+              <div class="sort-price-range-up"><span class="sort-price-range">价格区间</span>
+                <div class="input-price-range">
+                  <input class="minPrice" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')"/><span>─</span>
+                  <input class="maxPrice" onkeyup="this.value=this.value.replace(/\D/g,'')" onafterpaste="this.value=this.value.replace(/\D/g,'')"/>
+                </div>
+              </div>
+              <div class="sort-price-range-down"><span class="cleanall">清空</span><a href="javascript:void(0)"><span class="price-range-surebtn">确定</span></a></div>
+            </div>
+            <div class="sort-item sort-tips">以下旅游信息仅供参考，不同日期价格可能存在差异，具体以订单签订的合同为准</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="browsing-history" >
+        <div class="title-item">您还看过这些</div>
+        <div class="swiper-container" >
+          <div class="swiper-wrapper" id="footMarkList" style="width: 2320px; height: 80px;">
+            
+          </div>
+        </div>
+        <div class="arrow-left"><i class="seckill-icon-prev"></i></div>
+        <div class="arrow-right"><i class="seckill-icon-next"></i></div>
+      </div>
+      
+      <div class="prod-list-wrap">
+        <div class="prod-list-wrap-left">
+          <div class="syncSearchLoading" style="display: none;"><img src="/staticpc/images/loading-gif.gif" alt=""/>
+            <p>加载中...</p>
+          </div>
+          <ul class="prod-list">
+            
+          </ul>
+          
+          <div class="invoice-pagebox">
+            <div class="pagination"></div>
+          </div>
+          
+        
+	      <div class="AllsorryNothingSearch" style="display: none;">
+	        <div class="img-wrap"><img src="/staticpc/images/err/search-nothing.png" alt=""></div>
+	        <p>抱歉，没有找到符合条件的产品，别灰心，快去找顾问定制一个吧~</p>
+	        <div class="btnbox">
+	          <div class="yellow-btn"><a href="https://www.gzl.com.cn/bigCustomer/index.html">去定制</a></div>
+	          <div class="white-btn"><a href="https://www.gzl.com.cn">返回首页</a></div>
+	        </div>
+	      </div>
+          
+        </div>
+        <div class="prod-list-wrap-right">
+          <div class="surf-history footMark" style="display: none;">
+            <div class="surf-history-title">您还看过这些</div>
+            <ul class="surf-list" id="footMarkList1">
+            	
+            </ul>
+          </div>
+                    <div class="surf-history recommendList" style="display: none;">
+	           <div class="surf-history-title frameEdit" frameInfo="group_tour_right_recommend_title" frameType="3">
+				</div>
+	           <ul class="surf-list frameEdit" frameInfo="group_tour_right_recommend_cont" frameType="5">
+	               </ul>
+	        </div>
+	        
+	        <div class="surf-history related-recommend" style="display: none;">
+            <div class="surf-history-title">相关推荐</div>
+            <ul class="surf-list" id="relatedRecommend">
+            
+            	
+            </ul>
+          </div>
+	        
+	        
+        </div>
+      </div>
+      
+      <div class="search-none-box botRecommend-wrap" style="display: none;"> 
+        <div class="botRecommend search-none-show">
+          <div class="botRecommend-title">产品推荐</div>
+          <ul class="botRecommend-list" id="botRecommendList">
+          </ul>
+        </div>
+      </div>
+      
+    </div>
+    <script type="text/javascript">
+	if((''==''||''=='1')&& $.query.get('destName').toString()!=''){
+		var _mvq = window._mvq || []; 
+		window._mvq = _mvq;
+		_mvq.push(['$setAccount', 'm-191849-0']);
+	
+		_mvq.push(['$setGeneral', 'searchresult', '', /*用户名*/ '', /*用户id*/ '']);
+		_mvq.push(['$logConversion']);
+		_mvq.push(['$addSearchResult', /*搜素关键词*/ $.query.get('destName').toString(), /*搜索结果数*/ ''/*  */]);
+		_mvq.push(['$logData']);
+	}
+	</script>
+	<script type="text/javascript">
+	var flowSubUrl = "";
+	var flowUrl = window.location.href;
+	var flowRequest = "";
+	/* var webParams = {
+	        ctx:''
+	    } */
+</script>
+<script type="text/javascript" src="https://js.ecwalk.com/js/qrcode/jquery.qrcode.min.js"></script>
+<script type="text/javascript" src="/staticpc/js/qrcode/makecode.js?v=20260417100047"></script>
+  	
+<!--页脚start-->
+<div class="footer">
+ <div class="footer-ctx">
+        <div class="footer-intro" >
+          <div class="footer-box">
+            <div class="footer-title bold frameEdit" frameInfo="bottom_guide_singleFont1" frameType="3" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_guide" newModuleCode="bottom_guide_singleFont1" >
+				关于广之旅</div>
+            <ul class="frameEdit" frameInfo="bottom_guide_links" frameType="2" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_guide" newModuleCode="bottom_guide_links">
+				<li><a href="http://www.gzl.com.cn/newsCenter/d64565e053164977b78b92e15748938f.html" target="_blank" rel="nofollow" >广之旅简介</a></li>
+					<script type="text/javascript">
+						$(function () {
+							makecode("qrCode402981a385340999018605bd24d90e6b", 'http://www.gzl.com.cn/newsCenter/d64565e053164977b78b92e15748938f.html', 100, 100);
+						});
+					</script>
+				<li><a href="http://www.gzl.com.cn/newsCenter/ed4be48d92f2477db7341c65d8d411fe.html" target="_blank" rel="nofollow" >广之旅组织架构</a></li>
+					<script type="text/javascript">
+						$(function () {
+							makecode("qrCode402981a3889a5e6801891fddf6711f98", 'http://www.gzl.com.cn/newsCenter/ed4be48d92f2477db7341c65d8d411fe.html', 100, 100);
+						});
+					</script>
+				<li><a href="/newsCenter/371bb18408494f49ad32e2c85febded4.html" target="_blank" rel="nofollow" >营业执照</a></li>
+					<script type="text/javascript">
+						$(function () {
+							makecode("qrCodeA24B7B0940776302E0535101A9C019C4", '/newsCenter/371bb18408494f49ad32e2c85febded4.html', 100, 100);
+						});
+					</script>
+				<li><a href="https://activity.gzl.com.cn/zt/20241118_socialResponsibility_PC/index.html" target="_blank" rel="nofollow" >社会责任报告</a></li>
+					<script type="text/javascript">
+						$(function () {
+							makecode("qrCode4029819f9300c9880193432c60f621ef", 'https://activity.gzl.com.cn/zt/20241118_socialResponsibility_PC/index.html', 100, 100);
+						});
+					</script>
+				<li><a href="http://www.gzl.com.cn/newsCenter/5dd6b4a3494746b6ab4619194270fe49.html" target="_blank" >公示公告</a></li>
+					<script type="text/javascript">
+						$(function () {
+							makecode("qrCode402981a3867811e901872c583e0c2ace", 'http://www.gzl.com.cn/newsCenter/5dd6b4a3494746b6ab4619194270fe49.html', 100, 100);
+						});
+					</script>
+				</ul>
+          </div>
+          <div class="footer-box">
+           <div class="footer-title bold frameEdit" frameInfo="bottom_guide_singleFont2" frameType="3" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_pay" newModuleCode="bottom_guide_singleFont2" >
+				网站导航</div>
+            <ul class="frameEdit" frameInfo="bottom_pay_links" frameType="2" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_pay" newModuleCode="bottom_pay_links">
+            	<li><a href="/sitemap.html" target="_blank" rel="nofollow" >网站地图</a></li>
+					<script type="text/javascript">
+						$(function () {
+							makecode("qrCode4029819f90bf79390190bfc0ba30003f", '/sitemap.html', 100, 100);
+						});
+					</script>
+				</ul>
+          </div>
+          <div class="footer-box">
+            <div class="footer-title bold frameEdit" frameInfo="bottom_guide_singleFont3" frameType="3" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_book" newModuleCode="bottom_guide_singleFont3" >
+				联系我们</div>
+            <ul class="frameEdit" frameInfo="bottom_book_links" frameType="2" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_book" newModuleCode="bottom_book_links">
+             	<li><a href="/newsCenter/ccd0a44c958e443aaf4137ab0ad18dd5.html" target="_blank" rel="nofollow" >联系我们</a></li>
+					<script type="text/javascript">
+						$(function () {
+							makecode("qrCodeA24B7B09405F6302E0535101A9C019C4", '/newsCenter/ccd0a44c958e443aaf4137ab0ad18dd5.html', 100, 100);
+						});
+					</script>
+				<li><a href="/storeInfo/storeInfo.html" target="_blank" rel="nofollow" >门市网点</a></li>
+					<script type="text/javascript">
+						$(function () {
+							makecode("qrCodeA24B7B0940606302E0535101A9C019C4", '/storeInfo/storeInfo.html', 100, 100);
+						});
+					</script>
+				</ul>
+          </div>
+          
+          <div class="footer-box">
+          	<div class="footer-title bold frameEdit" frameInfo="bottom_guide_singleFont4" frameType="3" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_visa" newModuleCode="bottom_guide_singleFont4" >
+				诚邀合作公告</div>
+            <ul class="frameEdit" frameInfo="bottom_other_links3" frameType="2" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_visa" newModuleCode="bottom_other_links3">
+               	<li><a href="http://www.gzl.com.cn/newsCenter/487eed61d72b46b6a9b866ee7f06eb80.html" target="_blank" rel="nofollow" >白云山鸣春谷景区商铺合作项目</a></li>
+					<script type="text/javascript">
+						$(function () {
+							makecode("qrCode402981a38a451925018a7463785d1416", 'http://www.gzl.com.cn/newsCenter/487eed61d72b46b6a9b866ee7f06eb80.html', 100, 100);
+						});
+					</script>
+				</ul>
+          </div>
+          <div class="footer-box">
+          	<div class="footer-title bold frameEdit" frameInfo="bottom_guide_singleFont5" frameType="3" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_other" newModuleCode="bottom_guide_singleFont5" >
+				</div>
+            <ul class="frameEdit" frameInfo="bottom_other_links2" frameType="2" chnlType="B2C" chnlCode="B2C_INDEX" parentCode="b2c_index_bottom_other" newModuleCode="bottom_other_links2">
+               	</ul>
+          </div>
+        </div>
+        <div class="website-back">
+          <div class="website-back-text"><p id="companyName">Copyright © 1998-2025 广州易起行信息技术有限公司 | <a rel="noreferrer nofollow" target="_blank" href="https://beian.miit.gov.cn" id="icpInfo">ICP经营许可号：粤ICP备13071273号</a></p></div>
+        </div>
+      </div>
+  <script type="text/javascript" src="/static/js/decorate/removeTarget.js?time="></script></div>
+<script type="text/javascript" src="/staticpc/js/flow/flow.js?v=20260417100047" async="async"></script>
+<a href="/offSaleProduct.html"></a>
+<script type="text/javascript" src="/staticpc/js/common/webAnalysis.js?v=20260417100047"></script>
+<script>
+ /* if(window.document.location.href.indexOf('ecwalk')>0){
+	 $("#icpInfo").text("ICP经营许可号：粤ICP备13071273号");
+ } */
+    function doPiwikEvent(category,action,name,value){
+    	_paq.push(['trackEvent',category,action,name,value]);
+    }
+</script>
+<script src="/staticpc/js/app_download_bar.js?v=20260417100047"></script>  
+<!--  <script src="https://zt.gzl.com.cn//subject/b2c/test/sidebar/new/app_download_bar.js?v=20260417100047"></script>-->
+<!--页脚end-->
+<script type="js/template" id="range-calendar-double-wrp">
+      <div class="range-calendar-double-wrp">
+        <div class="price-calendar-ctx">
+          <div class="price-calendar-header-wrp">
+            <div class="price-calendar-header">
+              <div class="b-left-arrow">
+                <div class="b-left-arrow-icon c-icon"></div>
+              </div>
+              <div class="price-calendar-title"></div>
+            </div>
+            <div class="weekday-wrp"><span class="weekday">日</span><span class="weekday">一</span><span class="weekday">二</span><span class="weekday">三</span><span class="weekday">四</span><span class="weekday">五</span><span class="weekday">六</span>
+            </div>
+          </div>
+          <div class="price-calendar-route">
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="price-calendar-ctx">
+          <div class="price-calendar-header-wrp">
+            <div class="price-calendar-header">
+              <div class="price-calendar-title"></div>
+              <div class="b-right-arrow">
+                <div class="b-right-arrow-icon c-icon"></div>
+              </div>
+            </div>
+            <div class="weekday-wrp"><span class="weekday">日</span><span class="weekday">一</span><span class="weekday">二</span><span class="weekday">三</span><span class="weekday">四</span><span class="weekday">五</span><span class="weekday">六</span>
+            </div>
+          </div>
+          <div class="price-calendar-route">
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+            <div class="price-calendar-line">
+              <ul>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+                <li class="date-blank"></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+
+
+    <script type="text/javascript" src="/staticpc/js/calendar/calendar.js?v=20260417100047"></script>
+    <script src="/staticpc/js/lib/jquery.pagination.js?v=20260417100047"></script>
+    <script src="/staticpc/js/idangerous.swiper.min.js?v=20260417100047"></script>
+	<script src="/staticpc/js/search/searchCommon.js?v=20260417100047"></script>
+	<script src="/staticpc/js/search/searchAllListContent.js?v=20260417100047"></script>
+	<script src="/staticpc/js/search/searchAllListFact.js?v=20260417100047"></script>
+	<script src="/staticpc/js/search/searchAllList.js?v=20260417100047"></script>
+	
+	<script type="text/javascript">
+	//展开时
+	function morePiwikEvent(obj){
+		var objul = obj.parent().parent().find("ul").eq(0);
+		var pdIdLis = new Array();
+		var pdIdIndex = 0;
+		objul.find(".piwikPdId").each(function(){
+			pdIdIndex++;
+			if(pdIdIndex>4){
+				pdIdLis.push($(this).attr("pdId"));
+			}
+		});
+		if(pdIdLis.length>0){
+			//piwik埋点
+			doPiwikEvent("产品曝光","产品搜索页",pdIdLis.join(","),null);
+		}
+	}
+	$(function(){
+		/* var piwikPdIds = "";
+	    if(keyListPdIds.length>0){
+	    	piwikPdIds = keyListPdIds.join(",")+","+allListPdIds.join(",");
+	    }else{
+	    	piwikPdIds = allListPdIds.join(",");
+	    }
+	    //piwik埋点
+	    if(piwikPdIds!=""){
+	        doPiwikEvent("产品曝光","产品搜索页",piwikPdIds,null);
+	    } */
+	});
+	</script>
+	
+</body>
+</html>

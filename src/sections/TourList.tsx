@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 import { sources, destinations, themes } from '@/data/tours';
 
@@ -64,7 +63,6 @@ export function TourList() {
   const [displayCount, setDisplayCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const isMobile = useIsMobile();
   const [filters, setFilters] = useState<FilterState>({
     destination: '', minPrice: null, maxPrice: null, duration: null,
     source: '', departureDate: '', departureDateStart: '', departureDateEnd: '', theme: '', sortBy: 'hot',
@@ -282,18 +280,16 @@ export function TourList() {
       <div className="mb-4 sm:mb-6">
         <div className="flex items-center gap-3 flex-wrap mb-4">
           {/* 移动端筛选按钮 */}
-          {isMobile ? (
-            <Button variant="outline" className={`gap-2 ${showFilters ? 'bg-slate-100' : ''}`} onClick={() => setShowFilters(true)}>
-              <SlidersHorizontal className="w-4 h-4" />
-              筛选
-              {activeFilterCount > 0 && <Badge variant="secondary" className="ml-1">{activeFilterCount}</Badge>}
-            </Button>
-          ) : (
-            <Button variant="outline" className={`gap-2 ${showFilters ? 'bg-slate-100' : ''}`} onClick={() => setShowFilters(!showFilters)}>
-              <Filter className="w-4 h-4" />筛选
-              {activeFilterCount > 0 && <Badge variant="secondary" className="ml-1">{activeFilterCount}</Badge>}
-            </Button>
-          )}
+          <Button variant="outline" className={`gap-2 sm:hidden ${showFilters ? 'bg-slate-100' : ''}`} onClick={() => setShowFilters(true)}>
+            <SlidersHorizontal className="w-4 h-4" />
+            筛选
+            {activeFilterCount > 0 && <Badge variant="secondary" className="ml-1">{activeFilterCount}</Badge>}
+          </Button>
+          {/* 桌面端筛选按钮 */}
+          <Button variant="outline" className={`gap-2 hidden sm:inline-flex ${showFilters ? 'bg-slate-100' : ''}`} onClick={() => setShowFilters(!showFilters)}>
+            <Filter className="w-4 h-4" />筛选
+            {activeFilterCount > 0 && <Badge variant="secondary" className="ml-1">{activeFilterCount}</Badge>}
+          </Button>
           <div className="flex items-center gap-2 ml-auto">
             <ArrowUpDown className="w-4 h-4 text-slate-500" />
             <Select value={filters.sortBy} onValueChange={(v) => setFilters({ ...filters, sortBy: v as FilterState['sortBy'] })}>
@@ -310,16 +306,18 @@ export function TourList() {
         </div>
 
         {/* 桌面端筛选面板 */}
-        {!isMobile && showFilters && (
-          <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4 shadow-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {filterContent}
+        <div className="hidden sm:block">
+          {showFilters && (
+            <div className="bg-white rounded-xl border border-slate-200 p-4 mb-4 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {filterContent}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* 移动端筛选底部Sheet */}
-        {isMobile && (
+        <div className="sm:hidden">
           <Sheet open={showFilters} onOpenChange={setShowFilters}>
             <SheetContent side="bottom" className="h-[85vh] flex flex-col">
               <SheetHeader className="border-b pb-4">
@@ -344,7 +342,7 @@ export function TourList() {
               </div>
             </SheetContent>
           </Sheet>
-        )}
+        </div>
 
         {activeFilterCount > 0 && (
           <div className="flex items-center gap-2 flex-wrap">

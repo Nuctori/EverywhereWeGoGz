@@ -1,0 +1,4 @@
+﻿GET: HTTP 200, Content-Type: text/html
+POST: HTTP 200, Content-Type: text/html
+HEAD: HTTP 200, Content-Type: text/html
+OPTIONS: HTTP 200, Content-Type: text/html; Charset=gb2312

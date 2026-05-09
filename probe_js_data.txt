@@ -1,0 +1,3 @@
+﻿JS array data: 0
+JS object data: 0
+Empty divs with IDs: 0

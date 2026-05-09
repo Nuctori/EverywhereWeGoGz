@@ -1,0 +1,8 @@
+﻿http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=abroad&page=1
+  50 products, first: ['15393', '8410', '17321']
+http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=abroad&page=2
+  50 products, first: ['15393', '8410', '17321']
+http://gz.ptotour.com/line/list.aspx?cid=shenzhen&tid=domestic&page=1
+  50 products, first: ['13898', '24911', '25758']
+http://gz.ptotour.com/line/list.aspx?cid=shenzhen&tid=domestic&page=2
+  50 products, first: ['13898', '24911', '25758']

@@ -17,7 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useMediaQuery } from '@/hooks/use-media-query';
 import {
   MapPin, Clock, Users, Star, Flame, Sparkles, Zap,
   AlertTriangle, CheckCircle2, XCircle, Info,
@@ -42,7 +41,6 @@ function formatDate(dateStr: string | undefined): string {
 export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
   if (!tour) return null;
 
-  const isMobile = useMediaQuery('(max-width: 640px)');
   const sourceColor = {
     假日通: '#FF6B35', 广州去旅行: '#4ECDC4', 康辉: '#1A535C',
     暴走村: '#B8860B', 广之旅: '#FF006E', 广东中旅: '#8338EC', 品途: '#3A86FF',
@@ -323,45 +321,45 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
         <Button variant="outline" size="lg" onClick={() => window.open(searchUrl, '_blank')}>
           <Search className="w-4 h-4 mr-2" />官网搜索
         </Button>
-        {isMobile && (
-          <Button variant="outline" size="lg" onClick={onClose}>
-            <X className="w-4 h-4 mr-2" />关闭
-          </Button>
-        )}
+        <Button variant="outline" size="lg" onClick={onClose} className="sm:hidden">
+          <X className="w-4 h-4 mr-2" />关闭
+        </Button>
       </div>
     </>
   );
 
-  // 移动端使用全屏 Sheet
-  if (isMobile) {
-    return (
-      <Sheet open={!!tour} onOpenChange={(open) => !open && onClose()}>
-        <SheetContent side="bottom" className="h-[92vh] p-0 flex flex-col">
-          <SheetHeader className="p-4 pb-2 border-b shrink-0">
-            <SheetTitle className="text-base leading-relaxed pr-8">{tour.title}</SheetTitle>
-            <SheetDescription className="sr-only">{tour.title} 的详细信息</SheetDescription>
-          </SheetHeader>
-          <ScrollArea className="flex-1 px-4 py-4">
-            {content}
-          </ScrollArea>
-        </SheetContent>
-      </Sheet>
-    );
-  }
-
-  // 桌面端使用 Dialog
   return (
-    <Dialog open={!!tour} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-xl leading-relaxed">{tour.title}</DialogTitle>
-          <DialogDescription className="sr-only">{tour.title} 的详细信息</DialogDescription>
-        </DialogHeader>
-        <ScrollArea className="px-6 pb-6 max-h-[calc(90vh-100px)]">
-          {content}
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+    <>
+      {/* 移动端 Sheet - 使用 CSS 隐藏桌面端 */}
+      <div className="sm:hidden">
+        <Sheet open={!!tour} onOpenChange={(open) => !open && onClose()}>
+          <SheetContent side="bottom" className="h-[92vh] p-0 flex flex-col">
+            <SheetHeader className="p-4 pb-2 border-b shrink-0">
+              <SheetTitle className="text-base leading-relaxed pr-8">{tour.title}</SheetTitle>
+              <SheetDescription>{tour.title} 的详细信息</SheetDescription>
+            </SheetHeader>
+            <ScrollArea className="flex-1 px-4 py-4">
+              {content}
+            </ScrollArea>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* 桌面端 Dialog - 使用 CSS 隐藏移动端 */}
+      <div className="hidden sm:block">
+        <Dialog open={!!tour} onOpenChange={(open) => !open && onClose()}>
+          <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="text-xl leading-relaxed">{tour.title}</DialogTitle>
+              <DialogDescription>{tour.title} 的详细信息</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="px-6 pb-6 max-h-[calc(90vh-100px)]">
+              {content}
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
   );
 }
 

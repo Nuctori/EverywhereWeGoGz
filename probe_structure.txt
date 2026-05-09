@@ -1,0 +1,7 @@
+﻿Pager parent: div ['left']
+Pager previous sibling:  
+Pager next sibling:  
+Line items count: 50
+First item HTML: <li> <div class="pic"><a href="http://gz.ptotour.com/13898/" target="_blank"> <img data-original="http://m.tuniucdn.com/fb2/t1/G2/M00/A6/69/Cii-Tlhtuz2IYFvJAALilHb76b4AAGWpAChlRYAAuKs474_w450_h300_c1_t0_w320_h180_c1_t0.jpg" src="/images/loading.gif"/></a><i class="i1"></i></div> <div class="info1"><a class="name" href="http://gz.ptotour.com/13898/" target="_blank">&lt;æµ·åä¸äºåé£5æ¥æ¸¸&gt;èå¨/æä¾£ç²¾é0è´­ç©ï¼3ææ¸©å¾·å§/çº¢æ æç­+1ææµ·æ£ æ¹¾åæ¥ç»/ä¸ä¸½/ä¸è¾¾æåï¼æ¸¸åè¯ºè¾¾&amp;åå±±&amp;èæ¯æ´²å²ï¼å¥é©°æ¥æº/äº«ç§å®¶æ²æ»©</a> <div class="brief">â¢ç¨é¤å®æï¼å¨ç¨å®ææå®é¤åç¨é¤ï¼30å/äºº/é¤çæ åï¼å´æ¡é¤ä¿è¯åèä¸æ±¤æèªå©é¤â¢ä½å®¿å®æï¼4æè¿ä½/æµ·ç«æ¹åº¦åéåº/ä¸äºä¸½ç¦¾æ¸©å¾·å§åº¦åéåºï¼ä¸çº¿æµ·æ¯ï¼15åéæ­¥è¡è³æ²æ»©ï¼å°½äº«æµ·æ¹¾é£æ¯ãâ¢æ¸¸ç©å®æï¼</div> <div class="destination">æ¸¸ç©ç®çå°ï¼                     <em class="tag tag1">æµ·å</em> <em class="tag tag
+Detail links found: 0
+Page links found: 0

@@ -1,0 +1,3 @@
+﻿Page 1 (session): 50 products
+Page 2 (session): 50 products
+Cookies: {'ASP.NET_SessionId': 'ha1ufq0mdkelz1hjqcx2mq2m'}

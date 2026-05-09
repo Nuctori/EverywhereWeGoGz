@@ -1,0 +1,60 @@
+﻿======================================================================
+品途旅游网站 API 探测脚本
+======================================================================
+
+[*] 获取首页...
+  首页状态码: 200, 272304 bytes
+
+[*] 获取列表页...
+  列表页状态码: 200, 93073 bytes
+
+[1] 分析页面源码中的 JavaScript...
+  发现 2 个可能的 JSON 数据块
+  发现 4 个外部脚本
+  发现 1 个内联脚本
+  发现 1 个表单
+  发现 51 个 data-* 属性
+  发现 __VIEWSTATE (ASP.NET WebForms)
+
+  发现的端点/URL (20 个):
+    ./list.aspx?tid=domestic
+    /js/common.js
+    http://gz.ptotour.com/line/list.aspx?tid=abroad
+    http://gz.ptotour.com/line/list.aspx?tid=around
+    http://gz.ptotour.com/line/list.aspx?tid=domestic
+    http://gz.ptotour.com/line/list.aspx?tid=hongkong
+    http://gz.ptotour.com/line/list.aspx?tid=tuozhan
+    http://img.ptotour.com/js/FAQ.js
+    http://img.ptotour.com/js/jquery.lazyload.min.js
+    http://img.ptotour.com/js/jquery.min.js
+    http://www.ptotour.com/line/search.aspx?key=ä¹å¯¨æ²
+    http://www.ptotour.com/line/search.aspx?key=äºå
+    http://www.ptotour.com/line/search.aspx?key=åäº¬
+    http://www.ptotour.com/line/search.aspx?key=å¦é¨
+    http://www.ptotour.com/line/search.aspx?key=æ¡æ
+    http://www.ptotour.com/line/search.aspx?key=æ±è¥¿
+    http://www.ptotour.com/line/search.aspx?key=æ¸è¿
+    http://www.ptotour.com/line/search.aspx?key=è¥¿å®
+    http://www.ptotour.com/line/search.aspx?key=è¥¿è
+    http://www.ptotour.com/line/search.aspx?key=è´µå·
+
+[2] 测试 POST 请求到 list.aspx...
+  GET 状态码: 200
+  响应类型: text/html
+  响应长度: 93073
+
+[3] 测试常见 API 端点...
+python : Traceback (most recent call last):
+At line:1 char:59
++ ... NIOENCODING="utf-8"; python scripts\probe_ptotour_api.py 2>&1 | Out-F ...
++                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "D:\react\app\scripts\probe_ptotour_api.py", line 582, in <module>
+    main()
+  File "D:\react\app\scripts\probe_ptotour_api.py", line 564, in main
+    test_common_api_endpoints()
+  File "D:\react\app\scripts\probe_ptotour_api.py", line 214, in test_common_api_endpoints
+    resp = fetch(url, headers=headers, timeout=10)
+TypeError: fetch() got an unexpected keyword argument 'timeout'

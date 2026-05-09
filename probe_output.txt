@@ -1,0 +1,41 @@
+﻿======================================================================
+Ʒ;������վ API ̽��ű�
+======================================================================
+
+[*] ��ȡ��ҳ...
+  ��ҳ״̬��: 200, 272304 bytes
+
+[*] ��ȡ�б�ҳ...
+  �б�ҳ״̬��: 200, 93073 bytes
+
+[1] ����ҳ��Դ���е� JavaScript...
+  ���� 2 �����ܵ� JSON ���ݿ�
+  ���� 4 ���ⲿ�ű�
+  ���� 1 �������ű�
+  ���� 1 �����
+  ���� 51 �� data-* ����
+  ���� __VIEWSTATE (ASP.NET WebForms)
+
+  ���ֵĶ˵�/URL (20 ��):
+    ./list.aspx?tid=domestic
+    /js/common.js
+    http://gz.ptotour.com/line/list.aspx?tid=abroad
+    http://gz.ptotour.com/line/list.aspx?tid=around
+    http://gz.ptotour.com/line/list.aspx?tid=domestic
+    http://gz.ptotour.com/line/list.aspx?tid=hongkong
+    http://gz.ptotour.com/line/list.aspx?tid=tuozhan
+    http://img.ptotour.com/js/FAQ.js
+    http://img.ptotour.com/js/jquery.lazyload.min.js
+    http://img.ptotour.com/js/jquery.min.js
+python : Traceback (most recent call last):
+At line:1 char:28
++ ... cation d:\react\app; python scripts\probe_ptotour_api.py 2>&1 | Out-F ...
++                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "D:\react\app\scripts\probe_ptotour_api.py", line 582, in <module>
+    main()
+  File "D:\react\app\scripts\probe_ptotour_api.py", line 560, in main
+    print(f"    {e}")
+UnicodeEncodeError: 'gbk' codec can't encode character '\xe4' in position 48: illegal multibyte sequence

@@ -1,0 +1,26 @@
+﻿Line detail links (pattern /digits/): 150
+  http://gz.ptotour.com/13898/
+  http://gz.ptotour.com/13898/
+  http://gz.ptotour.com/13898/
+  http://gz.ptotour.com/24911/
+  http://gz.ptotour.com/24911/
+  http://gz.ptotour.com/24911/
+  http://gz.ptotour.com/25758/
+  http://gz.ptotour.com/25758/
+  http://gz.ptotour.com/25758/
+  http://gz.ptotour.com/13754/
+ID links: 150
+  http://gz.ptotour.com/13898/
+  http://gz.ptotour.com/13898/
+  http://gz.ptotour.com/13898/
+  http://gz.ptotour.com/24911/
+  http://gz.ptotour.com/24911/
+  http://gz.ptotour.com/24911/
+  http://gz.ptotour.com/25758/
+  http://gz.ptotour.com/25758/
+  http://gz.ptotour.com/25758/
+  http://gz.ptotour.com/13754/
+Page param links: 0
+Pager context:   <em class="tag tag1">æé½</em>                   </div>                  <div class="info"><span>è¡ç¨å¤©æ°ï¼<em class="tag">4å¤©</em></span><span>äº¤éæ¹å¼ï¼<em class="tag">é£æº/é£æº</em></span></div>                </div>                <div class="info2">                  <div class="price"><b>&yen;4362</b>èµ·</div>                  <a class="btn" target="_blank" href="http://gz.ptotour.com/25469/" >æ¥çè¯¦æ</a></div>              </li>                    </ul>        <div class="pager"  >                  </div>      </div>      <div class="right">        <div class="rightbox honorbox clear">          <div class="hd">ææ¸¸éæµ·å¤å½ææä¿é</div>          <div class="bd clear">            <ul>              <li>                <div class="title">åè´¨ä¿è¯</div>                <div class="desc">AAAAAçº§æè¡ç¤¾ </div>              </li>              <li>                <div class="title">ææ¸¸å±è®¤è¯ </div>                <div class="desc">æ·±å³ææ¸
+Page numbers: []
+Total a tags: 249

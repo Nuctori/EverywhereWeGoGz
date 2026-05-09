@@ -1,0 +1,177 @@
+﻿======================================================================
+品途旅游网站 API 探测脚本
+======================================================================
+
+[*] 获取首页...
+  首页状态码: 200, 272304 bytes
+
+[*] 获取列表页...
+  列表页状态码: 200, 93073 bytes
+
+[1] 分析页面源码中的 JavaScript...
+  发现 2 个可能的 JSON 数据块
+  发现 4 个外部脚本
+  发现 1 个内联脚本
+  发现 1 个表单
+  发现 51 个 data-* 属性
+  发现 __VIEWSTATE (ASP.NET WebForms)
+
+  发现的端点/URL (20 个):
+    ./list.aspx?tid=domestic
+    /js/common.js
+    http://gz.ptotour.com/line/list.aspx?tid=abroad
+    http://gz.ptotour.com/line/list.aspx?tid=around
+    http://gz.ptotour.com/line/list.aspx?tid=domestic
+    http://gz.ptotour.com/line/list.aspx?tid=hongkong
+    http://gz.ptotour.com/line/list.aspx?tid=tuozhan
+    http://img.ptotour.com/js/FAQ.js
+    http://img.ptotour.com/js/jquery.lazyload.min.js
+    http://img.ptotour.com/js/jquery.min.js
+    http://www.ptotour.com/line/search.aspx?key=ä¹å¯¨æ²
+    http://www.ptotour.com/line/search.aspx?key=äºå
+    http://www.ptotour.com/line/search.aspx?key=åäº¬
+    http://www.ptotour.com/line/search.aspx?key=å¦é¨
+    http://www.ptotour.com/line/search.aspx?key=æ¡æ
+    http://www.ptotour.com/line/search.aspx?key=æ±è¥¿
+    http://www.ptotour.com/line/search.aspx?key=æ¸è¿
+    http://www.ptotour.com/line/search.aspx?key=è¥¿å®
+    http://www.ptotour.com/line/search.aspx?key=è¥¿è
+    http://www.ptotour.com/line/search.aspx?key=è´µå·
+
+[2] 测试 POST 请求到 list.aspx...
+  GET 状态码: 200
+  响应类型: text/html
+  响应长度: 93073
+
+[3] 测试常见 API 端点...
+  [FOUND] /api/line/list -> HTTP 200, text/html; charset=utf-8, 241724 bytes
+          前100字符: RawUrl:http://gz.ptotour.com/api/line/list﻿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transition
+  [FOUND] /api/line/getlist -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /api/product/list -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /ajax/line/list -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /ajax/getlist -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /data/line/list -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [ERROR] 请求失败: Response ended prematurely
+  [FOUND] /handler/line.ashx -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /handler/list.ashx -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /line/handler.ashx -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /line/list.ashx -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /api/v1/line -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /api/v1/list -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /api/line -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /api/list -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /ajax/line -> HTTP 200, text/html; charset=utf-8, 241720 bytes
+          前100字符: RawUrl:http://gz.ptotour.com/ajax/line﻿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//
+  [FOUND] /ajax/list -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /line/listdata -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /line/getdata -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /line/api -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /line/ajax -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /api/line/search -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /api/search -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+  [FOUND] /ajax/search -> HTTP 200, text/html, 272304 bytes
+          前100字符: ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD
+
+[4] 测试不同 User-Agent...
+  [desktop] HTTP 200, 93073 bytes
+          页面中包含 api/ajax 关键字
+  [mobile] HTTP 200, 73254 bytes
+          页面中包含 api/ajax 关键字
+  [wechat] HTTP 200, 73254 bytes
+          页面中包含 api/ajax 关键字
+
+[5] 测试分页参数...
+  cid=guangzhou&tid=domestic&page=1        ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&page=2        ->  93084 bytes, ~1 products
+  cid=guangzhou&tid=domestic&page=3        ->  93084 bytes, ~1 products
+  cid=guangzhou&tid=domestic               ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&p=1           ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&p=2           ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&index=1       ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&index=2       ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&start=1       ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&start=2       ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&offset=0      ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&offset=50     ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&currentpage=1 ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&currentpage=2 ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&pageindex=1   ->  93073 bytes, ~1 products
+  cid=guangzhou&tid=domestic&pageindex=2   ->  93073 bytes, ~1 products
+
+[6] 检查 Cookie 和 Session...
+  Cookies:
+    ASP.NET_SessionId=0nj2zvn0upegjyabdc0tb5fr
+  响应头:
+    Server: Microsoft-IIS/10.0
+    X-Aspnet-Version: 0
+    X-Powered-By: WAF/2.0
+
+[7] 深入分析列表页 HTML 结构...
+  查找产品列表容器...
+  容器 1: div.['citylist']
+    直接子元素: 0
+  容器 2: ul.['clear', 'linelist']
+    直接子元素: 50
+  发现 15 个可能的产品链接
+  示例: ['http://www.ptotour.com/line/search.aspx?key=æ¸\x85è¿\x9c', 'http://www.ptotour.com/line/search.aspx?key=ä¹\x9då¯¨æ²\x9f', 'http://www.ptotour.com/line/search.aspx?key=æ¡\x82æ\x9e\x97', 'http://www.ptotour.com/line/search.aspx?key=å\x8e¦é\x97¨', 'http://www.ptotour.com/line/search.aspx?key=è´µå·\x9e']
+  发现分页元素: ['pager']
+  分页内容: 
+  发现 2 个隐藏 input 字段
+    __VIEWSTATE=aOqgXihMF0TYn/Mx3VQvN/EcNLR8N3TpgNQizhM8MH1MiM0kmeckDDm7YTm3uF/0KQh6nzzRz6KXFfsl
+    __VIEWSTATEGENERATOR=7F7DB381
+
+[8] 分析外部 JS 文件...
+  发现 4 个 JS 文件
+  JS http://img.ptotour.com/js/jquery.lazyload.min.js 中发现 API 引用:
+    data-
+    data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC
+    ,container:b,data_attribute:
+  JS http://img.ptotour.com/js/jquery.min.js 中发现 API 引用:
+    :function(e){return pt.globalEval(e),e}}}),pt.ajaxPrefilter(
+    ;a--;)n=pt._data(o[a],e+
+    },function(e,t){var n=function(e){pt.event.simulate(t,e.target,pt.event.fix(e))};pt.event.special[t]={setup:function(){var r=this.ownerDocument||this,i=pt._data(r,t);i||r.addEventListener(e,n,!0),pt._data(r,t,(i||0)+1)},teardown:function(){var r=this.ownerDocument||this,i=pt._data(r,t)-1;i?pt._data(r,t,i):(r.removeEventListener(e,n,!0),pt._removeData(r,t))}}}),pt.fn.extend({on:function(e,t,n,r){return w(this,e,t,n,r)},one:function(e,t,n,r){return w(this,e,t,n,r,1)},off:function(e,t,n){var r,i;if(e&&e.preventDefault&&e.handleObj)return r=e.handleObj,pt(e.delegateTarget).off(r.namespace?r.origType+
+    )));l=i=null}return e}function A(e,t,n){for(var r,i=t?pt.filter(t,e):e,o=0;null!=(r=i[o]);o++)n||1!==r.nodeType||pt.cleanData(h(r)),r.parentNode&&(n&&pt.contains(r.ownerDocument,r)&&m(h(r,
+    ==typeof t)&&(n=t,t=void 0),n===!1&&(n=x),this.each(function(){pt.event.remove(this,e,n,t)})},trigger:function(e,t){return this.each(function(){pt.event.trigger(e,t,this)})},triggerHandler:function(e,t){var n=this[0];return n?pt.event.trigger(e,t,n,!0):void 0}});var Zt=/ jQuery\d+=
+  JS /js/common.js 中发现 API 引用:
+    data-original
+
+[9] 测试 ASP.NET PostBack...
+  发现 2 个隐藏字段
+  PostBack 状态码: 200
+  响应长度: 93073
+
+[10] 测试 JSONP 端点...
+
+[11] 测试 WebService 端点...
+
+[12] 测试移动端 API...
+
+[13] 检查 robots.txt 和 sitemap...
+  http://gz.ptotour.com/robots.txt
+  ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD/xhtml1-transitional.dtd">  <html xmlns="http://www.w3.org/1999/xhtml">  <head id="ctl00_Head1"><meta http-equiv="Content-Type" content="text/html;charset=utf-8" /><meta id="ctl00_referrer" name="referrer" content="always" /><link rel="shortcut icon" href="/images/favicon.ico" /><link rel="stylesheet" type="text/css" href="/css/common.css" /><title>   å¹¿å·æè¡ç¤¾_å¹¿å·ææ¸¸å¬å¸_å¬å¸ä¼ä¸
+  http://gz.ptotour.com/sitemap.xml
+  ï»¿  <!DOCTYPE html PUBLIC "-//W3C//XHD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/XHD/xhtml1-transitional.dtd">  <html xmlns="http://www.w3.org/1999/xhtml">  <head id="ctl00_Head1"><meta http-equiv="Content-Type" content="text/html;charset=utf-8" /><meta id="ctl00_referrer" name="referrer" content="always" /><link rel="shortcut icon" href="/images/favicon.ico" /><link rel="stylesheet" type="text/css" href="/css/common.css" /><title>   å¹¿å·æè¡ç¤¾_å¹¿å·ææ¸¸å¬å¸_å¬å¸ä¼ä¸
+
+======================================================================
+探测完成
+======================================================================

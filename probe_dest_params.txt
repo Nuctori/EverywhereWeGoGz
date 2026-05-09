@@ -1,0 +1,8 @@
+﻿http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=domestic&did=1&page=1
+  50 products, first: ['13898', '24911', '25758']
+http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=domestic&did=1&page=2
+  50 products, first: ['13898', '24911', '25758']
+http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=domestic&dpid=1&page=1
+  0 products, first: []
+http://gz.ptotour.com/line/list.aspx?cid=guangzhou&tid=domestic&dpid=1&page=2
+  0 products, first: []

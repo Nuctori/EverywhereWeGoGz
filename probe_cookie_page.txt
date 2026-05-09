@@ -1,0 +1,3 @@
+﻿Page 1: 50 products, first: ['13898', '24911', '25758']
+Page 2: 50 products, first: ['13898', '24911', '25758']
+Same content: True

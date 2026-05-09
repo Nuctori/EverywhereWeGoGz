@@ -1,0 +1,11 @@
+﻿Total ul tags: 7
+  ul.[]: 13 items
+  ul.['clear', 'linelist']: 50 items
+Divs with line/list class: 3
+  div.['citylist']
+  div.['wrapper', 'clear', 'listSearch']
+  div.['wrapper', 'clear', 'ListBox']
+Product names: 50
+  <æµ·åä¸äºåé£5æ¥æ¸¸>èå¨/æä¾£ç²¾é0è´­
+  <åä¸äºå¸-ä¹é-èå·å­æ-è¥¿æ¹åé£4æ¥
+  <æ´é³ç¡ä¸¹-å°æå¯º-é¾é¨ç³çªé«é3æ¥æ¸¸>
