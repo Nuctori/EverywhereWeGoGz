@@ -8,7 +8,11 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState<'home' | 'admin'>('home');
 
-  const handleSearch = () => {
+  const handleSearch = (nextQuery?: string) => {
+    if (typeof nextQuery === 'string') {
+      setSearchQuery(nextQuery);
+    }
+
     const listEl = document.getElementById('tour-list');
     if (listEl) {
       listEl.scrollIntoView({ behavior: 'smooth' });
@@ -28,7 +32,7 @@ function App() {
         onSearch={handleSearch}
       />
       <div id="tour-list">
-        <TourList />
+        <TourList searchQuery={searchQuery} />
       </div>
       
       {/* 管理入口 */}

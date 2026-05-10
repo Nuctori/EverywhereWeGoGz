@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 interface HeroProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
-  onSearch: () => void;
+  onSearch: (value?: string) => void;
 }
 
 export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
@@ -45,13 +45,13 @@ export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
               className="pl-10 h-11 sm:h-12 bg-white text-slate-800 placeholder:text-slate-400 border-0 shadow-lg text-sm"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && onSearch()}
+              onKeyDown={(e) => e.key === 'Enter' && onSearch(searchQuery)}
             />
           </div>
           <Button
             size="lg"
             className="h-11 sm:h-12 px-4 sm:px-6 bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-semibold shadow-lg text-sm"
-            onClick={onSearch}
+            onClick={() => onSearch(searchQuery)}
           >
             <Search className="w-5 h-5 mr-1 sm:mr-2" />
             <span className="hidden sm:inline">搜索</span>
@@ -65,7 +65,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
               key={dest}
               onClick={() => {
                 onSearchChange(dest);
-                onSearch();
+                onSearch(dest);
               }}
               className="px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-full text-sm text-white/90 transition-colors whitespace-nowrap shrink-0"
             >

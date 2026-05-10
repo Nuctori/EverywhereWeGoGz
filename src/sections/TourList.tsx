@@ -140,7 +140,11 @@ const DEFAULT_FILTERS: FilterState = {
   sortBy: 'hot',
 };
 
-export function TourList() {
+interface TourListProps {
+  searchQuery: string;
+}
+
+export function TourList({ searchQuery }: TourListProps) {
   const { tours: localTours, loading } = useToursData();
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -222,10 +226,30 @@ export function TourList() {
     today,
   ]);
 
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
   const displayTours = useMemo(() => {
     if (localTours.length === 0) return [];
 
     const result = localTours.filter((tour) => {
+      if (normalizedSearchQuery) {
+        const matchesSearch = [
+          tour.title,
+          tour.destination,
+          tour.theme,
+          tour.source,
+          tour.transportType,
+          ...tour.tags,
+          ...tour.highlights,
+        ]
+          .filter(Boolean)
+          .some((value) => value.toLowerCase().includes(normalizedSearchQuery));
+
+        if (!matchesSearch) {
+          return false;
+        }
+      }
+
       if (filters.destination && !tour.destination.includes(filters.destination)) {
         return false;
       }
@@ -299,7 +323,7 @@ export function TourList() {
     }
 
     return result;
-  }, [dateFilter, debouncedPriceRange, filters, localTours]);
+  }, [dateFilter, debouncedPriceRange, filters, localTours, normalizedSearchQuery]);
 
   const waterfallTours = useMemo(
     () => displayTours.slice(0, displayCount),
