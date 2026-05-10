@@ -393,25 +393,25 @@ export function TourList({ searchQuery }: TourListProps) {
   };
 
   const commonFilters = (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-      <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
         <div>
-          <h2 className="text-base sm:text-lg font-semibold text-slate-900">
+          <h2 className="text-sm font-semibold text-slate-900">
             常用筛选放在前面
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             先选目的地、出发时间和预算，大多数情况不用再展开更多条件
           </p>
         </div>
         <div className="flex items-center gap-2 ml-auto">
           {activeFilterCount > 0 && (
-            <Badge variant="secondary" className="rounded-full px-3 py-1 text-sm">
+            <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-[11px]">
               已选 {activeFilterCount} 项
             </Badge>
           )}
           <Button
             variant="outline"
-            className="gap-2 min-h-11 px-4"
+            className="gap-2 h-9 px-3 text-sm"
             onClick={() => setShowFilters((prev) => !prev)}
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -421,7 +421,7 @@ export function TourList({ searchQuery }: TourListProps) {
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"
-              className="min-h-11 px-3 text-slate-600"
+              className="h-9 px-2 text-sm text-slate-600"
               onClick={resetFilters}
             >
               清空
@@ -430,10 +430,10 @@ export function TourList({ searchQuery }: TourListProps) {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         <div>
           <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-            <MapPin className="w-4 h-4 text-blue-600" />
+            <MapPin className="w-4 h-4 text-slate-500" />
             目的地
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
@@ -441,10 +441,10 @@ export function TourList({ searchQuery }: TourListProps) {
               type="button"
               onClick={() => setFilters({ ...filters, destination: '' })}
               className={cn(
-                'min-h-11 shrink-0 rounded-full border px-4 text-sm transition-colors',
+                'h-9 shrink-0 rounded-full border px-3.5 text-sm transition-colors',
                 !filters.destination
-                  ? 'border-blue-600 bg-blue-50 text-blue-700'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300',
+                  ? 'border-slate-300 bg-slate-50 text-slate-900'
+                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
               )}
             >
               全部目的地
@@ -455,10 +455,10 @@ export function TourList({ searchQuery }: TourListProps) {
                 type="button"
                 onClick={() => setFilters({ ...filters, destination: dest })}
                 className={cn(
-                  'min-h-11 shrink-0 rounded-full border px-4 text-sm transition-colors',
+                  'h-9 shrink-0 rounded-full border px-3.5 text-sm transition-colors',
                   filters.destination === dest
-                    ? 'border-blue-600 bg-blue-50 text-blue-700'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300',
+                    ? 'border-slate-300 bg-slate-50 text-slate-900'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
                 )}
               >
                 {dest}
@@ -469,7 +469,7 @@ export function TourList({ searchQuery }: TourListProps) {
 
         <div>
           <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-            <Calendar className="w-4 h-4 text-blue-600" />
+            <Calendar className="w-4 h-4 text-slate-500" />
             出发时间
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
@@ -492,10 +492,10 @@ export function TourList({ searchQuery }: TourListProps) {
                     })
                   }
                   className={cn(
-                    'min-h-11 rounded-xl border px-3 text-sm transition-colors',
+                    'h-9 rounded-xl border px-3 text-sm transition-colors',
                     selected
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300',
+                      ? 'border-slate-300 bg-slate-50 text-slate-900'
+                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
                   )}
                 >
                   {option.label}
@@ -507,7 +507,7 @@ export function TourList({ searchQuery }: TourListProps) {
 
         <div>
           <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-            <Filter className="w-4 h-4 text-blue-600" />
+            <Filter className="w-4 h-4 text-slate-500" />
             预算
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
@@ -517,10 +517,10 @@ export function TourList({ searchQuery }: TourListProps) {
                 type="button"
                 onClick={() => setQuickBudget(option.min, option.max)}
                 className={cn(
-                  'min-h-11 rounded-xl border px-3 text-sm transition-colors',
-                  isBudgetSelected(option.min, option.max)
-                    ? 'border-blue-600 bg-blue-50 text-blue-700'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-blue-300',
+                    'h-9 rounded-xl border px-3 text-sm transition-colors',
+                    isBudgetSelected(option.min, option.max)
+                    ? 'border-slate-300 bg-slate-50 text-slate-900'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
                 )}
               >
                 {option.label}
@@ -534,11 +534,11 @@ export function TourList({ searchQuery }: TourListProps) {
 
   const advancedFilters = (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
         <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
           <div>
             <h3 className="text-base font-semibold text-slate-900">更多筛选</h3>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               需要更细的条件时再展开，避免把常用操作藏起来
             </p>
           </div>
@@ -562,7 +562,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 setFilters({ ...filters, source: value === 'all' ? '' : value })
               }
             >
-              <SelectTrigger className="min-h-11">
+            <SelectTrigger className="h-9">
                 <SelectValue placeholder="全部平台" />
               </SelectTrigger>
               <SelectContent>
@@ -595,7 +595,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 })
               }
             >
-              <SelectTrigger className="min-h-11">
+            <SelectTrigger className="h-9">
                 <SelectValue placeholder="全部天数" />
               </SelectTrigger>
               <SelectContent>
@@ -620,7 +620,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 setFilters({ ...filters, theme: value === 'all' ? '' : value })
               }
             >
-              <SelectTrigger className="min-h-11">
+            <SelectTrigger className="h-9">
                 <SelectValue placeholder="全部主题" />
               </SelectTrigger>
               <SelectContent>
@@ -644,7 +644,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 setFilters({ ...filters, destination: value === 'all' ? '' : value })
               }
             >
-              <SelectTrigger className="min-h-11">
+            <SelectTrigger className="h-9">
                 <SelectValue placeholder="全部目的地" />
               </SelectTrigger>
               <SelectContent>
@@ -679,9 +679,9 @@ export function TourList({ searchQuery }: TourListProps) {
                       type="button"
                       variant="outline"
                       className={cn(
-                        'min-h-11',
+                        'h-9',
                         (filters.departureDateStart || filters.departureDateEnd) &&
-                          'border-blue-600 bg-blue-50 text-blue-700',
+                          'border-slate-300 bg-slate-50 text-slate-900',
                       )}
                     >
                       自定义日期范围
@@ -726,7 +726,7 @@ export function TourList({ searchQuery }: TourListProps) {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="min-h-11 text-slate-600"
+                    className="h-9 text-slate-600"
                     onClick={() =>
                       setFilters({
                         ...filters,
@@ -796,11 +796,11 @@ export function TourList({ searchQuery }: TourListProps) {
                 {advancedFilters}
               </div>
               <div className="border-t px-4 pt-4 pb-5 flex gap-3">
-                <Button variant="outline" className="flex-1 min-h-11" onClick={resetFilters}>
+                <Button variant="outline" className="flex-1 h-9" onClick={resetFilters}>
                   重置全部
                 </Button>
                 <Button
-                  className="flex-1 min-h-11 bg-blue-600 hover:bg-blue-700"
+                  className="flex-1 h-9 bg-slate-900 hover:bg-slate-800"
                   onClick={() => setShowFilters(false)}
                 >
                   查看 {displayTours.length} 条结果
@@ -819,7 +819,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 setFilters({ ...filters, sortBy: value as FilterState['sortBy'] })
               }
             >
-              <SelectTrigger className="w-[160px] min-h-11">
+              <SelectTrigger className="w-[160px] h-9">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

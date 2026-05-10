@@ -58,6 +58,10 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
   };
 
   const searchUrl = searchUrls[tour.source] + encodeURIComponent(tour.title.slice(0, 20));
+  const openExternalLink = (url: string) => {
+    if (!url) return;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   const content = (
     <>
@@ -152,6 +156,15 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
             <span className="text-sm text-green-700">本产品无需补单房差，单人出行同价</span>
           </div>
         )}
+
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Button className="h-11 bg-slate-900 hover:bg-slate-800" size="lg" onClick={() => openExternalLink(tour.bookingUrl)}>
+            <ExternalLink className="w-4 h-4 mr-2" />查看产品详情
+          </Button>
+          <Button variant="outline" className="h-11" size="lg" onClick={() => openExternalLink(searchUrl)}>
+            <Search className="w-4 h-4 mr-2" />官网搜索
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
@@ -322,10 +335,10 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
 
   const actionButtons = (
     <div className="flex flex-col sm:flex-row gap-3 p-4 sm:p-6 border-t bg-white shrink-0">
-      <Button className="flex-1" size="lg" onClick={() => window.open(tour.bookingUrl, '_blank')}>
+      <Button className="flex-1 bg-slate-900 hover:bg-slate-800" size="lg" onClick={() => openExternalLink(tour.bookingUrl)}>
         <ExternalLink className="w-4 h-4 mr-2" />查看产品详情
       </Button>
-      <Button variant="outline" size="lg" onClick={() => window.open(searchUrl, '_blank')}>
+      <Button variant="outline" size="lg" onClick={() => openExternalLink(searchUrl)}>
         <Search className="w-4 h-4 mr-2" />官网搜索
       </Button>
       <Button variant="outline" size="lg" onClick={onClose} className="sm:hidden">
