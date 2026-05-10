@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 
 import requests
 
-from tour_blacklist import is_blacklisted_title
+from tour_blacklist import is_blacklisted_title, looks_like_tour
 
 # 来源颜色映射
 SOURCE_COLORS = {
@@ -197,7 +197,7 @@ def raw_to_tour(raw, id_counter):
     title = raw.get('title', '')
     price = raw.get('price', 0)
 
-    if is_blacklisted_title(title):
+    if is_blacklisted_title(title) or not looks_like_tour(title):
         return None
 
     days = raw.get('days', 0) or extract_days(title)

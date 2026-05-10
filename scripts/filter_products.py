@@ -4,9 +4,9 @@ import re
 import sys
 
 try:
-    from tour_blacklist import is_blacklisted_title
+    from tour_blacklist import is_blacklisted_title, looks_like_tour
 except ImportError:
-    from scripts.tour_blacklist import is_blacklisted_title
+    from scripts.tour_blacklist import is_blacklisted_title, looks_like_tour
 
 def filter_products(input_file, output_file):
     with open(input_file, 'r', encoding='utf-8') as f:
@@ -21,7 +21,7 @@ def filter_products(input_file, output_file):
         compact = re.sub(r'\s+', '', title)
         
         has_weight = bool(weight_pattern.search(compact))
-        has_tour_kw = any(kw in compact for kw in tour_kw)
+        has_tour_kw = looks_like_tour(compact) or any(kw in compact for kw in tour_kw)
         is_cheap_item = price < 50 and len(compact) < 25
         
         return is_blacklisted_title(compact) or (has_weight and not has_tour_kw) or (is_cheap_item and not has_tour_kw)
