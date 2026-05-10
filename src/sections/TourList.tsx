@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Select,
   SelectContent,
@@ -146,6 +147,7 @@ interface TourListProps {
 
 export function TourList({ searchQuery }: TourListProps) {
   const { tours: localTours, loading } = useToursData();
+  const isMobile = useIsMobile();
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [displayCount, setDisplayCount] = useState(INITIAL_LOAD_COUNT);
@@ -776,11 +778,13 @@ export function TourList({ searchQuery }: TourListProps) {
       <div className="mb-4 sm:mb-6">
         {commonFilters}
 
-        <div className="hidden sm:block mt-4">
-          {showFilters && advancedFilters}
-        </div>
+        {!isMobile && showFilters && (
+          <div className="mt-4">
+            {advancedFilters}
+          </div>
+        )}
 
-        <div className="sm:hidden">
+        {isMobile && (
           <Sheet open={showFilters} onOpenChange={setShowFilters}>
             <SheetContent side="bottom" className="h-[88vh] flex flex-col px-0">
               <SheetHeader className="border-b px-4 pb-4">
@@ -808,7 +812,7 @@ export function TourList({ searchQuery }: TourListProps) {
               </div>
             </SheetContent>
           </Sheet>
-        </div>
+        )}
 
         <div className="mt-4 flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-2">

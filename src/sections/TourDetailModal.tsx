@@ -1,5 +1,6 @@
 import type { Tour } from '@/types/tour';
 import { useState } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Dialog,
   DialogContent,
@@ -40,6 +41,7 @@ function formatDate(dateStr: string | undefined): string {
 }
 
 export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
+  const isMobile = useIsMobile();
   if (!tour) return null;
 
   const sourceColor = {
@@ -341,16 +343,16 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
       <Button variant="outline" size="lg" onClick={() => openExternalLink(searchUrl)}>
         <Search className="w-4 h-4 mr-2" />官网搜索
       </Button>
-      <Button variant="outline" size="lg" onClick={onClose} className="sm:hidden">
+      {isMobile && <Button variant="outline" size="lg" onClick={onClose}>
         <X className="w-4 h-4 mr-2" />关闭
-      </Button>
+      </Button>}
     </div>
   );
 
   return (
     <>
       {/* 移动端 Sheet - 使用 CSS 隐藏桌面端 */}
-      <div className="sm:hidden">
+      {isMobile && (
         <Sheet open={!!tour} onOpenChange={(open) => !open && onClose()}>
           <SheetContent side="bottom" className="h-[92vh] p-0 flex flex-col">
             <SheetHeader className="p-4 pb-2 border-b shrink-0">
@@ -363,10 +365,10 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
             {actionButtons}
           </SheetContent>
         </Sheet>
-      </div>
+      )}
 
       {/* 桌面端 Dialog - 使用 CSS 隐藏移动端 */}
-      <div className="hidden sm:block">
+      {!isMobile && (
         <Dialog open={!!tour} onOpenChange={(open) => !open && onClose()}>
           <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
             <DialogHeader className="p-6 pb-0 shrink-0">
@@ -379,7 +381,7 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
             {actionButtons}
           </DialogContent>
         </Dialog>
-      </div>
+      )}
     </>
   );
 }
