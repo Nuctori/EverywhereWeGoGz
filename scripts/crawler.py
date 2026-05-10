@@ -27,6 +27,10 @@ import os
 from datetime import datetime, timedelta
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
+try:
+    from tour_blacklist import is_blacklisted_title
+except ImportError:
+    from scripts.tour_blacklist import is_blacklisted_title
 
 # ==================== 全局配置 ====================
 HEADERS = {
@@ -1056,7 +1060,7 @@ def main():
         title = raw.get('title', '')
         
         # 1. 过滤"押金"、"预付款"、"酒店预定"等非旅游产品
-        if any(k in title for k in ['押金', '预付款', '定金', '占位费', '机位', '酒店预定', '签证', '机票']):
+        if is_blacklisted_title(title) or any(k in title for k in ['押金', '预付款', '定金', '占位费', '机位', '酒店预定', '签证', '机票']):
             return False
         
         # 2. 过滤多日游但价格异常低的（可能是解析错误）

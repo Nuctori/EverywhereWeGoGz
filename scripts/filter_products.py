@@ -3,28 +3,35 @@ import json
 import re
 import sys
 
+try:
+    from tour_blacklist import is_blacklisted_title
+except ImportError:
+    from scripts.tour_blacklist import is_blacklisted_title
+
 def filter_products(input_file, output_file):
     with open(input_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
-    weight_pattern = re.compile(r'\d+\s*(g|ml|斤|kg|L|盒|袋|罐|瓶|包|箱)')
+    weight_pattern = re.compile(r'\d+\s*(g|ml|斤|kg|L|盒|袋|罐|瓶|包|箱)', re.I)
+    tour_kw = ['天', '日游', '游', '团', '行程', '酒店', '景点', '门票', '飞机', '高铁', '出发']
     
     def is_product(t):
-        title = t['title']
-        price = t['price']
+        title = str(t.get('title', ''))
+        price = float(t.get('price', 0) or 0)
+        compact = re.sub(r'\s+', '', title)
         
-        has_weight = bool(weight_pattern.search(title))
-        has_tour_kw = any(kw in title for kw in ['天', '日', '游', '团', '行程', '酒店', '景点', '门票', '飞机', '高铁', '出发'])
-        is_cheap_item = price < 50 and len(title) < 25
+        has_weight = bool(weight_pattern.search(compact))
+        has_tour_kw = any(kw in compact for kw in tour_kw)
+        is_cheap_item = price < 50 and len(compact) < 25
         
-        return (has_weight and not has_tour_kw) or (is_cheap_item and not has_tour_kw)
+        return is_blacklisted_title(compact) or (has_weight and not has_tour_kw) or (is_cheap_item and not has_tour_kw)
     
     filtered = [t for t in data if not is_product(t)]
     removed = [t for t in data if is_product(t)]
     
     print(f'原始数据: {len(data)} 条')
-    print(f'移除卖货产品: {len(removed)} 条')
-    print(f'保留旅行团: {len(filtered)} 条')
+    print(f'移除卖货/非旅游: {len(removed)} 条')
+    print(f'保留结果: {len(filtered)} 条')
     
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(filtered, f, ensure_ascii=False, indent=2)
