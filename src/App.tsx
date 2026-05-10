@@ -31,7 +31,7 @@ function App() {
         onSearchChange={setSearchQuery}
         onSearch={handleSearch}
       />
-      <div id="tour-list">
+      <div id="tour-list" className="scroll-mt-20">
         <TourList searchQuery={searchQuery} />
       </div>
       

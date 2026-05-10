@@ -13,6 +13,8 @@ from urllib.parse import urlparse
 
 import requests
 
+from tour_blacklist import is_blacklisted_title
+
 # 来源颜色映射
 SOURCE_COLORS = {
     '假日通': '#FF6B35',
@@ -36,10 +38,9 @@ def normalize_image_path(url: str, source: str) -> str:
     if not url:
         return url
 
-    if not url.startswith('http://'):
-        return url
-
     parsed = urlparse(url)
+    if parsed.scheme not in {'http', 'https'}:
+        return url
     ext = os.path.splitext(parsed.path)[1].lower()
     if ext not in IMAGE_EXTENSIONS:
         ext = '.jpg'
@@ -195,6 +196,10 @@ def raw_to_tour(raw, id_counter):
     source = raw.get('source', '未知')
     title = raw.get('title', '')
     price = raw.get('price', 0)
+
+    if is_blacklisted_title(title):
+        return None
+
     days = raw.get('days', 0) or extract_days(title)
     destination = raw.get('destination', '') or guess_destination(title)
     theme = guess_theme(title)
@@ -376,7 +381,8 @@ def main():
     tours = []
     for i, raw in enumerate(deduped, 1):
         tour = raw_to_tour(raw, i)
-        tours.append(tour)
+        if tour is not None:
+            tours.append(tour)
 
     print(f"[转换] 生成 {len(tours)} 条 Tour 数据")
 

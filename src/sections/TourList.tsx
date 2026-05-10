@@ -149,13 +149,17 @@ export function TourList({ searchQuery }: TourListProps) {
   const { tours: localTours, loading } = useToursData();
   const isMobile = useIsMobile();
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(true);
   const [displayCount, setDisplayCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>([0, 100]);
+
+  useEffect(() => {
+    setShowFilters(!isMobile);
+  }, [isMobile]);
 
   const { maxPriceAll, priceStats } = useMemo(
     () => computePriceStats(localTours),

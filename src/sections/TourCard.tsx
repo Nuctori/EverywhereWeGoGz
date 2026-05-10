@@ -2,6 +2,7 @@ import type { Tour } from '@/types/tour';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { resolveAssetUrl } from '@/lib/utils';
 import {
   MapPin, Calendar, Clock, Users, Flame, Sparkles, Zap,
   Eye, ImageOff, Footprints, Mountain,
@@ -51,18 +52,20 @@ export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps)
   const hasImage = tour.images && tour.images.length > 0 && !imgError;
   const rawImageSrc = hasImage ? tour.images[0] : getFallbackImage(tour.title);
   // 自动将 http 升级为 https，避免 Mixed Content 警告
-  const imageSrc = rawImageSrc.startsWith('http://') ? rawImageSrc.replace('http://', 'https://') : rawImageSrc;
+  const imageSrc = resolveAssetUrl(
+    rawImageSrc.startsWith('http://') ? rawImageSrc.replace('http://', 'https://') : rawImageSrc,
+  );
 
   // 限制标签数量，来源标签用灰色
   const tags = tour.tags?.slice(0, 2) || [];
 
   return (
-    <Card className="group overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer border-slate-200" onClick={onClick}>
+    <Card className="group overflow-hidden hover:shadow-md transition-shadow duration-200 cursor-pointer border-slate-200" onClick={onClick}>
       <div className="relative h-48 overflow-hidden bg-slate-100">
         <img
           src={imageSrc}
           alt={tour.title}
-          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-200"
           onError={() => setImgError(true)}
           loading="lazy"
           decoding="async"

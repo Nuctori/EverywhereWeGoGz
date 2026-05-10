@@ -15,6 +15,7 @@ import {
 export default function Admin() {
   const { status } = useCrawlStatus();
   const [message, setMessage] = useState<string | null>(null);
+  const baseUrl = import.meta.env.BASE_URL || '/';
 
   const handleTriggerCrawl = async () => {
     setMessage('静态站点不支持爬虫功能，请直接修改 src/data/tours.ts 更新数据。');
@@ -79,7 +80,7 @@ export default function Admin() {
               <p className="text-xs text-slate-500">旅行团静态数据状态</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => (window.location.href = '/')}>返回首页</Button>
+          <Button variant="outline" size="sm" onClick={() => (window.location.href = baseUrl)}>返回首页</Button>
         </div>
       </header>
 
