@@ -4,10 +4,14 @@
 合并所有数据源，生成 tours.ts 和 tours.json
 """
 
+import hashlib
 import json
 import os
 import re
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
+
+import requests
 
 # 来源颜色映射
 SOURCE_COLORS = {
@@ -20,11 +24,127 @@ SOURCE_COLORS = {
     '品途': '#3A86FF',
 }
 
+DATE_TOKEN_RE = re.compile(r'(\d{1,2})[./](\d{1,2})')
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'}
+
+
+def stable_hash(value: str) -> int:
+    return int(hashlib.sha1(value.encode('utf-8')).hexdigest(), 16)
+
+
+def normalize_image_path(url: str, source: str) -> str:
+    if not url:
+        return url
+
+    if not url.startswith('http://'):
+        return url
+
+    parsed = urlparse(url)
+    ext = os.path.splitext(parsed.path)[1].lower()
+    if ext not in IMAGE_EXTENSIONS:
+        ext = '.jpg'
+
+    cache_root = os.path.join(
+        os.path.dirname(__file__),
+        '..',
+        'public',
+        'data',
+        'image-cache',
+        parsed.netloc.replace(':', '_'),
+    )
+    os.makedirs(cache_root, exist_ok=True)
+
+    filename = f"{hashlib.sha1(url.encode('utf-8')).hexdigest()[:16]}{ext}"
+    local_path = os.path.join(cache_root, filename)
+    public_path = f"/data/image-cache/{parsed.netloc.replace(':', '_')}/{filename}"
+
+    if os.path.exists(local_path):
+        return public_path
+
+    try:
+        resp = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
+        resp.raise_for_status()
+        content_type = resp.headers.get('content-type', '').lower()
+        if content_type and 'image' not in content_type:
+            raise ValueError(f'unexpected content-type: {content_type}')
+        with open(local_path, 'wb') as f:
+            f.write(resp.content)
+        return public_path
+    except Exception as exc:
+        print(f"[图片缓存] {source} {url} -> {exc}")
+        return ensure_placeholder_image(source)
+
+
+def ensure_placeholder_image(source: str) -> str:
+    placeholder_root = os.path.join(
+        os.path.dirname(__file__),
+        '..',
+        'public',
+        'data',
+        'image-cache',
+        'placeholders',
+    )
+    os.makedirs(placeholder_root, exist_ok=True)
+
+    filename = f"{hashlib.sha1(source.encode('utf-8')).hexdigest()[:12]}.svg"
+    local_path = os.path.join(placeholder_root, filename)
+    public_path = f"/data/image-cache/placeholders/{filename}"
+
+    if os.path.exists(local_path):
+        return public_path
+
+    safe_source = source.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+    svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e2e8f0" />
+      <stop offset="100%" stop-color="#cbd5e1" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)" />
+  <rect x="60" y="60" width="680" height="480" rx="32" fill="#f8fafc" opacity="0.88" />
+  <text x="400" y="290" text-anchor="middle" font-size="42" fill="#475569" font-family="Arial, sans-serif">图片暂不可用</text>
+  <text x="400" y="350" text-anchor="middle" font-size="26" fill="#64748b" font-family="Arial, sans-serif">{safe_source}</text>
+</svg>'''
+    with open(local_path, 'w', encoding='utf-8') as f:
+        f.write(svg)
+    return public_path
+
+
+def normalize_images(images, source: str):
+    result = []
+    for img in images or []:
+        if not img:
+            continue
+        result.append(normalize_image_path(img, source))
+    return result
+
+
+def extract_title_dates(title: str):
+    normalized = (
+        title.replace('／', '/')
+        .replace('．', '.')
+        .replace('－', '-')
+        .replace('—', '-')
+        .replace('–', '-')
+    )
+    dates = []
+    year = datetime.now().year
+    for month, day in DATE_TOKEN_RE.findall(normalized):
+        try:
+            parsed = datetime(year, int(month), int(day))
+        except ValueError:
+            continue
+        value = parsed.strftime('%Y-%m-%d')
+        if value not in dates:
+            dates.append(value)
+    return dates
+
 
 def extract_days(title):
-    m = re.search(r"(\d+)[天日]", title)
+    m = re.search(r"(\d+(?:\.\d+)?)\s*[天日]", title)
     if m:
-        return int(m.group(1))
+        return int(float(m.group(1)))
     return 0
 
 
@@ -82,11 +202,24 @@ def raw_to_tour(raw, id_counter):
     images = raw.get('images', [])
     if not images and raw.get('img'):
         images = [raw['img']]
+    images = normalize_images(images, source)
+    if not images:
+        images = [ensure_placeholder_image(source)]
+
+    parsed_dates = extract_title_dates(title)
+    if parsed_dates:
+        departure_date = parsed_dates[0]
+        departure_dates = parsed_dates
+    else:
+        days_offset = (stable_hash(title) % 60) + 1
+        departure = datetime.now() + timedelta(days=days_offset)
+        departure_date = departure.strftime("%Y-%m-%d")
+        departure_dates = [departure_date]
 
     discount_rate = None
     original_price = None
     if price > 1000:
-        discount_rate = (hash(title) % 16) + 5
+        discount_rate = (stable_hash(title) % 16) + 5
         original_price = int(price / (1 - discount_rate / 100))
 
     if days <= 1:
@@ -96,11 +229,10 @@ def raw_to_tour(raw, id_counter):
     else:
         single_supplement = max(100, int(price * 0.25))
 
-    rating = round(3.8 + (hash(source + title) % 12) / 10, 1)
-    review_count = (hash(title + source) % 500) + 50
+    rating = round(3.8 + (stable_hash(source + title) % 12) / 10, 1)
+    review_count = (stable_hash(title + source) % 500) + 50
 
-    days_offset = (hash(title) % 60) + 1
-    departure = datetime.now() + timedelta(days=days_offset)
+    departure = datetime.strptime(departure_date, "%Y-%m-%d")
     return_date = departure + timedelta(days=days or 2)
 
     itinerary = []
@@ -115,7 +247,7 @@ def raw_to_tour(raw, id_counter):
         })
 
     available_seats = max(3, 20 - int(price / 1000))
-    total_seats = available_seats + (hash(title) % 10) + 5
+    total_seats = available_seats + (stable_hash(title) % 10) + 5
 
     return {
         "id": f"tour_{id_counter}",
@@ -145,7 +277,7 @@ def raw_to_tour(raw, id_counter):
         "visaRequirements": "无需签证（国内游）",
         "travelInsurance": True,
         "tourGuideService": True,
-        "freeWiFi": hash(title) % 2 == 0,
+        "freeWiFi": stable_hash(title) % 2 == 0,
         "childPolicy": "2-12岁儿童不占床享半价",
         "cancellationPolicy": "出发前7天可无损退改",
         "refundPolicy": "未消费项目按实结算退还",
@@ -154,9 +286,9 @@ def raw_to_tour(raw, id_counter):
         "bookingUrl": raw.get('url', '#'),
         "images": images,
         "tags": [theme, "纯玩", "品质"],
-        "isHot": hash(title + source) % 3 == 0,
-        "isNew": hash(title + source) % 5 == 0,
-        "isFlashSale": hash(title + source) % 10 == 0,
+        "isHot": stable_hash(title + source) % 3 == 0,
+        "isNew": stable_hash(title + source) % 5 == 0,
+        "isFlashSale": stable_hash(title + source) % 10 == 0,
         "discountRate": discount_rate if discount_rate is not None else None,
         "groupSize": "30人常规团",
         "theme": theme,
@@ -164,6 +296,9 @@ def raw_to_tour(raw, id_counter):
         "difficulty": "轻松",
         "season": "全年",
         "language": "中文导游",
+        "departureDate": departure_date,
+        "departureDates": departure_dates,
+        "hotDepartureDates": departure_dates[:4],
         "createdAt": datetime.now().isoformat(),
         "updatedAt": datetime.now().isoformat(),
     }
