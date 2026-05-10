@@ -317,18 +317,21 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
         </TabsContent>
       </Tabs>
 
-      <div className="mt-6 flex flex-col sm:flex-row gap-3">
-        <Button className="flex-1" size="lg" onClick={() => window.open(tour.bookingUrl, '_blank')}>
-          <ExternalLink className="w-4 h-4 mr-2" />查看产品详情
-        </Button>
-        <Button variant="outline" size="lg" onClick={() => window.open(searchUrl, '_blank')}>
-          <Search className="w-4 h-4 mr-2" />官网搜索
-        </Button>
-        <Button variant="outline" size="lg" onClick={onClose} className="sm:hidden">
-          <X className="w-4 h-4 mr-2" />关闭
-        </Button>
-      </div>
     </>
+  );
+
+  const actionButtons = (
+    <div className="flex flex-col sm:flex-row gap-3 p-4 sm:p-6 border-t bg-white shrink-0">
+      <Button className="flex-1" size="lg" onClick={() => window.open(tour.bookingUrl, '_blank')}>
+        <ExternalLink className="w-4 h-4 mr-2" />查看产品详情
+      </Button>
+      <Button variant="outline" size="lg" onClick={() => window.open(searchUrl, '_blank')}>
+        <Search className="w-4 h-4 mr-2" />官网搜索
+      </Button>
+      <Button variant="outline" size="lg" onClick={onClose} className="sm:hidden">
+        <X className="w-4 h-4 mr-2" />关闭
+      </Button>
+    </div>
   );
 
   return (
@@ -344,6 +347,7 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
             <ScrollArea className="flex-1 px-4 py-4">
               {content}
             </ScrollArea>
+            {actionButtons}
           </SheetContent>
         </Sheet>
       </div>
@@ -351,14 +355,15 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
       {/* 桌面端 Dialog - 使用 CSS 隐藏移动端 */}
       <div className="hidden sm:block">
         <Dialog open={!!tour} onOpenChange={(open) => !open && onClose()}>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden">
-            <DialogHeader className="p-6 pb-0">
+          <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
+            <DialogHeader className="p-6 pb-0 shrink-0">
               <DialogTitle className="text-xl leading-relaxed">{tour.title}</DialogTitle>
               <DialogDescription>{tour.title} 的详细信息</DialogDescription>
             </DialogHeader>
-            <ScrollArea className="px-6 pb-6 max-h-[calc(90vh-100px)]">
+            <ScrollArea className="flex-1 px-6 py-4">
               {content}
             </ScrollArea>
+            {actionButtons}
           </DialogContent>
         </Dialog>
       </div>

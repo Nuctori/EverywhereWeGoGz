@@ -47,11 +47,6 @@ function formatDate(dateStr: string | undefined): string {
 }
 
 export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps) {
-  const sourceColor = {
-    假日通: '#FF6B35', 广州去旅行: '#4ECDC4', 康辉: '#1A535C',
-    暴走村: '#B8860B', 广之旅: '#FF006E', 广东中旅: '#8338EC', 品途: '#3A86FF',
-  }[tour.source] || '#666';
-
   const [imgError, setImgError] = useState(false);
   const hasImage = tour.images && tour.images.length > 0 && !imgError;
   const rawImageSrc = hasImage ? tour.images[0] : getFallbackImage(tour.title);
