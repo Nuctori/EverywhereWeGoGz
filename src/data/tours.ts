@@ -27,6 +27,11 @@ export const sources = [
     "color": "#4ECDC4"
   },
   {
+    "name": "康辉",
+    "logo": "/icons/康辉.png",
+    "color": "#1A535C"
+  },
+  {
     "name": "暴走村",
     "logo": "/icons/暴走村.png",
     "color": "#B8860B"

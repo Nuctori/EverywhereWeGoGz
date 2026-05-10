@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 
 import requests
 
-from tour_blacklist import is_blacklisted_title, looks_like_tour
+from tour_blacklist import is_blacklisted_title
 
 # 来源颜色映射
 SOURCE_COLORS = {
@@ -192,17 +192,29 @@ def guess_theme(title):
     return '自然风光'
 
 
+def guess_leisure_level(title: str, days: int, theme: str) -> str:
+    t = title.lower()
+    if any(k in t for k in ['徒步', '登山', '穿越', '户外', '探险', '露营', '漂流', '越野', '房车旅行']):
+        return 'hard'
+    if days >= 8 or any(k in t for k in ['长线', '深度', '环线', '邮轮', '专列']):
+        return 'medium'
+    if theme in ['海岛度假', '亲子游', '古镇文化', '美食之旅', '摄影之旅']:
+        return 'easy'
+    return 'easy'
+
+
 def raw_to_tour(raw, id_counter):
     source = raw.get('source', '未知')
     title = raw.get('title', '')
     price = raw.get('price', 0)
 
-    if is_blacklisted_title(title) or not looks_like_tour(title):
+    if is_blacklisted_title(title):
         return None
 
     days = raw.get('days', 0) or extract_days(title)
     destination = raw.get('destination', '') or guess_destination(title)
     theme = guess_theme(title)
+    leisure_level = guess_leisure_level(title, days, theme)
 
     images = raw.get('images', [])
     if not images and raw.get('img'):
@@ -297,6 +309,7 @@ def raw_to_tour(raw, id_counter):
         "discountRate": discount_rate if discount_rate is not None else None,
         "groupSize": "30人常规团",
         "theme": theme,
+        "leisureLevel": leisure_level,
         "suitableFor": ["亲子", "情侣"],
         "difficulty": "轻松",
         "season": "全年",

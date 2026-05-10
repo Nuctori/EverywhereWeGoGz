@@ -4,24 +4,22 @@ import re
 import sys
 
 try:
-    from tour_blacklist import is_blacklisted_title, looks_like_tour
+    from tour_blacklist import is_blacklisted_title
 except ImportError:
-    from scripts.tour_blacklist import is_blacklisted_title, looks_like_tour
+    from scripts.tour_blacklist import is_blacklisted_title
 
 def filter_products(input_file, output_file):
     with open(input_file, 'r', encoding='utf-8') as f:
         data = json.load(f)
     
     weight_pattern = re.compile(r'\d+\s*(g|ml|斤|kg|L|盒|袋|罐|瓶|包|箱)', re.I)
-    tour_kw = ['天', '日游', '游', '团', '行程', '酒店', '景点', '门票', '飞机', '高铁', '出发']
-    
     def is_product(t):
         title = str(t.get('title', ''))
         price = float(t.get('price', 0) or 0)
         compact = re.sub(r'\s+', '', title)
         
         has_weight = bool(weight_pattern.search(compact))
-        has_tour_kw = looks_like_tour(compact) or any(kw in compact for kw in tour_kw)
+        has_tour_kw = any(kw in compact for kw in ['天', '日游', '游', '团', '行程', '酒店', '景点', '门票', '飞机', '高铁', '出发'])
         is_cheap_item = price < 50 and len(compact) < 25
         
         return is_blacklisted_title(compact) or (has_weight and not has_tour_kw) or (is_cheap_item and not has_tour_kw)

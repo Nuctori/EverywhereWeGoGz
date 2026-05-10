@@ -516,7 +516,7 @@ function LeisureLevelItem({ level }: { level: 'easy' | 'medium' | 'hard' }) {
     medium: { icon: <Footprints className="w-4 h-4 text-amber-500" />, label: '休闲指数', text: '中等强度，需要一定体力', color: 'text-amber-700', bg: 'bg-amber-50' },
     hard: { icon: <Mountain className="w-4 h-4 text-red-500" />, label: '休闲指数', text: '高强度/有挑战性，适合有户外经验者', color: 'text-red-700', bg: 'bg-red-50' },
   };
-  const c = config[level];
+  const c = config[level] || config.easy;
   return (
     <div className={`flex items-start gap-3 rounded-lg p-3 ${c.bg}`}>
       <div className="shrink-0 mt-0.5">{c.icon}</div>
