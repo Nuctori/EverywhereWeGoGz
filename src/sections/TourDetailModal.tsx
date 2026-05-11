@@ -52,11 +52,6 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
   );
   const heroFallbackImage = getFallbackImage(tour.title);
 
-  const sourceColor = {
-    假日通: '#FF6B35', 广州去旅行: '#4ECDC4', 康辉: '#1A535C',
-    暴走村: '#B8860B', 广之旅: '#FF006E', 广东中旅: '#8338EC', 品途: '#3A86FF',
-  }[tour.source] || '#666';
-
   const searchUrls: Record<string, string> = {
     '广之旅': 'https://www.gzl.com.cn/search?keyword=',
     '广东中旅': 'http://m.gdcts.com/search?keyword=',
@@ -77,27 +72,27 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
     <>
       <div className="flex items-center gap-2 mb-2 flex-wrap">
         {tour.isHot && (
-          <Badge className="bg-orange-500 text-white gap-1 text-xs">
-            <Flame className="w-3 h-3" />热门
+          <Badge variant="outline" className="gap-1 border-stone-200 bg-white text-xs text-stone-600">
+            <Flame className="w-3 h-3" />热度较高
           </Badge>
         )}
         {tour.isNew && (
-          <Badge className="bg-blue-500 text-white gap-1 text-xs">
-            <Sparkles className="w-3 h-3" />新品
+          <Badge variant="outline" className="gap-1 border-stone-200 bg-white text-xs text-stone-600">
+            <Sparkles className="w-3 h-3" />新上线
           </Badge>
         )}
         {tour.isFlashSale && (
-          <Badge className="bg-red-500 text-white gap-1 text-xs">
-            <Zap className="w-3 h-3" />限时抢
+          <Badge variant="outline" className="gap-1 border-stone-200 bg-white text-xs text-stone-600">
+            <Zap className="w-3 h-3" />价格变动
           </Badge>
         )}
-        <Badge className="text-white text-xs" style={{ backgroundColor: sourceColor }}>
+        <Badge variant="outline" className="border-stone-200 bg-white text-xs text-stone-600">
           {tour.source}
         </Badge>
       </div>
 
       {(heroImage || heroFallbackImage) && (
-        <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+        <div className="mb-6 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
           <img
             src={heroImage || heroFallbackImage}
             alt={tour.title}
@@ -116,62 +111,60 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
 
       {/* 核心信息 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        <div className="bg-slate-50 rounded-lg p-3 text-center">
-          <MapPin className="w-5 h-5 text-blue-500 mx-auto mb-1" />
-          <p className="text-xs text-slate-500">目的地</p>
-          <p className="font-semibold text-sm">{tour.destination}</p>
+        <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
+          <MapPin className="mx-auto mb-1 h-5 w-5 text-stone-500" />
+          <p className="text-xs text-stone-500">目的地</p>
+          <p className="text-sm font-semibold text-stone-900">{tour.destination}</p>
         </div>
-        <div className="bg-slate-50 rounded-lg p-3 text-center">
-          <Clock className="w-5 h-5 text-green-500 mx-auto mb-1" />
-          <p className="text-xs text-slate-500">行程天数</p>
-          <p className="font-semibold text-sm">{tour.duration}天</p>
+        <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
+          <Clock className="mx-auto mb-1 h-5 w-5 text-stone-500" />
+          <p className="text-xs text-stone-500">行程天数</p>
+          <p className="text-sm font-semibold text-stone-900">{tour.duration}天</p>
         </div>
-        <div className="bg-slate-50 rounded-lg p-3 text-center">
-          <Users className="w-5 h-5 text-purple-500 mx-auto mb-1" />
-          <p className="text-xs text-slate-500">剩余名额</p>
-          <p className="font-semibold text-sm">{tour.availableSeats}/{tour.totalSeats}</p>
+        <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
+          <Users className="mx-auto mb-1 h-5 w-5 text-stone-500" />
+          <p className="text-xs text-stone-500">剩余名额</p>
+          <p className="text-sm font-semibold text-stone-900">{tour.availableSeats}/{tour.totalSeats}</p>
         </div>
-        <div className="bg-slate-50 rounded-lg p-3 text-center">
-          <Star className="w-5 h-5 text-yellow-500 mx-auto mb-1" />
-          <p className="text-xs text-slate-500">评分</p>
-          <p className="font-semibold text-sm text-slate-400">—</p>
+        <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
+          <Star className="mx-auto mb-1 h-5 w-5 text-stone-500" />
+          <p className="text-xs text-stone-500">评分</p>
+          <p className="text-sm font-semibold text-stone-400">—</p>
         </div>
       </div>
 
-      {/* 价格区域 */}
-      <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-100 rounded-xl p-4 sm:p-5 mb-6">
-        <div className="flex items-center justify-between mb-3">
+      <div className="mb-6 rounded-2xl border border-stone-200 bg-white p-4 sm:p-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
           <div>
             {tour.originalPrice && (
-              <span className="text-sm text-slate-400 line-through mr-2">
+              <span className="mr-2 text-sm text-stone-400 line-through">
                 原价 ¥{tour.originalPrice.toLocaleString()}
               </span>
             )}
             <div className="flex items-baseline gap-1">
-              <span className="text-red-500 font-medium">¥</span>
-              <span className="text-2xl sm:text-3xl font-bold text-red-500">{tour.price.toLocaleString()}</span>
-              <span className="text-sm text-slate-500">/{tour.priceUnit}起</span>
+              <span className="text-stone-500 font-medium">¥</span>
+              <span className="text-2xl sm:text-3xl font-semibold text-stone-900">{tour.price.toLocaleString()}</span>
+              <span className="text-sm text-stone-500">/{tour.priceUnit}起</span>
             </div>
           </div>
           {tour.discountRate && (
-            <Badge className="bg-red-500 text-white text-sm px-3 py-1">
-              限时省 {tour.discountRate}%
+            <Badge variant="outline" className="border-stone-200 bg-white px-3 py-1 text-sm text-stone-600">
+              参考降幅 {tour.discountRate}%
             </Badge>
           )}
         </div>
 
-        {/* 单房差提示 */}
         {tour.singleSupplement > 0 ? (
-          <div className="bg-amber-100 border border-amber-300 rounded-lg p-3 sm:p-4 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-stone-50 p-3 sm:p-4">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-stone-500" />
             <div>
-              <h4 className="font-semibold text-amber-800 text-sm mb-1">
-                单房差参考（以实际预订为准）
+              <h4 className="mb-1 text-sm font-semibold text-stone-800">
+                单房差说明
               </h4>
-              <p className="text-xs sm:text-sm text-amber-700 leading-relaxed">
-                {tour.singleSupplementNote}。单房差金额由各旅行社根据酒店实际报价确定，以上仅为参考估算。
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
+                {tour.singleSupplementNote}。金额以实际预订页面为准。
               </p>
-              <div className="mt-2 text-xs sm:text-sm text-amber-800">
+              <div className="mt-2 text-xs sm:text-sm text-stone-700">
                 <span className="font-semibold">
                   单人出行预估 = 团费 ¥{tour.price.toLocaleString()} + 单房差约 ¥{tour.singleSupplement} = ¥{(tour.price + tour.singleSupplement).toLocaleString()}
                 </span>
@@ -179,18 +172,18 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
             </div>
           </div>
         ) : (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
-            <span className="text-sm text-green-700">本产品无需补单房差，单人出行同价</span>
+          <div className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 p-3">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-stone-500" />
+            <span className="text-sm text-stone-600">单人同价</span>
           </div>
         )}
 
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Button className="h-11 bg-slate-900 hover:bg-slate-800" size="lg" onClick={() => openExternalLink(tour.bookingUrl)}>
-            <ExternalLink className="w-4 h-4 mr-2" />查看产品详情
+          <Button className="h-11 bg-stone-900 hover:bg-stone-800" size="lg" onClick={() => openExternalLink(tour.bookingUrl)}>
+            <ExternalLink className="w-4 h-4 mr-2" />打开来源页面
           </Button>
           <Button variant="outline" className="h-11" size="lg" onClick={() => openExternalLink(searchUrl)}>
-            <Search className="w-4 h-4 mr-2" />官网搜索
+            <Search className="w-4 h-4 mr-2" />打开平台搜索
           </Button>
         </div>
       </div>
@@ -198,10 +191,10 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
       <Tabs defaultValue="overview" className="w-full">
         {/* 移动端Tab可滚动 */}
         <TabsList className="grid w-full grid-cols-4 h-auto">
-          <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">行程概览</TabsTrigger>
+          <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">概览</TabsTrigger>
           <TabsTrigger value="itinerary" className="text-xs sm:text-sm py-2">每日安排</TabsTrigger>
-          <TabsTrigger value="cost" className="text-xs sm:text-sm py-2">费用明细</TabsTrigger>
-          <TabsTrigger value="service" className="text-xs sm:text-sm py-2">服务保障</TabsTrigger>
+          <TabsTrigger value="cost" className="text-xs sm:text-sm py-2">费用</TabsTrigger>
+          <TabsTrigger value="service" className="text-xs sm:text-sm py-2">说明</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
@@ -222,21 +215,21 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
           </div>
 
           <div className="mt-4">
-            <h4 className="font-semibold text-slate-800 mb-2">行程亮点</h4>
+            <h4 className="font-semibold text-stone-800 mb-2">行程要点</h4>
             <div className="flex flex-wrap gap-2">
               {tour.highlights.map((h) => (
-                <Badge key={h} variant="outline" className="text-sm py-1 px-3">
-                  ✨ {h}
+                <Badge key={h} variant="outline" className="border-stone-200 bg-white text-sm py-1 px-3 text-stone-600">
+                  {h}
                 </Badge>
               ))}
             </div>
           </div>
 
           <div className="mt-4">
-            <h4 className="font-semibold text-slate-800 mb-2">适合人群</h4>
+            <h4 className="font-semibold text-stone-800 mb-2">适合人群</h4>
             <div className="flex flex-wrap gap-2">
               {tour.suitableFor.map((s) => (
-                <Badge key={s} className="bg-blue-50 text-blue-600 border-blue-200">
+                <Badge key={s} variant="outline" className="border-stone-200 bg-white text-stone-600">
                   {s}
                 </Badge>
               ))}
@@ -244,11 +237,11 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
           </div>
 
           <div className="mt-4">
-            <h4 className="font-semibold text-slate-800 mb-2">重要须知</h4>
+            <h4 className="font-semibold text-stone-800 mb-2">重要须知</h4>
             <ul className="space-y-2">
               {tour.importantNotes.map((note, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-slate-600">
-                  <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
+                  <Info className="w-4 h-4 text-stone-500 shrink-0 mt-0.5" />
                   {note}
                 </li>
               ))}
@@ -258,13 +251,13 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
 
         <TabsContent value="itinerary" className="space-y-4 mt-4">
           {tour.itinerary.map((day) => (
-            <div key={day.day} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div key={day.day} className="rounded-lg border border-stone-200 bg-white p-4 transition-shadow hover:shadow-sm">
               <div className="flex items-center gap-3 mb-2">
-                <Badge className="bg-blue-500 text-white">第{day.day}天</Badge>
-                <h4 className="font-semibold text-slate-800">{day.title}</h4>
+                <Badge variant="outline" className="border-stone-200 bg-white text-stone-600">第{day.day}天</Badge>
+                <h4 className="font-semibold text-stone-800">{day.title}</h4>
               </div>
-              <p className="text-sm text-slate-600 mb-3">{day.description}</p>
-              <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+              <p className="text-sm text-stone-600 mb-3">{day.description}</p>
+              <div className="flex flex-wrap gap-4 text-xs text-stone-500">
                 <span className="flex items-center gap-1">
                   <Utensils className="w-3.5 h-3.5" />
                   {day.meals.join('、')}
@@ -276,7 +269,7 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
               </div>
               <div className="mt-2 flex flex-wrap gap-2">
                 {day.activities.map((act) => (
-                  <Badge key={act} variant="secondary" className="text-xs">
+                  <Badge key={act} variant="secondary" className="bg-stone-100 text-xs text-stone-600">
                     {act}
                   </Badge>
                 ))}
@@ -287,14 +280,14 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
 
         <TabsContent value="cost" className="space-y-4 mt-4">
           <div>
-            <h4 className="font-semibold text-green-700 mb-3 flex items-center gap-2">
+            <h4 className="mb-3 flex items-center gap-2 font-semibold text-stone-800">
               <CheckCircle2 className="w-5 h-5" />
               费用包含
             </h4>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {tour.inclusions.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
-                  <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+                <li key={item} className="flex items-center gap-2 text-sm text-stone-600">
+                  <CheckCircle2 className="w-4 h-4 text-stone-500 shrink-0" />
                   {item}
                 </li>
               ))}
@@ -302,22 +295,22 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
           </div>
 
           <div>
-            <h4 className="font-semibold text-red-700 mb-3 flex items-center gap-2">
+            <h4 className="mb-3 flex items-center gap-2 font-semibold text-stone-800">
               <XCircle className="w-5 h-5" />
               费用不含
             </h4>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {tour.exclusions.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-slate-600">
-                  <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                <li key={item} className="flex items-center gap-2 text-sm text-stone-600">
+                  <XCircle className="w-4 h-4 text-stone-400 shrink-0" />
                   {item}
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="bg-slate-50 rounded-lg p-4 space-y-3">
-            <h4 className="font-semibold text-slate-800">退改政策</h4>
+          <div className="rounded-lg border border-stone-200 bg-white p-4 space-y-3">
+            <h4 className="font-semibold text-stone-800">退改政策</h4>
             <InfoItem icon={<RotateCcw className="w-4 h-4" />} label="取消政策" value={tour.cancellationPolicy} />
             <InfoItem icon={<CreditCard className="w-4 h-4" />} label="退款说明" value={tour.refundPolicy} />
             <InfoItem icon={<Baby className="w-4 h-4" />} label="儿童政策" value={tour.childPolicy} />
@@ -331,27 +324,27 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
             <ServiceItem icon={<Wifi className="w-5 h-5" />} label="免费WiFi" available={tour.freeWiFi} />
           </div>
 
-          <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2">
+          <div className="rounded-lg border border-stone-200 bg-white p-4">
+            <h4 className="mb-2 flex items-center gap-2 font-semibold text-stone-800">
               <Info className="w-4 h-4" />
-              平台承诺
+              数据说明
             </h4>
-            <ul className="space-y-2 text-sm text-blue-700">
+            <ul className="space-y-2 text-sm text-stone-600">
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                真实价格：所有费用明码标价，无隐形消费
+                价格与单房差仅供参考，具体以来源平台为准
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                单房差透明：明确告知单人出行额外成本
+                单房差按公开信息展示，不额外加价
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                多站比价：同一线路7大站点横向对比
+                同一线路来自多个平台，可横向比较
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                信息实时：价格、余位每日同步更新
+                数据会定期刷新，但仍建议下单前复核
               </li>
             </ul>
           </div>
@@ -363,11 +356,11 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
 
   const actionButtons = (
     <div className="flex flex-col sm:flex-row gap-3 p-4 sm:p-6 border-t bg-white shrink-0">
-      <Button className="flex-1 bg-slate-900 hover:bg-slate-800" size="lg" onClick={() => openExternalLink(tour.bookingUrl)}>
-        <ExternalLink className="w-4 h-4 mr-2" />查看产品详情
+      <Button className="flex-1 bg-stone-900 hover:bg-stone-800" size="lg" onClick={() => openExternalLink(tour.bookingUrl)}>
+        <ExternalLink className="w-4 h-4 mr-2" />打开来源页面
       </Button>
       <Button variant="outline" size="lg" onClick={() => openExternalLink(searchUrl)}>
-        <Search className="w-4 h-4 mr-2" />官网搜索
+        <Search className="w-4 h-4 mr-2" />打开平台搜索
       </Button>
       {isMobile && <Button variant="outline" size="lg" onClick={onClose}>
         <X className="w-4 h-4 mr-2" />关闭

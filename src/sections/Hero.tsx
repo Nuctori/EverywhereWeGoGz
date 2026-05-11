@@ -1,7 +1,13 @@
-import { Search, MapPin, Plane, TrendingUp } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpenText,
+  MapPin,
+  Search,
+  ShieldCheck,
+  SlidersHorizontal,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 
 interface HeroProps {
   searchQuery: string;
@@ -10,69 +16,93 @@ interface HeroProps {
 }
 
 export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
+  const quickDestinations = ['桂林', '三亚', '云南', '张家界', '西藏', '新疆'];
+
   return (
-    <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-8 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      {/* 背景装饰 */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-      </div>
+    <section className="px-4 pb-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(280px,0.7fr)] lg:items-stretch">
+        <div className="surface-panel rise-in relative overflow-hidden rounded-[32px] border border-stone-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.94),rgba(251,250,247,0.95))] p-6 sm:p-8 lg:p-10">
+          <div className="absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top_left,rgba(214,211,209,0.30),transparent_65%)]" />
+          <div className="absolute right-8 top-8 hidden h-40 w-40 rounded-full bg-[radial-gradient(circle,rgba(250,245,235,0.9),transparent_70%)] blur-2xl sm:block" />
 
-      <div className="relative max-w-5xl mx-auto text-center">
-        <Badge className="bg-white/20 text-white border-white/30 mb-3 hover:bg-white/30 text-xs sm:text-sm">
-          <TrendingUp className="w-3 h-3 mr-1" />
-          已聚合 7 大平台 · 3500+ 条实时线路
-        </Badge>
+          <div className="relative">
+            <p className="mt-6 text-[11px] font-medium uppercase tracking-[0.24em] text-stone-400">
+              广州出发 · 旅行团数据库
+            </p>
+            <h1 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-stone-950 sm:text-5xl">
+              先读懂线路差异，
+              <span className="mt-2 block font-editorial text-[1.06em] font-medium text-stone-700">
+                再决定哪一团更合适
+              </span>
+            </h1>
 
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 leading-tight">
-          广州出发旅行团
-          <span className="block text-yellow-300 mt-1">聚合比价工具</span>
-        </h1>
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-600 sm:text-base">
+              聚合 7 个平台的公开旅行团数据，把价格、出发日期、单房差和平台来源整理成一页可读的清单。
+            </p>
 
-        <p className="text-blue-100 text-sm sm:text-lg mb-1 sm:mb-2 max-w-2xl mx-auto">
-          从 7 大旅行平台实时抓取，30+ 维度横向对比
-        </p>
-        <p className="text-yellow-300 text-xs sm:text-sm font-medium mb-4 sm:mb-8 max-w-xl mx-auto">
-          🔥 核心差异化：单房差透明提示 —— OTA 不会告诉你的真相，我们全部公开
-        </p>
+            <div className="mt-8 flex max-w-3xl flex-col gap-3 rounded-[24px] border border-stone-200/80 bg-white/92 p-3 shadow-sm sm:flex-row sm:items-center">
+              <div className="relative flex-1">
+                <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+                <Input
+                  placeholder="搜索目的地、主题或平台，例如：桂林、亲子、广之旅"
+                  className="h-12 rounded-2xl border-0 bg-stone-50 pl-11 pr-4 text-sm text-stone-800 placeholder:text-stone-400 shadow-none focus-visible:ring-1"
+                  value={searchQuery}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && onSearch(searchQuery)}
+                />
+              </div>
+              <Button
+                size="lg"
+                className="h-12 rounded-2xl bg-stone-900 px-5 text-sm font-medium text-white hover:bg-stone-800"
+                onClick={() => onSearch(searchQuery)}
+              >
+                <Search className="mr-2 h-4 w-4" />
+                查看结果
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Button>
+            </div>
 
-        {/* 搜索框 */}
-        <div className="max-w-2xl mx-auto flex gap-2">
-          <div className="relative flex-1">
-            <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-            <Input
-              placeholder="搜索目的地：桂林、三亚、云南..."
-              className="pl-10 h-11 sm:h-12 bg-white text-slate-800 placeholder:text-slate-400 border-0 shadow-lg text-sm"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && onSearch(searchQuery)}
-            />
+            <div className="mt-4 flex flex-wrap gap-2">
+              {quickDestinations.map((dest) => (
+                <button
+                  key={dest}
+                  onClick={() => {
+                    onSearchChange(dest);
+                    onSearch(dest);
+                  }}
+                  className="rounded-full border border-stone-200 bg-white/80 px-3.5 py-2 text-sm text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
+                >
+                  {dest}
+                </button>
+              ))}
+            </div>
           </div>
-          <Button
-            size="lg"
-            className="h-11 sm:h-12 px-4 sm:px-6 bg-yellow-400 hover:bg-yellow-500 text-blue-900 font-semibold shadow-lg text-sm"
-            onClick={() => onSearch(searchQuery)}
-          >
-            <Search className="w-5 h-5 mr-1 sm:mr-2" />
-            <span className="hidden sm:inline">搜索</span>
-          </Button>
         </div>
 
-        {/* 快捷标签 - 移动端横向滚动 */}
-        <div className="flex gap-2 mt-4 overflow-x-auto pb-1 scrollbar-hide justify-start sm:justify-center px-1">
-          {['桂林', '三亚', '云南', '张家界', '西藏', '新疆'].map((dest) => (
-            <button
-              key={dest}
-              onClick={() => {
-                onSearchChange(dest);
-                onSearch(dest);
-              }}
-              className="px-3 py-1.5 bg-white/15 hover:bg-white/25 rounded-full text-sm text-white/90 transition-colors whitespace-nowrap shrink-0"
-            >
-              <Plane className="w-3 h-3 inline mr-1" />
-              {dest}
-            </button>
-          ))}
+        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+          <div className="surface-panel rise-in rounded-[28px] border border-stone-200/80 bg-white/88 p-5 [animation-delay:80ms]">
+            <BookOpenText className="h-5 w-5 text-stone-500" />
+            <h2 className="mt-4 text-lg font-semibold text-stone-900">先看信息</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">
+              不把花哨卖点堆在首屏，把真正影响决策的差异放在前面。
+            </p>
+          </div>
+
+          <div className="surface-panel rise-in rounded-[28px] border border-stone-200/80 bg-white/88 p-5 [animation-delay:140ms]">
+            <SlidersHorizontal className="h-5 w-5 text-stone-500" />
+            <h2 className="mt-4 text-lg font-semibold text-stone-900">先粗筛，再细看</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">
+              目的地、日期、预算常驻首屏，复杂条件折叠到后面，减少认知负担。
+            </p>
+          </div>
+
+          <div className="surface-panel rise-in rounded-[28px] border border-stone-200/80 bg-white/88 p-5 [animation-delay:200ms]">
+            <ShieldCheck className="h-5 w-5 text-stone-500" />
+            <h2 className="mt-4 text-lg font-semibold text-stone-900">单房差说明</h2>
+            <p className="mt-2 text-sm leading-6 text-stone-600">
+              保留单人出行成本提示，让“便宜”这件事不只停留在首屏价格。
+            </p>
+          </div>
         </div>
       </div>
     </section>

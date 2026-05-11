@@ -406,26 +406,39 @@ export function TourList({ searchQuery }: TourListProps) {
     );
   };
 
+  const baseChipClass =
+    'h-10 shrink-0 rounded-full border px-4 text-sm transition-colors';
+  const selectedChipClass =
+    'border-stone-300 bg-stone-900 text-white hover:border-stone-900 hover:bg-stone-900';
+  const idleChipClass =
+    'border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900';
+
   const commonFilters = (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
+    <div className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/92 p-5 sm:p-6">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900">
-            常用筛选放在前面
+          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-stone-400">
+            Filters
+          </p>
+          <h2 className="mt-2 text-xl font-semibold text-stone-900">
+            常用条件先放在前面
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            先选目的地、出发时间和预算，大多数情况不用再展开更多条件
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
+            先筛目的地、出发时间和预算，先缩小范围，再看更细的线路差异。
           </p>
         </div>
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="ml-auto flex items-center gap-2">
           {activeFilterCount > 0 && (
-            <Badge variant="secondary" className="rounded-full px-2 py-0.5 text-[11px]">
+            <Badge
+              variant="secondary"
+              className="rounded-full bg-stone-100 px-3 py-1 text-[11px] font-medium text-stone-600"
+            >
               已选 {activeFilterCount} 项
             </Badge>
           )}
           <Button
             variant="outline"
-            className="gap-2 h-9 px-3 text-sm"
+            className="h-10 gap-2 rounded-full border-stone-200 bg-white px-4 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900"
             onClick={() => setShowFilters((prev) => !prev)}
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -435,7 +448,7 @@ export function TourList({ searchQuery }: TourListProps) {
           {activeFilterCount > 0 && (
             <Button
               variant="ghost"
-              className="h-9 px-2 text-sm text-slate-600"
+              className="h-10 rounded-full px-3 text-sm text-stone-500 hover:bg-stone-100 hover:text-stone-900"
               onClick={resetFilters}
             >
               清空
@@ -444,10 +457,10 @@ export function TourList({ searchQuery }: TourListProps) {
         </div>
       </div>
 
-      <div className="space-y-3.5">
+      <div className="space-y-5">
         <div>
-          <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-            <MapPin className="w-4 h-4 text-slate-500" />
+          <div className="mb-3 flex items-center gap-2 text-sm font-medium text-stone-700">
+            <MapPin className="w-4 h-4 text-stone-500" />
             目的地
           </div>
           <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
@@ -455,10 +468,10 @@ export function TourList({ searchQuery }: TourListProps) {
               type="button"
               onClick={() => setFilters({ ...filters, destination: '' })}
               className={cn(
-                'h-9 shrink-0 rounded-full border px-3.5 text-sm transition-colors',
+                baseChipClass,
                 !filters.destination
-                  ? 'border-slate-300 bg-slate-50 text-slate-900'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+                  ? selectedChipClass
+                  : idleChipClass,
               )}
             >
               全部目的地
@@ -469,10 +482,10 @@ export function TourList({ searchQuery }: TourListProps) {
                 type="button"
                 onClick={() => setFilters({ ...filters, destination: dest })}
                 className={cn(
-                  'h-9 shrink-0 rounded-full border px-3.5 text-sm transition-colors',
+                  baseChipClass,
                   filters.destination === dest
-                    ? 'border-slate-300 bg-slate-50 text-slate-900'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+                    ? selectedChipClass
+                    : idleChipClass,
                 )}
               >
                 {dest}
@@ -482,8 +495,8 @@ export function TourList({ searchQuery }: TourListProps) {
         </div>
 
         <div>
-          <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-            <Calendar className="w-4 h-4 text-slate-500" />
+          <div className="mb-3 flex items-center gap-2 text-sm font-medium text-stone-700">
+            <Calendar className="w-4 h-4 text-stone-500" />
             出发时间
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
@@ -506,10 +519,10 @@ export function TourList({ searchQuery }: TourListProps) {
                     })
                   }
                   className={cn(
-                    'h-9 rounded-xl border px-3 text-sm transition-colors',
+                    'h-10 rounded-2xl border px-3 text-sm transition-colors',
                     selected
-                      ? 'border-slate-300 bg-slate-50 text-slate-900'
-                      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+                      ? selectedChipClass
+                      : idleChipClass,
                   )}
                 >
                   {option.label}
@@ -520,8 +533,8 @@ export function TourList({ searchQuery }: TourListProps) {
         </div>
 
         <div>
-          <div className="flex items-center gap-2 text-sm font-medium text-slate-700 mb-2">
-            <Filter className="w-4 h-4 text-slate-500" />
+          <div className="mb-3 flex items-center gap-2 text-sm font-medium text-stone-700">
+            <Filter className="w-4 h-4 text-stone-500" />
             预算
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
@@ -531,10 +544,10 @@ export function TourList({ searchQuery }: TourListProps) {
                 type="button"
                 onClick={() => setQuickBudget(option.min, option.max)}
                 className={cn(
-                    'h-9 rounded-xl border px-3 text-sm transition-colors',
+                    'h-10 rounded-2xl border px-3 text-sm transition-colors',
                     isBudgetSelected(option.min, option.max)
-                    ? 'border-slate-300 bg-slate-50 text-slate-900'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+                    ? selectedChipClass
+                    : idleChipClass,
                 )}
               >
                 {option.label}
@@ -548,17 +561,17 @@ export function TourList({ searchQuery }: TourListProps) {
 
   const advancedFilters = (
     <div className="space-y-5">
-      <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
-        <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
+      <div className="rounded-[28px] border border-stone-200/80 bg-stone-50/75 p-5 sm:p-6">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-base font-semibold text-slate-900">更多筛选</h3>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              需要更细的条件时再展开，避免把常用操作藏起来
+            <h3 className="text-lg font-semibold text-stone-900">更多筛选</h3>
+            <p className="mt-1 text-sm text-stone-500">
+              当你已经缩小范围后，再用这些条件做更细的阅读和比较。
             </p>
           </div>
           <Button
             variant="ghost"
-            className="text-slate-600"
+            className="rounded-full px-3 text-stone-500 hover:bg-white hover:text-stone-900"
             onClick={() => setShowFilters(false)}
           >
             收起
@@ -567,7 +580,7 @@ export function TourList({ searchQuery }: TourListProps) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-stone-700">
               来源平台
             </label>
             <Select
@@ -576,7 +589,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 setFilters({ ...filters, source: value === 'all' ? '' : value })
               }
             >
-            <SelectTrigger className="h-9">
+            <SelectTrigger className="h-10 rounded-2xl border-stone-200 bg-white">
                 <SelectValue placeholder="全部平台" />
               </SelectTrigger>
               <SelectContent>
@@ -597,7 +610,7 @@ export function TourList({ searchQuery }: TourListProps) {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-stone-700">
               行程天数
             </label>
             <Select
@@ -609,7 +622,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 })
               }
             >
-            <SelectTrigger className="h-9">
+            <SelectTrigger className="h-10 rounded-2xl border-stone-200 bg-white">
                 <SelectValue placeholder="全部天数" />
               </SelectTrigger>
               <SelectContent>
@@ -625,7 +638,7 @@ export function TourList({ searchQuery }: TourListProps) {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-stone-700">
               主题
             </label>
             <Select
@@ -634,7 +647,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 setFilters({ ...filters, theme: value === 'all' ? '' : value })
               }
             >
-            <SelectTrigger className="h-9">
+            <SelectTrigger className="h-10 rounded-2xl border-stone-200 bg-white">
                 <SelectValue placeholder="全部主题" />
               </SelectTrigger>
               <SelectContent>
@@ -649,7 +662,7 @@ export function TourList({ searchQuery }: TourListProps) {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-stone-700">
               目的地下拉选择
             </label>
             <Select
@@ -658,7 +671,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 setFilters({ ...filters, destination: value === 'all' ? '' : value })
               }
             >
-            <SelectTrigger className="h-9">
+            <SelectTrigger className="h-10 rounded-2xl border-stone-200 bg-white">
                 <SelectValue placeholder="全部目的地" />
               </SelectTrigger>
               <SelectContent>
@@ -675,11 +688,11 @@ export function TourList({ searchQuery }: TourListProps) {
 
         <div className="mt-5 grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-5">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-stone-700">
               出发日期范围
             </label>
-            <div className="rounded-xl border border-slate-200 bg-white p-3">
-              <div className="mb-3 text-sm text-slate-500">
+            <div className="rounded-[22px] border border-stone-200 bg-white p-4">
+              <div className="mb-3 text-sm text-stone-500">
                 {filters.departureDateStart || filters.departureDateEnd
                   ? `${filters.departureDateStart || '不限'} 至 ${filters.departureDateEnd || '不限'}`
                   : filters.departureDate
@@ -690,12 +703,12 @@ export function TourList({ searchQuery }: TourListProps) {
                 <Popover open={dateRangeOpen} onOpenChange={setDateRangeOpen}>
                   <PopoverTrigger asChild>
                     <Button
-                      type="button"
-                      variant="outline"
-                      className={cn(
-                        'h-9',
+                    type="button"
+                    variant="outline"
+                    className={cn(
+                        'h-10 rounded-full border-stone-200 bg-white',
                         (filters.departureDateStart || filters.departureDateEnd) &&
-                          'border-slate-300 bg-slate-50 text-slate-900',
+                          'border-stone-300 bg-stone-50 text-stone-900',
                       )}
                     >
                       自定义日期范围
@@ -740,7 +753,7 @@ export function TourList({ searchQuery }: TourListProps) {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-9 text-slate-600"
+                    className="h-10 rounded-full text-stone-500 hover:bg-stone-100 hover:text-stone-900"
                     onClick={() =>
                       setFilters({
                         ...filters,
@@ -758,15 +771,15 @@ export function TourList({ searchQuery }: TourListProps) {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-700">
+            <label className="mb-2 block text-sm font-medium text-stone-700">
               精细价格范围
             </label>
-            <div className="rounded-xl border border-slate-200 bg-white p-4">
-              <div className="text-sm text-slate-600">
+            <div className="rounded-[22px] border border-stone-200 bg-white p-4">
+              <div className="text-sm text-stone-600">
                 {priceRange[0].toLocaleString()} - {priceRange[1].toLocaleString()} 元
               </div>
               {priceStats.max > maxPriceAll && (
-                <div className="mt-1 text-xs text-slate-400">
+                <div className="mt-1 text-xs text-stone-400">
                   当前滑杆最高到 {maxPriceAll.toLocaleString()} 元，实际最高价约{' '}
                   {priceStats.max.toLocaleString()} 元
                 </div>
@@ -786,8 +799,8 @@ export function TourList({ searchQuery }: TourListProps) {
   );
 
   return (
-    <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8 max-w-7xl mx-auto">
-      <div className="mb-4 sm:mb-6">
+    <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mb-6">
         {commonFilters}
 
         {!isMobile && showFilters && (
@@ -812,51 +825,51 @@ export function TourList({ searchQuery }: TourListProps) {
                 {advancedFilters}
               </div>
               <div className="border-t px-4 pt-4 pb-5 flex gap-3">
-                <Button variant="outline" className="flex-1 h-9" onClick={resetFilters}>
+                <Button variant="outline" className="h-10 flex-1 rounded-2xl border-stone-200 bg-white" onClick={resetFilters}>
                   重置全部
                 </Button>
                 <Button
-                  className="flex-1 h-9 bg-slate-900 hover:bg-slate-800"
+                  className="h-10 flex-1 rounded-2xl bg-stone-900 hover:bg-stone-800"
                   onClick={() => setShowFilters(false)}
                 >
-                  查看 {displayTours.length} 条结果
+                  查看 {displayTours.length} 条线路
                 </Button>
               </div>
             </SheetContent>
           </Sheet>
         )}
 
-        <div className="mt-4 flex items-center gap-3 flex-wrap">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <ArrowUpDown className="w-4 h-4 text-slate-500" />
+            <ArrowUpDown className="w-4 h-4 text-stone-500" />
             <Select
               value={filters.sortBy}
               onValueChange={(value) =>
                 setFilters({ ...filters, sortBy: value as FilterState['sortBy'] })
               }
             >
-              <SelectTrigger className="w-[160px] h-9">
+              <SelectTrigger className="h-10 w-[170px] rounded-full border-stone-200 bg-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="hot">
                   <span className="flex items-center gap-2">
                     <Flame className="w-3.5 h-3.5 text-orange-500" />
-                    最热门
+                    热度优先
                   </span>
                 </SelectItem>
-                <SelectItem value="price_asc">价格从低到高</SelectItem>
-                <SelectItem value="price_desc">价格从高到低</SelectItem>
+                <SelectItem value="price_asc">价格由低到高</SelectItem>
+                <SelectItem value="price_desc">价格由高到低</SelectItem>
                 <SelectItem value="rating">
                   <span className="flex items-center gap-2">
                     <Star className="w-3.5 h-3.5 text-yellow-500" />
-                    评分最高
+                    评分优先
                   </span>
                 </SelectItem>
                 <SelectItem value="new">
                   <span className="flex items-center gap-2">
                     <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-                    最新上架
+                    新上线优先
                   </span>
                 </SelectItem>
               </SelectContent>
@@ -864,10 +877,10 @@ export function TourList({ searchQuery }: TourListProps) {
           </div>
 
           {activeFilterCount > 0 && (
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm text-slate-500">当前已选：</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm text-stone-500">当前已选：</span>
               {filters.destination && (
-                <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
                   <MapPin className="w-3 h-3" />
                   {filters.destination}
                   <X
@@ -877,7 +890,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 </Badge>
               )}
               {filters.theme && (
-                <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
                   {filters.theme}
                   <X
                     className="w-3 h-3 cursor-pointer"
@@ -886,7 +899,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 </Badge>
               )}
               {(priceRange[0] > 0 || priceRange[1] < maxPriceAll - 1) && (
-                <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
                   {priceRange[0].toLocaleString()}-{priceRange[1].toLocaleString()} 元
                   <X
                     className="w-3 h-3 cursor-pointer"
@@ -895,7 +908,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 </Badge>
               )}
               {(filters.departureDate || filters.departureDateStart || filters.departureDateEnd) && (
-                <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
                   <Calendar className="w-3 h-3" />
                   {filters.departureDateStart || filters.departureDateEnd
                     ? `${filters.departureDateStart || '不限'} 至 ${filters.departureDateEnd || '不限'}`
@@ -914,7 +927,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 </Badge>
               )}
               {filters.duration && (
-                <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
                   {filters.duration === 11 ? '10天以上' : `${filters.duration}天`}
                   <X
                     className="w-3 h-3 cursor-pointer"
@@ -923,7 +936,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 </Badge>
               )}
               {filters.source && (
-                <Badge variant="outline" className="gap-1 rounded-full px-3 py-1">
+                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
                   {filters.source}
                   <X
                     className="w-3 h-3 cursor-pointer"
@@ -937,10 +950,10 @@ export function TourList({ searchQuery }: TourListProps) {
       </div>
 
       {displayTours.length > 0 && (
-        <div className="mb-4 flex items-center justify-between text-sm text-slate-500">
+        <div className="mb-5 flex items-center justify-between text-sm text-stone-500">
           <span>共 {displayTours.length.toLocaleString()} 条结果</span>
           {displayCount < displayTours.length && (
-            <span className="text-xs">
+            <span className="text-xs text-stone-400">
               已显示 {waterfallTours.length.toLocaleString()} 条
             </span>
           )}
@@ -949,20 +962,20 @@ export function TourList({ searchQuery }: TourListProps) {
 
       {loading ? (
         <div className="py-20 text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500" />
-          <p className="text-slate-500">加载旅行数据中...</p>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-stone-700" />
+          <p className="text-stone-500">加载旅行数据中...</p>
         </div>
       ) : displayTours.length === 0 ? (
-        <div className="py-20 text-center">
+        <div className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/90 py-20 text-center">
           <div className="mb-4 text-5xl">暂无结果</div>
-          <h3 className="mb-2 text-lg font-semibold text-slate-700">
+          <h3 className="mb-2 text-lg font-semibold text-stone-700">
             没有找到符合条件的旅行团
           </h3>
-          <p className="text-slate-500">可以先放宽时间或预算条件，再看看更多线路</p>
+          <p className="text-stone-500">可以先放宽时间或预算条件，再看看更多线路</p>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
             {waterfallTours.map((tour) => (
               <TourCard key={tour.id} tour={tour} onClick={() => handleCardClick(tour)} />
             ))}
@@ -971,13 +984,13 @@ export function TourList({ searchQuery }: TourListProps) {
           {displayCount < displayTours.length && (
             <div ref={loadMoreRef} className="flex items-center justify-center py-8">
               {isLoadingMore ? (
-                <div className="flex items-center gap-2 text-slate-500">
+                <div className="flex items-center gap-2 text-stone-500">
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span className="text-sm">正在加载更多...</span>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-2 text-slate-400">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-300 border-t-blue-500" />
+                <div className="flex flex-col items-center gap-2 text-stone-400">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-stone-300 border-t-stone-700" />
                   <span className="text-xs">向下滚动加载更多</span>
                 </div>
               )}
@@ -985,7 +998,7 @@ export function TourList({ searchQuery }: TourListProps) {
           )}
 
           {displayCount >= displayTours.length && displayTours.length > INITIAL_LOAD_COUNT && (
-            <div className="py-8 text-center text-sm text-slate-400">
+            <div className="py-8 text-center text-sm text-stone-400">
               已加载全部 {displayTours.length.toLocaleString()} 条结果
             </div>
           )}
