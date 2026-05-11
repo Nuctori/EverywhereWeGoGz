@@ -1,7 +1,7 @@
 import { Compass } from 'lucide-react';
 
 export function Header() {
-  const navItems = ['目的地', '出发时间', '单房差', '平台来源'];
+  const navItems = ['目的地', '时间', '单房差', '平台'];
 
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200/80 bg-[rgba(247,246,243,0.82)] backdrop-blur-xl">
@@ -17,9 +17,6 @@ export function Header() {
                     旅比价
                   </span>
                 </div>
-                <p className="hidden text-xs text-stone-500 sm:block">
-                把旅行团信息整理成一页更易读的清单
-                </p>
               </div>
             </div>
 

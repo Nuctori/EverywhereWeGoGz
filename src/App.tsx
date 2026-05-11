@@ -59,14 +59,6 @@ function App() {
 
         <footer className="border-t border-stone-200/80 bg-white/75 px-4 py-8 backdrop-blur sm:px-6 lg:px-8">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-sm font-medium text-stone-700">
-                旅比价把旅行团信息整理成一份更清晰的阅读界面。
-              </p>
-              <p className="mt-1 text-sm text-stone-500">
-                所有数据均来自合作平台公开信息，仅用于聚合、筛选与横向比较。
-              </p>
-            </div>
             <div className="text-xs leading-6 text-stone-400 md:text-right">
               <p>覆盖：假日通 · 广州去旅行 · 康辉 · 暴走村 · 广之旅 · 广东中旅 · 品途</p>
               <p>© 2024 旅比价 · 让线路信息更好读</p>

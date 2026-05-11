@@ -417,15 +417,7 @@ export function TourList({ searchQuery }: TourListProps) {
     <div className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/92 p-5 sm:p-6">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-stone-400">
-            Filters
-          </p>
-          <h2 className="mt-2 text-xl font-semibold text-stone-900">
-            常用条件先放在前面
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-500">
-            先筛目的地、出发时间和预算，先缩小范围，再看更细的线路差异。
-          </p>
+          <h2 className="text-xl font-semibold text-stone-900">筛选</h2>
         </div>
         <div className="ml-auto flex items-center gap-2">
           {activeFilterCount > 0 && (
@@ -563,12 +555,7 @@ export function TourList({ searchQuery }: TourListProps) {
     <div className="space-y-5">
       <div className="rounded-[28px] border border-stone-200/80 bg-stone-50/75 p-5 sm:p-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-semibold text-stone-900">更多筛选</h3>
-            <p className="mt-1 text-sm text-stone-500">
-              当你已经缩小范围后，再用这些条件做更细的阅读和比较。
-            </p>
-          </div>
+          <h3 className="text-lg font-semibold text-stone-900">更多筛选</h3>
           <Button
             variant="ghost"
             className="rounded-full px-3 text-stone-500 hover:bg-white hover:text-stone-900"

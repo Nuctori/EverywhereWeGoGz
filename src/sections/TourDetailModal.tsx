@@ -162,7 +162,7 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
                 单房差说明
               </h4>
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                {tour.singleSupplementNote}。金额以实际预订页面为准。
+                {tour.singleSupplementNote}。
               </p>
               <div className="mt-2 text-xs sm:text-sm text-stone-700">
                 <span className="font-semibold">
@@ -332,19 +332,15 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
             <ul className="space-y-2 text-sm text-stone-600">
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                价格与单房差仅供参考，具体以来源平台为准
+                价格与单房差仅供参考
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                单房差按公开信息展示，不额外加价
+                以来源平台页面为准
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                同一线路来自多个平台，可横向比较
-              </li>
-              <li className="flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                数据会定期刷新，但仍建议下单前复核
+                同线路可横向比较
               </li>
             </ul>
           </div>
