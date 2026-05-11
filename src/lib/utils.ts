@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function resolveAssetUrl(path: string) {
   if (!path) return path
-  if (/^(?:https?:)?\/\//.test(path)) return path
+  if (/^(?:https?:)?\/\//.test(path) || path.startsWith('data:') || path.startsWith('blob:')) return path
 
   const baseUrl = import.meta.env.BASE_URL || "/"
   const normalizedBase = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl

@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { resolveAssetUrl } from '@/lib/utils';
+import { getFallbackImage } from '@/lib/image';
 import {
   MapPin, Clock, Users, Star, Flame, Sparkles, Zap,
   AlertTriangle, CheckCircle2, XCircle, Info,
@@ -49,6 +50,7 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
       ? (tour.images?.[0] || '').replace('http://', 'https://')
       : tour.images?.[0] || '',
   );
+  const heroFallbackImage = getFallbackImage(tour.title);
 
   const sourceColor = {
     假日通: '#FF6B35', 广州去旅行: '#4ECDC4', 康辉: '#1A535C',
@@ -94,14 +96,20 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
         </Badge>
       </div>
 
-      {heroImage && (
+      {(heroImage || heroFallbackImage) && (
         <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
           <img
-            src={heroImage}
+            src={heroImage || heroFallbackImage}
             alt={tour.title}
             className="h-56 w-full object-cover sm:h-72"
             loading="eager"
             decoding="async"
+            onError={(event) => {
+              const target = event.currentTarget;
+              if (target.dataset.fallbackApplied === 'true') return;
+              target.dataset.fallbackApplied = 'true';
+              target.src = heroFallbackImage;
+            }}
           />
         </div>
       )}
