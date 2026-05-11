@@ -369,13 +369,15 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
       {/* 移动端 Sheet - 使用 CSS 隐藏桌面端 */}
       {isMobile && (
         <Sheet open={!!tour} onOpenChange={(open) => !open && onClose()}>
-          <SheetContent side="bottom" className="h-[92vh] p-0 flex flex-col">
+          <SheetContent side="bottom" className="h-[92dvh] max-h-[92dvh] overflow-hidden p-0 flex flex-col">
             <SheetHeader className="p-4 pb-2 border-b shrink-0">
               <SheetTitle className="text-base leading-relaxed pr-8">{tour.title}</SheetTitle>
               <SheetDescription>{tour.title} 的详细信息</SheetDescription>
             </SheetHeader>
-            <ScrollArea className="flex-1 px-4 py-4">
-              {content}
+            <ScrollArea className="min-h-0 flex-1 overscroll-contain touch-pan-y px-4 py-4">
+              <div className="pb-4">
+                {content}
+              </div>
             </ScrollArea>
             {actionButtons}
           </SheetContent>
@@ -390,8 +392,10 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
               <DialogTitle className="text-xl leading-relaxed">{tour.title}</DialogTitle>
               <DialogDescription>{tour.title} 的详细信息</DialogDescription>
             </DialogHeader>
-            <ScrollArea className="flex-1 px-6 py-4">
-              {content}
+            <ScrollArea className="min-h-0 flex-1 overscroll-contain touch-pan-y px-6 py-4">
+              <div className="pb-4">
+                {content}
+              </div>
             </ScrollArea>
             {actionButtons}
           </DialogContent>
