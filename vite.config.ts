@@ -7,6 +7,11 @@ import { inspectAttr } from 'kimi-plugin-inspect-react'
 export default defineConfig({
   base: '/EverywhereWeGoGz/',
   plugins: [inspectAttr(), react()],
+  define: {
+    __DATA_VERSION__: JSON.stringify(
+      process.env.GITHUB_SHA ?? process.env.GITHUB_RUN_ID ?? Date.now().toString(),
+    ),
+  },
   server: {
     port: 3000,
   },

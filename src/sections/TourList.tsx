@@ -40,13 +40,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 
 import { sources, destinations, themes } from '@/data/tours';
 
+declare const __DATA_VERSION__: string;
+
 function useToursData() {
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const baseUrl = import.meta.env.BASE_URL || '/';
-    fetch(baseUrl + 'data/tours.json')
+    const dataUrl = `${baseUrl}data/tours.json?v=${encodeURIComponent(__DATA_VERSION__ || Date.now().toString())}`;
+    fetch(dataUrl, { cache: 'no-store' })
       .then((r) => r.json())
       .then((data) => {
         setTours(data);
