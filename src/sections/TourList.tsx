@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { isDisplayableTour } from '@/lib/tour-filter';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Select,
@@ -241,6 +242,10 @@ export function TourList({ searchQuery }: TourListProps) {
     if (localTours.length === 0) return [];
 
     const result = localTours.filter((tour) => {
+      if (!isDisplayableTour(tour)) {
+        return false;
+      }
+
       if (normalizedSearchQuery) {
         const matchesSearch = [
           tour.title,
