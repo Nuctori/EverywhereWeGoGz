@@ -364,7 +364,18 @@ def main():
             print(f"[旧数据] 读取失败: {e}")
 
     # 2. 读取新的raw数据
-    raw_files = ["raw_jrt365_full.json", "raw_http_full.json", "raw_pintu_full.json", "raw_saihuitong_full.json", "raw_gzl_api.json"]
+    # 假日通保留两个抓取口径：
+    # - raw_jrt365_full.json: 全量脚本输出
+    # - raw_jrt365.json: 主爬虫输出
+    # 两者存在一定差异，先一并并入，再统一去重，避免有效线路被单一路径漏掉。
+    raw_files = [
+        "raw_jrt365_full.json",
+        "raw_jrt365.json",
+        "raw_http_full.json",
+        "raw_pintu_full.json",
+        "raw_saihuitong_full.json",
+        "raw_gzl_api.json",
+    ]
     for fname in raw_files:
         fpath = os.path.join(data_dir, fname)
         if os.path.exists(fpath):

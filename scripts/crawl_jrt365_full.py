@@ -74,8 +74,10 @@ def fetch():
                     except:
                         pass
 
-                    # 限制最多抓5页避免太慢
-                    total_pages = min(total_pages, 5)
+                    # 默认抓取全部页；如需限页可通过环境变量控制
+                    max_pages = int(os.environ.get("JRT365_MAX_PAGES", "0") or "0")
+                    if max_pages > 0:
+                        total_pages = min(total_pages, max_pages)
 
                     for page in range(1, total_pages + 1):
                         if page > 1:
@@ -142,7 +144,9 @@ def fetch():
                 except:
                     pass
 
-                total_pages = min(total_pages, 5)
+                max_pages = int(os.environ.get("JRT365_MAX_PAGES", "0") or "0")
+                if max_pages > 0:
+                    total_pages = min(total_pages, max_pages)
 
                 for page in range(1, total_pages + 1):
                     if page > 1:
