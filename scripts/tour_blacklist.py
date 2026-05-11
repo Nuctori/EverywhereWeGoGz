@@ -1,38 +1,171 @@
 import re
 
 
-_PATTERNS = [
-    re.compile(r'当地玩乐'),
-    re.compile(r'自由行'),
-    re.compile(r'酒店(?:住宿)?套餐'),
-    re.compile(r'住宿套餐'),
-    re.compile(r'门票(?:套餐|票券|预订|预定|产品)'),
-    re.compile(r'(?:签证|签注)(?:代办|办理|套餐|服务)?'),
-    re.compile(r'(?:代订|代办|代购)[^\n]{0,20}(?:酒店|门票|签证|机票|巴士)'),
-    re.compile(r'(?:土特产|特产|手信|花生油|豆腐|人参|燕窝|海参|乳胶|茶叶|饮料|食品|零食|酱油|生抽|老抽)'),
-    re.compile(r'(?:致美斋|广州酒家|天润粮油|穗粮定制|客来客往|秀才郎|江门华联)'),
-    re.compile(r'(?:粘米|香米|丝苗米|蒸谷米|原米|富硒米|玉米|腊肠|鸭润|蚝油|鲍汁|甜醋|猪脚姜醋|醋制品|调味酱)'),
-    re.compile(r'(?:扫码|二维码|活动群|微信群|加群|已结束|结业|工作日活动)'),
-    re.compile(r'(?:工厂探秘|体验馆|展销会|年会|培训会|会议活动|直播间)'),
-    re.compile(r'\d+\s*(?:ml|毫升|g|克|kg|斤|l|L|盒|袋|罐|瓶|包|箱)\b', re.I),
-    re.compile(r'(?:×|\*)\s*\d+\s*(?:罐|瓶|盒|袋|箱|包)?'),
+_TOUR_MARKERS = [
+    re.compile(r"\d+\s*[天日][游团]?$"),
+    re.compile(r"\d+\s*[天日].*?(双飞|双动|高铁|动车|专列|往返|出发|成团|纯玩|跟团|联游|环线)"),
+    re.compile(r"(双飞|双动|高铁|动车|专列|往返|出发|成团|纯玩|跟团|联游|环线|徒步|穿越|深度游|精品小团|私家团|房车旅行|邮轮|探险)"),
 ]
+
+
+_PRODUCT_BRANDS = [
+    "红棉",
+    "陶陶居",
+    "致美斋",
+    "客来客往",
+    "蒸谷米",
+    "广州酒家",
+    "天润粮油",
+    "穗粮定制",
+    "江门华联",
+    "秀才郎",
+    "王老吉",
+    "广氏",
+    "ASIA亚洲",
+    "皇中皇",
+    "黄金食品",
+    "叹鸡",
+]
+
+
+_PRODUCT_WORDS = [
+    "黑糖",
+    "方糖",
+    "红糖",
+    "白糖",
+    "冰糖",
+    "黄糖",
+    "零卡糖",
+    "咖啡伴侣",
+    "糖条",
+    "糖包",
+    "糖粉",
+    "礼包",
+    "零食",
+    "食品",
+    "汤料",
+    "油粘米",
+    "粘米",
+    "香米",
+    "丝苗米",
+    "富硒米",
+    "蒸谷米",
+    "米粉",
+    "生晒面",
+    "面条",
+    "腐竹",
+    "花生油",
+    "腊肠",
+    "腊肉",
+    "腊味",
+    "腊鸭",
+    "调味酱",
+    "酱油",
+    "生抽",
+    "老抽",
+    "蚝油",
+    "鲍汁",
+    "甜醋",
+    "猪脚姜醋",
+    "凉茶",
+    "饮料",
+    "果汁",
+    "茶饮",
+    "植物饮料",
+    "碳酸饮料",
+    "果汁饮料",
+    "固体饮料",
+    "电解质水",
+    "椰子水",
+    "汽水",
+    "花茶",
+    "果干",
+    "冻干",
+    "蜜饯",
+    "蜂蜜",
+    "陈皮",
+    "芡实",
+    "莲子",
+    "罗汉果",
+    "无花果干",
+    "芒果干",
+    "花菇",
+    "白菜干",
+    "鸡仔饼",
+    "蛋卷",
+    "凤梨酥",
+    "曲奇",
+    "酥饼",
+    "糯米鸡",
+    "糯米糍",
+    "裹蒸粽",
+    "罗汉果",
+]
+
+
+_PRODUCT_CONTEXT = [
+    "包邮",
+    "起售",
+    "礼盒",
+    "礼装",
+    "礼袋",
+    "礼品",
+    "系列",
+    "组合",
+    "独立包装",
+    "省内包邮",
+    "任意搭配",
+    "多口味可选",
+    "出口品质",
+    "天然无添加",
+    "纯净无添加",
+    "省内邮",
+    "装",
+]
+
+
+_PRODUCT_PACKAGING_PATTERNS = [
+    re.compile(r"\d+\s*(?:ml|毫升|g|克|kg|斤|l|L|盒|袋|包|箱|罐|瓶|支|粒|条|枚)\b", re.I),
+    re.compile(r"(?:×|x|\*)\s*\d+\s*(?:盒|袋|包|箱|罐|瓶|支|粒|条|枚)?", re.I),
+    re.compile(r"\d+\s*(?:件|份)\s*起售"),
+]
+
+
+def _contains_any(text: str, terms) -> bool:
+    return any(term in text for term in terms)
+
+
+def _matches_any(text: str, patterns) -> bool:
+    return any(pattern.search(text) for pattern in patterns)
+
+
+def looks_like_product_title(title: str) -> bool:
+    compact = re.sub(r"\s+", "", title or "")
+    if not compact:
+        return False
+
+    if _contains_any(compact, _PRODUCT_BRANDS):
+        return (
+            _contains_any(compact, _PRODUCT_CONTEXT)
+            or _contains_any(compact, _PRODUCT_WORDS)
+            or _matches_any(compact, _PRODUCT_PACKAGING_PATTERNS)
+        )
+
+    if _contains_any(compact, _PRODUCT_CONTEXT):
+        return _contains_any(compact, _PRODUCT_WORDS) or _matches_any(compact, _PRODUCT_PACKAGING_PATTERNS)
+
+    if _contains_any(compact, _PRODUCT_WORDS) and _matches_any(compact, _PRODUCT_PACKAGING_PATTERNS):
+        return True
+
+    return False
 
 
 def is_blacklisted_title(title: str) -> bool:
-    compact = re.sub(r'\s+', '', title or '')
-    return any(pattern.search(compact) for pattern in _PATTERNS)
-
-
-_TOUR_MARKERS = [
-    re.compile(r'\d+\s*[天日][游团]?$'),
-    re.compile(r'\d+\s*[天日].*?(双飞|双动|高铁|动车|专列|往返|出发|成团|纯玩|跟团|联游|环线)'),
-    re.compile(r'(双飞|双动|高铁|动车|专列|往返|出发|成团|纯玩|跟团|联游|环线|徒步|穿越|深度游|精品小团|私家团|房车旅行|邮轮|探险)'),
-]
+    return looks_like_product_title(title)
 
 
 def looks_like_tour(title: str) -> bool:
-    compact = re.sub(r'\s+', '', title or '')
+    compact = re.sub(r"\s+", "", title or "")
     if not compact:
         return False
     if is_blacklisted_title(compact):
