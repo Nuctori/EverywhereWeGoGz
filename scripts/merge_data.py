@@ -210,6 +210,8 @@ def raw_to_tour(raw, id_counter):
 
     if is_blacklisted_title(title):
         return None
+    if source == '广之旅' and '/hotel/' in str(raw.get('url', '')).lower():
+        return None
 
     days = raw.get('days', 0) or extract_days(title)
     destination = raw.get('destination', '') or guess_destination(title)
@@ -362,13 +364,18 @@ def main():
             print(f"[旧数据] 读取失败: {e}")
 
     # 2. 读取新的raw数据
-    raw_files = ["raw_jrt365_full.json", "raw_http_full.json", "raw_saihuitong_full.json", "raw_gzl_api.json"]
+    raw_files = ["raw_jrt365_full.json", "raw_http_full.json", "raw_pintu_full.json", "raw_saihuitong_full.json", "raw_gzl_api.json"]
     for fname in raw_files:
         fpath = os.path.join(data_dir, fname)
         if os.path.exists(fpath):
             try:
                 with open(fpath, 'r', encoding='utf-8') as f:
                     data = json.load(f)
+                if fname == "raw_http_full.json":
+                    data = [
+                        item for item in data
+                        if item.get("source") not in {"品途", "广之旅"}
+                    ]
                 print(f"[{fname}] {len(data)}条")
                 all_raw.extend(data)
             except Exception as e:

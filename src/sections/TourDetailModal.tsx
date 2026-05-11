@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { resolveAssetUrl } from '@/lib/utils';
 import {
   MapPin, Clock, Users, Star, Flame, Sparkles, Zap,
   AlertTriangle, CheckCircle2, XCircle, Info,
@@ -43,6 +44,11 @@ function formatDate(dateStr: string | undefined): string {
 export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
   const isMobile = useIsMobile();
   if (!tour) return null;
+  const heroImage = resolveAssetUrl(
+    (tour.images?.[0] || '').startsWith('http://')
+      ? (tour.images?.[0] || '').replace('http://', 'https://')
+      : tour.images?.[0] || '',
+  );
 
   const sourceColor = {
     假日通: '#FF6B35', 广州去旅行: '#4ECDC4', 康辉: '#1A535C',
@@ -87,6 +93,18 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
           {tour.source}
         </Badge>
       </div>
+
+      {heroImage && (
+        <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+          <img
+            src={heroImage}
+            alt={tour.title}
+            className="h-56 w-full object-cover sm:h-72"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
+      )}
 
       {/* 核心信息 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
