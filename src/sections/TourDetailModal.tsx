@@ -18,7 +18,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { resolveAssetUrl } from '@/lib/utils';
 import { getFallbackImage } from '@/lib/image';
 import {
@@ -369,16 +368,16 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
       {/* 移动端 Sheet - 使用 CSS 隐藏桌面端 */}
       {isMobile && (
         <Sheet open={!!tour} onOpenChange={(open) => !open && onClose()}>
-          <SheetContent side="bottom" className="h-[92dvh] max-h-[92dvh] overflow-hidden p-0 flex flex-col">
+          <SheetContent side="bottom" className="h-[100dvh] max-h-[100dvh] overflow-hidden p-0 flex min-h-0 flex-col">
             <SheetHeader className="p-4 pb-2 border-b shrink-0">
               <SheetTitle className="text-base leading-relaxed pr-8">{tour.title}</SheetTitle>
               <SheetDescription>{tour.title} 的详细信息</SheetDescription>
             </SheetHeader>
-            <ScrollArea className="min-h-0 flex-1 overscroll-contain touch-pan-y px-4 py-4">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4 [-webkit-overflow-scrolling:touch]">
               <div className="pb-4">
                 {content}
               </div>
-            </ScrollArea>
+            </div>
             {actionButtons}
           </SheetContent>
         </Sheet>
@@ -387,16 +386,16 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
       {/* 桌面端 Dialog - 使用 CSS 隐藏移动端 */}
       {!isMobile && (
         <Dialog open={!!tour} onOpenChange={(open) => !open && onClose()}>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
+          <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden flex min-h-0 flex-col">
             <DialogHeader className="p-6 pb-0 shrink-0">
               <DialogTitle className="text-xl leading-relaxed">{tour.title}</DialogTitle>
               <DialogDescription>{tour.title} 的详细信息</DialogDescription>
             </DialogHeader>
-            <ScrollArea className="min-h-0 flex-1 overscroll-contain touch-pan-y px-6 py-4">
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y px-6 py-4 [-webkit-overflow-scrolling:touch]">
               <div className="pb-4">
                 {content}
               </div>
-            </ScrollArea>
+            </div>
             {actionButtons}
           </DialogContent>
         </Dialog>
