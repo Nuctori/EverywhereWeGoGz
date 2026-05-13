@@ -16,6 +16,7 @@ import requests
 
 from detail_parsers import detail_has_content, empty_detail, fetch_detail_data
 from tour_blacklist import is_blacklisted_title
+from validate_tour_availability import HTTP_ERROR, UNAVAILABLE, validate_url
 
 # 来源颜色映射
 SOURCE_COLORS = {
@@ -468,6 +469,94 @@ def extract_existing_detail(item):
     }
 
 
+def unique_availability_jobs(tours):
+    grouped = {}
+    for tour in tours:
+        url = str(tour.get("bookingUrl") or "").strip()
+        if not url:
+            continue
+        grouped.setdefault(url, []).append(tour)
+    return [(url, str(items[0].get("title") or "")) for url, items in grouped.items()]
+
+
+def filter_unavailable_tours(tours):
+    enabled = os.environ.get("AVAILABILITY_FILTER", "1").strip().lower()
+    if enabled in {"0", "false", "no", "off"}:
+        print("[可用性] 已跳过自动下架过滤")
+        return tours
+
+    jobs = unique_availability_jobs(tours)
+    if not jobs:
+        return tours
+
+    workers = max(4, min(20, int(os.environ.get("AVAILABILITY_WORKERS", "12") or "12")))
+    timeout = float(os.environ.get("AVAILABILITY_TIMEOUT", "10") or "10")
+    print(f"[可用性] 开始校验 {len(jobs)} 个唯一 URL，线程数 {workers}，超时 {timeout}s")
+
+    url_results = {}
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        future_map = {
+            executor.submit(validate_url, url, title, timeout): url
+            for url, title in jobs
+        }
+        total = len(future_map)
+        for idx, future in enumerate(as_completed(future_map), 1):
+            url = future_map[future]
+            try:
+                url_results[url] = future.result()
+            except Exception as exc:
+                url_results[url] = {
+                    "category": "network_error",
+                    "reason": f"unexpected error: {exc.__class__.__name__}",
+                    "status_code": None,
+                }
+            if idx % 50 == 0 or idx == total:
+                print(f"[可用性] {idx}/{total}")
+
+    filtered = []
+    removed_rows = []
+    kept_by_category = {}
+    removed_by_category = {}
+
+    for tour in tours:
+        url = str(tour.get("bookingUrl") or "").strip()
+        result = url_results.get(url, {"category": "reachable_unverified", "reason": "missing validation result"})
+        category = result.get("category", "reachable_unverified")
+        if category in {UNAVAILABLE, HTTP_ERROR}:
+            removed_by_category[category] = removed_by_category.get(category, 0) + 1
+            removed_rows.append(
+                {
+                    "source": tour.get("source", ""),
+                    "title": tour.get("title", ""),
+                    "url": url,
+                    "category": category,
+                    "reason": result.get("reason", ""),
+                }
+            )
+            continue
+        kept_by_category[category] = kept_by_category.get(category, 0) + 1
+        filtered.append(tour)
+
+    print(
+        f"[可用性] 保留 {len(filtered)}/{len(tours)} 条，"
+        f"移除 {len(removed_rows)} 条明确下架/404 线路"
+    )
+    for category, count in sorted(kept_by_category.items()):
+        print(f"[可用性] 保留 {category}: {count}")
+    for category, count in sorted(removed_by_category.items()):
+        print(f"[可用性] 移除 {category}: {count}")
+
+    if removed_rows:
+        print("[可用性] 移除样本:")
+        for row in removed_rows[:10]:
+            print(
+                f"  [{row['category']}] {row['source']} | {row['title'][:40]} | "
+                f"{row['reason']} | {row['url']}"
+            )
+
+    return filtered
+
+
 def main():
     print("=" * 60)
     print("数据合并脚本")
@@ -601,6 +690,9 @@ def main():
             f"exclusions={sum(1 for tour in subset if tour.get('exclusions'))}/{len(subset)} "
             f"notes={sum(1 for tour in subset if tour.get('importantNotes'))}/{len(subset)}"
         )
+
+    tours = filter_unavailable_tours(tours)
+    print(f"[输出] 自动过滤后 {len(tours)} 条 Tour 数据")
 
     # 生成元数据
     tours_clean = clean_nulls(tours)
