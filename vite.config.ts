@@ -3,9 +3,12 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 import { inspectAttr } from 'kimi-plugin-inspect-react'
 
+const appBase = process.env.APP_BASE?.trim()
+const base = appBase ? `/${appBase.replace(/^\/+|\/+$/g, '')}/` : '/'
+
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/EverywhereWeGoGz/',
+  base,
   plugins: [inspectAttr(), react()],
   define: {
     __DATA_VERSION__: JSON.stringify(
