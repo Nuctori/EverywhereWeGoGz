@@ -8,11 +8,13 @@ import hashlib
 import json
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 import requests
 
+from detail_parsers import detail_has_content, empty_detail, fetch_detail_data
 from tour_blacklist import is_blacklisted_title
 
 # 来源颜色映射
@@ -26,7 +28,7 @@ SOURCE_COLORS = {
     '品途': '#3A86FF',
 }
 
-DATE_TOKEN_RE = re.compile(r'(\d{1,2})[./](\d{1,2})')
+DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
 IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'}
 
 
@@ -131,7 +133,13 @@ def extract_title_dates(title: str):
     )
     dates = []
     year = datetime.now().year
-    for month, day in DATE_TOKEN_RE.findall(normalized):
+    for match in DATE_TOKEN_RE.finditer(normalized):
+        month, day = match.groups()
+        start, end = match.span()
+        prev_char = normalized[start - 1] if start > 0 else ''
+        next_char = normalized[end] if end < len(normalized) else ''
+        if prev_char in {'-', '~', '至', '到'} or next_char in {'-', '~', '至', '到'}:
+            continue
         try:
             parsed = datetime(year, int(month), int(day))
         except ValueError:
@@ -203,10 +211,12 @@ def guess_leisure_level(title: str, days: int, theme: str) -> str:
     return 'easy'
 
 
-def raw_to_tour_legacy(raw, id_counter):
+def raw_to_tour_legacy(raw, id_counter, detail=None):
+    return raw_to_tour(raw, id_counter, detail=detail)
     source = raw.get('source', '未知')
     title = raw.get('title', '')
     price = raw.get('price', 0)
+    detail = detail or empty_detail()
 
     if is_blacklisted_title(title):
         return None
@@ -242,11 +252,14 @@ def raw_to_tour_legacy(raw, id_counter):
         original_price = int(price / (1 - discount_rate / 100))
 
     if days <= 1:
-        single_supplement = 0
+        estimated_single_supplement = 0
     elif days <= 3:
-        single_supplement = max(50, int(price * 0.15))
+        estimated_single_supplement = max(50, int(price * 0.15))
     else:
-        single_supplement = max(100, int(price * 0.25))
+        estimated_single_supplement = max(100, int(price * 0.25))
+
+    actual_single_supplement = detail.get("singleSupplementAmount")
+    single_supplement = int(actual_single_supplement) if actual_single_supplement is not None else estimated_single_supplement
 
     rating = round(3.8 + (stable_hash(source + title) % 12) / 10, 1)
     review_count = (stable_hash(title + source) % 500) + 50
@@ -285,7 +298,7 @@ def raw_to_tour_legacy(raw, id_counter):
         "accommodationStars": 3,
         "meals": f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐",
         "singleSupplement": single_supplement,
-        "singleSupplementNote": f"单人出行需补单房差￥{single_supplement}" if single_supplement > 0 else "本产品无需单房差",
+        "singleSupplementNote": detail.get("singleSupplementNote", ""),
         "availableSeats": available_seats,
         "totalSeats": total_seats,
         "highlights": [f"{destination}必打卡", "特色美食", "精品住宿"],
@@ -324,10 +337,11 @@ def raw_to_tour_legacy(raw, id_counter):
     }
 
 
-def raw_to_tour(raw, id_counter):
+def raw_to_tour(raw, id_counter, detail=None):
     source = raw.get('source', '未知')
     title = raw.get('title', '')
     price = raw.get('price', 0)
+    detail = detail or empty_detail()
 
     if is_blacklisted_title(title):
         return None
@@ -351,31 +365,17 @@ def raw_to_tour(raw, id_counter):
         departure_date = parsed_dates[0]
         departure_dates = parsed_dates
     else:
-        days_offset = (stable_hash(title) % 60) + 1
-        departure = datetime.now() + timedelta(days=days_offset)
-        departure_date = departure.strftime("%Y-%m-%d")
-        departure_dates = [departure_date]
+        departure_date = ""
+        departure_dates = []
 
-    discount_rate = None
-    original_price = None
-    if price > 1000:
-        discount_rate = (stable_hash(title) % 16) + 5
-        original_price = int(price / (1 - discount_rate / 100))
+    single_supplement_amount = detail.get("singleSupplementAmount")
+    single_supplement = int(single_supplement_amount) if single_supplement_amount is not None else 0
 
-    if days <= 1:
-        single_supplement = 0
-    elif days <= 3:
-        single_supplement = max(50, int(price * 0.15))
+    if departure_date:
+        departure = datetime.strptime(departure_date, "%Y-%m-%d")
+        return_date = (departure + timedelta(days=days or 2)).strftime("%Y-%m-%d")
     else:
-        single_supplement = max(100, int(price * 0.25))
-
-    rating = round(3.8 + (stable_hash(source + title) % 12) / 10, 1)
-    review_count = (stable_hash(title + source) % 500) + 50
-
-    departure = datetime.strptime(departure_date, "%Y-%m-%d")
-    return_date = departure + timedelta(days=days or 2)
-    available_seats = max(3, 20 - int(price / 1000))
-    total_seats = available_seats + (stable_hash(title) % 10) + 5
+        return_date = ""
 
     return {
         "id": f"tour_{id_counter}",
@@ -385,40 +385,40 @@ def raw_to_tour(raw, id_counter):
         "destination": destination,
         "duration": days or 2,
         "price": int(price),
-        "originalPrice": original_price,
+        "originalPrice": None,
         "priceUnit": "人",
         "departureDate": departure_date,
-        "returnDate": return_date.strftime("%Y-%m-%d"),
+        "returnDate": return_date,
         "transportType": "大巴往返" if days and days <= 3 else ("高铁往返" if days and days <= 5 else "飞机往返"),
         "accommodationLevel": "舒适型",
         "accommodationStars": 3,
         "meals": f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐",
         "singleSupplement": single_supplement,
-        "singleSupplementNote": f"单人出行需补单房差￥{single_supplement}" if single_supplement > 0 else "本产品无需单房差",
-        "availableSeats": available_seats,
-        "totalSeats": total_seats,
-        "highlights": [f"{destination}必打卡", "特色美食", "精品住宿"],
-        # Do not fabricate itinerary / fee-related details from list-page data.
-        "itinerary": [],
-        "inclusions": [],
-        "exclusions": [],
-        "importantNotes": [],
+        "singleSupplementNote": detail.get("singleSupplementNote", ""),
+        "availableSeats": 0,
+        "totalSeats": 0,
+        "highlights": detail.get("highlights") or [f"{destination}必打卡", "特色美食", "精品住宿"],
+        "itinerary": detail.get("itinerary", []),
+        "inclusions": detail.get("inclusions", []),
+        "exclusions": detail.get("exclusions", []),
+        "optionalExpenses": detail.get("optionalExpenses", []),
+        "importantNotes": detail.get("importantNotes", []),
         "visaRequirements": "无需签证（国内游）",
         "travelInsurance": True,
         "tourGuideService": True,
         "freeWiFi": stable_hash(title) % 2 == 0,
-        "childPolicy": "",
-        "cancellationPolicy": "",
-        "refundPolicy": "",
-        "rating": rating,
-        "reviewCount": review_count,
+        "childPolicy": detail.get("childPolicy", ""),
+        "cancellationPolicy": detail.get("cancellationPolicy", ""),
+        "refundPolicy": detail.get("refundPolicy", ""),
+        "rating": 0,
+        "reviewCount": 0,
         "bookingUrl": raw.get('url', '#'),
         "images": images,
         "tags": [theme, "纯玩", "品质"],
-        "isHot": stable_hash(title + source) % 3 == 0,
-        "isNew": stable_hash(title + source) % 5 == 0,
-        "isFlashSale": stable_hash(title + source) % 10 == 0,
-        "discountRate": discount_rate if discount_rate is not None else None,
+        "isHot": False,
+        "isNew": False,
+        "isFlashSale": False,
+        "discountRate": None,
         "groupSize": "30人常规团",
         "theme": theme,
         "leisureLevel": leisure_level,
@@ -450,6 +450,22 @@ def make_tour_key(item):
     except (TypeError, ValueError):
         price_key = str(price)
     return f"{source}|{title}|{price_key}"
+
+
+def extract_existing_detail(item):
+    return {
+        "highlights": item.get("highlights", []),
+        "itinerary": item.get("itinerary", []),
+        "inclusions": item.get("inclusions", []),
+        "exclusions": item.get("exclusions", []),
+        "optionalExpenses": item.get("optionalExpenses", []),
+        "importantNotes": item.get("importantNotes", []),
+        "childPolicy": "",
+        "singleSupplementNote": "",
+        "singleSupplementAmount": None,
+        "cancellationPolicy": "",
+        "refundPolicy": "",
+    }
 
 
 def main():
@@ -541,26 +557,50 @@ def main():
     deduped = [r for r in deduped if r.get('price', 0) > 0 and len(r.get('title', '')) > 5]
     print(f"[过滤] 有效数据: {len(deduped)}条")
 
+    detail_results = {}
+    detail_workers = max(4, min(16, int(os.environ.get("DETAIL_WORKERS", "10") or "10")))
+    print(f"[详情] 开始抓取 {len(deduped)} 条，线程数 {detail_workers}")
+    with ThreadPoolExecutor(max_workers=detail_workers) as executor:
+        future_map = {
+            executor.submit(fetch_detail_data, raw): make_tour_key(raw)
+            for raw in deduped
+        }
+        total = len(future_map)
+        for idx, future in enumerate(as_completed(future_map), 1):
+            key = future_map[future]
+            try:
+                detail = future.result() or empty_detail()
+            except Exception as exc:
+                print(f"[详情] {key} -> {exc}")
+                detail = empty_detail()
+            if not detail_has_content(detail) and key in existing_tours:
+                existing_detail = extract_existing_detail(existing_tours[key])
+                if detail_has_content(existing_detail):
+                    detail = existing_detail
+            detail_results[key] = detail
+            if idx % 50 == 0 or idx == total:
+                print(f"[详情] {idx}/{total}")
+
     # 转换为前端格式
     tours = []
     for i, raw in enumerate(deduped, 1):
-        tour = raw_to_tour(raw, i)
+        tour = raw_to_tour(raw, i, detail_results.get(make_tour_key(raw), empty_detail()))
         if tour is not None:
             existing = existing_tours.get(make_tour_key(tour))
-            if existing:
-                for field in [
-                    "departureDate",
-                    "returnDate",
-                    "departureDates",
-                    "hotDepartureDates",
-                    "createdAt",
-                    "updatedAt",
-                ]:
-                    if existing.get(field):
-                        tour[field] = existing[field]
+            if existing and existing.get("createdAt"):
+                tour["createdAt"] = existing["createdAt"]
             tours.append(tour)
 
     print(f"[转换] 生成 {len(tours)} 条 Tour 数据")
+    for source in sorted(set(t["source"] for t in tours)):
+        subset = [tour for tour in tours if tour["source"] == source]
+        print(
+            f"[详情覆盖] {source}: "
+            f"itinerary={sum(1 for tour in subset if tour.get('itinerary'))}/{len(subset)} "
+            f"inclusions={sum(1 for tour in subset if tour.get('inclusions'))}/{len(subset)} "
+            f"exclusions={sum(1 for tour in subset if tour.get('exclusions'))}/{len(subset)} "
+            f"notes={sum(1 for tour in subset if tour.get('importantNotes'))}/{len(subset)}"
+        )
 
     # 生成元数据
     tours_clean = clean_nulls(tours)

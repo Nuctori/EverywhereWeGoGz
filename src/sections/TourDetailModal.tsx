@@ -120,13 +120,18 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
   const reliableItinerary = (tour.itinerary || []).filter((day) => !isLegacyPlaceholderItineraryDay(day));
   const reliableInclusions = filterReliableList(tour.inclusions, LEGACY_FEE_PLACEHOLDERS);
   const reliableExclusions = filterReliableList(tour.exclusions, LEGACY_FEE_PLACEHOLDERS);
+  const reliableOptionalExpenses = filterReliableList(tour.optionalExpenses, LEGACY_FEE_PLACEHOLDERS);
   const reliableImportantNotes = filterReliableList(tour.importantNotes, LEGACY_NOTE_PLACEHOLDERS);
   const cancellationPolicy = getReliablePolicy(tour.cancellationPolicy);
   const refundPolicy = getReliablePolicy(tour.refundPolicy);
   const childPolicy = getReliablePolicy(tour.childPolicy);
+  const hasReliableSingleSupplement = Boolean(normalizeText(tour.singleSupplementNote));
+  const hasAvailabilityData = tour.availableSeats > 0 && tour.totalSeats > 0;
+  const hasDepartureDates = (tour.departureDates || []).filter(Boolean).length > 0 || Boolean(tour.departureDate);
   const hasReliableCostData =
     reliableInclusions.length > 0 ||
     reliableExclusions.length > 0 ||
+    reliableOptionalExpenses.length > 0 ||
     Boolean(cancellationPolicy) ||
     Boolean(refundPolicy) ||
     Boolean(childPolicy);
@@ -187,7 +192,9 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
         <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
           <Users className="mx-auto mb-1 h-5 w-5 text-stone-500" />
           <p className="text-xs text-stone-500">剩余名额</p>
-          <p className="text-sm font-semibold text-stone-900">{tour.availableSeats}/{tour.totalSeats}</p>
+          <p className="text-sm font-semibold text-stone-900">
+            {hasAvailabilityData ? `${tour.availableSeats}/${tour.totalSeats}` : '待确认'}
+          </p>
         </div>
         <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
           <Star className="mx-auto mb-1 h-5 w-5 text-stone-500" />
@@ -199,11 +206,11 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
       <div className="mb-6 rounded-2xl border border-stone-200 bg-white p-4 sm:p-5">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
-            {tour.originalPrice && (
-              <span className="mr-2 text-sm text-stone-400 line-through">
-                原价 ¥{tour.originalPrice.toLocaleString()}
-              </span>
-            )}
+          {tour.originalPrice && (
+            <span className="mr-2 text-sm text-stone-400 line-through">
+              原价 ¥{tour.originalPrice.toLocaleString()}
+            </span>
+          )}
             <div className="flex items-baseline gap-1">
               <span className="text-stone-500 font-medium">¥</span>
               <span className="text-2xl sm:text-3xl font-semibold text-stone-900">{tour.price.toLocaleString()}</span>
@@ -217,7 +224,7 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
           )}
         </div>
 
-        {tour.singleSupplement > 0 ? (
+        {hasReliableSingleSupplement ? (
           <div className="flex items-start gap-3 rounded-lg border border-stone-200 bg-stone-50 p-3 sm:p-4">
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-stone-500" />
             <div>
@@ -227,17 +234,12 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
                 {tour.singleSupplementNote}。
               </p>
-              <div className="mt-2 text-xs sm:text-sm text-stone-700">
-                <span className="font-semibold">
-                  单人出行预估 = 团费 ¥{tour.price.toLocaleString()} + 单房差约 ¥{tour.singleSupplement} = ¥{(tour.price + tour.singleSupplement).toLocaleString()}
-                </span>
-              </div>
             </div>
           </div>
         ) : (
           <div className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 p-3">
-            <CheckCircle2 className="h-5 w-5 shrink-0 text-stone-500" />
-            <span className="text-sm text-stone-600">单人同价</span>
+            <Info className="h-5 w-5 shrink-0 text-stone-500" />
+            <span className="text-sm text-stone-600">单房差需以来源详情页或客服二次确认为准</span>
           </div>
         )}
 
@@ -262,7 +264,13 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
 
         <TabsContent value="overview" className="space-y-4 mt-4">
           {/* 出团日期选择器 */}
-          <DepartureDateSelector tour={tour} />
+          {hasDepartureDates ? (
+            <DepartureDateSelector tour={tour} />
+          ) : (
+            <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-500">
+              该线路暂未抓取到可靠的出发日期，避免误导，这里不展示推测团期。请以来源页面的发团日历或客服确认为准。
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InfoItem icon={<Calendar className="w-4 h-4" />} label="返程日期" value={formatDate(tour.returnDate)} />
@@ -399,6 +407,27 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
             )}
           </div>
 
+          <div>
+            <h4 className="mb-3 flex items-center gap-2 font-semibold text-stone-800">
+              <AlertTriangle className="w-5 h-5" />
+              自费项目 / 额外收费
+            </h4>
+            {reliableOptionalExpenses.length > 0 ? (
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {reliableOptionalExpenses.map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-stone-600">
+                    <AlertTriangle className="w-4 h-4 text-stone-400 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-4 text-sm text-stone-500">
+                暂未抓取到可靠的自费项目或额外收费说明。
+              </div>
+            )}
+          </div>
+
           <div className="rounded-lg border border-stone-200 bg-white p-4 space-y-3">
             {!cancellationPolicy && !refundPolicy && !childPolicy && (
               <div className="text-sm text-stone-500">
@@ -501,11 +530,16 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
 }
 
 function DepartureDateSelector({ tour }: { tour: Tour }) {
-  const [selectedDate, setSelectedDate] = useState(tour.departureDate);
+  const dates = (tour.departureDates || []).filter(Boolean);
+  const fallbackDate = tour.departureDate || dates[0] || '';
+  const [selectedDate, setSelectedDate] = useState(fallbackDate);
   const [showAll, setShowAll] = useState(false);
-
-  const allDates = tour.departureDates || [tour.departureDate];
+  const allDates = dates.length > 0 ? dates : (fallbackDate ? [fallbackDate] : []);
   const hotDates = tour.hotDepartureDates || [];
+
+  if (allDates.length === 0 || !selectedDate) {
+    return null;
+  }
 
   // 计算返程日期
   const getReturnDate = (departStr: string) => {
@@ -543,10 +577,10 @@ function DepartureDateSelector({ tour }: { tour: Tour }) {
           选择出团日期
           <span className="text-xs font-normal text-slate-400">（{allDates.length}个可选团期）</span>
         </h4>
-        {selectedDate !== tour.departureDate && (
+        {selectedDate !== fallbackDate && (
           <button
             className="text-xs text-blue-500 hover:text-blue-600"
-            onClick={() => setSelectedDate(tour.departureDate)}
+            onClick={() => setSelectedDate(fallbackDate)}
           >
             恢复默认
           </button>

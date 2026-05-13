@@ -277,6 +277,9 @@ export function TourList({ searchQuery }: TourListProps) {
       }
 
       if (dateFilter) {
+        if (!tour.departureDate) {
+          return false;
+        }
         if (dateFilter.mode === 'exact' && tour.departureDate !== dateFilter.date) {
           return false;
         }

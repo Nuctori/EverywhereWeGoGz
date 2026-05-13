@@ -40,6 +40,7 @@ export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps)
     rawImageSrc.startsWith('http://') ? rawImageSrc.replace('http://', 'https://') : rawImageSrc,
   );
   const tags = tour.tags?.slice(0, 2) || [];
+  const hasReliableSingleSupplement = Boolean(tour.singleSupplementNote?.trim());
 
   return (
     <Card
@@ -138,11 +139,11 @@ export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps)
                 </span>
               )}
             </div>
-            <p className={`mt-1 text-xs ${tour.singleSupplement > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
-              {tour.singleSupplement > 0 ? (
-                <>单人补差约 <span className="font-semibold">¥{tour.singleSupplement}</span></>
+            <p className={`mt-1 text-xs ${hasReliableSingleSupplement ? 'text-amber-700' : 'text-stone-500'}`}>
+              {hasReliableSingleSupplement ? (
+                <>单房差以详情页说明为准</>
               ) : (
-                '单人同价'
+                '单房差待确认'
               )}
             </p>
           </div>

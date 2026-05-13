@@ -22,6 +22,7 @@ export interface Tour {
   itinerary: DayItinerary[];
   inclusions: string[];
   exclusions: string[];
+  optionalExpenses?: string[];
   importantNotes: string[];
   visaRequirements: string;
   travelInsurance: boolean;
