@@ -1,0 +1,38 @@
+name: Refresh Availability Cache
+
+on:
+  schedule:
+    - cron: '30 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  refresh-cache:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Refresh availability cache
+        run: python scripts/validate_tour_availability.py --input public/data/tours.json --output audit/tour-availability-report.json --cache src/data/tour-availability-cache.json --cache-ttl-hours 0 --sample-failures 0
+
+      - name: Commit cache updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add src/data/tour-availability-cache.json
+          if git diff --cached --quiet; then
+            echo "Availability cache unchanged"
+            exit 0
+          fi
+          git commit -m "chore: refresh availability cache [$(date +%Y-%m-%d)]"
+          git push

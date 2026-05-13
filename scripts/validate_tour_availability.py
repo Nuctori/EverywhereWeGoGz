@@ -29,6 +29,7 @@ import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -40,6 +41,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 DEFAULT_INPUT = Path("public/data/tours.json")
 DEFAULT_OUTPUT = Path("audit/tour-availability-report.json")
+DEFAULT_CACHE = Path("src/data/tour-availability-cache.json")
 
 BLOCKED = "blocked"
 HTTP_ERROR = "http_error"
@@ -153,6 +155,7 @@ def get_session() -> requests.Session:
     session = getattr(_thread_local, "session", None)
     if session is None:
         session = requests.Session()
+        session.trust_env = False
         session.headers.update(
             {
                 "User-Agent": USER_AGENT,
@@ -404,10 +407,138 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
     return result
 
 
+def utc_now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def parse_checked_at(value: str) -> float | None:
+    if not value:
+        return None
+    try:
+        normalized = value.replace("Z", "+00:00")
+        return datetime.fromisoformat(normalized).timestamp()
+    except ValueError:
+        return None
+
+
+def load_cache(path: Path) -> dict[str, dict[str, Any]]:
+    if not path.exists():
+        return {}
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            payload = json.load(f)
+    except Exception:
+        return {}
+
+    raw_entries = payload.get("entries") if isinstance(payload, dict) else None
+    if not isinstance(raw_entries, dict):
+        return {}
+
+    entries: dict[str, dict[str, Any]] = {}
+    for url, entry in raw_entries.items():
+        if isinstance(url, str) and isinstance(entry, dict):
+            entries[url] = entry
+    return entries
+
+
+def save_cache(path: Path, entries: dict[str, dict[str, Any]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "generated_at": utc_now_iso(),
+        "entries": dict(sorted(entries.items())),
+    }
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+
+
+def is_cache_entry_fresh(entry: dict[str, Any], ttl_hours: float) -> bool:
+    if ttl_hours <= 0:
+        return False
+    checked_at = parse_checked_at(str(entry.get("checked_at") or ""))
+    if checked_at is None:
+        return False
+    age_seconds = time.time() - checked_at
+    return age_seconds <= ttl_hours * 3600
+
+
+def run_validation_jobs(
+    jobs: list[tuple[str, str]],
+    *,
+    workers: int,
+    timeout: float,
+    cache_path: Path | None = DEFAULT_CACHE,
+    cache_ttl_hours: float = 24.0,
+    use_cache: bool = True,
+    write_cache: bool = True,
+) -> tuple[dict[str, dict[str, Any]], dict[str, int]]:
+    cache_entries = load_cache(cache_path) if use_cache and cache_path else {}
+    url_results: dict[str, dict[str, Any]] = {}
+    to_validate: list[tuple[str, str]] = []
+    title_by_url = {url: title for url, title in jobs}
+    stats = {
+        "cache_hits": 0,
+        "cache_misses": 0,
+        "validated": 0,
+    }
+
+    for url, title in jobs:
+        cached = cache_entries.get(url)
+        if cached and is_cache_entry_fresh(cached, cache_ttl_hours):
+            result = dict(cached)
+            result["url"] = url
+            result["title"] = title
+            url_results[url] = result
+            stats["cache_hits"] += 1
+            continue
+        to_validate.append((url, title))
+        stats["cache_misses"] += 1
+
+    if to_validate:
+        with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
+            future_map = {
+                executor.submit(validate_url, url, title, timeout): url
+                for url, title in to_validate
+            }
+            total = len(future_map)
+            for idx, future in enumerate(as_completed(future_map), 1):
+                url = future_map[future]
+                title = title_by_url.get(url, "")
+                try:
+                    result = future.result()
+                except Exception as exc:  # pragma: no cover
+                    result = {
+                        "url": url,
+                        "title": title,
+                        "domain_rule": "",
+                        "category": NETWORK_ERROR,
+                        "reason": f"unexpected error: {exc.__class__.__name__}",
+                        "status_code": None,
+                        "final_url": url,
+                        "matched_keyword": "",
+                        "elapsed_ms": 0,
+                        "text_sample": "",
+                        "title_token_hits": [],
+                    }
+                result["checked_at"] = utc_now_iso()
+                url_results[url] = result
+                cache_entries[url] = result
+                stats["validated"] += 1
+                if idx % 50 == 0 or idx == total:
+                    print(f"[可用性缓存] 刷新 {idx}/{total}")
+
+    if cache_path and write_cache:
+        save_cache(cache_path, cache_entries)
+
+    return url_results, stats
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="快速校验旅行团链接可用性")
     parser.add_argument("--input", default=str(DEFAULT_INPUT), help="输入 tours.json 路径")
     parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="输出 JSON 报告路径")
+    parser.add_argument("--cache", default=str(DEFAULT_CACHE), help="可用性缓存文件路径")
+    parser.add_argument("--cache-ttl-hours", type=float, default=24.0, help="缓存有效期（小时），默认 24")
+    parser.add_argument("--no-cache", action="store_true", help="禁用读取/写入缓存")
     parser.add_argument("--workers", type=int, default=10, help="并发数，默认 10")
     parser.add_argument("--timeout", type=float, default=12.0, help="单请求超时秒数，默认 12")
     parser.add_argument("--limit", type=int, default=0, help="仅校验前 N 条，0 表示全部")
@@ -490,6 +621,7 @@ def main() -> int:
     input_path = Path(args.input)
     output_path = Path(args.output)
     csv_path = output_path.with_suffix(".csv")
+    cache_path = Path(args.cache)
 
     if not input_path.exists():
         print(f"[错误] 输入文件不存在: {input_path}")
@@ -503,37 +635,16 @@ def main() -> int:
     jobs, grouped = unique_jobs(tours)
     print(f"[去重] 唯一 URL {len(jobs)} 条")
 
-    url_results: dict[str, dict[str, Any]] = {}
     started = time.time()
-
-    with ThreadPoolExecutor(max_workers=max(1, args.workers)) as executor:
-        future_map = {
-            executor.submit(validate_url, url, title, args.timeout): url
-            for url, title in jobs
-        }
-        completed = 0
-        for future in as_completed(future_map):
-            url = future_map[future]
-            completed += 1
-            try:
-                url_results[url] = future.result()
-            except Exception as exc:  # pragma: no cover
-                url_results[url] = {
-                    "url": url,
-                    "title": "",
-                    "domain_rule": "",
-                    "category": NETWORK_ERROR,
-                    "reason": f"unexpected error: {exc.__class__.__name__}",
-                    "status_code": None,
-                    "final_url": url,
-                    "matched_keyword": "",
-                    "elapsed_ms": 0,
-                    "text_sample": "",
-                    "title_token_hits": [],
-                }
-
-            if completed % 50 == 0 or completed == len(future_map):
-                print(f"[进度] {completed}/{len(future_map)}")
+    url_results, cache_stats = run_validation_jobs(
+        jobs,
+        workers=max(1, args.workers),
+        timeout=args.timeout,
+        cache_path=None if args.no_cache else cache_path,
+        cache_ttl_hours=args.cache_ttl_hours,
+        use_cache=not args.no_cache,
+        write_cache=not args.no_cache,
+    )
 
     rows = build_rows(grouped, url_results)
 
@@ -546,6 +657,11 @@ def main() -> int:
         "total_tours": len(tours),
         "unique_urls": len(jobs),
         "elapsed_seconds": round(time.time() - started, 2),
+        "cache": {
+            "path": "" if args.no_cache else str(cache_path),
+            "ttl_hours": args.cache_ttl_hours,
+            **cache_stats,
+        },
         "summary": dict(category_counter),
         "summary_by_source": {
             f"{source}::{category}": count
@@ -560,6 +676,11 @@ def main() -> int:
     write_csv(csv_path, rows)
 
     print("\n[汇总]")
+    if not args.no_cache:
+        print(
+            f"[缓存] 命中 {cache_stats['cache_hits']} | "
+            f"刷新 {cache_stats['validated']} | 未命中 {cache_stats['cache_misses']}"
+        )
     for category, count in sorted(category_counter.items(), key=lambda item: (-item[1], item[0])):
         print(f"  {category}: {count}")
 

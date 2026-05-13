@@ -10,13 +10,14 @@ import os
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
+from pathlib import Path
 from urllib.parse import urlparse
 
 import requests
 
 from detail_parsers import detail_has_content, empty_detail, fetch_detail_data
 from tour_blacklist import is_blacklisted_title
-from validate_tour_availability import HTTP_ERROR, UNAVAILABLE, validate_url
+from validate_tour_availability import DEFAULT_CACHE, HTTP_ERROR, UNAVAILABLE, run_validation_jobs
 
 # 来源颜色映射
 SOURCE_COLORS = {
@@ -491,27 +492,26 @@ def filter_unavailable_tours(tours):
 
     workers = max(4, min(20, int(os.environ.get("AVAILABILITY_WORKERS", "12") or "12")))
     timeout = float(os.environ.get("AVAILABILITY_TIMEOUT", "10") or "10")
-    print(f"[可用性] 开始校验 {len(jobs)} 个唯一 URL，线程数 {workers}，超时 {timeout}s")
+    cache_path = os.environ.get("AVAILABILITY_CACHE_PATH", str(DEFAULT_CACHE)).strip()
+    cache_ttl_hours = float(os.environ.get("AVAILABILITY_CACHE_TTL_HOURS", "24") or "24")
+    print(
+        f"[可用性] 开始校验 {len(jobs)} 个唯一 URL，线程数 {workers}，超时 {timeout}s，"
+        f"缓存 {cache_path}（TTL {cache_ttl_hours}h）"
+    )
 
-    url_results = {}
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        future_map = {
-            executor.submit(validate_url, url, title, timeout): url
-            for url, title in jobs
-        }
-        total = len(future_map)
-        for idx, future in enumerate(as_completed(future_map), 1):
-            url = future_map[future]
-            try:
-                url_results[url] = future.result()
-            except Exception as exc:
-                url_results[url] = {
-                    "category": "network_error",
-                    "reason": f"unexpected error: {exc.__class__.__name__}",
-                    "status_code": None,
-                }
-            if idx % 50 == 0 or idx == total:
-                print(f"[可用性] {idx}/{total}")
+    url_results, cache_stats = run_validation_jobs(
+        jobs,
+        workers=workers,
+        timeout=timeout,
+        cache_path=None if not cache_path else Path(cache_path),
+        cache_ttl_hours=cache_ttl_hours,
+        use_cache=bool(cache_path),
+        write_cache=bool(cache_path),
+    )
+    print(
+        f"[可用性] 缓存命中 {cache_stats['cache_hits']} | "
+        f"刷新 {cache_stats['validated']} | 未命中 {cache_stats['cache_misses']}"
+    )
 
     filtered = []
     removed_rows = []

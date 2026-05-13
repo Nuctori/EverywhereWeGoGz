@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "deploy:workers": "npm run build && wrangler deploy",
     "audit:availability": "python scripts/validate_tour_availability.py",
+    "audit:availability:refresh": "python scripts/validate_tour_availability.py --cache-ttl-hours 0 --sample-failures 0",
     "lint": "eslint .",
     "preview": "vite preview"
   },
