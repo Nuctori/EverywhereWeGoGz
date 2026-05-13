@@ -59,12 +59,12 @@ export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps)
             event.currentTarget.src = getFallbackImage(tour.title);
           }}
         />
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-stone-950/18 to-transparent" />
-        <div className="absolute left-4 top-4 rounded-full border border-white/70 bg-white/88 px-2.5 py-1 text-[11px] font-medium text-stone-600 shadow-sm backdrop-blur">
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-stone-950/32 via-stone-950/10 to-transparent" />
+        <div className="absolute left-4 top-4 rounded-full border border-white/85 bg-white/96 px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-stone-800 shadow-[0_8px_24px_rgba(15,23,42,0.18)] ring-1 ring-black/6 backdrop-blur-md">
           {tour.source}
         </div>
         {tour.discountRate && tour.discountRate > 0 && (
-          <div className="absolute bottom-4 right-4 rounded-full border border-white/80 bg-white/92 px-2.5 py-1 text-[11px] font-semibold text-stone-700 shadow-sm backdrop-blur">
+          <div className="absolute bottom-4 right-4 rounded-full border border-white/85 bg-white/96 px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-stone-800 shadow-[0_8px_24px_rgba(15,23,42,0.18)] ring-1 ring-black/6 backdrop-blur-md">
             参考降幅 {tour.discountRate}%
           </div>
         )}
