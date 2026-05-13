@@ -8,6 +8,7 @@
     "typecheck": "tsc -b",
     "build": "tsc -b && vite build",
     "deploy:workers": "npm run build && wrangler deploy",
+    "audit:availability": "python scripts/validate_tour_availability.py",
     "lint": "eslint .",
     "preview": "vite preview"
   },
