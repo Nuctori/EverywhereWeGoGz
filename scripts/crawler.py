@@ -171,7 +171,7 @@ def guess_theme(title):
     return '自然风光'
 
 
-def raw_to_tour(raw, id_counter):
+def raw_to_tour_legacy(raw, id_counter):
     """将爬虫原始数据转换为前端 Tour 格式"""
     source = raw.get('source', '未知')
     title = raw.get('title', '')
@@ -985,6 +985,84 @@ class PintuSpider:
 
 
 # ==================== 数据生成 ====================
+
+def raw_to_tour(raw, id_counter):
+    """将爬虫原始数据转换为前端 Tour 格式。"""
+    source = raw.get('source', '未知')
+    title = raw.get('title', '')
+    price = raw.get('price', 0)
+    days = raw.get('days', 0) or extract_days(title)
+    destination = raw.get('destination', '') or guess_destination(title)
+    theme = guess_theme(title)
+
+    images = raw.get('images', [])
+    if not images and raw.get('img'):
+        images = [raw['img']]
+
+    discount_rate = None
+    original_price = None
+    if price > 1000:
+        discount_rate = (hash(title) % 16) + 5
+        original_price = int(price / (1 - discount_rate / 100))
+
+    if days <= 1:
+        single_supplement = 0
+    elif days <= 3:
+        single_supplement = max(50, int(price * 0.15))
+    else:
+        single_supplement = max(100, int(price * 0.25))
+
+    rating = round(3.8 + (hash(source + title) % 12) / 10, 1)
+    review_count = (hash(title + source) % 500) + 50
+    days_offset = (hash(title) % 60) + 1
+    departure = datetime.now() + timedelta(days=days_offset)
+    return_date = departure + timedelta(days=days or 2)
+    available_seats = max(3, 20 - int(price / 1000))
+    total_seats = available_seats + (hash(title) % 10) + 5
+
+    return {
+        "id": f"tour_{id_counter}",
+        "title": title,
+        "source": source,
+        "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png",
+        "destination": destination,
+        "duration": days or 2,
+        "price": int(price),
+        "originalPrice": original_price,
+        "priceUnit": "人",
+        "departureDate": departure.strftime("%Y-%m-%d"),
+        "returnDate": return_date.strftime("%Y-%m-%d"),
+        "transportType": "大巴往返" if days and days <= 3 else ("高铁往返" if days and days <= 5 else "飞机往返"),
+        "accommodationLevel": "舒适型",
+        "accommodationStars": 3,
+        "meals": f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐",
+        "singleSupplement": single_supplement,
+        "singleSupplementNote": f"单人出行需补单房差￥{single_supplement}" if single_supplement > 0 else "本产品无需单房差",
+        "availableSeats": available_seats,
+        "totalSeats": total_seats,
+        "highlights": [f"{destination}必打卡", "特色美食", "精品住宿"],
+        # Do not fabricate itinerary / fee-related details from list-page data.
+        "itinerary": [],
+        "inclusions": [],
+        "exclusions": [],
+        "importantNotes": [],
+        "visaRequirements": "无需签证（国内游）",
+        "travelInsurance": True,
+        "tourGuideService": True,
+        "freeWiFi": hash(title) % 2 == 0,
+        "childPolicy": "",
+        "cancellationPolicy": "",
+        "refundPolicy": "",
+        "rating": rating,
+        "reviewCount": review_count,
+        "bookingUrl": raw.get('url', '#'),
+        "images": images,
+        "tags": [theme, "纯玩", "品质"],
+        "isHot": hash(title + source) % 3 == 0,
+        "isNew": hash(title + source) % 5 == 0,
+        "isFlashSale": hash(title + source) % 10 == 0,
+    }
+
 
 def clean_nulls(obj):
     """递归移除值为 None/null 的字段，避免 TypeScript 类型错误"""

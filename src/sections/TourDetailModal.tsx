@@ -41,6 +41,56 @@ function formatDate(dateStr: string | undefined): string {
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
+const LEGACY_POLICY_PLACEHOLDERS = new Set([
+  '2-12岁儿童不占床享半价',
+  '出发前7天可无损退改',
+  '未消费项目按实结算退还',
+]);
+
+const LEGACY_NOTE_PLACEHOLDERS = new Set([
+  '请携带有效身份证件',
+  '行程可能因天气调整',
+]);
+
+const LEGACY_FEE_PLACEHOLDERS = new Set([
+  '往返交通',
+  '酒店住宿',
+  '景点门票',
+  '导游服务',
+  '个人消费',
+  '单房差',
+  '自费项目',
+]);
+
+function normalizeText(value: string | undefined) {
+  return (value || '').trim();
+}
+
+function isLegacyPlaceholderItineraryDay(day: Tour['itinerary'][number]) {
+  const description = normalizeText(day.description);
+  const accommodation = normalizeText(day.accommodation);
+  const activities = (day.activities || []).map((item) => normalizeText(item)).filter(Boolean);
+  const meals = (day.meals || []).map((item) => normalizeText(item)).filter(Boolean);
+
+  const hasPlaceholderDescription = /^今日安排.*精彩活动，感受当地独特魅力。?$/.test(description);
+  const hasPlaceholderActivities =
+    activities.length === 2 && activities[0] === '景点游览' && activities[1] === '自由活动';
+  const hasPlaceholderAccommodation = accommodation === '当地酒店' || accommodation === '温馨的家';
+  const hasPlaceholderMeals =
+    meals.length > 0 && meals.every((item) => item === '早餐' || item === '午餐');
+
+  return hasPlaceholderDescription && hasPlaceholderActivities && hasPlaceholderAccommodation && hasPlaceholderMeals;
+}
+
+function filterReliableList(items: string[] | undefined, placeholders: Set<string>) {
+  return (items || []).map((item) => normalizeText(item)).filter((item) => item && !placeholders.has(item));
+}
+
+function getReliablePolicy(value: string | undefined) {
+  const normalized = normalizeText(value);
+  return normalized && !LEGACY_POLICY_PLACEHOLDERS.has(normalized) ? normalized : '';
+}
+
 export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
   const isMobile = useIsMobile();
   if (!tour) return null;
@@ -66,6 +116,20 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
     if (!url) return;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
+
+  const reliableItinerary = (tour.itinerary || []).filter((day) => !isLegacyPlaceholderItineraryDay(day));
+  const reliableInclusions = filterReliableList(tour.inclusions, LEGACY_FEE_PLACEHOLDERS);
+  const reliableExclusions = filterReliableList(tour.exclusions, LEGACY_FEE_PLACEHOLDERS);
+  const reliableImportantNotes = filterReliableList(tour.importantNotes, LEGACY_NOTE_PLACEHOLDERS);
+  const cancellationPolicy = getReliablePolicy(tour.cancellationPolicy);
+  const refundPolicy = getReliablePolicy(tour.refundPolicy);
+  const childPolicy = getReliablePolicy(tour.childPolicy);
+  const hasReliableCostData =
+    reliableInclusions.length > 0 ||
+    reliableExclusions.length > 0 ||
+    Boolean(cancellationPolicy) ||
+    Boolean(refundPolicy) ||
+    Boolean(childPolicy);
 
   const content = (
     <>
@@ -237,19 +301,25 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
 
           <div className="mt-4">
             <h4 className="font-semibold text-stone-800 mb-2">重要须知</h4>
-            <ul className="space-y-2">
-              {tour.importantNotes.map((note, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
-                  <Info className="w-4 h-4 text-stone-500 shrink-0 mt-0.5" />
-                  {note}
-                </li>
-              ))}
-            </ul>
+            {reliableImportantNotes.length > 0 ? (
+              <ul className="space-y-2">
+                {reliableImportantNotes.map((note, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-stone-600">
+                    <Info className="w-4 h-4 text-stone-500 shrink-0 mt-0.5" />
+                    {note}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-500">
+                该线路暂未抓取到可靠的注意事项，请以下单前的来源页面说明为准。
+              </div>
+            )}
           </div>
         </TabsContent>
 
         <TabsContent value="itinerary" className="space-y-4 mt-4">
-          {tour.itinerary.map((day) => (
+          {reliableItinerary.length > 0 ? reliableItinerary.map((day) => (
             <div key={day.day} className="rounded-lg border border-stone-200 bg-white p-4 transition-shadow hover:shadow-sm">
               <div className="flex items-center gap-3 mb-2">
                 <Badge variant="outline" className="border-stone-200 bg-white text-stone-600">第{day.day}天</Badge>
@@ -274,23 +344,38 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
                 ))}
               </div>
             </div>
-          ))}
+          )) : (
+            <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-5 text-sm leading-6 text-stone-500">
+              该线路暂未抓取到可靠的每日安排，避免误导，这里不再展示模板行程。请打开来源页面查看详细行程。
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="cost" className="space-y-4 mt-4">
+          {!hasReliableCostData && (
+            <div className="rounded-lg border border-dashed border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+              该线路暂未结构化抓取到可靠的费用说明。门票、景区小交通、自费项目、儿童附加费、退改规则等额外收费，请以来源页面的“费用说明 / 预订须知”为准。
+            </div>
+          )}
           <div>
             <h4 className="mb-3 flex items-center gap-2 font-semibold text-stone-800">
               <CheckCircle2 className="w-5 h-5" />
               费用包含
             </h4>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {tour.inclusions.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-stone-600">
-                  <CheckCircle2 className="w-4 h-4 text-stone-500 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            {reliableInclusions.length > 0 ? (
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {reliableInclusions.map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-stone-600">
+                    <CheckCircle2 className="w-4 h-4 text-stone-500 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-4 text-sm text-stone-500">
+                暂未抓取到可靠的费用包含明细。
+              </div>
+            )}
           </div>
 
           <div>
@@ -298,21 +383,32 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
               <XCircle className="w-5 h-5" />
               费用不含
             </h4>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {tour.exclusions.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-stone-600">
-                  <XCircle className="w-4 h-4 text-stone-400 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
+            {reliableExclusions.length > 0 ? (
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {reliableExclusions.map((item) => (
+                  <li key={item} className="flex items-center gap-2 text-sm text-stone-600">
+                    <XCircle className="w-4 h-4 text-stone-400 shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-4 text-sm text-stone-500">
+                暂未抓取到可靠的费用不含、自费或额外收费说明。
+              </div>
+            )}
           </div>
 
           <div className="rounded-lg border border-stone-200 bg-white p-4 space-y-3">
+            {!cancellationPolicy && !refundPolicy && !childPolicy && (
+              <div className="text-sm text-stone-500">
+                暂未抓取到可靠的退改、退款或儿童政策说明，请以来源页面为准。
+              </div>
+            )}
             <h4 className="font-semibold text-stone-800">退改政策</h4>
-            <InfoItem icon={<RotateCcw className="w-4 h-4" />} label="取消政策" value={tour.cancellationPolicy} />
-            <InfoItem icon={<CreditCard className="w-4 h-4" />} label="退款说明" value={tour.refundPolicy} />
-            <InfoItem icon={<Baby className="w-4 h-4" />} label="儿童政策" value={tour.childPolicy} />
+            <InfoItem icon={<RotateCcw className="w-4 h-4" />} label="取消政策" value={cancellationPolicy} />
+            <InfoItem icon={<CreditCard className="w-4 h-4" />} label="退款说明" value={refundPolicy} />
+            <InfoItem icon={<Baby className="w-4 h-4" />} label="儿童政策" value={childPolicy} />
           </div>
         </TabsContent>
 
@@ -547,6 +643,7 @@ function LeisureLevelItem({ level }: { level: 'easy' | 'medium' | 'hard' }) {
 }
 
 function InfoItem({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+  if (!value?.trim()) return null;
   return (
     <div className="flex items-start gap-3 bg-slate-50 rounded-lg p-3">
       <div className="text-slate-400 shrink-0 mt-0.5">{icon}</div>
