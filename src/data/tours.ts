@@ -4,37 +4,37 @@ export const sources = [
   {
     "name": "假日通",
     "logo": "/icons/假日通.png",
-    "color": "#666"
+    "color": "#FF6B35"
   },
   {
     "name": "品途",
     "logo": "/icons/品途.png",
-    "color": "#666"
+    "color": "#3A86FF"
   },
   {
     "name": "广东中旅",
     "logo": "/icons/广东中旅.png",
-    "color": "#666"
+    "color": "#8338EC"
   },
   {
     "name": "广之旅",
     "logo": "/icons/广之旅.png",
-    "color": "#666"
+    "color": "#FF006E"
   },
   {
     "name": "广州去旅行",
     "logo": "/icons/广州去旅行.png",
-    "color": "#666"
+    "color": "#4ECDC4"
   },
   {
     "name": "康辉",
     "logo": "/icons/康辉.png",
-    "color": "#666"
+    "color": "#1A535C"
   },
   {
     "name": "暴走村",
     "logo": "/icons/暴走村.png",
-    "color": "#666"
+    "color": "#B8860B"
   }
 ];
 

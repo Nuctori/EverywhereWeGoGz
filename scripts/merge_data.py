@@ -32,6 +32,14 @@ SOURCE_COLORS = {
 
 DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
 IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'}
+RAW_FILE_PRIORITIES = {
+    "raw_jrt365_full.json": 10,
+    "raw_jrt365.json": 20,
+    "raw_http_full.json": 10,
+    "raw_pintu_full.json": 10,
+    "raw_saihuitong_full.json": 10,
+    "raw_gzl_api.json": 10,
+}
 
 
 def stable_hash(value: str) -> int:
@@ -454,6 +462,18 @@ def make_tour_key(item):
     return f"{source}|{title}|{price_key}"
 
 
+def score_raw_candidate(item):
+    return (
+        int(item.get("_merge_priority", 0) or 0),
+        1 if str(item.get("url") or "").strip() else 0,
+        1 if str(item.get("img") or "").strip() else 0,
+    )
+
+
+def prefer_raw_candidate(current, candidate):
+    return score_raw_candidate(candidate) >= score_raw_candidate(current)
+
+
 def extract_existing_detail(item):
     return {
         "highlights": item.get("highlights", []),
@@ -625,21 +645,29 @@ def main():
                         item for item in data
                         if item.get("source") not in {"品途", "广之旅"}
                     ]
-                print(f"[{fname}] {len(data)}条")
-                all_raw.extend(data)
+                priority = RAW_FILE_PRIORITIES.get(fname, 0)
+                enriched = []
+                for item in data:
+                    if not isinstance(item, dict):
+                        continue
+                    candidate = dict(item)
+                    candidate["_merge_priority"] = priority
+                    enriched.append(candidate)
+                print(f"[{fname}] {len(enriched)}条")
+                all_raw.extend(enriched)
             except Exception as e:
                 print(f"[{fname}] 读取失败: {e}")
 
     print(f"\n[汇总] 原始数据: {len(all_raw)}条")
 
     # 去重
-    seen = set()
-    deduped = []
+    seen = {}
     for it in all_raw:
         key = it.get("source", "") + "|" + it.get("title", "") + "|" + str(it.get("price", ""))
-        if key not in seen:
-            seen.add(key)
-            deduped.append(it)
+        previous = seen.get(key)
+        if previous is None or prefer_raw_candidate(previous, it):
+            seen[key] = it
+    deduped = list(seen.values())
     print(f"[去重] 后: {len(deduped)}条")
 
     # 过滤
@@ -701,7 +729,7 @@ def main():
     themes = sorted(set(t["theme"] for t in tours_clean if t.get("theme")))
 
     sources_def = [
-        {"name": s, "logo": f"/icons/{s.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png", "color": SOURCE_COLORS.get(s, '#666')}
+        {"name": s, "logo": f"/icons/{s}.png", "color": SOURCE_COLORS.get(s, '#666')}
         for s in sources
     ]
 

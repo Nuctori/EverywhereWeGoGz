@@ -43,6 +43,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 DEFAULT_INPUT = Path("public/data/tours.json")
 DEFAULT_OUTPUT = Path("audit/tour-availability-report.json")
 DEFAULT_CACHE = Path("src/data/tour-availability-cache.json")
+CACHE_SCHEMA_VERSION = 2
 
 BLOCKED = "blocked"
 HTTP_ERROR = "http_error"
@@ -251,20 +252,62 @@ def detect_redirect_problem(original_url: str, final_url: str) -> str:
 
 def detect_jrt365_unavailable_shell(raw_html: str) -> bool:
     soup = BeautifulSoup(raw_html, "lxml")
-    selectors = [
+    title_selectors = [
+        "#ctl00_ContentPlaceHolder_htmlform_id_tourname",
+        "#ctl00_ContentPlaceHolder_htmlform_id_tourname_1",
+    ]
+    content_selectors = [
         "#con_e_1",
         "#con_e_2",
         "#con_e_3",
         "#con_e_4",
         "#ctl00_ContentPlaceHolder_htmlform_id_note",
     ]
-    texts = []
-    for selector in selectors:
+
+    titles = []
+    for selector in title_selectors:
         node = soup.select_one(selector)
-        if not node:
-            return False
-        texts.append(node.get_text(" ", strip=True))
-    return all(not text for text in texts)
+        titles.append(node.get_text(" ", strip=True) if node else "")
+
+    contents = []
+    for selector in content_selectors:
+        node = soup.select_one(selector)
+        contents.append(node.get_text(" ", strip=True) if node else "")
+
+    print_link = soup.select_one("#ctl00_ContentPlaceHolder_htmlform_id_print_xc")
+    print_href = (print_link.get("href", "") if print_link else "").strip()
+
+    if any(titles) or any(contents) or print_href:
+        return False
+
+    return 'tourname: ""' in raw_html and 'salelable3: ""' in raw_html
+
+
+def has_jrt365_detail_content(raw_html: str) -> bool:
+    soup = BeautifulSoup(raw_html, "lxml")
+    title = ""
+    for selector in (
+        "#ctl00_ContentPlaceHolder_htmlform_id_tourname",
+        "#ctl00_ContentPlaceHolder_htmlform_id_tourname_1",
+    ):
+        node = soup.select_one(selector)
+        title = (node.get_text(" ", strip=True) if node else "").strip()
+        if title:
+            break
+
+    if not title:
+        return False
+
+    print_link = soup.select_one("#ctl00_ContentPlaceHolder_htmlform_id_print_xc")
+    print_href = (print_link.get("href", "") if print_link else "").strip()
+    if print_href:
+        return True
+
+    for selector in ("#con_e_1", "#con_e_2", "#con_e_3", "#con_e_4", "#ctl00_ContentPlaceHolder_htmlform_id_note"):
+        node = soup.select_one(selector)
+        if node and node.get_text(" ", strip=True):
+            return True
+    return False
 
 
 def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
@@ -370,15 +413,26 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
         return result
 
     if rule:
-        if rule.name == "假日通" and detect_jrt365_unavailable_shell(raw_html):
-            result.update(
-                {
-                    "category": UNAVAILABLE,
-                    "reason": "假日通 detail shell without content",
-                    "matched_keyword": "",
-                }
-            )
-            return result
+        if rule.name == "假日通":
+            if detect_jrt365_unavailable_shell(raw_html):
+                result.update(
+                    {
+                        "category": UNAVAILABLE,
+                        "reason": "假日通 detail shell without content",
+                        "matched_keyword": "",
+                    }
+                )
+                return result
+
+            if has_jrt365_detail_content(raw_html):
+                result.update(
+                    {
+                        "category": OK,
+                        "reason": "假日通 detail content found",
+                        "matched_keyword": "",
+                    }
+                )
+                return result
 
         rule_negative = match_keyword(text, rule.negative_keywords)
         if rule_negative:
@@ -460,7 +514,10 @@ def load_cache(path: Path) -> dict[str, dict[str, Any]]:
     except Exception:
         return {}
 
-    raw_entries = payload.get("entries") if isinstance(payload, dict) else None
+    if not isinstance(payload, dict) or payload.get("schema_version") != CACHE_SCHEMA_VERSION:
+        return {}
+
+    raw_entries = payload.get("entries")
     if not isinstance(raw_entries, dict):
         return {}
 
@@ -475,6 +532,7 @@ def save_cache(path: Path, entries: dict[str, dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "generated_at": utc_now_iso(),
+        "schema_version": CACHE_SCHEMA_VERSION,
         "entries": dict(sorted(entries.items())),
     }
     with path.open("w", encoding="utf-8") as f:
