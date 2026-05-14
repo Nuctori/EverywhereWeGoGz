@@ -20,7 +20,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python dependencies
-        run: pip install requests
+        run: pip install requests beautifulsoup4 lxml
 
       - name: Refresh availability cache
         run: python scripts/validate_tour_availability.py --input public/data/tours.json --output audit/tour-availability-report.json --cache src/data/tour-availability-cache.json --cache-ttl-hours 0 --sample-failures 0

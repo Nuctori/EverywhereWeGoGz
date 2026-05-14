@@ -35,6 +35,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 import requests
+from bs4 import BeautifulSoup
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -248,6 +249,24 @@ def detect_redirect_problem(original_url: str, final_url: str) -> str:
     return ""
 
 
+def detect_jrt365_unavailable_shell(raw_html: str) -> bool:
+    soup = BeautifulSoup(raw_html, "lxml")
+    selectors = [
+        "#con_e_1",
+        "#con_e_2",
+        "#con_e_3",
+        "#con_e_4",
+        "#ctl00_ContentPlaceHolder_htmlform_id_note",
+    ]
+    texts = []
+    for selector in selectors:
+        node = soup.select_one(selector)
+        if not node:
+            return False
+        texts.append(node.get_text(" ", strip=True))
+    return all(not text for text in texts)
+
+
 def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
     started = time.time()
     rule = find_domain_rule(url)
@@ -292,6 +311,7 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
     response.encoding = response.apparent_encoding or response.encoding
     final_url = response.url
     status_code = response.status_code
+    raw_html = response.text
     text = html_to_text(response.text)
     text_sample = text[:220]
     title_hits_count, title_hits = title_confidence(title, text)
@@ -350,6 +370,16 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
         return result
 
     if rule:
+        if rule.name == "假日通" and detect_jrt365_unavailable_shell(raw_html):
+            result.update(
+                {
+                    "category": UNAVAILABLE,
+                    "reason": "假日通 detail shell without content",
+                    "matched_keyword": "",
+                }
+            )
+            return result
+
         rule_negative = match_keyword(text, rule.negative_keywords)
         if rule_negative:
             result.update(
