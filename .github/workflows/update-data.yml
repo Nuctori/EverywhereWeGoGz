@@ -12,6 +12,7 @@ env:
   DETAIL_FETCH_MODE: cache
   IMAGE_CACHE_MODE: remote
   AVAILABILITY_FILTER: 0
+  JRT365_AVAILABILITY_FILTER: 1
 
 jobs:
   update-and-deploy:

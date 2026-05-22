@@ -40,6 +40,7 @@ RAW_FILE_PRIORITIES = {
     "raw_saihuitong_full.json": 10,
     "raw_gzl_api.json": 10,
 }
+JRT365_HOST_TOKEN = "jrt365.com"
 
 
 def stable_hash(value: str) -> int:
@@ -547,12 +548,7 @@ def unique_availability_jobs(tours):
     return [(url, str(items[0].get("title") or "")) for url, items in grouped.items()]
 
 
-def filter_unavailable_tours(tours):
-    enabled = os.environ.get("AVAILABILITY_FILTER", "1").strip().lower()
-    if enabled in {"0", "false", "no", "off"}:
-        print("[可用性] 已跳过自动下架过滤")
-        return tours
-
+def apply_availability_filter(tours, label="all tours"):
     jobs = unique_availability_jobs(tours)
     if not jobs:
         return tours
@@ -562,7 +558,7 @@ def filter_unavailable_tours(tours):
     cache_path = os.environ.get("AVAILABILITY_CACHE_PATH", str(DEFAULT_CACHE)).strip()
     cache_ttl_hours = float(os.environ.get("AVAILABILITY_CACHE_TTL_HOURS", "24") or "24")
     print(
-        f"[可用性] 开始校验 {len(jobs)} 个唯一 URL，线程数 {workers}，超时 {timeout}s，"
+        f"[可用性] {label}: 开始校验 {len(jobs)} 个唯一 URL，线程数 {workers}，超时 {timeout}s，"
         f"缓存 {cache_path}（TTL {cache_ttl_hours}h）"
     )
 
@@ -622,6 +618,36 @@ def filter_unavailable_tours(tours):
             )
 
     return filtered
+
+
+def is_jrt365_tour(tour):
+    url = str(tour.get("bookingUrl") or "").strip().lower()
+    return JRT365_HOST_TOKEN in url
+
+
+def filter_unavailable_tours(tours):
+    enabled = os.environ.get("AVAILABILITY_FILTER", "1").strip().lower()
+    if enabled in {"0", "false", "no", "off"}:
+        jrt365_filter = os.environ.get("JRT365_AVAILABILITY_FILTER", "0").strip().lower()
+        if jrt365_filter not in {"1", "true", "yes", "on"}:
+            print("[可用性] 已跳过自动下架过滤")
+            return tours
+
+        jrt365_tours = [tour for tour in tours if is_jrt365_tour(tour)]
+        if not jrt365_tours:
+            print("[可用性] 全局过滤已关闭，且没有假日通线路需要单独校验")
+            return tours
+
+        print(f"[可用性] 全局过滤已关闭，仅校验假日通线路 {len(jrt365_tours)} 条")
+        filtered_jrt365 = apply_availability_filter(jrt365_tours, label="JRT365 only")
+        kept_ids = {tour.get("id") for tour in filtered_jrt365}
+        return [
+            tour
+            for tour in tours
+            if not is_jrt365_tour(tour) or tour.get("id") in kept_ids
+        ]
+
+    return apply_availability_filter(tours)
 
 
 def main():
