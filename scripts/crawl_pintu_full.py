@@ -26,7 +26,7 @@ CATS = [
     {"name": "国内游", "tid": "domestic"},
     {"name": "出境游", "tid": "abroad"},
 ]
-MAX_PAGES = 20
+MAX_PAGES = 80
 RETRY_TIMES = 3
 
 

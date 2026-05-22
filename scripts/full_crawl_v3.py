@@ -137,7 +137,7 @@ class PintuSpider:
         {"name": "国内游", "tid": "domestic"},
         {"name": "出境游", "tid": "abroad"},
     ]
-    MAX_PAGES = 10
+    MAX_PAGES = 80
 
     def fetch(self):
         print("[品途] 抓取中...")
@@ -230,7 +230,7 @@ class GdctsSpider:
         "/product/category/index/regionalId_1/8/key/6",
         "/product/category/index/regionalId_1/9/key/7",
     ]
-    MAX_PAGES = 5  # 每个子分类最多5页 (20条/页)
+    MAX_PAGES = 30  # 尽量全量抓取，直到空页停止
 
     def fetch(self):
         print("[广东中旅] 抓取中...")

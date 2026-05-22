@@ -10,6 +10,25 @@ import json
 import os
 import time
 
+def create_webdriver():
+    from selenium import webdriver
+
+    for options_cls, builder in (
+        (webdriver.EdgeOptions, webdriver.Edge),
+        (webdriver.ChromeOptions, webdriver.Chrome),
+    ):
+        options = options_cls()
+        options.add_argument('--headless=new')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-gpu')
+        options.add_argument('--window-size=1440,2400')
+        try:
+            return builder(options=options)
+        except Exception:
+            continue
+    raise RuntimeError("Unable to create webdriver")
+
 
 def extract_days(title):
     m = re.search(r"(\d+)[天日]", title)
@@ -24,15 +43,7 @@ class GzqlxSpider:
     def fetch(self):
         print("[广州去旅行] 全量抓取中...")
         try:
-            from selenium import webdriver
-            from selenium.webdriver.edge.options import Options
-
-            options = Options()
-            options.add_argument('--headless')
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
-
-            driver = webdriver.Edge(options=options)
+            driver = create_webdriver()
             all_items = []
             seen = set()
 
@@ -103,15 +114,7 @@ class BaozoucunSpider:
     def fetch(self):
         print("[暴走村] 全量抓取中...")
         try:
-            from selenium import webdriver
-            from selenium.webdriver.edge.options import Options
-
-            options = Options()
-            options.add_argument('--headless')
-            options.add_argument('--no-sandbox')
-            options.add_argument('--disable-dev-shm-usage')
-
-            driver = webdriver.Edge(options=options)
+            driver = create_webdriver()
             all_items = []
             seen = set()
 

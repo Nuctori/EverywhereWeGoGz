@@ -7,22 +7,20 @@ on:
   # 手动触发
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  DETAIL_FETCH_MODE: cache
+  IMAGE_CACHE_MODE: remote
+  AVAILABILITY_FILTER: 0
+
 jobs:
   update-and-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pages: write
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -30,18 +28,23 @@ jobs:
           python-version: '3.11'
 
       - name: Install Python dependencies
-        run: pip install requests beautifulsoup4 lxml
+        run: pip install requests beautifulsoup4 lxml selenium
 
-      - name: Install Node dependencies
-        run: npm ci
+      - name: Run full source crawls
+        run: |
+          python scripts/crawl_jrt365_full.py
+          python scripts/crawl_saihuitong_full.py
+          python scripts/crawl_pintu_full.py
+          python scripts/crawl_gzl_api.py
+          python scripts/full_crawl_v3.py
 
-      - name: Run crawler
-        run: python scripts/crawler.py
+      - name: Merge crawled data
+        run: python scripts/merge_data.py
 
       - name: Check if data changed
         id: check_changes
         run: |
-          git add src/data/tours.ts
+          git add src/data/tours.ts public/data/tours.json src/data/raw_jrt365_full.json src/data/raw_saihuitong_full.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/tour-availability-cache.json
           if git diff --cached --quiet; then
             echo "Data unchanged, skipping build and deploy"
             echo "changed=false" >> $GITHUB_OUTPUT
@@ -49,12 +52,6 @@ jobs:
             echo "Data changed, proceeding with build and deploy"
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
-
-      - name: Build
-        if: steps.check_changes.outputs.changed == 'true'
-        run: npm run build
-        env:
-          APP_BASE: EverywhereWeGoGz
 
       - name: Commit data changes
         if: steps.check_changes.outputs.changed == 'true'
@@ -64,13 +61,3 @@ jobs:
           git commit -m "chore: update tour data [$(date +%Y-%m-%d)]"
           git push
         continue-on-error: true
-
-      - name: Upload artifact
-        if: steps.check_changes.outputs.changed == 'true'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-
-      - name: Deploy to GitHub Pages
-        if: steps.check_changes.outputs.changed == 'true'
-        uses: actions/deploy-pages@v4

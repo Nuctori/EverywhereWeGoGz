@@ -34,7 +34,7 @@ def fetch():
         "/product/category/index/regionalId_1/8/key/6",
         "/product/category/index/regionalId_1/9/key/7",
     ]
-    MAX_PAGES = 5
+    MAX_PAGES = 30
     
     all_items = []
     seen = set()

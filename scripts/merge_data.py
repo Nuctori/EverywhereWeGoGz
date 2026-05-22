@@ -50,6 +50,10 @@ def normalize_image_path(url: str, source: str) -> str:
     if not url:
         return url
 
+    image_cache_mode = os.environ.get("IMAGE_CACHE_MODE", "download").strip().lower()
+    if image_cache_mode in {"remote", "skip", "off"}:
+        return url
+
     parsed = urlparse(url)
     if parsed.scheme not in {'http', 'https'}:
         return url
@@ -490,6 +494,49 @@ def extract_existing_detail(item):
     }
 
 
+def load_detail_results(deduped, existing_tours):
+    detail_mode = os.environ.get("DETAIL_FETCH_MODE", "fetch").strip().lower()
+    detail_results = {}
+
+    if detail_mode in {"cache", "cached", "existing"}:
+        print(f"[详情] 使用已有 tours.json 详情缓存，共 {len(existing_tours)} 条")
+        for raw in deduped:
+            key = make_tour_key(raw)
+            existing = existing_tours.get(key)
+            if existing:
+                detail_results[key] = extract_existing_detail(existing)
+        return detail_results
+
+    if detail_mode in {"off", "skip", "none"}:
+        print("[详情] 已禁用远程详情抓取")
+        return detail_results
+
+    detail_workers = max(4, min(16, int(os.environ.get("DETAIL_WORKERS", "10") or "10")))
+    print(f"[详情] 开始抓取 {len(deduped)} 条，线程数 {detail_workers}")
+    with ThreadPoolExecutor(max_workers=detail_workers) as executor:
+        future_map = {
+            executor.submit(fetch_detail_data, raw): make_tour_key(raw)
+            for raw in deduped
+        }
+        total = len(future_map)
+        for idx, future in enumerate(as_completed(future_map), 1):
+            key = future_map[future]
+            try:
+                detail = future.result() or empty_detail()
+            except Exception as exc:
+                print(f"[详情] {key} -> {exc}")
+                detail = empty_detail()
+            if not detail_has_content(detail) and key in existing_tours:
+                existing_detail = extract_existing_detail(existing_tours[key])
+                if detail_has_content(existing_detail):
+                    detail = existing_detail
+            detail_results[key] = detail
+            if idx % 50 == 0 or idx == total:
+                print(f"[详情] {idx}/{total}")
+
+    return detail_results
+
+
 def unique_availability_jobs(tours):
     grouped = {}
     for tour in tours:
@@ -674,29 +721,7 @@ def main():
     deduped = [r for r in deduped if r.get('price', 0) > 0 and len(r.get('title', '')) > 5]
     print(f"[过滤] 有效数据: {len(deduped)}条")
 
-    detail_results = {}
-    detail_workers = max(4, min(16, int(os.environ.get("DETAIL_WORKERS", "10") or "10")))
-    print(f"[详情] 开始抓取 {len(deduped)} 条，线程数 {detail_workers}")
-    with ThreadPoolExecutor(max_workers=detail_workers) as executor:
-        future_map = {
-            executor.submit(fetch_detail_data, raw): make_tour_key(raw)
-            for raw in deduped
-        }
-        total = len(future_map)
-        for idx, future in enumerate(as_completed(future_map), 1):
-            key = future_map[future]
-            try:
-                detail = future.result() or empty_detail()
-            except Exception as exc:
-                print(f"[详情] {key} -> {exc}")
-                detail = empty_detail()
-            if not detail_has_content(detail) and key in existing_tours:
-                existing_detail = extract_existing_detail(existing_tours[key])
-                if detail_has_content(existing_detail):
-                    detail = existing_detail
-            detail_results[key] = detail
-            if idx % 50 == 0 or idx == total:
-                print(f"[详情] {idx}/{total}")
+    detail_results = load_detail_results(deduped, existing_tours)
 
     # 转换为前端格式
     tours = []
