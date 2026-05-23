@@ -36,9 +36,7 @@ function formatDate(dateStr: string | undefined): string {
 export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps) {
   const hasImage = tour.images && tour.images.length > 0;
   const rawImageSrc = hasImage ? tour.images[0] : getFallbackImage(tour.title);
-  const imageSrc = resolveAssetUrl(
-    rawImageSrc.startsWith('http://') ? rawImageSrc.replace('http://', 'https://') : rawImageSrc,
-  );
+  const imageSrc = resolveAssetUrl(rawImageSrc);
   const tags = tour.tags?.slice(0, 2) || [];
   const hasReliableSingleSupplement = Boolean(tour.singleSupplementNote?.trim());
 

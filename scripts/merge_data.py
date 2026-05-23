@@ -52,11 +52,11 @@ def normalize_image_path(url: str, source: str) -> str:
         return url
 
     image_cache_mode = os.environ.get("IMAGE_CACHE_MODE", "download").strip().lower()
-    if image_cache_mode in {"remote", "skip", "off"}:
-        return url
 
     parsed = urlparse(url)
     if parsed.scheme not in {'http', 'https'}:
+        return url
+    if image_cache_mode in {"remote", "skip", "off"} and parsed.scheme == 'https':
         return url
     ext = os.path.splitext(parsed.path)[1].lower()
     if ext not in IMAGE_EXTENSIONS:
