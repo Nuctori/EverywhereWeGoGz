@@ -43,14 +43,17 @@ import { sources, destinations, themes } from '@/data/tours';
 
 declare const __DATA_VERSION__: string;
 
+function getDataUrl(path: string) {
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  return `${baseUrl}data/${path}?v=${encodeURIComponent(__DATA_VERSION__ || Date.now().toString())}`;
+}
+
 function useToursData() {
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const baseUrl = import.meta.env.BASE_URL || '/';
-    const dataUrl = `${baseUrl}data/tours.json?v=${encodeURIComponent(__DATA_VERSION__ || Date.now().toString())}`;
-    fetch(dataUrl, { cache: 'no-store' })
+    fetch(getDataUrl('tours-list.json'))
       .then((r) => r.json())
       .then((data) => {
         setTours(data);
@@ -63,6 +66,47 @@ function useToursData() {
   }, []);
 
   return { tours, loading };
+}
+
+function useTourDetail() {
+  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
+  const [loadingDetailId, setLoadingDetailId] = useState<string | null>(null);
+  const detailCacheRef = useRef<Record<string, Partial<Tour>>>({});
+
+  const selectTour = useCallback((tour: Tour) => {
+    setSelectedTour(tour);
+
+    if (detailCacheRef.current[tour.id]) {
+      setSelectedTour({ ...tour, ...detailCacheRef.current[tour.id] });
+      return;
+    }
+
+    setLoadingDetailId(tour.id);
+    fetch(getDataUrl(`tour-details/${tour.id}.json`))
+      .then((r) => {
+        if (!r.ok) throw new Error(`Failed to load tour detail: ${r.status}`);
+        return r.json();
+      })
+      .then((detail) => {
+        detailCacheRef.current[tour.id] = detail;
+        setSelectedTour((current) =>
+          current?.id === tour.id ? { ...current, ...detail } : current,
+        );
+      })
+      .catch(() => {
+        detailCacheRef.current[tour.id] = {};
+      })
+      .finally(() => {
+        setLoadingDetailId((current) => (current === tour.id ? null : current));
+      });
+  }, []);
+
+  return {
+    selectedTour,
+    detailLoading: Boolean(selectedTour && loadingDetailId === selectedTour.id),
+    selectTour,
+    clearSelectedTour: () => setSelectedTour(null),
+  };
 }
 
 function computePriceStats(tours: Tour[]) {
@@ -152,7 +196,7 @@ interface TourListProps {
 export function TourList({ searchQuery }: TourListProps) {
   const { tours: localTours, loading } = useToursData();
   const isMobile = useIsMobile();
-  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
+  const { selectedTour, detailLoading, selectTour, clearSelectedTour } = useTourDetail();
   const [showFilters, setShowFilters] = useState(true);
   const [displayCount, setDisplayCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -390,7 +434,7 @@ export function TourList({ searchQuery }: TourListProps) {
     priceRange[0] > 0 || priceRange[1] < maxPriceAll - 1,
   ].filter(Boolean).length;
 
-  const handleCardClick = (tour: Tour) => setSelectedTour(tour);
+  const handleCardClick = (tour: Tour) => selectTour(tour);
 
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
@@ -995,7 +1039,7 @@ export function TourList({ searchQuery }: TourListProps) {
         </>
       )}
 
-      <TourDetailModal tour={selectedTour} onClose={() => setSelectedTour(null)} />
+      <TourDetailModal tour={selectedTour} loading={detailLoading} onClose={clearSelectedTour} />
     </section>
   );
 }

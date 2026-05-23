@@ -807,7 +807,10 @@ export const tours: Tour[] = [];
     os.makedirs(os.path.dirname(json_path), exist_ok=True)
 
     with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(tours_clean, f, ensure_ascii=False, indent=2)
+        json.dump(tours_clean, f, ensure_ascii=False, separators=(',', ':'))
+    split_script = os.path.abspath(os.path.join(os.path.dirname(__file__), "split_tour_data.mjs"))
+    if os.path.exists(split_script):
+        os.system(f'node "{split_script}"')
     print(f"[保存] tours.json -> {json_path}")
     print(f"[文件大小] {os.path.getsize(json_path) / 1024:.1f} KB")
 

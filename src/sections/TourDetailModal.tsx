@@ -31,6 +31,7 @@ import {
 
 interface TourDetailModalProps {
   tour: Tour | null;
+  loading?: boolean;
   onClose: () => void;
 }
 
@@ -91,7 +92,7 @@ function getReliablePolicy(value: string | undefined) {
   return normalized && !LEGACY_POLICY_PLACEHOLDERS.has(normalized) ? normalized : '';
 }
 
-export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
+export function TourDetailModal({ tour, loading = false, onClose }: TourDetailModalProps) {
   const isMobile = useIsMobile();
   if (!tour) return null;
   const heroImage = resolveAssetUrl(
@@ -254,6 +255,11 @@ export function TourDetailModal({ tour, onClose }: TourDetailModalProps) {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
+        {loading && (
+          <div className="mb-3 rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-500">
+            正在加载详情...
+          </div>
+        )}
         {/* 移动端Tab可滚动 */}
         <TabsList className="grid w-full grid-cols-4 h-auto">
           <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">概览</TabsTrigger>

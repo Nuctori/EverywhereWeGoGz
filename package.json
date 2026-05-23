@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc -b",
-    "build": "tsc -b && vite build",
+    "build": "npm run data:split && tsc -b && vite build",
+    "data:split": "node scripts/split_tour_data.mjs",
     "deploy:workers": "npm run build && wrangler deploy",
     "audit:availability": "python scripts/validate_tour_availability.py",
     "audit:availability:refresh": "python scripts/validate_tour_availability.py --cache-ttl-hours 0 --sample-failures 0",
