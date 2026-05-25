@@ -35,6 +35,7 @@ IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'}
 RAW_FILE_PRIORITIES = {
     "raw_jrt365_full.json": 10,
     "raw_jrt365.json": 20,
+    "raw_kanghui.json": 30,
     "raw_http_full.json": 10,
     "raw_pintu_full.json": 10,
     "raw_saihuitong_full.json": 10,
@@ -824,6 +825,7 @@ def main():
     raw_files = [
         "raw_jrt365_full.json",
         "raw_jrt365.json",
+        "raw_kanghui.json",
         "raw_http_full.json",
         "raw_pintu_full.json",
         "raw_saihuitong_full.json",
