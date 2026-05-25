@@ -24,7 +24,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
 
           <div className="relative max-w-4xl">
             <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-stone-400">
-              广州出发 · 旅行团数据库
+              老广去边度 · 广州出发
             </p>
             <h1 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-stone-950 sm:text-5xl">
               看线路，直接筛。

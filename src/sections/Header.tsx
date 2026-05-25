@@ -14,7 +14,7 @@ export function Header() {
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="truncate text-sm font-semibold tracking-tight text-stone-900">
-                    旅比价
+                    老广去边度
                   </span>
                 </div>
               </div>

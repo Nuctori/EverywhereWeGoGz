@@ -189,6 +189,67 @@ const DEFAULT_FILTERS: FilterState = {
   sortBy: 'hot',
 };
 
+const RECOMMENDED_TITLE_HINTS = [
+  '已成团',
+  '即将成团',
+  '热卖',
+  '爆款',
+  '首发',
+  '限时',
+  '甄选',
+  '精选',
+];
+
+function getDaysUntil(dateString: string) {
+  if (!dateString) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(dateString);
+  if (Number.isNaN(target.getTime())) return null;
+  target.setHours(0, 0, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / 86400000);
+}
+
+function getRecommendationScore(tour: Tour) {
+  let score = 0;
+
+  if (RECOMMENDED_TITLE_HINTS.some((token) => tour.title.includes(token))) {
+    score += 4;
+  }
+
+  score += Math.min(tour.departureDates?.length ?? 0, 4);
+  score += Math.min(tour.hotDepartureDates?.length ?? 0, 2);
+
+  const daysUntil = getDaysUntil(tour.departureDate);
+  if (daysUntil !== null) {
+    if (daysUntil < 0) {
+      score -= 1;
+    } else if (daysUntil <= 7) {
+      score += 3;
+    } else if (daysUntil <= 30) {
+      score += 2;
+    } else if (daysUntil <= 90) {
+      score += 1;
+    }
+  }
+
+  if (tour.isNew) {
+    score += 1;
+  }
+
+  return score;
+}
+
+function compareRecommended(a: Tour, b: Tour) {
+  return (
+    getRecommendationScore(b) - getRecommendationScore(a) ||
+    (b.isHot ? 1 : 0) - (a.isHot ? 1 : 0) ||
+    (b.hotDepartureDates?.length ?? 0) - (a.hotDepartureDates?.length ?? 0) ||
+    (b.departureDates?.length ?? 0) - (a.departureDates?.length ?? 0) ||
+    a.price - b.price
+  );
+}
+
 interface TourListProps {
   searchQuery: string;
 }
@@ -370,10 +431,7 @@ export function TourList({ searchQuery }: TourListProps) {
         result.sort((a, b) => b.price - a.price);
         break;
       case 'hot':
-        result.sort(
-          (a, b) =>
-            (b.isHot ? 1 : 0) - (a.isHot ? 1 : 0) || b.reviewCount - a.reviewCount,
-        );
+        result.sort(compareRecommended);
         break;
       case 'new':
         result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
@@ -889,7 +947,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 <SelectItem value="hot">
                   <span className="flex items-center gap-2">
                     <Flame className="w-3.5 h-3.5 text-orange-500" />
-                    热度优先
+                    推荐优先
                   </span>
                 </SelectItem>
                 <SelectItem value="price_asc">价格由低到高</SelectItem>

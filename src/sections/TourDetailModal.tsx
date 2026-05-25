@@ -142,7 +142,7 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
       <div className="flex items-center gap-2 mb-2 flex-wrap">
         {tour.isHot && (
           <Badge variant="outline" className="gap-1 border-stone-200 bg-white text-xs text-stone-600">
-            <Flame className="w-3 h-3" />热度较高
+            <Flame className="w-3 h-3" />推荐线路
           </Badge>
         )}
         {tour.isNew && (

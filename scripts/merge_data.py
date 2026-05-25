@@ -226,6 +226,67 @@ def guess_leisure_level(title: str, days: int, theme: str) -> str:
     return 'easy'
 
 
+RECOMMENDED_TITLE_HINTS = (
+    "已成团",
+    "即将成团",
+    "热卖",
+    "爆款",
+    "首发",
+    "限时",
+    "甄选",
+    "精选",
+)
+
+NEW_TITLE_HINTS = (
+    "新品",
+    "新上线",
+    "全新上线",
+    "首发",
+    "新开",
+)
+
+
+def is_new_tour(title: str) -> bool:
+    return any(token in title for token in NEW_TITLE_HINTS)
+
+
+def compute_recommendation_score(
+    title: str,
+    departure_date: str,
+    departure_dates: list[str],
+    detail: dict,
+) -> int:
+    score = 0
+
+    if any(token in title for token in RECOMMENDED_TITLE_HINTS):
+        score += 4
+
+    score += min(len(departure_dates or []), 4)
+
+    if departure_date:
+        try:
+            target = datetime.strptime(departure_date, "%Y-%m-%d").date()
+            today = datetime.now().date()
+            days_until = (target - today).days
+            if days_until < 0:
+                score -= 1
+            elif days_until <= 7:
+                score += 3
+            elif days_until <= 30:
+                score += 2
+            elif days_until <= 90:
+                score += 1
+        except ValueError:
+            pass
+
+    if detail.get("highlights"):
+        score += 1
+    if detail.get("itinerary"):
+        score += 1
+
+    return score
+
+
 def raw_to_tour_legacy(raw, id_counter, detail=None):
     return raw_to_tour(raw, id_counter, detail=detail)
     source = raw.get('source', '未知')
@@ -392,6 +453,14 @@ def raw_to_tour(raw, id_counter, detail=None):
     else:
         return_date = ""
 
+    recommendation_score = compute_recommendation_score(
+        title,
+        departure_date,
+        departure_dates,
+        detail,
+    )
+    is_new = is_new_tour(title)
+
     return {
         "id": f"tour_{id_counter}",
         "title": title,
@@ -430,8 +499,8 @@ def raw_to_tour(raw, id_counter, detail=None):
         "bookingUrl": raw.get('url', '#'),
         "images": images,
         "tags": [theme, "纯玩", "品质"],
-        "isHot": False,
-        "isNew": False,
+        "isHot": recommendation_score >= 5,
+        "isNew": is_new,
         "isFlashSale": False,
         "discountRate": None,
         "groupSize": "30人常规团",

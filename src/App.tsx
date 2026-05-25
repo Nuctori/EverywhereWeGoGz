@@ -61,7 +61,7 @@ function App() {
           <div className="mx-auto flex max-w-7xl flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="text-xs leading-6 text-stone-400 md:text-right">
               <p>覆盖：假日通 · 广州去旅行 · 康辉 · 暴走村 · 广之旅 · 广东中旅 · 品途</p>
-              <p>© 2024 旅比价 · 让线路信息更好读</p>
+              <p>© 2024 老广去边度 · 让线路信息更好读</p>
             </div>
           </div>
         </footer>

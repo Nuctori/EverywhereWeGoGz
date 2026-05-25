@@ -24,6 +24,12 @@ def safe_request(url, timeout=None):
     try:
         resp = requests.get(url, headers=HEADERS, timeout=t)
         resp.raise_for_status()
+        encoding = (resp.encoding or "").lower()
+        apparent = (resp.apparent_encoding or "").lower()
+        if not encoding or encoding == "iso-8859-1":
+            resp.encoding = apparent or "utf-8"
+        elif apparent and apparent != encoding and apparent in {"utf-8", "gbk", "gb18030"}:
+            resp.encoding = apparent
         return resp
     except Exception as e:
         print(f"  [失败] {url} -> {e}")
@@ -67,7 +73,6 @@ class KanghuiSpider:
                 if not resp:
                     continue
 
-                resp.encoding = 'gbk'
                 soup = BeautifulSoup(resp.text, "lxml")
                 
                 # 使用div class=product j_item
