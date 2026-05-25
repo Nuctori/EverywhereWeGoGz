@@ -401,17 +401,6 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
         )
         return result
 
-    global_negative = match_keyword(text, GLOBAL_NEGATIVE_KEYWORDS)
-    if global_negative:
-        result.update(
-            {
-                "category": UNAVAILABLE,
-                "reason": "matched negative keyword",
-                "matched_keyword": global_negative,
-            }
-        )
-        return result
-
     if rule:
         if rule.name == "假日通":
             if detect_jrt365_unavailable_shell(raw_html):
@@ -430,6 +419,21 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
                         "category": OK,
                         "reason": "假日通 detail content found",
                         "matched_keyword": "",
+                    }
+                )
+                return result
+
+        if any(fragment in final_url.lower() for fragment in ("gzl.cn", "gzl.com.cn")):
+            rule_positive = match_keyword(text, rule.positive_markers)
+            if rule_positive:
+                reason = f"{rule.name} detail markers found"
+                if title_hits_count > 0:
+                    reason += " + title tokens matched"
+                result.update(
+                    {
+                        "category": OK,
+                        "reason": reason,
+                        "matched_keyword": rule_positive,
                     }
                 )
                 return result
@@ -457,6 +461,18 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
             )
             return result
 
+    global_negative = match_keyword(text, GLOBAL_NEGATIVE_KEYWORDS)
+    if global_negative:
+        result.update(
+            {
+                "category": UNAVAILABLE,
+                "reason": "matched negative keyword",
+                "matched_keyword": global_negative,
+            }
+        )
+        return result
+
+    if rule:
         rule_positive = match_keyword(text, rule.positive_markers)
         if rule_positive:
             reason = f"{rule.name} detail markers found"

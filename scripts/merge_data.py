@@ -545,6 +545,7 @@ def raw_to_tour(raw, id_counter, detail=None):
         "rating": 0,
         "reviewCount": 0,
         "bookingUrl": raw.get('url', '#'),
+        "url": raw.get('url', '#'),
         "images": images,
         "tags": [theme, "纯玩", "品质"],
         "isHot": recommendation_score >= 5,
