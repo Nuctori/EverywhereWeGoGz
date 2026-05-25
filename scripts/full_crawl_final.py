@@ -11,6 +11,10 @@ import time
 import os
 from datetime import datetime
 from bs4 import BeautifulSoup
+try:
+    from crawl_gzl_api import fetch as fetch_gzl_api
+except ImportError:
+    from scripts.crawl_gzl_api import fetch as fetch_gzl_api
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
@@ -288,6 +292,8 @@ class GzlSpider:
     PATHS = ["/abroad/abroad.html", "/around/guangdong.html", "/domestic/domestic.html", "/free/free.html"]
 
     def fetch(self):
+        print("[GZL] fetching via API...")
+        return fetch_gzl_api()
         print("[广之旅] 抓取中...")
         items = []
         seen = set()
@@ -348,7 +354,7 @@ def main():
     print("全量HTTP站点爬虫 - 最终版")
     print("=" * 60)
     all_raw = []
-    spiders = [KanghuiSpider(), PintuSpider(), GdctsSpider(), GzlSpider()]
+    spiders = [KanghuiSpider(), PintuSpider(), GdctsSpider()]
     for spider in spiders:
         try:
             items = spider.fetch()

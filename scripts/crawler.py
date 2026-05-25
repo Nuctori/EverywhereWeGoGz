@@ -28,6 +28,10 @@ from datetime import datetime, timedelta
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 try:
+    from crawl_gzl_api import fetch as fetch_gzl_api
+except ImportError:
+    from scripts.crawl_gzl_api import fetch as fetch_gzl_api
+try:
     from tour_blacklist import is_blacklisted_title
 except ImportError:
     from scripts.tour_blacklist import is_blacklisted_title
@@ -701,7 +705,8 @@ class GzlSpider:
     PATHS = ["/abroad/abroad.html", "/around/guangdong.html", "/domestic/domestic.html", "/free/free.html"]
 
     def fetch(self):
-        print("[广之旅] 抓取中...")
+        print("[GZL] fetching via API...")
+        return fetch_gzl_api()
         all_items = []
         for path in self.PATHS:
             url = self.BASE_URL + path

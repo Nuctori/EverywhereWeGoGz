@@ -12,6 +12,10 @@ import time
 import os
 from datetime import datetime
 from bs4 import BeautifulSoup
+try:
+    from crawl_gzl_api import fetch as fetch_gzl_api
+except ImportError:
+    from scripts.crawl_gzl_api import fetch as fetch_gzl_api
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -300,6 +304,8 @@ class GzlSpider:
     BASE_URL = "http://nn.gzl.cn"
     
     def fetch(self):
+        print("[GZL] fetching via API...")
+        return fetch_gzl_api()
         print("[广之旅] 抓取中...")
         items = []
         seen = set()
@@ -354,7 +360,6 @@ def main():
         KanghuiSpider(),
         PintuSpider(),
         GdctsSpider(),
-        GzlSpider(),
     ]
     
     for spider in spiders:
