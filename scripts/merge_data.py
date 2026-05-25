@@ -165,6 +165,51 @@ def extract_title_dates(title: str):
     return dates
 
 
+def normalize_departure_dates(values):
+    normalized = []
+    seen = set()
+    for value in values or []:
+        if not value:
+            continue
+        text = str(value).strip()
+        try:
+            parsed = datetime.strptime(text, "%Y-%m-%d")
+        except ValueError:
+            continue
+        iso_value = parsed.strftime("%Y-%m-%d")
+        if iso_value in seen:
+            continue
+        seen.add(iso_value)
+        normalized.append(iso_value)
+    normalized.sort()
+    return normalized
+
+
+def first_upcoming_date(dates):
+    if not dates:
+        return ""
+    today = datetime.now().date()
+    for value in dates:
+        try:
+            if datetime.strptime(value, "%Y-%m-%d").date() >= today:
+                return value
+        except ValueError:
+            continue
+    return dates[0]
+
+
+def extract_structured_departure_dates(raw):
+    candidates = []
+    if raw.get("departureDates"):
+        candidates.extend(raw.get("departureDates") or [])
+    if raw.get("departureDaysList"):
+        candidates.extend(raw.get("departureDaysList") or [])
+    if raw.get("departureDate"):
+        candidates.append(raw.get("departureDate"))
+    dates = normalize_departure_dates(candidates)
+    return first_upcoming_date(dates), dates
+
+
 def extract_days(title):
     m = re.search(r"(\d+(?:\.\d+)?)\s*[天日]", title)
     if m:
@@ -436,13 +481,15 @@ def raw_to_tour(raw, id_counter, detail=None):
     if not images:
         images = [ensure_placeholder_image(source)]
 
-    parsed_dates = extract_title_dates(title)
-    if parsed_dates:
-        departure_date = parsed_dates[0]
-        departure_dates = parsed_dates
-    else:
-        departure_date = ""
-        departure_dates = []
+    departure_date, departure_dates = extract_structured_departure_dates(raw)
+    if not departure_dates:
+        parsed_dates = extract_title_dates(title)
+        if parsed_dates:
+            departure_dates = parsed_dates
+            departure_date = first_upcoming_date(parsed_dates)
+        else:
+            departure_date = ""
+            departure_dates = []
 
     single_supplement_amount = detail.get("singleSupplementAmount")
     single_supplement = int(single_supplement_amount) if single_supplement_amount is not None else 0
@@ -510,6 +557,7 @@ def raw_to_tour(raw, id_counter, detail=None):
         "difficulty": "轻松",
         "season": "全年",
         "language": "中文导游",
+        "sourceId": str(raw.get("sourceId") or raw.get("pdId") or raw.get("prodcode") or raw.get("groupno") or ""),
         "departureDates": departure_dates,
         "hotDepartureDates": departure_dates[:4],
         "createdAt": datetime.now().isoformat(),
@@ -526,6 +574,9 @@ def clean_nulls(obj):
 
 
 def make_tour_key(item):
+    source_id = str(item.get("sourceId") or item.get("pdId") or item.get("prodcode") or item.get("groupno") or "").strip()
+    if source_id:
+        return f"{item.get('source', '')}|id:{source_id}"
     source = item.get("source", "")
     title = item.get("title", "")
     price = item.get("price", 0)
@@ -539,6 +590,8 @@ def make_tour_key(item):
 def score_raw_candidate(item):
     return (
         int(item.get("_merge_priority", 0) or 0),
+        min(len(normalize_departure_dates(item.get("departureDates") or item.get("departureDaysList") or [])), 32),
+        1 if str(item.get("departureDate") or "").strip() else 0,
         1 if str(item.get("url") or "").strip() else 0,
         1 if str(item.get("img") or "").strip() else 0,
     )
@@ -805,7 +858,7 @@ def main():
     # 去重
     seen = {}
     for it in all_raw:
-        key = it.get("source", "") + "|" + it.get("title", "") + "|" + str(it.get("price", ""))
+        key = make_tour_key(it)
         previous = seen.get(key)
         if previous is None or prefer_raw_candidate(previous, it):
             seen[key] = it

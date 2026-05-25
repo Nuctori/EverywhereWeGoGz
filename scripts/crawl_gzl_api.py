@@ -7,6 +7,7 @@
 import requests
 import json
 import os
+from datetime import datetime
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -53,6 +54,28 @@ def extract_days(title):
     if m:
         return int(m.group(1))
     return 0
+
+
+def normalize_departure_dates(values):
+    if not values:
+        return []
+    normalized = []
+    seen = set()
+    for value in values:
+        if not value:
+            continue
+        text = str(value).strip()
+        try:
+            parsed = datetime.strptime(text, "%Y-%m-%d")
+        except ValueError:
+            continue
+        iso_value = parsed.strftime("%Y-%m-%d")
+        if iso_value in seen:
+            continue
+        seen.add(iso_value)
+        normalized.append(iso_value)
+    normalized.sort()
+    return normalized
 
 
 def get_session():
@@ -112,18 +135,23 @@ def parse_product(product):
     days = product.get("travelDays", 0)
     pd_id = product.get("pdId", "")
     ptype = product.get("type", "")
+    departure_dates = normalize_departure_dates(product.get("departureDaysList", []))
     
     # 构建URL
-    url = ""
-    if ptype == "PRODUCTGROUP":
+    url = str(product.get("url", "") or "").strip()
+    if url.startswith("//"):
+        url = f"http:{url}"
+    elif url.startswith("/"):
+        url = f"{BASE_URL}{url}"
+    if not url and ptype == "PRODUCTGROUP":
         url = f"{BASE_URL}/domestic/{pd_id}.html"
-    elif ptype == "FREE_TOUR":
+    elif not url and ptype == "FREE_TOUR":
         url = f"{BASE_URL}/freetour/{pd_id}.html"
-    elif ptype == "SCENIC":
+    elif not url and ptype == "SCENIC":
         url = f"{BASE_URL}/tickets/{pd_id}.html"
-    elif ptype == "HOTEL":
+    elif not url and ptype == "HOTEL":
         url = f"{BASE_URL}/hotel/{pd_id}.html"
-    else:
+    elif not url:
         url = f"{BASE_URL}/domestic/{pd_id}.html"
     
     # 图片
@@ -132,10 +160,14 @@ def parse_product(product):
     
     item = {
         "source": "广之旅",
+        "sourceId": pd_id,
+        "productType": ptype,
         "title": title,
         "price": price,
         "url": url,
         "days": days or extract_days(title),
+        "departureDates": departure_dates,
+        "departureDate": departure_dates[0] if departure_dates else "",
     }
     if img_url:
         item["img"] = img_url

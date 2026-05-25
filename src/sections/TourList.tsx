@@ -210,6 +210,14 @@ function getDaysUntil(dateString: string) {
   return Math.round((target.getTime() - today.getTime()) / 86400000);
 }
 
+function getEffectiveDepartureDates(tour: Tour) {
+  const dates = (tour.departureDates || []).filter(Boolean);
+  if (dates.length > 0) {
+    return dates;
+  }
+  return tour.departureDate ? [tour.departureDate] : [];
+}
+
 function getRecommendationScore(tour: Tour) {
   let score = 0;
 
@@ -382,27 +390,40 @@ export function TourList({ searchQuery }: TourListProps) {
       }
 
       if (dateFilter) {
-        if (!tour.departureDate) {
-          return false;
-        }
-        if (dateFilter.mode === 'exact' && tour.departureDate !== dateFilter.date) {
-          return false;
-        }
-
-        if (dateFilter.mode === 'within' && tour.departureDate > dateFilter.date) {
+        const candidateDates = getEffectiveDepartureDates(tour);
+        if (candidateDates.length === 0) {
           return false;
         }
 
-        if (dateFilter.mode === 'after' && tour.departureDate < dateFilter.date) {
+        if (dateFilter.mode === 'exact' && !candidateDates.includes(dateFilter.date)) {
+          return false;
+        }
+
+        if (
+          dateFilter.mode === 'within' &&
+          !candidateDates.some((date) => date <= dateFilter.date)
+        ) {
+          return false;
+        }
+
+        if (
+          dateFilter.mode === 'after' &&
+          !candidateDates.some((date) => date >= dateFilter.date)
+        ) {
           return false;
         }
 
         if (dateFilter.mode === 'range') {
-          if (dateFilter.start && tour.departureDate < dateFilter.start) {
-            return false;
-          }
-
-          if (dateFilter.end && tour.departureDate > dateFilter.end) {
+          const inRange = candidateDates.some((date) => {
+            if (dateFilter.start && date < dateFilter.start) {
+              return false;
+            }
+            if (dateFilter.end && date > dateFilter.end) {
+              return false;
+            }
+            return true;
+          });
+          if (!inRange) {
             return false;
           }
         }
