@@ -100,6 +100,20 @@ export interface AiRecommendationResult {
   source: 'local-preview' | 'ai-api';
 }
 
+export interface AiProviderConfig {
+  apiKey: string;
+  baseUrl: string;
+  model: string;
+}
+
+export interface AiWeatherContext {
+  destination: string;
+  travelDate?: string;
+  forecastSummary: string;
+  seasonAdvice: string[];
+  source: 'open-meteo' | 'seasonal-rule' | 'none';
+}
+
 export type AiRecommendationCandidate = Pick<
   Tour,
   | 'id'
@@ -130,4 +144,5 @@ export interface AiRecommendationRequest {
   candidateTours: AiRecommendationCandidate[];
   activeFilters: FilterState;
   searchQuery: string;
+  aiConfig?: Partial<AiProviderConfig>;
 }

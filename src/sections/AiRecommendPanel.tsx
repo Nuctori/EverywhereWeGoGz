@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Bot, Loader2, MessageCircle, RotateCcw, Send, Sparkles, X } from 'lucide-react';
+import { Bot, Eye, EyeOff, Loader2, MessageCircle, RotateCcw, Send, Settings, Sparkles, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -14,10 +14,17 @@ import type {
   AiRecommendationCandidate,
   AiRecommendationMessage,
   AiRecommendationResult,
+  AiProviderConfig,
   FilterState,
 } from '@/types/tour';
-import { requestAiRecommendations } from '@/lib/ai-recommendation';
+import {
+  clearAiProviderConfig,
+  getAiProviderConfig,
+  requestAiRecommendations,
+  saveAiProviderConfig,
+} from '@/lib/ai-recommendation';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 
 interface AiRecommendPanelProps {
   tours: AiRecommendationCandidate[];
@@ -53,6 +60,9 @@ export function AiRecommendPanel({
 }: AiRecommendPanelProps) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
+  const [showSettings, setShowSettings] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [aiConfig, setAiConfig] = useState<Partial<AiProviderConfig>>(() => getAiProviderConfig());
   const [messages, setMessages] = useState<AiRecommendationMessage[]>([
     createMessage('assistant', '告诉我预算、天数、想去哪里、同行人群或行程强度，我会先把合适线路挑出来。'),
   ]);
@@ -86,6 +96,7 @@ export function AiRecommendPanel({
         candidateTours: tours,
         activeFilters,
         searchQuery,
+        aiConfig,
       });
       onResultChange(nextResult);
       setMessages((current) => [
@@ -107,6 +118,23 @@ export function AiRecommendPanel({
       createMessage('assistant', '已清空上一轮结果。你可以重新描述这次想怎么出行。'),
     ]);
     setInput('');
+  };
+
+  const saveSettings = () => {
+    saveAiProviderConfig(aiConfig);
+    setMessages((current) => [
+      ...current,
+      createMessage('assistant', 'AI 接口配置已保存。本轮开始会优先使用你的自定义地址、模型和 Key。'),
+    ]);
+  };
+
+  const clearSettings = () => {
+    clearAiProviderConfig();
+    setAiConfig({});
+    setMessages((current) => [
+      ...current,
+      createMessage('assistant', '已清除自定义 AI 配置，之后会回到公开默认配置或本地推荐。'),
+    ]);
   };
 
   return (
@@ -137,14 +165,85 @@ export function AiRecommendPanel({
           <SheetHeader className="border-b border-stone-200 bg-white px-5 py-4">
             <SheetTitle className="flex items-center gap-2 text-stone-950">
               <Bot className="h-5 w-5 text-emerald-700" />
-              AI 推荐预留
+              AI 智能推荐
             </SheetTitle>
-            <SheetDescription>
-              当前使用本地预匹配，后续可替换为真实多轮 AI 推荐接口。
-            </SheetDescription>
+            <div className="flex items-start justify-between gap-3">
+              <SheetDescription>
+                可使用公开默认接口，也可以配置自己的 OpenAI-compatible 地址和 Key。
+              </SheetDescription>
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-8 shrink-0 rounded-xl px-2 text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+                onClick={() => setShowSettings((value) => !value)}
+              >
+                <Settings className="h-4 w-4" />
+              </Button>
+            </div>
           </SheetHeader>
 
           <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
+            {showSettings && (
+              <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium text-stone-900">AI 接口</div>
+                    <div className="mt-1 text-xs leading-5 text-stone-500">
+                      留空时使用构建环境里的公开默认值；前端 Key 会暴露，请只放低额度或个人可控 Key。
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <Input
+                    value={aiConfig.baseUrl || ''}
+                    onChange={(event) => setAiConfig((current) => ({ ...current, baseUrl: event.target.value }))}
+                    placeholder="Base URL，例如 https://api.openai.com/v1"
+                    className="h-10 rounded-xl border-stone-200 bg-stone-50 text-sm"
+                  />
+                  <Input
+                    value={aiConfig.model || ''}
+                    onChange={(event) => setAiConfig((current) => ({ ...current, model: event.target.value }))}
+                    placeholder="模型，例如 gpt-4.1-mini / deepseek-chat"
+                    className="h-10 rounded-xl border-stone-200 bg-stone-50 text-sm"
+                  />
+                  <div className="flex gap-2">
+                    <Input
+                      type={showApiKey ? 'text' : 'password'}
+                      value={aiConfig.apiKey || ''}
+                      onChange={(event) => setAiConfig((current) => ({ ...current, apiKey: event.target.value }))}
+                      placeholder="API Key"
+                      className="h-10 rounded-xl border-stone-200 bg-stone-50 text-sm"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-10 rounded-xl border-stone-200 bg-white px-3"
+                      onClick={() => setShowApiKey((value) => !value)}
+                    >
+                      {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+                <div className="mt-3 flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-8 rounded-xl px-3 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+                    onClick={clearSettings}
+                  >
+                    清除
+                  </Button>
+                  <Button
+                    type="button"
+                    className="h-8 rounded-xl bg-stone-900 px-3 text-xs hover:bg-stone-800"
+                    onClick={saveSettings}
+                  >
+                    保存配置
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {messages.map((message) => (
               <div
                 key={message.id}
