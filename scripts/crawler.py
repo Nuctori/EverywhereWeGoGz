@@ -642,7 +642,7 @@ class BaozoucunSpider:
             # 从页面URL或文本中提取mids
             mids = ['73252', '79969', '73242', '78982', '78741', '73249', '81417', '78430', '78431', '78742', '73513', '73250', '81413', '81418', '81414', '73251', '78901', '73244']
 
-            for mid in mids[:8]:  # 限制数量避免太慢
+            for mid in mids:
                 try:
                     driver.get(f'{self.BASE_URL}/m/events?mid={mid}')
                     time.sleep(2)

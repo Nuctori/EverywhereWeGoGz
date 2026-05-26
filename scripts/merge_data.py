@@ -31,7 +31,7 @@ SOURCE_COLORS = {
 }
 
 DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
-IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'}
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.jfif', '.png', '.webp', '.gif', '.bmp', '.svg'}
 RAW_FILE_PRIORITIES = {
     "raw_jrt365_full.json": 10,
     "raw_jrt365.json": 20,
@@ -44,6 +44,21 @@ RAW_FILE_PRIORITIES = {
 JRT365_HOST_TOKEN = "jrt365.com"
 
 
+def looks_like_image(content: bytes) -> bool:
+    signatures = (
+        b"\xff\xd8\xff",  # jpg/jpeg/jfif
+        b"\x89PNG\r\n\x1a\n",
+        b"GIF87a",
+        b"GIF89a",
+        b"RIFF",  # webp starts with RIFF....WEBP
+        b"<svg",
+    )
+    head = content[:16].lstrip()
+    return any(head.startswith(signature) for signature in signatures) or (
+        content[:12].startswith(b"RIFF") and content[8:12] == b"WEBP"
+    )
+
+
 def stable_hash(value: str) -> int:
     return int(hashlib.sha1(value.encode('utf-8')).hexdigest(), 16)
 
@@ -52,7 +67,7 @@ def normalize_image_path(url: str, source: str) -> str:
     if not url:
         return url
 
-    image_cache_mode = os.environ.get("IMAGE_CACHE_MODE", "download").strip().lower()
+    image_cache_mode = os.environ.get("IMAGE_CACHE_MODE", "remote").strip().lower()
 
     parsed = urlparse(url)
     if parsed.scheme not in {'http', 'https'}:
@@ -84,7 +99,7 @@ def normalize_image_path(url: str, source: str) -> str:
         resp = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
         resp.raise_for_status()
         content_type = resp.headers.get('content-type', '').lower()
-        if content_type and 'image' not in content_type:
+        if content_type and 'image' not in content_type and not looks_like_image(resp.content):
             raise ValueError(f'unexpected content-type: {content_type}')
         with open(local_path, 'wb') as f:
             f.write(resp.content)
@@ -750,7 +765,7 @@ def is_jrt365_tour(tour):
 
 
 def filter_unavailable_tours(tours):
-    enabled = os.environ.get("AVAILABILITY_FILTER", "1").strip().lower()
+    enabled = os.environ.get("AVAILABILITY_FILTER", "0").strip().lower()
     if enabled in {"0", "false", "no", "off"}:
         jrt365_filter = os.environ.get("JRT365_AVAILABILITY_FILTER", "0").strip().lower()
         if jrt365_filter not in {"1", "true", "yes", "on"}:

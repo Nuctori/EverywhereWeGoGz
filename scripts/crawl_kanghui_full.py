@@ -26,6 +26,7 @@ HEADERS = {
 REQUEST_DELAY = 0.2
 TIMEOUT = 20
 MAX_PAGE_LIMIT = 200
+PLACEHOLDER_IMAGE_TOKENS = ("lazyImg", "{{", "}}")
 
 
 def safe_get(url, params=None):
@@ -61,6 +62,10 @@ def extract_prodcode(href):
     return values[0] if values else ""
 
 
+def is_placeholder_image_url(url):
+    return not url or any(token in url for token in PLACEHOLDER_IMAGE_TOKENS)
+
+
 def parse_products(html):
     soup = BeautifulSoup(html, "lxml")
     products = []
@@ -84,8 +89,16 @@ def parse_products(html):
         image_url = ""
         image = card.find("img", class_=re.compile(r"(?:^|\s)lazy_img(?:\s|$)"))
         if image:
-            image_src = image.get("data-original") or image.get("src") or ""
-            image_url = urljoin(BASE_URL, image_src) if image_src else ""
+            image_src = (
+                image.get("data-original")
+                or image.get("data-src")
+                or image.get("data-lazy-src")
+                or ""
+            )
+            if not image_src:
+                src = image.get("src") or ""
+                image_src = "" if is_placeholder_image_url(src) else src
+            image_url = urljoin(BASE_URL, image_src) if not is_placeholder_image_url(image_src) else ""
 
         item = {
             "source": "康辉",
