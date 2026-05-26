@@ -1,92 +1,61 @@
-# 旅比价 - 静态旅行团聚合比价工具
+# 旅游比价 - 静态旅行团聚合工具
 
-纯静态站点，所有数据来自 `src/data/tours.ts`，筛选排序在浏览器端完成。
+这是一个纯静态 React/Vite 站点。前台不直接读取 TypeScript 数据数组，而是读取 `public/data` 下的 JSON 构建产物：
+
+- 列表页：`public/data/tours-list.json`
+- 详情弹窗：`public/data/tour-details/*.json`
+- 后台数据概览：`public/data/tours-meta.json`
+- 原始全量数据：`public/data/tours.json`
+
+筛选、排序、搜索和详情弹窗都在浏览器端完成，不依赖后端服务。
 
 ## 本地开发
 
 ```bash
 npm install
-npm run dev      # 开发服务器
-npm run build    # 构建到 dist/
-npm run preview  # 预览构建结果
+npm run dev
+npm run build
+npm run preview
 ```
 
-## 数据更新
+## 数据更新流程
 
-数据文件：`src/data/tours.ts`
+1. 更新或重新生成 `public/data/tours.json`。
+2. 运行 `npm run data:split`，生成：
+   - `public/data/tours-list.json`
+   - `public/data/tour-details/*.json`
+   - `public/data/tours-meta.json`
+3. 运行 `npm run build` 验证构建产物。
 
-### 手动更新
+`npm run build` 会自动先执行 `npm run data:split`，再进行 TypeScript 检查和 Vite 构建。
 
-直接修改 `src/data/tours.ts` 中的 `tours` 数组，然后运行 `npm run build`。
+## 静态数据说明
 
-### 自动更新（CI）
+`src/data/tours.ts` 目前只保留来源、目的地、主题等前台筛选元数据，不再作为旅行团列表的真实数据源。
 
-项目包含 GitHub Actions 工作流，支持定时自动更新数据并部署：
+后台页显示的是 `public/data/tours-meta.json` 中的静态快照，包括记录数、文件大小、详情分片数、来源分布和生成时间。它不会在浏览器里启动爬虫，也不会生成模拟数据。
 
-1. **部署工作流** (`.github/workflows/deploy.yml`)
-   - 每次 push 到 master/main 时自动构建部署
-   - 也可手动触发
+## 目录结构
 
-2. **数据更新工作流** (`.github/workflows/update-data.yml`)
-   - 每天凌晨 3 点自动运行
-   - 可手动触发
-   - 更新数据后自动提交并重新部署
+```text
+public/data/
+  tours.json              原始全量数据
+  tours-list.json         前台列表数据
+  tours-meta.json         后台概览元信息
+  tour-details/           按线路 id 拆分的详情数据
 
-### 接入真实数据源
+scripts/
+  split_tour_data.mjs     将全量数据拆成列表、详情和元信息
 
-在 `update-data.yml` 的 `数据更新步骤` 区域添加你的数据获取逻辑：
-
-**方式一：API 接口**
-```yaml
-- name: Fetch tour data
-  run: node scripts/fetch-data.js
-  env:
-    API_KEY: ${{ secrets.API_KEY }}
+src/
+  sections/               前台页面组件
+  pages/Admin.tsx         静态数据概览页
+  hooks/use-tours.ts      后台元信息读取 hook
+  data/tours.ts           筛选选项元数据
 ```
 
-**方式二：Python 爬虫**
-```yaml
-- name: Setup Python
-  uses: actions/setup-python@v5
-  with:
-    python-version: '3.11'
-- name: Run crawler
-  run: |
-    pip install requests beautifulsoup4
-    python scripts/crawler.py > data/tours.json
-```
+## 部署
 
-**方式三：远程 JSON 文件**
-```yaml
-- name: Download data
-  run: curl -o src/data/tours.json ${{ secrets.DATA_URL }}
-```
+仓库已配置 GitHub Pages workflow。push 到 `master` 或手动触发 `.github/workflows/deploy.yml` 后，会自动运行构建并发布 `dist/`。
 
-参考示例脚本：
-- `scripts/fetch-data.example.js` — Node.js 数据获取脚本
-- `scripts/crawler.example.py` — Python 爬虫脚本
-
-复制示例文件并修改为你的实际逻辑即可。
-
-## 部署到 GitHub Pages
-
-1. 在仓库 Settings → Pages 中，Source 选择 "GitHub Actions"
-2. push 代码到 master/main 分支，自动触发部署
-3. 访问 `https://<username>.github.io/<repo-name>/`
-
-## 项目结构
-
-```
-├── .github/workflows/     # CI/CD 工作流
-│   ├── deploy.yml         # 构建部署
-│   └── update-data.yml    # 定时更新数据
-├── scripts/               # 数据更新脚本
-│   ├── fetch-data.example.js
-│   └── crawler.example.py
-├── src/
-│   ├── data/tours.ts      # 旅行团数据（手动或 CI 更新）
-│   ├── hooks/use-tours.ts # 数据 hook（已移除 API 调用）
-│   ├── sections/          # 页面组件
-│   └── pages/             # 页面
-└── dist/                  # 构建输出（静态站点）
-```
+部署前构建会重新生成 `public/data` 下的 JSON、详情分片和元信息，并执行数据完整性审计。

@@ -5,24 +5,35 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertCircle,
   BarChart3,
-  Bug,
   CheckCircle,
   Clock,
   Database,
+  FileJson,
+  RefreshCw,
   Server,
 } from 'lucide-react';
 
-export default function Admin() {
-  const { status } = useCrawlStatus();
+interface AdminProps {
+  onBackHome?: () => void;
+}
+
+export default function Admin({ onBackHome }: AdminProps) {
+  const { status, loading, fetchStatus } = useCrawlStatus();
   const [message, setMessage] = useState<string | null>(null);
   const baseUrl = import.meta.env.BASE_URL || '/';
 
-  const handleTriggerCrawl = async () => {
-    setMessage('静态站点不支持爬虫功能，请直接修改 src/data/tours.ts 更新数据。');
+  const handleRefresh = async () => {
+    setMessage(null);
+    await fetchStatus();
   };
 
-  const handleGenerateMock = async () => {
-    setMessage('静态站点不支持生成模拟数据，请直接修改 src/data/tours.ts 更新数据。');
+  const handleBackHome = () => {
+    if (onBackHome) {
+      onBackHome();
+      return;
+    }
+
+    window.location.href = baseUrl;
   };
 
   const formatTime = (iso: string | null | undefined) => {
@@ -40,12 +51,10 @@ export default function Admin() {
     switch (value) {
       case 'success':
         return 'bg-green-500';
-      case 'running':
+      case 'loading':
         return 'bg-blue-500';
       case 'error':
         return 'bg-red-500';
-      case 'mock':
-        return 'bg-amber-500';
       default:
         return 'bg-slate-400';
     }
@@ -54,18 +63,20 @@ export default function Admin() {
   const statusLabel = (value?: string) => {
     switch (value) {
       case 'success':
-        return '成功';
-      case 'running':
-        return '运行中';
+        return '已生成';
+      case 'loading':
+        return '读取中';
       case 'error':
-        return '失败';
-      case 'mock':
-        return '模拟数据';
+        return '元信息缺失';
       case 'never':
       default:
-        return '从未运行';
+        return '未知';
     }
   };
+
+  const topSources = Object.entries(status.sourceStats)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 7);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -76,11 +87,11 @@ export default function Admin() {
               <Server className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-slate-800">数据概览</h1>
-              <p className="text-xs text-slate-500">旅行团静态数据状态</p>
+              <h1 className="text-lg font-bold text-slate-800">静态数据概览</h1>
+              <p className="text-xs text-slate-500">读取 public/data 里的构建产物元信息</p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => (window.location.href = baseUrl)}>返回首页</Button>
+          <Button variant="outline" size="sm" onClick={handleBackHome}>返回首页</Button>
         </div>
       </header>
 
@@ -102,13 +113,13 @@ export default function Admin() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">数据状态</p>
+                  <p className="text-sm text-slate-500">元信息状态</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className={`w-2.5 h-2.5 rounded-full ${statusColor(status?.lastCrawlStatus)}`} />
                     <span className="text-sm font-medium">{statusLabel(status?.lastCrawlStatus)}</span>
                   </div>
                 </div>
-                <Bug className="w-8 h-8 text-purple-500" />
+                <FileJson className="w-8 h-8 text-purple-500" />
               </div>
             </CardContent>
           </Card>
@@ -117,7 +128,7 @@ export default function Admin() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">上次更新</p>
+                  <p className="text-sm text-slate-500">生成时间</p>
                   <p className="text-sm font-medium text-slate-800">{formatTime(status?.lastCrawl)}</p>
                 </div>
                 <Clock className="w-8 h-8 text-amber-500" />
@@ -140,33 +151,28 @@ export default function Admin() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">静态站点说明</CardTitle>
+            <CardTitle className="text-base">当前数据链路</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-700 space-y-2">
               <p className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                当前为纯静态站点，所有数据来自 src/data/tours.ts
+                前台列表读取 public/data/tours-list.json，详情弹窗按需读取 public/data/tour-details/*.json
               </p>
               <p className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                如需更新数据，请直接修改 tours.ts 文件后重新构建
+                构建前会运行 scripts/split_tour_data.mjs，从 public/data/tours.json 生成列表、详情分片和 tours-meta.json
               </p>
               <p className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                筛选、排序等功能均在浏览器端完成，无需后端服务器
+                本页只展示静态数据快照，不提供浏览器端爬虫或模拟数据生成功能
               </p>
             </div>
 
             <div className="flex gap-3 flex-wrap">
-              <Button onClick={handleTriggerCrawl} variant="outline" className="gap-2" disabled>
-                <Bug className="w-4 h-4" />
-                启动爬虫（不可用）
-              </Button>
-
-              <Button variant="outline" onClick={handleGenerateMock} disabled className="gap-2">
-                <Database className="w-4 h-4" />
-                生成模拟数据（不可用）
+              <Button onClick={handleRefresh} variant="outline" className="gap-2" disabled={loading}>
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                重新读取元信息
               </Button>
             </div>
 
@@ -178,6 +184,50 @@ export default function Admin() {
             )}
           </CardContent>
         </Card>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">文件拆分</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-500">原始数据 public/data/tours.json</span>
+                <span className="font-medium">{formatSize(status.rawSize)}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-500">列表数据 public/data/tours-list.json</span>
+                <span className="font-medium">{formatSize(status.listSize)}</span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-500">详情分片 public/data/tour-details/</span>
+                <span className="font-medium">
+                  {status.detailFiles.toLocaleString()} 个 / {formatSize(status.detailSize)}
+                </span>
+              </div>
+              <div className="flex justify-between gap-4">
+                <span className="text-slate-500">数据最新更新时间</span>
+                <span className="font-medium">{formatTime(status.latestUpdatedAt)}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">来源分布</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {topSources.length > 0 ? topSources.map(([source, count]) => (
+                <div key={source} className="flex items-center justify-between gap-4 text-sm">
+                  <span className="truncate text-slate-600">{source}</span>
+                  <span className="font-medium text-slate-800">{count.toLocaleString()}</span>
+                </div>
+              )) : (
+                <p className="text-sm text-slate-500">尚未读取到来源统计。</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );

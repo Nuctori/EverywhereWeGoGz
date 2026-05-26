@@ -28,8 +28,17 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
       - name: Install Python dependencies
         run: pip install requests beautifulsoup4 lxml selenium
+
+      - name: Install Node dependencies
+        run: npm ci
 
       - name: Run full source crawls
         run: |
@@ -42,10 +51,13 @@ jobs:
       - name: Merge crawled data
         run: python scripts/merge_data.py
 
+      - name: Audit merged data
+        run: npm run audit:data-integrity
+
       - name: Check if data changed
         id: check_changes
         run: |
-          git add src/data/tours.ts public/data/tours.json src/data/raw_jrt365_full.json src/data/raw_saihuitong_full.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/tour-availability-cache.json
+          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tour-details src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/tour-availability-cache.json public/data/image-cache
           if git diff --cached --quiet; then
             echo "Data unchanged, skipping build and deploy"
             echo "changed=false" >> $GITHUB_OUTPUT

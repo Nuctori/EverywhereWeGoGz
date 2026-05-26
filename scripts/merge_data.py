@@ -42,6 +42,7 @@ RAW_FILE_PRIORITIES = {
     "raw_gzl_api.json": 10,
 }
 JRT365_HOST_TOKEN = "jrt365.com"
+PLACEHOLDER_IMAGE_TOKENS = ("lazyimg", "{{", "}}")
 
 
 def looks_like_image(content: bytes) -> bool:
@@ -67,13 +68,17 @@ def normalize_image_path(url: str, source: str) -> str:
     if not url:
         return url
 
+    normalized_url = str(url).strip()
+    if any(token in normalized_url.lower() for token in PLACEHOLDER_IMAGE_TOKENS):
+        return ""
+
     image_cache_mode = os.environ.get("IMAGE_CACHE_MODE", "remote").strip().lower()
 
-    parsed = urlparse(url)
+    parsed = urlparse(normalized_url)
     if parsed.scheme not in {'http', 'https'}:
-        return url
+        return normalized_url
     if image_cache_mode in {"remote", "skip", "off"} and parsed.scheme == 'https':
-        return url
+        return normalized_url
     ext = os.path.splitext(parsed.path)[1].lower()
     if ext not in IMAGE_EXTENSIONS:
         ext = '.jpg'
@@ -88,7 +93,7 @@ def normalize_image_path(url: str, source: str) -> str:
     )
     os.makedirs(cache_root, exist_ok=True)
 
-    filename = f"{hashlib.sha1(url.encode('utf-8')).hexdigest()[:16]}{ext}"
+    filename = f"{hashlib.sha1(normalized_url.encode('utf-8')).hexdigest()[:16]}{ext}"
     local_path = os.path.join(cache_root, filename)
     public_path = f"/data/image-cache/{parsed.netloc.replace(':', '_')}/{filename}"
 
@@ -96,7 +101,7 @@ def normalize_image_path(url: str, source: str) -> str:
         return public_path
 
     try:
-        resp = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
+        resp = requests.get(normalized_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
         resp.raise_for_status()
         content_type = resp.headers.get('content-type', '').lower()
         if content_type and 'image' not in content_type and not looks_like_image(resp.content):
@@ -105,7 +110,7 @@ def normalize_image_path(url: str, source: str) -> str:
             f.write(resp.content)
         return public_path
     except Exception as exc:
-        print(f"[图片缓存] {source} {url} -> {exc}")
+        print(f"[图片缓存] {source} {normalized_url} -> {exc}")
         return ensure_placeholder_image(source)
 
 
@@ -150,7 +155,9 @@ def normalize_images(images, source: str):
     for img in images or []:
         if not img:
             continue
-        result.append(normalize_image_path(img, source))
+        normalized = normalize_image_path(img, source)
+        if normalized:
+            result.append(normalized)
     return result
 
 

@@ -20,7 +20,7 @@ function App() {
   };
 
   if (currentPage === 'admin') {
-    return <Admin />;
+    return <Admin onBackHome={() => setCurrentPage('home')} />;
   }
 
   return (
