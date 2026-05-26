@@ -11,10 +11,9 @@ const outputFiles = {
 
 const rawFiles = [
   'src/data/raw_jrt365_full.json',
-  'src/data/raw_jrt365.json',
   'src/data/raw_saihuitong_full.json',
   'src/data/raw_kanghui.json',
-  'src/data/raw_http_full.json',
+  'src/data/raw_gdcts_full.json',
   'src/data/raw_pintu_full.json',
   'src/data/raw_gzl_api.json',
 ];

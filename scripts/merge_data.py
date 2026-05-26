@@ -34,9 +34,8 @@ DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
 IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.jfif', '.png', '.webp', '.gif', '.bmp', '.svg'}
 RAW_FILE_PRIORITIES = {
     "raw_jrt365_full.json": 10,
-    "raw_jrt365.json": 20,
     "raw_kanghui.json": 30,
-    "raw_http_full.json": 10,
+    "raw_gdcts_full.json": 20,
     "raw_pintu_full.json": 10,
     "raw_saihuitong_full.json": 10,
     "raw_gzl_api.json": 10,
@@ -857,18 +856,12 @@ def main():
                 }
                 all_raw.append(raw)
         except Exception as e:
-            print(f"[旧数据] 读取失败: {e}")
-
-    # 2. 读取新的raw数据
-    # 假日通保留两个抓取口径：
-    # - raw_jrt365_full.json: 全量脚本输出
-    # - raw_jrt365.json: 主爬虫输出
-    # 两者存在一定差异，先一并并入，再统一去重，避免有效线路被单一路径漏掉。
+            print(f"[旧数据] 读取失败: {e}")    # 2. ????raw??
+    # ??????? raw_jrt365_full.json???? tourgroup_list.aspx ????
     raw_files = [
         "raw_jrt365_full.json",
-        "raw_jrt365.json",
         "raw_kanghui.json",
-        "raw_http_full.json",
+        "raw_gdcts_full.json",
         "raw_pintu_full.json",
         "raw_saihuitong_full.json",
         "raw_gzl_api.json",
