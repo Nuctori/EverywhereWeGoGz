@@ -244,14 +244,6 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
           </div>
         )}
 
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Button className="h-11 bg-stone-900 hover:bg-stone-800" size="lg" onClick={() => openExternalLink(tour.bookingUrl)}>
-            <ExternalLink className="w-4 h-4 mr-2" />打开来源页面
-          </Button>
-          <Button variant="outline" className="h-11" size="lg" onClick={() => openExternalLink(searchUrl)}>
-            <Search className="w-4 h-4 mr-2" />打开平台搜索
-          </Button>
-        </div>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
