@@ -15,6 +15,7 @@ import type {
   AiRecommendationMessage,
   AiRecommendationResult,
   AiProviderConfig,
+  AiPreferenceMemory,
   FilterState,
 } from '@/types/tour';
 import {
@@ -41,6 +42,17 @@ const starterPrompts = [
   '想去云南或桂林，看看自然风景',
 ];
 
+const AI_CHAT_STORAGE_KEY = 'travel-ai-chat-state';
+const MAX_PERSISTED_MESSAGES = 40;
+
+interface AiChatState {
+  conversationId: string;
+  input: string;
+  messages: AiRecommendationMessage[];
+  result: AiRecommendationResult | null;
+  preferenceMemory: AiPreferenceMemory | null;
+}
+
 function createMessage(role: AiRecommendationMessage['role'], content: string): AiRecommendationMessage {
   return {
     id: `${role}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -48,6 +60,40 @@ function createMessage(role: AiRecommendationMessage['role'], content: string): 
     content,
     createdAt: new Date().toISOString(),
   };
+}
+
+function createInitialMessage() {
+  return createMessage('assistant', '告诉我预算、天数、想去哪里、同行人群或行程强度，我会先把合适线路挑出来。');
+}
+
+function createConversationId() {
+  return `ai-rec-${Date.now().toString(36)}-${Math.random().toString(16).slice(2)}`;
+}
+
+function readStoredChatState(): Partial<AiChatState> {
+  if (typeof window === 'undefined') return {};
+
+  try {
+    return JSON.parse(window.localStorage.getItem(AI_CHAT_STORAGE_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function saveStoredChatState(state: AiChatState) {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(
+    AI_CHAT_STORAGE_KEY,
+    JSON.stringify({
+      ...state,
+      messages: state.messages.slice(-MAX_PERSISTED_MESSAGES),
+    }),
+  );
+}
+
+function clearStoredChatState() {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(AI_CHAT_STORAGE_KEY);
 }
 
 export function AiRecommendPanel({
@@ -58,17 +104,46 @@ export function AiRecommendPanel({
   onResultChange,
   onFocusResults,
 }: AiRecommendPanelProps) {
+  const storedChatState = useMemo(() => readStoredChatState(), []);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState(storedChatState.input || '');
   const [showApiKey, setShowApiKey] = useState(false);
   const [aiConfig, setAiConfig] = useState<Partial<AiProviderConfig>>(() => getAiProviderConfig());
-  const [messages, setMessages] = useState<AiRecommendationMessage[]>([
-    createMessage('assistant', '告诉我预算、天数、想去哪里、同行人群或行程强度，我会先把合适线路挑出来。'),
-  ]);
+  const [messages, setMessages] = useState<AiRecommendationMessage[]>(() =>
+    storedChatState.messages?.length ? storedChatState.messages : [createInitialMessage()],
+  );
+  const [preferenceMemory, setPreferenceMemory] = useState<AiPreferenceMemory | null>(
+    storedChatState.preferenceMemory || null,
+  );
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const conversationId = useMemo(() => `ai-rec-${Date.now().toString(36)}`, []);
+  const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
+  const conversationId = useMemo(
+    () => storedChatState.conversationId || createConversationId(),
+    [storedChatState.conversationId],
+  );
   const hasResult = Boolean(result && result.items.length > 0);
+
+  useEffect(() => {
+    if (storedChatState.result && !result) {
+      onResultChange(storedChatState.result);
+    }
+  }, [onResultChange, result, storedChatState.result]);
+
+  useEffect(() => {
+    if (skipInitialSaveRef.current) {
+      skipInitialSaveRef.current = false;
+      return;
+    }
+
+    saveStoredChatState({
+      conversationId,
+      input,
+      messages,
+      result,
+      preferenceMemory,
+    });
+  }, [conversationId, input, messages, preferenceMemory, result]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -95,8 +170,10 @@ export function AiRecommendPanel({
         activeFilters,
         searchQuery,
         aiConfig,
+        preferenceMemory,
       });
       onResultChange(nextResult);
+      setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
       setMessages((current) => [
         ...current,
         createMessage(
@@ -112,10 +189,10 @@ export function AiRecommendPanel({
 
   const clearConversation = () => {
     onResultChange(null);
-    setMessages([
-      createMessage('assistant', '已清空上一轮结果。你可以重新描述这次想怎么出行。'),
-    ]);
+    setPreferenceMemory(null);
+    setMessages([createMessage('assistant', '已清空上一轮结果和本地偏好记忆。你可以重新描述这次想怎么出行。')]);
     setInput('');
+    clearStoredChatState();
   };
 
   const saveSettings = () => {
@@ -142,6 +219,11 @@ export function AiRecommendPanel({
           <div className="flex items-center gap-2 text-sm font-semibold text-emerald-900">
             <Sparkles className="h-4 w-4 text-emerald-700" />
             AI 按需求找旅行团
+            {preferenceMemory && (
+              <Badge className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] text-emerald-800 hover:bg-emerald-100">
+                已记住偏好
+              </Badge>
+            )}
           </div>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-stone-600">
             直接描述出发时间、天数、预算、同行人和偏好；AI 会结合班期原语、天气、季节和线路信息置顶推荐。

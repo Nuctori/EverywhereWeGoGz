@@ -1,5 +1,6 @@
 import type {
   AiProviderConfig,
+  AiPreferenceMemory,
   AiRecommendationCandidate,
   AiRecommendationItem,
   AiRecommendationMessage,
@@ -251,6 +252,53 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
     .slice(0, MAX_AI_RECOMMENDATIONS);
 
   return items.length > 0 ? items : fallbackRecommendations(tours);
+}
+
+function uniqueStrings(values: Array<string | undefined | null>) {
+  return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
+}
+
+function uniqueNumbers(values: Array<number | undefined | null>) {
+  return [...new Set(values.filter((value): value is number => Number.isFinite(value)))];
+}
+
+function mergePreferenceMemory(
+  previous: AiPreferenceMemory | null | undefined,
+  intent: AiTravelIntent | null,
+): AiPreferenceMemory {
+  return {
+    destinationHints: uniqueStrings([
+      ...(previous?.destinationHints || []),
+      ...(intent?.destinationHints || []),
+    ]).slice(-12),
+    travelStyle: uniqueStrings([
+      ...(previous?.travelStyle || []),
+      ...(intent?.travelStyle || []),
+    ]).slice(-16),
+    mustHave: uniqueStrings([
+      ...(previous?.mustHave || []),
+      ...(intent?.mustHave || []),
+    ]).slice(-16),
+    avoid: uniqueStrings([
+      ...(previous?.avoid || []),
+      ...(intent?.avoid || []),
+    ]).slice(-16),
+    weatherSensitivity: uniqueStrings([
+      ...(previous?.weatherSensitivity || []),
+      ...(intent?.weatherSensitivity || []),
+    ]).slice(-12),
+    budgetMin: intent?.budgetMin ?? previous?.budgetMin ?? null,
+    budgetMax: intent?.budgetMax ?? previous?.budgetMax ?? null,
+    tripDays: intent?.tripDays ?? previous?.tripDays ?? null,
+    tripDaysMin: intent?.tripDaysMin ?? previous?.tripDaysMin ?? null,
+    tripDaysMax: intent?.tripDaysMax ?? previous?.tripDaysMax ?? null,
+    departureWeekdays: uniqueNumbers([
+      ...(previous?.departureWeekdays || []),
+      ...(intent?.departureWeekdays || []),
+    ]).filter((weekday) => weekday >= 0 && weekday <= 6),
+    departureTimeOfDay: intent?.departureTimeOfDay ?? previous?.departureTimeOfDay ?? null,
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 function getDepartureDates(tour: AiRecommendationCandidate) {
@@ -558,6 +606,7 @@ function buildAiMessages(params: {
   weatherContext: AiWeatherContext;
   searchQuery: string;
   intent: AiTravelIntent | null;
+  preferenceMemory: AiPreferenceMemory | null;
 }) {
   const systemPrompt = [
     '你是旅行团推荐顾问，需要根据用户需求、天气、季节、目的地常识和给定旅行团候选列表推荐线路。',
@@ -586,6 +635,7 @@ function buildAiMessages(params: {
     userNeed: params.userText,
     searchQuery: params.searchQuery,
     recentConversation: params.messages.slice(-8).map(({ role, content }) => ({ role, content })),
+    preferenceMemory: params.preferenceMemory,
     interpretedIntent: params.intent,
     weatherContext: params.weatherContext,
     candidateTours: params.candidates,
@@ -601,6 +651,7 @@ function buildIntentMessages(params: {
   userText: string;
   messages: AiRecommendationMessage[];
   searchQuery: string;
+  preferenceMemory: AiPreferenceMemory | null;
 }) {
   return [
     {
@@ -634,6 +685,7 @@ function buildIntentMessages(params: {
         },
         userNeed: params.userText,
         searchQuery: params.searchQuery,
+        existingPreferenceMemory: params.preferenceMemory,
         recentConversation: params.messages.slice(-8).map(({ role, content }) => ({ role, content })),
       }),
     },
@@ -746,6 +798,7 @@ export async function requestAiRecommendations({
   activeFilters,
   searchQuery,
   aiConfig,
+  preferenceMemory,
 }: AiRecommendationRequest): Promise<AiRecommendationResult> {
   const text = getLatestUserText(messages);
   const filteredCandidates = candidateTours.filter((tour) => {
@@ -763,12 +816,14 @@ export async function requestAiRecommendations({
   const config = getResolvedAiConfig(aiConfig);
 
   if (!config) {
+    const nextPreferenceMemory = mergePreferenceMemory(preferenceMemory, null);
     return {
       conversationId,
       summary: '当前未配置 AI 接口，已先按目的地、预算、天数和行程强度做本地预匹配。',
       items: localItems,
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
+      preferenceMemory: nextPreferenceMemory,
     };
   }
 
@@ -779,9 +834,11 @@ export async function requestAiRecommendations({
         userText: text,
         messages,
         searchQuery,
+        preferenceMemory: preferenceMemory || null,
       }),
     });
     const intent = normalizeIntent(intentResponse);
+    const nextPreferenceMemory = mergePreferenceMemory(preferenceMemory, intent);
     const weatherContext = await fetchWeatherContext(text, availableCandidates);
     const compactedCandidates = compactCandidates(
       availableCandidates,
@@ -797,6 +854,7 @@ export async function requestAiRecommendations({
         weatherContext,
         searchQuery,
         intent,
+        preferenceMemory: nextPreferenceMemory,
       }),
     });
     const aiItems = validateAiItems(aiResponse, availableCandidates);
@@ -814,14 +872,17 @@ export async function requestAiRecommendations({
       items: aiItems,
       generatedAt: new Date().toISOString(),
       source: 'ai-api',
+      preferenceMemory: nextPreferenceMemory,
     };
   } catch {
+    const nextPreferenceMemory = mergePreferenceMemory(preferenceMemory, null);
     return {
       conversationId,
       summary: 'AI 接口暂时不可用，已先使用本地规则按需求做预匹配。',
       items: localItems,
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
+      preferenceMemory: nextPreferenceMemory,
     };
   }
 }

@@ -98,6 +98,7 @@ export interface AiRecommendationResult {
   items: AiRecommendationItem[];
   generatedAt: string;
   source: 'local-preview' | 'ai-api';
+  preferenceMemory?: AiPreferenceMemory;
 }
 
 export interface AiProviderConfig {
@@ -112,6 +113,22 @@ export interface AiWeatherContext {
   forecastSummary: string;
   seasonAdvice: string[];
   source: 'open-meteo' | 'seasonal-rule' | 'none';
+}
+
+export interface AiPreferenceMemory {
+  destinationHints: string[];
+  travelStyle: string[];
+  mustHave: string[];
+  avoid: string[];
+  weatherSensitivity: string[];
+  budgetMin?: number | null;
+  budgetMax?: number | null;
+  tripDays?: number | null;
+  tripDaysMin?: number | null;
+  tripDaysMax?: number | null;
+  departureWeekdays: number[];
+  departureTimeOfDay?: string | null;
+  updatedAt: string;
 }
 
 export type AiRecommendationCandidate = Pick<
@@ -146,4 +163,5 @@ export interface AiRecommendationRequest {
   activeFilters: FilterState;
   searchQuery: string;
   aiConfig?: Partial<AiProviderConfig>;
+  preferenceMemory?: AiPreferenceMemory | null;
 }
