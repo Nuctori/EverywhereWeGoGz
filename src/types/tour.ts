@@ -75,3 +75,59 @@ export type FilterState = {
   theme: string;
   sortBy: 'price_asc' | 'price_desc' | 'hot' | 'new' | 'rating';
 };
+
+export type AiRecommendationMessageRole = 'assistant' | 'user';
+
+export interface AiRecommendationMessage {
+  id: string;
+  role: AiRecommendationMessageRole;
+  content: string;
+  createdAt: string;
+}
+
+export interface AiRecommendationItem {
+  tourId: string;
+  score: number;
+  reason: string;
+  matchedSignals: string[];
+}
+
+export interface AiRecommendationResult {
+  conversationId: string;
+  summary: string;
+  items: AiRecommendationItem[];
+  generatedAt: string;
+  source: 'local-preview' | 'ai-api';
+}
+
+export type AiRecommendationCandidate = Pick<
+  Tour,
+  | 'id'
+  | 'title'
+  | 'source'
+  | 'destination'
+  | 'duration'
+  | 'price'
+  | 'departureDate'
+  | 'transportType'
+  | 'accommodationLevel'
+  | 'meals'
+  | 'highlights'
+  | 'tags'
+  | 'isHot'
+  | 'theme'
+  | 'suitableFor'
+  | 'leisureLevel'
+  | 'season'
+  | 'rating'
+  | 'groupSize'
+  | 'hotDepartureDates'
+>;
+
+export interface AiRecommendationRequest {
+  conversationId: string;
+  messages: AiRecommendationMessage[];
+  candidateTours: AiRecommendationCandidate[];
+  activeFilters: FilterState;
+  searchQuery: string;
+}

@@ -1,7 +1,13 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import type { Tour, FilterState } from '@/types/tour';
+import type {
+  AiRecommendationCandidate,
+  AiRecommendationResult,
+  Tour,
+  FilterState,
+} from '@/types/tour';
 import { TourCard } from './TourCard';
 import { TourDetailModal } from './TourDetailModal';
+import { AiRecommendPanel } from './AiRecommendPanel';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
@@ -273,6 +279,8 @@ export function TourList({ searchQuery }: TourListProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>([0, 100]);
+  const [aiRecommendationResult, setAiRecommendationResult] =
+    useState<AiRecommendationResult | null>(null);
 
   useEffect(() => {
     setShowFilters(!isMobile);
@@ -350,6 +358,17 @@ export function TourList({ searchQuery }: TourListProps) {
   ]);
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+
+  const aiRecommendationByTourId = useMemo(
+    () =>
+      new Map(
+        aiRecommendationResult?.items.map((item, index) => [
+          item.tourId,
+          { ...item, rank: index + 1 },
+        ]) ?? [],
+      ),
+    [aiRecommendationResult],
+  );
 
   const displayTours = useMemo(() => {
     if (localTours.length === 0) return [];
@@ -462,8 +481,36 @@ export function TourList({ searchQuery }: TourListProps) {
         break;
     }
 
+    if (aiRecommendationByTourId.size > 0) {
+      const pinned: Tour[] = [];
+      const rest: Tour[] = [];
+
+      for (const tour of result) {
+        if (aiRecommendationByTourId.has(tour.id)) {
+          pinned.push(tour);
+        } else {
+          rest.push(tour);
+        }
+      }
+
+      pinned.sort((a, b) => {
+        const aItem = aiRecommendationByTourId.get(a.id);
+        const bItem = aiRecommendationByTourId.get(b.id);
+        return (bItem?.score ?? 0) - (aItem?.score ?? 0);
+      });
+
+      return [...pinned, ...rest];
+    }
+
     return result;
-  }, [dateFilter, debouncedPriceRange, filters, localTours, normalizedSearchQuery]);
+  }, [
+    aiRecommendationByTourId,
+    dateFilter,
+    debouncedPriceRange,
+    filters,
+    localTours,
+    normalizedSearchQuery,
+  ]);
 
   const waterfallTours = useMemo(
     () => displayTours.slice(0, displayCount),
@@ -472,7 +519,7 @@ export function TourList({ searchQuery }: TourListProps) {
 
   useEffect(() => {
     setDisplayCount(INITIAL_LOAD_COUNT);
-  }, [filters, debouncedPriceRange]);
+  }, [aiRecommendationResult, filters, debouncedPriceRange]);
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -523,6 +570,37 @@ export function TourList({ searchQuery }: TourListProps) {
   const setQuickBudget = (min: number, max: number) => {
     setSliderValues([priceToSlider(min, maxPriceAll), priceToSlider(max, maxPriceAll)]);
   };
+
+  const aiCandidateTours = useMemo<AiRecommendationCandidate[]>(
+    () =>
+      localTours.map((tour) => ({
+        id: tour.id,
+        title: tour.title,
+        source: tour.source,
+        destination: tour.destination,
+        duration: tour.duration,
+        price: tour.price,
+        departureDate: tour.departureDate,
+        transportType: tour.transportType,
+        accommodationLevel: tour.accommodationLevel,
+        meals: tour.meals,
+        highlights: tour.highlights,
+        tags: tour.tags,
+        isHot: tour.isHot,
+        theme: tour.theme,
+        suitableFor: tour.suitableFor,
+        leisureLevel: tour.leisureLevel,
+        season: tour.season,
+        rating: tour.rating,
+        groupSize: tour.groupSize,
+        hotDepartureDates: tour.hotDepartureDates,
+      })),
+    [localTours],
+  );
+
+  const focusResults = useCallback(() => {
+    document.getElementById('tour-list')?.scrollIntoView({ behavior: 'smooth' });
+  }, []);
 
   const isBudgetSelected = (min: number, max: number) => {
     const tolerance = 80;
@@ -989,6 +1067,20 @@ export function TourList({ searchQuery }: TourListProps) {
             </Select>
           </div>
 
+          {aiRecommendationResult && aiRecommendationResult.items.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
+              <Sparkles className="h-4 w-4 text-emerald-700" />
+              <span>AI 已推荐 {aiRecommendationResult.items.length} 条线路</span>
+              <button
+                type="button"
+                className="rounded-full px-2 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"
+                onClick={() => setAiRecommendationResult(null)}
+              >
+                清除
+              </button>
+            </div>
+          )}
+
           {activeFilterCount > 0 && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm text-stone-500">当前已选：</span>
@@ -1089,9 +1181,19 @@ export function TourList({ searchQuery }: TourListProps) {
       ) : (
         <>
           <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {waterfallTours.map((tour) => (
-              <TourCard key={tour.id} tour={tour} onClick={() => handleCardClick(tour)} />
-            ))}
+            {waterfallTours.map((tour) => {
+              const recommendation = aiRecommendationByTourId.get(tour.id);
+
+              return (
+                <TourCard
+                  key={tour.id}
+                  tour={tour}
+                  onClick={() => handleCardClick(tour)}
+                  recommendationReason={recommendation?.reason}
+                  recommendationRank={recommendation?.rank}
+                />
+              );
+            })}
           </div>
 
           {displayCount < displayTours.length && (
@@ -1119,6 +1221,14 @@ export function TourList({ searchQuery }: TourListProps) {
       )}
 
       <TourDetailModal tour={selectedTour} loading={detailLoading} onClose={clearSelectedTour} />
+      <AiRecommendPanel
+        tours={aiCandidateTours}
+        activeFilters={filters}
+        searchQuery={searchQuery}
+        result={aiRecommendationResult}
+        onResultChange={setAiRecommendationResult}
+        onFocusResults={focusResults}
+      />
     </section>
   );
 }

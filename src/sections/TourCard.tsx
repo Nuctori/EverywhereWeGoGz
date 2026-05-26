@@ -19,6 +19,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 interface TourCardProps {
   tour: Tour;
   onClick: () => void;
+  recommendationReason?: string;
+  recommendationRank?: number;
 }
 
 function formatDate(dateStr: string | undefined): string {
@@ -33,7 +35,12 @@ function formatDate(dateStr: string | undefined): string {
   return `${month}月${day}日`;
 }
 
-export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps) {
+export const TourCard = memo(function TourCard({
+  tour,
+  onClick,
+  recommendationReason,
+  recommendationRank,
+}: TourCardProps) {
   const hasImage = tour.images && tour.images.length > 0;
   const rawImageSrc = hasImage ? tour.images[0] : getFallbackImage(tour.title);
   const imageSrc = resolveAssetUrl(rawImageSrc);
@@ -82,6 +89,15 @@ export const TourCard = memo(function TourCard({ tour, onClick }: TourCardProps)
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
+        {recommendationReason && (
+          <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-800">
+            <span className="font-medium">
+              AI推荐{recommendationRank ? ` TOP ${recommendationRank}` : ''}：
+            </span>
+            {recommendationReason}
+          </div>
+        )}
 
         <div className="mt-3 flex flex-wrap gap-1.5">
           {tags.map((tag) => (
