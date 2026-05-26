@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-26T10:15:00.341Z",
-  "latestUpdatedAt": "2026-05-26T11:26:14.726877",
-  "totalRecords": 4148,
-  "listRecords": 4148,
-  "detailFiles": 4148,
+  "generatedAt": "2026-05-26T12:22:39.737Z",
+  "latestUpdatedAt": "2026-05-26T20:16:43.063452",
+  "totalRecords": 4066,
+  "listRecords": 4066,
+  "detailFiles": 4066,
   "sourceStats": {
     "假日通": 231,
     "康辉": 958,
@@ -11,18 +11,18 @@
     "品途": 147,
     "广州去旅行": 43,
     "暴走村": 117,
-    "广之旅": 2169
+    "广之旅": 2087
   },
   "destinationStats": {
-    "其他": 2188,
-    "广东": 1014,
-    "厦门": 35,
+    "其他": 2119,
+    "广东": 1004,
+    "厦门": 34,
     "张家界": 34,
     "北京": 126,
     "三亚": 144,
     "桂林": 62,
-    "云南": 213,
-    "贵州": 61,
+    "云南": 212,
+    "贵州": 60,
     "西安": 28,
     "四川": 104,
     "西藏": 42,
@@ -31,15 +31,15 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 55470220
+      "size": 56888199
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 7048502
+      "size": 7007543
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 48425866
+      "size": 49884722
     }
   }
 }

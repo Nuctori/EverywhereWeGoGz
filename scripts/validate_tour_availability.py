@@ -43,7 +43,7 @@ sys.stdout.reconfigure(encoding="utf-8")
 DEFAULT_INPUT = Path("public/data/tours.json")
 DEFAULT_OUTPUT = Path("audit/tour-availability-report.json")
 DEFAULT_CACHE = Path("src/data/tour-availability-cache.json")
-CACHE_SCHEMA_VERSION = 2
+CACHE_SCHEMA_VERSION = 3
 
 BLOCKED = "blocked"
 HTTP_ERROR = "http_error"
@@ -310,6 +310,57 @@ def has_jrt365_detail_content(raw_html: str) -> bool:
     return False
 
 
+def extract_gzl_product_id(raw_html: str, final_url: str) -> str:
+    pdid_match = re.search(r'var\s+pdId\s*=\s*"([^"]+)"', raw_html, re.IGNORECASE)
+    if pdid_match:
+        return pdid_match.group(1).strip()
+
+    path = urlparse(final_url).path.strip("/")
+    if path.endswith(".html"):
+        path = path[:-5]
+    return path.rsplit("/", 1)[-1].strip()
+
+
+def is_gzl_schedule_sellable(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    stripped = value.strip()
+    if not stripped:
+        return False
+    if "|||" in stripped or "|0|" in stripped:
+        return False
+    return True
+
+
+def fetch_gzl_schedule_date_map(final_url: str, pd_id: str, timeout: float) -> dict[str, Any] | None:
+    if not pd_id:
+        return None
+
+    parsed = urlparse(final_url)
+    endpoint = f"{parsed.scheme or 'http'}://{parsed.netloc}/freetour/scheduleDateMap.json"
+    headers = {
+        "Referer": final_url,
+        "X-Requested-With": "XMLHttpRequest",
+    }
+
+    try:
+        response = get_session().post(
+            endpoint,
+            data={"pdId": pd_id, "ctripPdSn": ""},
+            headers=headers,
+            timeout=timeout,
+        )
+        response.raise_for_status()
+        payload = response.json()
+    except (requests.RequestException, ValueError):
+        return None
+
+    schedule_map = payload.get("ScheduleDateMap")
+    if isinstance(schedule_map, dict):
+        return schedule_map
+    return None
+
+
 def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
     started = time.time()
     rule = find_domain_rule(url)
@@ -424,6 +475,45 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
                 return result
 
         if any(fragment in final_url.lower() for fragment in ("gzl.cn", "gzl.com.cn")):
+            sale_flag_match = re.search(r"isB2cOnSale\s*=\s*'([^']*)'", raw_html, re.IGNORECASE)
+            sale_flag = sale_flag_match.group(1).strip().lower() if sale_flag_match else ""
+            if sale_flag == "false":
+                result.update(
+                    {
+                        "category": UNAVAILABLE,
+                        "reason": "广之旅 sale flag is false",
+                        "matched_keyword": "isB2cOnSale=false",
+                    }
+                )
+                return result
+
+            if "<title>404</title>" in raw_html.lower():
+                result.update(
+                    {
+                        "category": UNAVAILABLE,
+                        "reason": "广之旅 404 shell",
+                        "matched_keyword": "title=404",
+                    }
+                )
+                return result
+
+            if "/freetour/" in urlparse(final_url).path.lower():
+                pd_id = extract_gzl_product_id(raw_html, final_url)
+                schedule_map = fetch_gzl_schedule_date_map(final_url, pd_id, timeout)
+                if schedule_map is not None:
+                    sellable_dates = [
+                        day for day, value in schedule_map.items() if is_gzl_schedule_sellable(value)
+                    ]
+                    if not sellable_dates:
+                        result.update(
+                            {
+                                "category": UNAVAILABLE,
+                                "reason": "广之旅 freetour schedule has no sellable dates",
+                                "matched_keyword": "scheduleDateMap=no-sellable-dates",
+                            }
+                        )
+                        return result
+
             rule_positive = match_keyword(text, rule.positive_markers)
             if rule_positive:
                 reason = f"{rule.name} detail markers found"

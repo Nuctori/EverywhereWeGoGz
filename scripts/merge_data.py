@@ -42,6 +42,7 @@ RAW_FILE_PRIORITIES = {
     "raw_gzl_api.json": 10,
 }
 JRT365_HOST_TOKEN = "jrt365.com"
+GZL_HOST_TOKENS = ("gzl.cn", "gzl.com.cn")
 PLACEHOLDER_IMAGE_TOKENS = ("lazyimg", "{{", "}}")
 
 
@@ -771,26 +772,44 @@ def is_jrt365_tour(tour):
     return JRT365_HOST_TOKEN in url
 
 
+def is_gzl_tour(tour):
+    url = str(tour.get("bookingUrl") or "").strip().lower()
+    return any(token in url for token in GZL_HOST_TOKENS)
+
+
 def filter_unavailable_tours(tours):
     enabled = os.environ.get("AVAILABILITY_FILTER", "0").strip().lower()
     if enabled in {"0", "false", "no", "off"}:
         jrt365_filter = os.environ.get("JRT365_AVAILABILITY_FILTER", "0").strip().lower()
-        if jrt365_filter not in {"1", "true", "yes", "on"}:
+        gzl_filter = os.environ.get("GZL_AVAILABILITY_FILTER", "1").strip().lower()
+
+        enabled_predicates = []
+        if jrt365_filter in {"1", "true", "yes", "on"}:
+            enabled_predicates.append(("JRT365", is_jrt365_tour))
+        if gzl_filter in {"1", "true", "yes", "on"}:
+            enabled_predicates.append(("GZL", is_gzl_tour))
+
+        if not enabled_predicates:
             print("[可用性] 已跳过自动下架过滤")
             return tours
 
-        jrt365_tours = [tour for tour in tours if is_jrt365_tour(tour)]
-        if not jrt365_tours:
-            print("[可用性] 全局过滤已关闭，且没有假日通线路需要单独校验")
+        scoped_tours = [
+            tour
+            for tour in tours
+            if any(predicate(tour) for _, predicate in enabled_predicates)
+        ]
+        if not scoped_tours:
+            print("[可用性] 全局过滤已关闭，且没有需要单独校验的线路")
             return tours
 
-        print(f"[可用性] 全局过滤已关闭，仅校验假日通线路 {len(jrt365_tours)} 条")
-        filtered_jrt365 = apply_availability_filter(jrt365_tours, label="JRT365 only")
-        kept_ids = {tour.get("id") for tour in filtered_jrt365}
+        scope_names = ", ".join(name for name, _ in enabled_predicates)
+        print(f"[可用性] 全局过滤已关闭，仅校验 {scope_names} 线路 {len(scoped_tours)} 条")
+        filtered_scoped = apply_availability_filter(scoped_tours, label=f"{scope_names} only")
+        kept_ids = {tour.get("id") for tour in filtered_scoped}
         return [
             tour
             for tour in tours
-            if not is_jrt365_tour(tour) or tour.get("id") in kept_ids
+            if not any(predicate(tour) for _, predicate in enabled_predicates) or tour.get("id") in kept_ids
         ]
 
     return apply_availability_filter(tours)
