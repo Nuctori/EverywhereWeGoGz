@@ -457,8 +457,8 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
             if detect_jrt365_unavailable_shell(raw_html):
                 result.update(
                     {
-                        "category": REACHABLE_UNVERIFIED,
-                        "reason": "假日通 detail shell without content; kept for manual review",
+                        "category": UNAVAILABLE,
+                        "reason": "假日通 detail shell without content",
                         "matched_keyword": "",
                     }
                 )

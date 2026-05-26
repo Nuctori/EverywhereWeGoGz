@@ -19,12 +19,12 @@ const rawFiles = [
 ];
 
 const sourceRules = {
-  '假日通': { min: 180, ratio: 0.75 },
+  '假日通': { min: 50, ratio: 0.2 },
   '康辉': { min: 850, ratio: 0.7 },
   '广东中旅': { min: 400, ratio: 0.75 },
   '品途': { min: 120, ratio: 0.75 },
   '广州去旅行': { min: 35, ratio: 0.75 },
-  '暴走村': { min: 90, ratio: 0.75 },
+  '暴走村': { min: 50, ratio: 0.45 },
   '广之旅': { min: 1900, ratio: 0.6 },
 };
 

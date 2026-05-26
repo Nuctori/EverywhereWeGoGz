@@ -305,18 +305,7 @@ class Jrt365Spider:
             driver = webdriver.Edge(options=options)
             all_items = []
 
-            # 定义各分类的目的地
-            categories = [
-                ('/tourgroup/tourgroup_list_sn.aspx',
-                 ['粤北', '粤西', '粤东及广州周边', '广州及珠三角'],
-                 '省内旅游'),
-                ('/tourgroup/tourgroup_list_gn.aspx',
-                 ['华东', '华中', '华北及东北', '华南', '西北及西南'],
-                 '国内旅游'),
-                ('/tourgroup/tourgroup_list_cj.aspx',
-                 ['东南亚', '中东非', '日本及韩国', '欧洲', '澳洲及新西兰', '美国及加拿大'],
-                 '出境旅游'),
-            ]
+            categories = []
 
             for path, mudidi_list, cat_name in categories:
                 for mudidi in mudidi_list:
@@ -392,9 +381,7 @@ class Jrt365Spider:
 
             # 港澳、热销、自由行（不指定目的地）
             simple_categories = [
-                ('/tourgroup/tourgroup_list_ga.aspx', '港澳旅游'),
-                ('/tourgroup/tourgroup_list_cty.aspx', '热销'),
-                ('/tourgroup/tourgroup_list_zyx.aspx', '自由行'),
+                ('/tourgroup/tourgroup_list.aspx', '全部线路'),
             ]
 
             for path, name in simple_categories:

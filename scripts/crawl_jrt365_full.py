@@ -45,25 +45,12 @@ def fetch():
         all_items = []
         seen = set()
 
-        categories = [
-            ('/tourgroup/tourgroup_list_sn.aspx',
-             ['粤北', '粤西', '粤东及广州周边', '广州及珠三角'],
-             '省内旅游'),
-            ('/tourgroup/tourgroup_list_gn.aspx',
-             ['华东', '华中', '华北及东北', '华南', '西北及西南'],
-             '国内旅游'),
-            ('/tourgroup/tourgroup_list_cj.aspx',
-             ['东南亚', '中东非', '日本及韩国', '欧洲', '澳洲及新西兰', '美国及加拿大'],
-             '出境旅游'),
-        ]
-
-        simple_categories = [
-            ('/tourgroup/tourgroup_list_ga.aspx', '港澳旅游'),
-            ('/tourgroup/tourgroup_list_cty.aspx', '热销'),
-            ('/tourgroup/tourgroup_list_zyx.aspx', '自由行'),
-        ]
-
         BASE_URL = "http://www.jrt365.com"
+
+        categories = []
+        simple_categories = [
+            ('/tourgroup/tourgroup_list.aspx', 'all tours'),
+        ]
 
         for path, mudidi_list, cat_name in categories:
             for mudidi in mudidi_list:

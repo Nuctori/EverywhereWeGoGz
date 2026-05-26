@@ -440,6 +440,53 @@ def _extract_input_value(soup: BeautifulSoup, input_id: str) -> str:
     return (node.get("value") or "").strip() if node else ""
 
 
+def _extract_gzl_note_blocks(notes: Any) -> list[str]:
+    if not notes:
+        return []
+    blocks: list[str] = []
+    for node in notes.select("li"):
+        text = _html_to_text(node)
+        if text:
+            blocks.append(text)
+    return _dedupe(blocks)
+
+
+def _is_gzl_fee_block(text: str) -> bool:
+    markers = [
+        "团费报价",
+        "费用已含",
+        "费用包含",
+        "费用不含",
+        "费用未含",
+        "报价包含",
+        "报价不含",
+        "门票优惠",
+        "小孩收费",
+        "儿童收费",
+        "儿童价标准",
+        "婴儿",
+        "单房差",
+        "补房差",
+    ]
+    return any(marker in text for marker in markers)
+
+
+def _is_gzl_policy_block(text: str) -> bool:
+    markers = [
+        "退团",
+        "取消",
+        "改签",
+        "延期",
+        "违约",
+        "扣除旅游费用",
+        "退款",
+        "退费",
+        "不能退换",
+        "不予退还",
+    ]
+    return any(marker in text for marker in markers)
+
+
 def _parse_gzl_itinerary(desc_soup: BeautifulSoup) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for index, node in enumerate(desc_soup.select(".trip-list > li")):
@@ -508,30 +555,35 @@ def _parse_gzl_detail(raw: dict[str, Any]) -> dict[str, Any]:
     travel_text = _html_to_text(travel) if travel else ""
     fee_text = _html_to_text(fee) if fee else ""
     notes_text = _html_to_text(notes) if notes else ""
+    note_blocks = _extract_gzl_note_blocks(notes)
+    fee_blocks = [block for block in note_blocks if _is_gzl_fee_block(block)]
+    policy_blocks = [block for block in note_blocks if _is_gzl_policy_block(block)]
+    fee_structured_text = "\n".join(part for part in [fee_text, *fee_blocks] if part)
+    policy_text = "\n".join(part for part in [fee_text, notes_text, *policy_blocks] if part)
 
     detail["highlights"] = _text_to_list(feature_text)[:6]
     detail["itinerary"] = _parse_gzl_itinerary(desc_soup) or _parse_itinerary_from_text(travel_text)
-    _apply_section_fields(detail, fee_text)
+    _apply_section_fields(detail, fee_structured_text)
     if not detail["childPolicy"]:
         detail["childPolicy"] = _sanitize_policy_text(
-            _extract_policy_sentence(notes_text, ["儿童", "小童", "占床", "不占床"]),
-            keywords=["儿童", "小童", "占床", "不占床"],
+            _extract_policy_sentence(policy_text, ["儿童", "小童", "小孩", "婴儿", "占床", "不占床"]),
+            keywords=["儿童", "小童", "小孩", "婴儿", "占床", "不占床"],
         )
     if not detail["singleSupplementNote"]:
         detail["singleSupplementNote"] = _sanitize_policy_text(
-            _extract_policy_sentence("\n".join(part for part in [fee_text, notes_text] if part), ["单房差", "补房差", "附加费"]),
+            _extract_policy_sentence(policy_text, ["单房差", "补房差", "附加费"]),
             keywords=["单房差", "补房差", "附加费"],
             max_length=160,
         )
         detail["singleSupplementAmount"] = _extract_single_room_amount(detail["singleSupplementNote"])
     if not detail["cancellationPolicy"]:
         detail["cancellationPolicy"] = _sanitize_policy_text(
-            _extract_policy_sentence(notes_text, ["退团", "取消", "违约"]),
+            _extract_policy_sentence(policy_text, ["退团", "取消", "违约"]),
             keywords=["退团", "取消", "违约"],
         )
     if not detail["refundPolicy"]:
         detail["refundPolicy"] = _sanitize_policy_text(
-            _extract_policy_sentence(notes_text, ["退款", "退费", "返还"]),
+            _extract_policy_sentence(policy_text, ["退款", "退费", "返还"]),
             keywords=["退款", "退费", "返还"],
         )
     detail["importantNotes"] = _merge_notes(notes_text)
@@ -708,7 +760,6 @@ def _parse_outdoors_detail(raw: dict[str, Any]) -> dict[str, Any]:
         detail["highlights"] = _text_to_list("\n".join(highlight_parts))[:6]
 
     return detail
-
 
 
 def _parse_jrt365_print_detail(print_url: str, referer: str) -> dict[str, Any]:

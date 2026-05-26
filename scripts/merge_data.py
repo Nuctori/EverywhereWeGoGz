@@ -35,8 +35,10 @@ DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
 IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.jfif', '.png', '.webp', '.gif', '.bmp', '.svg'}
 RAW_FILE_PRIORITIES = {
     "raw_jrt365_full.json": 10,
+    "raw_jrt365.json": 10,
     "raw_kanghui.json": 30,
     "raw_gdcts_full.json": 20,
+    "raw_http_full.json": 20,
     "raw_pintu_full.json": 10,
     "raw_saihuitong_full.json": 10,
     "raw_gzl_api.json": 10,
@@ -44,6 +46,7 @@ RAW_FILE_PRIORITIES = {
 }
 JRT365_HOST_TOKEN = "jrt365.com"
 GZL_HOST_TOKENS = ("gzl.cn", "gzl.com.cn")
+JLB_HOST_TOKEN = "360jlb.cn"
 PLACEHOLDER_IMAGE_TOKENS = ("lazyimg", "{{", "}}")
 
 
@@ -604,6 +607,9 @@ def make_tour_key(item):
     if source_id:
         return f"{item.get('source', '')}|id:{source_id}"
     source = item.get("source", "")
+    url = str(item.get("url") or item.get("bookingUrl") or "").strip()
+    if source == "假日通" and url:
+        return f"{source}|url:{url.lower()}"
     title = item.get("title", "")
     price = item.get("price", 0)
     try:
@@ -635,12 +641,48 @@ def extract_existing_detail(item):
         "exclusions": item.get("exclusions", []),
         "optionalExpenses": item.get("optionalExpenses", []),
         "importantNotes": item.get("importantNotes", []),
-        "childPolicy": "",
-        "singleSupplementNote": "",
-        "singleSupplementAmount": None,
-        "cancellationPolicy": "",
-        "refundPolicy": "",
+        "childPolicy": item.get("childPolicy", ""),
+        "singleSupplementNote": item.get("singleSupplementNote", ""),
+        "singleSupplementAmount": item.get("singleSupplementAmount"),
+        "cancellationPolicy": item.get("cancellationPolicy", ""),
+        "refundPolicy": item.get("refundPolicy", ""),
     }
+
+
+def merge_detail_with_existing(detail, existing_detail):
+    if not existing_detail:
+        return detail or empty_detail()
+
+    detail = detail or empty_detail()
+    merged = dict(existing_detail)
+
+    list_fields = [
+        "highlights",
+        "itinerary",
+        "inclusions",
+        "exclusions",
+        "optionalExpenses",
+        "importantNotes",
+    ]
+    scalar_fields = [
+        "childPolicy",
+        "singleSupplementNote",
+        "cancellationPolicy",
+        "refundPolicy",
+    ]
+
+    for field in list_fields:
+        merged[field] = detail.get(field) or existing_detail.get(field, [])
+
+    for field in scalar_fields:
+        merged[field] = detail.get(field) or existing_detail.get(field, "")
+
+    if detail.get("singleSupplementAmount") is not None:
+        merged["singleSupplementAmount"] = detail.get("singleSupplementAmount")
+    else:
+        merged["singleSupplementAmount"] = existing_detail.get("singleSupplementAmount")
+
+    return merged
 
 
 def load_detail_results(deduped, existing_tours):
@@ -675,10 +717,10 @@ def load_detail_results(deduped, existing_tours):
             except Exception as exc:
                 print(f"[详情] {key} -> {exc}")
                 detail = empty_detail()
-            if not detail_has_content(detail) and key in existing_tours:
+            if key in existing_tours:
                 existing_detail = extract_existing_detail(existing_tours[key])
                 if detail_has_content(existing_detail):
-                    detail = existing_detail
+                    detail = merge_detail_with_existing(detail, existing_detail)
             detail_results[key] = detail
             if idx % 50 == 0 or idx == total:
                 print(f"[详情] {idx}/{total}")
@@ -778,17 +820,25 @@ def is_gzl_tour(tour):
     return any(token in url for token in GZL_HOST_TOKENS)
 
 
+def is_360jlb_tour(tour):
+    url = str(tour.get("bookingUrl") or "").strip().lower()
+    return JLB_HOST_TOKEN in url
+
+
 def filter_unavailable_tours(tours):
     enabled = os.environ.get("AVAILABILITY_FILTER", "0").strip().lower()
     if enabled in {"0", "false", "no", "off"}:
         jrt365_filter = os.environ.get("JRT365_AVAILABILITY_FILTER", "0").strip().lower()
         gzl_filter = os.environ.get("GZL_AVAILABILITY_FILTER", "1").strip().lower()
+        jlb_filter = os.environ.get("JLB_AVAILABILITY_FILTER", "1").strip().lower()
 
         enabled_predicates = []
         if jrt365_filter in {"1", "true", "yes", "on"}:
             enabled_predicates.append(("JRT365", is_jrt365_tour))
         if gzl_filter in {"1", "true", "yes", "on"}:
             enabled_predicates.append(("GZL", is_gzl_tour))
+        if jlb_filter in {"1", "true", "yes", "on"}:
+            enabled_predicates.append(("360JLB", is_360jlb_tour))
 
         if not enabled_predicates:
             print("[可用性] 已跳过自动下架过滤")
@@ -858,12 +908,19 @@ def main():
                 }
                 all_raw.append(raw)
         except Exception as e:
-            print(f"[旧数据] 读取失败: {e}")    # 2. ????raw??
-    # ??????? raw_jrt365_full.json???? tourgroup_list.aspx ????
+            print(f"[旧数据] 读取失败: {e}")
+
+    # 2. 读取新的raw数据
+    # 假日通保留两个抓取口径：
+    # - raw_jrt365_full.json: 全量脚本输出
+    # - raw_jrt365.json: 主爬虫输出
+    # 两者存在一定差异，先一并并入，再统一去重，避免有效线路被单一路径漏掉。
     raw_files = [
         "raw_jrt365_full.json",
+        "raw_jrt365.json",
         "raw_kanghui.json",
         "raw_gdcts_full.json",
+        "raw_http_full.json",
         "raw_pintu_full.json",
         "raw_saihuitong_full.json",
         "raw_gzl_api.json",
