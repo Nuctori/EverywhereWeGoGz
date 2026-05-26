@@ -1,5 +1,3 @@
-import { Compass } from 'lucide-react';
-
 export function Header() {
   const navItems = ['目的地', '时间', '单房差', '平台'];
 
@@ -7,18 +5,13 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-stone-200/80 bg-[rgba(247,246,243,0.82)] backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-stone-200 bg-white shadow-sm">
-                <Compass className="h-4.5 w-4.5 text-stone-700" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-semibold tracking-tight text-stone-900">
-                    老广去边度
-                  </span>
-                </div>
-              </div>
-            </div>
+          <div className="flex min-w-0 items-center">
+            <img
+              src="/brand/laoguang-logo-tight.jpg"
+              alt="老广去边度"
+              className="h-12 w-auto max-w-[172px] object-contain sm:h-14 sm:max-w-[200px]"
+            />
+          </div>
 
           <nav className="flex items-center gap-3">
             <div className="hidden items-center gap-1 md:flex">
