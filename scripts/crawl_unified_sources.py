@@ -20,6 +20,7 @@ CRAWLERS = [
     ("pintu", "crawl_pintu_full"),
     ("saihuitong", "crawl_saihuitong_full"),
     ("gzl", "crawl_gzl_api"),
+    ("outdoors", "crawl_outdoors_full"),
 ]
 
 

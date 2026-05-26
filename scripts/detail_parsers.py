@@ -596,6 +596,121 @@ def _parse_360jlb_detail(raw: dict[str, Any]) -> dict[str, Any]:
     return detail
 
 
+def _parse_outdoors_itinerary(soup: BeautifulSoup) -> list[dict[str, Any]]:
+    container = soup.select_one("#siderexplain")
+    if not container:
+        return []
+
+    items: list[dict[str, Any]] = []
+    day_nodes = container.select(".frist_explain")
+    for index, node in enumerate(day_nodes):
+        day_marker = node.select_one(".i-exico")
+        marker_text = _html_to_text(day_marker) if day_marker else ""
+        day_match = re.search(r"D\s*(\d+)", marker_text, re.I)
+        day = int(day_match.group(1)) if day_match else index + 1
+
+        title_parts = []
+        for title_node in node.select(".p-frist_explain"):
+            title_text = _html_to_text(title_node)
+            if title_text:
+                title_parts.append(title_text.replace("\n", " "))
+        overview_node = node.find(string=re.compile("行程概述"))
+        overview = ""
+        if overview_node:
+            overview_parent = overview_node.find_parent("tr")
+            overview = _html_to_text(overview_parent) if overview_parent else ""
+            overview = re.sub(r"^行程概述\s*", "", overview).strip()
+
+        description = _html_to_text(node)
+        if len(description) < 8:
+            continue
+        title = overview or " - ".join(_dedupe(title_parts)) or f"第{day}天"
+
+        sibling = node.find_next_sibling()
+        extra_text = ""
+        while sibling and not (
+            getattr(sibling, "name", None)
+            and "frist_explain" in (sibling.get("class") or [])
+        ):
+            extra_text = "\n".join(part for part in [extra_text, _html_to_text(sibling)] if part)
+            sibling = sibling.find_next_sibling()
+
+        chunk = "\n".join(part for part in [description, extra_text] if part)
+        items.append(
+            {
+                "day": day,
+                "title": title[:120],
+                "description": chunk[:2400],
+                "meals": _extract_meals(chunk),
+                "accommodation": _extract_accommodation(chunk),
+                "activities": _extract_activities(chunk),
+            }
+        )
+
+    return items
+
+
+def _collect_outdoors_cost_text(soup: BeautifulSoup) -> str:
+    marker = soup.select_one("#cost-description")
+    if not marker:
+        return ""
+
+    parts: list[str] = []
+    for sibling in marker.find_next_siblings():
+        if getattr(sibling, "name", None) in {"h2", "div"}:
+            sibling_id = sibling.get("id") or ""
+            if sibling_id in {"mk06", "mk07"}:
+                break
+            classes = sibling.get("class") or []
+            if "h2-a" in classes:
+                break
+        text = _html_to_text(sibling)
+        if text:
+            parts.append(text)
+    return "\n".join(parts)
+
+
+def _collect_outdoors_notes(soup: BeautifulSoup) -> str:
+    start = soup.select_one("#mk06")
+    if not start:
+        return ""
+
+    parts: list[str] = []
+    for sibling in start.find_next_siblings():
+        if getattr(sibling, "name", None) in {"h2", "span"}:
+            sibling_id = sibling.get("id") or ""
+            if sibling_id == "mk07":
+                break
+        text = _html_to_text(sibling)
+        if text:
+            parts.append(text)
+    return "\n".join(parts)
+
+
+def _parse_outdoors_detail(raw: dict[str, Any]) -> dict[str, Any]:
+    detail = empty_detail()
+    text, _ = _fetch_text(raw["url"])
+    soup = BeautifulSoup(text, "lxml")
+
+    detail["itinerary"] = _parse_outdoors_itinerary(soup)
+
+    cost_text = _collect_outdoors_cost_text(soup)
+    notes_text = _collect_outdoors_notes(soup)
+    _apply_section_fields(detail, "\n".join(part for part in [cost_text, notes_text] if part))
+    detail["importantNotes"] = _merge_notes(notes_text)
+
+    highlight_parts = []
+    for selector in [".route-feature", ".line-feature", ".feature", ".xq_intro"]:
+        text_part = _collect_text_from_selectors(soup, [selector])
+        if text_part:
+            highlight_parts.append(text_part)
+    if highlight_parts:
+        detail["highlights"] = _text_to_list("\n".join(highlight_parts))[:6]
+
+    return detail
+
+
+
 def _parse_jrt365_print_detail(print_url: str, referer: str) -> dict[str, Any]:
     detail = empty_detail()
     text, final_url = _fetch_text(print_url, referer=referer)
@@ -723,6 +838,8 @@ def fetch_detail_data(raw: dict[str, Any]) -> dict[str, Any]:
             return _parse_gzl_detail(raw)
         if source in {"广州去旅行", "暴走村"}:
             return _parse_360jlb_detail(raw)
+        if source == "天涯户外":
+            return _parse_outdoors_detail(raw)
         if source == "假日通":
             return _parse_jrt365_detail(raw)
     except Exception as exc:

@@ -28,6 +28,7 @@ SOURCE_COLORS = {
     '广之旅': '#FF006E',
     '广东中旅': '#8338EC',
     '品途': '#3A86FF',
+    '天涯户外': '#2F855A',
 }
 
 DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
@@ -39,6 +40,7 @@ RAW_FILE_PRIORITIES = {
     "raw_pintu_full.json": 10,
     "raw_saihuitong_full.json": 10,
     "raw_gzl_api.json": 10,
+    "raw_outdoors_full.json": 10,
 }
 JRT365_HOST_TOKEN = "jrt365.com"
 GZL_HOST_TOKENS = ("gzl.cn", "gzl.com.cn")
@@ -865,6 +867,7 @@ def main():
         "raw_pintu_full.json",
         "raw_saihuitong_full.json",
         "raw_gzl_api.json",
+        "raw_outdoors_full.json",
     ]
     for fname in raw_files:
         fpath = os.path.join(data_dir, fname)
