@@ -1,5 +1,6 @@
 export function Header() {
   const navItems = ['目的地', '时间', '单房差', '平台'];
+  const logoSrc = `${import.meta.env.BASE_URL}brand/laoguang-logo-tight.jpg`;
 
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200/80 bg-[rgba(247,246,243,0.82)] backdrop-blur-xl">
@@ -7,7 +8,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between gap-4">
           <div className="flex min-w-0 items-center">
             <img
-              src="/brand/laoguang-logo-tight.jpg"
+              src={logoSrc}
               alt="老广去边度"
               className="h-12 w-auto max-w-[172px] object-contain sm:h-14 sm:max-w-[200px]"
             />

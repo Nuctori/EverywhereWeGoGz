@@ -14,6 +14,7 @@ interface HeroProps {
 
 export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
   const quickDestinations = ['桂林', '三亚', '云南', '张家界', '西藏', '新疆'];
+  const logoSrc = `${import.meta.env.BASE_URL}brand/laoguang-logo-full.jpg`;
 
   return (
     <section className="px-4 pb-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
@@ -70,7 +71,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
             </div>
 
             <img
-              src="/brand/laoguang-logo-full.jpg"
+              src={logoSrc}
               alt=""
               aria-hidden="true"
               className="hidden w-full max-w-[260px] justify-self-end object-contain lg:block"
