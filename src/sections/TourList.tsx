@@ -179,6 +179,12 @@ function formatDateLabel(value: string, today: string) {
   return value;
 }
 
+function addDays(dateString: string, days: number) {
+  const date = new Date(`${dateString}T00:00:00`);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split('T')[0];
+}
+
 const PAGE_SIZE = 24;
 const INITIAL_LOAD_COUNT = 24;
 
@@ -310,10 +316,10 @@ export function TourList({ searchQuery }: TourListProps) {
     () => [
       { label: '不限时间', value: '' },
       { label: '今天出发', value: today },
-      { label: '3天内', value: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0] },
-      { label: '7天内', value: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0] },
-      { label: '15天内', value: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0] },
-      { label: '30天内', value: new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0] },
+      { label: '3天内', value: addDays(today, 3) },
+      { label: '7天内', value: addDays(today, 7) },
+      { label: '15天内', value: addDays(today, 15) },
+      { label: '30天内', value: addDays(today, 30) },
     ],
     [today],
   );
@@ -581,6 +587,7 @@ export function TourList({ searchQuery }: TourListProps) {
         duration: tour.duration,
         price: tour.price,
         departureDate: tour.departureDate,
+        departureDates: tour.departureDates,
         transportType: tour.transportType,
         accommodationLevel: tour.accommodationLevel,
         meals: tour.meals,
@@ -991,6 +998,15 @@ export function TourList({ searchQuery }: TourListProps) {
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <AiRecommendPanel
+        tours={aiCandidateTours}
+        activeFilters={filters}
+        searchQuery={searchQuery}
+        result={aiRecommendationResult}
+        onResultChange={setAiRecommendationResult}
+        onFocusResults={focusResults}
+      />
+
       <div className="mb-6">
         {commonFilters}
 
@@ -1221,14 +1237,6 @@ export function TourList({ searchQuery }: TourListProps) {
       )}
 
       <TourDetailModal tour={selectedTour} loading={detailLoading} onClose={clearSelectedTour} />
-      <AiRecommendPanel
-        tours={aiCandidateTours}
-        activeFilters={filters}
-        searchQuery={searchQuery}
-        result={aiRecommendationResult}
-        onResultChange={setAiRecommendationResult}
-        onFocusResults={focusResults}
-      />
     </section>
   );
 }

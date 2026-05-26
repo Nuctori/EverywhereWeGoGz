@@ -123,6 +123,7 @@ export type AiRecommendationCandidate = Pick<
   | 'duration'
   | 'price'
   | 'departureDate'
+  | 'departureDates'
   | 'transportType'
   | 'accommodationLevel'
   | 'meals'

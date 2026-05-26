@@ -9,7 +9,25 @@ import type {
 } from '@/types/tour';
 
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
-const MAX_AI_CANDIDATES = 120;
+const MAX_AI_CANDIDATES = 180;
+const MAX_AI_RECOMMENDATIONS = 12;
+const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+interface AiTravelIntent {
+  tripDays?: number | null;
+  tripDaysMin?: number | null;
+  tripDaysMax?: number | null;
+  departureWeekdays?: number[];
+  departureTimeOfDay?: 'morning' | 'afternoon' | 'evening' | 'night' | 'any' | null;
+  destinationHints?: string[];
+  budgetMax?: number | null;
+  budgetMin?: number | null;
+  travelStyle?: string[];
+  mustHave?: string[];
+  avoid?: string[];
+  weatherSensitivity?: string[];
+  confidence?: number;
+}
 
 const THEME_KEYWORDS = [
   '亲子',
@@ -60,6 +78,7 @@ const DESTINATION_COORDS: Record<string, { latitude: number; longitude: number }
 };
 
 type StoredAiProviderConfig = Partial<AiProviderConfig>;
+type RecommendationPrimitive = ReturnType<typeof buildTourPrimitive>;
 
 function normalizeText(value: string) {
   return value.trim().toLowerCase();
@@ -214,7 +233,7 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
       (b.rating || 0) - (a.rating || 0) ||
       a.price - b.price,
     )
-    .slice(0, 6)
+    .slice(0, MAX_AI_RECOMMENDATIONS)
     .map((tour, index) => ({
       tourId: tour.id,
       score: 10 - index,
@@ -229,9 +248,129 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
     .map((tour) => scoreTour(tour, normalizedText))
     .filter((item): item is AiRecommendationItem => Boolean(item))
     .sort((a, b) => b.score - a.score)
-    .slice(0, 8);
+    .slice(0, MAX_AI_RECOMMENDATIONS);
 
   return items.length > 0 ? items : fallbackRecommendations(tours);
+}
+
+function getDepartureDates(tour: AiRecommendationCandidate) {
+  return [
+    ...(tour.departureDates || []),
+    ...(tour.hotDepartureDates || []),
+    tour.departureDate,
+  ]
+    .filter(Boolean)
+    .filter((date, index, all) => all.indexOf(date) === index);
+}
+
+function getWeekday(date: string) {
+  const parsed = new Date(`${date}T00:00:00`);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed.getDay();
+}
+
+function inferScheduleHints(tour: AiRecommendationCandidate) {
+  const corpus = getSearchCorpus(tour);
+  const dates = getDepartureDates(tour);
+  const weekdays = dates
+    .map(getWeekday)
+    .filter((day): day is number => day !== null);
+  const textWeekdays = WEEKDAY_LABELS
+    .map((label, weekday) => {
+      const short = label.replace('周', '');
+      const matched =
+        corpus.includes(label) ||
+        corpus.includes(`星期${short}`) ||
+        corpus.includes(`礼拜${short}`) ||
+        (weekday === 0 && (corpus.includes('周天') || corpus.includes('星期天')));
+      return matched ? weekday : null;
+    })
+    .filter((weekday): weekday is number => weekday !== null);
+  const uniqueWeekdays = [...new Set([...weekdays, ...textWeekdays])].sort((a, b) => a - b);
+  const eveningDeparture = /晚|晚上|夜间|夜发|夜游|卧铺|夕发|夜宿/.test(corpus);
+  const recurringText = /每周|天天|全年|逢周|固定发团|班期/.test(corpus);
+
+  return {
+    departureDates: dates.slice(0, 10),
+    departureWeekdays: uniqueWeekdays,
+    departureWeekdayLabels: uniqueWeekdays.map((weekday) => WEEKDAY_LABELS[weekday]),
+    timeOfDayHints: eveningDeparture ? ['evening', 'night'] : [],
+    hasEveningOrNightDeparture: eveningDeparture,
+    hasRecurringScheduleText: recurringText,
+    rawScheduleText: [tour.title, tour.departureDate, ...(tour.hotDepartureDates || [])]
+      .filter(Boolean)
+      .join(' · ')
+      .slice(0, 220),
+  };
+}
+
+function buildTourPrimitive(tour: AiRecommendationCandidate) {
+  return {
+    id: tour.id,
+    title: tour.title,
+    source: tour.source,
+    destination: tour.destination,
+    tripDays: tour.duration,
+    price: tour.price,
+    theme: tour.theme,
+    tags: tour.tags?.slice(0, 6) ?? [],
+    highlights: tour.highlights?.slice(0, 4) ?? [],
+    transportType: tour.transportType,
+    accommodationLevel: tour.accommodationLevel,
+    meals: tour.meals,
+    leisureLevel: tour.leisureLevel,
+    suitableFor: tour.suitableFor?.slice(0, 4) ?? [],
+    season: tour.season,
+    rating: tour.rating,
+    groupSize: tour.groupSize,
+    isHot: tour.isHot,
+    schedule: inferScheduleHints(tour),
+  };
+}
+
+function intentMatchesPrimitive(intent: AiTravelIntent | null, primitive: RecommendationPrimitive) {
+  if (!intent) return true;
+
+  if (intent.tripDays && primitive.tripDays !== intent.tripDays) return false;
+  if (intent.tripDaysMin && primitive.tripDays < intent.tripDaysMin) return false;
+  if (intent.tripDaysMax && primitive.tripDays > intent.tripDaysMax) return false;
+  if (intent.budgetMin && primitive.price < intent.budgetMin) return false;
+  if (intent.budgetMax && primitive.price > intent.budgetMax) return false;
+
+  const weekdays = intent.departureWeekdays?.filter((day) => Number.isInteger(day)) ?? [];
+  if (weekdays.length > 0) {
+    const hasWeekday = primitive.schedule.departureWeekdays.some((weekday) => weekdays.includes(weekday));
+    if (!hasWeekday) return false;
+  }
+
+  if (
+    (intent.departureTimeOfDay === 'evening' || intent.departureTimeOfDay === 'night') &&
+    !primitive.schedule.hasEveningOrNightDeparture
+  ) {
+    return false;
+  }
+
+  if (intent.destinationHints?.length) {
+    const destinationCorpus = `${primitive.destination} ${primitive.title}`.toLowerCase();
+    const hasDestination = intent.destinationHints.some((hint) =>
+      destinationCorpus.includes(String(hint).toLowerCase()),
+    );
+    if (!hasDestination) return false;
+  }
+
+  return true;
+}
+
+function rankPrimitive(primitive: RecommendationPrimitive, localItems: AiRecommendationItem[]) {
+  const localRank = localItems.findIndex((item) => item.tourId === primitive.id);
+  return (
+    (localRank >= 0 ? 200 - localRank * 8 : 0) +
+    (primitive.isHot ? 16 : 0) +
+    Math.min(primitive.schedule.departureDates.length, 6) * 3 +
+    (primitive.schedule.hasRecurringScheduleText ? 5 : 0) +
+    (primitive.rating || 0) * 2 -
+    Math.min(primitive.price / 1000, 12)
+  );
 }
 
 function readStoredAiConfig(): StoredAiProviderConfig {
@@ -290,37 +429,15 @@ function getResolvedAiConfig(override?: Partial<AiProviderConfig>): AiProviderCo
 function compactCandidates(
   tours: AiRecommendationCandidate[],
   localItems: AiRecommendationItem[],
+  intent: AiTravelIntent | null = null,
 ) {
-  const tourById = new Map(tours.map((tour) => [tour.id, tour]));
-  const ranked = localItems
-    .map((item) => tourById.get(item.tourId))
-    .filter((tour): tour is AiRecommendationCandidate => Boolean(tour));
-  const rankedIds = new Set(ranked.map((tour) => tour.id));
-  const rest = tours.filter((tour) => !rankedIds.has(tour.id));
-  const selected = [...ranked, ...rest].slice(0, MAX_AI_CANDIDATES);
+  const primitives = tours.map(buildTourPrimitive);
+  const strictMatches = primitives.filter((primitive) => intentMatchesPrimitive(intent, primitive));
+  const pool = strictMatches.length >= 8 ? strictMatches : primitives;
 
-  return selected.map((tour) => ({
-    id: tour.id,
-    title: tour.title,
-    source: tour.source,
-    destination: tour.destination,
-    duration: tour.duration,
-    price: tour.price,
-    departureDate: tour.departureDate,
-    transportType: tour.transportType,
-    accommodationLevel: tour.accommodationLevel,
-    meals: tour.meals,
-    highlights: tour.highlights?.slice(0, 4) ?? [],
-    tags: tour.tags?.slice(0, 6) ?? [],
-    isHot: tour.isHot,
-    theme: tour.theme,
-    suitableFor: tour.suitableFor?.slice(0, 4) ?? [],
-    leisureLevel: tour.leisureLevel,
-    season: tour.season,
-    rating: tour.rating,
-    groupSize: tour.groupSize,
-    hotDepartureDates: tour.hotDepartureDates?.slice(0, 6) ?? [],
-  }));
+  return pool
+    .sort((a, b) => rankPrimitive(b, localItems) - rankPrimitive(a, localItems))
+    .slice(0, MAX_AI_CANDIDATES);
 }
 
 function getLikelyDestination(text: string, tours: AiRecommendationCandidate[]) {
@@ -440,18 +557,21 @@ function buildAiMessages(params: {
   candidates: ReturnType<typeof compactCandidates>;
   weatherContext: AiWeatherContext;
   searchQuery: string;
+  intent: AiTravelIntent | null;
 }) {
   const systemPrompt = [
     '你是旅行团推荐顾问，需要根据用户需求、天气、季节、目的地常识和给定旅行团候选列表推荐线路。',
     '只能推荐候选列表中真实存在的 tourId，不允许编造线路、价格、班期或服务。',
-    '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选列表。',
+    '候选里的 schedule、tripDays、price、destination、theme、leisureLevel 是推荐原语，请优先用这些结构化原语判断硬条件。',
+    '例如用户说“周五晚上出发的3日游”，应理解为 departureWeekdays 包含 5、hasEveningOrNightDeparture 为 true、tripDays 为 3。',
+    '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选列表和推荐原语。',
     '如果用户提到老人、儿童、轻松、怕累，应降低高强度、长途奔波和极端天气目的地优先级。',
     '如果天气或季节不适合，要在理由中说明风险，并优先推荐更稳妥的候选。',
     '严格输出 JSON，不要 Markdown，不要额外解释。',
   ].join('\n');
 
   const userPayload = {
-    task: '从 candidateTours 中选出最多 8 条旅行团，按适合程度排序。',
+    task: `从 candidateTours 中选出最多 ${MAX_AI_RECOMMENDATIONS} 条旅行团，按适合程度排序。`,
     outputSchema: {
       summary: '一句中文总结，说明推荐依据',
       items: [
@@ -466,6 +586,7 @@ function buildAiMessages(params: {
     userNeed: params.userText,
     searchQuery: params.searchQuery,
     recentConversation: params.messages.slice(-8).map(({ role, content }) => ({ role, content })),
+    interpretedIntent: params.intent,
     weatherContext: params.weatherContext,
     candidateTours: params.candidates,
   };
@@ -473,6 +594,49 @@ function buildAiMessages(params: {
   return [
     { role: 'system', content: systemPrompt },
     { role: 'user', content: JSON.stringify(userPayload) },
+  ];
+}
+
+function buildIntentMessages(params: {
+  userText: string;
+  messages: AiRecommendationMessage[];
+  searchQuery: string;
+}) {
+  return [
+    {
+      role: 'system',
+      content: [
+        '你负责把旅行团自然语言需求理解成结构化意图。',
+        '不要推荐线路，只抽取约束和偏好。',
+        'weekday 使用 0-6 表示周日到周六；周五是 5。',
+        '如果用户说晚上、晚、夜发、夜间、周五晚，departureTimeOfDay 应为 evening 或 night。',
+        '如果不确定就留 null 或空数组，不要硬猜。',
+        '严格输出 JSON，不要 Markdown。',
+      ].join('\n'),
+    },
+    {
+      role: 'user',
+      content: JSON.stringify({
+        outputSchema: {
+          tripDays: '精确行程天数，数字或 null',
+          tripDaysMin: '最少天数，数字或 null',
+          tripDaysMax: '最多天数，数字或 null',
+          departureWeekdays: '出发星期数组，0=周日，5=周五',
+          departureTimeOfDay: 'morning|afternoon|evening|night|any|null',
+          destinationHints: ['目的地词'],
+          budgetMin: '最低预算或 null',
+          budgetMax: '最高预算或 null',
+          travelStyle: ['亲子、老人、轻松、徒步、海边等偏好'],
+          mustHave: ['必须满足的条件'],
+          avoid: ['需要避开的条件'],
+          weatherSensitivity: ['怕热、避雨、台风风险、避寒等'],
+          confidence: '0-1',
+        },
+        userNeed: params.userText,
+        searchQuery: params.searchQuery,
+        recentConversation: params.messages.slice(-8).map(({ role, content }) => ({ role, content })),
+      }),
+    },
   ];
 }
 
@@ -509,7 +673,7 @@ function validateAiItems(
   return rawItems
     .map((item) => item as Partial<AiRecommendationItem>)
     .filter((item) => item.tourId && candidateIds.has(item.tourId))
-    .slice(0, 8)
+    .slice(0, MAX_AI_RECOMMENDATIONS)
     .map((item, index) => ({
       tourId: String(item.tourId),
       score: Number.isFinite(Number(item.score)) ? Number(item.score) : 80 - index,
@@ -520,9 +684,33 @@ function validateAiItems(
     }));
 }
 
+function normalizeIntent(value: unknown): AiTravelIntent | null {
+  if (!value || typeof value !== 'object') return null;
+  const raw = value as AiTravelIntent;
+  return {
+    tripDays: raw.tripDays ? Number(raw.tripDays) : null,
+    tripDaysMin: raw.tripDaysMin ? Number(raw.tripDaysMin) : null,
+    tripDaysMax: raw.tripDaysMax ? Number(raw.tripDaysMax) : null,
+    departureWeekdays: Array.isArray(raw.departureWeekdays)
+      ? raw.departureWeekdays.map(Number).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+      : [],
+    departureTimeOfDay: raw.departureTimeOfDay || null,
+    destinationHints: Array.isArray(raw.destinationHints) ? raw.destinationHints.map(String).filter(Boolean) : [],
+    budgetMin: raw.budgetMin ? Number(raw.budgetMin) : null,
+    budgetMax: raw.budgetMax ? Number(raw.budgetMax) : null,
+    travelStyle: Array.isArray(raw.travelStyle) ? raw.travelStyle.map(String).filter(Boolean) : [],
+    mustHave: Array.isArray(raw.mustHave) ? raw.mustHave.map(String).filter(Boolean) : [],
+    avoid: Array.isArray(raw.avoid) ? raw.avoid.map(String).filter(Boolean) : [],
+    weatherSensitivity: Array.isArray(raw.weatherSensitivity)
+      ? raw.weatherSensitivity.map(String).filter(Boolean)
+      : [],
+    confidence: Number.isFinite(Number(raw.confidence)) ? Number(raw.confidence) : undefined,
+  };
+}
+
 async function callAiApi(params: {
   config: AiProviderConfig;
-  messages: ReturnType<typeof buildAiMessages>;
+  messages: ReturnType<typeof buildAiMessages> | ReturnType<typeof buildIntentMessages>;
 }) {
   const response = await fetch(getChatCompletionsUrl(params.config.baseUrl), {
     method: 'POST',
@@ -585,8 +773,21 @@ export async function requestAiRecommendations({
   }
 
   try {
+    const intentResponse = await callAiApi({
+      config,
+      messages: buildIntentMessages({
+        userText: text,
+        messages,
+        searchQuery,
+      }),
+    });
+    const intent = normalizeIntent(intentResponse);
     const weatherContext = await fetchWeatherContext(text, availableCandidates);
-    const compactedCandidates = compactCandidates(availableCandidates, localItems);
+    const compactedCandidates = compactCandidates(
+      availableCandidates,
+      localItems,
+      intent,
+    );
     const aiResponse = await callAiApi({
       config,
       messages: buildAiMessages({
@@ -595,6 +796,7 @@ export async function requestAiRecommendations({
         candidates: compactedCandidates,
         weatherContext,
         searchQuery,
+        intent,
       }),
     });
     const aiItems = validateAiItems(aiResponse, availableCandidates);
