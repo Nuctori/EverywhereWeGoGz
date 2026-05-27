@@ -44,6 +44,7 @@ import {
 } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { zhCN } from 'date-fns/locale';
 
 import { sources, destinations, themes } from '@/data/tours';
 
@@ -176,17 +177,33 @@ function useDebouncedValue<T>(value: T, delay: number): T {
 function formatDateLabel(value: string, today: string) {
   if (!value) return '';
   if (value === today) return '今天';
-  return value;
+  const [year, month, day] = value.split('-');
+  if (!year || !month || !day) return value;
+  return `${Number(month)}月${Number(day)}日`;
 }
 
 function addDays(dateString: string, days: number) {
   const date = new Date(`${dateString}T00:00:00`);
   date.setDate(date.getDate() + days);
-  return date.toISOString().split('T')[0];
+  return toDateInputValue(date);
+}
+
+function toDateInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function fromDateInputValue(value: string) {
+  const [year, month, day] = value.split('-').map(Number);
+  if (!year || !month || !day) return undefined;
+  return new Date(year, month - 1, day);
 }
 
 const PAGE_SIZE = 24;
 const INITIAL_LOAD_COUNT = 24;
+const VISIBLE_DESTINATION_COUNT = 14;
 
 const DEFAULT_FILTERS: FilterState = {
   destination: '',
@@ -310,7 +327,7 @@ export function TourList({ searchQuery }: TourListProps) {
     setSliderValues([0, 100]);
   }, [maxPriceAll]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = toDateInputValue(new Date());
 
   const dateOptions = useMemo(
     () => [
@@ -335,6 +352,37 @@ export function TourList({ searchQuery }: TourListProps) {
     ],
     [maxPriceAll],
   );
+
+  const visibleDestinations = useMemo(() => {
+    const destinationCounts = new Map<string, number>();
+
+    for (const tour of localTours) {
+      if (isDisplayableTour(tour) && tour.destination) {
+        destinationCounts.set(
+          tour.destination,
+          (destinationCounts.get(tour.destination) ?? 0) + 1,
+        );
+      }
+    }
+
+    const rankedDestinations = [...destinations].sort(
+      (a, b) => (destinationCounts.get(b) ?? 0) - (destinationCounts.get(a) ?? 0),
+    );
+
+    return rankedDestinations.slice(0, VISIBLE_DESTINATION_COUNT);
+  }, [localTours]);
+  const overflowDestinations = useMemo(
+    () => destinations.filter((dest) => !visibleDestinations.includes(dest)),
+    [visibleDestinations],
+  );
+  const selectedDestinationInOverflow =
+    Boolean(filters.destination) && !visibleDestinations.includes(filters.destination);
+  const dateRangeLabel =
+    filters.departureDateStart || filters.departureDateEnd
+      ? `${filters.departureDateStart ? formatDateLabel(filters.departureDateStart, today) : '不限'} 至 ${
+          filters.departureDateEnd ? formatDateLabel(filters.departureDateEnd, today) : '不限'
+        }`
+      : '';
 
   const dateFilter = useMemo(() => {
     if (filters.departureDateStart || filters.departureDateEnd) {
@@ -370,7 +418,7 @@ export function TourList({ searchQuery }: TourListProps) {
       new Map(
         aiRecommendationResult?.items.map((item, index) => [
           item.tourId,
-          { ...item, rank: index + 1 },
+          { ...item, rank: item.reason ? index + 1 : undefined },
         ]) ?? [],
       ),
     [aiRecommendationResult],
@@ -679,7 +727,7 @@ export function TourList({ searchQuery }: TourListProps) {
             >
               全部目的地
             </button>
-            {destinations.map((dest) => (
+            {visibleDestinations.map((dest) => (
               <button
                 key={dest}
                 type="button"
@@ -694,6 +742,33 @@ export function TourList({ searchQuery }: TourListProps) {
                 {dest}
               </button>
             ))}
+            <Select
+              value={selectedDestinationInOverflow ? filters.destination : 'more-destinations'}
+              onValueChange={(value) => {
+                if (value !== 'more-destinations') {
+                  setFilters({ ...filters, destination: value });
+                }
+              }}
+            >
+              <SelectTrigger
+                className={cn(
+                  'h-10 w-[148px] shrink-0 rounded-full border px-4 text-sm shadow-none',
+                  selectedDestinationInOverflow
+                    ? selectedChipClass
+                    : idleChipClass,
+                )}
+              >
+                <SelectValue placeholder="更多目的地" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[320px]">
+                <SelectItem value="more-destinations">更多目的地</SelectItem>
+                {overflowDestinations.map((dest) => (
+                  <SelectItem key={dest} value={dest}>
+                    {dest}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -891,45 +966,57 @@ export function TourList({ searchQuery }: TourListProps) {
             </label>
             <div className="rounded-[22px] border border-stone-200 bg-white p-4">
               <div className="mb-3 text-sm text-stone-500">
-                {filters.departureDateStart || filters.departureDateEnd
-                  ? `${filters.departureDateStart || '不限'} 至 ${filters.departureDateEnd || '不限'}`
-                  : filters.departureDate
+                {dateRangeLabel ||
+                  (filters.departureDate
                     ? `${formatDateLabel(filters.departureDate, today)} 及之前`
-                    : '当前为全部日期'}
+                    : '当前为全部日期')}
               </div>
               <div className="flex gap-2 flex-wrap">
                 <Popover open={dateRangeOpen} onOpenChange={setDateRangeOpen}>
                   <PopoverTrigger asChild>
                     <Button
-                    type="button"
-                    variant="outline"
-                    className={cn(
-                        'h-10 rounded-full border-stone-200 bg-white',
+                      type="button"
+                      variant="outline"
+                      className={cn(
+                        'h-10 gap-2 rounded-full border-stone-200 bg-white px-4 text-stone-700',
                         (filters.departureDateStart || filters.departureDateEnd) &&
                           'border-stone-300 bg-stone-50 text-stone-900',
                       )}
                     >
-                      自定义日期范围
+                      <Calendar className="w-4 h-4 text-stone-500" />
+                      {dateRangeLabel || '自定义日期'}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto rounded-[18px] border-stone-200 p-2 shadow-xl" align="start">
                     <CalendarComponent
                       mode="range"
                       numberOfMonths={2}
+                      locale={zhCN}
+                      weekStartsOn={1}
                       selected={{
                         from: filters.departureDateStart
-                          ? new Date(filters.departureDateStart)
+                          ? fromDateInputValue(filters.departureDateStart)
                           : undefined,
                         to: filters.departureDateEnd
-                          ? new Date(filters.departureDateEnd)
+                          ? fromDateInputValue(filters.departureDateEnd)
                           : undefined,
+                      }}
+                      formatters={{
+                        formatCaption: (date) =>
+                          `${date.getFullYear()}年${date.getMonth() + 1}月`,
+                        formatWeekdayName: (date) =>
+                          ['日', '一', '二', '三', '四', '五', '六'][date.getDay()],
+                      }}
+                      labels={{
+                        labelNext: () => '下个月',
+                        labelPrevious: () => '上个月',
                       }}
                       onSelect={(range) => {
                         if (!range?.from) return;
 
-                        const start = range.from.toISOString().split('T')[0];
+                        const start = toDateInputValue(range.from);
                         const end = range.to
-                          ? range.to.toISOString().split('T')[0]
+                          ? toDateInputValue(range.to)
                           : start;
 
                         setFilters({
@@ -1132,7 +1219,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
                   <Calendar className="w-3 h-3" />
                   {filters.departureDateStart || filters.departureDateEnd
-                    ? `${filters.departureDateStart || '不限'} 至 ${filters.departureDateEnd || '不限'}`
+                    ? dateRangeLabel
                     : formatDateLabel(filters.departureDate, today)}
                   <X
                     className="w-3 h-3 cursor-pointer"
