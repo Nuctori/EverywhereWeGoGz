@@ -95,11 +95,7 @@ function getReliablePolicy(value: string | undefined) {
 export function TourDetailModal({ tour, loading = false, onClose }: TourDetailModalProps) {
   const isMobile = useIsMobile();
   if (!tour) return null;
-  const heroImage = resolveAssetUrl(
-    (tour.images?.[0] || '').startsWith('http://')
-      ? (tour.images?.[0] || '').replace('http://', 'https://')
-      : tour.images?.[0] || '',
-  );
+  const heroImage = resolveAssetUrl(tour.images?.[0] || '');
   const heroFallbackImage = getFallbackImage(tour.title);
 
   const searchUrls: Record<string, string> = {
