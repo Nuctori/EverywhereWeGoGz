@@ -8,8 +8,21 @@ import re
 import json
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urljoin
+
+import requests
+from bs4 import BeautifulSoup
 
 GROUPNO_RE = re.compile(r'groupno=([^&"\']+)', re.IGNORECASE)
+TOURNAME_RE = re.compile(r'is_tournameno\s*=\s*"([^"]*)"', re.IGNORECASE)
+GROUPNO_JS_RE = re.compile(r'is_groupno\s*=\s*"([^"]*)"', re.IGNORECASE)
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0",
+    "X-Requested-With": "XMLHttpRequest",
+}
+BASE_URL = "http://www.jrt365.com"
 
 def create_webdriver():
     from selenium import webdriver
@@ -45,6 +58,117 @@ def extract_groupno(url):
     return match.group(1).strip() if match else ''
 
 
+def decode_response_text(response):
+    for encoding in ('utf-8-sig', 'utf-8', response.encoding or '', response.apparent_encoding or ''):
+        if not encoding:
+            continue
+        try:
+            return response.content.decode(encoding)
+        except Exception:
+            continue
+    return response.text
+
+
+def parse_flashcalendar_dates(markup, year, month):
+    soup = BeautifulSoup(markup, 'lxml')
+    result = soup.select_one('#result')
+    if not result or result.get_text(' ', strip=True).lower() != 'true':
+        return []
+
+    allday = soup.select_one('#allday')
+    if not allday:
+        return []
+
+    dates = []
+    for node in allday.find_all(['a', 'li', 'div']):
+        text = node.get_text(' ', strip=True)
+        match = re.search(r'(\d{1,2})\s*日', text)
+        if not match:
+            continue
+        day = int(match.group(1))
+        iso = f"{int(year):04d}-{int(month):02d}-{day:02d}"
+        if iso not in dates:
+            dates.append(iso)
+    return dates
+
+
+def fetch_detail_snapshot(item):
+    url = str(item.get('url') or '').strip()
+    if not url:
+        return {}
+
+    try:
+        detail_resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
+        detail_resp.raise_for_status()
+    except Exception:
+        return {}
+
+    detail_text = decode_response_text(detail_resp)
+    if '该团号不可在此显示' in detail_text:
+        return {}
+
+    soup = BeautifulSoup(detail_text, 'lxml')
+    title = ''
+    for selector in (
+        '#ctl00_ContentPlaceHolder_htmlform_id_tourname',
+        '#ctl00_ContentPlaceHolder_htmlform_id_tourname_1',
+    ):
+        node = soup.select_one(selector)
+        title = node.get_text(' ', strip=True) if node else ''
+        if title:
+            break
+
+    tournameno_match = TOURNAME_RE.search(detail_text)
+    groupno_match = GROUPNO_JS_RE.search(detail_text)
+    tournameno = tournameno_match.group(1).strip() if tournameno_match else ''
+    groupno = groupno_match.group(1).strip() if groupno_match else extract_groupno(url)
+    print_link = soup.select_one('#ctl00_ContentPlaceHolder_htmlform_id_print_xc')
+    print_url = urljoin(detail_resp.url, print_link.get('href', '').strip()) if print_link and print_link.get('href') else ''
+
+    departure_dates = []
+    if tournameno and groupno:
+        current_year = time.localtime().tm_year
+        current_month = time.localtime().tm_mon
+        month_windows = []
+        for offset in range(0, 12):
+            month_index = current_month - 1 + offset
+            year = current_year + (month_index // 12)
+            month = (month_index % 12) + 1
+            month_windows.append((year, month))
+
+        for year, month in month_windows:
+                try:
+                    calendar_resp = requests.get(
+                        f'{BASE_URL}/tourgroup/tourgroup_ziliao_flashcalendar.aspx',
+                        params={
+                            'tournameno': tournameno,
+                            'yyyy': str(year),
+                            'mm': f'{month:02d}',
+                            'groupno': groupno,
+                        },
+                        headers={**HEADERS, 'Referer': detail_resp.url},
+                        timeout=20,
+                    )
+                    calendar_resp.raise_for_status()
+                except Exception:
+                    continue
+                calendar_text = decode_response_text(calendar_resp)
+                for date in parse_flashcalendar_dates(calendar_text, year, month):
+                    if date not in departure_dates:
+                        departure_dates.append(date)
+
+    return {
+        'sourceId': groupno,
+        'groupno': groupno,
+        'tournameno': tournameno,
+        'departureDates': departure_dates,
+        'departureDate': departure_dates[0] if departure_dates else '',
+        'printUrl': print_url,
+        'detailTitle': title,
+        'hasDetailContent': bool(title),
+    }
+
+
 def fetch():
     print("[假日通] 全量抓取中...")
     try:
@@ -53,8 +177,6 @@ def fetch():
         driver = create_webdriver()
         all_items = []
         seen = set()
-
-        BASE_URL = "http://www.jrt365.com"
 
         categories = []
         simple_categories = [
@@ -132,6 +254,7 @@ def fetch():
                                             item["img"] = img_url
                                         else:
                                             item["img"] = BASE_URL + img_url
+                                    item.update(fetch_detail_snapshot(item))
                                     all_items.append(item)
                             except:
                                 pass
@@ -204,6 +327,7 @@ def fetch():
                                         item["img"] = img_url
                                     else:
                                         item["img"] = BASE_URL + img_url
+                                item.update(fetch_detail_snapshot(item))
                                 all_items.append(item)
                         except:
                             pass
@@ -218,8 +342,42 @@ def fetch():
         return []
 
 
+def refresh_existing():
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
+    data_dir = os.path.abspath(data_dir)
+    input_path = os.path.join(data_dir, "raw_jrt365_full.json")
+    if not os.path.exists(input_path):
+        raise FileNotFoundError(input_path)
+
+    with open(input_path, "r", encoding="utf-8") as f:
+        items = json.load(f)
+
+    workers = max(4, min(16, int(os.environ.get("JRT365_REFRESH_WORKERS", "8") or "8")))
+    refreshed = [None] * len(items)
+    total = len(items)
+
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        future_map = {
+            executor.submit(fetch_detail_snapshot, dict(item)): index
+            for index, item in enumerate(items)
+        }
+        for completed, future in enumerate(as_completed(future_map), start=1):
+            index = future_map[future]
+            merged = dict(items[index])
+            try:
+                merged.update(future.result() or {})
+            except Exception:
+                pass
+            refreshed[index] = merged
+            if completed % 20 == 0 or completed == total:
+                print(f"[假日通] 已刷新 {completed}/{total} 条")
+
+    return refreshed
+
+
 def main():
-    items = fetch()
+    refresh_mode = os.environ.get("JRT365_REFRESH_EXISTING", "").strip().lower() in {"1", "true", "yes", "on"}
+    items = refresh_existing() if refresh_mode else fetch()
     data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
     data_dir = os.path.abspath(data_dir)
     os.makedirs(data_dir, exist_ok=True)
