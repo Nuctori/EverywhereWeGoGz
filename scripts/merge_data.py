@@ -48,6 +48,7 @@ JRT365_HOST_TOKEN = "jrt365.com"
 GZL_HOST_TOKENS = ("gzl.cn", "gzl.com.cn")
 JLB_HOST_TOKEN = "360jlb.cn"
 PLACEHOLDER_IMAGE_TOKENS = ("lazyimg", "{{", "}}")
+OUTDOORS_HOST_TOKEN = "outdoors.com.cn"
 
 
 def looks_like_image(content: bytes) -> bool:
@@ -82,7 +83,8 @@ def normalize_image_path(url: str, source: str) -> str:
     parsed = urlparse(normalized_url)
     if parsed.scheme not in {'http', 'https'}:
         return normalized_url
-    if image_cache_mode in {"remote", "skip", "off"}:
+    force_cache = source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc
+    if image_cache_mode in {"remote", "skip", "off"} and not force_cache:
         return normalized_url
     ext = os.path.splitext(parsed.path)[1].lower()
     if ext not in IMAGE_EXTENSIONS:
@@ -106,7 +108,10 @@ def normalize_image_path(url: str, source: str) -> str:
         return public_path
 
     try:
-        resp = requests.get(normalized_url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        if source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc:
+            headers["Referer"] = f"https://www.{OUTDOORS_HOST_TOKEN}/"
+        resp = requests.get(normalized_url, headers=headers, timeout=20)
         resp.raise_for_status()
         content_type = resp.headers.get('content-type', '').lower()
         if content_type and 'image' not in content_type and not looks_like_image(resp.content):
