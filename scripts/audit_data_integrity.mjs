@@ -18,6 +18,8 @@ const rawFiles = [
   'src/data/raw_gzl_api.json',
 ];
 
+const gzlRawFile = 'src/data/raw_gzl_api.json';
+
 const sourceRules = {
   '假日通': { min: 50, ratio: 0.2 },
   '康辉': { min: 850, ratio: 0.7 },
@@ -145,6 +147,10 @@ function imageFileExists(imageUrl) {
   return fs.existsSync(localPath);
 }
 
+function normalizeUrl(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
 function fail(errors, message) {
   errors.push(message);
 }
@@ -155,6 +161,9 @@ const warnings = [];
 const fullTours = asArray(readJson(outputFiles.full), outputFiles.full);
 const listTours = asArray(readJson(outputFiles.list), outputFiles.list);
 const meta = readJson(outputFiles.meta);
+const rawGzlTours = fs.existsSync(path.join(root, gzlRawFile))
+  ? asArray(readJson(path.join(root, gzlRawFile)), path.join(root, gzlRawFile))
+  : [];
 
 if (fullTours.length !== listTours.length) {
   fail(errors, `List/full count mismatch: tours.json=${fullTours.length}, tours-list.json=${listTours.length}`);
@@ -237,11 +246,66 @@ for (const id of fullIds) {
   }
 }
 
+const rawGzlByUrl = new Map(
+  rawGzlTours
+    .filter((tour) => normalizeUrl(tour?.url))
+    .map((tour) => [normalizeUrl(tour.url), tour]),
+);
+
+let gzlSchedulePriceChecks = 0;
+for (const tour of fullTours) {
+  const bookingUrl = normalizeUrl(tour?.bookingUrl || tour?.url);
+  if (!bookingUrl) continue;
+
+  const rawGzl = rawGzlByUrl.get(bookingUrl);
+  if (!rawGzl || rawGzl.priceSource !== 'scheduleDateMap') {
+    continue;
+  }
+
+  gzlSchedulePriceChecks += 1;
+  const outputPrice = Number(tour.price);
+  const rawPrice = Number(rawGzl.price);
+  const startingPrice = Number(rawGzl.startingPrice);
+
+  if (outputPrice !== rawPrice) {
+    fail(
+      errors,
+      [
+        'GZL schedule price mismatch:',
+        `tour=${tour.id}`,
+        `url=${bookingUrl}`,
+        `outputPrice=${outputPrice}`,
+        `rawPrice=${rawPrice}`,
+        `startingPrice=${Number.isFinite(startingPrice) ? startingPrice : 'n/a'}`,
+      ].join(' '),
+    );
+  }
+
+  if (
+    Number.isFinite(startingPrice) &&
+    startingPrice !== rawPrice &&
+    outputPrice === startingPrice
+  ) {
+    fail(
+      errors,
+      [
+        'GZL startingPrice regression:',
+        `tour=${tour.id}`,
+        `url=${bookingUrl}`,
+        `outputPrice=${outputPrice}`,
+        `startingPrice=${startingPrice}`,
+        `rawPrice=${rawPrice}`,
+      ].join(' '),
+    );
+  }
+}
+
 console.log('Data integrity audit');
 console.log(`- total: ${fullTours.length}`);
 console.log(`- detail shards: ${detailFiles.length}`);
 console.log(`- source counts: ${JSON.stringify(outputCounts)}`);
 console.log(`- raw unique counts: ${JSON.stringify(rawCounts)}`);
+console.log(`- gzl schedule price checks: ${gzlSchedulePriceChecks}`);
 
 if (warnings.length) {
   console.warn(`Warnings (${warnings.length}):`);
