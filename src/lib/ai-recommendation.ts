@@ -11,7 +11,7 @@ import type {
 
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 const MAX_AI_CANDIDATES = 180;
-const MAX_AI_RECOMMENDATIONS = 12;
+const MAX_AI_COMMENTARY_ITEMS = 6;
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 interface AiTravelIntent {
@@ -234,11 +234,12 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
       (b.rating || 0) - (a.rating || 0) ||
       a.price - b.price,
     )
-    .slice(0, MAX_AI_RECOMMENDATIONS)
     .map((tour, index) => ({
       tourId: tour.id,
-      score: 10 - index,
-      reason: tour.isHot ? '热门线路，适合作为推荐备选' : '综合热度和价格表现较稳',
+      score: Math.max(1, 100 - index),
+      reason: index < MAX_AI_COMMENTARY_ITEMS
+        ? tour.isHot ? '热门线路，适合作为推荐备选' : '综合热度和价格表现较稳'
+        : undefined,
       matchedSignals: tour.isHot ? ['热门线路'] : ['综合排序靠前'],
     }));
 }
@@ -249,9 +250,51 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
     .map((tour) => scoreTour(tour, normalizedText))
     .filter((item): item is AiRecommendationItem => Boolean(item))
     .sort((a, b) => b.score - a.score)
-    .slice(0, MAX_AI_RECOMMENDATIONS);
+    .map((item, index) => ({
+      ...item,
+      reason: index < MAX_AI_COMMENTARY_ITEMS ? item.reason : undefined,
+    }));
 
   return items.length > 0 ? items : fallbackRecommendations(tours);
+}
+
+function stripRecommendationCommentary(item: AiRecommendationItem): AiRecommendationItem {
+  return {
+    ...item,
+    reason: undefined,
+    matchedSignals: [],
+  };
+}
+
+function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecommendationItem[] {
+  let commentaryCount = 0;
+
+  return items.map((item) => {
+    if (!item.reason) {
+      return stripRecommendationCommentary(item);
+    }
+
+    commentaryCount += 1;
+    return commentaryCount <= MAX_AI_COMMENTARY_ITEMS
+      ? item
+      : stripRecommendationCommentary(item);
+  });
+}
+
+function mergeAiAndLocalRecommendations(
+  aiItems: AiRecommendationItem[],
+  localItems: AiRecommendationItem[],
+): AiRecommendationItem[] {
+  const seenTourIds = new Set<string>();
+  const merged: AiRecommendationItem[] = [];
+
+  for (const item of [...aiItems, ...localItems]) {
+    if (seenTourIds.has(item.tourId)) continue;
+    seenTourIds.add(item.tourId);
+    merged.push(item);
+  }
+
+  return limitRecommendationCommentary(merged);
 }
 
 function uniqueStrings(values: Array<string | undefined | null>) {
@@ -620,15 +663,15 @@ function buildAiMessages(params: {
   ].join('\n');
 
   const userPayload = {
-    task: `从 candidateTours 中选出最多 ${MAX_AI_RECOMMENDATIONS} 条旅行团，按适合程度排序。`,
+    task: `从 candidateTours 中选出所有适合的旅行团，按适合程度排序；只给前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只需要 tourId 和 score。`,
     outputSchema: {
       summary: '一句中文总结，说明推荐依据',
       items: [
         {
           tourId: '候选列表里的 id',
           score: '0-100 的数字',
-          reason: '一句中文推荐理由，结合用户需求/天气/季节/线路特点',
-          matchedSignals: ['3到5个中文匹配信号'],
+          reason: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，一句中文推荐理由，结合用户需求/天气/季节/线路特点`,
+          matchedSignals: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，3到5个中文匹配信号`,
         },
       ],
     },
@@ -725,14 +768,15 @@ function validateAiItems(
   return rawItems
     .map((item) => item as Partial<AiRecommendationItem>)
     .filter((item) => item.tourId && candidateIds.has(item.tourId))
-    .slice(0, MAX_AI_RECOMMENDATIONS)
     .map((item, index) => ({
       tourId: String(item.tourId),
       score: Number.isFinite(Number(item.score)) ? Number(item.score) : 80 - index,
-      reason: item.reason?.trim() || '综合用户需求、天气和线路特点后较为合适',
-      matchedSignals: Array.isArray(item.matchedSignals)
+      reason: index < MAX_AI_COMMENTARY_ITEMS
+        ? item.reason?.trim() || '综合用户需求、天气和线路特点后较为合适'
+        : undefined,
+      matchedSignals: index < MAX_AI_COMMENTARY_ITEMS && Array.isArray(item.matchedSignals)
         ? item.matchedSignals.map(String).slice(0, 5)
-        : ['AI综合推荐'],
+        : index < MAX_AI_COMMENTARY_ITEMS ? ['AI综合推荐'] : [],
     }));
 }
 
@@ -869,7 +913,7 @@ export async function requestAiRecommendations({
         typeof aiResponse.summary === 'string' && aiResponse.summary.trim()
           ? aiResponse.summary.trim()
           : '已结合用户需求、天气、季节和线路特点生成推荐。',
-      items: aiItems,
+      items: mergeAiAndLocalRecommendations(aiItems, localItems),
       generatedAt: new Date().toISOString(),
       source: 'ai-api',
       preferenceMemory: nextPreferenceMemory,

@@ -176,10 +176,7 @@ export function AiRecommendPanel({
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
       setMessages((current) => [
         ...current,
-        createMessage(
-          'assistant',
-          `${nextResult.summary} 已为你置顶 ${nextResult.items.length} 条候选线路。`,
-        ),
+        createMessage('assistant', `已更新推荐结果，并置顶 ${nextResult.items.length} 条候选线路。`),
       ]);
       onFocusResults();
     } finally {

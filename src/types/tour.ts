@@ -88,7 +88,7 @@ export interface AiRecommendationMessage {
 export interface AiRecommendationItem {
   tourId: string;
   score: number;
-  reason: string;
+  reason?: string;
   matchedSignals: string[];
 }
 
