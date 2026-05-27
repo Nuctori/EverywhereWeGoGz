@@ -7,6 +7,7 @@
 import requests
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
 HEADERS = {
@@ -78,6 +79,119 @@ def normalize_departure_dates(values):
     return normalized
 
 
+def first_upcoming_date(values):
+    dates = normalize_departure_dates(values)
+    if not dates:
+        return ""
+
+    today = datetime.now().date()
+    for value in dates:
+        try:
+            if datetime.strptime(value, "%Y-%m-%d").date() >= today:
+                return value
+        except ValueError:
+            continue
+    return dates[0]
+
+
+def coerce_price(value):
+    if value in (None, ""):
+        return 0
+    if isinstance(value, (int, float)):
+        return int(float(value))
+    text = str(value).strip().replace(",", "")
+    if not text:
+        return 0
+    try:
+        return int(float(text))
+    except ValueError:
+        return 0
+
+
+def parse_schedule_value(value):
+    if value is None:
+        return {"sellable": False, "price": 0}
+
+    if isinstance(value, dict):
+        price = coerce_price(value.get("adultPrice") or value.get("stdPrice") or value.get("price"))
+        stock = value.get("stock")
+        sellable = price > 0 and (stock is None or coerce_price(stock) > 0)
+        return {"sellable": sellable, "price": price}
+
+    text = str(value).strip()
+    if not text or text.startswith("|||") or "|0|" in text:
+        return {"sellable": False, "price": 0}
+
+    if text.startswith("{") and text.endswith("}"):
+        try:
+            payload = json.loads(text)
+        except ValueError:
+            return {"sellable": False, "price": 0}
+        return parse_schedule_value(payload)
+
+    price = coerce_price(text.split("|", 1)[0])
+    return {"sellable": price > 0, "price": price}
+
+
+def fetch_schedule_snapshot(session, pd_id, ptype, url):
+    if not pd_id or not url:
+        return {}
+
+    lower_url = str(url).lower()
+    if ptype == "PRODUCTGROUP" or any(token in lower_url for token in ("/domestic/", "/abroad/", "/around/")):
+        endpoint = f"{BASE_URL}/grouptour/scheduleDateMap.json"
+        payload = {"pdId": pd_id, "activityId": ""}
+    elif ptype in {"FREE_TOUR", "FREETRAVEL"} or "/freetour/" in lower_url:
+        endpoint = f"{BASE_URL}/freetour/scheduleDateMap.json"
+        payload = {"pdId": pd_id, "ctripPdSn": "", "activityId": ""}
+    else:
+        return {}
+
+    try:
+        response = session.post(
+            endpoint,
+            data=payload,
+            timeout=15,
+            headers={
+                "Referer": url,
+                "X-Requested-With": "XMLHttpRequest",
+            },
+        )
+        response.raise_for_status()
+        result = response.json()
+    except Exception:
+        return {}
+
+    schedule_map = result.get("ScheduleDateMap")
+    if not isinstance(schedule_map, dict):
+        return {}
+
+    sellable_dates = []
+    prices_by_date = {}
+    for raw_date, raw_value in schedule_map.items():
+        try:
+            iso_date = datetime.strptime(str(raw_date).strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+
+        parsed = parse_schedule_value(raw_value)
+        if not parsed["sellable"] or parsed["price"] <= 0:
+            continue
+
+        prices_by_date[iso_date] = parsed["price"]
+        sellable_dates.append(iso_date)
+
+    sellable_dates = normalize_departure_dates(sellable_dates)
+    departure_date = first_upcoming_date(sellable_dates)
+    price = prices_by_date.get(departure_date, 0) if departure_date else 0
+
+    return {
+        "departure_dates": sellable_dates,
+        "departure_date": departure_date,
+        "price": price,
+    }
+
+
 def get_session():
     """获取session和cookie"""
     session = requests.Session()
@@ -128,10 +242,10 @@ def fetch_products(session, dest_name, search_type, page=1):
         return []
 
 
-def parse_product(product):
+def parse_product(session, product, schedule_cache):
     """解析产品数据"""
     title = product.get("title", "")
-    price = product.get("b2cMinPrice", 0)
+    list_price = coerce_price(product.get("b2cMinPrice", 0))
     days = product.get("travelDays", 0)
     pd_id = product.get("pdId", "")
     ptype = product.get("type", "")
@@ -157,6 +271,21 @@ def parse_product(product):
     # 图片
     images = product.get("defaultImage", {})
     img_url = images.get("imageStr", "") if images else ""
+
+    schedule_key = f"{ptype}|{pd_id}|{url}"
+    schedule_snapshot = schedule_cache.get(schedule_key)
+    if schedule_snapshot is None:
+        schedule_snapshot = fetch_schedule_snapshot(session, pd_id, ptype, url)
+        schedule_cache[schedule_key] = schedule_snapshot
+
+    schedule_dates = schedule_snapshot.get("departure_dates") or []
+    schedule_price = coerce_price(schedule_snapshot.get("price"))
+    schedule_departure_date = schedule_snapshot.get("departure_date") or ""
+
+    if schedule_dates:
+        departure_dates = schedule_dates
+    departure_date = schedule_departure_date or first_upcoming_date(departure_dates)
+    price = schedule_price or list_price
     
     item = {
         "source": "广之旅",
@@ -164,10 +293,12 @@ def parse_product(product):
         "productType": ptype,
         "title": title,
         "price": price,
+        "startingPrice": list_price,
+        "priceSource": "scheduleDateMap" if schedule_price else "b2cMinPrice",
         "url": url,
         "days": days or extract_days(title),
         "departureDates": departure_dates,
-        "departureDate": departure_dates[0] if departure_dates else "",
+        "departureDate": departure_date,
     }
     if img_url:
         item["img"] = img_url
@@ -180,6 +311,7 @@ def fetch():
     session = get_session()
     all_items = []
     seen = set()
+    schedule_cache = {}
     
     for dest in DESTINATIONS:
         for search_type, type_name in SEARCH_TYPES:
@@ -198,7 +330,7 @@ def fetch():
                 
                 page_items = 0
                 for product in products:
-                    item = parse_product(product)
+                    item = parse_product(session, product, schedule_cache)
                     if not item["title"] or item["price"] <= 0:
                         continue
                     
@@ -221,14 +353,74 @@ def fetch():
     return all_items
 
 
+def refresh_existing_prices(items):
+    workers = max(4, min(32, int(os.environ.get("GZL_REFRESH_WORKERS", "16") or "16")))
+
+    def refresh_one(raw_item):
+        session = get_session()
+        item = dict(raw_item)
+        pd_id = str(item.get("sourceId") or item.get("pdId") or "").strip()
+        ptype = str(item.get("productType") or item.get("type") or "").strip()
+        url = str(item.get("url") or "").strip()
+
+        if not pd_id or not url:
+            return item
+
+        schedule_snapshot = fetch_schedule_snapshot(session, pd_id, ptype, url)
+
+        schedule_dates = schedule_snapshot.get("departure_dates") or []
+        schedule_price = coerce_price(schedule_snapshot.get("price"))
+        schedule_departure_date = schedule_snapshot.get("departure_date") or ""
+
+        current_price = coerce_price(item.get("price"))
+        item["startingPrice"] = coerce_price(item.get("startingPrice") or current_price)
+        if schedule_price > 0:
+            item["price"] = schedule_price
+            item["priceSource"] = "scheduleDateMap"
+        else:
+            item["priceSource"] = item.get("priceSource") or "b2cMinPrice"
+
+        if schedule_dates:
+            item["departureDates"] = schedule_dates
+        if schedule_departure_date:
+            item["departureDate"] = schedule_departure_date
+        elif item.get("departureDates"):
+            item["departureDate"] = first_upcoming_date(item.get("departureDates") or [])
+
+        return item
+
+    refreshed = [None] * len(items)
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        future_map = {
+            executor.submit(refresh_one, raw_item): index
+            for index, raw_item in enumerate(items)
+        }
+        for completed, future in enumerate(as_completed(future_map), start=1):
+            index = future_map[future]
+            refreshed[index] = future.result()
+            if completed % 100 == 0:
+                print(f"[广之旅] 已刷新 {completed}/{len(items)} 条")
+    return refreshed
+
+
 def main():
-    items = fetch()
     data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
     data_dir = os.path.abspath(data_dir)
     os.makedirs(data_dir, exist_ok=True)
-    with open(os.path.join(data_dir, "raw_gzl_api.json"), "w", encoding="utf-8") as f:
+    output_path = os.path.join(data_dir, "raw_gzl_api.json")
+
+    refresh_existing = os.environ.get("GZL_REFRESH_EXISTING", "").strip().lower() in {"1", "true", "yes", "on"}
+    if refresh_existing and os.path.exists(output_path):
+        with open(output_path, "r", encoding="utf-8") as f:
+            items = json.load(f)
+        print(f"[广之旅] 刷新现有价格: {len(items)} 条")
+        items = refresh_existing_prices(items)
+    else:
+        items = fetch()
+
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
-    print(f"[保存] -> {os.path.join(data_dir, 'raw_gzl_api.json')}")
+    print(f"[保存] -> {output_path}")
 
 
 if __name__ == "__main__":
