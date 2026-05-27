@@ -78,6 +78,37 @@ interface AiChatState {
   preferenceMemory: AiPreferenceMemory | null;
 }
 
+function getQuestionLead(prompt: string) {
+  const normalized = prompt.replace(/\s+/g, '');
+  const asksWeatherCapability =
+    /(天气|气温|温度|下雨|降雨|台风|预报)/.test(normalized) &&
+    /(能|会|可以|有没有|怎么|如何|知道|获取|查|看|支持)/.test(normalized);
+
+  if (asksWeatherCapability) {
+    return '可以，我会先结合能拿到的天气信息来辅助判断；如果时间太远拿不到可靠预报，就会退回到季节和目的地经验判断。';
+  }
+
+  return null;
+}
+
+function buildResultAssistantReply(result: AiRecommendationResult, prompt: string) {
+  const questionLead = getQuestionLead(prompt);
+  if (questionLead) {
+    return `${questionLead}${result.summary}`;
+  }
+
+  const isQuestion = /[？?]$/.test(prompt) || /^(你能|你会|可以|能不能|有没有|怎么|如何|为啥|为什么)/.test(prompt);
+  if (isQuestion) {
+    return `可以，我先按这个问题帮你判断一下。${result.summary}`;
+  }
+
+  if (result.source === 'ai-api') {
+    return `我先按你的条件筛了一轮，${result.summary}`;
+  }
+
+  return `我先给你一版可用结果，${result.summary}`;
+}
+
 function createMessage(role: AiRecommendationMessage['role'], content: string): AiRecommendationMessage {
   return {
     id: `${role}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -239,7 +270,7 @@ export function AiRecommendPanel({
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
       setMessages((current) => [
         ...current,
-        createMessage('assistant', `已更新推荐结果，并置顶 ${nextResult.items.length} 条候选线路。`),
+        createMessage('assistant', buildResultAssistantReply(nextResult, prompt)),
       ]);
       onFocusResults();
     } finally {
