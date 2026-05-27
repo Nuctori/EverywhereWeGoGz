@@ -11,7 +11,7 @@ import type {
 
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 const MAX_AI_CANDIDATES = 180;
-const MAX_AI_COMMENTARY_ITEMS = 6;
+const MAX_AI_COMMENTARY_ITEMS = 18;
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 interface AiTravelIntent {
