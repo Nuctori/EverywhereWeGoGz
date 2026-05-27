@@ -4,6 +4,7 @@ import type {
   AiRecommendationCandidate,
   AiRecommendationItem,
   AiRecommendationMessage,
+  AiRecommendationProgress,
   AiRecommendationRequest,
   AiRecommendationResult,
   AiWeatherContext,
@@ -1164,6 +1165,24 @@ function parseAiJson(content: string) {
   }
 }
 
+function emitProgress(
+  callback: AiRecommendationRequest['onProgress'],
+  progress: AiRecommendationProgress,
+) {
+  callback?.(progress);
+}
+
+export const __aiRecommendationTestHooks = {
+  auditAiRecommendations,
+  buildTourPrimitive,
+  compactCandidates,
+  getPrimitiveConflictReasons,
+  mergeAiAndLocalRecommendations,
+  mergeIntentWithMemory,
+  normalizeIntent,
+  validateAiItems,
+};
+
 function validateAiItems(
   value: unknown,
   candidateTours: AiRecommendationCandidate[],
@@ -1358,7 +1377,15 @@ export async function requestAiRecommendations({
   aiConfig,
   preferenceMemory,
   previousResult,
+  onProgress,
 }: AiRecommendationRequest): Promise<AiRecommendationResult> {
+  emitProgress(onProgress, {
+    stage: 'queued',
+    label: '已收到需求',
+    detail: '正在整理你的出发时间、预算、天数和偏好。',
+    progress: 12,
+  });
+
   const text = getLatestUserText(messages);
   const localIntent = inferLocalIntent(text);
   const inheritedPreferenceMemory = mergePreferenceMemory(preferenceMemory, localIntent);
@@ -1392,6 +1419,15 @@ export async function requestAiRecommendations({
     mergeIntentWithMemory(localIntent, inheritedPreferenceMemory),
   );
 
+  emitProgress(onProgress, {
+    stage: config ? 'intent' : 'fallback',
+    label: config ? '准备调用 AI' : '未配置 AI，改用本地推荐',
+    detail: config
+      ? `将从 ${availableCandidates.length} 条候选线路中理解需求并生成推荐。`
+      : `正在按当前条件从 ${availableCandidates.length} 条候选线路中做规则匹配。`,
+    progress: config ? 20 : 100,
+  });
+
   if (!config) {
     return {
       conversationId,
@@ -1399,6 +1435,11 @@ export async function requestAiRecommendations({
       items: localItems,
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
+      status: {
+        mode: 'local-only',
+        label: '本次使用本地规则推荐',
+        detail: `因为没有可用的 AI 配置，已直接筛出 ${localItems.length} 条候选线路。`,
+      },
       preferenceMemory: inheritedPreferenceMemory,
     };
   }
@@ -1419,6 +1460,12 @@ export async function requestAiRecommendations({
     const effectiveIntent = mergeIntentWithMemory(intent, nextPreferenceMemory);
     const effectiveUserText = buildEffectiveUserText(text, nextPreferenceMemory);
     const auditContext = buildRecommendationAuditContext(candidateTours, previousResult, effectiveIntent);
+    emitProgress(onProgress, {
+      stage: 'context',
+      label: '正在补充行程上下文',
+      detail: `正在结合天气、季节和候选池信息，范围约 ${availableCandidates.length} 条线路。`,
+      progress: 56,
+    });
     const weatherContext = await fetchWeatherContext(effectiveUserText, availableCandidates);
     const compactedCandidates = compactCandidates(
       availableCandidates,
@@ -1427,6 +1474,12 @@ export async function requestAiRecommendations({
       { budgetPriority: effectiveIntent?.budgetPriority },
     );
     const routeAtlas = buildRouteAtlas(candidateTours, effectiveIntent);
+    emitProgress(onProgress, {
+      stage: 'ranking',
+      label: '正在生成推荐结果',
+      detail: `AI 正在对 ${compactedCandidates.length} 条高相关候选线路做排序和取舍。`,
+      progress: 82,
+    });
     const aiResponse = await callAiApi({
       config,
       messages: buildAiMessages({
@@ -1452,36 +1505,50 @@ export async function requestAiRecommendations({
       throw new Error('AI returned no valid tour ids');
     }
 
+    const mergedItems = mergeAiAndLocalRecommendations(aiItems, localItems);
+    emitProgress(onProgress, {
+      stage: 'completed',
+      label: '推荐结果已生成',
+      detail: `已完成排序，并置顶 ${mergedItems.length} 条候选线路。`,
+      progress: 100,
+    });
+
     return {
       conversationId,
       summary:
         typeof aiResponse.summary === 'string' && aiResponse.summary.trim()
           ? aiResponse.summary.trim()
           : '已结合用户需求、天气、季节和线路特点生成推荐。',
-      items: mergeAiAndLocalRecommendations(aiItems, localItems),
+      items: mergedItems,
       generatedAt: new Date().toISOString(),
       source: 'ai-api',
+      status: {
+        mode: 'ai',
+        label: 'AI 已完成推荐',
+        detail: `已结合需求理解、天气和候选线路排序，输出 ${mergedItems.length} 条结果。`,
+      },
       preferenceMemory: nextPreferenceMemory,
     };
   } catch {
+    emitProgress(onProgress, {
+      stage: 'fallback',
+      label: 'AI 暂不可用，已切换备用方案',
+      detail: `正在按本地规则从 ${availableCandidates.length} 条候选线路里给出可用结果。`,
+      progress: 100,
+    });
+
     return {
       conversationId,
       summary: 'AI 接口暂时不可用，已先使用本地规则按需求做预匹配。',
       items: localItems,
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
+      status: {
+        mode: 'fallback',
+        label: 'AI 未完成，本次已降级到本地推荐',
+        detail: `为了不中断结果展示，已先返回 ${localItems.length} 条本地规则筛选结果。`,
+      },
       preferenceMemory: inheritedPreferenceMemory,
     };
   }
 }
-
-export const __aiRecommendationTestHooks = {
-  auditAiRecommendations,
-  buildTourPrimitive,
-  compactCandidates,
-  getPrimitiveConflictReasons,
-  mergeAiAndLocalRecommendations,
-  mergeIntentWithMemory,
-  normalizeIntent,
-  validateAiItems,
-};

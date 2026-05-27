@@ -92,12 +92,36 @@ export interface AiRecommendationItem {
   matchedSignals: string[];
 }
 
+export type AiRecommendationProcessMode = 'ai' | 'fallback' | 'local-only';
+
+export type AiRecommendationProgressStage =
+  | 'queued'
+  | 'intent'
+  | 'context'
+  | 'ranking'
+  | 'completed'
+  | 'fallback';
+
+export interface AiRecommendationProgress {
+  stage: AiRecommendationProgressStage;
+  label: string;
+  detail: string;
+  progress: number;
+}
+
+export interface AiRecommendationStatus {
+  mode: AiRecommendationProcessMode;
+  label: string;
+  detail: string;
+}
+
 export interface AiRecommendationResult {
   conversationId: string;
   summary: string;
   items: AiRecommendationItem[];
   generatedAt: string;
   source: 'local-preview' | 'ai-api';
+  status?: AiRecommendationStatus;
   preferenceMemory?: AiPreferenceMemory;
 }
 
@@ -167,4 +191,5 @@ export interface AiRecommendationRequest {
   aiConfig?: Partial<AiProviderConfig>;
   preferenceMemory?: AiPreferenceMemory | null;
   previousResult?: AiRecommendationResult | null;
+  onProgress?: (progress: AiRecommendationProgress) => void;
 }

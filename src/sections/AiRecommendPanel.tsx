@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Bot, Eye, EyeOff, Loader2, MessageCircle, RotateCcw, Send, Settings, Sparkles } from 'lucide-react';
+import {
+  Bot,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Loader2,
+  RotateCcw,
+  Send,
+  Settings,
+  Sparkles,
+  TriangleAlert,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -10,9 +21,11 @@ import {
 } from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import type {
   AiRecommendationCandidate,
   AiRecommendationMessage,
+  AiRecommendationProgress,
   AiRecommendationResult,
   AiProviderConfig,
   AiPreferenceMemory,
@@ -41,10 +54,21 @@ interface AiRecommendPanelProps {
 const starterPrompts = [
   '3天内出发，预算2000以内，想轻松一点',
   '亲子出游，5天左右，别太赶',
-  '想去云南或桂林，看看自然风景',
+  '想去云南或者桂林，看看自然风景',
 ];
 
 const MAX_PERSISTED_MESSAGES = 40;
+
+const progressSteps: Array<{
+  stage: AiRecommendationProgress['stage'];
+  shortLabel: string;
+}> = [
+  { stage: 'queued', shortLabel: '收到需求' },
+  { stage: 'intent', shortLabel: '理解需求' },
+  { stage: 'context', shortLabel: '补充上下文' },
+  { stage: 'ranking', shortLabel: '生成推荐' },
+  { stage: 'completed', shortLabel: '已完成' },
+];
 
 interface AiChatState {
   conversationId: string;
@@ -64,7 +88,7 @@ function createMessage(role: AiRecommendationMessage['role'], content: string): 
 }
 
 function createInitialMessage() {
-  return createMessage('assistant', '告诉我预算、天数、想去哪里、同行人群或行程强度，我会先把合适线路挑出来。');
+  return createMessage('assistant', '告诉我预算、天数、目的地和同行人，我会先帮你把合适线路筛出来。');
 }
 
 function createConversationId() {
@@ -92,6 +116,26 @@ function saveStoredChatState(state: AiChatState) {
   );
 }
 
+function getResultStatusMeta(result: AiRecommendationResult | null) {
+  if (!result) return null;
+
+  if (result.status) return result.status;
+
+  if (result.source === 'ai-api') {
+    return {
+      mode: 'ai' as const,
+      label: 'AI 已完成推荐',
+      detail: `已生成 ${result.items.length} 条推荐线路，并按匹配度置顶。`,
+    };
+  }
+
+  return {
+    mode: 'fallback' as const,
+    label: '本次使用备用推荐结果',
+    detail: `AI 没有顺利完成时，先返回了 ${result.items.length} 条本地规则筛选结果。`,
+  };
+}
+
 export function AiRecommendPanel({
   tours,
   activeFilters,
@@ -113,6 +157,7 @@ export function AiRecommendPanel({
     storedChatState.preferenceMemory || null,
   );
   const [loading, setLoading] = useState(false);
+  const [progressState, setProgressState] = useState<AiRecommendationProgress | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
   const didRestoreStoredResultRef = useRef(false);
@@ -121,7 +166,7 @@ export function AiRecommendPanel({
     [storedChatState.conversationId],
   );
   const hasResult = Boolean(result && result.items.length > 0);
-  const isShowingProgress = loading && !hasResult;
+  const resultStatusMeta = getResultStatusMeta(result);
 
   useEffect(() => {
     if (didRestoreStoredResultRef.current || !storedChatState.result) return;
@@ -158,6 +203,7 @@ export function AiRecommendPanel({
     setLoading(false);
     setInput('');
     setPreferenceMemory(null);
+    setProgressState(null);
     setMessages([createInitialMessage()]);
   }, [clearVersion]);
 
@@ -170,6 +216,12 @@ export function AiRecommendPanel({
     setMessages(nextMessages);
     setInput('');
     setLoading(true);
+    setProgressState({
+      stage: 'queued',
+      label: '已收到需求',
+      detail: '正在开始本次处理。',
+      progress: 8,
+    });
 
     try {
       const nextResult = await requestAiRecommendations({
@@ -181,6 +233,7 @@ export function AiRecommendPanel({
         aiConfig,
         preferenceMemory,
         previousResult: result,
+        onProgress: (progress) => setProgressState(progress),
       });
       onResultChange(nextResult);
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
@@ -197,6 +250,7 @@ export function AiRecommendPanel({
   const clearConversation = () => {
     onResultChange(null);
     setPreferenceMemory(null);
+    setProgressState(null);
     setMessages([createMessage('assistant', '已清空上一轮结果和本地偏好记忆。你可以重新描述这次想怎么出行。')]);
     setInput('');
     clearStoredAiChatState();
@@ -206,7 +260,7 @@ export function AiRecommendPanel({
     saveAiProviderConfig(aiConfig);
     setMessages((current) => [
       ...current,
-      createMessage('assistant', 'AI 接口配置已保存。本轮开始会优先使用你的自定义地址、模型和 Key。'),
+      createMessage('assistant', 'AI 接口配置已保存。接下来会优先使用你的自定义地址、模型和 Key。'),
     ]);
   };
 
@@ -215,7 +269,7 @@ export function AiRecommendPanel({
     setAiConfig({});
     setMessages((current) => [
       ...current,
-      createMessage('assistant', '已清除自定义 AI 配置，之后会回到公开默认配置或本地推荐。'),
+      createMessage('assistant', '已清除自定义 AI 配置，之后会回到默认配置或本地推荐。'),
     ]);
   };
 
@@ -233,7 +287,7 @@ export function AiRecommendPanel({
             )}
           </div>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-stone-600">
-            直接描述出发时间、天数、预算、同行人和偏好；AI 会结合班期原语、天气、季节和线路信息置顶推荐。
+            直接描述出发时间、天数、预算、同行人和偏好；AI 会结合班期、天气、季节和线路信息置顶推荐。
           </p>
         </div>
         <Button
@@ -299,43 +353,140 @@ export function AiRecommendPanel({
         </div>
       </div>
 
-      {(isShowingProgress || hasResult || messages.length > 1) && (
-        <div ref={scrollRef} className="mt-4 max-h-64 space-y-3 overflow-y-auto rounded-2xl border border-stone-200 bg-white/80 p-3">
-          {messages.slice(1).map((message) => (
-            <div
-              key={message.id}
-              className={cn('flex', message.role === 'user' ? 'justify-end' : 'justify-start')}
-            >
-              <div
-                className={cn(
-                  'max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-6 shadow-sm',
-                  message.role === 'user'
-                    ? 'bg-stone-900 text-white'
-                    : 'border border-stone-200 bg-white text-stone-700',
-                )}
-              >
-                {message.content}
+      {(progressState || resultStatusMeta || messages.length > 1) && (
+        <div className="mt-4 space-y-3">
+          {progressState && (
+            <div className="rounded-2xl border border-emerald-200 bg-white/90 p-4 shadow-sm">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-stone-900">
+                    {loading ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-emerald-700" />
+                    ) : progressState.stage === 'fallback' ? (
+                      <TriangleAlert className="h-4 w-4 text-amber-600" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-700" />
+                    )}
+                    {progressState.label}
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-stone-600">{progressState.detail}</p>
+                </div>
+                <Badge
+                  className={cn(
+                    'rounded-full px-2.5 py-1 text-[11px]',
+                    loading
+                      ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100'
+                      : progressState.stage === 'fallback'
+                        ? 'bg-amber-100 text-amber-800 hover:bg-amber-100'
+                        : 'bg-emerald-700 text-white hover:bg-emerald-700',
+                  )}
+                >
+                  {loading ? '处理中' : progressState.stage === 'fallback' ? '备用方案' : '已完成'}
+                </Badge>
               </div>
-            </div>
-          ))}
-          {isShowingProgress && (
-            <div className="flex justify-start">
-              <div className="flex items-center gap-2 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-500 shadow-sm">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                正在理解需求并匹配班期、天气和线路
+
+              <Progress value={progressState.progress} className="mt-3 h-2 bg-emerald-100 [&_[data-slot=progress-indicator]]:bg-emerald-600" />
+
+              <div className="mt-3 grid gap-2 sm:grid-cols-5">
+                {progressSteps.map((step, index) => {
+                  const currentIndex = progressSteps.findIndex((item) => item.stage === progressState.stage);
+                  const isDone = currentIndex > index || (!loading && progressState.stage === 'completed' && currentIndex >= index);
+                  const isCurrent = progressState.stage === step.stage || (progressState.stage === 'fallback' && index === progressSteps.length - 1);
+
+                  return (
+                    <div
+                      key={step.stage}
+                      className={cn(
+                        'rounded-xl border px-3 py-2 text-xs transition-colors',
+                        isCurrent
+                          ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
+                          : isDone
+                            ? 'border-stone-200 bg-stone-50 text-stone-700'
+                            : 'border-stone-200/80 bg-white text-stone-400',
+                      )}
+                    >
+                      <div className="flex items-center gap-2 font-medium">
+                        <span
+                          className={cn(
+                            'inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px]',
+                            isCurrent
+                              ? 'bg-emerald-600 text-white'
+                              : isDone
+                                ? 'bg-stone-700 text-white'
+                                : 'bg-stone-100 text-stone-500',
+                          )}
+                        >
+                          {index + 1}
+                        </span>
+                        {step.shortLabel}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
-          {hasResult && (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-              <div className="mb-2 flex items-center gap-2 font-medium">
-                <MessageCircle className="h-4 w-4" />
-                推荐结果已置顶
-                <Badge className="rounded-full bg-emerald-700 px-2 py-0.5 text-[11px] text-white hover:bg-emerald-700">
-                  {result?.items.length}
-                </Badge>
+
+          {resultStatusMeta && hasResult && !loading && (
+            <div
+              className={cn(
+                'rounded-2xl border px-4 py-4 shadow-sm',
+                resultStatusMeta.mode === 'ai'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-950'
+                  : 'border-amber-200 bg-amber-50 text-amber-950',
+              )}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    {resultStatusMeta.mode === 'ai' ? (
+                      <CheckCircle2 className="h-4 w-4" />
+                    ) : (
+                      <TriangleAlert className="h-4 w-4" />
+                    )}
+                    {resultStatusMeta.label}
+                  </div>
+                  <p className="mt-1 text-sm leading-6 opacity-90">{resultStatusMeta.detail}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    className={cn(
+                      'rounded-full px-2 py-0.5 text-[11px] text-white',
+                      resultStatusMeta.mode === 'ai' ? 'bg-emerald-700 hover:bg-emerald-700' : 'bg-amber-700 hover:bg-amber-700',
+                    )}
+                  >
+                    置顶 {result?.items.length}
+                  </Badge>
+                </div>
               </div>
-              <p className="leading-6">{result?.summary}</p>
+              <p className="mt-3 rounded-xl bg-white/70 px-3 py-3 text-sm leading-6 text-stone-700">
+                {result?.summary}
+              </p>
+            </div>
+          )}
+
+          {messages.length > 1 && (
+            <div
+              ref={scrollRef}
+              className="max-h-64 space-y-3 overflow-y-auto rounded-2xl border border-stone-200 bg-white/80 p-3"
+            >
+              {messages.slice(1).map((message) => (
+                <div
+                  key={message.id}
+                  className={cn('flex', message.role === 'user' ? 'justify-end' : 'justify-start')}
+                >
+                  <div
+                    className={cn(
+                      'max-w-[88%] rounded-2xl px-4 py-2.5 text-sm leading-6 shadow-sm',
+                      message.role === 'user'
+                        ? 'bg-stone-900 text-white'
+                        : 'border border-stone-200 bg-white text-stone-700',
+                    )}
+                  >
+                    {message.content}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
