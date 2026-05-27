@@ -38,6 +38,15 @@ interface RecommendationContext {
   budgetPriority?: AiTravelIntent['budgetPriority'];
 }
 
+interface CandidateAuditPrimitive extends RecommendationPrimitive {
+  matchStatus: 'match' | 'soft_conflict' | 'fallback';
+  conflictReasons: string[];
+  priceContext: {
+    poolPercentile: number | null;
+    pricePerDay: number | null;
+  };
+}
+
 const THEME_KEYWORDS = [
   '亲子',
   '美食',
@@ -725,33 +734,52 @@ function buildRecommendationAuditContext(
 }
 
 function intentMatchesPrimitive(intent: AiTravelIntent | null, primitive: RecommendationPrimitive) {
-  if (!intent) return true;
+  return getPrimitiveConflictReasons(intent, primitive).length === 0;
+}
 
-  if (intent.tripDays && primitive.tripDays !== intent.tripDays) return false;
-  if (intent.tripDaysMin && primitive.tripDays < intent.tripDaysMin) return false;
-  if (intent.tripDaysMax && primitive.tripDays > intent.tripDaysMax) return false;
-  if (intent.budgetMin && primitive.price < intent.budgetMin) return false;
-  if (intent.budgetMax && primitive.price > intent.budgetMax) return false;
+function getPrimitiveConflictReasons(intent: AiTravelIntent | null, primitive: RecommendationPrimitive) {
+  const reasons: string[] = [];
+  if (!intent) return reasons;
+
+  if (intent.tripDays && primitive.tripDays !== intent.tripDays) {
+    reasons.push(`天数不是${intent.tripDays}天`);
+  }
+  if (intent.tripDaysMin && primitive.tripDays < intent.tripDaysMin) {
+    reasons.push(`天数少于${intent.tripDaysMin}天`);
+  }
+  if (intent.tripDaysMax && primitive.tripDays > intent.tripDaysMax) {
+    reasons.push(`天数超过${intent.tripDaysMax}天`);
+  }
+  if (intent.budgetMin && primitive.price < intent.budgetMin) {
+    reasons.push(`价格低于预算下限￥${intent.budgetMin.toLocaleString()}`);
+  }
+  if (intent.budgetMax && primitive.price > intent.budgetMax) {
+    reasons.push(`价格高于预算上限￥${intent.budgetMax.toLocaleString()}`);
+  }
 
   const weekdays = intent.departureWeekdays?.filter((day) => Number.isInteger(day)) ?? [];
   if (weekdays.length > 0) {
     const hasWeekday = primitive.schedule.departureWeekdays.some((weekday) => weekdays.includes(weekday));
-    if (!hasWeekday) return false;
+    if (!hasWeekday) {
+      reasons.push(`缺少${weekdays.map((weekday) => WEEKDAY_LABELS[weekday]).join('/')}出发班期`);
+    }
   }
 
   if (
     (intent.departureTimeOfDay === 'evening' || intent.departureTimeOfDay === 'night') &&
     !primitive.schedule.hasEveningOrNightDeparture
   ) {
-    return false;
+    reasons.push('未识别到晚间或夜间出发');
   }
 
   if (intent.destinationHints?.length) {
     const destinationCorpus = `${primitive.destination} ${primitive.title}`;
-    if (!destinationHintsMatchCorpus(intent.destinationHints, destinationCorpus)) return false;
+    if (!destinationHintsMatchCorpus(intent.destinationHints, destinationCorpus)) {
+      reasons.push(`目的地不匹配：${intent.destinationHints.join('/')}`);
+    }
   }
 
-  return true;
+  return reasons;
 }
 
 function primitiveMatchesDestination(intent: AiTravelIntent | null, primitive: RecommendationPrimitive) {
@@ -779,6 +807,29 @@ function rankPrimitive(
     (primitive.rating || 0) * 2 -
     pricePenalty
   );
+}
+
+function getPricePercentile(price: number, sortedPrices: number[]) {
+  if (!Number.isFinite(price) || sortedPrices.length === 0) return null;
+  const cheaperOrEqualCount = sortedPrices.filter((value) => value <= price).length;
+  return Math.round((cheaperOrEqualCount / sortedPrices.length) * 100);
+}
+
+function annotateCandidatePrimitive(
+  primitive: RecommendationPrimitive,
+  intent: AiTravelIntent | null,
+  sortedPrices: number[],
+  matchStatus: CandidateAuditPrimitive['matchStatus'],
+) {
+  return {
+    ...primitive,
+    matchStatus,
+    conflictReasons: getPrimitiveConflictReasons(intent, primitive),
+    priceContext: {
+      poolPercentile: getPricePercentile(primitive.price, sortedPrices),
+      pricePerDay: primitive.tripDays > 0 ? Math.round(primitive.price / primitive.tripDays) : null,
+    },
+  } satisfies CandidateAuditPrimitive;
 }
 
 function readStoredAiConfig(): StoredAiProviderConfig {
@@ -841,19 +892,35 @@ function compactCandidates(
   context?: RecommendationContext,
 ) {
   const primitives = tours.map(buildTourPrimitive);
+  const sortedPrices = primitives
+    .map((primitive) => primitive.price)
+    .filter((price) => Number.isFinite(price) && price > 0)
+    .sort((a, b) => a - b);
   const hasDestinationIntent = Boolean(intent?.destinationHints?.length);
   const destinationMatches = hasDestinationIntent
     ? primitives.filter((primitive) => primitiveMatchesDestination(intent, primitive))
     : primitives;
   const strictMatches = destinationMatches.filter((primitive) => intentMatchesPrimitive(intent, primitive));
-  const pool = strictMatches.length >= (hasDestinationIntent ? 1 : 8)
-    ? strictMatches
-    : hasDestinationIntent && destinationMatches.length > 0
-      ? destinationMatches
-      : primitives;
-
-  return pool
+  const softConflicts = (hasDestinationIntent && destinationMatches.length > 0
+    ? destinationMatches.filter((primitive) => !strictMatches.some((match) => match.id === primitive.id))
+    : primitives.filter((primitive) => !strictMatches.some((match) => match.id === primitive.id)))
     .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context))
+    .slice(0, Math.max(24, Math.floor(MAX_AI_CANDIDATES * 0.25)));
+  const fallbackPool = primitives
+    .filter((primitive) =>
+      !strictMatches.some((match) => match.id === primitive.id) &&
+      !softConflicts.some((match) => match.id === primitive.id),
+    )
+    .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context))
+    .slice(0, 12);
+
+  return [
+    ...strictMatches
+      .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context))
+      .map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'match')),
+    ...softConflicts.map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'soft_conflict')),
+    ...fallbackPool.map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'fallback')),
+  ]
     .slice(0, MAX_AI_CANDIDATES);
 }
 
@@ -983,6 +1050,7 @@ function buildAiMessages(params: {
     '你是旅行团推荐顾问，需要根据用户需求、天气、季节、目的地常识和给定旅行团候选列表推荐线路。',
     '只能推荐候选列表中真实存在的 tourId，不允许编造线路、价格、班期或服务。',
     '候选里的 schedule、tripDays、price、destination、theme、leisureLevel 是推荐原语，请优先用这些结构化原语判断硬条件。',
+    'candidateTours 里的 matchStatus=match 表示完全匹配；soft_conflict/fallback 带有 conflictReasons，只能在没有足够 match 或需要说明取舍时靠后使用。',
     'routeAtlas 是全站线路地图，用来理解哪些区域/主题通常有哪些天数和价格；但最终 items 仍只能来自 candidateTours。',
     'auditContext 提供上一轮推荐摘要、有效候选池价格分布和业务知识；处理“便宜点、轻松点、再近点”等短句时，必须结合 auditContext 和 preferenceMemory 继承上下文。',
     '如果用户需求与全站线路地图明显冲突，例如预算或天数不现实，请在 summary 里说明取舍，并推荐最接近的真实候选。',
@@ -1118,6 +1186,71 @@ function validateAiItems(
         ? item.matchedSignals.map(String).slice(0, 5)
         : index < MAX_AI_COMMENTARY_ITEMS ? ['AI综合推荐'] : [],
     }));
+}
+
+function getConflictSeverity(reasons: string[]) {
+  return reasons.reduce((severity, reason) => {
+    if (reason.startsWith('目的地不匹配')) return severity + 60;
+    if (reason.startsWith('价格高于') || reason.startsWith('价格低于')) return severity + 18;
+    if (reason.startsWith('天数')) return severity + 14;
+    if (reason.startsWith('缺少') || reason.startsWith('未识别')) return severity + 10;
+    return severity + 8;
+  }, 0);
+}
+
+function getAuditNote(reasons: string[]) {
+  if (reasons.length === 0) return null;
+  const visibleReasons = reasons.slice(0, 2).join('；');
+  return `审计提示：${visibleReasons}`;
+}
+
+function auditAiRecommendations(
+  aiItems: AiRecommendationItem[],
+  localItems: AiRecommendationItem[],
+  candidateTours: AiRecommendationCandidate[],
+  intent: AiTravelIntent | null,
+): AiRecommendationItem[] {
+  const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
+  const auditedAiItems: AiRecommendationItem[] = [];
+
+  for (const item of aiItems) {
+    const primitive = primitiveByTourId.get(item.tourId);
+    if (!primitive) continue;
+
+    const conflictReasons = getPrimitiveConflictReasons(intent, primitive);
+    const conflictSeverity = getConflictSeverity(conflictReasons);
+    const auditNote = getAuditNote(conflictReasons);
+    const score = Math.max(0, item.score - conflictSeverity);
+    if (score <= 0) continue;
+
+    auditedAiItems.push({
+      ...item,
+      score,
+      reason: auditNote && item.reason
+        ? `${item.reason}（${auditNote.replace('审计提示：', '')}）`
+        : item.reason,
+      matchedSignals: auditNote
+        ? [...item.matchedSignals.filter((signal) => !signal.startsWith('审计提示')), auditNote].slice(0, 5)
+        : item.matchedSignals,
+    });
+  }
+
+  const auditedIds = new Set(auditedAiItems.map((item) => item.tourId));
+  const supplementalItems = localItems
+    .filter((item) => !auditedIds.has(item.tourId))
+    .map((item) => {
+      const primitive = primitiveByTourId.get(item.tourId);
+      const conflictReasons = primitive ? getPrimitiveConflictReasons(intent, primitive) : [];
+      const conflictSeverity = getConflictSeverity(conflictReasons);
+      return {
+        ...item,
+        score: Math.max(0, item.score - conflictSeverity),
+      };
+    })
+    .filter((item) => item.score > 0)
+    .slice(0, 24);
+
+  return [...auditedAiItems, ...supplementalItems].sort((a, b) => b.score - a.score);
 }
 
 function normalizeIntent(value: unknown): AiTravelIntent | null {
@@ -1308,7 +1441,12 @@ export async function requestAiRecommendations({
         preferenceMemory: nextPreferenceMemory,
       }),
     });
-    const aiItems = validateAiItems(aiResponse, availableCandidates);
+    const aiItems = auditAiRecommendations(
+      validateAiItems(aiResponse, availableCandidates),
+      localItems,
+      availableCandidates,
+      effectiveIntent,
+    );
 
     if (aiItems.length === 0) {
       throw new Error('AI returned no valid tour ids');
@@ -1336,3 +1474,14 @@ export async function requestAiRecommendations({
     };
   }
 }
+
+export const __aiRecommendationTestHooks = {
+  auditAiRecommendations,
+  buildTourPrimitive,
+  compactCandidates,
+  getPrimitiveConflictReasons,
+  mergeAiAndLocalRecommendations,
+  mergeIntentWithMemory,
+  normalizeIntent,
+  validateAiItems,
+};
