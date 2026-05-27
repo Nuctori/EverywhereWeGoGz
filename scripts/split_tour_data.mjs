@@ -12,15 +12,37 @@ const imageCacheDir = path.join(dataDir, 'image-cache', 'placeholders');
 const invalidImageTokens = ['lazyimg', '{{', '}}'];
 const writeRetries = 5;
 
-const detailFields = new Set([
-  'itinerary',
-  'inclusions',
-  'exclusions',
-  'optionalExpenses',
-  'importantNotes',
-  'childPolicy',
-  'cancellationPolicy',
-  'refundPolicy',
+const listFields = new Set([
+  'id',
+  'title',
+  'source',
+  'destination',
+  'duration',
+  'price',
+  'originalPrice',
+  'priceUnit',
+  'departureDate',
+  'transportType',
+  'accommodationLevel',
+  'meals',
+  'singleSupplementNote',
+  'bookingUrl',
+  'images',
+  'tags',
+  'highlights',
+  'isHot',
+  'isNew',
+  'isFlashSale',
+  'flashSaleEndTime',
+  'discountRate',
+  'groupSize',
+  'theme',
+  'suitableFor',
+  'leisureLevel',
+  'season',
+  'rating',
+  'departureDates',
+  'hotDepartureDates',
 ]);
 
 const tours = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
@@ -91,10 +113,10 @@ const listTours = tours.map((tour) => {
   const detailTour = {};
 
   for (const [key, value] of Object.entries(tour)) {
-    if (detailFields.has(key)) {
-      detailTour[key] = value;
-    } else {
+    if (listFields.has(key)) {
       listTour[key] = value;
+    } else {
+      detailTour[key] = value;
     }
   }
 

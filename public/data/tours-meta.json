@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-05-27T07:09:31.210Z",
-  "latestUpdatedAt": "2026-05-27T15:09:06.855429",
+  "generatedAt": "2026-05-27T10:08:20.975Z",
+  "latestUpdatedAt": "2026-05-27T18:08:12.090656",
   "totalRecords": 4568,
   "listRecords": 4568,
   "detailFiles": 4568,
@@ -131,15 +131,15 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 65491094
+      "size": 65483106
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 7883166
+      "size": 5621090
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 57612496
+      "size": 59866584
     }
   }
 }

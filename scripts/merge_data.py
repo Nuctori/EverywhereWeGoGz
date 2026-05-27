@@ -83,7 +83,10 @@ def normalize_image_path(url: str, source: str) -> str:
     parsed = urlparse(normalized_url)
     if parsed.scheme not in {'http', 'https'}:
         return normalized_url
-    force_cache = source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc
+    force_cache = (
+        (source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc) or
+        (source == "假日通" and parsed.netloc == "jrttp.jrt365.com:8066")
+    )
     if image_cache_mode in {"remote", "skip", "off"} and not force_cache:
         return normalized_url
     ext = os.path.splitext(parsed.path)[1].lower()
@@ -111,6 +114,8 @@ def normalize_image_path(url: str, source: str) -> str:
         headers = {'User-Agent': 'Mozilla/5.0'}
         if source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc:
             headers["Referer"] = f"https://www.{OUTDOORS_HOST_TOKEN}/"
+        elif source == "假日通" and parsed.netloc == "jrttp.jrt365.com:8066":
+            headers["Referer"] = "http://www.jrt365.com/"
         resp = requests.get(normalized_url, headers=headers, timeout=20)
         resp.raise_for_status()
         content_type = resp.headers.get('content-type', '').lower()
