@@ -33,6 +33,7 @@ interface AiRecommendPanelProps {
   activeFilters: FilterState;
   searchQuery: string;
   result: AiRecommendationResult | null;
+  clearVersion: number;
   onResultChange: (result: AiRecommendationResult | null) => void;
   onFocusResults: () => void;
 }
@@ -91,12 +92,12 @@ function saveStoredChatState(state: AiChatState) {
   );
 }
 
-
 export function AiRecommendPanel({
   tours,
   activeFilters,
   searchQuery,
   result,
+  clearVersion,
   onResultChange,
   onFocusResults,
 }: AiRecommendPanelProps) {
@@ -150,6 +151,15 @@ export function AiRecommendPanel({
       behavior: 'smooth',
     });
   }, [messages]);
+
+  useEffect(() => {
+    if (clearVersion === 0) return;
+
+    setLoading(false);
+    setInput('');
+    setPreferenceMemory(null);
+    setMessages([createInitialMessage()]);
+  }, [clearVersion]);
 
   const submitPrompt = async (rawPrompt?: string) => {
     const prompt = (rawPrompt ?? input).trim();

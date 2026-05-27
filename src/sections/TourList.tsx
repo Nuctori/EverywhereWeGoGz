@@ -303,6 +303,7 @@ export function TourList({ searchQuery }: TourListProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>([0, 100]);
+  const [aiClearVersion, setAiClearVersion] = useState(0);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
 
@@ -424,7 +425,6 @@ export function TourList({ searchQuery }: TourListProps) {
       ),
     [aiRecommendationResult],
   );
-
   const displayTours = useMemo(() => {
     if (localTours.length === 0) return [];
 
@@ -566,10 +566,19 @@ export function TourList({ searchQuery }: TourListProps) {
     localTours,
     normalizedSearchQuery,
   ]);
-
+  const visibleTourIds = useMemo(
+    () => new Set(displayTours.map((tour) => tour.id)),
+    [displayTours],
+  );
+  const hiddenAiRecommendationCount = useMemo(
+    () =>
+      aiRecommendationResult?.items.filter((item) => !visibleTourIds.has(item.tourId)).length ?? 0,
+    [aiRecommendationResult, visibleTourIds],
+  );
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
+    setAiClearVersion((current) => current + 1);
   }, []);
 
   const waterfallTours = useMemo(
@@ -1096,6 +1105,7 @@ export function TourList({ searchQuery }: TourListProps) {
         activeFilters={filters}
         searchQuery={searchQuery}
         result={aiRecommendationResult}
+        clearVersion={aiClearVersion}
         onResultChange={setAiRecommendationResult}
         onFocusResults={focusResults}
       />
@@ -1180,13 +1190,24 @@ export function TourList({ searchQuery }: TourListProps) {
             <div className="flex flex-wrap items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
               <Sparkles className="h-4 w-4 text-emerald-700" />
               <span>AI 已推荐 {aiRecommendationResult.items.length} 条线路</span>
-              <button
+              {hiddenAiRecommendationCount > 0 && (
+                <span className="text-xs text-emerald-700">
+                  {hiddenAiRecommendationCount} 条被当前筛选隐藏
+                </span>
+              )}
+              <Button
                 type="button"
-                className="rounded-full px-2 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"
-                onClick={clearAiRecommendation}
+                variant="ghost"
+                size="sm"
+                className="h-7 rounded-full px-2 text-xs font-medium text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  clearAiRecommendation();
+                }}
               >
                 清除
-              </button>
+              </Button>
             </div>
           )}
 
