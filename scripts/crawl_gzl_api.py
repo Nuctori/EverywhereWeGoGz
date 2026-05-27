@@ -20,6 +20,8 @@ HEADERS = {
 }
 
 BASE_URL = "http://nn.gzl.cn"
+MIN_DEPARTURE_YEAR = 2000
+MAX_DEPARTURE_YEAR_OFFSET = 3
 
 # 目的地列表
 DESTINATIONS = [
@@ -62,6 +64,7 @@ def normalize_departure_dates(values):
         return []
     normalized = []
     seen = set()
+    max_year = datetime.now().year + MAX_DEPARTURE_YEAR_OFFSET
     for value in values:
         if not value:
             continue
@@ -69,6 +72,8 @@ def normalize_departure_dates(values):
         try:
             parsed = datetime.strptime(text, "%Y-%m-%d")
         except ValueError:
+            continue
+        if parsed.year < MIN_DEPARTURE_YEAR or parsed.year > max_year:
             continue
         iso_value = parsed.strftime("%Y-%m-%d")
         if iso_value in seen:
@@ -286,6 +291,11 @@ def parse_product(session, product, schedule_cache):
         departure_dates = schedule_dates
     departure_date = schedule_departure_date or first_upcoming_date(departure_dates)
     price = schedule_price or list_price
+    ai_tags = []
+    for raw_tag in product.get("pdTagNames") or []:
+        tag = str(raw_tag or "").strip()
+        if tag and tag not in ai_tags:
+            ai_tags.append(tag)
     
     item = {
         "source": "广之旅",
@@ -299,6 +309,23 @@ def parse_product(session, product, schedule_cache):
         "days": days or extract_days(title),
         "departureDates": departure_dates,
         "departureDate": departure_date,
+        "meta": {
+            "supplierName": str(product.get("pdCompanyName") or "").strip(),
+            "priceSource": "scheduleDateMap" if schedule_price else "b2cMinPrice",
+            "productType": ptype,
+            "aiTags": ai_tags,
+            "sourceFeatures": [
+                feature
+                for feature, enabled in (
+                    ("self_support", str(product.get("selfSupport") or "").strip() == "1"),
+                    ("wifi_available", str(product.get("isGiveWifi") or "").strip() == "1"),
+                )
+                if enabled
+            ],
+            "sourceAttributes": {
+                "pdLevel": str(product.get("pdLevel") or "").strip(),
+            },
+        },
     }
     if img_url:
         item["img"] = img_url

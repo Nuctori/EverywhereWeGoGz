@@ -19,15 +19,17 @@ const rawFiles = [
 ];
 
 const gzlRawFile = 'src/data/raw_gzl_api.json';
+const MIN_DEPARTURE_YEAR = 2000;
+const MAX_DEPARTURE_YEAR_OFFSET = 3;
 
 const sourceRules = {
-  '假日通': { min: 50, ratio: 0.2 },
+  '假日通': { min: 0, ratio: 0, allowMissing: true },
   '康辉': { min: 850, ratio: 0.7 },
   '广东中旅': { min: 400, ratio: 0.75 },
   '品途': { min: 120, ratio: 0.75 },
   '广州去旅行': { min: 35, ratio: 0.75 },
   '暴走村': { min: 50, ratio: 0.45 },
-  '广之旅': { min: 1900, ratio: 0.6 },
+  '广之旅': { min: 1800, ratio: 0.75, requireStructuredDates: true },
 };
 
 const invalidImageTokens = [
@@ -79,6 +81,68 @@ function stableTourKey(item) {
   return `${source}|title:${title}|price:${price}`;
 }
 
+function normalizeDepartureDates(values) {
+  const maxYear = new Date().getFullYear() + MAX_DEPARTURE_YEAR_OFFSET;
+  const seen = new Set();
+  const normalized = [];
+
+  for (const value of values || []) {
+    if (!value) {
+      continue;
+    }
+
+    const text = String(value).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+      continue;
+    }
+
+    const year = Number(text.slice(0, 4));
+    if (year < MIN_DEPARTURE_YEAR || year > maxYear) {
+      continue;
+    }
+
+    if (seen.has(text)) {
+      continue;
+    }
+
+    seen.add(text);
+    normalized.push(text);
+  }
+
+  normalized.sort();
+  return normalized;
+}
+
+function structuredDepartureDatesOf(item) {
+  return normalizeDepartureDates([
+    ...(Array.isArray(item?.departureDates) ? item.departureDates : []),
+    ...(Array.isArray(item?.departureDaysList) ? item.departureDaysList : []),
+    item?.departureDate,
+  ]);
+}
+
+function hasStructuredDepartureDates(item) {
+  return structuredDepartureDatesOf(item).length > 0;
+}
+
+function hasInvalidDepartureDateToken(item) {
+  const maxYear = new Date().getFullYear() + MAX_DEPARTURE_YEAR_OFFSET;
+  const values = [
+    ...(Array.isArray(item?.departureDates) ? item.departureDates : []),
+    ...(Array.isArray(item?.departureDaysList) ? item.departureDaysList : []),
+    item?.departureDate,
+  ];
+
+  return values.some((value) => {
+    const text = String(value || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+      return false;
+    }
+    const year = Number(text.slice(0, 4));
+    return year < MIN_DEPARTURE_YEAR || year > maxYear;
+  });
+}
+
 function countBySource(items) {
   const counts = {};
   for (const item of items) {
@@ -115,6 +179,11 @@ function loadRawCounts() {
       const title = String(item.title || item.name || '').trim();
       const price = Number(item.price || 0);
       if (title.length <= 5 || !(price > 0)) {
+        continue;
+      }
+
+      const rule = sourceRules[source];
+      if (rule?.requireStructuredDates && !hasStructuredDepartureDates(item)) {
         continue;
       }
 
@@ -204,6 +273,9 @@ for (const [source, rule] of Object.entries(sourceRules)) {
 
 const expectedSources = Object.keys(sourceRules);
 for (const source of expectedSources) {
+  if (sourceRules[source]?.allowMissing) {
+    continue;
+  }
   if (!Object.prototype.hasOwnProperty.call(outputCounts, source)) {
     fail(errors, `Missing expected source in output: ${source}`);
   }
@@ -220,6 +292,20 @@ for (const tour of fullTours) {
     fail(errors, `Duplicate tour id: ${tour.id}`);
   }
   fullIds.add(tour.id);
+
+  if (sourceOf(tour) === '广之旅' && !hasStructuredDepartureDates(tour)) {
+    fail(errors, `GZL tour missing valid structured departure dates: ${tour.id} ${tour.bookingUrl || tour.url || ''}`);
+  }
+
+  const bookingUrl = normalizeUrl(tour?.bookingUrl || tour?.url);
+  if (bookingUrl.includes('jrt365.com')) {
+    if (!String(tour.sourceId || '').trim()) {
+      fail(errors, `JRT365 tour missing sourceId: ${tour.id} ${tour.bookingUrl || tour.url || ''}`);
+    }
+    if (!hasStructuredDepartureDates(tour)) {
+      fail(errors, `JRT365 tour missing structured departure dates: ${tour.id} ${tour.bookingUrl || tour.url || ''}`);
+    }
+  }
 
   const images = collectImages(tour);
   if (images.length === 0) {
@@ -251,6 +337,15 @@ const rawGzlByUrl = new Map(
     .filter((tour) => normalizeUrl(tour?.url))
     .map((tour) => [normalizeUrl(tour.url), tour]),
 );
+
+for (const rawGzl of rawGzlTours) {
+  if (hasInvalidDepartureDateToken(rawGzl)) {
+    fail(
+      errors,
+      `raw_gzl_api.json contains invalid GZL departure date token: ${rawGzl.sourceId || rawGzl.url || rawGzl.title || ''}`,
+    );
+  }
+}
 
 let gzlSchedulePriceChecks = 0;
 for (const tour of fullTours) {

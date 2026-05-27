@@ -49,6 +49,8 @@ JLB_HOST_TOKEN = "360jlb.cn"
 PLACEHOLDER_IMAGE_TOKENS = ("lazyimg", "{{", "}}")
 OUTDOORS_HOST_TOKEN = "outdoors.com.cn"
 GROUPNO_RE = re.compile(r"groupno=([^&]+)", re.IGNORECASE)
+MIN_DEPARTURE_YEAR = 2000
+MAX_DEPARTURE_YEAR_OFFSET = 3
 
 
 def looks_like_image(content: bytes) -> bool:
@@ -213,6 +215,7 @@ def extract_title_dates(title: str):
 def normalize_departure_dates(values):
     normalized = []
     seen = set()
+    max_year = datetime.now().year + MAX_DEPARTURE_YEAR_OFFSET
     for value in values or []:
         if not value:
             continue
@@ -220,6 +223,8 @@ def normalize_departure_dates(values):
         try:
             parsed = datetime.strptime(text, "%Y-%m-%d")
         except ValueError:
+            continue
+        if parsed.year < MIN_DEPARTURE_YEAR or parsed.year > max_year:
             continue
         iso_value = parsed.strftime("%Y-%m-%d")
         if iso_value in seen:
@@ -253,6 +258,75 @@ def extract_structured_departure_dates(raw):
         candidates.append(raw.get("departureDate"))
     dates = normalize_departure_dates(candidates)
     return first_upcoming_date(dates), dates
+
+
+def build_ai_meta(raw, source: str, departure_date: str, departure_dates: list[str]):
+    raw_meta = raw.get("meta") if isinstance(raw.get("meta"), dict) else {}
+    raw_tags = raw_meta.get("aiTags") or raw.get("pdTagNames") or []
+    ai_tags = []
+    for value in raw_tags:
+        tag = str(value or "").strip()
+        if tag and tag not in ai_tags:
+            ai_tags.append(tag)
+
+    source_features = []
+    for value in raw_meta.get("sourceFeatures") or []:
+        feature = str(value or "").strip()
+        if feature and feature not in source_features:
+            source_features.append(feature)
+
+    source_attributes = {}
+    if isinstance(raw_meta.get("sourceAttributes"), dict):
+        for key, value in raw_meta["sourceAttributes"].items():
+            text = str(value or "").strip()
+            if text:
+                source_attributes[str(key)] = text
+
+    supplier_name = str(
+        raw_meta.get("supplierName")
+        or raw.get("supplierName")
+        or raw.get("pdCompanyName")
+        or ""
+    ).strip()
+    if supplier_name:
+        source_attributes.setdefault("supplierName", supplier_name)
+
+    product_type = str(
+        raw_meta.get("productType")
+        or raw.get("productType")
+        or raw.get("type")
+        or ""
+    ).strip()
+    if product_type:
+        source_attributes.setdefault("productType", product_type)
+
+    price_source = str(
+        raw_meta.get("priceSource")
+        or raw.get("priceSource")
+        or ""
+    ).strip()
+    if price_source:
+        source_attributes.setdefault("priceSource", price_source)
+
+    risk_flags = []
+    if not departure_dates:
+        risk_flags.append("missing_structured_schedule")
+    if source == "假日通":
+        risk_flags.append("supplier_requires_strict_schedule_validation")
+
+    data_quality = {
+        "hasStructuredDepartureDates": bool(departure_dates),
+        "isDepartureDateReliable": bool(departure_date),
+        "availabilityConfidence": "high" if departure_dates else ("medium" if source != "假日通" else "low"),
+        "riskFlags": risk_flags,
+    }
+
+    return {
+        "aiTags": ai_tags[:12],
+        "sourceFeatures": source_features[:8],
+        "sourceAttributes": source_attributes,
+        "dataQuality": data_quality,
+    }
 
 
 def extract_days(title):
@@ -536,6 +610,16 @@ def raw_to_tour(raw, id_counter, detail=None):
             departure_date = ""
             departure_dates = []
 
+    raw_structured_dates = normalize_departure_dates(
+        (raw.get("departureDates") or [])
+        + (raw.get("departureDaysList") or [])
+        + ([raw.get("departureDate")] if raw.get("departureDate") else [])
+    )
+    if source == "广之旅" and not raw_structured_dates:
+        return None
+    if source == "假日通" and not departure_dates:
+        return None
+
     single_supplement_amount = detail.get("singleSupplementAmount")
     single_supplement = int(single_supplement_amount) if single_supplement_amount is not None else 0
 
@@ -556,6 +640,7 @@ def raw_to_tour(raw, id_counter, detail=None):
     source_id = str(raw.get("sourceId") or raw.get("pdId") or raw.get("prodcode") or raw.get("groupno") or "").strip()
     if not source_id and source == "假日通":
         source_id = extract_jrt365_groupno(raw.get("url", ""))
+    ai_meta = build_ai_meta(raw, source, departure_date, departure_dates)
 
     return {
         "id": f"tour_{id_counter}",
@@ -610,6 +695,8 @@ def raw_to_tour(raw, id_counter, detail=None):
         "sourceId": source_id,
         "departureDates": departure_dates,
         "hotDepartureDates": departure_dates[:4],
+        "meta": ai_meta,
+        "dataQuality": ai_meta["dataQuality"],
         "createdAt": datetime.now().isoformat(),
         "updatedAt": datetime.now().isoformat(),
     }
@@ -851,7 +938,7 @@ def is_360jlb_tour(tour):
 def filter_unavailable_tours(tours):
     enabled = os.environ.get("AVAILABILITY_FILTER", "0").strip().lower()
     if enabled in {"0", "false", "no", "off"}:
-        jrt365_filter = os.environ.get("JRT365_AVAILABILITY_FILTER", "0").strip().lower()
+        jrt365_filter = os.environ.get("JRT365_AVAILABILITY_FILTER", "1").strip().lower()
         gzl_filter = os.environ.get("GZL_AVAILABILITY_FILTER", "1").strip().lower()
         jlb_filter = os.environ.get("JLB_AVAILABILITY_FILTER", "1").strip().lower()
 

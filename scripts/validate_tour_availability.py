@@ -278,7 +278,9 @@ def detect_jrt365_unavailable_shell(raw_html: str) -> bool:
     print_href = (print_link.get("href", "") if print_link else "").strip()
 
     if any(titles) or any(contents) or print_href:
-        return False
+        if any(titles) or any(contents):
+            return False
+        return 'tourname: ""' in raw_html or 'salelable3: ""' in raw_html
 
     return 'tourname: ""' in raw_html and 'salelable3: ""' in raw_html
 
@@ -308,6 +310,44 @@ def has_jrt365_detail_content(raw_html: str) -> bool:
         if node and node.get_text(" ", strip=True):
             return True
     return False
+
+
+def detect_jrt365_broken_schedule_context(raw_html: str) -> bool:
+    empty_title = 'tourname: ""' in raw_html
+    empty_sale_flag = 'salelable3: ""' in raw_html
+    if empty_title or empty_sale_flag:
+        return True
+
+    soup = BeautifulSoup(raw_html, "lxml")
+    title = ""
+    for selector in (
+        "#ctl00_ContentPlaceHolder_htmlform_id_tourname",
+        "#ctl00_ContentPlaceHolder_htmlform_id_tourname_1",
+    ):
+        node = soup.select_one(selector)
+        title = (node.get_text(" ", strip=True) if node else "").strip()
+        if title:
+            break
+    if title:
+        return False
+
+    detail_selectors = (
+        "#con_e_1",
+        "#con_e_2",
+        "#con_e_3",
+        "#con_e_4",
+        "#ctl00_ContentPlaceHolder_htmlform_id_note",
+    )
+    has_detail_text = any(
+        (node.get_text(" ", strip=True) if node else "").strip()
+        for node in (soup.select_one(selector) for selector in detail_selectors)
+    )
+    if has_detail_text:
+        return False
+
+    print_link = soup.select_one("#ctl00_ContentPlaceHolder_htmlform_id_print_xc")
+    print_href = (print_link.get("href", "") if print_link else "").strip()
+    return bool(print_href)
 
 
 def extract_gzl_product_id(raw_html: str, final_url: str) -> str:
@@ -460,6 +500,16 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
                         "category": UNAVAILABLE,
                         "reason": "假日通 detail shell without content",
                         "matched_keyword": "",
+                    }
+                )
+                return result
+
+            if detect_jrt365_broken_schedule_context(raw_html):
+                result.update(
+                    {
+                        "category": UNAVAILABLE,
+                        "reason": "假日通 broken schedule context",
+                        "matched_keyword": "empty-tourname-or-schedule",
                     }
                 )
                 return result

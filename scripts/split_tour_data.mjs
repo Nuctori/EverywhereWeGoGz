@@ -43,6 +43,8 @@ const listFields = new Set([
   'rating',
   'departureDates',
   'hotDepartureDates',
+  'meta',
+  'dataQuality',
 ]);
 
 const tours = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
@@ -127,7 +129,10 @@ const listTours = tours.map((tour) => {
 });
 
 for (const staleFile of existingDetailFiles) {
-  fs.unlinkSync(path.join(detailsDir, staleFile));
+  const stalePath = path.join(detailsDir, staleFile);
+  if (fs.existsSync(stalePath)) {
+    fs.unlinkSync(stalePath);
+  }
 }
 
 writeTextFileWithRetry(listPath, JSON.stringify(listTours));
