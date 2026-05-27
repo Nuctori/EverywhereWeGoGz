@@ -180,6 +180,7 @@ export function AiRecommendPanel({
         searchQuery,
         aiConfig,
         preferenceMemory,
+        previousResult: result,
       });
       onResultChange(nextResult);
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);

@@ -123,11 +123,13 @@ export interface AiPreferenceMemory {
   weatherSensitivity: string[];
   budgetMin?: number | null;
   budgetMax?: number | null;
+  budgetPriority?: 'low' | 'balanced' | 'premium' | null;
   tripDays?: number | null;
   tripDaysMin?: number | null;
   tripDaysMax?: number | null;
   departureWeekdays: number[];
   departureTimeOfDay?: string | null;
+  refinementMode?: 'new_search' | 'refine_previous' | 'broaden' | 'replace_destination' | null;
   updatedAt: string;
 }
 
@@ -164,4 +166,5 @@ export interface AiRecommendationRequest {
   searchQuery: string;
   aiConfig?: Partial<AiProviderConfig>;
   preferenceMemory?: AiPreferenceMemory | null;
+  previousResult?: AiRecommendationResult | null;
 }
