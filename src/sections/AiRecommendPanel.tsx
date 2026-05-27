@@ -24,6 +24,7 @@ import {
   requestAiRecommendations,
   saveAiProviderConfig,
 } from '@/lib/ai-recommendation';
+import { AI_CHAT_STORAGE_KEY, clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 
@@ -42,7 +43,6 @@ const starterPrompts = [
   '想去云南或桂林，看看自然风景',
 ];
 
-const AI_CHAT_STORAGE_KEY = 'travel-ai-chat-state';
 const MAX_PERSISTED_MESSAGES = 40;
 
 interface AiChatState {
@@ -91,10 +91,6 @@ function saveStoredChatState(state: AiChatState) {
   );
 }
 
-function clearStoredChatState() {
-  if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(AI_CHAT_STORAGE_KEY);
-}
 
 export function AiRecommendPanel({
   tours,
@@ -118,6 +114,7 @@ export function AiRecommendPanel({
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
+  const didRestoreStoredResultRef = useRef(false);
   const conversationId = useMemo(
     () => storedChatState.conversationId || createConversationId(),
     [storedChatState.conversationId],
@@ -126,10 +123,11 @@ export function AiRecommendPanel({
   const isShowingProgress = loading && !hasResult;
 
   useEffect(() => {
-    if (storedChatState.result && !result) {
-      onResultChange(storedChatState.result);
-    }
-  }, [onResultChange, result, storedChatState.result]);
+    if (didRestoreStoredResultRef.current || !storedChatState.result) return;
+
+    didRestoreStoredResultRef.current = true;
+    onResultChange(storedChatState.result);
+  }, [onResultChange, storedChatState.result]);
 
   useEffect(() => {
     if (skipInitialSaveRef.current) {
@@ -190,7 +188,7 @@ export function AiRecommendPanel({
     setPreferenceMemory(null);
     setMessages([createMessage('assistant', '已清空上一轮结果和本地偏好记忆。你可以重新描述这次想怎么出行。')]);
     setInput('');
-    clearStoredChatState();
+    clearStoredAiChatState();
   };
 
   const saveSettings = () => {

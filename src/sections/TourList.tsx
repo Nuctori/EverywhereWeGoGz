@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
+import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -565,6 +566,11 @@ export function TourList({ searchQuery }: TourListProps) {
     localTours,
     normalizedSearchQuery,
   ]);
+
+  const clearAiRecommendation = useCallback(() => {
+    clearStoredAiChatState();
+    setAiRecommendationResult(null);
+  }, []);
 
   const waterfallTours = useMemo(
     () => displayTours.slice(0, displayCount),
@@ -1177,7 +1183,7 @@ export function TourList({ searchQuery }: TourListProps) {
               <button
                 type="button"
                 className="rounded-full px-2 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"
-                onClick={() => setAiRecommendationResult(null)}
+                onClick={clearAiRecommendation}
               >
                 清除
               </button>
