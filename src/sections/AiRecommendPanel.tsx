@@ -123,6 +123,7 @@ export function AiRecommendPanel({
     [storedChatState.conversationId],
   );
   const hasResult = Boolean(result && result.items.length > 0);
+  const isShowingProgress = loading && !hasResult;
 
   useEffect(() => {
     if (storedChatState.result && !result) {
@@ -289,7 +290,7 @@ export function AiRecommendPanel({
         </div>
       </div>
 
-      {(loading || hasResult || messages.length > 1) && (
+      {(isShowingProgress || hasResult || messages.length > 1) && (
         <div ref={scrollRef} className="mt-4 max-h-64 space-y-3 overflow-y-auto rounded-2xl border border-stone-200 bg-white/80 p-3">
           {messages.slice(1).map((message) => (
             <div
@@ -308,7 +309,7 @@ export function AiRecommendPanel({
               </div>
             </div>
           ))}
-          {loading && (
+          {isShowingProgress && (
             <div className="flex justify-start">
               <div className="flex items-center gap-2 rounded-2xl border border-stone-200 bg-white px-4 py-3 text-sm text-stone-500 shadow-sm">
                 <Loader2 className="h-4 w-4 animate-spin" />
