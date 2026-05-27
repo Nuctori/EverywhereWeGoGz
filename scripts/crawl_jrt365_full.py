@@ -9,6 +9,8 @@ import json
 import os
 import time
 
+GROUPNO_RE = re.compile(r'groupno=([^&"\']+)', re.IGNORECASE)
+
 def create_webdriver():
     from selenium import webdriver
 
@@ -34,6 +36,13 @@ def extract_days(title):
     if m:
         return int(m.group(1))
     return 0
+
+
+def extract_groupno(url):
+    if not url:
+        return ''
+    match = GROUPNO_RE.search(url)
+    return match.group(1).strip() if match else ''
 
 
 def fetch():
@@ -102,6 +111,7 @@ def fetch():
                                     title = title_m.group(1).strip()
                                     price = float(price_m.group(1)) if price_m else 0
                                     img_url = img_m.group(1) if img_m else ''
+                                    groupno = extract_groupno(href)
 
                                     key = title + "|" + str(price)
                                     if key in seen:
@@ -114,6 +124,8 @@ def fetch():
                                         "price": price,
                                         "url": href,
                                         "days": extract_days(title),
+                                        "groupno": groupno,
+                                        "sourceId": groupno,
                                     }
                                     if img_url:
                                         if img_url.startswith('http'):
@@ -171,6 +183,7 @@ def fetch():
                                 title = title_m.group(1).strip()
                                 price = float(price_m.group(1)) if price_m else 0
                                 img_url = img_m.group(1) if img_m else ''
+                                groupno = extract_groupno(href)
 
                                 key = title + "|" + str(price)
                                 if key in seen:
@@ -183,6 +196,8 @@ def fetch():
                                     "price": price,
                                     "url": href,
                                     "days": extract_days(title),
+                                    "groupno": groupno,
+                                    "sourceId": groupno,
                                 }
                                 if img_url:
                                     if img_url.startswith('http'):

@@ -35,7 +35,6 @@ DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
 IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.jfif', '.png', '.webp', '.gif', '.bmp', '.svg'}
 RAW_FILE_PRIORITIES = {
     "raw_jrt365_full.json": 10,
-    "raw_jrt365.json": 10,
     "raw_kanghui.json": 30,
     "raw_gdcts_full.json": 20,
     "raw_http_full.json": 20,
@@ -49,6 +48,7 @@ GZL_HOST_TOKENS = ("gzl.cn", "gzl.com.cn")
 JLB_HOST_TOKEN = "360jlb.cn"
 PLACEHOLDER_IMAGE_TOKENS = ("lazyimg", "{{", "}}")
 OUTDOORS_HOST_TOKEN = "outdoors.com.cn"
+GROUPNO_RE = re.compile(r"groupno=([^&]+)", re.IGNORECASE)
 
 
 def looks_like_image(content: bytes) -> bool:
@@ -68,6 +68,13 @@ def looks_like_image(content: bytes) -> bool:
 
 def stable_hash(value: str) -> int:
     return int(hashlib.sha1(value.encode('utf-8')).hexdigest(), 16)
+
+
+def extract_jrt365_groupno(value: str) -> str:
+    if not value:
+        return ""
+    match = GROUPNO_RE.search(str(value))
+    return match.group(1).strip() if match else ""
 
 
 def normalize_image_path(url: str, source: str) -> str:
@@ -546,6 +553,10 @@ def raw_to_tour(raw, id_counter, detail=None):
     )
     is_new = is_new_tour(title)
 
+    source_id = str(raw.get("sourceId") or raw.get("pdId") or raw.get("prodcode") or raw.get("groupno") or "").strip()
+    if not source_id and source == "假日通":
+        source_id = extract_jrt365_groupno(raw.get("url", ""))
+
     return {
         "id": f"tour_{id_counter}",
         "title": title,
@@ -596,7 +607,7 @@ def raw_to_tour(raw, id_counter, detail=None):
         "difficulty": "轻松",
         "season": "全年",
         "language": "中文导游",
-        "sourceId": str(raw.get("sourceId") or raw.get("pdId") or raw.get("prodcode") or raw.get("groupno") or ""),
+        "sourceId": source_id,
         "departureDates": departure_dates,
         "hotDepartureDates": departure_dates[:4],
         "createdAt": datetime.now().isoformat(),
@@ -614,10 +625,12 @@ def clean_nulls(obj):
 
 def make_tour_key(item):
     source_id = str(item.get("sourceId") or item.get("pdId") or item.get("prodcode") or item.get("groupno") or "").strip()
-    if source_id:
-        return f"{item.get('source', '')}|id:{source_id}"
     source = item.get("source", "")
     url = str(item.get("url") or item.get("bookingUrl") or "").strip()
+    if not source_id and source == "假日通":
+        source_id = extract_jrt365_groupno(url)
+    if source_id:
+        return f"{item.get('source', '')}|id:{source_id}"
     if source == "假日通" and url:
         return f"{source}|url:{url.lower()}"
     title = item.get("title", "")
@@ -921,13 +934,10 @@ def main():
             print(f"[旧数据] 读取失败: {e}")
 
     # 2. 读取新的raw数据
-    # 假日通保留两个抓取口径：
-    # - raw_jrt365_full.json: 全量脚本输出
-    # - raw_jrt365.json: 主爬虫输出
-    # 两者存在一定差异，先一并并入，再统一去重，避免有效线路被单一路径漏掉。
+    # 假日通仅保留 unified crawl 刷新的 raw_jrt365_full.json。
+    # raw_jrt365.json 已不在统一抓取链路中刷新，继续混入会把陈旧线路重新带回产物。
     raw_files = [
         "raw_jrt365_full.json",
-        "raw_jrt365.json",
         "raw_kanghui.json",
         "raw_gdcts_full.json",
         "raw_http_full.json",
