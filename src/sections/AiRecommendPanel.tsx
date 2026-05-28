@@ -5,6 +5,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  Mic,
   RotateCcw,
   Send,
   Settings,
@@ -58,6 +59,49 @@ const starterPrompts = [
 ];
 
 const MAX_PERSISTED_MESSAGES = 40;
+const LONG_PRESS_DURATION_MS = 320;
+
+interface SpeechRecognitionAlternativeLike {
+  transcript: string;
+}
+
+interface SpeechRecognitionResultLike {
+  isFinal: boolean;
+  length: number;
+  [index: number]: SpeechRecognitionAlternativeLike;
+}
+
+interface SpeechRecognitionEventLike extends Event {
+  results: ArrayLike<SpeechRecognitionResultLike>;
+  resultIndex: number;
+}
+
+interface SpeechRecognitionErrorEventLike extends Event {
+  error?: string;
+  message?: string;
+}
+
+interface BrowserSpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  maxAlternatives: number;
+  onend: ((event: Event) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
+type BrowserSpeechRecognitionConstructor = new () => BrowserSpeechRecognition;
+
+declare global {
+  interface Window {
+    SpeechRecognition?: BrowserSpeechRecognitionConstructor;
+    webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor;
+  }
+}
 
 const progressSteps: Array<{
   stage: AiRecommendationProgress['stage'];
@@ -126,6 +170,21 @@ function createConversationId() {
   return `ai-rec-${Date.now().toString(36)}-${Math.random().toString(16).slice(2)}`;
 }
 
+function mergeRecognizedText(base: string, transcript: string) {
+  const trimmedBase = base.trimEnd();
+  const trimmedTranscript = transcript.trim();
+
+  if (!trimmedBase) return trimmedTranscript;
+  if (!trimmedTranscript) return trimmedBase;
+
+  const shouldJoinWithoutSpace =
+    /[\u4e00-\u9fff]$/.test(trimmedBase) || /^[，。！？；：,.!?;:]/.test(trimmedTranscript);
+
+  return shouldJoinWithoutSpace
+    ? `${trimmedBase}${trimmedTranscript}`
+    : `${trimmedBase} ${trimmedTranscript}`;
+}
+
 function readStoredChatState(): Partial<AiChatState> {
   if (typeof window === 'undefined') return {};
 
@@ -189,15 +248,147 @@ export function AiRecommendPanel({
   );
   const [loading, setLoading] = useState(false);
   const [progressState, setProgressState] = useState<AiRecommendationProgress | null>(null);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const [speechError, setSpeechError] = useState<string | null>(null);
+  const [speechHint, setSpeechHint] = useState('正在检测浏览器语音能力...');
+  const [speechPressing, setSpeechPressing] = useState(false);
+  const [speechListening, setSpeechListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
   const didRestoreStoredResultRef = useRef(false);
+  const speechRecognitionCtorRef = useRef<BrowserSpeechRecognitionConstructor | null>(null);
+  const speechRecognitionRef = useRef<BrowserSpeechRecognition | null>(null);
+  const speechPressTimerRef = useRef<number | null>(null);
+  const speechBaseInputRef = useRef('');
   const conversationId = useMemo(
     () => storedChatState.conversationId || createConversationId(),
     [storedChatState.conversationId],
   );
   const hasResult = Boolean(result && result.items.length > 0);
   const resultStatusMeta = getResultStatusMeta(result);
+
+  const clearSpeechPressTimer = () => {
+    if (speechPressTimerRef.current !== null) {
+      window.clearTimeout(speechPressTimerRef.current);
+      speechPressTimerRef.current = null;
+    }
+  };
+
+  const stopSpeechRecognition = (abort = false) => {
+    clearSpeechPressTimer();
+    setSpeechPressing(false);
+
+    const recognition = speechRecognitionRef.current;
+    if (!recognition) return;
+
+    try {
+      if (abort) {
+        recognition.abort();
+      } else {
+        recognition.stop();
+      }
+    } catch {
+      setSpeechListening(false);
+    }
+  };
+
+  const startSpeechRecognition = () => {
+    const SpeechRecognitionCtor = speechRecognitionCtorRef.current;
+    clearSpeechPressTimer();
+
+    if (!SpeechRecognitionCtor || speechListening || loading) return;
+
+    try {
+      const recognition = new SpeechRecognitionCtor();
+      speechRecognitionRef.current = recognition;
+      speechBaseInputRef.current = input;
+      setSpeechError(null);
+      setSpeechHint('请按住说话，松开后结束语音转文字');
+
+      recognition.lang = 'zh-CN';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+      recognition.onresult = (event) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let index = 0; index < event.results.length; index += 1) {
+          const segment = event.results[index]?.[0]?.transcript?.trim();
+          if (!segment) continue;
+
+          if (event.results[index].isFinal) {
+            finalTranscript += segment;
+          } else {
+            interimTranscript += segment;
+          }
+        }
+
+        const nextTranscript = `${finalTranscript}${interimTranscript}`.trim();
+        setInput(mergeRecognizedText(speechBaseInputRef.current, nextTranscript));
+      };
+      recognition.onerror = (event) => {
+        const nextError =
+          event.error === 'not-allowed'
+            ? '语音权限未开启，请允许浏览器访问麦克风。'
+            : event.error === 'no-speech'
+              ? '没有识别到语音，可以再试一次。'
+              : event.error === 'audio-capture'
+                ? '没有检测到可用麦克风。'
+                : '语音转文字启动失败，请稍后重试。';
+
+        setSpeechError(nextError);
+        setSpeechHint('当前无法继续语音输入');
+        setSpeechListening(false);
+      };
+      recognition.onend = () => {
+        speechRecognitionRef.current = null;
+        setSpeechListening(false);
+        setSpeechPressing(false);
+        setSpeechHint(
+          speechRecognitionCtorRef.current
+            ? '浏览器支持语音输入，长按麦克风开始，松开结束'
+            : '当前浏览器不支持 Web Speech API 语音转文字',
+        );
+      };
+
+      recognition.start();
+      setSpeechListening(true);
+    } catch {
+      speechRecognitionRef.current = null;
+      setSpeechListening(false);
+      setSpeechError('当前浏览器无法启动语音识别。');
+      setSpeechHint('当前浏览器不支持或未开放语音输入');
+    }
+  };
+
+  const handleSpeechPressStart = () => {
+    if (!speechRecognitionCtorRef.current || loading) return;
+
+    setSpeechError(null);
+    setSpeechPressing(true);
+    setSpeechHint('继续按住即可进入语音转文字');
+    clearSpeechPressTimer();
+    speechPressTimerRef.current = window.setTimeout(() => {
+      startSpeechRecognition();
+    }, LONG_PRESS_DURATION_MS);
+  };
+
+  const handleSpeechPressEnd = () => {
+    clearSpeechPressTimer();
+
+    if (speechListening) {
+      stopSpeechRecognition();
+      return;
+    }
+
+    setSpeechPressing(false);
+    setSpeechHint(
+      speechRecognitionCtorRef.current
+        ? '浏览器支持语音输入，长按麦克风开始，松开结束'
+        : '当前浏览器不支持 Web Speech API 语音转文字',
+    );
+  };
 
   useEffect(() => {
     if (didRestoreStoredResultRef.current || !storedChatState.result) return;
@@ -229,8 +420,53 @@ export function AiRecommendPanel({
   }, [messages]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const SpeechRecognitionCtor =
+      window.SpeechRecognition ?? window.webkitSpeechRecognition ?? null;
+
+    speechRecognitionCtorRef.current = SpeechRecognitionCtor;
+    setSpeechSupported(Boolean(SpeechRecognitionCtor));
+    setSpeechHint(
+      SpeechRecognitionCtor
+        ? '浏览器支持语音输入，长按麦克风开始，松开结束'
+        : '当前浏览器不支持 Web Speech API 语音转文字',
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!speechPressing && !speechListening) return;
+
+    const handlePointerRelease = () => {
+      handleSpeechPressEnd();
+    };
+
+    window.addEventListener('pointerup', handlePointerRelease);
+    window.addEventListener('pointercancel', handlePointerRelease);
+
+    return () => {
+      window.removeEventListener('pointerup', handlePointerRelease);
+      window.removeEventListener('pointercancel', handlePointerRelease);
+    };
+  }, [speechListening, speechPressing]);
+
+  useEffect(() => {
+    return () => {
+      clearSpeechPressTimer();
+      if (speechRecognitionRef.current) {
+        try {
+          speechRecognitionRef.current.abort();
+        } catch {
+          // noop
+        }
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (clearVersion === 0) return;
 
+    stopSpeechRecognition(true);
     setLoading(false);
     setInput('');
     setPreferenceMemory(null);
@@ -358,7 +594,27 @@ export function AiRecommendPanel({
               </button>
             ))}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className={cn(
+                'h-9 rounded-xl border-stone-200 bg-white px-3 text-xs',
+                speechListening
+                  ? 'border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-50'
+                  : speechSupported
+                    ? 'text-stone-700 hover:bg-stone-50'
+                    : 'text-stone-400 hover:bg-white',
+              )}
+              disabled={!speechSupported || loading}
+              onPointerDown={handleSpeechPressStart}
+              onPointerUp={handleSpeechPressEnd}
+              onPointerLeave={handleSpeechPressEnd}
+              onPointerCancel={handleSpeechPressEnd}
+            >
+              <Mic className={cn('h-3.5 w-3.5', speechListening && 'animate-pulse')} />
+              {speechListening ? '松开结束' : speechPressing ? '继续按住' : '长按语音'}
+            </Button>
             {hasResult && (
               <Button
                 type="button"
@@ -381,6 +637,10 @@ export function AiRecommendPanel({
               推荐线路
             </Button>
           </div>
+        </div>
+        <div className="px-1 pb-1 text-[11px] leading-5">
+          <p className={cn('text-stone-500', speechListening && 'text-emerald-700')}>{speechHint}</p>
+          {speechError && <p className="text-rose-600">{speechError}</p>}
         </div>
       </div>
 
