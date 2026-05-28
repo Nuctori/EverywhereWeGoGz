@@ -52,6 +52,12 @@ export interface Tour {
   updatedAt: string;
   departureDates?: string[];
   hotDepartureDates?: string[];
+  dataQuality?: {
+    hasStructuredDepartureDates?: boolean;
+    isDepartureDateReliable?: boolean;
+    availabilityConfidence?: 'low' | 'medium' | 'high';
+    riskFlags?: string[];
+  };
 }
 
 export interface DayItinerary {
@@ -73,7 +79,7 @@ export type FilterState = {
   departureDateStart: string;
   departureDateEnd: string;
   theme: string;
-  sortBy: 'price_asc' | 'price_desc' | 'hot' | 'new' | 'rating';
+  sortBy: 'price_asc' | 'price_desc' | 'hot' | 'new';
 };
 
 export type AiRecommendationMessageRole = 'assistant' | 'user';

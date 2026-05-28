@@ -11,6 +11,42 @@ const detailsDir = path.join(dataDir, 'tour-details');
 const imageCacheDir = path.join(dataDir, 'image-cache', 'placeholders');
 const invalidImageTokens = ['lazyimg', '{{', '}}'];
 const writeRetries = 5;
+const destinationKeywordMap = [
+  ['华东', ['华东', '江南', '上海', '苏州', '杭州', '南京', '无锡', '乌镇', '周庄', '南浔', '西湖', '外滩', '迪士尼', '拈花湾', '牛首山']],
+  ['广东', ['广东', '广州', '深圳', '珠海', '从化', '增城', '龙门', '新丰', '英德', '佛冈', '江门', '惠州', '双月湾', '巽寮湾', '古兜', '恩平', '新兴', '清远', '沙扒湾', '温泉']],
+  ['云南', ['云南', '昆明', '大理', '丽江', '西双版纳', '腾冲', '芒市', '瑞丽', '香格里拉', '普洱']],
+  ['三亚', ['三亚', '海南', '海口', '蜈支洲', '天涯海角']],
+  ['北京', ['北京', '故宫', '长城']],
+  ['四川', ['四川', '成都', '九寨沟', '黄龙', '稻城', '四姑娘山']],
+  ['新疆', ['新疆', '乌鲁木齐', '喀什', '伊犁', '喀纳斯', '天山']],
+  ['贵州', ['贵州', '贵阳', '黄果树', '荔波', '西江']],
+  ['桂林', ['桂林', '阳朔', '漓江']],
+  ['西藏', ['西藏', '拉萨', '布达拉宫', '林芝']],
+  ['张家界', ['张家界', '天门山']],
+  ['厦门', ['厦门', '鼓浪屿']],
+  ['西安', ['西安', '兵马俑']],
+  ['青甘', ['青海', '甘肃', '青甘', '西宁', '兰州', '敦煌', '张掖', '嘉峪关', '茶卡', '莫高窟']],
+  ['内蒙古', ['内蒙', '内蒙古', '呼伦贝尔', '海拉尔', '满洲里', '鄂尔多斯', '草原']],
+  ['湖南', ['湖南', '长沙', '郴州', '莽山', '湘西', '凤凰古城']],
+  ['湖北', ['湖北', '武汉', '恩施', '神农架']],
+  ['江西', ['江西', '南昌', '婺源', '三清山', '庐山', '景德镇', '赣州']],
+  ['山东', ['山东', '青岛', '济南', '烟台', '威海', '泰山', '曲阜', '淄博']],
+  ['河南', ['河南', '郑州', '开封', '洛阳', '云台山', '老君山']],
+  ['重庆', ['重庆', '武隆', '仙女山', '洪崖洞']],
+  ['港澳', ['香港', '澳门', '麦理浩径', '维港']],
+  ['广西', ['广西', '贺州', '北海', '涠洲岛', '德天', '崇左', '百色']],
+  ['福建', ['福建', '泉州', '福州', '平潭', '武夷山', '漳州']],
+];
+const knownSourceLogos = new Set([
+  '假日通',
+  '广州去旅行',
+  '康辉',
+  '暴走村',
+  '广之旅',
+  '广东中旅',
+  '品途',
+  '天涯户外',
+]);
 
 const listFields = new Set([
   'id',
@@ -89,7 +125,29 @@ function writeTextFileWithRetry(filePath, content) {
   throw lastError;
 }
 
+function inferDestinationFromTour(tour) {
+  const title = String(tour.title || '').trim();
+  const candidates = [
+    title,
+    ...(Array.isArray(tour.highlights) ? tour.highlights : []),
+    ...(Array.isArray(tour.tags) ? tour.tags : []),
+  ]
+    .map((value) => String(value || '').trim())
+    .filter(Boolean)
+    .join(' ');
+
+  for (const [destination, keywords] of destinationKeywordMap) {
+    if (keywords.some((keyword) => candidates.includes(keyword))) {
+      return destination;
+    }
+  }
+
+  return '';
+}
+
 let sanitizedImages = 0;
+let normalizedDestinations = 0;
+let normalizedSourceLogos = 0;
 for (const tour of tours) {
   const images = Array.isArray(tour.images) ? tour.images : [];
   const validImages = images.map((image) => String(image || '').trim()).filter((image) => !isInvalidImage(image));
@@ -98,9 +156,25 @@ for (const tour of tours) {
     sanitizedImages += 1;
     tour.images = validImages.length > 0 ? validImages : [placeholderImage(tour.source)];
   }
+
+  if (!tour.sourceLogo || knownSourceLogos.has(String(tour.source || '').trim())) {
+    const nextSourceLogo = `/icons/${tour.source}.png`;
+    if (tour.sourceLogo !== nextSourceLogo) {
+      normalizedSourceLogos += 1;
+      tour.sourceLogo = nextSourceLogo;
+    }
+  }
+
+  if (!tour.destination || tour.destination === '其他') {
+    const inferredDestination = inferDestinationFromTour(tour);
+    if (inferredDestination && inferredDestination !== tour.destination) {
+      normalizedDestinations += 1;
+      tour.destination = inferredDestination;
+    }
+  }
 }
 
-if (sanitizedImages > 0) {
+if (sanitizedImages > 0 || normalizedDestinations > 0 || normalizedSourceLogos > 0) {
   fs.writeFileSync(sourcePath, JSON.stringify(tours), 'utf8');
 }
 
@@ -190,6 +264,8 @@ writeTextFileWithRetry(metaPath, JSON.stringify(meta, null, 2));
 
 console.log(`Split ${tours.length} tours`);
 console.log(`sanitized images ${sanitizedImages}`);
+console.log(`normalized destinations ${normalizedDestinations}`);
+console.log(`normalized source logos ${normalizedSourceLogos}`);
 console.log(`tours.json ${sourceSize}`);
 console.log(`tours-list.json ${listSize}`);
 console.log(`tour-details ${detailFiles.length} files, ${detailSize}`);

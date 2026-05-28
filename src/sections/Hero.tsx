@@ -10,10 +10,10 @@ interface HeroProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onSearch: (value?: string) => void;
+  quickDestinations: string[];
 }
 
-export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
-  const quickDestinations = ['桂林', '三亚', '云南', '张家界', '西藏', '新疆'];
+export function Hero({ searchQuery, onSearchChange, onSearch, quickDestinations }: HeroProps) {
   const logoSrc = `${import.meta.env.BASE_URL}brand/laoguang-logo-full.jpg`;
 
   return (
@@ -29,8 +29,11 @@ export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
                 老广去边度 · 广州出发
               </p>
               <h1 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-stone-950 sm:text-5xl">
-                看线路，直接筛。
+                先看班期和预算，再选适合的团。
               </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
+                聚合多平台跟团线路，先把出发时间、预算和目的地缩小，再决定要不要看 AI 推荐。
+              </p>
 
               <div className="mt-8 flex max-w-3xl flex-col gap-3 rounded-[24px] border border-stone-200/80 bg-white/92 p-3 shadow-sm sm:flex-row sm:items-center">
                 <div className="relative flex-1">
@@ -55,6 +58,9 @@ export function Hero({ searchQuery, onSearchChange, onSearch }: HeroProps) {
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
+                <span className="self-center pr-1 text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+                  热门目的地
+                </span>
                 {quickDestinations.map((dest) => (
                   <button
                     key={dest}

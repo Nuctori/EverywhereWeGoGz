@@ -42,6 +42,14 @@ function formatDate(dateStr: string | undefined): string {
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
+function getReadableDestination(tour: Tour) {
+  if (tour.destination && tour.destination !== '其他') {
+    return tour.destination;
+  }
+  const candidate = tour.highlights?.find((item) => item && item !== '其他必打卡');
+  return candidate ? candidate.replace(/必打卡$/, '') : '目的地待确认';
+}
+
 const LEGACY_POLICY_PLACEHOLDERS = new Set([
   '2-12岁儿童不占床享半价',
   '出发前7天可无损退改',
@@ -97,6 +105,7 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
   if (!tour) return null;
   const heroImage = resolveAssetUrl(tour.images?.[0] || '');
   const heroFallbackImage = getFallbackImage(tour.title);
+  const destinationLabel = getReadableDestination(tour);
 
   const searchUrls: Record<string, string> = {
     '广之旅': 'https://www.gzl.com.cn/search?keyword=',
@@ -175,11 +184,11 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
       )}
 
       {/* 核心信息 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
           <MapPin className="mx-auto mb-1 h-5 w-5 text-stone-500" />
           <p className="text-xs text-stone-500">目的地</p>
-          <p className="text-sm font-semibold text-stone-900">{tour.destination}</p>
+          <p className="text-sm font-semibold text-stone-900">{destinationLabel}</p>
         </div>
         <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
           <Clock className="mx-auto mb-1 h-5 w-5 text-stone-500" />
@@ -195,8 +204,10 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
         </div>
         <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
           <Star className="mx-auto mb-1 h-5 w-5 text-stone-500" />
-          <p className="text-xs text-stone-500">评分</p>
-          <p className="text-sm font-semibold text-stone-400">—</p>
+          <p className="text-xs text-stone-500">数据状态</p>
+          <p className="text-sm font-semibold text-stone-900">
+            {tour.dataQuality?.isDepartureDateReliable ? '班期已核验' : '以源站为准'}
+          </p>
         </div>
       </div>
 
@@ -236,7 +247,7 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
         ) : (
           <div className="flex items-center gap-2 rounded-lg border border-stone-200 bg-stone-50 p-3">
             <Info className="h-5 w-5 shrink-0 text-stone-500" />
-            <span className="text-sm text-stone-600">单房差需以来源详情页或客服二次确认为准</span>
+            <span className="text-sm text-stone-600">当前未抓到可靠单房差，单人出行前建议打开源站核对</span>
           </div>
         )}
 
@@ -249,12 +260,14 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
           </div>
         )}
         {/* 移动端Tab可滚动 */}
-        <TabsList className="grid w-full grid-cols-4 h-auto">
-          <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">概览</TabsTrigger>
-          <TabsTrigger value="itinerary" className="text-xs sm:text-sm py-2">每日安排</TabsTrigger>
-          <TabsTrigger value="cost" className="text-xs sm:text-sm py-2">费用</TabsTrigger>
-          <TabsTrigger value="service" className="text-xs sm:text-sm py-2">说明</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto pb-1">
+          <TabsList className="grid min-w-[520px] grid-cols-4 h-auto">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">概览</TabsTrigger>
+            <TabsTrigger value="itinerary" className="text-xs sm:text-sm py-2">每日安排</TabsTrigger>
+            <TabsTrigger value="cost" className="text-xs sm:text-sm py-2">费用</TabsTrigger>
+            <TabsTrigger value="service" className="text-xs sm:text-sm py-2">说明</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="overview" className="space-y-4 mt-4">
           {/* 出团日期选择器 */}
@@ -445,20 +458,20 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
           <div className="rounded-lg border border-stone-200 bg-white p-4">
             <h4 className="mb-2 flex items-center gap-2 font-semibold text-stone-800">
               <Info className="w-4 h-4" />
-              数据说明
+              使用提醒
             </h4>
             <ul className="space-y-2 text-sm text-stone-600">
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                价格与单房差仅供参考
+                班期和价格会变动，下单前请再打开源站确认
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                以来源平台页面为准
+                费用包含、退改和单房差是最值得二次核对的三项
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
-                同线路可横向比较
+                这个页面更适合先比线路，再决定跳去源站完成预订
               </li>
             </ul>
           </div>
@@ -489,7 +502,7 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
         <Sheet open={!!tour} onOpenChange={(open) => !open && onClose()}>
           <SheetContent side="bottom" className="h-[100dvh] max-h-[100dvh] overflow-hidden p-0 flex min-h-0 flex-col">
             <SheetHeader className="p-4 pb-2 border-b shrink-0">
-              <SheetTitle className="text-base leading-relaxed pr-8">{tour.title}</SheetTitle>
+              <SheetTitle className="pr-8 text-left text-base leading-relaxed">{tour.title}</SheetTitle>
               <SheetDescription>{tour.title} 的详细信息</SheetDescription>
             </SheetHeader>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4 [-webkit-overflow-scrolling:touch]">

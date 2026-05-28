@@ -40,14 +40,11 @@ import {
   MapPin,
   SlidersHorizontal,
   Sparkles,
-  Star,
   X,
 } from 'lucide-react';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { zhCN } from 'date-fns/locale';
-
-import { sources, destinations, themes } from '@/data/tours';
 
 declare const __DATA_VERSION__: string;
 
@@ -205,6 +202,17 @@ function fromDateInputValue(value: string) {
 const PAGE_SIZE = 24;
 const INITIAL_LOAD_COUNT = 24;
 const VISIBLE_DESTINATION_COUNT = 14;
+const HERO_DESTINATION_COUNT = 6;
+const SOURCE_COLORS: Record<string, string> = {
+  假日通: '#FF6B35',
+  广州去旅行: '#4ECDC4',
+  康辉: '#1A535C',
+  暴走村: '#B8860B',
+  广之旅: '#FF006E',
+  广东中旅: '#8338EC',
+  品途: '#3A86FF',
+  天涯户外: '#2F855A',
+};
 
 const DEFAULT_FILTERS: FilterState = {
   destination: '',
@@ -288,6 +296,64 @@ function compareRecommended(a: Tour, b: Tour) {
   );
 }
 
+function getDynamicHeroDestinations(tours: Tour[]) {
+  const counts = new Map<string, number>();
+
+  for (const tour of tours) {
+    const destination = String(tour.destination || '').trim();
+    if (!destination || destination === '其他') continue;
+    counts.set(destination, (counts.get(destination) || 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, HERO_DESTINATION_COUNT)
+    .map(([destination]) => destination);
+}
+
+function getDestinationOptions(tours: Tour[]) {
+  const counts = new Map<string, number>();
+
+  for (const tour of tours) {
+    const destination = String(tour.destination || '').trim();
+    if (!destination || !isDisplayableTour(tour)) continue;
+    counts.set(destination, (counts.get(destination) || 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'))
+    .map(([destination]) => destination);
+}
+
+function getThemeOptions(tours: Tour[]) {
+  const counts = new Map<string, number>();
+
+  for (const tour of tours) {
+    const theme = String(tour.theme || '').trim();
+    if (!theme || !isDisplayableTour(tour)) continue;
+    counts.set(theme, (counts.get(theme) || 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'))
+    .map(([theme]) => theme);
+}
+
+function getSourceOptions(tours: Tour[]) {
+  const sourceMeta = new Map<string, { name: string; color?: string }>();
+
+  for (const tour of tours) {
+    const source = String(tour.source || '').trim();
+    if (!source) continue;
+    sourceMeta.set(source, {
+      name: source,
+      color: SOURCE_COLORS[source] || sourceMeta.get(source)?.color,
+    });
+  }
+
+  return Array.from(sourceMeta.values()).sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+}
+
 interface TourListProps {
   searchQuery: string;
 }
@@ -313,6 +379,22 @@ export function TourList({ searchQuery }: TourListProps) {
 
   const { maxPriceAll, priceStats } = useMemo(
     () => computePriceStats(localTours),
+    [localTours],
+  );
+  const heroDestinations = useMemo(
+    () => getDynamicHeroDestinations(localTours),
+    [localTours],
+  );
+  const destinationOptions = useMemo(
+    () => getDestinationOptions(localTours),
+    [localTours],
+  );
+  const themeOptions = useMemo(
+    () => getThemeOptions(localTours),
+    [localTours],
+  );
+  const sourceOptions = useMemo(
+    () => getSourceOptions(localTours),
     [localTours],
   );
 
@@ -356,26 +438,11 @@ export function TourList({ searchQuery }: TourListProps) {
   );
 
   const visibleDestinations = useMemo(() => {
-    const destinationCounts = new Map<string, number>();
-
-    for (const tour of localTours) {
-      if (isDisplayableTour(tour) && tour.destination) {
-        destinationCounts.set(
-          tour.destination,
-          (destinationCounts.get(tour.destination) ?? 0) + 1,
-        );
-      }
-    }
-
-    const rankedDestinations = [...destinations].sort(
-      (a, b) => (destinationCounts.get(b) ?? 0) - (destinationCounts.get(a) ?? 0),
-    );
-
-    return rankedDestinations.slice(0, VISIBLE_DESTINATION_COUNT);
-  }, [localTours]);
+    return destinationOptions.slice(0, VISIBLE_DESTINATION_COUNT);
+  }, [destinationOptions]);
   const overflowDestinations = useMemo(
-    () => destinations.filter((dest) => !visibleDestinations.includes(dest)),
-    [visibleDestinations],
+    () => destinationOptions.filter((dest) => !visibleDestinations.includes(dest)),
+    [destinationOptions, visibleDestinations],
   );
   const selectedDestinationInOverflow =
     Boolean(filters.destination) && !visibleDestinations.includes(filters.destination);
@@ -530,9 +597,6 @@ export function TourList({ searchQuery }: TourListProps) {
         break;
       case 'new':
         result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-        break;
-      case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
         break;
     }
 
@@ -882,12 +946,12 @@ export function TourList({ searchQuery }: TourListProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部平台</SelectItem>
-                {sources.map((source) => (
+                {sourceOptions.map((source) => (
                   <SelectItem key={source.name} value={source.name}>
                     <span className="flex items-center gap-2">
                       <span
                         className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: source.color }}
+                        style={{ backgroundColor: source.color || '#78716c' }}
                       />
                       {source.name}
                     </span>
@@ -940,7 +1004,7 @@ export function TourList({ searchQuery }: TourListProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部主题</SelectItem>
-                {themes.map((theme) => (
+                {themeOptions.map((theme) => (
                   <SelectItem key={theme} value={theme}>
                     {theme}
                   </SelectItem>
@@ -964,7 +1028,7 @@ export function TourList({ searchQuery }: TourListProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全部目的地</SelectItem>
-                {destinations.map((dest) => (
+                {destinationOptions.map((dest) => (
                   <SelectItem key={dest} value={dest}>
                     {dest}
                   </SelectItem>
@@ -1111,6 +1175,12 @@ export function TourList({ searchQuery }: TourListProps) {
       />
 
       <div className="mb-6">
+        {heroDestinations.length > 0 && (
+          <div className="mb-4 rounded-[24px] border border-stone-200/80 bg-white/80 px-4 py-3 text-sm text-stone-600">
+            <span className="font-medium text-stone-900">当前热门目的地：</span>{' '}
+            {heroDestinations.join(' · ')}
+          </div>
+        )}
         {commonFilters}
 
         {!isMobile && showFilters && (
@@ -1170,12 +1240,6 @@ export function TourList({ searchQuery }: TourListProps) {
                 </SelectItem>
                 <SelectItem value="price_asc">价格由低到高</SelectItem>
                 <SelectItem value="price_desc">价格由高到低</SelectItem>
-                <SelectItem value="rating">
-                  <span className="flex items-center gap-2">
-                    <Star className="w-3.5 h-3.5 text-yellow-500" />
-                    评分优先
-                  </span>
-                </SelectItem>
                 <SelectItem value="new">
                   <span className="flex items-center gap-2">
                     <Sparkles className="w-3.5 h-3.5 text-blue-500" />

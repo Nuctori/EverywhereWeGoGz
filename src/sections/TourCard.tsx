@@ -35,6 +35,21 @@ function formatDate(dateStr: string | undefined): string {
   return `${month}月${day}日`;
 }
 
+function getReadableDestination(tour: Tour) {
+  if (tour.destination && tour.destination !== '其他') {
+    return tour.destination;
+  }
+  const candidate = tour.highlights?.find((item) => item && item !== '其他必打卡');
+  return candidate ? candidate.replace(/必打卡$/, '') : '目的地待确认';
+}
+
+function buildTitleSummary(tour: Tour) {
+  const chunks = [getReadableDestination(tour), `${tour.duration}天`];
+  if (tour.theme) chunks.push(tour.theme);
+  if (tour.transportType) chunks.push(tour.transportType.replace('往返', ''));
+  return chunks.filter(Boolean).join(' · ');
+}
+
 export const TourCard = memo(function TourCard({
   tour,
   onClick,
@@ -46,6 +61,8 @@ export const TourCard = memo(function TourCard({
   const imageSrc = resolveAssetUrl(rawImageSrc);
   const tags = tour.tags?.slice(0, 2) || [];
   const hasReliableSingleSupplement = Boolean(tour.singleSupplementNote?.trim());
+  const titleSummary = buildTitleSummary(tour);
+  const destinationLabel = getReadableDestination(tour);
 
   return (
     <Card
@@ -80,7 +97,7 @@ export const TourCard = memo(function TourCard({
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <h3 className="line-clamp-2 text-base font-semibold leading-7 text-stone-900 transition-colors group-hover:text-stone-700">
+              <h3 className="line-clamp-3 text-base font-semibold leading-7 text-stone-900 transition-colors group-hover:text-stone-700">
                 {tour.title}
               </h3>
             </TooltipTrigger>
@@ -89,6 +106,10 @@ export const TourCard = memo(function TourCard({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
+        <p className="mt-2 text-sm text-stone-500">
+          {titleSummary}
+        </p>
 
         {recommendationReason && (
           <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-800">
@@ -131,7 +152,7 @@ export const TourCard = memo(function TourCard({
 
         <div className="mt-4 space-y-2">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-500">
-            <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{tour.destination}</span>
+            <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{destinationLabel}</span>
             <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{tour.duration}天</span>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-500">
@@ -155,9 +176,9 @@ export const TourCard = memo(function TourCard({
             </div>
             <p className={`mt-1 text-xs ${hasReliableSingleSupplement ? 'text-amber-700' : 'text-stone-500'}`}>
               {hasReliableSingleSupplement ? (
-                <>单房差以详情页说明为准</>
+                <>已提供单房差说明</>
               ) : (
-                '单房差待确认'
+                '单人出行费用待确认'
               )}
             </p>
           </div>
