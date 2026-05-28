@@ -600,8 +600,10 @@ def raw_to_tour(raw, id_counter, detail=None):
     if not images:
         images = [ensure_placeholder_image(source)]
 
-    departure_date, departure_dates = extract_structured_departure_dates(raw)
-    if not departure_dates:
+    structured_departure_date, raw_structured_dates = extract_structured_departure_dates(raw)
+    departure_date = structured_departure_date
+    departure_dates = list(raw_structured_dates)
+    if source != "假日通" and not departure_dates:
         parsed_dates = extract_title_dates(title)
         if parsed_dates:
             departure_dates = parsed_dates
@@ -609,15 +611,9 @@ def raw_to_tour(raw, id_counter, detail=None):
         else:
             departure_date = ""
             departure_dates = []
-
-    raw_structured_dates = normalize_departure_dates(
-        (raw.get("departureDates") or [])
-        + (raw.get("departureDaysList") or [])
-        + ([raw.get("departureDate")] if raw.get("departureDate") else [])
-    )
     if source == "广之旅" and not raw_structured_dates:
         return None
-    if source == "假日通" and not departure_dates:
+    if source == "假日通" and not raw_structured_dates:
         return None
 
     single_supplement_amount = detail.get("singleSupplementAmount")

@@ -23,7 +23,7 @@ const MIN_DEPARTURE_YEAR = 2000;
 const MAX_DEPARTURE_YEAR_OFFSET = 3;
 
 const sourceRules = {
-  '假日通': { min: 0, ratio: 0, allowMissing: true },
+  '假日通': { min: 150, ratio: 0.55, requireStructuredDates: true },
   '康辉': { min: 850, ratio: 0.7 },
   '广东中旅': { min: 400, ratio: 0.75 },
   '品途': { min: 120, ratio: 0.75 },
@@ -233,6 +233,10 @@ const meta = readJson(outputFiles.meta);
 const rawGzlTours = fs.existsSync(path.join(root, gzlRawFile))
   ? asArray(readJson(path.join(root, gzlRawFile)), path.join(root, gzlRawFile))
   : [];
+const rawJrtFile = path.join(root, 'src/data/raw_jrt365_full.json');
+const rawJrtTours = fs.existsSync(rawJrtFile)
+  ? asArray(readJson(rawJrtFile), rawJrtFile)
+  : [];
 
 if (fullTours.length !== listTours.length) {
   fail(errors, `List/full count mismatch: tours.json=${fullTours.length}, tours-list.json=${listTours.length}`);
@@ -256,6 +260,14 @@ if (detailFiles.length !== fullTours.length) {
 
 const outputCounts = countBySource(fullTours);
 const rawCounts = loadRawCounts();
+const rawStructuredJrtKeys = new Set(
+  rawJrtTours
+    .filter((tour) => sourceOf(tour) === '假日通')
+    .filter((tour) => String(tour.title || tour.name || '').trim().length > 5)
+    .filter((tour) => Number(tour.price || 0) > 0)
+    .filter((tour) => hasStructuredDepartureDates(tour))
+    .map((tour) => stableTourKey(tour)),
+);
 
 for (const [source, rule] of Object.entries(sourceRules)) {
   const outputCount = outputCounts[source] || 0;
@@ -304,6 +316,9 @@ for (const tour of fullTours) {
     }
     if (!hasStructuredDepartureDates(tour)) {
       fail(errors, `JRT365 tour missing structured departure dates: ${tour.id} ${tour.bookingUrl || tour.url || ''}`);
+    }
+    if (!rawStructuredJrtKeys.has(stableTourKey(tour))) {
+      fail(errors, `JRT365 tour missing raw structured-date backing: ${tour.id} ${tour.bookingUrl || tour.url || ''}`);
     }
   }
 
