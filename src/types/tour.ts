@@ -136,6 +136,10 @@ export interface AiWeatherContext {
   travelDate?: string;
   forecastSummary: string;
   seasonAdvice: string[];
+  inferredFrom?: string[];
+  queryReason?: string;
+  bestSeasonNote?: string;
+  role?: 'departure' | 'destination';
   source: 'open-meteo' | 'seasonal-rule' | 'none';
 }
 

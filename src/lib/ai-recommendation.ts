@@ -8,6 +8,7 @@ import type {
   AiRecommendationRequest,
   AiRecommendationResult,
   AiWeatherContext,
+  FilterState,
 } from '@/types/tour';
 
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
@@ -15,6 +16,7 @@ const MAX_AI_CANDIDATES = 180;
 const MAX_AI_COMMENTARY_ITEMS = 18;
 const ROUTE_ATLAS_MAX_GROUPS = 18;
 const ROUTE_ATLAS_MAX_EXAMPLES = 4;
+const DEFAULT_DEPARTURE_CITY = '广州';
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 interface AiTravelIntent {
@@ -37,6 +39,12 @@ interface AiTravelIntent {
 
 interface RecommendationContext {
   budgetPriority?: AiTravelIntent['budgetPriority'];
+}
+
+interface DestinationWeatherInsight extends AiWeatherContext {
+  role: 'departure' | 'destination';
+  queryReason?: string;
+  bestSeasonNote?: string;
 }
 
 interface CandidateAuditPrimitive extends RecommendationPrimitive {
@@ -925,26 +933,212 @@ function compactCandidates(
     .slice(0, MAX_AI_CANDIDATES);
 }
 
-function getLikelyDestination(text: string, tours: AiRecommendationCandidate[]) {
-  const [hint] = collectDestinationHints(text);
-  if (hint) return hint;
-
-  const destinationCounts = new Map<string, number>();
-  for (const tour of tours.slice(0, 40)) {
-    if (!tour.destination) continue;
-    destinationCounts.set(tour.destination, (destinationCounts.get(tour.destination) || 0) + 1);
-  }
-
-  return [...destinationCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] || '';
+function extractRecentUserTexts(messages: AiRecommendationMessage[], limit = 6) {
+  return messages
+    .filter((message) => message.role === 'user')
+    .slice(-limit)
+    .map((message) => message.content.trim())
+    .filter(Boolean);
 }
 
-function getLikelyTravelDate(tours: AiRecommendationCandidate[]) {
+function parseDateString(value: string | null | undefined) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatDateInput(value: Date) {
+  return value.toISOString().slice(0, 10);
+}
+
+function getEarliestDate(values: Array<string | null | undefined>) {
+  const parsed = values
+    .map(parseDateString)
+    .filter((value): value is Date => Boolean(value))
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  return parsed[0] ? formatDateInput(parsed[0]) : undefined;
+}
+
+function getLikelyTravelDate(text: string, tours: AiRecommendationCandidate[]) {
+  if (/(未来7天|未来七天|近7天|近七天|最近|这周|本周|这几天)/.test(text)) {
+    return new Date().toISOString().slice(0, 10);
+  }
+
   return tours.find((tour) => tour.departureDate)?.departureDate;
+}
+
+function resolveWeatherContext(params: {
+  text: string;
+  messages: AiRecommendationMessage[];
+  searchQuery: string;
+  activeFilters: FilterState;
+  preferenceMemory: AiPreferenceMemory | null | undefined;
+  tours: AiRecommendationCandidate[];
+}) {
+  const inferredFrom: string[] = [];
+  const recentUserTexts = extractRecentUserTexts(params.messages);
+  const destinationSources = [
+    params.text,
+    ...recentUserTexts,
+    params.searchQuery,
+    params.activeFilters.destination,
+    ...(params.preferenceMemory?.destinationHints || []),
+  ].filter(Boolean);
+
+  let destination = '';
+  for (const sourceText of destinationSources) {
+    const [hint] = collectDestinationHints(sourceText);
+    if (hint) {
+      destination = hint;
+      if (sourceText === params.text) {
+        inferredFrom.push('当前提问');
+      } else if (recentUserTexts.includes(sourceText)) {
+        inferredFrom.push('近期对话');
+      } else if (sourceText === params.searchQuery) {
+        inferredFrom.push('搜索词');
+      } else if (sourceText === params.activeFilters.destination) {
+        inferredFrom.push('当前筛选');
+      } else {
+        inferredFrom.push('偏好记忆');
+      }
+      break;
+    }
+  }
+
+  if (!destination) {
+    destination = DEFAULT_DEPARTURE_CITY;
+    inferredFrom.push('默认出发地');
+  }
+
+  const prefersCurrentDate = /(未来7天|未来七天|近7天|近七天|最近|这周|本周|这几天|当前|现在|这个月|本月)/.test(
+    [params.text, ...recentUserTexts].join(' '),
+  );
+  let travelDate: string | undefined;
+
+  if (prefersCurrentDate) {
+    travelDate = formatDateInput(new Date());
+    inferredFrom.push('当前日期');
+  } else {
+    travelDate =
+      params.activeFilters.departureDateStart ||
+      params.activeFilters.departureDate ||
+      getEarliestDate([
+        params.activeFilters.departureDateStart,
+        params.activeFilters.departureDate,
+        params.activeFilters.departureDateEnd,
+      ]) ||
+      getEarliestDate(params.tours.flatMap((tour) => [
+        tour.departureDate,
+        ...(tour.departureDates || []),
+        ...(tour.hotDepartureDates || []),
+      ])) ||
+      getLikelyTravelDate(params.text, params.tours);
+
+    if (travelDate) {
+      if (params.activeFilters.departureDateStart || params.activeFilters.departureDate || params.activeFilters.departureDateEnd) {
+        inferredFrom.push('出发日期筛选');
+      } else {
+        inferredFrom.push('候选线路班期');
+      }
+    }
+  }
+
+  return {
+    destination,
+    travelDate,
+    inferredFrom: uniqueStrings(inferredFrom),
+  };
+}
+
+function getDestinationBestSeasonNote(destination: string, corpus = '') {
+  const text = `${destination} ${corpus}`;
+
+  if (/(北海道|新疆|喀纳斯|九寨沟|额济纳|稻城|川西)/.test(text)) {
+    return '这类目的地观赏体验通常对季节窗口很敏感，旺季景观更强，但天气、温差和人流波动也更明显。';
+  }
+  if (/(三亚|海南|海岛|普吉|巴厘|长滩|沙巴|仙本那|芽庄)/.test(text)) {
+    return '海岛和海边玩法更依赖晴天、风浪和降雨窗口，连续降雨、强对流或台风天会明显影响体验。';
+  }
+  if (/(桂林|贵州|云南|张家界|黄山|草原|呼伦贝尔|香格里拉)/.test(text)) {
+    return '山水和高原草原类目的地通常存在更明显的观赏期与雨季差异，能见度、路况和体感温差都值得单独判断。';
+  }
+  if (/(樱花|红叶|赏花|花海|银杏|雪景|冰雪|避暑)/.test(text)) {
+    return '这类主题本身就依赖最佳观赏期，建议结合天气与季节窗口一起判断，不宜只看价格。';
+  }
+
+  return '如目的地玩法明显依赖景观窗口、晴雨条件或季节体感，建议把天气与观赏期作为排序因子一起考虑。';
+}
+
+function shouldInspectDestinationWeather(tour: AiRecommendationCandidate, searchCorpus: string) {
+  const text = `${tour.destination} ${tour.theme} ${tour.title} ${searchCorpus}`;
+  return /(海岛|海边|沙滩|潜水|浮潜|玩水|漂流|峡谷|山水|草原|雪|冰|温泉|避暑|赏花|花海|红叶|樱花|银杏|日出|星空|摄影|自然)/
+    .test(text);
+}
+
+function buildDestinationWeatherCandidates(
+  tours: AiRecommendationCandidate[],
+  localItems: AiRecommendationItem[],
+  searchQuery: string,
+  intent: AiTravelIntent | null,
+) {
+  const scoreByTourId = new Map(localItems.map((item) => [item.tourId, item.score]));
+  const grouped = new Map<string, {
+    destination: string;
+    score: number;
+    evidence: string[];
+    corpus: string;
+  }>();
+
+  for (const tour of tours.slice(0, 80)) {
+    const corpus = getSearchCorpus(tour);
+    const destination = getAtlasRegions(tour)[0] || tour.destination;
+    if (!destination) continue;
+    if (!shouldInspectDestinationWeather(tour, corpus)) continue;
+
+    const relevance =
+      (scoreByTourId.get(tour.id) || 0) +
+      (tour.isHot ? 6 : 0) +
+      (intent?.destinationHints?.length && destinationHintsMatchCorpus(intent.destinationHints, `${tour.destination} ${tour.title}`) ? 16 : 0) +
+      (searchQuery && corpus.includes(searchQuery.toLowerCase()) ? 8 : 0);
+    const existing = grouped.get(destination) || {
+      destination,
+      score: 0,
+      evidence: [],
+      corpus,
+    };
+
+    existing.score = Math.max(existing.score, relevance);
+    existing.corpus = `${existing.corpus} ${corpus}`.slice(0, 500);
+    existing.evidence = uniqueStrings([
+      ...existing.evidence,
+      tour.theme,
+      ...tour.tags.slice(0, 2),
+      ...tour.highlights.slice(0, 2),
+    ]).slice(0, 6);
+    grouped.set(destination, existing);
+  }
+
+  return [...grouped.values()]
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 4);
+}
+
+function isSouthChinaHotRainySeason(destination: string, month: number) {
+  if (![5, 6, 7, 8, 9, 10].includes(month)) return false;
+
+  return ['广东', '广州', '深圳', '珠海', '佛山', '东莞', '中山', '惠州', '海南', '三亚', '海口', '广西']
+    .some((name) => destination.includes(name));
 }
 
 function getSeasonAdvice(destination: string, travelDate?: string) {
   const month = travelDate ? new Date(travelDate).getMonth() + 1 : new Date().getMonth() + 1;
   const advice: string[] = [];
+
+  if (isSouthChinaHotRainySeason(destination, month)) {
+    advice.push('华南此时通常已经进入闷热多雨阶段，体感更接近夏季，选线路时应优先考虑避暑、遮阳、防雨和室内外搭配。');
+    advice.push('广东、海南和沿海线路要额外关注强降雨、雷暴和台风预警，海边、玩水和长时间暴晒项目不宜盲目优先。');
+  }
 
   if ([6, 7, 8, 9].includes(month)) {
     advice.push('夏秋季需关注高温、暴雨和沿海台风风险，老人亲子优先选择节奏轻、室内外搭配合理的线路。');
@@ -963,7 +1157,7 @@ function getSeasonAdvice(destination: string, travelDate?: string) {
     }
   }
 
-  if ([3, 4, 5].includes(month)) {
+  if ([3, 4, 5].includes(month) && !isSouthChinaHotRainySeason(destination, month)) {
     advice.push('春季适合踏青赏花、山水自然和短途休闲，但南方回南天和连续降雨会影响体验。');
   }
 
@@ -980,33 +1174,62 @@ function findCoords(destination: string) {
 }
 
 async function fetchWeatherContext(
-  text: string,
-  tours: AiRecommendationCandidate[],
+  params: {
+    text: string;
+    messages: AiRecommendationMessage[];
+    searchQuery: string;
+    activeFilters: FilterState;
+    preferenceMemory: AiPreferenceMemory | null | undefined;
+    tours: AiRecommendationCandidate[];
+  },
 ): Promise<AiWeatherContext> {
-  const destination = getLikelyDestination(text, tours);
-  const travelDate = getLikelyTravelDate(tours);
-  const seasonAdvice = getSeasonAdvice(destination, travelDate);
-  const coords = findCoords(destination);
+  const { destination, travelDate, inferredFrom } = resolveWeatherContext(params);
+  return fetchDestinationWeatherInsight({
+    destination,
+    travelDate,
+    inferredFrom,
+    role: 'departure',
+    queryReason: inferredFrom?.includes('默认出发地')
+      ? '默认作为广州出发天气与出行风险提示'
+      : '根据当前上下文推断的主天气锚点',
+  });
+}
 
-  if (!destination || !coords) {
+async function fetchDestinationWeatherInsight(params: {
+  destination: string;
+  travelDate?: string;
+  inferredFrom?: string[];
+  role: 'departure' | 'destination';
+  queryReason?: string;
+  corpus?: string;
+}): Promise<DestinationWeatherInsight> {
+  const seasonAdvice = getSeasonAdvice(params.destination, params.travelDate);
+  const coords = findCoords(params.destination);
+  const bestSeasonNote = getDestinationBestSeasonNote(params.destination, params.corpus || '');
+
+  if (!params.destination || !coords) {
     return {
-      destination,
-      travelDate,
-      forecastSummary: '未匹配到可查询天气的目的地，使用季节和目的地常识辅助判断。',
+      destination: params.destination,
+      travelDate: params.travelDate,
+      forecastSummary: '未匹配到可查询天气的目的地，使用季节和世界知识辅助判断。',
       seasonAdvice,
+      inferredFrom: params.inferredFrom,
+      queryReason: params.queryReason,
+      bestSeasonNote,
+      role: params.role,
       source: 'seasonal-rule',
     };
   }
 
   try {
-    const params = new URLSearchParams({
+    const query = new URLSearchParams({
       latitude: String(coords.latitude),
       longitude: String(coords.longitude),
       daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code',
       timezone: 'auto',
       forecast_days: '7',
     });
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${query.toString()}`);
     if (!response.ok) throw new Error(`Weather API failed: ${response.status}`);
 
     const data = await response.json();
@@ -1019,18 +1242,26 @@ async function fetchWeatherContext(
     const maxRain = Math.round(Math.max(...rainProbs));
 
     return {
-      destination,
-      travelDate,
-      forecastSummary: `${destination}未来7天约 ${minTemp}-${maxTemp}℃，最高降水概率约 ${maxRain}%。`,
+      destination: params.destination,
+      travelDate: params.travelDate,
+      forecastSummary: `${params.destination}未来7天约 ${minTemp}-${maxTemp}℃，最高降水概率约 ${maxRain}%。`,
       seasonAdvice,
+      inferredFrom: params.inferredFrom,
+      queryReason: params.queryReason,
+      bestSeasonNote,
+      role: params.role,
       source: 'open-meteo',
     };
   } catch {
     return {
-      destination,
-      travelDate,
-      forecastSummary: '天气接口暂时不可用，使用季节和目的地常识辅助判断。',
+      destination: params.destination,
+      travelDate: params.travelDate,
+      forecastSummary: '天气接口暂时不可用，使用季节和世界知识辅助判断。',
       seasonAdvice,
+      inferredFrom: params.inferredFrom,
+      queryReason: params.queryReason,
+      bestSeasonNote,
+      role: params.role,
       source: 'seasonal-rule',
     };
   }
@@ -1043,6 +1274,7 @@ function buildAiMessages(params: {
   routeAtlas: RouteAtlas;
   auditContext: RecommendationAuditContext;
   weatherContext: AiWeatherContext;
+  destinationWeatherInsights: DestinationWeatherInsight[];
   searchQuery: string;
   intent: AiTravelIntent | null;
   preferenceMemory: AiPreferenceMemory | null;
@@ -1059,6 +1291,10 @@ function buildAiMessages(params: {
     '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选列表和推荐原语。',
     '如果用户提到老人、儿童、轻松、怕累，应降低高强度、长途奔波和极端天气目的地优先级。',
     '如果天气或季节不适合，要在理由中说明风险，并优先推荐更稳妥的候选。',
+    'summary 必须优先反映 weatherContext 的真实结论；如果已出现高温、闷热、暴雨或台风风险，不要再写成“春季踏青”这类泛化判断。',
+    'weatherContext.destination、travelDate 和 inferredFrom 是从当前提问、近几轮对话、搜索词、筛选器、偏好记忆和候选线路池综合推断出的上下文；回答天气和季节时优先依赖这些上下文，不要只看最后一句字面。',
+    '如果 inferredFrom 包含“默认出发地”，就把 weatherContext 当作广州出发天气和出行风险提示，不要把这份天气表述成所有候选目的地的实时天气。',
+    'destinationWeatherInsights 是针对少数高相关、明显受天气或最佳观赏期影响的目的地补充查询结果。你应自行决定哪些结果值得引用，并利用世界知识判断是否处于更合适的观赏窗口。',
     '严格输出 JSON，不要 Markdown，不要额外解释。',
   ].join('\n');
 
@@ -1081,6 +1317,7 @@ function buildAiMessages(params: {
     preferenceMemory: params.preferenceMemory,
     interpretedIntent: params.intent,
     weatherContext: params.weatherContext,
+    destinationWeatherInsights: params.destinationWeatherInsights,
     routeAtlas: params.routeAtlas,
     auditContext: params.auditContext,
     candidateTours: params.candidates,
@@ -1466,7 +1703,32 @@ export async function requestAiRecommendations({
       detail: `正在结合天气、季节和候选池信息，范围约 ${availableCandidates.length} 条线路。`,
       progress: 56,
     });
-    const weatherContext = await fetchWeatherContext(effectiveUserText, availableCandidates);
+    const weatherContext = await fetchWeatherContext({
+      text: effectiveUserText,
+      messages,
+      searchQuery,
+      activeFilters,
+      preferenceMemory: nextPreferenceMemory,
+      tours: availableCandidates,
+    });
+    const destinationWeatherCandidates = buildDestinationWeatherCandidates(
+      availableCandidates,
+      localItems,
+      searchQuery,
+      effectiveIntent,
+    );
+    const destinationWeatherInsights = await Promise.all(
+      destinationWeatherCandidates.map((candidate) =>
+        fetchDestinationWeatherInsight({
+          destination: candidate.destination,
+          travelDate: weatherContext.travelDate,
+          inferredFrom: ['候选目的地补充查询'],
+          role: 'destination',
+          queryReason: `该目的地天气和观赏期可能显著影响体验：${candidate.evidence.join(' / ')}`,
+          corpus: candidate.corpus,
+        }),
+      ),
+    );
     const compactedCandidates = compactCandidates(
       availableCandidates,
       localItems,
@@ -1489,6 +1751,7 @@ export async function requestAiRecommendations({
         routeAtlas,
         auditContext,
         weatherContext,
+        destinationWeatherInsights,
         searchQuery,
         intent: effectiveIntent,
         preferenceMemory: nextPreferenceMemory,
