@@ -108,11 +108,21 @@ export type AiRecommendationProgressStage =
   | 'completed'
   | 'fallback';
 
+export type AiRecommendationSubstepStatus = 'pending' | 'active' | 'done';
+
+export interface AiRecommendationSubstep {
+  id: string;
+  label: string;
+  detail?: string;
+  status: AiRecommendationSubstepStatus;
+}
+
 export interface AiRecommendationProgress {
   stage: AiRecommendationProgressStage;
   label: string;
   detail: string;
   progress: number;
+  substeps?: AiRecommendationSubstep[];
 }
 
 export interface AiRecommendationStatus {

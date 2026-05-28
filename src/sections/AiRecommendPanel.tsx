@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bot,
+  ChevronDown,
+  ChevronUp,
   CheckCircle2,
   Eye,
   EyeOff,
@@ -248,6 +250,7 @@ export function AiRecommendPanel({
   );
   const [loading, setLoading] = useState(false);
   const [progressState, setProgressState] = useState<AiRecommendationProgress | null>(null);
+  const [expandedStage, setExpandedStage] = useState<AiRecommendationProgress['stage'] | null>(null);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [speechHint, setSpeechHint] = useState('正在检测浏览器语音能力...');
@@ -267,14 +270,14 @@ export function AiRecommendPanel({
   const hasResult = Boolean(result && result.items.length > 0);
   const resultStatusMeta = getResultStatusMeta(result);
 
-  const clearSpeechPressTimer = () => {
+  const clearSpeechPressTimer = useCallback(() => {
     if (speechPressTimerRef.current !== null) {
       window.clearTimeout(speechPressTimerRef.current);
       speechPressTimerRef.current = null;
     }
-  };
+  }, []);
 
-  const stopSpeechRecognition = (abort = false) => {
+  const stopSpeechRecognition = useCallback((abort = false) => {
     clearSpeechPressTimer();
     setSpeechPressing(false);
 
@@ -290,9 +293,9 @@ export function AiRecommendPanel({
     } catch {
       setSpeechListening(false);
     }
-  };
+  }, [clearSpeechPressTimer]);
 
-  const startSpeechRecognition = () => {
+  const startSpeechRecognition = useCallback(() => {
     const SpeechRecognitionCtor = speechRecognitionCtorRef.current;
     clearSpeechPressTimer();
 
@@ -360,9 +363,9 @@ export function AiRecommendPanel({
       setSpeechError('当前浏览器无法启动语音识别。');
       setSpeechHint('当前浏览器不支持或未开放语音输入');
     }
-  };
+  }, [clearSpeechPressTimer, input, loading, speechListening]);
 
-  const handleSpeechPressStart = () => {
+  const handleSpeechPressStart = useCallback(() => {
     if (!speechRecognitionCtorRef.current || loading) return;
 
     setSpeechError(null);
@@ -372,9 +375,9 @@ export function AiRecommendPanel({
     speechPressTimerRef.current = window.setTimeout(() => {
       startSpeechRecognition();
     }, LONG_PRESS_DURATION_MS);
-  };
+  }, [clearSpeechPressTimer, loading, startSpeechRecognition]);
 
-  const handleSpeechPressEnd = () => {
+  const handleSpeechPressEnd = useCallback(() => {
     clearSpeechPressTimer();
 
     if (speechListening) {
@@ -388,7 +391,7 @@ export function AiRecommendPanel({
         ? '浏览器支持语音输入，长按麦克风开始，松开结束'
         : '当前浏览器不支持 Web Speech API 语音转文字',
     );
-  };
+  }, [clearSpeechPressTimer, speechListening, stopSpeechRecognition]);
 
   useEffect(() => {
     if (didRestoreStoredResultRef.current || !storedChatState.result) return;
@@ -448,7 +451,7 @@ export function AiRecommendPanel({
       window.removeEventListener('pointerup', handlePointerRelease);
       window.removeEventListener('pointercancel', handlePointerRelease);
     };
-  }, [speechListening, speechPressing]);
+  }, [handleSpeechPressEnd, speechListening, speechPressing]);
 
   useEffect(() => {
     return () => {
@@ -461,7 +464,7 @@ export function AiRecommendPanel({
         }
       }
     };
-  }, []);
+  }, [clearSpeechPressTimer]);
 
   useEffect(() => {
     if (clearVersion === 0) return;
@@ -471,8 +474,18 @@ export function AiRecommendPanel({
     setInput('');
     setPreferenceMemory(null);
     setProgressState(null);
+    setExpandedStage(null);
     setMessages([createInitialMessage()]);
-  }, [clearVersion]);
+  }, [clearVersion, stopSpeechRecognition]);
+
+  useEffect(() => {
+    if (!progressState?.substeps?.length) {
+      setExpandedStage(null);
+      return;
+    }
+
+    setExpandedStage((current) => (current === progressState.stage ? current : progressState.stage));
+  }, [progressState]);
 
   const submitPrompt = async (rawPrompt?: string) => {
     const prompt = (rawPrompt ?? input).trim();
@@ -488,6 +501,11 @@ export function AiRecommendPanel({
       label: '已收到需求',
       detail: '正在开始本次处理。',
       progress: 8,
+      substeps: [
+        { id: 'capture', label: '接收本次条件', status: 'done' },
+        { id: 'start', label: '启动推荐流程', status: 'active' },
+        { id: 'prepare', label: '准备需求理解', status: 'pending' },
+      ],
     });
 
     try {
@@ -518,6 +536,7 @@ export function AiRecommendPanel({
     onResultChange(null);
     setPreferenceMemory(null);
     setProgressState(null);
+    setExpandedStage(null);
     setMessages([createMessage('assistant', '已清空上一轮结果和本地偏好记忆。你可以重新描述这次想怎么出行。')]);
     setInput('');
     clearStoredAiChatState();
@@ -661,6 +680,27 @@ export function AiRecommendPanel({
                     {progressState.label}
                   </div>
                   <p className="mt-1 text-sm leading-6 text-stone-600">{progressState.detail}</p>
+                  {progressState.substeps?.length ? (
+                    <button
+                      type="button"
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 transition-colors hover:text-emerald-800"
+                      onClick={() =>
+                        setExpandedStage((current) => (current === progressState.stage ? null : progressState.stage))
+                      }
+                    >
+                      {expandedStage === progressState.stage ? (
+                        <>
+                          收起本阶段进度
+                          <ChevronUp className="h-3.5 w-3.5" />
+                        </>
+                      ) : (
+                        <>
+                          查看本阶段进度
+                          <ChevronDown className="h-3.5 w-3.5" />
+                        </>
+                      )}
+                    </button>
+                  ) : null}
                 </div>
                 <Badge
                   className={cn(
@@ -715,6 +755,34 @@ export function AiRecommendPanel({
                   );
                 })}
               </div>
+
+              {progressState.substeps?.length && expandedStage === progressState.stage ? (
+                <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-3">
+                  <div className="text-xs font-medium text-emerald-900">当前阶段拆解</div>
+                  <div className="mt-2 space-y-2">
+                    {progressState.substeps.map((substep) => (
+                      <div key={substep.id} className="flex items-start gap-2 text-xs text-stone-700">
+                        <span
+                          className={cn(
+                            'mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-medium',
+                            substep.status === 'done'
+                              ? 'bg-emerald-600 text-white'
+                              : substep.status === 'active'
+                                ? 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300'
+                                : 'bg-white text-stone-500 ring-1 ring-stone-200',
+                          )}
+                        >
+                          {substep.status === 'done' ? '✓' : substep.status === 'active' ? '进行中' : '待开始'}
+                        </span>
+                        <div className="min-w-0 pt-0.5">
+                          <div className="font-medium text-stone-800">{substep.label}</div>
+                          {substep.detail ? <div className="mt-0.5 text-stone-500">{substep.detail}</div> : null}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
           )}
 

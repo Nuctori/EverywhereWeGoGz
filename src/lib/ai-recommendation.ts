@@ -5,6 +5,7 @@ import type {
   AiRecommendationItem,
   AiRecommendationMessage,
   AiRecommendationProgress,
+  AiRecommendationSubstep,
   AiRecommendationRequest,
   AiRecommendationResult,
   AiWeatherContext,
@@ -18,6 +19,18 @@ const ROUTE_ATLAS_MAX_GROUPS = 18;
 const ROUTE_ATLAS_MAX_EXAMPLES = 4;
 const DEFAULT_DEPARTURE_CITY = '广州';
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+function withActiveSubstep(
+  items: Array<{ id: string; label: string; detail?: string }>,
+  activeId: string,
+): AiRecommendationSubstep[] {
+  const activeIndex = items.findIndex((item) => item.id === activeId);
+
+  return items.map((item, index) => ({
+    ...item,
+    status: activeIndex === -1 ? 'pending' : index < activeIndex ? 'done' : index === activeIndex ? 'active' : 'pending',
+  }));
+}
 
 interface AiTravelIntent {
   tripDays?: number | null;
@@ -1621,6 +1634,14 @@ export async function requestAiRecommendations({
     label: '已收到需求',
     detail: '正在整理你的出发时间、预算、天数和偏好。',
     progress: 12,
+    substeps: withActiveSubstep(
+      [
+        { id: 'capture', label: '接收本次条件' },
+        { id: 'normalize', label: '整理预算和天数' },
+        { id: 'prepare', label: '准备进入需求理解' },
+      ],
+      'normalize',
+    ),
   });
 
   const text = getLatestUserText(messages);
@@ -1663,6 +1684,23 @@ export async function requestAiRecommendations({
       ? `将从 ${availableCandidates.length} 条候选线路中理解需求并生成推荐。`
       : `正在按当前条件从 ${availableCandidates.length} 条候选线路中做规则匹配。`,
     progress: config ? 20 : 100,
+    substeps: config
+      ? withActiveSubstep(
+          [
+            { id: 'scope', label: '圈定候选范围' },
+            { id: 'intent', label: '提取偏好和约束' },
+            { id: 'handoff', label: '准备上下文补充' },
+          ],
+          'intent',
+        )
+      : withActiveSubstep(
+          [
+            { id: 'scope', label: '圈定候选范围' },
+            { id: 'rules', label: '按规则筛选线路' },
+            { id: 'fallback', label: '生成备用结果' },
+          ],
+          'rules',
+        ),
   });
 
   if (!config) {
@@ -1702,6 +1740,14 @@ export async function requestAiRecommendations({
       label: '正在补充行程上下文',
       detail: `正在结合天气、季节和候选池信息，范围约 ${availableCandidates.length} 条线路。`,
       progress: 56,
+      substeps: withActiveSubstep(
+        [
+          { id: 'weather', label: '补充天气信息' },
+          { id: 'season', label: '结合季节与时令' },
+          { id: 'candidate', label: '汇总候选池特征' },
+        ],
+        'season',
+      ),
     });
     const weatherContext = await fetchWeatherContext({
       text: effectiveUserText,
@@ -1741,6 +1787,14 @@ export async function requestAiRecommendations({
       label: '正在生成推荐结果',
       detail: `AI 正在对 ${compactedCandidates.length} 条高相关候选线路做排序和取舍。`,
       progress: 82,
+      substeps: withActiveSubstep(
+        [
+          { id: 'compact', label: '筛出高相关候选' },
+          { id: 'rank', label: '结合偏好做排序' },
+          { id: 'summary', label: '准备推荐摘要' },
+        ],
+        'rank',
+      ),
     });
     const aiResponse = await callAiApi({
       config,
@@ -1774,6 +1828,14 @@ export async function requestAiRecommendations({
       label: '推荐结果已生成',
       detail: `已完成排序，并置顶 ${mergedItems.length} 条候选线路。`,
       progress: 100,
+      substeps: withActiveSubstep(
+        [
+          { id: 'ranked', label: '排序结果已完成' },
+          { id: 'top', label: '置顶匹配线路' },
+          { id: 'ready', label: '返回推荐摘要' },
+        ],
+        'ready',
+      ),
     });
 
     return {
@@ -1798,6 +1860,14 @@ export async function requestAiRecommendations({
       label: 'AI 暂不可用，已切换备用方案',
       detail: `正在按本地规则从 ${availableCandidates.length} 条候选线路里给出可用结果。`,
       progress: 100,
+      substeps: withActiveSubstep(
+        [
+          { id: 'detect', label: '检测 AI 不可用' },
+          { id: 'rules', label: '切换本地规则' },
+          { id: 'return', label: '返回备用推荐' },
+        ],
+        'return',
+      ),
     });
 
     return {
