@@ -56,8 +56,8 @@ src/
 
 ## 部署
 
-仓库已配置 Cloudflare Workers workflow。push 到 `master` 或手动触发 `.github/workflows/deploy.yml` 后，会自动运行构建并通过 `wrangler deploy` 发布 `dist/`。
+仓库已配置 GitHub Pages workflow。push 到 `master` 或手动触发 `.github/workflows/deploy.yml` 后，会自动构建并发布 `dist/` 到 GitHub Pages。
 
-GitHub Actions 需要配置仓库密钥 `CLOUDFLARE_API_TOKEN`，否则 Workers 发布会在鉴权阶段失败。
+构建时会注入 `APP_BASE=EverywhereWeGoGz`，这样静态资源路径会自动适配仓库 Pages 路径。
 
 部署前构建会重新生成 `public/data` 下的 JSON、详情分片和元信息，并执行数据完整性审计。
