@@ -13,8 +13,9 @@ import type {
 } from '@/types/tour';
 
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
-const MAX_AI_CANDIDATES = 180;
+const MAX_AI_CANDIDATES = 36;
 const MAX_AI_COMMENTARY_ITEMS = 18;
+const MAX_AI_OUTPUT_ITEMS = 24;
 const ROUTE_ATLAS_MAX_GROUPS = 18;
 const ROUTE_ATLAS_MAX_EXAMPLES = 4;
 const DEFAULT_DEPARTURE_CITY = '广州';
@@ -1357,6 +1358,9 @@ function buildAiMessages(params: {
     candidateTours: params.candidates,
   };
 
+  userPayload.task = `只从 candidateTours 中选出最适合的前 ${MAX_AI_OUTPUT_ITEMS} 个旅行团，按适合程度排序返回；不要返回更多 items。仅前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只返回 tourId 和 score。`;
+  (userPayload.outputSchema as { itemCountLimit?: number }).itemCountLimit = MAX_AI_OUTPUT_ITEMS;
+
   return [
     { role: 'system', content: systemPrompt },
     { role: 'user', content: JSON.stringify(userPayload) },
@@ -1622,6 +1626,7 @@ async function callAiApi(params: {
       model: params.config.model,
       messages: params.messages,
       temperature: 0.25,
+      max_tokens: 4096,
       response_format: { type: 'json_object' },
     }),
   });
