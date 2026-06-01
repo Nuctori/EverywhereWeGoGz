@@ -44,6 +44,9 @@ jobs:
         run: npm run build
         env:
           APP_BASE: EverywhereWeGoGz
+          VITE_AI_DEFAULT_BASE_URL: https://api.siliconflow.cn/v1
+          VITE_AI_DEFAULT_MODEL: Qwen/Qwen3-8B
+          VITE_AI_DEFAULT_API_KEY_B64: c2stcGF3ZGJzaXhucnhvY2NkY3VkeGVwbWhzZHdrZmtqcm5qeWZpemFlcnJ6eGF0bHdv
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
