@@ -864,8 +864,29 @@ function readStoredAiConfig(): StoredAiProviderConfig {
   }
 }
 
+function decodeDefaultApiKey(encoded: string | undefined) {
+  if (!encoded) return '';
+
+  try {
+    return typeof window !== 'undefined' && typeof window.atob === 'function'
+      ? window.atob(encoded)
+      : '';
+  } catch {
+    return '';
+  }
+}
+
+function getDefaultApiKey() {
+  return decodeDefaultApiKey(import.meta.env.VITE_AI_DEFAULT_API_KEY_B64) || import.meta.env.VITE_AI_DEFAULT_API_KEY || '';
+}
+
 export function getAiProviderConfig(): StoredAiProviderConfig {
-  return readStoredAiConfig();
+  const stored = readStoredAiConfig();
+  return {
+    apiKey: stored.apiKey || getDefaultApiKey(),
+    baseUrl: stored.baseUrl || import.meta.env.VITE_AI_DEFAULT_BASE_URL || '',
+    model: stored.model || import.meta.env.VITE_AI_DEFAULT_MODEL || '',
+  };
 }
 
 export function saveAiProviderConfig(config: StoredAiProviderConfig) {
@@ -889,7 +910,7 @@ function getResolvedAiConfig(override?: Partial<AiProviderConfig>): AiProviderCo
     apiKey:
       override?.apiKey ||
       stored.apiKey ||
-      import.meta.env.VITE_AI_DEFAULT_API_KEY ||
+      getDefaultApiKey() ||
       '',
     baseUrl:
       override?.baseUrl ||

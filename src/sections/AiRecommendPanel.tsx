@@ -552,7 +552,7 @@ export function AiRecommendPanel({
 
   const clearSettings = () => {
     clearAiProviderConfig();
-    setAiConfig({});
+    setAiConfig(getAiProviderConfig());
     setMessages((current) => [
       ...current,
       createMessage('assistant', '已清除自定义 AI 配置，之后会回到默认配置或本地推荐。'),
