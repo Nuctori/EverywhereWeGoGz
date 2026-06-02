@@ -300,6 +300,28 @@ function cleanAvoidTerm(value: string) {
     .trim();
 }
 
+const AVOID_ATOM_KEYWORDS = [
+  '温泉',
+  '泡汤',
+  '海边',
+  '海滩',
+  '沙滩',
+  '徒步',
+  '爬山',
+  '登山',
+  '溯溪',
+  '漂流',
+  '暴走',
+  '穿越',
+  '购物',
+  '暴晒',
+];
+
+function expandAvoidTerm(term: string) {
+  const atoms = AVOID_ATOM_KEYWORDS.filter((keyword) => term.includes(keyword));
+  return atoms.length > 0 ? [term, ...atoms] : [term];
+}
+
 function collectAvoidHints(text: string) {
   const normalized = text.replace(/\s+/g, '');
   const matches = normalized.matchAll(
@@ -310,8 +332,9 @@ function collectAvoidHints(text: string) {
   for (const match of matches) {
     const [, , rawSegment = ''] = match;
     const segmentTerms = rawSegment
-      .split(/(?:、|,|，|\/|\||和|或|以及)/)
+      .split(/(?:不要推荐|不推荐|不要|不想|不喜欢|不爱|别|避开|排除|不考虑|拒绝|讨厌|受不了|不接受|、|,|，|\/|\||和|或|以及)/)
       .map(cleanAvoidTerm)
+      .flatMap(expandAvoidTerm)
       .filter((term) => term.length >= 2 && term.length <= 12);
     terms.push(...segmentTerms);
   }
@@ -770,7 +793,7 @@ function extractExperienceCategories(tour: AiRecommendationCandidate) {
   if (/海边|海滩|沙滩|海景|海岛|双月湾|巽寮湾|沙扒湾|盐洲岛|南澳岛|海陵岛|上下川|放鸡岛|湾区|游艇/.test(corpus)) {
     categories.push('海边沙滩');
   }
-  if (/森林|氧吧|瀑布|峡谷|溶洞|山水|山泉|湖|溪|山|谷|丹霞|九瀑|云门山|白水寨|古龙峡|黄腾峡|三百山/.test(corpus)) {
+  if (/森林|氧吧|瀑布|峡谷|溶洞|山水|山泉|湿地|绿道|星湖|丹霞|九瀑|云门山|白水寨|古龙峡|黄腾峡|三百山|天露山|紫云谷|姑婆山/.test(corpus)) {
     categories.push('森林山水');
   }
   if (/博物馆|古城|古镇|水乡|碉楼|祠|寺|学村|文化|非遗|骑楼|南风古灶|潮州|开平/.test(corpus)) {
@@ -779,7 +802,7 @@ function extractExperienceCategories(tour: AiRecommendationCandidate) {
   if (/美食|早茶|牛肉|海鲜|火锅|顺德|潮汕|乳鸽|烧鹅|茶点|寻味/.test(corpus)) {
     categories.push('美食体验');
   }
-  if (/冰世界|冰雪世界|室内|酒店|度假村|别墅|庄园|亲子|乐园/.test(corpus)) {
+  if (/冰世界|冰雪世界|室内|度假村|别墅|庄园|亲子|乐园|泳池/.test(corpus)) {
     categories.push('室内度假');
   }
   if (/徒步|登山|爬山|暴走|穿越|骑行/.test(corpus)) {
@@ -814,7 +837,7 @@ function extractSeasonalComfortAtoms(tour: AiRecommendationCandidate) {
   if (/冰|水上|水世界|漂流|嬉水|亲水|沙滩|海边|游泳|泳池/.test(corpus)) {
     atoms.push('夏季友好：玩水或清凉体验');
   }
-  if (/森林|氧吧|山泉|瀑布|溶洞|峡谷|山|谷/.test(corpus)) {
+  if (/森林|氧吧|山泉|瀑布|溶洞|峡谷|湿地|绿道|星湖|丹霞|九瀑|云门山|白水寨|古龙峡|黄腾峡|三百山|天露山|紫云谷|姑婆山/.test(corpus)) {
     atoms.push('夏季友好：森林山水遮阴');
   }
   if (/博物馆|室内|冰世界|冰雪世界/.test(corpus)) {
@@ -1360,6 +1383,14 @@ function isGenericReason(reason: string) {
   return /^(价格|低价|班期|热门|性价比|预算|天数|行程|综合|适合预算)|综合匹配|性价比高|班期多|价格低|自然风光生态|适合轻松|天气取舍/.test(reason);
 }
 
+function hasEnoughReasonSpecificity(reason: string) {
+  const hasPrice = /(?:￥\s*)?\d{2,5}\s*元|预算|价格/.test(reason);
+  const hasWeatherTradeoff = /(天气|高温|闷热|下雨|阵雨|多雨|避雨|避暑|清凉|风浪|夏季|取舍|室内|暴晒|雷暴)/.test(reason);
+  const hasExperienceAction = /(看点|亮点|体验|入住|含|玩|游|逛|吃|赏|泳池|海景房|博物馆|美食|沙滩|浮潜|桨板)/.test(reason);
+
+  return [hasPrice, hasWeatherTradeoff, hasExperienceAction].filter(Boolean).length >= 2;
+}
+
 function getPrimitiveTitleFact(primitive: RecommendationPrimitive) {
   return normalizeSemanticAtom(primitive.title)
     .replace(/^\d+/, '')
@@ -1368,6 +1399,8 @@ function getPrimitiveTitleFact(primitive: RecommendationPrimitive) {
 
 function getPrimitiveWeatherAppeal(primitive: RecommendationPrimitive) {
   const categories = new Set(primitive.experienceCategories);
+  if (categories.has('温泉泡汤') && categories.has('玩水清凉')) return '有玩水清凉点，但高温泡汤要取舍';
+  if (categories.has('玩水清凉') && categories.has('海边沙滩')) return '有玩水和海边夏天感，但要看晴雨和风浪';
   if (categories.has('玩水清凉')) return '有玩水清凉点，夏季体感更对题';
   if (categories.has('森林山水')) return '有森林山水遮阴，比纯室外暴晒稳';
   if (categories.has('文化逛城') || categories.has('室内度假')) return '室内外搭配更适合闷热或阵雨天';
@@ -1377,25 +1410,29 @@ function getPrimitiveWeatherAppeal(primitive: RecommendationPrimitive) {
   return primitive.seasonalComfortAtoms[0] || '按预算和班期可作为备选';
 }
 
+function getPrimitiveComfortNote(primitive: RecommendationPrimitive) {
+  return primitive.seasonalComfortAtoms.find((atom) => /雨天需取舍|高温天气需取舍|天气敏感/.test(atom)) ||
+    primitive.seasonalComfortAtoms[0] ||
+    '';
+}
+
 function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive) {
   const atoms = getPrimitiveExperienceAtoms(primitive, 2)
     .filter((atom) => atom !== '综合')
     .filter((atom) => !primitive.experienceCategories.includes(atom));
   const titleFact = getPrimitiveTitleFact(primitive);
   const categoryText = primitive.experienceCategories.slice(0, 2).join('、');
-  const factText = atoms.length > 0
-    ? `${titleFact}，看点是${atoms.join('、')}`
-    : categoryText
-      ? `${titleFact}，偏${categoryText}`
-      : `${titleFact}，${primitive.theme || '短途线路'}`;
-  const comfortText = primitive.seasonalComfortAtoms[0]
-    ? primitive.seasonalComfortAtoms[0]
-    : '';
   const priceText = Number.isFinite(primitive.price) && primitive.price > 0
     ? `，${primitive.price.toLocaleString()}元`
     : '';
+  const factText = atoms.length > 0
+    ? `${atoms.join('、')}${priceText}`
+    : categoryText
+      ? `${titleFact}${priceText}，偏${categoryText}`
+      : `${titleFact}${priceText}，${primitive.theme || '短途线路'}`;
+  const comfortText = getPrimitiveComfortNote(primitive);
 
-  return `${factText}${priceText}；${getPrimitiveWeatherAppeal(primitive)}${comfortText ? `（${comfortText}）` : ''}`;
+  return `${factText}；${getPrimitiveWeatherAppeal(primitive)}${comfortText ? `（${comfortText}）` : ''}`;
 }
 
 function isGenericMatchedSignal(signal: string) {
@@ -1410,7 +1447,7 @@ function buildPrimitiveMatchedSignals(primitive: RecommendationPrimitive) {
     .filter((category) => category !== '非跟团产品')
     .slice(0, 2);
   const priceSignal = Number.isFinite(primitive.price) && primitive.price > 0
-    ? `￥${primitive.price}`
+    ? `${primitive.price}元`
     : '';
   const weatherSignal = primitive.seasonalComfortAtoms[0]
     ?.replace(/^夏季友好：/, '')
@@ -1444,7 +1481,12 @@ function getConcreteMatchedSignals(
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
   const trimmed = typeof reason === 'string' ? reason.trim() : '';
   if (!primitive) return trimmed || '综合用户需求、天气和线路特点后较为合适';
-  if (trimmed && reasonMentionsCandidateFact(trimmed, primitive) && !isGenericReason(trimmed)) {
+  if (
+    trimmed &&
+    reasonMentionsCandidateFact(trimmed, primitive) &&
+    !isGenericReason(trimmed) &&
+    hasEnoughReasonSpecificity(trimmed)
+  ) {
     return trimmed;
   }
   return buildPrimitiveConcreteReason(primitive);
@@ -2815,10 +2857,13 @@ export async function requestAiRecommendations({
       }),
       maxTokens: 3000,
     });
+    const compactedCandidateIds = new Set(compactedCandidates.map((candidate) => candidate.id));
+    const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
+    const compactedLocalItems = localItems.filter((item) => compactedCandidateIds.has(item.tourId));
     const aiItems = auditAiRecommendations(
-      validateAiItems(aiResponse, availableCandidates),
-      localItems,
-      availableCandidates,
+      validateAiItems(aiResponse, compactedCandidateTours),
+      compactedLocalItems,
+      compactedCandidateTours,
       effectiveIntent,
     );
 
@@ -2826,7 +2871,7 @@ export async function requestAiRecommendations({
       throw new Error('AI returned no valid tour ids');
     }
 
-    const mergedItems = mergeAiAndLocalRecommendations(aiItems, localItems);
+    const mergedItems = mergeAiAndLocalRecommendations(aiItems, compactedLocalItems);
     emitProgress(onProgress, {
       stage: 'completed',
       label: '推荐结果已生成',
