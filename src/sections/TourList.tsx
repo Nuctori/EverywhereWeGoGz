@@ -542,7 +542,7 @@ export function TourList({ searchQuery }: TourListProps) {
 
         if (
           dateFilter.mode === 'within' &&
-          !candidateDates.some((date) => date <= dateFilter.date)
+          !candidateDates.some((date) => date >= today && date <= dateFilter.date)
         ) {
           return false;
         }
@@ -629,6 +629,7 @@ export function TourList({ searchQuery }: TourListProps) {
     filters,
     localTours,
     normalizedSearchQuery,
+    today,
   ]);
   const visibleTourIds = useMemo(
     () => new Set(displayTours.map((tour) => tour.id)),
