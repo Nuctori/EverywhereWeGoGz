@@ -36,7 +36,7 @@ import type {
 } from '@/types/tour';
 import {
   clearAiProviderConfig,
-  getAiProviderConfig,
+  getStoredAiProviderConfig,
   requestAiRecommendations,
   saveAiProviderConfig,
 } from '@/lib/ai-recommendation';
@@ -61,8 +61,6 @@ const starterPrompts = [
 ];
 
 const MAX_PERSISTED_MESSAGES = 40;
-const LONG_PRESS_DURATION_MS = 320;
-
 interface SpeechRecognitionAlternativeLike {
   transcript: string;
 }
@@ -241,7 +239,10 @@ export function AiRecommendPanel({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [input, setInput] = useState(storedChatState.input || '');
   const [showApiKey, setShowApiKey] = useState(false);
-  const [aiConfig, setAiConfig] = useState<Partial<AiProviderConfig>>(() => getAiProviderConfig());
+  const [aiConfig, setAiConfig] = useState<Partial<AiProviderConfig>>(() => getStoredAiProviderConfig());
+  const [useCustomAiConfig, setUseCustomAiConfig] = useState(
+    () => Object.keys(getStoredAiProviderConfig()).length > 0,
+  );
   const [messages, setMessages] = useState<AiRecommendationMessage[]>(() =>
     storedChatState.messages?.length ? storedChatState.messages : [createInitialMessage()],
   );
@@ -254,14 +255,12 @@ export function AiRecommendPanel({
   const [speechSupported, setSpeechSupported] = useState(false);
   const [speechError, setSpeechError] = useState<string | null>(null);
   const [speechHint, setSpeechHint] = useState('正在检测浏览器语音能力...');
-  const [speechPressing, setSpeechPressing] = useState(false);
   const [speechListening, setSpeechListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
   const didRestoreStoredResultRef = useRef(false);
   const speechRecognitionCtorRef = useRef<BrowserSpeechRecognitionConstructor | null>(null);
   const speechRecognitionRef = useRef<BrowserSpeechRecognition | null>(null);
-  const speechPressTimerRef = useRef<number | null>(null);
   const speechBaseInputRef = useRef('');
   const conversationId = useMemo(
     () => storedChatState.conversationId || createConversationId(),
@@ -270,17 +269,7 @@ export function AiRecommendPanel({
   const hasResult = Boolean(result && result.items.length > 0);
   const resultStatusMeta = getResultStatusMeta(result);
 
-  const clearSpeechPressTimer = useCallback(() => {
-    if (speechPressTimerRef.current !== null) {
-      window.clearTimeout(speechPressTimerRef.current);
-      speechPressTimerRef.current = null;
-    }
-  }, []);
-
   const stopSpeechRecognition = useCallback((abort = false) => {
-    clearSpeechPressTimer();
-    setSpeechPressing(false);
-
     const recognition = speechRecognitionRef.current;
     if (!recognition) return;
 
@@ -293,20 +282,27 @@ export function AiRecommendPanel({
     } catch {
       setSpeechListening(false);
     }
-  }, [clearSpeechPressTimer]);
+  }, []);
 
   const startSpeechRecognition = useCallback(() => {
     const SpeechRecognitionCtor = speechRecognitionCtorRef.current;
-    clearSpeechPressTimer();
-
     if (!SpeechRecognitionCtor || speechListening || loading) return;
 
     try {
+      if (speechRecognitionRef.current) {
+        try {
+          speechRecognitionRef.current.abort();
+        } catch {
+          // noop
+        }
+        speechRecognitionRef.current = null;
+      }
+
       const recognition = new SpeechRecognitionCtor();
       speechRecognitionRef.current = recognition;
       speechBaseInputRef.current = input;
       setSpeechError(null);
-      setSpeechHint('请按住说话，松开后结束语音转文字');
+      setSpeechHint('正在启动语音识别...');
 
       recognition.lang = 'zh-CN';
       recognition.continuous = true;
@@ -347,10 +343,9 @@ export function AiRecommendPanel({
       recognition.onend = () => {
         speechRecognitionRef.current = null;
         setSpeechListening(false);
-        setSpeechPressing(false);
         setSpeechHint(
           speechRecognitionCtorRef.current
-            ? '浏览器支持语音输入，长按麦克风开始，松开结束'
+            ? '浏览器支持语音输入，点击麦克风开始或结束'
             : '当前浏览器不支持 Web Speech API 语音转文字',
         );
       };
@@ -363,35 +358,20 @@ export function AiRecommendPanel({
       setSpeechError('当前浏览器无法启动语音识别。');
       setSpeechHint('当前浏览器不支持或未开放语音输入');
     }
-  }, [clearSpeechPressTimer, input, loading, speechListening]);
+  }, [input, loading, speechListening]);
 
-  const handleSpeechPressStart = useCallback(() => {
+  const handleSpeechToggle = useCallback(() => {
     if (!speechRecognitionCtorRef.current || loading) return;
 
     setSpeechError(null);
-    setSpeechPressing(true);
-    setSpeechHint('继续按住即可进入语音转文字');
-    clearSpeechPressTimer();
-    speechPressTimerRef.current = window.setTimeout(() => {
-      startSpeechRecognition();
-    }, LONG_PRESS_DURATION_MS);
-  }, [clearSpeechPressTimer, loading, startSpeechRecognition]);
-
-  const handleSpeechPressEnd = useCallback(() => {
-    clearSpeechPressTimer();
 
     if (speechListening) {
       stopSpeechRecognition();
       return;
     }
 
-    setSpeechPressing(false);
-    setSpeechHint(
-      speechRecognitionCtorRef.current
-        ? '浏览器支持语音输入，长按麦克风开始，松开结束'
-        : '当前浏览器不支持 Web Speech API 语音转文字',
-    );
-  }, [clearSpeechPressTimer, speechListening, stopSpeechRecognition]);
+    startSpeechRecognition();
+  }, [loading, speechListening, startSpeechRecognition, stopSpeechRecognition]);
 
   useEffect(() => {
     if (didRestoreStoredResultRef.current || !storedChatState.result) return;
@@ -432,30 +412,13 @@ export function AiRecommendPanel({
     setSpeechSupported(Boolean(SpeechRecognitionCtor));
     setSpeechHint(
       SpeechRecognitionCtor
-        ? '浏览器支持语音输入，长按麦克风开始，松开结束'
+        ? '浏览器支持语音输入，点击麦克风开始或结束'
         : '当前浏览器不支持 Web Speech API 语音转文字',
     );
   }, []);
 
   useEffect(() => {
-    if (!speechPressing && !speechListening) return;
-
-    const handlePointerRelease = () => {
-      handleSpeechPressEnd();
-    };
-
-    window.addEventListener('pointerup', handlePointerRelease);
-    window.addEventListener('pointercancel', handlePointerRelease);
-
     return () => {
-      window.removeEventListener('pointerup', handlePointerRelease);
-      window.removeEventListener('pointercancel', handlePointerRelease);
-    };
-  }, [handleSpeechPressEnd, speechListening, speechPressing]);
-
-  useEffect(() => {
-    return () => {
-      clearSpeechPressTimer();
       if (speechRecognitionRef.current) {
         try {
           speechRecognitionRef.current.abort();
@@ -464,7 +427,7 @@ export function AiRecommendPanel({
         }
       }
     };
-  }, [clearSpeechPressTimer]);
+  }, []);
 
   useEffect(() => {
     if (clearVersion === 0) return;
@@ -544,6 +507,7 @@ export function AiRecommendPanel({
 
   const saveSettings = () => {
     saveAiProviderConfig(aiConfig);
+    setUseCustomAiConfig(true);
     setMessages((current) => [
       ...current,
       createMessage('assistant', 'AI 接口配置已保存。接下来会优先使用你的自定义地址、模型和 Key。'),
@@ -552,7 +516,9 @@ export function AiRecommendPanel({
 
   const clearSettings = () => {
     clearAiProviderConfig();
-    setAiConfig(getAiProviderConfig());
+    setAiConfig({});
+    setUseCustomAiConfig(false);
+    setShowApiKey(false);
     setMessages((current) => [
       ...current,
       createMessage('assistant', '已清除自定义 AI 配置，之后会回到默认配置或本地推荐。'),
@@ -626,13 +592,10 @@ export function AiRecommendPanel({
                     : 'text-stone-400 hover:bg-white',
               )}
               disabled={!speechSupported || loading}
-              onPointerDown={handleSpeechPressStart}
-              onPointerUp={handleSpeechPressEnd}
-              onPointerLeave={handleSpeechPressEnd}
-              onPointerCancel={handleSpeechPressEnd}
+              onClick={handleSpeechToggle}
             >
               <Mic className={cn('h-3.5 w-3.5', speechListening && 'animate-pulse')} />
-              {speechListening ? '松开结束' : speechPressing ? '继续按住' : '长按语音'}
+              {speechListening ? '点击结束' : '点击语音'}
             </Button>
             {hasResult && (
               <Button
@@ -869,10 +832,15 @@ export function AiRecommendPanel({
             <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
               <div className="mb-4">
                 <div className="text-sm font-medium text-stone-900">AI 接口</div>
-                <div className="mt-1 text-xs leading-5 text-stone-500">
+                <div className="hidden">
                   留空时使用构建环境里的公开默认值；前端 Key 会暴露，请只放低额度或个人可控 Key。
                 </div>
+                <div className="mt-1 text-xs leading-5 text-stone-500">
+                  默认使用内置 AI 服务，不展示默认 API 的地址、模型或 Key；需要时可切换为自定义 OpenAI-compatible 接口。
+                </div>
               </div>
+              {useCustomAiConfig ? (
+                <>
               <div className="space-y-3">
                 <Input
                   value={aiConfig.baseUrl || ''}
@@ -921,6 +889,31 @@ export function AiRecommendPanel({
                   保存配置
                 </Button>
               </div>
+                </>
+              ) : (
+                <>
+                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 px-4 py-3">
+                    <div className="text-sm font-medium text-emerald-950">当前使用内置 AI 服务</div>
+                    <div className="mt-1 text-xs leading-5 text-emerald-800">
+                      默认 API 配置由站点统一提供，不在这里显示具体地址、模型或 Key。
+                    </div>
+                  </div>
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-9 rounded-xl border-stone-200 bg-white px-3 text-xs"
+                      onClick={() => {
+                        setAiConfig({});
+                        setUseCustomAiConfig(true);
+                        setShowApiKey(false);
+                      }}
+                    >
+                      使用自定义接口
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </SheetContent>

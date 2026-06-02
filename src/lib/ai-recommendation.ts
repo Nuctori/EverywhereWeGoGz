@@ -143,9 +143,50 @@ const DESTINATION_COORDS: Record<string, { latitude: number; longitude: number }
 };
 
 type StoredAiProviderConfig = Partial<AiProviderConfig>;
-type RecommendationPrimitive = ReturnType<typeof buildTourPrimitive>;
-type RouteAtlas = ReturnType<typeof buildRouteAtlas>;
+
+interface RecommendationPrimitive {
+  id: string;
+  title: string;
+  source: string;
+  destination: string;
+  tripDays: number;
+  price: number;
+  theme: string;
+  tags: string[];
+  highlights: string[];
+  transportType: string;
+  accommodationLevel: string;
+  meals: string;
+  leisureLevel: AiRecommendationCandidate['leisureLevel'];
+  suitableFor: string[];
+  season: string;
+  rating: number;
+  groupSize: string;
+  isHot: boolean;
+  schedule: ReturnType<typeof inferScheduleHints>;
+}
+
+interface RouteAtlasGroup {
+  region: string;
+  theme: string;
+  count: number;
+  priceRange: ReturnType<typeof formatRange>;
+  dayRange: ReturnType<typeof formatRange>;
+  keywords: string[];
+  examples: Array<{ id: string; title: string; price: number; days: number; destination: string }>;
+}
+
+type RouteAtlas = RouteAtlasGroup[];
 type RecommendationAuditContext = ReturnType<typeof buildRecommendationAuditContext>;
+
+const searchCorpusCache = new WeakMap<AiRecommendationCandidate, string>();
+const atlasRegionsCache = new WeakMap<AiRecommendationCandidate, string[]>();
+const primitiveCache = new WeakMap<AiRecommendationCandidate, RecommendationPrimitive>();
+const routeAtlasCache = new WeakMap<AiRecommendationCandidate[], Map<string, RouteAtlas>>();
+const weatherSnapshotCache = new Map<string, Promise<{
+  forecastSummary: string;
+  source: 'open-meteo' | 'seasonal-rule';
+}>>();
 
 function percentile(sortedValues: number[], ratio: number) {
   if (sortedValues.length === 0) return null;
@@ -244,7 +285,10 @@ function collectThemeHints(text: string) {
 }
 
 function getSearchCorpus(tour: AiRecommendationCandidate) {
-  return [
+  const cached = searchCorpusCache.get(tour);
+  if (cached) return cached;
+
+  const corpus = [
     tour.title,
     tour.destination,
     tour.theme,
@@ -261,6 +305,9 @@ function getSearchCorpus(tour: AiRecommendationCandidate) {
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
+
+  searchCorpusCache.set(tour, corpus);
+  return corpus;
 }
 
 function scoreTour(tour: AiRecommendationCandidate, text: string): AiRecommendationItem | null {
@@ -542,7 +589,7 @@ function inferScheduleHints(tour: AiRecommendationCandidate) {
   return {
     departureDates: dates.slice(0, 10),
     departureWeekdays: uniqueWeekdays,
-    departureWeekdayLabels: uniqueWeekdays.map((weekday) => WEEKDAY_LABELS[weekday]),
+    departureWeekdayLabels: uniqueWeekdays.map((weekday: number) => WEEKDAY_LABELS[weekday]),
     timeOfDayHints: eveningDeparture ? ['evening', 'night'] : [],
     hasEveningOrNightDeparture: eveningDeparture,
     hasRecurringScheduleText: recurringText,
@@ -553,8 +600,11 @@ function inferScheduleHints(tour: AiRecommendationCandidate) {
   };
 }
 
-function buildTourPrimitive(tour: AiRecommendationCandidate) {
-  return {
+function buildTourPrimitive(tour: AiRecommendationCandidate): RecommendationPrimitive {
+  const cached = primitiveCache.get(tour);
+  if (cached) return cached;
+
+  const primitive = {
     id: tour.id,
     title: tour.title,
     source: tour.source,
@@ -575,9 +625,15 @@ function buildTourPrimitive(tour: AiRecommendationCandidate) {
     isHot: tour.isHot,
     schedule: inferScheduleHints(tour),
   };
+
+  primitiveCache.set(tour, primitive);
+  return primitive;
 }
 
 function getAtlasRegions(tour: AiRecommendationCandidate) {
+  const cached = atlasRegionsCache.get(tour);
+  if (cached) return cached;
+
   const corpus = getSearchCorpus(tour);
   const regions = Object.entries(DESTINATION_ALIASES)
     .filter(([destination, aliases]) =>
@@ -586,8 +642,9 @@ function getAtlasRegions(tour: AiRecommendationCandidate) {
     )
     .map(([destination]) => destination);
 
-  if (regions.length > 0) return regions;
-  return [tour.destination || '其他'];
+  const resolved = regions.length > 0 ? regions : [tour.destination || '其他'];
+  atlasRegionsCache.set(tour, resolved);
+  return resolved;
 }
 
 function getAtlasGroupKey(tour: AiRecommendationCandidate) {
@@ -607,7 +664,16 @@ function formatRange(values: number[]) {
   };
 }
 
-function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelIntent | null) {
+function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelIntent | null): RouteAtlas {
+  const intentCacheKey = JSON.stringify({
+    destinationHints: intent?.destinationHints || [],
+    travelStyle: intent?.travelStyle || [],
+    mustHave: intent?.mustHave || [],
+  });
+  const atlasCacheByIntent = routeAtlasCache.get(tours);
+  const cached = atlasCacheByIntent?.get(intentCacheKey);
+  if (cached) return cached;
+
   const groups = new Map<string, {
     key: string;
     region: string;
@@ -673,7 +739,7 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
     groups.set(key, group);
   }
 
-  return [...groups.values()]
+  const atlas = [...groups.values()]
     .sort((a, b) => b.relevance - a.relevance || b.count - a.count)
     .slice(0, ROUTE_ATLAS_MAX_GROUPS)
     .map((group) => ({
@@ -688,6 +754,11 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
         .map(([keyword]) => keyword),
       examples: group.examples,
     }));
+
+  const nextCache = atlasCacheByIntent || new Map<string, RouteAtlas>();
+  nextCache.set(intentCacheKey, atlas);
+  routeAtlasCache.set(tours, nextCache);
+  return atlas;
 }
 
 function summarizeToursForAudit(tours: AiRecommendationCandidate[]) {
@@ -888,6 +959,10 @@ export function getAiProviderConfig(): StoredAiProviderConfig {
     baseUrl: stored.baseUrl || import.meta.env.VITE_AI_DEFAULT_BASE_URL || '',
     model: stored.model || import.meta.env.VITE_AI_DEFAULT_MODEL || '',
   };
+}
+
+export function getStoredAiProviderConfig(): StoredAiProviderConfig {
+  return readStoredAiConfig();
 }
 
 export function saveAiProviderConfig(config: StoredAiProviderConfig) {
@@ -1257,35 +1332,54 @@ async function fetchDestinationWeatherInsight(params: {
   }
 
   try {
-    const query = new URLSearchParams({
-      latitude: String(coords.latitude),
-      longitude: String(coords.longitude),
-      daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code',
-      timezone: 'auto',
-      forecast_days: '7',
-    });
-    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${query.toString()}`);
-    if (!response.ok) throw new Error(`Weather API failed: ${response.status}`);
+    const weatherCacheKey = `${params.destination}::${coords.latitude},${coords.longitude}::${params.travelDate || 'none'}`;
+    let weatherSnapshotPromise = weatherSnapshotCache.get(weatherCacheKey);
 
-    const data = await response.json();
-    const daily = data.daily;
-    const maxTemps: number[] = daily?.temperature_2m_max ?? [];
-    const minTemps: number[] = daily?.temperature_2m_min ?? [];
-    const rainProbs: number[] = daily?.precipitation_probability_max ?? [];
-    const maxTemp = Math.round(Math.max(...maxTemps));
-    const minTemp = Math.round(Math.min(...minTemps));
-    const maxRain = Math.round(Math.max(...rainProbs));
+    if (!weatherSnapshotPromise) {
+      weatherSnapshotPromise = (async () => {
+        const query = new URLSearchParams({
+          latitude: String(coords.latitude),
+          longitude: String(coords.longitude),
+          daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code',
+          timezone: 'auto',
+          forecast_days: '7',
+        });
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?${query.toString()}`);
+        if (!response.ok) throw new Error(`Weather API failed: ${response.status}`);
+
+        const data = await response.json();
+        const daily = data.daily;
+        const maxTemps: number[] = daily?.temperature_2m_max ?? [];
+        const minTemps: number[] = daily?.temperature_2m_min ?? [];
+        const rainProbs: number[] = daily?.precipitation_probability_max ?? [];
+        const maxTemp = Math.round(Math.max(...maxTemps));
+        const minTemp = Math.round(Math.min(...minTemps));
+        const maxRain = Math.round(Math.max(...rainProbs));
+
+        return {
+          forecastSummary: `${params.destination}未来7天约 ${minTemp}-${maxTemp}℃，最高降水概率约 ${maxRain}%。`,
+          source: 'open-meteo' as const,
+        };
+      })().catch((error) => {
+        weatherSnapshotCache.delete(weatherCacheKey);
+        throw error;
+      });
+
+      weatherSnapshotCache.set(weatherCacheKey, weatherSnapshotPromise);
+    }
+
+    const weatherSnapshot = await weatherSnapshotPromise;
 
     return {
       destination: params.destination,
       travelDate: params.travelDate,
-      forecastSummary: `${params.destination}未来7天约 ${minTemp}-${maxTemp}℃，最高降水概率约 ${maxRain}%。`,
+      forecastSummary: weatherSnapshot.forecastSummary,
       seasonAdvice,
       inferredFrom: params.inferredFrom,
       queryReason: params.queryReason,
       bestSeasonNote,
       role: params.role,
-      source: 'open-meteo',
+      source: weatherSnapshot.source,
     };
   } catch {
     return {
@@ -1775,7 +1869,7 @@ export async function requestAiRecommendations({
         'season',
       ),
     });
-    const weatherContext = await fetchWeatherContext({
+    const weatherContextPromise = fetchWeatherContext({
       text: effectiveUserText,
       messages,
       searchQuery,
@@ -1783,31 +1877,39 @@ export async function requestAiRecommendations({
       preferenceMemory: nextPreferenceMemory,
       tours: availableCandidates,
     });
+    const compactedCandidatesPromise = Promise.resolve(
+      compactCandidates(
+        availableCandidates,
+        localItems,
+        effectiveIntent,
+        { budgetPriority: effectiveIntent?.budgetPriority },
+      ),
+    );
+    const routeAtlasPromise = Promise.resolve(buildRouteAtlas(candidateTours, effectiveIntent));
+
+    const weatherContext = await weatherContextPromise;
     const destinationWeatherCandidates = buildDestinationWeatherCandidates(
       availableCandidates,
       localItems,
       searchQuery,
       effectiveIntent,
     );
-    const destinationWeatherInsights = await Promise.all(
-      destinationWeatherCandidates.map((candidate) =>
-        fetchDestinationWeatherInsight({
-          destination: candidate.destination,
-          travelDate: weatherContext.travelDate,
-          inferredFrom: ['候选目的地补充查询'],
-          role: 'destination',
-          queryReason: `该目的地天气和观赏期可能显著影响体验：${candidate.evidence.join(' / ')}`,
-          corpus: candidate.corpus,
-        }),
+    const [destinationWeatherInsights, compactedCandidates, routeAtlas] = await Promise.all([
+      Promise.all(
+        destinationWeatherCandidates.map((candidate) =>
+          fetchDestinationWeatherInsight({
+            destination: candidate.destination,
+            travelDate: weatherContext.travelDate,
+            inferredFrom: ['候选目的地补充查询'],
+            role: 'destination',
+            queryReason: `该目的地天气和观赏期可能显著影响体验：${candidate.evidence.join(' / ')}`,
+            corpus: candidate.corpus,
+          }),
+        ),
       ),
-    );
-    const compactedCandidates = compactCandidates(
-      availableCandidates,
-      localItems,
-      effectiveIntent,
-      { budgetPriority: effectiveIntent?.budgetPriority },
-    );
-    const routeAtlas = buildRouteAtlas(candidateTours, effectiveIntent);
+      compactedCandidatesPromise,
+      routeAtlasPromise,
+    ]);
     emitProgress(onProgress, {
       stage: 'ranking',
       label: '正在生成推荐结果',
