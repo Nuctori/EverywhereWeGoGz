@@ -65,6 +65,7 @@ interface DestinationWeatherInsight extends AiWeatherContext {
 
 interface CandidateAuditPrimitive extends RecommendationPrimitive {
   matchStatus: 'match' | 'soft_conflict' | 'fallback';
+  routeGroup: string;
   conflictReasons: string[];
   priceContext: {
     poolPercentile: number | null;
@@ -165,6 +166,8 @@ interface RecommendationPrimitive {
   rating: number;
   groupSize: string;
   isHot: boolean;
+  semanticAtoms: string[];
+  seasonalComfortAtoms: string[];
   schedule: ReturnType<typeof inferScheduleHints>;
 }
 
@@ -175,7 +178,7 @@ interface RouteAtlasGroup {
   priceRange: ReturnType<typeof formatRange>;
   dayRange: ReturnType<typeof formatRange>;
   keywords: string[];
-  examples: Array<{ id: string; title: string; price: number; days: number; destination: string }>;
+  examples: Array<{ id: string; title: string; price: number; days: number; destination: string; atoms: string[] }>;
 }
 
 type RouteAtlas = RouteAtlasGroup[];
@@ -428,7 +431,7 @@ function scoreTour(tour: AiRecommendationCandidate, text: string): AiRecommendat
   return {
     tourId: tour.id,
     score,
-    reason: signals.slice(0, 3).join('，') || '综合匹配度较高',
+    reason: buildLocalTourReason(tour, signals, '综合匹配度较高'),
     matchedSignals: signals.slice(0, 5),
   };
 }
@@ -444,7 +447,11 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
       tourId: tour.id,
       score: Math.max(1, 100 - index),
       reason: index < MAX_AI_COMMENTARY_ITEMS
-        ? tour.isHot ? '热门线路，适合作为推荐备选' : '综合热度和价格表现较稳'
+        ? buildLocalTourReason(
+            tour,
+            tour.isHot ? ['热门线路'] : ['价格和热度表现较稳'],
+            tour.isHot ? '热门线路，适合作为推荐备选' : '综合热度和价格表现较稳',
+          )
         : undefined,
       matchedSignals: tour.isHot ? ['热门线路'] : ['综合排序靠前'],
     }));
@@ -666,6 +673,124 @@ function getWeekday(date: string) {
   return parsed.getDay();
 }
 
+const SEMANTIC_ATOM_STOPWORDS = new Set([
+  '纯玩',
+  '品质',
+  '其他必打卡',
+  '特色美食',
+  '精品住宿',
+  '产品特色',
+  '含餐',
+  '含早',
+  '待确认',
+  '广东必打卡',
+]);
+
+const SEMANTIC_ATOM_PATTERN =
+  /[\p{Script=Han}A-Za-z0-9]{0,8}(?:温泉|漂流|海滩|沙滩|水上乐园|水世界|冰雪世界|冰世界|森林公园|森林|氧吧|博物馆|古城|古镇|峡谷|瀑布|溶洞|玻璃桥|游船|花海|水乡|寺|山|岛|湾|湖|河|乐园|公园|度假村|美食|演出|摄影|亲子)[\p{Script=Han}A-Za-z0-9]{0,4}/gu;
+
+function stripSemanticAtomNoise(value: string) {
+  return value
+    .replace(/<[^>]*>/g, '')
+    .replace(/【[^】]*】/g, '')
+    .replace(/＜[^＞]*＞/g, '')
+    .replace(/\([^)]*\)/g, '')
+    .replace(/（[^）]*）/g, '')
+    .replace(/\d+\s*(?:天|日|晚|小时|人|元|月|号|餐|正|早|次)/g, '')
+    .replace(/等待确认|参考价格|单人出行费用待确认|产品特色|广州出发|东莞出发|深圳出发/g, '')
+    .trim();
+}
+
+function normalizeSemanticAtom(value: string) {
+  return stripSemanticAtomNoise(value)
+    .replace(/\d+$/g, '')
+    .replace(/[^\p{Script=Han}a-zA-Z0-9]/gu, '')
+    .trim();
+}
+
+function isUsefulSemanticAtom(value: string) {
+  if (value.length < 2 || value.length > 12) return false;
+  return !SEMANTIC_ATOM_STOPWORDS.has(value);
+}
+
+function expandSemanticAtomParts(value: string) {
+  const cleaned = stripSemanticAtomNoise(value);
+  const directParts = cleaned.split(/[＊*｜|、，,。；;：:·+＋\-—_（）()【】＜＞<>\s/]+/g);
+  const patternParts = cleaned.match(SEMANTIC_ATOM_PATTERN) || [];
+
+  return [...directParts, ...patternParts];
+}
+
+function extractSemanticAtoms(tour: AiRecommendationCandidate) {
+  const rawParts = [
+    tour.theme,
+    ...(tour.tags || []),
+    ...(tour.highlights || []),
+    tour.title,
+  ];
+
+  return uniqueStrings(
+    rawParts
+      .flatMap(expandSemanticAtomParts)
+      .map(normalizeSemanticAtom)
+      .filter(isUsefulSemanticAtom),
+  ).slice(0, 10);
+}
+
+function extractSeasonalComfortAtoms(tour: AiRecommendationCandidate) {
+  const corpus = getSearchCorpus(tour);
+  const atoms: string[] = [];
+
+  if (/冰|水上|水世界|漂流|沙滩|海边|游泳|泳池/.test(corpus)) {
+    atoms.push('夏季友好：玩水或清凉体验');
+  }
+  if (/森林|氧吧|山泉|瀑布|溶洞|峡谷/.test(corpus)) {
+    atoms.push('夏季友好：森林山水遮阴');
+  }
+  if (/博物馆|室内|冰世界|冰雪世界/.test(corpus)) {
+    atoms.push('夏季友好：室内或避暑点');
+  }
+  if (/温泉|泡汤|spa/i.test(corpus)) {
+    atoms.push('高温天气需取舍：温泉泡汤');
+  }
+  if (/徒步|爬山|登山|暴走/.test(corpus)) {
+    atoms.push('高温天气需取舍：户外强度');
+  }
+
+  return uniqueStrings(atoms).slice(0, 3);
+}
+
+function getReasonAtomsForTour(tour: AiRecommendationCandidate) {
+  const broadTerms = new Set([
+    tour.destination,
+    tour.theme,
+    ...(tour.tags || []),
+    ...THEME_KEYWORDS,
+    '休闲',
+    '度假',
+    '广东',
+  ].filter(Boolean));
+
+  const atoms = extractSemanticAtoms(tour).filter((atom) =>
+    !broadTerms.has(atom) &&
+    !tour.destination.includes(atom) &&
+    !atom.includes('度假') &&
+    !atom.includes('纯玩'),
+  );
+
+  return (atoms.length > 0 ? atoms : extractSemanticAtoms(tour)).slice(0, 2);
+}
+
+function buildLocalTourReason(tour: AiRecommendationCandidate, signals: string[], fallback: string) {
+  const atoms = getReasonAtomsForTour(tour);
+  const concrete = atoms.length > 0 ? `${tour.destination}${atoms.join('、')}` : '';
+  const signalText = signals.slice(0, 2).join('，');
+
+  if (concrete && signalText) return `${concrete}；${signalText}`;
+  if (concrete) return `${concrete}，可作为具体玩法备选`;
+  return signalText || fallback;
+}
+
 function inferScheduleHints(tour: AiRecommendationCandidate) {
   const corpus = getSearchCorpus(tour);
   const dates = getDepartureDates(tour);
@@ -724,6 +849,8 @@ function buildTourPrimitive(tour: AiRecommendationCandidate): RecommendationPrim
     rating: tour.rating,
     groupSize: tour.groupSize,
     isHot: tour.isHot,
+    semanticAtoms: extractSemanticAtoms(tour),
+    seasonalComfortAtoms: extractSeasonalComfortAtoms(tour),
     schedule: inferScheduleHints(tour),
   };
 
@@ -783,7 +910,7 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
     prices: number[];
     days: number[];
     keywords: Map<string, number>;
-    examples: Array<{ id: string; title: string; price: number; days: number; destination: string }>;
+    examples: Array<{ id: string; title: string; price: number; days: number; destination: string; atoms: string[] }>;
     relevance: number;
   }>();
   const intentText = [
@@ -795,6 +922,7 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
   for (const tour of tours) {
     const key = getAtlasGroupKey(tour);
     const [region, theme] = key.split('｜');
+    const primitive = buildTourPrimitive(tour);
     const group = groups.get(key) || {
       key,
       region,
@@ -823,6 +951,8 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
       tour.transportType,
       ...tour.tags.slice(0, 4),
       ...tour.highlights.slice(0, 3),
+      ...primitive.semanticAtoms.slice(0, 5),
+      ...primitive.seasonalComfortAtoms.slice(0, 3),
     ].filter(Boolean)) {
       group.keywords.set(keyword, (group.keywords.get(keyword) || 0) + 1);
     }
@@ -834,6 +964,7 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
         price: tour.price,
         days: tour.duration,
         destination: tour.destination,
+        atoms: primitive.semanticAtoms.slice(0, 3),
       });
     }
 
@@ -1021,6 +1152,148 @@ function rankPrimitive(
   );
 }
 
+function getPrimitiveExperienceAtoms(primitive: RecommendationPrimitive, limit = 2) {
+  const broadTerms = new Set([
+    primitive.destination,
+    primitive.theme,
+    ...primitive.tags,
+    ...THEME_KEYWORDS,
+    '休闲',
+    '度假',
+    '广东',
+  ].filter(Boolean));
+  const concreteAtoms = primitive.semanticAtoms.filter((atom) =>
+    !broadTerms.has(atom) &&
+    !primitive.destination.includes(atom) &&
+    !atom.includes('度假') &&
+    !atom.includes('纯玩'),
+  );
+
+  if (concreteAtoms.length > 0) return concreteAtoms.slice(0, limit);
+
+  const fallbackAtoms = uniqueStrings([
+    primitive.theme,
+    ...primitive.tags,
+    ...primitive.highlights,
+  ])
+    .map(normalizeSemanticAtom)
+    .filter(isUsefulSemanticAtom)
+    .filter((atom) => !primitive.destination.includes(atom));
+
+  return (fallbackAtoms.length > 0 ? fallbackAtoms : ['综合']).slice(0, limit);
+}
+
+function getReasonFactAtoms(primitive: RecommendationPrimitive) {
+  return uniqueStrings([
+    ...getPrimitiveExperienceAtoms(primitive, 4),
+    ...primitive.semanticAtoms,
+    ...primitive.highlights,
+  ])
+    .map(normalizeSemanticAtom)
+    .filter(isUsefulSemanticAtom)
+    .filter((atom) =>
+      !THEME_KEYWORDS.includes(atom) &&
+      atom !== primitive.theme &&
+      !primitive.destination.includes(atom) &&
+      !atom.includes('度假') &&
+      !atom.includes('纯玩'),
+    );
+}
+
+function reasonMentionsCandidateFact(reason: string, primitive: RecommendationPrimitive) {
+  const normalizedReason = normalizeText(reason);
+  const facts = getReasonFactAtoms(primitive);
+
+  return facts.some((fact) => normalizedReason.includes(normalizeText(fact)));
+}
+
+function isGenericReason(reason: string) {
+  return /^(价格|低价|班期|热门|性价比|预算|天数|行程|综合|适合预算)|综合匹配|性价比高|班期多|价格低/.test(reason);
+}
+
+function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive) {
+  const atoms = getPrimitiveExperienceAtoms(primitive, 2).filter((atom) => atom !== '综合');
+  const factText = atoms.length > 0
+    ? `${primitive.destination}${atoms.join('、')}`
+    : `${primitive.destination}${primitive.theme || '线路'}`;
+  const comfortText = primitive.seasonalComfortAtoms[0]
+    ? `，${primitive.seasonalComfortAtoms[0]}`
+    : '';
+  const priceText = Number.isFinite(primitive.price) && primitive.price > 0
+    ? `，￥${primitive.price.toLocaleString()}`
+    : '';
+
+  return `${factText}${priceText}${comfortText}，更适合作为本次需求的具体备选`;
+}
+
+function getConcreteAiReason(reason: string | undefined, primitive: RecommendationPrimitive | undefined) {
+  const trimmed = reason?.trim();
+  if (!primitive) return trimmed || '综合用户需求、天气和线路特点后较为合适';
+  if (trimmed && reasonMentionsCandidateFact(trimmed, primitive) && !isGenericReason(trimmed)) {
+    return trimmed;
+  }
+  return buildPrimitiveConcreteReason(primitive);
+}
+
+function getDiversityGroupKey(primitive: RecommendationPrimitive) {
+  const destination = primitive.destination || '其他';
+  const dayBucket = primitive.tripDays >= 4 ? '4天+' : `${primitive.tripDays}天`;
+  const atoms = getPrimitiveExperienceAtoms(primitive, 2);
+  const style = atoms.length > 0
+    ? atoms.join('/')
+    : primitive.theme || primitive.tags[0] || primitive.highlights[0] || '综合';
+  return `${destination}｜${dayBucket}｜${style}`;
+}
+
+function selectDiversePrimitives(
+  primitives: RecommendationPrimitive[],
+  limit: number,
+  localItems: AiRecommendationItem[],
+  context?: RecommendationContext,
+) {
+  if (primitives.length <= limit) return primitives;
+
+  const ranked = [...primitives].sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context));
+  const groups = new Map<string, RecommendationPrimitive[]>();
+
+  for (const primitive of ranked) {
+    const key = getDiversityGroupKey(primitive);
+    const group = groups.get(key) || [];
+    group.push(primitive);
+    groups.set(key, group);
+  }
+
+  const groupEntries = [...groups.entries()].sort(([, a], [, b]) =>
+    rankPrimitive(b[0], localItems, context) - rankPrimitive(a[0], localItems, context),
+  );
+  const selected: RecommendationPrimitive[] = [];
+  const selectedIds = new Set<string>();
+  let round = 0;
+
+  while (selected.length < limit) {
+    let added = false;
+    for (const [, group] of groupEntries) {
+      const next = group[round];
+      if (!next || selectedIds.has(next.id)) continue;
+      selected.push(next);
+      selectedIds.add(next.id);
+      added = true;
+      if (selected.length >= limit) break;
+    }
+    if (!added) break;
+    round += 1;
+  }
+
+  for (const primitive of ranked) {
+    if (selected.length >= limit) break;
+    if (selectedIds.has(primitive.id)) continue;
+    selected.push(primitive);
+    selectedIds.add(primitive.id);
+  }
+
+  return selected.sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context));
+}
+
 function getPricePercentile(price: number, sortedPrices: number[]) {
   if (!Number.isFinite(price) || sortedPrices.length === 0) return null;
   const cheaperOrEqualCount = sortedPrices.filter((value) => value <= price).length;
@@ -1036,6 +1309,7 @@ function annotateCandidatePrimitive(
   return {
     ...primitive,
     matchStatus,
+    routeGroup: getDiversityGroupKey(primitive),
     conflictReasons: getPrimitiveConflictReasons(intent, primitive),
     priceContext: {
       poolPercentile: getPricePercentile(primitive.price, sortedPrices),
@@ -1141,25 +1415,45 @@ function compactCandidates(
     ? primitives.filter((primitive) => primitiveMatchesDestination(intent, primitive))
     : primitives;
   const strictMatches = destinationMatches.filter((primitive) => intentMatchesPrimitive(intent, primitive));
+  const strictLimit = strictMatches.length > 0
+    ? Math.max(18, MAX_AI_CANDIDATES - 12)
+    : 0;
+  const diverseStrictMatches = selectDiversePrimitives(
+    strictMatches,
+    Math.min(strictLimit, MAX_AI_CANDIDATES),
+    localItems,
+    context,
+  );
   const softConflicts = (hasDestinationIntent && destinationMatches.length > 0
     ? destinationMatches.filter((primitive) => !strictMatches.some((match) => match.id === primitive.id))
     : primitives.filter((primitive) => !strictMatches.some((match) => match.id === primitive.id)))
-    .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context))
-    .slice(0, Math.max(12, Math.floor(MAX_AI_CANDIDATES * 0.25)));
+    .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context));
+  const softLimit = Math.max(6, Math.floor(MAX_AI_CANDIDATES * 0.18));
+  const diverseSoftConflicts = selectDiversePrimitives(
+    softConflicts,
+    softLimit,
+    localItems,
+    context,
+  );
   const fallbackPool = primitives
     .filter((primitive) =>
       !strictMatches.some((match) => match.id === primitive.id) &&
-      !softConflicts.some((match) => match.id === primitive.id),
+      !diverseSoftConflicts.some((match) => match.id === primitive.id),
     )
-    .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context))
-    .slice(0, 12);
+    .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context));
+  const fallbackLimit = Math.max(4, MAX_AI_CANDIDATES - diverseStrictMatches.length - diverseSoftConflicts.length);
+  const diverseFallbackPool = selectDiversePrimitives(
+    fallbackPool,
+    fallbackLimit,
+    localItems,
+    context,
+  );
 
   return [
-    ...strictMatches
-      .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context))
+    ...diverseStrictMatches
       .map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'match')),
-    ...softConflicts.map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'soft_conflict')),
-    ...fallbackPool.map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'fallback')),
+    ...diverseSoftConflicts.map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'soft_conflict')),
+    ...diverseFallbackPool.map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'fallback')),
   ]
     .slice(0, MAX_AI_CANDIDATES);
 }
@@ -1619,16 +1913,18 @@ function buildAiMessages(params: {
   const systemPrompt = [
     '你是旅行团推荐顾问，需要根据用户需求、天气、季节、目的地常识和给定旅行团候选列表推荐线路。',
     '只能推荐候选列表中真实存在的 tourId，不允许编造线路、价格、班期或服务。',
-    'candidateTours 是压缩后的 API 推荐原语：schedule、tripDays、price、destination、theme、tags、highlights、leisureLevel、matchStatus、conflictReasons 和 priceContext 都是判断依据。',
+    'candidateTours 是压缩后的 API 推荐原语：schedule、tripDays、price、destination、theme、tags、highlights、semanticAtoms、seasonalComfortAtoms、leisureLevel、routeGroup、matchStatus、conflictReasons 和 priceContext 都是判断依据。',
     '本地只负责提供原语、候选边界和硬约束审计；语义取舍由你结合用户需求、天气和线路原语完成。',
     'candidateTours 里的 matchStatus=match 表示完全匹配；soft_conflict/fallback 带有 conflictReasons，只能在没有足够 match 或需要说明取舍时靠后使用。',
     'routeAtlas 是全站线路地图，用来理解哪些区域/主题通常有哪些天数和价格；但最终 items 仍只能来自 candidateTours。',
     'auditContext 提供上一轮推荐摘要、有效候选池价格分布和业务知识；处理“便宜点、轻松点、再近点”等短句时，必须结合 auditContext 和 preferenceMemory 继承上下文。',
     '如果用户需求与全站线路地图明显冲突，例如预算或天数不现实，请在 summary 里说明取舍，并推荐最接近的真实候选。',
     '例如用户说“周五晚上出发的3日游”，应理解为 departureWeekdays 包含 5、hasEveningOrNightDeparture 为 true、tripDays 为 3。',
-    '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选列表和推荐原语。',
+    '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选列表和推荐原语，尤其要结合 seasonalComfortAtoms 判断夏季闷热、暴雨或高温下的取舍。',
     '如果用户提到老人、儿童、轻松、怕累，应降低高强度、长途奔波和极端天气目的地优先级。',
     '如果天气或季节不适合，要在理由中说明风险，并优先推荐更稳妥的候选。',
+    '每条 reason 必须引用 1-2 个 candidateTours 中存在的具体 semanticAtoms、highlights 或 title 事实，再说明它为什么适合本次需求；不要只写“价格低、班期多、性价比高、行程轻松”。',
+    '当用户明确否定某类体验时，summary 和 reason 都不要把该体验包装成推荐点；如果候选池缺少替代品，应直接说明候选受限，而不是继续正向推荐被否定主题。',
     'summary 必须优先反映 weatherContext 的真实结论；如果已出现高温、闷热、暴雨或台风风险，不要再写成“春季踏青”这类泛化判断。',
     'weatherContext.destination、travelDate 和 inferredFrom 是从当前提问、近几轮对话、搜索词、筛选器、偏好记忆和候选线路池综合推断出的上下文；回答天气和季节时优先依赖这些上下文，不要只看最后一句字面。',
     '如果 inferredFrom 包含“默认出发地”，就把 weatherContext 当作广州出发天气和出行风险提示，不要把这份天气表述成所有候选目的地的实时天气。',
@@ -1637,15 +1933,15 @@ function buildAiMessages(params: {
   ].join('\n');
 
   const userPayload = {
-    task: `从 candidateTours 中选出所有适合的旅行团，按适合程度排序；只给前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只需要 tourId 和 score。`,
+    task: `从 candidateTours 中选出所有适合的旅行团，按适合程度排序；只给前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只需要 tourId 和 score。reason 要像直接回复用户的推荐理由，必须包含具体玩法/地点原子和本次需求取舍。`,
     outputSchema: {
       summary: '一句中文总结，说明推荐依据',
       items: [
         {
           tourId: '候选列表里的 id',
           score: '0-100 的数字',
-          reason: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，一句中文推荐理由，结合用户需求/天气/季节/线路特点`,
-          matchedSignals: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，3到5个中文匹配信号`,
+          reason: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，一句中文推荐理由；必须点名 1-2 个 semanticAtoms/highlights/title 事实，并说明为什么适合本次需求或天气/季节取舍；禁止只写低价、班期多、性价比高`,
+          matchedSignals: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，3到5个中文匹配信号，优先使用具体玩法/地点原子`,
         },
       ],
     },
@@ -1658,10 +1954,15 @@ function buildAiMessages(params: {
     destinationWeatherInsights: params.destinationWeatherInsights,
     routeAtlas: params.routeAtlas,
     auditContext: compactRecommendationAuditContext(params.auditContext),
+    reasonQualityRules: [
+      '必须具体：引用玩法/地点原子，例如森林氧吧、水上乐园、博物馆、沙滩、冰世界。',
+      '必须解释适配：把原子与预算、出发时间、天气、怕热/避雨/轻松等用户需求连起来。',
+      '禁止空话：不要只写低价、热门、班期多、性价比高、综合匹配。',
+    ],
     candidateTours: params.candidates,
   };
 
-  userPayload.task = `只从 candidateTours 中选出最适合的前 ${MAX_AI_OUTPUT_ITEMS} 个旅行团，按适合程度排序返回；不要返回更多 items。仅前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只返回 tourId 和 score。`;
+  userPayload.task = `只从 candidateTours 中选出最适合的前 ${MAX_AI_OUTPUT_ITEMS} 个旅行团，按适合程度排序返回；不要返回更多 items。仅前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只返回 tourId 和 score。reason 必须具体引用候选原语里的玩法/地点事实，并说明本次需求取舍。`;
   (userPayload.outputSchema as { itemCountLimit?: number }).itemCountLimit = MAX_AI_OUTPUT_ITEMS;
 
   return [
@@ -1772,6 +2073,7 @@ function validateAiItems(
   candidateTours: AiRecommendationCandidate[],
 ): AiRecommendationItem[] {
   const candidateIds = new Set(candidateTours.map((tour) => tour.id));
+  const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
   const rawItems = Array.isArray((value as { items?: unknown[] })?.items)
     ? (value as { items: unknown[] }).items
     : [];
@@ -1783,7 +2085,7 @@ function validateAiItems(
       tourId: String(item.tourId),
       score: Number.isFinite(Number(item.score)) ? Number(item.score) : 80 - index,
       reason: index < MAX_AI_COMMENTARY_ITEMS
-        ? item.reason?.trim() || '综合用户需求、天气和线路特点后较为合适'
+        ? getConcreteAiReason(item.reason, primitiveByTourId.get(String(item.tourId)))
         : undefined,
       matchedSignals: index < MAX_AI_COMMENTARY_ITEMS && Array.isArray(item.matchedSignals)
         ? item.matchedSignals.map(String).slice(0, 5)

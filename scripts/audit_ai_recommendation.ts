@@ -6,6 +6,7 @@ import type { AiRecommendationCandidate } from '../src/types/tour.ts';
 
 const {
   auditAiRecommendations,
+  buildTourPrimitive,
   collectAvoidHints,
   compactCandidates,
   getPrimitiveConflictReasons,
@@ -110,6 +111,7 @@ assert.deepEqual(collectAvoidHints('500元以内，不要漂流、爬山'), ['�
 assert.deepEqual(collectAvoidHints('不喜欢温泉，讨厌购物团'), ['温泉', '购物团']);
 assert.ok(shouldUseAiIntentExtraction('不喜欢温泉', { travelStyle: ['温泉'] }));
 assert.ok(shouldUseAiIntentExtraction('受不了暴晒，别安排海边暴走', null));
+assert.ok(buildTourPrimitive(hotSpringTour).seasonalComfortAtoms.some((atom) => atom.includes('高温天气需取舍')));
 
 const auditedAvoid = auditAiRecommendations(
   [{ tourId: 'hot-spring', score: 100, reason: '便宜', matchedSignals: ['低价'] }],
@@ -157,5 +159,163 @@ const allowHotSpringAgain = mergeIntentWithMemory(
   },
 );
 assert.ok(!allowHotSpringAgain?.avoid?.includes('温泉'));
+
+const hotSpringCluster = Array.from({ length: 30 }, (_, index) => candidate({
+  id: `cluster-hot-spring-${index}`,
+  title: `广东温泉度假${index + 1}`,
+  destination: '广东',
+  duration: 2,
+  price: 180 + index,
+  theme: '温泉度假',
+  tags: ['温泉度假', '纯玩'],
+  highlights: ['泡温泉'],
+  isHot: true,
+}));
+const diverseAlternatives = [
+  candidate({
+    id: 'culture-day',
+    title: '广州博物馆文化1天',
+    destination: '广东',
+    duration: 1,
+    price: 99,
+    theme: '古镇文化',
+    tags: ['古镇文化', '纯玩'],
+    highlights: ['博物馆'],
+  }),
+  candidate({
+    id: 'beach-three-day',
+    title: '沙扒湾海边3天',
+    destination: '广东',
+    duration: 3,
+    price: 199,
+    theme: '海岛度假',
+    tags: ['海岛度假', '纯玩'],
+    highlights: ['沙滩'],
+  }),
+  candidate({
+    id: 'nature-day',
+    title: '从化森林氧吧1天',
+    destination: '广东',
+    duration: 1,
+    price: 88,
+    theme: '自然风光',
+    tags: ['自然风光', '纯玩'],
+    highlights: ['森林'],
+  }),
+];
+const diversityIntent = mergeIntentWithMemory({ budgetMax: 500, budgetPriority: 'low' }, null);
+const dominantLocalItems = hotSpringCluster.map((tour, index) => ({
+  tourId: tour.id,
+  score: 300 - index,
+  reason: '低价',
+  matchedSignals: ['低价'],
+}));
+const diverseCompacted = compactCandidates(
+  [...hotSpringCluster, ...diverseAlternatives],
+  dominantLocalItems,
+  diversityIntent,
+  { budgetPriority: 'low' },
+);
+assert.ok(diverseCompacted.some((item) => item.id === 'culture-day'));
+assert.ok(diverseCompacted.some((item) => item.id === 'beach-three-day'));
+assert.ok(diverseCompacted.some((item) => item.id === 'nature-day'));
+const culturePrimitive = buildTourPrimitive(diverseAlternatives[0]);
+assert.ok(culturePrimitive.semanticAtoms.includes('博物馆'));
+assert.ok(diverseCompacted.every((item) => Array.isArray(item.semanticAtoms)));
+assert.ok(diverseCompacted.every((item) => item.routeGroup.includes('｜')));
+
+const noisyHotSpringCluster = Array.from({ length: 30 }, (_, index) => candidate({
+  id: `noisy-hot-spring-${index}`,
+  title: `广东温泉度假${index + 1}`,
+  destination: '广东',
+  duration: 2,
+  price: 160 + index,
+  theme: '温泉度假',
+  tags: ['温泉度假', '纯玩'],
+  highlights: ['泡温泉'],
+  isHot: true,
+}));
+const noisyAlternatives = [
+  candidate({
+    id: 'noisy-culture',
+    title: '广东温泉度假博物馆文化线',
+    destination: '广东',
+    duration: 2,
+    price: 220,
+    theme: '温泉度假',
+    tags: ['温泉度假', '纯玩'],
+    highlights: ['博物馆'],
+  }),
+  candidate({
+    id: 'noisy-beach',
+    title: '广东温泉度假沙扒湾海边线',
+    destination: '广东',
+    duration: 2,
+    price: 230,
+    theme: '温泉度假',
+    tags: ['温泉度假', '纯玩'],
+    highlights: ['沙滩'],
+  }),
+  candidate({
+    id: 'noisy-forest',
+    title: '广东温泉度假森林氧吧线',
+    destination: '广东',
+    duration: 2,
+    price: 240,
+    theme: '温泉度假',
+    tags: ['温泉度假', '纯玩'],
+    highlights: ['森林氧吧'],
+  }),
+];
+const noisyDominantLocalItems = noisyHotSpringCluster.map((tour, index) => ({
+  tourId: tour.id,
+  score: 300 - index,
+  reason: '低价',
+  matchedSignals: ['低价'],
+}));
+const noisyCompacted = compactCandidates(
+  [...noisyHotSpringCluster, ...noisyAlternatives],
+  noisyDominantLocalItems,
+  diversityIntent,
+  { budgetPriority: 'low' },
+);
+assert.ok(noisyCompacted.some((item) => item.id === 'noisy-culture'));
+assert.ok(noisyCompacted.some((item) => item.id === 'noisy-beach'));
+assert.ok(noisyCompacted.some((item) => item.id === 'noisy-forest'));
+
+const noHighlightHotSpringCluster = Array.from({ length: 30 }, (_, index) => candidate({
+  id: `no-highlight-hot-spring-${index}`,
+  title: `广东温泉度假${index + 1}`,
+  destination: '广东',
+  duration: 2,
+  price: 150 + index,
+  theme: '温泉度假',
+  tags: ['温泉度假', '纯玩'],
+  highlights: [],
+  isHot: true,
+}));
+const noHighlightDominantLocalItems = noHighlightHotSpringCluster.map((tour, index) => ({
+  tourId: tour.id,
+  score: 300 - index,
+  reason: '低价',
+  matchedSignals: ['低价'],
+}));
+const noHighlightCompacted = compactCandidates(
+  [...noHighlightHotSpringCluster, ...noisyAlternatives],
+  noHighlightDominantLocalItems,
+  diversityIntent,
+  { budgetPriority: 'low' },
+);
+assert.ok(noHighlightCompacted.some((item) => item.id === 'noisy-culture'));
+assert.ok(noHighlightCompacted.some((item) => item.id === 'noisy-beach'));
+assert.ok(noHighlightCompacted.some((item) => item.id === 'noisy-forest'));
+assert.ok(!noHighlightCompacted.some((item) => /温泉度假\d/.test(item.routeGroup)));
+
+const genericReasonItems = validateAiItems({
+  items: [
+    { tourId: 'noisy-culture', score: 95, reason: '价格低，班期多，性价比高', matchedSignals: ['低价'] },
+  ],
+}, noisyAlternatives);
+assert.ok(genericReasonItems[0].reason?.includes('博物馆'));
 
 console.log('AI recommendation audit passed');
