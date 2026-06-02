@@ -46,6 +46,7 @@ import { Input } from '@/components/ui/input';
 
 interface AiRecommendPanelProps {
   tours: AiRecommendationCandidate[];
+  toursLoading: boolean;
   activeFilters: FilterState;
   searchQuery: string;
   result: AiRecommendationResult | null;
@@ -228,6 +229,7 @@ function getResultStatusMeta(result: AiRecommendationResult | null) {
 
 export function AiRecommendPanel({
   tours,
+  toursLoading,
   activeFilters,
   searchQuery,
   result,
@@ -267,6 +269,7 @@ export function AiRecommendPanel({
     [storedChatState.conversationId],
   );
   const hasResult = Boolean(result && result.items.length > 0);
+  const toursReady = !toursLoading && tours.length > 0;
   const resultStatusMeta = getResultStatusMeta(result);
 
   const stopSpeechRecognition = useCallback((abort = false) => {
@@ -452,7 +455,7 @@ export function AiRecommendPanel({
 
   const submitPrompt = async (rawPrompt?: string) => {
     const prompt = (rawPrompt ?? input).trim();
-    if (!prompt || loading) return;
+    if (!prompt || loading || !toursReady) return;
 
     const userMessage = createMessage('user', prompt);
     const nextMessages = [...messages, userMessage];
@@ -571,9 +574,9 @@ export function AiRecommendPanel({
               <button
                 key={prompt}
                 type="button"
-                className="shrink-0 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-600 transition hover:border-stone-300 hover:bg-white hover:text-stone-900"
+                className="shrink-0 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-600 transition hover:border-stone-300 hover:bg-white hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-55"
                 onClick={() => submitPrompt(prompt)}
-                disabled={loading}
+                disabled={loading || !toursReady}
               >
                 {prompt}
               </button>
@@ -613,7 +616,7 @@ export function AiRecommendPanel({
               type="button"
               className="h-9 rounded-xl bg-emerald-700 px-4 text-xs hover:bg-emerald-800"
               onClick={() => submitPrompt()}
-              disabled={loading || !input.trim()}
+              disabled={loading || !input.trim() || !toursReady}
             >
               {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
               推荐线路
@@ -621,7 +624,9 @@ export function AiRecommendPanel({
           </div>
         </div>
         <div className="px-1 pb-1 text-[11px] leading-5">
-          <p className={cn('text-stone-500', speechListening && 'text-emerald-700')}>{speechHint}</p>
+          <p className={cn('text-stone-500', speechListening && 'text-emerald-700')}>
+            {toursReady ? speechHint : '线路数据加载中，请稍候再使用 AI 推荐。'}
+          </p>
           {speechError && <p className="text-rose-600">{speechError}</p>}
         </div>
       </div>

@@ -1166,6 +1166,7 @@ export function TourList({ searchQuery }: TourListProps) {
     <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <AiRecommendPanel
         tours={aiCandidateTours}
+        toursLoading={loading}
         activeFilters={filters}
         searchQuery={searchQuery}
         result={aiRecommendationResult}
