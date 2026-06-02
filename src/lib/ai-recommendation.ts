@@ -314,7 +314,7 @@ const AVOID_ATOM_KEYWORDS = [
   '暴走',
   '穿越',
   '购物',
-  '暴晒',
+  '日晒',
 ];
 
 function expandAvoidTerm(term: string) {
