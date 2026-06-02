@@ -1722,6 +1722,7 @@ async function callAiApi(params: {
       temperature: 0.25,
       max_tokens: 4096,
       response_format: { type: 'json_object' },
+      thinking: { type: 'disabled' },
     }),
   });
 
