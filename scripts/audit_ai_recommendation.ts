@@ -12,6 +12,7 @@ const {
   getPrimitiveConflictReasons,
   matchesActiveDateFilters,
   matchesDateWindow,
+  mergeAiAndLocalRecommendations,
   mergeIntentWithMemory,
   resolvePromptDateWindow,
   shouldUseAiIntentExtraction,
@@ -82,6 +83,24 @@ const aiItems = validateAiItems({
 const audited = auditAiRecommendations(aiItems, [], tours, inheritedIntent);
 assert.equal(audited[0].tourId, 'phuket-budget');
 assert.ok(audited.find((item) => item.tourId === 'guizhou-cheap')?.matchedSignals.some((signal) => signal.startsWith('审计提示')));
+const mergedCapItems = mergeAiAndLocalRecommendations(
+  Array.from({ length: 12 }, (_, index) => ({ tourId: `ai-${index}`, score: 100 - index, matchedSignals: [] })),
+  Array.from({ length: 30 }, (_, index) => ({ tourId: `local-${index}`, score: 80 - index, matchedSignals: [] })),
+);
+assert.ok(mergedCapItems.length <= 12);
+const auditCapTours = Array.from({ length: 30 }, (_, index) => candidate({
+  id: `audit-cap-${index}`,
+  title: `广东清凉短线${index}`,
+  destination: '广东',
+  price: 100 + index,
+}));
+const auditCapItems = auditAiRecommendations(
+  [],
+  auditCapTours.map((tour, index) => ({ tourId: tour.id, score: 90 - index, matchedSignals: [] })),
+  auditCapTours,
+  null,
+);
+assert.ok(auditCapItems.length <= 12);
 
 const avoidIntent = mergeIntentWithMemory({ avoid: ['温泉'] }, null);
 const hotSpringTour = candidate({
@@ -145,6 +164,10 @@ const promptDateWindow = resolvePromptDateWindow('推荐500元以下未来7天�
 assert.ok(promptDateWindow);
 assert.ok(matchesDateWindow({ ...nonHotSpringTour, departureDate: tomorrow, departureDates: [tomorrow] }, promptDateWindow));
 assert.ok(!matchesDateWindow({ ...nonHotSpringTour, departureDate: yesterday, departureDates: [yesterday] }, promptDateWindow));
+const futureFewDaysWindow = resolvePromptDateWindow('未来几天下雨，500元以下推荐旅行团');
+assert.ok(futureFewDaysWindow);
+assert.ok(matchesDateWindow({ ...nonHotSpringTour, departureDate: tomorrow, departureDates: [tomorrow] }, futureFewDaysWindow));
+assert.ok(!matchesDateWindow({ ...nonHotSpringTour, departureDate: yesterday, departureDates: [yesterday] }, futureFewDaysWindow));
 
 const allowHotSpringAgain = mergeIntentWithMemory(
   { travelStyle: ['温泉'], mustHave: ['泡温泉'], avoid: [] },
@@ -204,6 +227,12 @@ const diverseAlternatives = [
   }),
 ];
 const diversityIntent = mergeIntentWithMemory({ budgetMax: 500, budgetPriority: 'low' }, null);
+const hotRainyWeatherContext = {
+  destination: '广州',
+  travelDate: '2026-06-02',
+  forecastSummary: '广州未来7天闷热多雨，有高温、阵雨和雷暴风险。',
+  seasonAdvice: '华南此时通常已经进入闷热多雨阶段，优先考虑避暑、遮阳、防雨和室内外搭配。',
+};
 const dominantLocalItems = hotSpringCluster.map((tour, index) => ({
   tourId: tour.id,
   score: 300 - index,
@@ -214,15 +243,17 @@ const diverseCompacted = compactCandidates(
   [...hotSpringCluster, ...diverseAlternatives],
   dominantLocalItems,
   diversityIntent,
-  { budgetPriority: 'low' },
+  { budgetPriority: 'low', weatherSensitivity: ['关注天气'], weatherContext: hotRainyWeatherContext },
 );
 assert.ok(diverseCompacted.some((item) => item.id === 'culture-day'));
 assert.ok(diverseCompacted.some((item) => item.id === 'beach-three-day'));
 assert.ok(diverseCompacted.some((item) => item.id === 'nature-day'));
+assert.ok(diverseCompacted.filter((item) => item.experienceCategories.includes('温泉泡汤')).length <= 2);
 const culturePrimitive = buildTourPrimitive(diverseAlternatives[0]);
 assert.ok(culturePrimitive.semanticAtoms.includes('博物馆'));
 assert.ok(diverseCompacted.every((item) => Array.isArray(item.semanticAtoms)));
 assert.ok(diverseCompacted.every((item) => item.routeGroup.includes('｜')));
+assert.ok(buildTourPrimitive(hotSpringCluster[0]).experienceCategories.includes('温泉泡汤'));
 
 const noisyHotSpringCluster = Array.from({ length: 30 }, (_, index) => candidate({
   id: `noisy-hot-spring-${index}`,
@@ -238,7 +269,7 @@ const noisyHotSpringCluster = Array.from({ length: 30 }, (_, index) => candidate
 const noisyAlternatives = [
   candidate({
     id: 'noisy-culture',
-    title: '广东温泉度假博物馆文化线',
+    title: '广东博物馆文化线',
     destination: '广东',
     duration: 2,
     price: 220,
@@ -248,7 +279,7 @@ const noisyAlternatives = [
   }),
   candidate({
     id: 'noisy-beach',
-    title: '广东温泉度假沙扒湾海边线',
+    title: '广东沙扒湾海边线',
     destination: '广东',
     duration: 2,
     price: 230,
@@ -258,7 +289,7 @@ const noisyAlternatives = [
   }),
   candidate({
     id: 'noisy-forest',
-    title: '广东温泉度假森林氧吧线',
+    title: '广东森林氧吧线',
     destination: '广东',
     duration: 2,
     price: 240,
@@ -277,11 +308,12 @@ const noisyCompacted = compactCandidates(
   [...noisyHotSpringCluster, ...noisyAlternatives],
   noisyDominantLocalItems,
   diversityIntent,
-  { budgetPriority: 'low' },
+  { budgetPriority: 'low', weatherSensitivity: ['关注天气'], weatherContext: hotRainyWeatherContext },
 );
 assert.ok(noisyCompacted.some((item) => item.id === 'noisy-culture'));
 assert.ok(noisyCompacted.some((item) => item.id === 'noisy-beach'));
 assert.ok(noisyCompacted.some((item) => item.id === 'noisy-forest'));
+assert.ok(noisyCompacted.filter((item) => item.experienceCategories.includes('温泉泡汤')).length <= 2);
 
 const noHighlightHotSpringCluster = Array.from({ length: 30 }, (_, index) => candidate({
   id: `no-highlight-hot-spring-${index}`,
@@ -304,12 +336,89 @@ const noHighlightCompacted = compactCandidates(
   [...noHighlightHotSpringCluster, ...noisyAlternatives],
   noHighlightDominantLocalItems,
   diversityIntent,
-  { budgetPriority: 'low' },
+  { budgetPriority: 'low', weatherSensitivity: ['关注天气'], weatherContext: hotRainyWeatherContext },
 );
 assert.ok(noHighlightCompacted.some((item) => item.id === 'noisy-culture'));
 assert.ok(noHighlightCompacted.some((item) => item.id === 'noisy-beach'));
 assert.ok(noHighlightCompacted.some((item) => item.id === 'noisy-forest'));
 assert.ok(!noHighlightCompacted.some((item) => /温泉度假\d/.test(item.routeGroup)));
+assert.ok(noHighlightCompacted.filter((item) => item.experienceCategories.includes('温泉泡汤')).length <= 2);
+
+const implicitHotSpringPrimitive = buildTourPrimitive(candidate({
+  id: 'implicit-hot-spring',
+  title: '龙门铁泉3天(依泉楼)',
+  destination: '广东',
+  duration: 3,
+  price: 399,
+  theme: '自然风光',
+  tags: ['自然风光'],
+  highlights: [],
+}));
+assert.ok(implicitHotSpringPrimitive.experienceCategories.includes('温泉泡汤'));
+assert.ok(getPrimitiveConflictReasons(
+  { avoid: ['温泉'], weatherSensitivity: [], departureWeekdays: [] },
+  implicitHotSpringPrimitive,
+).some((reason) => reason.startsWith('命中需避开条件')));
+
+const lodgingOnlyPackage = candidate({
+  id: 'hotel-package',
+  title: '北京亦庄新城酒店住宿套餐*等待确认',
+  destination: '北京',
+  duration: 1,
+  price: 199,
+  theme: '自然风光',
+  tags: ['自然风光'],
+  highlights: ['精品住宿'],
+});
+const realTourAlternative = candidate({
+  id: 'real-tour',
+  title: '从化森林氧吧亲水栈道1天',
+  destination: '广东',
+  duration: 1,
+  price: 99,
+  theme: '自然风光',
+  tags: ['自然风光'],
+  highlights: ['森林氧吧', '亲水栈道'],
+});
+const packageCompacted = compactCandidates(
+  [lodgingOnlyPackage, realTourAlternative],
+  [{ tourId: lodgingOnlyPackage.id, score: 300, reason: '低价', matchedSignals: ['低价'] }],
+  diversityIntent,
+  { budgetPriority: 'low', weatherSensitivity: ['关注天气'], weatherContext: hotRainyWeatherContext },
+);
+assert.ok(buildTourPrimitive(lodgingOnlyPackage).experienceCategories.includes('非跟团产品'));
+assert.ok(packageCompacted.some((item) => item.id === 'real-tour'));
+assert.ok(!packageCompacted.some((item) => item.id === 'hotel-package'));
+
+const rainyMountainTour = candidate({
+  id: 'rainy-mountain',
+  title: '广东峡谷溯溪爬山1天',
+  destination: '广东',
+  duration: 1,
+  price: 128,
+  theme: '自然风光',
+  tags: ['自然风光'],
+  highlights: ['峡谷溯溪', '爬山'],
+});
+const rainyIndoorTour = candidate({
+  id: 'rainy-indoor',
+  title: '广州博物馆美食轻松1天',
+  destination: '广东',
+  duration: 1,
+  price: 128,
+  theme: '古镇文化',
+  tags: ['古镇文化'],
+  highlights: ['博物馆', '美食'],
+});
+const rainyCompacted = compactCandidates(
+  [rainyMountainTour, rainyIndoorTour],
+  [{ tourId: rainyMountainTour.id, score: 300, reason: '低价', matchedSignals: ['低价'] }],
+  diversityIntent,
+  { budgetPriority: 'low', weatherSensitivity: ['避雨'], weatherContext: hotRainyWeatherContext },
+);
+assert.ok(buildTourPrimitive(rainyMountainTour).seasonalComfortAtoms.includes('雨天需取舍：山水户外或涉水风险'));
+assert.ok(rainyCompacted.some((item) => item.id === 'rainy-indoor'));
+assert.ok(!rainyCompacted.some((item) => item.id === 'rainy-mountain'));
 
 const genericReasonItems = validateAiItems({
   items: [
@@ -317,5 +426,18 @@ const genericReasonItems = validateAiItems({
   ],
 }, noisyAlternatives);
 assert.ok(genericReasonItems[0].reason?.includes('博物馆'));
+assert.ok(genericReasonItems[0].matchedSignals.some((signal) => signal.includes('博物馆')));
+const nonStringReasonItems = validateAiItems({
+  items: [
+    { tourId: 'noisy-forest', score: 93, reason: 123, matchedSignals: ['低价'] },
+  ],
+}, noisyAlternatives);
+assert.ok(nonStringReasonItems[0].reason?.includes('森林') || nonStringReasonItems[0].reason?.includes('氧吧'));
+const vagueReasonItems = validateAiItems({
+  items: [
+    { tourId: 'noisy-beach', score: 94, reason: '自然风光生态，含早轻松，适合本次天气取舍。', matchedSignals: ['自然风光'] },
+  ],
+}, noisyAlternatives);
+assert.ok(vagueReasonItems[0].reason?.includes('沙扒湾') || vagueReasonItems[0].reason?.includes('沙滩'));
 
 console.log('AI recommendation audit passed');
