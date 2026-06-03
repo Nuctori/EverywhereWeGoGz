@@ -16,6 +16,7 @@ const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 const MAX_AI_CANDIDATES = 18;
 const MAX_AI_COMMENTARY_ITEMS = 8;
 const MAX_AI_OUTPUT_ITEMS = 12;
+const MAX_DESTINATION_WEATHER_INSIGHTS = 8;
 const ROUTE_ATLAS_MAX_GROUPS = 8;
 const ROUTE_ATLAS_MAX_EXAMPLES = 2;
 const MAX_RECENT_CONVERSATION_MESSAGES = 4;
@@ -1764,6 +1765,97 @@ function compactRecentConversation(messages: AiRecommendationMessage[]) {
     .filter((message) => message.content);
 }
 
+function isThinRecommendationSummary(summary: string) {
+  const normalized = summary.replace(/\s+/g, '');
+  if (!normalized) return true;
+  if (normalized.length < 36) return true;
+
+  return /(综合.*推荐|按.*条件.*筛|结合.*需求.*天气.*排序|输出\d+条结果|优先推荐.*线路|生成推荐)/.test(normalized)
+    && normalized.length < 90;
+}
+
+function buildSummaryTopDestinations(
+  items: AiRecommendationItem[],
+  candidateTours: AiRecommendationCandidate[],
+) {
+  const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
+  const topPrimitives = items
+    .slice(0, 3)
+    .map((item) => primitiveByTourId.get(item.tourId))
+    .filter((primitive): primitive is RecommendationPrimitive => Boolean(primitive));
+
+  if (topPrimitives.length === 0) return '';
+
+  const lines = topPrimitives.map((primitive) => {
+    const atoms = getPrimitiveExperienceAtoms(primitive, 1).filter((atom) => atom !== '综合');
+    const feature = atoms[0] || primitive.theme || primitive.experienceCategories[0] || '';
+    return feature && !primitive.destination.includes(feature)
+      ? `${primitive.destination}的${feature}`
+      : primitive.destination || feature;
+  });
+
+  return uniqueStrings(lines).slice(0, 3).join('、');
+}
+
+function buildRecommendationSummary(params: {
+  items: AiRecommendationItem[];
+  candidateTours: AiRecommendationCandidate[];
+  weatherContext: AiWeatherContext;
+  destinationWeatherInsights: DestinationWeatherInsight[];
+  intent: AiTravelIntent | null;
+}) {
+  const topDestinations = buildSummaryTopDestinations(params.items, params.candidateTours);
+  const topLine = topDestinations
+    ? `这次更适合优先看${topDestinations}这类线路。`
+    : '这次会优先保留更稳妥、适配当前条件的线路。';
+  const weatherLead = params.weatherContext.forecastSummary
+    ? `天气上看，${params.weatherContext.forecastSummary.replace(/[。；]+$/u, '')}。`
+    : '';
+  const cautionPool = uniqueStrings([
+    ...(params.weatherContext.seasonAdvice || []),
+    ...params.destinationWeatherInsights.flatMap((insight) => [
+      insight.bestSeasonNote || '',
+      ...(insight.seasonAdvice || []),
+    ]),
+  ]);
+  const cautionLine = cautionPool.find((text) => /(台风|暴雨|强降雨|高温|闷热|风浪|花期|雨季|观赏期|取舍)/.test(text))
+    || cautionPool[0]
+    || '';
+  const preferenceBits = uniqueStrings([
+    params.intent?.budgetMax ? `${params.intent.budgetMax}元以内预算` : '',
+    params.intent?.weatherSensitivity?.includes('怕热') ? '怕热' : '',
+    params.intent?.weatherSensitivity?.includes('避雨') ? '避雨' : '',
+    params.intent?.travelStyle?.slice(0, 1)[0] || '',
+  ]).slice(0, 3);
+  const tradeoffLine = preferenceBits.length > 0
+    ? `排序时我会优先照顾${preferenceBits.join('、')}，把天气更敏感或体验波动更大的线路往后放。`
+    : '';
+
+  return [topLine, weatherLead, cautionLine, tradeoffLine]
+    .filter(Boolean)
+    .join('');
+}
+
+function finalizeRecommendationSummary(params: {
+  aiSummary: string;
+  items: AiRecommendationItem[];
+  candidateTours: AiRecommendationCandidate[];
+  weatherContext: AiWeatherContext;
+  destinationWeatherInsights: DestinationWeatherInsight[];
+  intent: AiTravelIntent | null;
+}) {
+  const aiSummary = params.aiSummary.trim();
+  const fallbackSummary = buildRecommendationSummary(params);
+  if (!aiSummary) return fallbackSummary;
+  if (isThinRecommendationSummary(aiSummary)) return fallbackSummary;
+
+  const hasRiskContext = /(天气|高温|闷热|下雨|暴雨|台风|风浪|雨季|花期|观赏期|注意|风险)/.test(aiSummary);
+  if (hasRiskContext || !fallbackSummary) return aiSummary;
+
+  const fallbackTail = fallbackSummary.replace(/^.*?。/u, '');
+  return fallbackTail ? `${aiSummary}${fallbackTail}` : aiSummary;
+}
+
 function parseDateString(value: string | null | undefined) {
   if (!value) return null;
   const parsed = new Date(value);
@@ -1955,19 +2047,16 @@ function getDestinationBestSeasonNote(destination: string, corpus = '') {
   return '如目的地玩法明显依赖景观窗口、晴雨条件或季节体感，建议把天气与观赏期作为排序因子一起考虑。';
 }
 
-function shouldInspectDestinationWeather(tour: AiRecommendationCandidate, searchCorpus: string) {
-  const text = `${tour.destination} ${tour.theme} ${tour.title} ${searchCorpus}`;
+function shouldInspectDestinationWeather(text: string) {
   return /(海岛|海边|沙滩|潜水|浮潜|玩水|漂流|峡谷|山水|草原|雪|冰|温泉|避暑|赏花|花海|红叶|樱花|银杏|日出|星空|摄影|自然)/
     .test(text);
 }
 
 function buildDestinationWeatherCandidates(
-  tours: AiRecommendationCandidate[],
-  localItems: AiRecommendationItem[],
+  candidates: ReturnType<typeof compactCandidates>,
   searchQuery: string,
   intent: AiTravelIntent | null,
 ) {
-  const scoreByTourId = new Map(localItems.map((item) => [item.tourId, item.score]));
   const grouped = new Map<string, {
     destination: string;
     score: number;
@@ -1975,17 +2064,30 @@ function buildDestinationWeatherCandidates(
     corpus: string;
   }>();
 
-  for (const tour of tours.slice(0, 40)) {
-    const corpus = getSearchCorpus(tour);
-    const destination = getAtlasRegions(tour)[0] || tour.destination;
+  for (const candidate of candidates) {
+    const corpus = [
+      candidate.destination,
+      candidate.theme,
+      candidate.title,
+      candidate.routeGroup,
+      ...candidate.tags,
+      ...candidate.highlights,
+      ...candidate.semanticAtoms,
+      ...candidate.experienceCategories,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    const destination = candidate.routeGroup || candidate.destination;
     if (!destination) continue;
-    if (!shouldInspectDestinationWeather(tour, corpus)) continue;
 
-    const relevance =
-      (scoreByTourId.get(tour.id) || 0) +
-      (tour.isHot ? 6 : 0) +
-      (intent?.destinationHints?.length && destinationHintsMatchCorpus(intent.destinationHints, `${tour.destination} ${tour.title}`) ? 16 : 0) +
-      (searchQuery && corpus.includes(searchQuery.toLowerCase()) ? 8 : 0);
+    const relevance = (
+      (candidate.matchStatus === 'match' ? 24 : candidate.matchStatus === 'soft_conflict' ? 12 : 4) +
+      (candidate.isHot ? 6 : 0) +
+      (shouldInspectDestinationWeather(corpus) ? 10 : 0) +
+      (intent?.destinationHints?.length && destinationHintsMatchCorpus(intent.destinationHints, `${candidate.destination} ${candidate.title}`) ? 16 : 0) +
+      (searchQuery && corpus.includes(searchQuery.toLowerCase()) ? 8 : 0)
+    );
     const existing = grouped.get(destination) || {
       destination,
       score: 0,
@@ -1997,16 +2099,16 @@ function buildDestinationWeatherCandidates(
     existing.corpus = `${existing.corpus} ${corpus}`.slice(0, 300);
     existing.evidence = uniqueStrings([
       ...existing.evidence,
-      tour.theme,
-      ...tour.tags.slice(0, 2),
-      ...tour.highlights.slice(0, 2),
+      candidate.theme,
+      ...candidate.tags.slice(0, 2),
+      ...candidate.highlights.slice(0, 2),
     ]).slice(0, 6);
     grouped.set(destination, existing);
   }
 
   return [...grouped.values()]
     .sort((a, b) => b.score - a.score)
-    .slice(0, 2);
+    .slice(0, MAX_DESTINATION_WEATHER_INSIGHTS);
 }
 
 function isSouthChinaHotRainySeason(destination: string, month: number) {
@@ -2215,6 +2317,8 @@ function buildAiMessages(params: {
     '如果用户提到老人、儿童、轻松、怕累，应降低高强度、长途奔波和极端天气目的地优先级。',
     '如果天气或季节不适合，要在理由中说明风险，并优先推荐更稳妥的候选。',
     '每条 reason 必须引用 1-2 个 candidateTours 中存在的具体 semanticAtoms、highlights 或 title 事实，再说明它为什么适合本次需求；不要只写“价格低、班期多、性价比高、行程轻松”。',
+    'summary 不要只给结论，至少要交代推荐方向、当前天气/季节判断，以及用户下单前最该注意的一件事。',
+    '如果两个目的地玩法相近，但天气、花期、雨季、台风或风浪风险明显不同，可以明确说明“为什么这次推 A、不推 B”。',
     '当用户明确否定某类体验时，summary 和 reason 都不要把该体验包装成推荐点；如果候选池缺少替代品，应直接说明候选受限，而不是继续正向推荐被否定主题。',
     'summary 必须优先反映 weatherContext 的真实结论；如果已出现高温、闷热、暴雨或台风风险，不要再写成“春季踏青”这类泛化判断。',
     'weatherContext.destination、travelDate 和 inferredFrom 是从当前提问、近几轮对话、搜索词、筛选器、偏好记忆和候选线路池综合推断出的上下文；回答天气和季节时优先依赖这些上下文，不要只看最后一句字面。',
@@ -2224,14 +2328,14 @@ function buildAiMessages(params: {
   ].join('\n');
 
   const userPayload = {
-    task: `从 candidateTours 中选出所有适合的旅行团，按适合程度排序；只给前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只需要 tourId 和 score。reason 要像直接回复用户的推荐理由，必须包含具体玩法/地点原子和本次需求取舍。`,
+    task: `从 candidateTours 中选出所有适合的旅行团，按适合程度排序；只给前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只需要 tourId 和 score。summary 要像顾问式总建议，至少覆盖推荐方向、天气/季节判断和注意事项。reason 要像直接回复用户的推荐理由，必须包含具体玩法/地点原子和本次需求取舍。`,
     outputSchema: {
-      summary: '一句中文总结，说明推荐依据',
+      summary: '2到4句中文总建议：先说推荐方向，再说天气/季节判断，再补一条注意事项或替代逻辑',
       items: [
         {
           tourId: '候选列表里的 id',
           score: '0-100 的数字',
-          reason: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，一句中文推荐理由；必须点名 1-2 个 semanticAtoms/highlights/title 事实，并说明为什么适合本次需求或天气/季节取舍；禁止只写低价、班期多、性价比高`,
+          reason: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，2到3句中文推荐理由；必须点名 1-2 个 semanticAtoms/highlights/title 事实，并说明为什么适合本次需求、天气/季节取舍，以及用户要注意的风险；禁止只写低价、班期多、性价比高`,
           matchedSignals: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，3到5个中文匹配信号，优先使用具体玩法/地点原子`,
         },
       ],
@@ -2249,12 +2353,13 @@ function buildAiMessages(params: {
       '必须具体：引用玩法/地点原子，例如沙扒湾、双月湾、森林氧吧、水上乐园、博物馆、冰世界。',
       '必须解释适配：把原子与预算、未来7天班期、天气、怕热/避雨/轻松等用户需求连起来。',
       '必须有取舍：温泉泡汤、高强度户外、海边风浪等天气敏感项要明确说风险，不要包装成无条件优点。',
+      '能比较时就比较：如果用户本来想去海边，但某目的地近期风浪、强降雨或台风风险更高，可以直接说这次为什么改推另一个更稳的海边目的地。',
       '禁止空话：不要只写低价、热门、班期多、性价比高、自然风光生态、综合匹配。',
     ],
     candidateTours: params.candidates,
   };
 
-  userPayload.task = `只从 candidateTours 中选出最适合的前 ${MAX_AI_OUTPUT_ITEMS} 个旅行团，按适合程度排序返回；不要返回更多 items。仅前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只返回 tourId 和 score。reason 必须具体引用候选原语里的玩法/地点事实，并说明本次需求取舍。`;
+  userPayload.task = `只从 candidateTours 中选出最适合的前 ${MAX_AI_OUTPUT_ITEMS} 个旅行团，按适合程度排序返回；不要返回更多 items。summary 必须写成顾问式总建议，交代推荐方向、天气/季节判断、注意事项，必要时说明为什么改推更稳妥的替代目的地。仅前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只返回 tourId 和 score。reason 必须具体引用候选原语里的玩法/地点事实，并说明本次需求取舍。`;
   (userPayload.outputSchema as { itemCountLimit?: number }).itemCountLimit = MAX_AI_OUTPUT_ITEMS;
 
   return [
@@ -2791,8 +2896,7 @@ export async function requestAiRecommendations({
     );
     const destinationWeatherCandidates = useWeatherResearch
       ? buildDestinationWeatherCandidates(
-          availableCandidates,
-          localItems,
+          compactedCandidates,
           searchQuery,
           effectiveIntent,
         )
@@ -2889,10 +2993,14 @@ export async function requestAiRecommendations({
 
     return {
       conversationId,
-      summary:
-        typeof aiResponse.summary === 'string' && aiResponse.summary.trim()
-          ? aiResponse.summary.trim()
-          : '已结合用户需求、天气、季节和线路特点生成推荐。',
+      summary: finalizeRecommendationSummary({
+        aiSummary: typeof aiResponse.summary === 'string' ? aiResponse.summary : '',
+        items: mergedItems,
+        candidateTours: compactedCandidateTours,
+        weatherContext,
+        destinationWeatherInsights,
+        intent: effectiveIntent,
+      }),
       items: mergedItems,
       generatedAt: new Date().toISOString(),
       source: 'ai-api',

@@ -147,11 +147,7 @@ function buildResultAssistantReply(result: AiRecommendationResult, prompt: strin
     return `可以，我先按这个问题帮你判断一下。${result.summary}`;
   }
 
-  if (result.source === 'ai-api') {
-    return `我先按你的条件筛了一轮，${result.summary}`;
-  }
-
-  return `我先给你一版可用结果，${result.summary}`;
+  return result.summary;
 }
 
 function createMessage(role: AiRecommendationMessage['role'], content: string): AiRecommendationMessage {
