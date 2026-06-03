@@ -60,6 +60,17 @@ interface RecommendationContext {
   weatherContext?: AiWeatherContext;
 }
 
+interface LocalRecommendationQuery {
+  normalizedText: string;
+  destinationHints: string[];
+  avoidHints: string[];
+  themeHints: string[];
+  budget: ReturnType<typeof parseBudget>;
+  duration: ReturnType<typeof parseDuration>;
+  prefersEasyPace: boolean;
+  prefersRecentDeparture: boolean;
+}
+
 interface DestinationWeatherInsight extends AiWeatherContext {
   role: 'departure' | 'destination';
   queryReason?: string;
@@ -393,21 +404,38 @@ function getSearchCorpus(tour: AiRecommendationCandidate) {
   return corpus;
 }
 
-function scoreTour(tour: AiRecommendationCandidate, text: string): AiRecommendationItem | null {
+function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
+  const normalizedText = normalizeText(text);
+  const avoidHints = collectAvoidHints(normalizedText);
+
+  return {
+    normalizedText,
+    destinationHints: collectDestinationHints(normalizedText),
+    avoidHints,
+    themeHints: collectThemeHints(normalizedText).filter((hint) => !avoidHints.includes(hint)),
+    budget: parseBudget(normalizedText),
+    duration: parseDuration(normalizedText),
+    prefersEasyPace:
+      normalizedText.includes('轻松') ||
+      normalizedText.includes('休闲') ||
+      normalizedText.includes('老人'),
+    prefersRecentDeparture:
+      normalizedText.includes('近期') ||
+      normalizedText.includes('马上') ||
+      normalizedText.includes('本周'),
+  };
+}
+
+function scoreTour(tour: AiRecommendationCandidate, query: LocalRecommendationQuery): AiRecommendationItem | null {
   const corpus = getSearchCorpus(tour);
-  const destinationHints = collectDestinationHints(text);
-  const avoidHints = collectAvoidHints(text);
-  if (avoidHints.some((hint) => corpus.includes(normalizeText(hint)))) {
+  if (query.avoidHints.some((hint) => corpus.includes(normalizeText(hint)))) {
     return null;
   }
 
-  const themeHints = collectThemeHints(text).filter((hint) => !avoidHints.includes(hint));
-  const budget = parseBudget(text);
-  const duration = parseDuration(text);
   const signals: string[] = [];
   let score = 0;
 
-  for (const hint of destinationHints) {
+  for (const hint of query.destinationHints) {
     if (destinationHintsMatchCorpus([hint], `${tour.destination} ${tour.title} ${corpus}`)) {
       score += 18;
       signals.push(`目的地匹配：${hint}`);
@@ -415,29 +443,29 @@ function scoreTour(tour: AiRecommendationCandidate, text: string): AiRecommendat
     }
   }
 
-  for (const hint of themeHints) {
+  for (const hint of query.themeHints) {
     if (corpus.includes(normalizeText(hint))) {
       score += 10;
       signals.push(`偏好匹配：${hint}`);
     }
   }
 
-  if (budget) {
-    if (tour.price >= budget.min && tour.price <= budget.max) {
+  if (query.budget) {
+    if (tour.price >= query.budget.min && tour.price <= query.budget.max) {
       score += 12;
       signals.push(`预算接近：￥${tour.price.toLocaleString()}`);
-    } else if (Number.isFinite(budget.max) && tour.price <= budget.max * 1.25) {
+    } else if (Number.isFinite(query.budget.max) && tour.price <= query.budget.max * 1.25) {
       score += 5;
       signals.push('价格略高但仍可比较');
     }
   }
 
-  if (duration && tour.duration >= duration.min && tour.duration <= duration.max) {
+  if (query.duration && tour.duration >= query.duration.min && tour.duration <= query.duration.max) {
     score += 10;
     signals.push(`天数合适：${tour.duration}天`);
   }
 
-  if (text.includes('轻松') || text.includes('休闲') || text.includes('老人')) {
+  if (query.prefersEasyPace) {
     if (tour.leisureLevel === 'easy') {
       score += 10;
       signals.push('行程强度较轻');
@@ -446,7 +474,7 @@ function scoreTour(tour: AiRecommendationCandidate, text: string): AiRecommendat
     }
   }
 
-  if (text.includes('近期') || text.includes('马上') || text.includes('本周')) {
+  if (query.prefersRecentDeparture) {
     score += Math.min(tour.hotDepartureDates?.length ?? 0, 3) * 3;
     if ((tour.hotDepartureDates?.length ?? 0) > 0) {
       signals.push('近期班期较多');
@@ -488,9 +516,9 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
 }
 
 function localRecommendations(tours: AiRecommendationCandidate[], text: string) {
-  const normalizedText = normalizeText(text);
+  const query = buildLocalRecommendationQuery(text);
   const items = tours
-    .map((tour) => scoreTour(tour, normalizedText))
+    .map((tour) => scoreTour(tour, query))
     .filter((item): item is AiRecommendationItem => Boolean(item))
     .sort((a, b) => b.score - a.score)
     .map((item, index) => ({
@@ -2449,6 +2477,14 @@ function emitProgress(
   callback?.(progress);
 }
 
+/**
+ * Yield to the browser's event loop so pending React state updates
+ * (e.g., progress bar text) can paint before heavy synchronous work.
+ */
+function yieldToMain() {
+  return new Promise<void>((resolve) => setTimeout(resolve, 0));
+}
+
 export const __aiRecommendationTestHooks = {
   auditAiRecommendations,
   buildTourPrimitive,
@@ -2721,6 +2757,8 @@ export async function requestAiRecommendations({
       'normalize',
     ),
   });
+
+  await yieldToMain();
 
   const text = getLatestUserText(messages);
   const localIntent = inferLocalIntent(text);
