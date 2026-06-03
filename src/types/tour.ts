@@ -151,6 +151,9 @@ export interface AiWeatherContext {
   destination: string;
   travelDate?: string;
   forecastSummary: string;
+  dateSpecificSummary?: string;
+  weatherWindowLabel?: string;
+  weatherRiskLevel?: 'better' | 'mixed' | 'worse' | 'unknown';
   seasonAdvice: string[];
   inferredFrom?: string[];
   queryReason?: string;

@@ -13,10 +13,10 @@ import type {
 } from '@/types/tour';
 
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
-const MAX_AI_CANDIDATES = 18;
-const MAX_AI_COMMENTARY_ITEMS = 8;
-const MAX_AI_OUTPUT_ITEMS = 12;
-const MAX_DESTINATION_WEATHER_INSIGHTS = 8;
+const MAX_AI_CANDIDATES = 36;
+const MAX_AI_COMMENTARY_ITEMS = 24;
+const MAX_AI_OUTPUT_ITEMS = 24;
+const MAX_DESTINATION_WEATHER_INSIGHTS = 12;
 const ROUTE_ATLAS_MAX_GROUPS = 8;
 const ROUTE_ATLAS_MAX_EXAMPLES = 2;
 const MAX_RECENT_CONVERSATION_MESSAGES = 4;
@@ -205,6 +205,9 @@ const primitiveCache = new WeakMap<AiRecommendationCandidate, RecommendationPrim
 const routeAtlasCache = new WeakMap<AiRecommendationCandidate[], Map<string, RouteAtlas>>();
 const weatherSnapshotCache = new Map<string, Promise<{
   forecastSummary: string;
+  dateSpecificSummary?: string;
+  weatherWindowLabel?: string;
+  weatherRiskLevel?: AiWeatherContext['weatherRiskLevel'];
   source: 'open-meteo' | 'seasonal-rule';
 }>>();
 
@@ -1460,8 +1463,18 @@ function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive) {
       ? `${titleFact}${priceText}，偏${categoryText}`
       : `${titleFact}${priceText}，${primitive.theme || '短途线路'}`;
   const comfortText = getPrimitiveComfortNote(primitive);
+  const weatherAppeal = getPrimitiveWeatherAppeal(primitive);
+  const normalizedComfortCore = comfortText
+    .replace(/^雨天需取舍：/, '')
+    .replace(/^高温天气需取舍：/, '')
+    .replace(/^天气敏感：/, '');
+  const shouldAppendComfort =
+    Boolean(comfortText) &&
+    Boolean(normalizedComfortCore) &&
+    !weatherAppeal.includes(comfortText) &&
+    !weatherAppeal.includes(normalizedComfortCore);
 
-  return `${factText}；${getPrimitiveWeatherAppeal(primitive)}${comfortText ? `（${comfortText}）` : ''}`;
+  return `${factText}；${weatherAppeal}${shouldAppendComfort ? `（${comfortText}）` : ''}`;
 }
 
 function isGenericMatchedSignal(signal: string) {
@@ -1832,12 +1845,14 @@ function buildRecommendationSummary(params: {
   destinationWeatherInsights: DestinationWeatherInsight[];
   intent: AiTravelIntent | null;
 }) {
+  const dateWindowLine = buildDestinationWeatherLine(params.destinationWeatherInsights);
   const topDestinations = buildSummaryTopDestinations(params.items, params.candidateTours);
   const topLine = topDestinations
     ? `这次更适合优先看${topDestinations}这类线路。`
     : '这次会优先保留更稳妥、适配当前条件的线路。';
-  const weatherLead = params.weatherContext.forecastSummary
-    ? `天气上看，${params.weatherContext.forecastSummary.replace(/[。；]+$/u, '')}。`
+  const weatherLeadSource = params.weatherContext.dateSpecificSummary || params.weatherContext.forecastSummary;
+  const weatherLead = weatherLeadSource
+    ? `天气上看，${weatherLeadSource.replace(/[。；]+$/u, '')}。`
     : '';
   const cautionPool = uniqueStrings([
     ...(params.weatherContext.seasonAdvice || []),
@@ -1845,7 +1860,7 @@ function buildRecommendationSummary(params: {
       insight.bestSeasonNote || '',
       ...(insight.seasonAdvice || []),
     ]),
-  ]);
+  ]).filter((text) => !weatherLead.includes(text));
   const cautionLine = cautionPool.find((text) => /(台风|暴雨|强降雨|高温|闷热|风浪|花期|雨季|观赏期|取舍)/.test(text))
     || cautionPool[0]
     || '';
@@ -1859,9 +1874,118 @@ function buildRecommendationSummary(params: {
     ? `排序时我会优先照顾${preferenceBits.join('、')}，把天气更敏感或体验波动更大的线路往后放。`
     : '';
 
-  return [topLine, weatherLead, cautionLine, tradeoffLine]
+  return [topLine, weatherLead, dateWindowLine, cautionLine, tradeoffLine]
     .filter(Boolean)
     .join('');
+}
+
+function buildDestinationWeatherLine(insights: DestinationWeatherInsight[]) {
+  const datedInsights = insights.filter((insight) => insight.travelDate && insight.weatherWindowLabel);
+  if (datedInsights.length === 0) return '';
+
+  const renderWindow = (insight: DestinationWeatherInsight) =>
+    `${insight.weatherWindowLabel || `${formatMonthDay(insight.travelDate)}这班`}的${insight.destination}`;
+  const better = datedInsights.find((insight) => insight.weatherRiskLevel === 'better');
+  const worse = datedInsights.find((insight) =>
+    insight.weatherRiskLevel === 'worse' &&
+    (!better || insight.destination !== better.destination || insight.travelDate !== better.travelDate),
+  );
+  const mixed = datedInsights.find((insight) => insight.weatherRiskLevel === 'mixed');
+
+  if (better && worse) {
+    return `团期天气上，${renderWindow(better)}相对更稳，${renderWindow(worse)}更吃天气。`;
+  }
+  if (better) {
+    return `团期天气上，${renderWindow(better)}相对更稳。`;
+  }
+  if (worse) {
+    return `团期天气上，${renderWindow(worse)}更吃天气。`;
+  }
+  if (mixed) {
+    return `团期天气上，${renderWindow(mixed)}天气波动会更明显。`;
+  }
+  return '';
+}
+
+function isWeatherSensitivePrimitive(primitive: RecommendationPrimitive) {
+  const corpus = [
+    primitive.destination,
+    primitive.theme,
+    primitive.title,
+    ...primitive.semanticAtoms,
+    ...primitive.experienceCategories,
+    ...primitive.seasonalComfortAtoms,
+  ].join(' ');
+  return shouldInspectDestinationWeather(corpus);
+}
+
+function findWeatherInsightForPrimitive(
+  primitive: RecommendationPrimitive,
+  insights: DestinationWeatherInsight[],
+) {
+  const travelDate = getEarliestDate(primitive.schedule.departureDates);
+  const sameDestination = insights.filter((insight) => insight.destination === primitive.destination);
+  if (travelDate) {
+    const exact = sameDestination.find((insight) => insight.travelDate === travelDate);
+    if (exact) return exact;
+  }
+  return sameDestination[0];
+}
+
+function buildWeatherReasonSuffix(
+  primitive: RecommendationPrimitive,
+  insight: DestinationWeatherInsight | undefined,
+) {
+  if (!insight || !insight.dateSpecificSummary || !insight.weatherWindowLabel) return '';
+  const reasonCore = insight.dateSpecificSummary.replace(/[。；]+$/u, '');
+  const label = insight.weatherWindowLabel;
+  const experience = primitive.experienceCategories[0] || primitive.theme || '玩法';
+  if (insight.weatherRiskLevel === 'better') {
+    return `${label}${reasonCore}，这班做${experience}体感会更稳`;
+  }
+  if (insight.weatherRiskLevel === 'worse') {
+    return `${label}${reasonCore}，这班更吃天气，${experience}体验波动会更大`;
+  }
+  if (insight.weatherRiskLevel === 'mixed') {
+    return `${label}${reasonCore}，这班天气有波动，${experience}要留意临场变化`;
+  }
+  return `${label}${reasonCore}`;
+}
+
+function attachWeatherGuidanceToItems(
+  items: AiRecommendationItem[],
+  candidateTours: AiRecommendationCandidate[],
+  destinationWeatherInsights: DestinationWeatherInsight[],
+) {
+  if (destinationWeatherInsights.length === 0) return items;
+  const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
+
+  return items.map((item) => {
+    if (!item.reason) return item;
+    const primitive = primitiveByTourId.get(item.tourId);
+    if (!primitive || !isWeatherSensitivePrimitive(primitive)) return item;
+    const insight = findWeatherInsightForPrimitive(primitive, destinationWeatherInsights);
+    const weatherSuffix = buildWeatherReasonSuffix(primitive, insight);
+    if (!weatherSuffix) return item;
+
+    const reason = item.reason.trim();
+    const normalizedReason = normalizeText(reason);
+    const normalizedSuffix = normalizeText(weatherSuffix);
+    if (
+      normalizedReason.includes(normalizedSuffix) ||
+      (insight?.travelDate && normalizedReason.includes(formatMonthDay(insight.travelDate).toLowerCase())) ||
+      normalizedReason.includes('这班更吃天气') ||
+      normalizedReason.includes('这班做') ||
+      normalizedReason.includes('天气波动会更大')
+    ) {
+      return item;
+    }
+
+    return {
+      ...item,
+      reason: `${reason}。${weatherSuffix}。`,
+    };
+  });
 }
 
 function finalizeRecommendationSummary(params: {
@@ -1888,6 +2012,12 @@ function parseDateString(value: string | null | undefined) {
   if (!value) return null;
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatMonthDay(value: string | null | undefined) {
+  const parsed = value ? new Date(`${value}T00:00:00`) : null;
+  if (!parsed || Number.isNaN(parsed.getTime())) return '';
+  return `${parsed.getMonth() + 1}月${parsed.getDate()}日`;
 }
 
 function formatDateInput(value: Date) {
@@ -2087,6 +2217,7 @@ function buildDestinationWeatherCandidates(
 ) {
   const grouped = new Map<string, {
     destination: string;
+    travelDate?: string;
     score: number;
     evidence: string[];
     corpus: string;
@@ -2106,32 +2237,38 @@ function buildDestinationWeatherCandidates(
       .filter(Boolean)
       .join(' ')
       .toLowerCase();
-    const destination = candidate.routeGroup || candidate.destination;
+    const destination = candidate.destination;
+    const travelDate = getEarliestDate(candidate.schedule.departureDates);
     if (!destination) continue;
+    const candidateKey = `${destination}::${travelDate || 'none'}`;
 
     const relevance = (
       (candidate.matchStatus === 'match' ? 24 : candidate.matchStatus === 'soft_conflict' ? 12 : 4) +
       (candidate.isHot ? 6 : 0) +
       (shouldInspectDestinationWeather(corpus) ? 10 : 0) +
       (intent?.destinationHints?.length && destinationHintsMatchCorpus(intent.destinationHints, `${candidate.destination} ${candidate.title}`) ? 16 : 0) +
-      (searchQuery && corpus.includes(searchQuery.toLowerCase()) ? 8 : 0)
+      (searchQuery && corpus.includes(searchQuery.toLowerCase()) ? 8 : 0) +
+      (travelDate ? 4 : 0)
     );
-    const existing = grouped.get(destination) || {
+    const existing = grouped.get(candidateKey) || {
       destination,
+      travelDate,
       score: 0,
       evidence: [],
       corpus,
     };
 
     existing.score = Math.max(existing.score, relevance);
+    existing.travelDate = existing.travelDate || travelDate;
     existing.corpus = `${existing.corpus} ${corpus}`.slice(0, 300);
     existing.evidence = uniqueStrings([
       ...existing.evidence,
+      travelDate ? `${formatMonthDay(travelDate)}出发` : '',
       candidate.theme,
       ...candidate.tags.slice(0, 2),
       ...candidate.highlights.slice(0, 2),
     ]).slice(0, 6);
-    grouped.set(destination, existing);
+    grouped.set(candidateKey, existing);
   }
 
   return [...grouped.values()]
@@ -2245,6 +2382,9 @@ async function fetchDestinationWeatherInsight(params: {
       destination: params.destination,
       travelDate: params.travelDate,
       forecastSummary: '未匹配到可查询天气的目的地，使用季节和世界知识辅助判断。',
+      dateSpecificSummary: params.travelDate ? `${formatMonthDay(params.travelDate)}暂无可用实况预报，先按季节窗口判断` : undefined,
+      weatherWindowLabel: params.travelDate ? `${formatMonthDay(params.travelDate)}这班` : undefined,
+      weatherRiskLevel: 'unknown',
       seasonAdvice,
       inferredFrom: params.inferredFrom,
       queryReason: params.queryReason,
@@ -2272,15 +2412,33 @@ async function fetchDestinationWeatherInsight(params: {
 
         const data = await response.json();
         const daily = data.daily;
+        const dailyTimes: string[] = daily?.time ?? [];
         const maxTemps: number[] = daily?.temperature_2m_max ?? [];
         const minTemps: number[] = daily?.temperature_2m_min ?? [];
         const rainProbs: number[] = daily?.precipitation_probability_max ?? [];
         const maxTemp = Math.round(Math.max(...maxTemps));
         const minTemp = Math.round(Math.min(...minTemps));
         const maxRain = Math.round(Math.max(...rainProbs));
+        const targetIndex = params.travelDate ? dailyTimes.indexOf(params.travelDate) : -1;
+        const dayMaxTemp = targetIndex >= 0 ? Math.round(maxTemps[targetIndex] ?? maxTemp) : undefined;
+        const dayMinTemp = targetIndex >= 0 ? Math.round(minTemps[targetIndex] ?? minTemp) : undefined;
+        const dayRain = targetIndex >= 0 ? Math.round(rainProbs[targetIndex] ?? maxRain) : undefined;
+        const weatherRiskLevel: AiWeatherContext['weatherRiskLevel'] =
+          typeof dayRain === 'number' || typeof dayMaxTemp === 'number'
+            ? (Number(dayRain ?? 0) >= 70 || Number(dayMaxTemp ?? 0) >= 35
+                ? 'worse'
+                : Number(dayRain ?? 0) >= 40 || Number(dayMaxTemp ?? 0) >= 32
+                  ? 'mixed'
+                  : 'better')
+            : 'unknown';
 
         return {
           forecastSummary: `${params.destination}未来7天约 ${minTemp}-${maxTemp}℃，最高降水概率约 ${maxRain}%。`,
+          dateSpecificSummary: params.travelDate && targetIndex >= 0
+            ? `${formatMonthDay(params.travelDate)}预计 ${dayMinTemp}-${dayMaxTemp}℃，降雨概率约 ${dayRain}%`
+            : undefined,
+          weatherWindowLabel: params.travelDate ? `${formatMonthDay(params.travelDate)}这班` : undefined,
+          weatherRiskLevel,
           source: 'open-meteo' as const,
         };
       })().catch((error) => {
@@ -2297,6 +2455,9 @@ async function fetchDestinationWeatherInsight(params: {
       destination: params.destination,
       travelDate: params.travelDate,
       forecastSummary: weatherSnapshot.forecastSummary,
+      dateSpecificSummary: weatherSnapshot.dateSpecificSummary,
+      weatherWindowLabel: weatherSnapshot.weatherWindowLabel,
+      weatherRiskLevel: weatherSnapshot.weatherRiskLevel,
       seasonAdvice,
       inferredFrom: params.inferredFrom,
       queryReason: params.queryReason,
@@ -2309,6 +2470,9 @@ async function fetchDestinationWeatherInsight(params: {
       destination: params.destination,
       travelDate: params.travelDate,
       forecastSummary: '天气接口暂时不可用，使用季节和世界知识辅助判断。',
+      dateSpecificSummary: params.travelDate ? `${formatMonthDay(params.travelDate)}天气接口暂不可用，先按季节窗口判断` : undefined,
+      weatherWindowLabel: params.travelDate ? `${formatMonthDay(params.travelDate)}这班` : undefined,
+      weatherRiskLevel: 'unknown',
       seasonAdvice,
       inferredFrom: params.inferredFrom,
       queryReason: params.queryReason,
@@ -2944,7 +3108,7 @@ export async function requestAiRecommendations({
         destinationWeatherCandidates.map((candidate) =>
           fetchDestinationWeatherInsight({
             destination: candidate.destination,
-            travelDate: weatherContext.travelDate,
+            travelDate: candidate.travelDate || weatherContext.travelDate,
             inferredFrom: ['候选目的地补充查询'],
             role: 'destination',
             queryReason: `该目的地天气和观赏期可能显著影响体验：${candidate.evidence.join(' / ')}`,
@@ -3013,7 +3177,11 @@ export async function requestAiRecommendations({
       throw new Error('AI returned no valid tour ids');
     }
 
-    const mergedItems = mergeAiAndLocalRecommendations(aiItems, compactedLocalItems);
+    const mergedItems = attachWeatherGuidanceToItems(
+      mergeAiAndLocalRecommendations(aiItems, compactedLocalItems),
+      compactedCandidateTours,
+      destinationWeatherInsights,
+    );
     emitProgress(onProgress, {
       stage: 'completed',
       label: '推荐结果已生成',

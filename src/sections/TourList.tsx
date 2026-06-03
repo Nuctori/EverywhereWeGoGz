@@ -487,7 +487,7 @@ export function TourList({ searchQuery }: TourListProps) {
       new Map(
         aiRecommendationResult?.items.map((item, index) => [
           item.tourId,
-          { ...item, rank: item.reason ? index + 1 : undefined },
+          { ...item, rank: index + 1 },
         ]) ?? [],
       ),
     [aiRecommendationResult],
