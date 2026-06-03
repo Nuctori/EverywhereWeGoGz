@@ -20,6 +20,7 @@ const MAX_DESTINATION_WEATHER_INSIGHTS = 6;
 const ROUTE_ATLAS_MAX_GROUPS = 8;
 const ROUTE_ATLAS_MAX_EXAMPLES = 2;
 const MAX_RECENT_CONVERSATION_MESSAGES = 4;
+const AI_CACHE_PROMPT_VERSION = '2026-06-04-prefix-v2';
 const DEFAULT_DEPARTURE_CITY = '广州';
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
@@ -49,6 +50,8 @@ interface AiTravelIntent {
   mustHave?: string[];
   avoid?: string[];
   weatherSensitivity?: string[];
+  semanticFocus?: string[];
+  nearestAlternativeOkay?: boolean | null;
   budgetPriority?: 'low' | 'balanced' | 'premium' | null;
   refinementMode?: 'new_search' | 'refine_previous' | 'broaden' | 'replace_destination' | null;
   confidence?: number;
@@ -58,6 +61,7 @@ interface RecommendationContext {
   budgetPriority?: AiTravelIntent['budgetPriority'];
   weatherSensitivity?: string[];
   weatherContext?: AiWeatherContext;
+  intent?: AiTravelIntent | null;
 }
 
 interface RecommendationCopyProfile {
@@ -222,6 +226,7 @@ type RecommendationAuditContext = ReturnType<typeof buildRecommendationAuditCont
 const searchCorpusCache = new WeakMap<AiRecommendationCandidate, string>();
 const atlasRegionsCache = new WeakMap<AiRecommendationCandidate, string[]>();
 const primitiveCache = new WeakMap<AiRecommendationCandidate, RecommendationPrimitive>();
+const normalizedTourCache = new WeakMap<AiRecommendationCandidate, AiRecommendationCandidate>();
 const routeAtlasCache = new WeakMap<AiRecommendationCandidate[], Map<string, RouteAtlas>>();
 const weatherSnapshotCache = new Map<string, Promise<{
   forecastSummary: string;
@@ -239,6 +244,156 @@ function percentile(sortedValues: number[], ratio: number) {
 
 function normalizeText(value: string) {
   return value.trim().toLowerCase();
+}
+
+
+function compactPreferenceMemoryForPrompt(memory: AiPreferenceMemory | null) {
+  if (!memory) return null;
+
+  return {
+    d: memory.destinationHints,
+    ts: memory.travelStyle,
+    mh: memory.mustHave,
+    av: memory.avoid,
+    ws: memory.weatherSensitivity,
+    sf: memory.semanticFocus || [],
+    na: memory.nearestAlternativeOkay ?? null,
+    b0: memory.budgetMin ?? null,
+    b1: memory.budgetMax ?? null,
+    bp: memory.budgetPriority ?? null,
+    td: memory.tripDays ?? null,
+    t0: memory.tripDaysMin ?? null,
+    t1: memory.tripDaysMax ?? null,
+    dd: memory.departureWithinDays ?? null,
+    dw: memory.departureWeekdays,
+    dt: memory.departureTimeOfDay ?? null,
+    rm: memory.refinementMode ?? null,
+  };
+}
+
+function compactIntentForPrompt(intent: AiTravelIntent | null) {
+  if (!intent) return null;
+
+  return {
+    td: intent.tripDays ?? null,
+    t0: intent.tripDaysMin ?? null,
+    t1: intent.tripDaysMax ?? null,
+    dd: intent.departureWithinDays ?? null,
+    dw: intent.departureWeekdays || [],
+    dt: intent.departureTimeOfDay ?? null,
+    d: intent.destinationHints || [],
+    b0: intent.budgetMin ?? null,
+    b1: intent.budgetMax ?? null,
+    ts: intent.travelStyle || [],
+    mh: intent.mustHave || [],
+    av: intent.avoid || [],
+    ws: intent.weatherSensitivity || [],
+    sf: intent.semanticFocus || [],
+    na: intent.nearestAlternativeOkay ?? null,
+    bp: intent.budgetPriority ?? null,
+    rm: intent.refinementMode ?? null,
+    cf: intent.confidence ?? null,
+  };
+}
+
+function compactWeatherContextForPrompt(context: AiWeatherContext) {
+  return {
+    d: context.destination,
+    td: context.travelDate || '',
+    fs: context.forecastSummary,
+    ds: context.dateSpecificSummary || '',
+    wl: context.weatherWindowLabel || '',
+    rl: context.weatherRiskLevel || '',
+    sa: context.seasonAdvice,
+    if: context.inferredFrom || [],
+    qr: context.queryReason || '',
+    bs: context.bestSeasonNote || '',
+    ro: context.role || '',
+    so: context.source,
+  };
+}
+
+function compactDestinationWeatherInsightsForPrompt(insights: DestinationWeatherInsight[]) {
+  return insights.map((insight) => compactWeatherContextForPrompt(insight));
+}
+
+function compactRouteAtlasForPrompt(routeAtlas: RouteAtlas) {
+  return routeAtlas.map((group) => ({
+    r: group.region,
+    t: group.theme,
+    c: group.count,
+    pr: group.priceRange,
+    dr: group.dayRange,
+    k: group.keywords,
+    ex: group.examples.map((example) => [
+      example.id,
+      example.title,
+      example.price,
+      example.days,
+      example.destination,
+      example.atoms,
+    ]),
+  }));
+}
+
+function compactAuditContextForPrompt(context: RecommendationAuditContext) {
+  const compact = compactRecommendationAuditContext(context);
+  return {
+    ps: compact.previousSummary,
+    pt: compact.previousTopResultSnapshot,
+    ep: compact.effectivePoolSnapshot,
+    br: compact.businessRules,
+  };
+}
+
+function compactCandidatesForPrompt(candidates: ReturnType<typeof compactCandidates>) {
+  return candidates.map((candidate) => [
+    candidate.id,
+    candidate.title,
+    candidate.destination,
+    candidate.tripDays,
+    candidate.price,
+    candidate.theme,
+    candidate.source,
+    candidate.transportType,
+    candidate.accommodationLevel,
+    candidate.meals,
+    candidate.leisureLevel,
+    candidate.rating,
+    candidate.groupSize,
+    candidate.isHot ? 1 : 0,
+    candidate.matchStatus,
+    candidate.routeGroup,
+    candidate.schedule.departureDates.slice(0, 4),
+    candidate.schedule.departureWeekdays.slice(0, 4),
+    candidate.schedule.timeOfDayHints.slice(0, 2),
+    candidate.schedule.hasEveningOrNightDeparture ? 1 : 0,
+    candidate.priceContext.poolPercentile ?? null,
+    candidate.priceContext.pricePerDay ?? null,
+    candidate.tags.slice(0, 4),
+    candidate.highlights.slice(0, 3),
+    candidate.semanticAtoms.slice(0, 6),
+    candidate.experienceCategories.slice(0, 4),
+    candidate.seasonalComfortAtoms.slice(0, 4),
+    candidate.suitableFor.slice(0, 3),
+    candidate.conflictReasons.slice(0, 3),
+  ]);
+}
+
+function buildStablePromptPrefix(params: {
+  candidates: ReturnType<typeof compactCandidates>;
+  routeAtlas: RouteAtlas;
+}) {
+  return {
+    v: AI_CACHE_PROMPT_VERSION,
+    ck: [
+      'id', 'title', 'destination', 'days', 'price', 'theme', 'source', 'transport', 'stay', 'meals',
+      'pace', 'rating', 'group', 'hot', 'match', 'routeGroup', 'dates', 'weekdays', 'timeHints', 'night',
+      'pricePct', 'pricePerDay', 'tags', 'highlights', 'atoms', 'cats', 'seasonAtoms', 'fit', 'conflicts',
+    ],
+    candidates: compactCandidatesForPrompt(params.candidates),
+    routeAtlas: compactRouteAtlasForPrompt(params.routeAtlas),
+  };
 }
 
 function getLatestUserText(messages: AiRecommendationMessage[]) {
@@ -535,7 +690,8 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
           )
         : undefined,
       matchedSignals: tour.isHot ? ['热门线路'] : ['综合排序靠前'],
-    }));
+    }))
+    .slice(0, MAX_AI_OUTPUT_ITEMS);
 }
 
 function localRecommendations(tours: AiRecommendationCandidate[], text: string) {
@@ -547,7 +703,8 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
     .map((item, index) => ({
       ...item,
       reason: index < MAX_AI_COMMENTARY_ITEMS ? item.reason : undefined,
-    }));
+    }))
+    .slice(0, MAX_AI_OUTPUT_ITEMS);
 
   return items.length > 0 ? items : fallbackRecommendations(tours);
 }
@@ -560,6 +717,7 @@ function buildLocalRecommendationText(
     ...(preferenceMemory?.destinationHints || []),
     ...(preferenceMemory?.travelStyle || []),
     ...(preferenceMemory?.mustHave || []),
+    ...(preferenceMemory?.semanticFocus || []),
     ...(preferenceMemory?.avoid || []).map((term) => `避开${term}`),
     ...(preferenceMemory?.weatherSensitivity || []),
     preferenceMemory?.budgetMax ? `${preferenceMemory.budgetMax}元以内` : '',
@@ -615,6 +773,7 @@ function getIntentSemanticTerms(intent: AiTravelIntent | null) {
   return uniqueStrings([
     ...(intent.travelStyle || []),
     ...(intent.mustHave || []),
+    ...(intent.semanticFocus || []),
     ...(intent.destinationHints || []),
   ]).filter((term) => term.length >= 2 && term.length <= 16);
 }
@@ -736,6 +895,9 @@ function buildIntentLocalRecommendations(
   tours: AiRecommendationCandidate[],
   intent: AiTravelIntent | null,
 ): AiRecommendationItem[] {
+  // 经验：本地意图排序只做硬约束、预算带、班期和显式避开项这类可审计信号。
+  // 像公益/研学/住好一点/更像上一轮需求/海边但怕风浪这类软语义，交给模型结合
+  // semanticFocus、上下文和候选原语去理解；不要继续在这里长出新的软语义规则器。
   if (!intent) return [];
   const allTerms = getIntentSemanticTerms(intent);
   const poolMatchedTerms = new Set(
@@ -906,31 +1068,23 @@ function mergeAiAndLocalRecommendations(
   aiItems: AiRecommendationItem[],
   localItems: AiRecommendationItem[],
 ): AiRecommendationItem[] {
+  // 经验：合并阶段保持 AI 排序主导，只拿本地结果做补位。
+  // 如果这里让本地分数反向覆盖 AI，规则器和智能会互相打架，复杂软语义会被拉回低价/热门启发式。
   const seenTourIds = new Set<string>();
-  const merged: AiRecommendationItem[] = [];
-  const localMetaByTourId = new Map(localItems.map((item, index) => [
-    item.tourId,
-    {
-      rank: index,
-      score: item.score,
-    },
-  ]));
-
-  for (const item of [...aiItems, ...localItems]) {
-    if (seenTourIds.has(item.tourId)) continue;
+  const primaryAiItems = [...aiItems]
+    .sort((a, b) => b.score - a.score)
+    .filter((item) => {
+      if (seenTourIds.has(item.tourId)) return false;
+      seenTourIds.add(item.tourId);
+      return true;
+    });
+  const supplementalLocalItems = localItems.filter((item) => {
+    if (seenTourIds.has(item.tourId)) return false;
     seenTourIds.add(item.tourId);
-    merged.push(item);
-  }
-
-  const reranked = merged.sort((a, b) => {
-    const aLocal = localMetaByTourId.get(a.tourId);
-    const bLocal = localMetaByTourId.get(b.tourId);
-    const aDisplayScore = a.score + (aLocal ? Math.max(0, 240 - aLocal.rank * 12) + aLocal.score * 1.4 : 0);
-    const bDisplayScore = b.score + (bLocal ? Math.max(0, 240 - bLocal.rank * 12) + bLocal.score * 1.4 : 0);
-    return bDisplayScore - aDisplayScore;
+    return true;
   });
 
-  return limitRecommendationCommentary(reranked).slice(0, MAX_AI_OUTPUT_ITEMS);
+  return limitRecommendationCommentary([...primaryAiItems, ...supplementalLocalItems]).slice(0, MAX_AI_OUTPUT_ITEMS);
 }
 
 function uniqueStrings(values: Array<string | undefined | null>) {
@@ -980,11 +1134,16 @@ function mergePreferenceMemory(
       ...(previous?.mustHave || []),
       ...(intent?.mustHave || []),
     ]).slice(-16),
+    semanticFocus: uniqueStrings([
+      ...(previous?.semanticFocus || []),
+      ...(intent?.semanticFocus || []),
+    ]).slice(-16),
     avoid: mergedAvoid.slice(-16),
     weatherSensitivity: uniqueStrings([
       ...(previous?.weatherSensitivity || []),
       ...(intent?.weatherSensitivity || []),
     ]).slice(-12),
+    nearestAlternativeOkay: intent?.nearestAlternativeOkay ?? previous?.nearestAlternativeOkay ?? null,
     budgetMin: intent?.budgetMin ?? previous?.budgetMin ?? null,
     budgetMax: intent?.budgetMax ?? previous?.budgetMax ?? null,
     budgetPriority: intent?.budgetPriority ?? previous?.budgetPriority ?? null,
@@ -1003,17 +1162,50 @@ function mergePreferenceMemory(
 }
 
 function getDepartureDates(tour: AiRecommendationCandidate) {
-  const today = getTodayInputValue();
-  const uniqueDates = [
+  return [
     ...(tour.departureDates || []),
     ...(tour.hotDepartureDates || []),
     tour.departureDate,
   ]
     .filter(Boolean)
     .filter((date, index, all) => all.indexOf(date) === index);
+}
 
-  const upcomingDates = uniqueDates.filter((date) => date >= today);
-  return upcomingDates.length > 0 ? upcomingDates : uniqueDates;
+function normalizeCandidateTour(tour: AiRecommendationCandidate): AiRecommendationCandidate {
+  const cached = normalizedTourCache.get(tour);
+  if (cached) return cached;
+
+  const normalizedDates = getCandidateDepartureDates(tour);
+  const upcomingDepartureDate = normalizedDates[0];
+  const normalized = upcomingDepartureDate && upcomingDepartureDate !== tour.departureDate
+    ? {
+        ...tour,
+        departureDate: upcomingDepartureDate,
+      }
+    : tour;
+  normalizedTourCache.set(tour, normalized);
+  return normalized;
+}
+
+function padRecommendationItems(
+  items: AiRecommendationItem[],
+  fallbackPool: AiRecommendationItem[],
+) {
+  if (items.length >= MAX_AI_OUTPUT_ITEMS) {
+    return limitRecommendationCommentary(items).slice(0, MAX_AI_OUTPUT_ITEMS);
+  }
+
+  const seenTourIds = new Set(items.map((item) => item.tourId));
+  const padded = [...items];
+
+  for (const item of fallbackPool) {
+    if (seenTourIds.has(item.tourId)) continue;
+    seenTourIds.add(item.tourId);
+    padded.push(item);
+    if (padded.length >= MAX_AI_OUTPUT_ITEMS) break;
+  }
+
+  return limitRecommendationCommentary(padded).slice(0, MAX_AI_OUTPUT_ITEMS);
 }
 
 function getWeekday(date: string) {
@@ -1216,7 +1408,7 @@ function buildLocalTourReason(tour: AiRecommendationCandidate, signals: string[]
 
 function inferScheduleHints(tour: AiRecommendationCandidate) {
   const corpus = getSearchCorpus(tour);
-  const dates = getDepartureDates(tour);
+  const dates = getCandidateDepartureDates(tour);
   const weekdays = dates
     .map(getWeekday)
     .filter((day): day is number => day !== null);
@@ -1643,16 +1835,35 @@ function rankPrimitive(
     : context?.budgetPriority === 'premium'
       ? Math.max(0, 12 - Math.min(primitive.price / 1000, 12))
       : Math.min(primitive.price / 1000, 12);
+  const conflictPenalty = context?.intent
+    ? getConflictSeverity(getPrimitiveConflictReasons(context.intent, primitive)) * 1.6
+    : 0;
+  const underBudgetPenalty = context?.intent
+    ? getUnderBudgetBandPenalty(primitive, context.intent) * 1.35
+    : 0;
+  const nearestDeparture = primitive.schedule.departureDates[0];
+  const todayTimestamp = parseDateString(getTodayInputValue())?.getTime() ?? 0;
+  const nearestDepartureTimestamp = parseDateString(nearestDeparture)?.getTime() ?? 0;
+  const departureLeadDays = nearestDeparture
+    ? Math.max(0, Math.floor((nearestDepartureTimestamp - todayTimestamp) / 86400000))
+    : null;
+  const hasFutureDeparture = primitive.schedule.departureDates.length > 0;
+  const departureBonus = hasFutureDeparture && nearestDeparture
+    ? Math.max(0, 18 - (departureLeadDays ?? 0))
+    : -36;
 
   return (
     localRankBoost +
     (primitive.isHot ? 16 : 0) +
     Math.min(primitive.schedule.departureDates.length, 6) * 3 +
     (primitive.schedule.hasRecurringScheduleText ? 5 : 0) +
+    departureBonus +
     getWeatherSuitabilityScore(primitive, context) +
     (isLikelyAiNonTour(primitive) ? -180 : 0) +
     (primitive.rating || 0) * 2 -
-    pricePenalty
+    pricePenalty -
+    underBudgetPenalty -
+    conflictPenalty
   );
 }
 
@@ -2010,28 +2221,49 @@ function readStoredAiConfig(): StoredAiProviderConfig {
   }
 }
 
+function readRuntimeEnv(name: string) {
+  const viteValue =
+    typeof import.meta !== 'undefined' &&
+    typeof import.meta.env === 'object' &&
+    import.meta.env !== null
+      ? (import.meta.env as Record<string, unknown>)[name]
+      : undefined;
+  if (typeof viteValue === 'string' && viteValue.trim()) return viteValue.trim();
+
+  const runtimeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
+  const processValue = runtimeProcess?.env?.[name];
+  return typeof processValue === 'string' ? processValue.trim() : '';
+}
+
 function decodeDefaultApiKey(encoded: string | undefined) {
   if (!encoded) return '';
 
   try {
-    return typeof window !== 'undefined' && typeof window.atob === 'function'
-      ? window.atob(encoded)
-      : '';
+    if (typeof window !== 'undefined' && typeof window.atob === 'function') {
+      return window.atob(encoded);
+    }
+
+    const runtimeBuffer = (globalThis as {
+      Buffer?: {
+        from: (value: string, encoding: string) => { toString: (encoding: string) => string };
+      };
+    }).Buffer;
+    return runtimeBuffer ? runtimeBuffer.from(encoded, 'base64').toString('utf8') : '';
   } catch {
     return '';
   }
 }
 
 function getDefaultApiKey() {
-  return decodeDefaultApiKey(import.meta.env.VITE_AI_DEFAULT_API_KEY_B64) || import.meta.env.VITE_AI_DEFAULT_API_KEY || '';
+  return decodeDefaultApiKey(readRuntimeEnv('VITE_AI_DEFAULT_API_KEY_B64')) || readRuntimeEnv('VITE_AI_DEFAULT_API_KEY') || '';
 }
 
 export function getAiProviderConfig(): StoredAiProviderConfig {
   const stored = readStoredAiConfig();
   return {
     apiKey: stored.apiKey || getDefaultApiKey(),
-    baseUrl: stored.baseUrl || import.meta.env.VITE_AI_DEFAULT_BASE_URL || '',
-    model: stored.model || import.meta.env.VITE_AI_DEFAULT_MODEL || '',
+    baseUrl: stored.baseUrl || readRuntimeEnv('VITE_AI_DEFAULT_BASE_URL') || '',
+    model: stored.model || readRuntimeEnv('VITE_AI_DEFAULT_MODEL') || '',
   };
 }
 
@@ -2065,12 +2297,12 @@ function getResolvedAiConfig(override?: Partial<AiProviderConfig>): AiProviderCo
     baseUrl:
       override?.baseUrl ||
       stored.baseUrl ||
-      import.meta.env.VITE_AI_DEFAULT_BASE_URL ||
+      readRuntimeEnv('VITE_AI_DEFAULT_BASE_URL') ||
       '',
     model:
       override?.model ||
       stored.model ||
-      import.meta.env.VITE_AI_DEFAULT_MODEL ||
+      readRuntimeEnv('VITE_AI_DEFAULT_MODEL') ||
       '',
   };
 
@@ -2228,6 +2460,34 @@ function stripTerminalPunctuation(text: string) {
   return text.replace(/[。；，,\s]+$/u, '').trim();
 }
 
+function isUnhelpfulWeatherNarration(text: string | null | undefined) {
+  const normalized = stripTerminalPunctuation(text || '');
+  if (!normalized) return true;
+
+  return /(未匹配到可查询天气的目的地|暂无可用实况预报|暂无实况预报|天气接口暂时不可用|天气接口暂不可用|本次未请求天气调研|没有拿到强结论天气窗口|先按季节窗口判断)/.test(normalized);
+}
+
+function getRenderableWeatherLead(
+  weatherContext: AiWeatherContext,
+  destinationWeatherInsights: DestinationWeatherInsight[],
+) {
+  const dateWindowLine = buildDestinationWeatherLine(destinationWeatherInsights);
+  if (!isUnhelpfulWeatherNarration(dateWindowLine)) {
+    return stripTerminalPunctuation(dateWindowLine);
+  }
+
+  const directLead = stripTerminalPunctuation(weatherContext.dateSpecificSummary || weatherContext.forecastSummary || '');
+  if (!isUnhelpfulWeatherNarration(directLead)) {
+    return directLead;
+  }
+
+  return '';
+}
+
+function getFallbackWeatherSummary(seasonAdvice: string[], bestSeasonNote?: string | null) {
+  return stripTerminalPunctuation(bestSeasonNote || seasonAdvice[0] || '结合当地季节体感和玩法稳定性判断');
+}
+
 function buildSummaryPreferenceText(intent: AiTravelIntent | null) {
   const bits = uniqueStrings([
     intent?.tripDays ? `${intent.tripDays}天` : '',
@@ -2258,19 +2518,17 @@ function buildRecommendationSummary(params: {
   const topLine = topDestinations
     ? `推荐方向：这次优先看${topDestinations}这类线路，排序先按${buildSummaryPreferenceText(params.intent)}去保留更稳的结果。`
     : `推荐方向：这次先按${buildSummaryPreferenceText(params.intent)}保留更稳妥、适配当前条件的线路。`;
-  const weatherLeadSource = params.weatherContext.dateSpecificSummary || params.weatherContext.forecastSummary;
-  const dateWindowLine = buildDestinationWeatherLine(params.destinationWeatherInsights);
-  const normalizedWeatherLead = stripTerminalPunctuation(dateWindowLine || weatherLeadSource || '');
+  const normalizedWeatherLead = getRenderableWeatherLead(params.weatherContext, params.destinationWeatherInsights);
   const weatherLead = normalizedWeatherLead
     ? `天气判断：${normalizedWeatherLead}。`
-    : '天气判断：这次没有拿到强结论天气窗口，先按季节体感和线路稳定性排序。';
+    : '';
   const cautionPool = uniqueStrings([
     ...(params.weatherContext.seasonAdvice || []),
     ...params.destinationWeatherInsights.flatMap((insight) => [
       insight.bestSeasonNote || '',
       ...(insight.seasonAdvice || []),
     ]),
-  ]).filter((text) => !weatherLead.includes(text));
+  ]).filter((text) => !weatherLead.includes(text) && !isUnhelpfulWeatherNarration(text));
   const cautionLine = cautionPool.find((text) => /(台风|暴雨|强降雨|高温|闷热|风浪|花期|雨季|观赏期|取舍)/.test(text))
     || cautionPool[0]
     || (profile.wantsBeach
@@ -2284,7 +2542,7 @@ function buildRecommendationSummary(params: {
     topLine,
     weatherLead,
     `注意：${caution}。`,
-  ].join('');
+  ].filter(Boolean).join('');
 }
 
 function buildDestinationWeatherLine(insights: DestinationWeatherInsight[]) {
@@ -2350,7 +2608,7 @@ function buildWeatherReasonSentence(
     return `${dayLabel}预计${core}。`;
   }
 
-  return `${dayLabel}暂无实况预报，先按当地季节窗口判断，建议把它当次选。`;
+  return '';
 }
 
 function isWeatherSensitivePrimitive(primitive: RecommendationPrimitive) {
@@ -2405,7 +2663,8 @@ function rewriteRecommendationCopy(params: {
       currentReason &&
       reasonMentionsCandidateFact(currentReason, primitive) &&
       !isGenericReason(currentReason) &&
-      hasEnoughReasonSpecificity(currentReason)
+      hasEnoughReasonSpecificity(currentReason) &&
+      shouldUseAiSummary(currentReason, params.weatherContext)
     ) {
       return {
         ...item,
@@ -2513,7 +2772,10 @@ function formatMonthDay(value: string | null | undefined) {
 }
 
 function formatDateInput(value: Date) {
-  return value.toISOString().slice(0, 10);
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function getTodayInputValue() {
@@ -2549,6 +2811,19 @@ function getCandidateDepartureDates(tour: AiRecommendationCandidate) {
     .filter(Boolean)
     .filter((date) => date >= today)
     .sort();
+}
+
+function filterPastOnlyCandidatesWhenFutureExists(tours: AiRecommendationCandidate[]) {
+  const hasUpcomingPool = tours.some((tour) => getCandidateDepartureDates(tour).length > 0);
+  if (!hasUpcomingPool) return tours;
+
+  const filtered = tours.filter((tour) => {
+    const allDates = getDepartureDates(tour);
+    if (allDates.length === 0) return true;
+    return getCandidateDepartureDates(tour).length > 0;
+  });
+
+  return filtered.length > 0 ? filtered : tours;
 }
 
 function matchesDateWindow(tour: AiRecommendationCandidate, dateWindow: { start: string; end: string } | null) {
@@ -2661,11 +2936,8 @@ function resolveWeatherContext(params: {
         params.activeFilters.departureDate,
         params.activeFilters.departureDateEnd,
       ]) ||
-      getEarliestDate(params.tours.flatMap((tour) => [
-        tour.departureDate,
-        ...(tour.departureDates || []),
-        ...(tour.hotDepartureDates || []),
-      ])) ||
+      getEarliestDate(params.tours.flatMap((tour) => getCandidateDepartureDates(tour))) ||
+      getEarliestDate(params.tours.flatMap((tour) => getDepartureDates(tour))) ||
       getLikelyTravelDate(params.text, params.tours);
 
     if (travelDate) {
@@ -2830,7 +3102,7 @@ function shouldUseWeatherResearch(text: string, intent: AiTravelIntent | null) {
 function buildNoWeatherContext(): AiWeatherContext {
   return {
     destination: DEFAULT_DEPARTURE_CITY,
-    forecastSummary: '本次未请求天气调研，推荐主要依据预算、时间、目的地和线路约束。',
+    forecastSummary: '',
     seasonAdvice: [],
     inferredFrom: [],
     role: 'departure',
@@ -2907,8 +3179,8 @@ async function fetchDestinationWeatherInsight(params: {
     return {
       destination: params.destination,
       travelDate: params.travelDate,
-      forecastSummary: '未匹配到可查询天气的目的地，使用季节和世界知识辅助判断。',
-      dateSpecificSummary: params.travelDate ? `${formatMonthDay(params.travelDate)}暂无可用实况预报，先按季节窗口判断` : undefined,
+      forecastSummary: getFallbackWeatherSummary(seasonAdvice, bestSeasonNote),
+      dateSpecificSummary: undefined,
       weatherWindowLabel: params.travelDate ? `${formatMonthDay(params.travelDate)}这班` : undefined,
       weatherRiskLevel: 'unknown',
       seasonAdvice,
@@ -2995,8 +3267,8 @@ async function fetchDestinationWeatherInsight(params: {
     return {
       destination: params.destination,
       travelDate: params.travelDate,
-      forecastSummary: '天气接口暂时不可用，使用季节和世界知识辅助判断。',
-      dateSpecificSummary: params.travelDate ? `${formatMonthDay(params.travelDate)}天气接口暂不可用，先按季节窗口判断` : undefined,
+      forecastSummary: getFallbackWeatherSummary(seasonAdvice, bestSeasonNote),
+      dateSpecificSummary: undefined,
       weatherWindowLabel: params.travelDate ? `${formatMonthDay(params.travelDate)}这班` : undefined,
       weatherRiskLevel: 'unknown',
       seasonAdvice,
@@ -3022,72 +3294,65 @@ function buildAiMessages(params: {
   preferenceMemory: AiPreferenceMemory | null;
 }) {
   const intentCoverage = analyzeIntentCoverage(params.candidates, params.intent);
+  // 经验：想让 provider cache 命中，关键不是少输出，而是让大块静态上下文稳定。
+  // 所以这里把“稳定规则”和“稳定候选上下文”拆成独立 system message，动态请求只保留本轮变化部分。
   const systemPrompt = [
-    '你是旅行团推荐顾问，需要根据用户需求、天气、季节、目的地常识和给定旅行团候选列表推荐线路。',
-    '只能推荐候选列表中真实存在的 tourId，不允许编造线路、价格、班期或服务。',
-    'candidateTours 是压缩后的 API 推荐原语：schedule、tripDays、price、destination、theme、tags、highlights、semanticAtoms、experienceCategories、seasonalComfortAtoms、leisureLevel、routeGroup、matchStatus、conflictReasons 和 priceContext 都是判断依据。',
-    '本地只负责提供原语、候选边界和硬约束审计；语义取舍由你结合用户需求、天气和线路原语完成。',
-    '你必须理解推荐器的能力边界：candidateTours 代表当前可落地的产品池。用户需求里超出候选池显式承接范围的部分，可以用世界知识判断最接近的替代方向，但必须明确说这是“最接近的替代”，不能假装候选池已经精准满足。',
-    'candidateTours 里的 matchStatus=match 表示完全匹配；soft_conflict/fallback 带有 conflictReasons，只能在没有足够 match 或需要说明取舍时靠后使用。',
-    'routeAtlas 是全站线路地图，用来理解哪些区域/主题通常有哪些天数和价格；但最终 items 仍只能来自 candidateTours。',
-    'auditContext 提供上一轮推荐摘要、有效候选池价格分布和业务知识；处理“便宜点、轻松点、再近点”等短句时，必须结合 auditContext 和 preferenceMemory 继承上下文。',
-    '如果用户说“2000以内/3000以内”这类预算上限，默认理解成“不要超过上限，但预算带附近通常比极低价更贴需求”；除非用户明确追求最低价，否则不要把 29 元、299 元这类明显远低于预算带的超低价线路排在更合适的 1200-2000 元线路前面。',
-    '如果 interpretedIntent.departureWithinDays 已给出，并且候选池里存在对应未来班期，优先使用这些未来班期；不要为了凑结果把已经过期或明显不在窗口内的旧班期排到前面。',
-    '如果用户需求与全站线路地图明显冲突，例如预算或天数不现实，请在 summary 里说明取舍，并推荐最接近的真实候选。',
-    '例如用户说“周五晚上出发的3日游”，应理解为 departureWeekdays 包含 5、hasEveningOrNightDeparture 为 true、tripDays 为 3。',
-    '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选列表和推荐原语，尤其要结合 experienceCategories 与 seasonalComfortAtoms 判断夏季闷热、暴雨或高温下的取舍。',
-    '如果用户提到老人、儿童、轻松、怕累，应降低高强度、长途奔波和极端天气目的地优先级。',
-    '如果天气或季节不适合，要在理由中说明风险，并优先推荐更稳妥的候选。',
-    '每条 reason 必须引用 1-2 个 candidateTours 中存在的具体 semanticAtoms、highlights 或 title 事实，再说明它为什么适合本次需求；不要只写“价格低、班期多、性价比高、行程轻松”。',
-    'summary 不要只给结论，至少要交代推荐方向、当前天气/季节判断，以及用户下单前最该注意的一件事。',
-    '如果两个目的地玩法相近，但天气、花期、雨季、台风或风浪风险明显不同，可以明确说明“为什么这次推 A、不推 B”。',
-    '当用户明确否定某类体验时，summary 和 reason 都不要把该体验包装成推荐点；如果候选池缺少替代品，应直接说明候选受限，而不是继续正向推荐被否定主题。',
-    'summary 必须优先反映 weatherContext 的真实结论；如果已出现高温、闷热、暴雨或台风风险，不要再写成“春季踏青”这类泛化判断。',
-    'weatherContext.destination、travelDate 和 inferredFrom 是从当前提问、近几轮对话、搜索词、筛选器、偏好记忆和候选线路池综合推断出的上下文；回答天气和季节时优先依赖这些上下文，不要只看最后一句字面。',
-    '如果 inferredFrom 包含“默认出发地”，就把 weatherContext 当作广州出发天气和出行风险提示，不要把这份天气表述成所有候选目的地的实时天气。',
-    'destinationWeatherInsights 是针对少数高相关、明显受天气或最佳观赏期影响的目的地补充查询结果。你应自行决定哪些结果值得引用，并利用世界知识判断是否处于更合适的观赏窗口。',
+    '你是旅行团推荐顾问，只能基于给定候选池做推荐。',
+    '只允许返回真实存在的 tourId，不允许编造线路、价格、班期、酒店、景点或服务。',
+    '本地层负责硬约束、候选边界和审计；软语义取舍交给你结合用户需求、天气、季节、目的地常识和候选原语完成。',
+    '用户需求超出候选池显式承接范围时，可以用世界知识判断最接近的替代方向，但必须明确说明是“最接近的替代”，不能假装已精准满足。',
+    'matchStatus=match 优先；soft_conflict 或 fallback 只有在缺少足够 match，或必须说明取舍时才靠后使用。',
+    '预算上限如“2000 以内”默认表示不要超过上限且尽量贴近预算带，不等于盲目选全站最低价；除非用户明确追求极致低价，不要把明显脱离预算带的 99/299 低价团排在更合适的正常团前面。',
+    '如果给出了 departureWithinDays，并且候选池有对应未来班期，优先选窗口内未来班期，不要为了凑结果把旧班期排前面。',
+    '如果用户否定某类体验，不要把它包装成推荐点；若候选不足，直接说明候选受限和替代逻辑。',
+    '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选原语。',
+    'reason 必须引用候选里真实存在的具体事实，例如 title、highlights、semanticAtoms；不要只写性价比高、班期多、综合匹配。',
+    'summary 至少交代推荐方向、天气或季节判断，以及下单前最该注意的一件事。',
     '严格输出 JSON，不要 Markdown，不要额外解释。',
   ].join('\n');
 
-  const userPayload = {
-    task: `从 candidateTours 中选出所有适合的旅行团，按适合程度排序；只给前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只需要 tourId 和 score。summary 要像顾问式总建议，至少覆盖推荐方向、天气/季节判断和注意事项。reason 要像直接回复用户的推荐理由，必须包含具体玩法/地点原子和本次需求取舍。`,
-    outputSchema: {
-      summary: '2到4句中文总建议：先说推荐方向，再说天气/季节判断，再补一条注意事项或替代逻辑',
+  const stablePrefix = buildStablePromptPrefix({
+    candidates: params.candidates,
+    routeAtlas: params.routeAtlas,
+  });
+
+  const dynamicRequest = {
+    t: 'rank_top24',
+    q: params.userText,
+    sq: params.searchQuery,
+    rc: compactRecentConversation(params.messages),
+    pm: compactPreferenceMemoryForPrompt(params.preferenceMemory),
+    it: compactIntentForPrompt(params.intent),
+    ic: intentCoverage,
+    ac: compactAuditContextForPrompt(params.auditContext),
+    wx: compactWeatherContextForPrompt(params.weatherContext),
+    dw: compactDestinationWeatherInsightsForPrompt(params.destinationWeatherInsights),
+    ol: MAX_AI_OUTPUT_ITEMS,
+    cl: MAX_AI_COMMENTARY_ITEMS,
+    schema: {
+      summary: '2-4 句中文，写推荐方向、天气/季节判断、注意事项或替代逻辑',
       items: [
         {
-          tourId: '候选列表里的 id',
-          score: '0-100 的数字',
-          reason: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，2到3句中文推荐理由；必须点名 1-2 个 semanticAtoms/highlights/title 事实，并说明为什么适合本次需求、天气/季节取舍，以及用户要注意的风险；禁止只写低价、班期多、性价比高`,
-          matchedSignals: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要，3到5个中文匹配信号，优先使用具体玩法/地点原子`,
+          tourId: '候选 id',
+          score: '0-100 number',
+          reason: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要。2-3 句中文，引用 1-2 个候选事实并解释需求取舍、天气风险和适配原因`,
+          matchedSignals: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要。3-5 个中文短语，优先具体玩法/地点原子`,
         },
       ],
+      itemCountLimit: MAX_AI_OUTPUT_ITEMS,
     },
-    userNeed: params.userText,
-    searchQuery: params.searchQuery,
-    recentConversation: compactRecentConversation(params.messages),
-    preferenceMemory: params.preferenceMemory,
-    interpretedIntent: params.intent,
-    intentCoverage,
-    weatherContext: params.weatherContext,
-    destinationWeatherInsights: params.destinationWeatherInsights,
-    routeAtlas: params.routeAtlas,
-    auditContext: compactRecommendationAuditContext(params.auditContext),
-    reasonQualityRules: [
-      '必须具体：引用玩法/地点原子，例如沙扒湾、双月湾、森林氧吧、水上乐园、博物馆、冰世界。',
-      '必须解释适配：把原子与预算、未来7天班期、天气、怕热/避雨/轻松等用户需求连起来。',
-      '必须有取舍：温泉泡汤、高强度户外、海边风浪等天气敏感项要明确说风险，不要包装成无条件优点。',
-      '能比较时就比较：如果用户本来想去海边，但某目的地近期风浪、强降雨或台风风险更高，可以直接说这次为什么改推另一个更稳的海边目的地。',
-      '禁止空话：不要只写低价、热门、班期多、性价比高、自然风光生态、综合匹配。',
+    rq: [
+      '优先具体玩法、地点、原子事实，不要空话。',
+      '要解释预算、天数、班期、天气、轻松度与用户需求如何匹配。',
+      '天气敏感项必须说清风险和取舍。',
+      '可比较时直接说明这次为什么推 A 不推 B。',
     ],
-    candidateTours: params.candidates,
   };
-
-  userPayload.task = `只从 candidateTours 中选出最适合的前 ${MAX_AI_OUTPUT_ITEMS} 个旅行团，按适合程度排序返回；不要返回更多 items。summary 必须写成顾问式总建议，交代推荐方向、天气/季节判断、注意事项，必要时说明为什么改推更稳妥的替代目的地。仅前 ${MAX_AI_COMMENTARY_ITEMS} 条写 reason 和 matchedSignals，其余条目只返回 tourId 和 score。reason 必须具体引用候选原语里的玩法/地点事实，并说明本次需求取舍。`;
-  (userPayload.outputSchema as { itemCountLimit?: number }).itemCountLimit = MAX_AI_OUTPUT_ITEMS;
 
   return [
     { role: 'system', content: systemPrompt },
-    { role: 'user', content: JSON.stringify(userPayload) },
+    { role: 'system', content: JSON.stringify(stablePrefix) },
+    { role: 'user', content: JSON.stringify(dynamicRequest) },
   ];
 }
 
@@ -3098,50 +3363,227 @@ function buildIntentMessages(params: {
   preferenceMemory: AiPreferenceMemory | null;
   auditContext: RecommendationAuditContext;
 }) {
+  const schemaAndExamples = {
+    v: AI_CACHE_PROMPT_VERSION,
+    schema: {
+      tripDays: 'number|null',
+      tripDaysMin: 'number|null',
+      tripDaysMax: 'number|null',
+      departureWithinDays: 'number|null',
+      departureWeekdays: 'number[]',
+      departureTimeOfDay: 'morning|afternoon|evening|night|any|null',
+      destinationHints: 'string[]',
+      budgetMin: 'number|null',
+      budgetMax: 'number|null',
+      travelStyle: 'string[]',
+      mustHave: 'string[]',
+      avoid: 'string[]',
+      weatherSensitivity: 'string[]',
+      semanticFocus: 'string[]',
+      nearestAlternativeOkay: 'boolean|null',
+      budgetPriority: 'low|balanced|premium|null',
+      refinementMode: 'new_search|refine_previous|broaden|replace_destination|null',
+      confidence: '0-1',
+    },
+    examples: [
+      {
+        input: '端午前后想去海边，但怕下雨和风浪，带娃，预算4000以内',
+        output: {
+          tripDays: null,
+          tripDaysMin: null,
+          tripDaysMax: null,
+          departureWithinDays: null,
+          departureWeekdays: [],
+          departureTimeOfDay: null,
+          destinationHints: [],
+          budgetMin: null,
+          budgetMax: 4000,
+          travelStyle: ['海边', '亲子'],
+          mustHave: ['海边'],
+          avoid: [],
+          weatherSensitivity: ['避雨', '风浪风险'],
+          semanticFocus: ['亲子互动', '海边天气稳定性'],
+          nearestAlternativeOkay: false,
+          budgetPriority: 'balanced',
+          refinementMode: 'new_search',
+          confidence: 0.84,
+        },
+      },
+      {
+        input: '我要扶贫或者公益属性更强的路线，没有就给最接近替代并直说',
+        output: {
+          tripDays: null,
+          tripDaysMin: null,
+          tripDaysMax: null,
+          departureWithinDays: null,
+          departureWeekdays: [],
+          departureTimeOfDay: null,
+          destinationHints: [],
+          budgetMin: null,
+          budgetMax: null,
+          travelStyle: [],
+          mustHave: [],
+          avoid: [],
+          weatherSensitivity: [],
+          semanticFocus: ['公益', '扶贫', '助农'],
+          nearestAlternativeOkay: true,
+          budgetPriority: null,
+          refinementMode: 'new_search',
+          confidence: 0.9,
+        },
+      },
+    ],
+  };
+
+  // Experience: prompt-level intent extraction should carry soft semantics so the local ranker does not flatten complex needs.
+  const systemPrompt = [
+    'You extract structured travel intent only. Do not recommend tours.',
+    'Use world knowledge for soft semantics, but do not fabricate candidate-pool capabilities as already satisfied.',
+    'If the current turn is relative, such as cheaper, easier, closer, broader, or replace destination, inherit context from memory and recent conversation instead of flattening intent.',
+    'A budget ceiling like within 2000 means an upper bound near that band, not blindly the site-wide cheapest option.',
+    'Soft semantic needs such as 公益, 扶贫, 助农, 研学, 住好一点, 别太赶, 亲子互动 should be preserved in semanticFocus when expressed or clearly implied.',
+    'Return strict JSON only.',
+  ].join('\n');
+
+  const dynamicRequest = {
+    t: 'extract_intent',
+    q: params.userText,
+    sq: params.searchQuery,
+    pm: compactPreferenceMemoryForPrompt(params.preferenceMemory),
+    ac: compactAuditContextForPrompt(params.auditContext),
+    rc: compactRecentConversation(params.messages),
+  };
+
+  return [
+    { role: 'system', content: systemPrompt },
+    { role: 'system', content: JSON.stringify(schemaAndExamples) },
+    { role: 'user', content: JSON.stringify(dynamicRequest) },
+  ];
+}
+
+function buildIntentRecoveryMessages(params: {
+  userText: string;
+  messages: AiRecommendationMessage[];
+  searchQuery: string;
+  preferenceMemory: AiPreferenceMemory | null;
+}) {
   return [
     {
       role: 'system',
       content: [
-        '你负责把旅行团自然语言需求理解成结构化意图。',
-        '不要推荐线路，只抽取约束和偏好。',
-        '要理解推荐器的能力边界：候选池之外的语义可以用世界知识补全成偏好或约束，但不能把库里没有显式承接的能力强行写成已满足。',
-        '如果用户这轮明确提出新的目的地或区域，优先把它视为覆盖旧目的地；预算、天数、出行风格等可从 existingPreferenceMemory 继承。',
-        '如果用户本轮是“便宜点、再便宜、贵一点、轻松点、更多选择”等相对表达，不要丢弃上一轮上下文；用 refinementMode 表达它是在上一轮基础上收窄、放宽或换方向。',
-        'budgetPriority 表示相对价格偏好：low=更便宜/性价比优先，balanced=均衡，premium=更舒适或高预算；不要用关键词硬猜，要结合 recentConversation 和 auditContext 判断。',
-        'avoid 是用户明确不要、避开、排除或不考虑的语义对象；应抽成可和候选 title/theme/tags/highlights 对照的短词，不限于固定主题词。',
-        'departureWithinDays 用来表示“3天内出发/7天内走/最近几天能走”这类出发窗口，它不是行程天数。',
-        'weekday 使用 0-6 表示周日到周六；周五是 5。',
-        '如果用户说晚上、晚、夜发、夜间、周五晚，departureTimeOfDay 应为 evening 或 night。',
-        '如果不确定就留 null 或空数组，不要硬猜。',
+        '你负责做第二次旅行需求意图抽取补救。',
+        '上一轮抽取过于空泛；这一次必须尽量把用户已经明确表达的软硬需求转成结构化字段。',
+        '只抽取用户真实表达或从当前上下文可合理继承的内容，不要编造候选池已满足的事实。',
+        '如果用户说海边、沙滩、海岛，就必须在 travelStyle 或 mustHave 中保留海边相关语义。',
+        '如果用户说怕下雨、风浪、台风、天气窗口，就必须在 weatherSensitivity 里体现。',
+        '如果用户说公益、扶贫、助农、研学、住好一点、别太赶、亲子互动，这类世界知识语义应写入 semanticFocus。',
+        '如果用户接受“没有就给最接近替代并直说”，nearestAlternativeOkay=true。',
+        '如果用户是在上一轮基础上说“再便宜一点/贵一点/轻松点/更接近原需求”，要保留 refinementMode 和相对价格方向，不要把意图抽空。',
+        '只有在文本完全没有表达时，才允许返回接近空对象。',
         '严格输出 JSON，不要 Markdown。',
       ].join('\n'),
     },
     {
       role: 'user',
       content: JSON.stringify({
-        outputSchema: {
-          tripDays: '精确行程天数，数字或 null',
-          tripDaysMin: '最少天数，数字或 null',
-          tripDaysMax: '最多天数，数字或 null',
-          departureWithinDays: '距离今天多少天内可以出发，数字或 null',
-          departureWeekdays: '出发星期数组，0=周日，5=周五',
+        schemaReminder: {
+          tripDays: 'number|null',
+          tripDaysMin: 'number|null',
+          tripDaysMax: 'number|null',
+          departureWithinDays: 'number|null',
+          departureWeekdays: 'number[]',
           departureTimeOfDay: 'morning|afternoon|evening|night|any|null',
-          destinationHints: ['目的地词'],
-          budgetMin: '最低预算或 null',
-          budgetMax: '最高预算或 null',
-          travelStyle: ['亲子、老人、轻松、徒步、海边等偏好'],
-          mustHave: ['必须满足的条件'],
-          avoid: ['需要避开的语义对象，例如温泉、漂流、爬山、购物、暴晒等短词'],
-          weatherSensitivity: ['怕热、避雨、台风风险、避寒等'],
+          destinationHints: 'string[]',
+          budgetMin: 'number|null',
+          budgetMax: 'number|null',
+          travelStyle: 'string[]',
+          mustHave: 'string[]',
+          avoid: 'string[]',
+          weatherSensitivity: 'string[]',
+          semanticFocus: 'string[]',
+          nearestAlternativeOkay: 'boolean|null',
           budgetPriority: 'low|balanced|premium|null',
           refinementMode: 'new_search|refine_previous|broaden|replace_destination|null',
           confidence: '0-1',
         },
-        userNeed: params.userText,
-        searchQuery: params.searchQuery,
-        existingPreferenceMemory: params.preferenceMemory,
-        auditContext: compactRecommendationAuditContext(params.auditContext),
-        recentConversation: compactRecentConversation(params.messages),
+        examples: [
+          {
+            userNeed: '端午前后想去海边，但怕下雨和风浪，2大1小，预算4000以内',
+            output: {
+              tripDays: null,
+              tripDaysMin: null,
+              tripDaysMax: null,
+              departureWithinDays: null,
+              departureWeekdays: [],
+              departureTimeOfDay: null,
+              destinationHints: [],
+              budgetMin: null,
+              budgetMax: 4000,
+              travelStyle: ['海边', '亲子'],
+              mustHave: ['海边'],
+              avoid: [],
+              weatherSensitivity: ['避雨', '风浪风险'],
+              semanticFocus: ['亲子互动', '海边天气稳定性'],
+              nearestAlternativeOkay: false,
+              budgetPriority: 'balanced',
+              refinementMode: 'new_search',
+              confidence: 0.84,
+            },
+          },
+          {
+            userNeed: '我要扶贫或者公益属性更强的路线，没有就直说最接近替代，不要硬编',
+            output: {
+              tripDays: null,
+              tripDaysMin: null,
+              tripDaysMax: null,
+              departureWithinDays: null,
+              departureWeekdays: [],
+              departureTimeOfDay: null,
+              destinationHints: [],
+              budgetMin: null,
+              budgetMax: null,
+              travelStyle: [],
+              mustHave: [],
+              avoid: [],
+              weatherSensitivity: [],
+              semanticFocus: ['公益', '扶贫', '助农'],
+              nearestAlternativeOkay: true,
+              budgetPriority: null,
+              refinementMode: 'new_search',
+              confidence: 0.9,
+            },
+          },
+          {
+            userNeed: '再便宜一点，但还是要比上一轮更接近我原来的需求，不是单纯全站最低价',
+            contextHint: '上一轮已经有目的地和主题偏好',
+            output: {
+              tripDays: null,
+              tripDaysMin: null,
+              tripDaysMax: null,
+              departureWithinDays: null,
+              departureWeekdays: [],
+              departureTimeOfDay: null,
+              destinationHints: [],
+              budgetMin: null,
+              budgetMax: null,
+              travelStyle: [],
+              mustHave: [],
+              avoid: [],
+              weatherSensitivity: [],
+              semanticFocus: ['保留上一轮核心需求'],
+              nearestAlternativeOkay: false,
+              budgetPriority: 'low',
+              refinementMode: 'refine_previous',
+              confidence: 0.78,
+            },
+          },
+        ],
+        currentTask: {
+          userNeed: params.userText,
+          searchQuery: params.searchQuery,
+          existingPreferenceMemory: params.preferenceMemory,
+          recentConversation: compactRecentConversation(params.messages),
+        },
       }),
     },
   ];
@@ -3268,10 +3710,10 @@ function auditAiRecommendations(
     const budgetBandPenalty = getUnderBudgetBandPenalty(primitive, intent);
     const localMeta = localMetaByTourId.get(item.tourId);
     const localSupport = localMeta
-      ? Math.max(0, 96 - localMeta.rank * 5) + localMeta.score * 0.7
+      ? Math.max(0, 18 - localMeta.rank * 1.5) + localMeta.score * 0.12
       : 0;
     const auditNote = getAuditNote(conflictReasons);
-    const score = Math.max(0, item.score + localSupport - conflictSeverity - budgetBandPenalty * 6);
+    const score = Math.max(0, item.score + localSupport - conflictSeverity - budgetBandPenalty * 4.5);
     if (score <= 0) continue;
 
     auditedAiItems.push({
@@ -3294,10 +3736,10 @@ function auditAiRecommendations(
       const conflictReasons = primitive ? getPrimitiveConflictReasons(intent, primitive) : [];
       const conflictSeverity = getConflictSeverity(conflictReasons);
       const budgetBandPenalty = primitive ? getUnderBudgetBandPenalty(primitive, intent) : 0;
-      const localSupport = Math.max(0, 96 - index * 5) + item.score * 0.7;
+      const localSupport = Math.max(0, 18 - index * 1.5) + item.score * 0.12;
       return {
         ...item,
-        score: Math.max(0, item.score + localSupport - conflictSeverity - budgetBandPenalty * 6),
+        score: Math.max(0, item.score + localSupport - conflictSeverity - budgetBandPenalty * 4.5),
       };
     });
 
@@ -3339,6 +3781,8 @@ function normalizeIntent(value: unknown): AiTravelIntent | null {
     weatherSensitivity: Array.isArray(raw.weatherSensitivity)
       ? raw.weatherSensitivity.map(String).filter(Boolean)
       : [],
+    semanticFocus: Array.isArray(raw.semanticFocus) ? raw.semanticFocus.map(String).filter(Boolean) : [],
+    nearestAlternativeOkay: typeof raw.nearestAlternativeOkay === 'boolean' ? raw.nearestAlternativeOkay : null,
     budgetPriority: ['low', 'balanced', 'premium'].includes(String(raw.budgetPriority))
       ? raw.budgetPriority as AiTravelIntent['budgetPriority']
       : null,
@@ -3377,10 +3821,12 @@ function mergeIntentWithMemory(
     destinationHints: intent?.destinationHints?.length ? intent.destinationHints : memory?.destinationHints || [],
     travelStyle: intent?.travelStyle?.length ? intent.travelStyle : memory?.travelStyle || [],
     mustHave: intent?.mustHave?.length ? intent.mustHave : memory?.mustHave || [],
+    semanticFocus: intent?.semanticFocus?.length ? intent.semanticFocus : memory?.semanticFocus || [],
     avoid,
     weatherSensitivity: intent?.weatherSensitivity?.length
       ? intent.weatherSensitivity
       : memory?.weatherSensitivity || [],
+    nearestAlternativeOkay: intent?.nearestAlternativeOkay ?? memory?.nearestAlternativeOkay ?? null,
     budgetMin: intent?.budgetMin ?? memory?.budgetMin ?? null,
     budgetMax: intent?.budgetMax ?? memory?.budgetMax ?? null,
     budgetPriority: intent?.budgetPriority ?? memory?.budgetPriority ?? null,
@@ -3426,38 +3872,118 @@ function normalizeBudgetPriorityByUserText(
   return intent;
 }
 
+function getIntentSignalCount(intent: AiTravelIntent | null) {
+  if (!intent) return 0;
+
+  return [
+    intent.tripDays,
+    intent.tripDaysMin,
+    intent.tripDaysMax,
+    intent.departureWithinDays,
+    intent.departureTimeOfDay,
+    intent.budgetMin,
+    intent.budgetMax,
+    intent.budgetPriority,
+    intent.refinementMode,
+    intent.nearestAlternativeOkay === true ? 'nearestAlternativeOkay' : null,
+    ...(intent.departureWeekdays || []),
+    ...(intent.destinationHints || []),
+    ...(intent.travelStyle || []),
+    ...(intent.mustHave || []),
+    ...(intent.avoid || []),
+    ...(intent.weatherSensitivity || []),
+    ...(intent.semanticFocus || []),
+  ].filter((value) => value !== null && value !== undefined && value !== '').length;
+}
+
+function shouldRetryIntentExtraction(
+  intent: AiTravelIntent | null,
+  userText: string,
+  memory: AiPreferenceMemory | null | undefined,
+) {
+  const normalizedText = userText.replace(/\s+/g, '');
+  const hasMeaningfulText = normalizedText.length >= 6;
+  const hasRecoverableClues = /(海边|沙滩|海岛|亲子|孩子|老人|轻松|别太赶|公益|扶贫|助农|研学|预算|以内|左右|便宜|贵一点|天气|下雨|风浪|台风|不要|避开|云南|桂林|三亚|广东|周末|出发)/.test(normalizedText);
+  const signalCount = getIntentSignalCount(intent);
+  const hasMemory = Boolean(memory && getIntentSignalCount(memory as unknown as AiTravelIntent) > 0);
+  return hasMeaningfulText && hasRecoverableClues && signalCount === 0 && !hasMemory;
+}
+
 async function callAiApi(params: {
   config: AiProviderConfig;
   messages: ReturnType<typeof buildAiMessages> | ReturnType<typeof buildIntentMessages>;
   maxTokens?: number;
 }) {
-  const response = await fetch(getChatCompletionsUrl(params.config.baseUrl), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${params.config.apiKey}`,
-    },
-    body: JSON.stringify({
-      model: params.config.model,
-      messages: params.messages,
-      temperature: 0.25,
-      max_tokens: params.maxTokens ?? 2048,
-      response_format: { type: 'json_object' },
-      thinking: { type: 'disabled' },
-    }),
+  const url = getChatCompletionsUrl(params.config.baseUrl);
+  const requestBody = JSON.stringify({
+    model: params.config.model,
+    messages: params.messages,
+    temperature: 0.25,
+    max_tokens: params.maxTokens ?? 2048,
+    response_format: { type: 'json_object' },
+    thinking: { type: 'disabled' },
   });
 
-  if (!response.ok) {
-    throw new Error(`AI API failed: ${response.status}`);
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${params.config.apiKey}`,
+        },
+        body: requestBody,
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        let providerMessage = response.statusText || '';
+        if (errorBody) {
+          try {
+            const parsed = JSON.parse(errorBody) as {
+              error?: { message?: string; code?: string; type?: string };
+              message?: string;
+            };
+            providerMessage =
+              parsed.error?.message ||
+              parsed.message ||
+              parsed.error?.code ||
+              parsed.error?.type ||
+              providerMessage;
+          } catch {
+            providerMessage = errorBody.slice(0, 180) || providerMessage;
+          }
+        }
+        throw new Error(
+          providerMessage
+            ? `AI API failed: ${response.status} ${providerMessage}`
+            : `AI API failed: ${response.status}`,
+        );
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (typeof content !== 'string') {
+        throw new Error('AI API response missing message content');
+      }
+
+      return parseAiJson(content);
+    } catch (error) {
+      lastError = error;
+      if (attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 600));
+      }
+    }
   }
 
-  const data = await response.json();
-  const content = data.choices?.[0]?.message?.content;
-  if (typeof content !== 'string') {
-    throw new Error('AI API response missing message content');
-  }
+  throw lastError instanceof Error ? lastError : new Error('AI API failed');
+}
 
-  return parseAiJson(content);
+function getAiFailureDetail(error: unknown) {
+  if (!(error instanceof Error)) return 'AI service unavailable';
+  const message = error.message.replace(/\s+/g, ' ').trim();
+  return message || 'AI service unavailable';
 }
 
 export async function requestAiRecommendations({
@@ -3491,7 +4017,8 @@ export async function requestAiRecommendations({
   const text = getLatestUserText(messages);
   const basePreferenceMemory = preferenceMemory ?? null;
   const baseEffectiveUserText = buildEffectiveUserText(text, basePreferenceMemory);
-  const uiFilteredCandidates = candidateTours.filter((tour) => {
+  const normalizedCandidateTours = candidateTours.map(normalizeCandidateTour);
+  const uiFilteredCandidates = normalizedCandidateTours.filter((tour) => {
     if (activeFilters.destination && !tour.destination.includes(activeFilters.destination)) {
       return false;
     }
@@ -3517,21 +4044,47 @@ export async function requestAiRecommendations({
   );
   const scopedCandidates = uiFilteredCandidates.length > 0 || hasActiveCandidateConstraint
     ? uiFilteredCandidates
-    : candidateTours;
-  const fallbackLocalItems = localRecommendations(scopedCandidates, baseEffectiveUserText);
+    : normalizedCandidateTours;
+  const candidatePool = filterPastOnlyCandidatesWhenFutureExists(scopedCandidates);
+  const memoryBackedIntent = mergeIntentWithMemory(null, basePreferenceMemory);
+  let cachedMemoryBackedLocalItems: AiRecommendationItem[] | null = null;
+  let cachedFallbackLocalItems: AiRecommendationItem[] | null = null;
+  const getFallbackLocalItems = () => {
+    if (!cachedFallbackLocalItems) {
+      cachedFallbackLocalItems = padRecommendationItems(
+        localRecommendations(candidatePool, baseEffectiveUserText),
+        fallbackRecommendations(candidatePool),
+      );
+    }
+    return cachedFallbackLocalItems;
+  };
+  const getMemoryBackedLocalItems = () => {
+    if (!cachedMemoryBackedLocalItems) {
+      const memoryIntentItems = buildIntentLocalRecommendations(candidatePool, memoryBackedIntent);
+      cachedMemoryBackedLocalItems = padRecommendationItems(
+        memoryIntentItems.length > 0
+          ? memoryIntentItems
+          : localRecommendations(candidatePool, baseEffectiveUserText),
+        fallbackRecommendations(candidatePool),
+      );
+    }
+    return cachedMemoryBackedLocalItems;
+  };
+  let runtimeFallbackItems: AiRecommendationItem[] = [];
+  let runtimePreferenceMemory = basePreferenceMemory;
   const config = getResolvedAiConfig(aiConfig);
   const initialAuditContext = buildRecommendationAuditContext(
-    scopedCandidates,
+    candidatePool,
     previousResult,
-    mergeIntentWithMemory(null, basePreferenceMemory),
+    memoryBackedIntent,
   );
 
   emitProgress(onProgress, {
     stage: config ? 'intent' : 'fallback',
     label: config ? '准备调用 AI' : '未配置 AI，改用本地推荐',
     detail: config
-      ? `将从 ${scopedCandidates.length} 条候选线路中理解需求并生成推荐。`
-      : `正在按当前条件从 ${scopedCandidates.length} 条候选线路中做规则匹配。`,
+      ? `将从 ${candidatePool.length} 条候选线路中理解需求并生成推荐。`
+      : `正在按当前条件从 ${candidatePool.length} 条候选线路中做规则匹配。`,
     progress: config ? 20 : 100,
     substeps: config
       ? withActiveSubstep(
@@ -3552,7 +4105,7 @@ export async function requestAiRecommendations({
         ),
   });
 
-  if (scopedCandidates.length === 0) {
+  if (candidatePool.length === 0) {
     return {
       conversationId,
       summary: '按当前预算、时间和避开条件没有找到完全匹配的旅行团；建议放宽预算、出发时间或更换玩法方向。',
@@ -3572,13 +4125,13 @@ export async function requestAiRecommendations({
     return {
       conversationId,
       summary: '当前未配置 AI 接口，已先按目的地、预算、天数和行程强度做本地预匹配。',
-      items: fallbackLocalItems,
+      items: getMemoryBackedLocalItems(),
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
       status: {
         mode: 'local-only',
         label: '本次使用本地规则推荐',
-        detail: `因为没有可用的 AI 配置，已直接筛出 ${fallbackLocalItems.length} 条候选线路。`,
+        detail: `因为没有可用的 AI 配置，已直接筛出 ${getFallbackLocalItems().length} 条候选线路。`,
       },
       preferenceMemory: basePreferenceMemory ?? undefined,
     };
@@ -3596,15 +4149,38 @@ export async function requestAiRecommendations({
       }),
       maxTokens: 768,
     });
-    const intent = normalizeBudgetPriorityByUserText(normalizeIntent(intentResponse), text);
+    let intent = normalizeBudgetPriorityByUserText(
+      normalizeIntent(intentResponse),
+      text,
+    );
+    if (shouldRetryIntentExtraction(intent, text, basePreferenceMemory)) {
+      const recoveredIntentResponse = await callAiApi({
+        config,
+        messages: buildIntentRecoveryMessages({
+          userText: text,
+          messages,
+          searchQuery,
+          preferenceMemory: basePreferenceMemory,
+        }),
+        maxTokens: 768,
+      });
+      const recoveredIntent = normalizeBudgetPriorityByUserText(
+        normalizeIntent(recoveredIntentResponse),
+        text,
+      );
+      if (getIntentSignalCount(recoveredIntent) > getIntentSignalCount(intent)) {
+        intent = recoveredIntent;
+      }
+    }
     const nextPreferenceMemory = mergePreferenceMemory(basePreferenceMemory, intent);
     const effectiveIntent = mergeIntentWithMemory(intent, nextPreferenceMemory);
     const effectiveUserText = buildEffectiveUserText(text, nextPreferenceMemory);
     const intentDateWindow = buildDateWindowFromIntent(effectiveIntent);
-    let availableCandidates = scopedCandidates.filter((tour) => {
+    const wideAvailableCandidates = candidatePool.filter((tour) => {
       const primitive = buildTourPrimitive(tour);
       return primitiveMatchesAvoid(primitive, effectiveIntent?.avoid).length === 0;
     });
+    let availableCandidates = wideAvailableCandidates;
 
     if (effectiveIntent?.destinationHints?.length) {
       const destinationMatched = availableCandidates.filter((tour) =>
@@ -3624,9 +4200,16 @@ export async function requestAiRecommendations({
     }
 
     const localItems = buildIntentLocalRecommendations(availableCandidates, effectiveIntent);
-    const localItemsForMerge = localItems.length > 0
+    const wideLocalItems = buildIntentLocalRecommendations(wideAvailableCandidates, effectiveIntent);
+    const strictLocalItems = localItems.length > 0
       ? localItems
       : localRecommendations(availableCandidates, effectiveUserText);
+    const broadLocalFallbackItems = wideLocalItems.length > 0
+      ? wideLocalItems
+      : localRecommendations(wideAvailableCandidates, effectiveUserText);
+    const localItemsForMerge = padRecommendationItems(strictLocalItems, broadLocalFallbackItems);
+    runtimeFallbackItems = localItemsForMerge;
+    runtimePreferenceMemory = nextPreferenceMemory;
     const auditContext = buildRecommendationAuditContext(availableCandidates, previousResult, effectiveIntent);
     emitProgress(onProgress, {
       stage: 'context',
@@ -3650,7 +4233,7 @@ export async function requestAiRecommendations({
           searchQuery,
           activeFilters,
           preferenceMemory: nextPreferenceMemory,
-          tours: availableCandidates,
+          tours: wideAvailableCandidates,
         })
       : buildNoWeatherContext();
     const weatherContextPromise = useWeatherResearch
@@ -3660,10 +4243,10 @@ export async function requestAiRecommendations({
           searchQuery,
           activeFilters,
           preferenceMemory: nextPreferenceMemory,
-          tours: availableCandidates,
+          tours: wideAvailableCandidates,
         })
       : Promise.resolve(weatherContextForRanking);
-    const routeAtlasPromise = Promise.resolve(buildRouteAtlas(availableCandidates, effectiveIntent));
+    const routeAtlasPromise = Promise.resolve(buildRouteAtlas(wideAvailableCandidates, effectiveIntent));
 
     const compactedCandidates = compactCandidates(
       availableCandidates,
@@ -3671,11 +4254,28 @@ export async function requestAiRecommendations({
       effectiveIntent,
       {
         budgetPriority: effectiveIntent?.budgetPriority,
+        intent: effectiveIntent,
         weatherSensitivity: effectiveIntent?.weatherSensitivity,
         weatherContext: weatherContextForRanking,
       },
     );
-    if (compactedCandidates.length === 0) {
+    const wideCompactedCandidates = compactCandidates(
+      wideAvailableCandidates,
+      localItemsForMerge,
+      effectiveIntent,
+      {
+        budgetPriority: effectiveIntent?.budgetPriority,
+        intent: effectiveIntent,
+        weatherSensitivity: effectiveIntent?.weatherSensitivity,
+        weatherContext: weatherContextForRanking,
+      },
+    );
+    const mergedCompactedCandidates = [
+      ...compactedCandidates,
+      ...wideCompactedCandidates.filter((candidate) => !compactedCandidates.some((item) => item.id === candidate.id)),
+    ].slice(0, MAX_AI_CANDIDATES);
+    const aiCandidatePool = compactedCandidates.length > 0 ? compactedCandidates : mergedCompactedCandidates;
+    if (mergedCompactedCandidates.length === 0) {
       return {
         conversationId,
         summary: '按当前避开条件没有可推荐的候选线路；已避免继续调用 AI 生成不合适结果。',
@@ -3709,7 +4309,7 @@ export async function requestAiRecommendations({
       messages: buildAiMessages({
         userText: effectiveUserText,
         messages,
-        candidates: compactedCandidates,
+        candidates: aiCandidatePool,
         routeAtlas: await routeAtlasPromise,
         auditContext,
         weatherContext: weatherContextForRanking,
@@ -3720,8 +4320,8 @@ export async function requestAiRecommendations({
       }),
       maxTokens: 3000,
     });
-    const compactedCandidateIds = new Set(compactedCandidates.map((candidate) => candidate.id));
-    const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
+    const compactedCandidateIds = new Set(aiCandidatePool.map((candidate) => candidate.id));
+    const compactedCandidateTours = wideAvailableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
     const compactedLocalItems = localItemsForMerge.filter((item) => compactedCandidateIds.has(item.tourId));
     const aiItems = auditAiRecommendations(
       validateAiItems(aiResponse, compactedCandidateTours),
@@ -3734,11 +4334,14 @@ export async function requestAiRecommendations({
       throw new Error('AI returned no valid tour ids');
     }
 
-    const baseMergedItems = mergeAiAndLocalRecommendations(aiItems, compactedLocalItems);
+    const baseMergedItems = padRecommendationItems(
+      mergeAiAndLocalRecommendations(aiItems, compactedLocalItems),
+      localItemsForMerge,
+    );
     const topWeatherTourIds = new Set(baseMergedItems.slice(0, 8).map((item) => item.tourId));
     const destinationWeatherCandidates = useWeatherResearch
       ? buildDestinationWeatherCandidates(
-          compactedCandidates.filter((candidate) => topWeatherTourIds.has(candidate.id)),
+          aiCandidatePool.filter((candidate) => topWeatherTourIds.has(candidate.id)),
           searchQuery,
           effectiveIntent,
         )
@@ -3808,11 +4411,16 @@ export async function requestAiRecommendations({
       },
       preferenceMemory: nextPreferenceMemory,
     };
-  } catch {
+  } catch (error) {
+    const failureDetail = getAiFailureDetail(error);
+    const fallbackItems = runtimeFallbackItems.length > 0 ? runtimeFallbackItems : getMemoryBackedLocalItems();
+    if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+      console.warn('[ai-recommendation] fallback to local recommendations:', failureDetail);
+    }
     emitProgress(onProgress, {
       stage: 'fallback',
       label: 'AI 暂不可用，已切换备用方案',
-      detail: `正在按本地规则从 ${scopedCandidates.length} 条候选线路里给出可用结果。`,
+      detail: `正在按本地规则从 ${candidatePool.length} 条候选线路里给出可用结果。`,
       progress: 100,
       substeps: withActiveSubstep(
         [
@@ -3827,15 +4435,15 @@ export async function requestAiRecommendations({
     return {
       conversationId,
       summary: 'AI 接口暂时不可用，已先使用本地规则按需求做预匹配。',
-      items: fallbackLocalItems,
+      items: fallbackItems,
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
       status: {
         mode: 'fallback',
         label: 'AI 未完成，本次已降级到本地推荐',
-        detail: `为了不中断结果展示，已先返回 ${fallbackLocalItems.length} 条本地规则筛选结果。`,
+        detail: `为了不中断结果展示，已先返回 ${fallbackItems.length} 条本地规则筛选结果。${failureDetail ? ` (${failureDetail})` : ''}`,
       },
-      preferenceMemory: basePreferenceMemory ?? undefined,
+      preferenceMemory: runtimePreferenceMemory ?? undefined,
     };
   }
 }

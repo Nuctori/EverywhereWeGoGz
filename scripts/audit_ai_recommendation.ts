@@ -137,10 +137,18 @@ const auditedAvoid = auditAiRecommendations(
 );
 assert.equal(auditedAvoid.length, 0);
 
-const today = new Date().toISOString().slice(0, 10);
-const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+function toLocalDateInput(value: Date) {
+  return [
+    value.getFullYear(),
+    String(value.getMonth() + 1).padStart(2, '0'),
+    String(value.getDate()).padStart(2, '0'),
+  ].join('-');
+}
+
+const today = toLocalDateInput(new Date());
+const tomorrow = toLocalDateInput(new Date(Date.now() + 24 * 60 * 60 * 1000));
+const yesterday = toLocalDateInput(new Date(Date.now() - 24 * 60 * 60 * 1000));
+const nextWeek = toLocalDateInput(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
 const baseFilters = {
   destination: '',
   minPrice: null,

@@ -168,6 +168,8 @@ export interface AiPreferenceMemory {
   mustHave: string[];
   avoid: string[];
   weatherSensitivity: string[];
+  semanticFocus?: string[];
+  nearestAlternativeOkay?: boolean | null;
   budgetMin?: number | null;
   budgetMax?: number | null;
   budgetPriority?: 'low' | 'balanced' | 'premium' | null;
