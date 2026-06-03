@@ -23,6 +23,20 @@ interface TourCardProps {
   recommendationRank?: number;
 }
 
+function getUpcomingDepartureDate(tour: Tour) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const dates = [tour.departureDate, ...(tour.departureDates || [])]
+    .filter(Boolean)
+    .map((value) => new Date(`${value}T00:00:00`))
+    .filter((date) => !Number.isNaN(date.getTime()))
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  const futureDate = dates.find((date) => date.getTime() >= today.getTime());
+  return futureDate ? futureDate.toISOString().slice(0, 10) : tour.departureDate;
+}
+
 function formatDate(dateStr: string | undefined): string {
   if (!dateStr) return '待定';
   const d = new Date(dateStr);
@@ -43,9 +57,40 @@ function getReadableDestination(tour: Tour) {
   return candidate ? candidate.replace(/必打卡$/, '') : '目的地待确认';
 }
 
+function getReadableTheme(tour: Tour) {
+  const corpus = [
+    tour.destination,
+    tour.title,
+    ...(tour.highlights || []),
+    ...(tour.tags || []),
+  ].join(' ');
+
+  const signals = [
+    { label: '海边度假', pattern: /海边|海滩|沙滩|海岛|海景|双月湾|巽寮湾|沙扒湾|南澳岛|海陵岛|浮潜|潜水/ },
+    { label: '森林山水', pattern: /森林|氧吧|瀑布|峡谷|山水|雪山|草原|湿地|溶洞|湖|九寨沟|长白山|呼伦贝尔/ },
+    { label: '文化逛城', pattern: /古城|古镇|博物馆|非遗|祠|寺|骑楼|水乡|文化|潮州|开平/ },
+    { label: '玩水清凉', pattern: /漂流|溯溪|桨板|浆板|sup|水上乐园|水世界|嬉水|亲水|泳池/ },
+    { label: '温泉泡汤', pattern: /温泉|泡汤|汤泉|私汤|热泉|spa/i },
+  ];
+  const inferred = signals.find((item) => item.pattern.test(corpus))?.label || '';
+  const theme = tour.theme?.trim();
+
+  if (!theme) return inferred;
+
+  const mismatchChecks = [
+    { pattern: /海岛|海边|沙滩|海景/, requires: /海边|海滩|沙滩|海岛|海景|双月湾|巽寮湾|沙扒湾|南澳岛|海陵岛|浮潜|潜水/ },
+    { pattern: /温泉/, requires: /温泉|泡汤|汤泉|私汤|热泉|spa/i },
+    { pattern: /亲子|乐园|度假村/, requires: /亲子|乐园|度假村|水上乐园|博物馆|动物园|玩水/ },
+  ];
+  const mismatched = mismatchChecks.some((item) => item.pattern.test(theme) && !item.requires.test(corpus));
+
+  return mismatched && inferred ? inferred : theme;
+}
+
 function buildTitleSummary(tour: Tour) {
   const chunks = [getReadableDestination(tour), `${tour.duration}天`];
-  if (tour.theme) chunks.push(tour.theme);
+  const readableTheme = getReadableTheme(tour);
+  if (readableTheme) chunks.push(readableTheme);
   if (tour.transportType) chunks.push(tour.transportType.replace('往返', ''));
   return chunks.filter(Boolean).join(' · ');
 }
@@ -63,6 +108,7 @@ export const TourCard = memo(function TourCard({
   const hasReliableSingleSupplement = Boolean(tour.singleSupplementNote?.trim());
   const titleSummary = buildTitleSummary(tour);
   const destinationLabel = getReadableDestination(tour);
+  const displayDepartureDate = getUpcomingDepartureDate(tour);
 
   return (
     <Card
@@ -156,7 +202,7 @@ export const TourCard = memo(function TourCard({
             <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{tour.duration}天</span>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-500">
-            <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{formatDate(tour.departureDate)}</span>
+            <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{formatDate(displayDepartureDate)}</span>
             {tour.groupSize && <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{tour.groupSize}</span>}
           </div>
         </div>

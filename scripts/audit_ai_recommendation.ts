@@ -15,7 +15,6 @@ const {
   mergeAiAndLocalRecommendations,
   mergeIntentWithMemory,
   resolvePromptDateWindow,
-  shouldUseAiIntentExtraction,
   validateAiItems,
 } = __aiRecommendationTestHooks;
 
@@ -87,7 +86,7 @@ const mergedCapItems = mergeAiAndLocalRecommendations(
   Array.from({ length: 12 }, (_, index) => ({ tourId: `ai-${index}`, score: 100 - index, matchedSignals: [] })),
   Array.from({ length: 30 }, (_, index) => ({ tourId: `local-${index}`, score: 80 - index, matchedSignals: [] })),
 );
-assert.ok(mergedCapItems.length <= 12);
+assert.ok(mergedCapItems.length <= 24);
 const auditCapTours = Array.from({ length: 30 }, (_, index) => candidate({
   id: `audit-cap-${index}`,
   title: `广东清凉短线${index}`,
@@ -100,7 +99,7 @@ const auditCapItems = auditAiRecommendations(
   auditCapTours,
   null,
 );
-assert.ok(auditCapItems.length <= 12);
+assert.ok(auditCapItems.length <= 24);
 
 const avoidIntent = mergeIntentWithMemory({ avoid: ['温泉'] }, null);
 const hotSpringTour = candidate({
@@ -127,9 +126,7 @@ const avoidCompacted = compactCandidates([hotSpringTour, nonHotSpringTour], [], 
 assert.ok(!avoidCompacted.some((item) => item.id === 'hot-spring'));
 assert.ok(avoidCompacted.some((item) => item.id === 'beach'));
 assert.deepEqual(collectAvoidHints('500元以内，不要漂流、爬山'), ['漂流', '爬山']);
-assert.deepEqual(collectAvoidHints('不喜欢温泉，讨厌购物团'), ['温泉', '购物团']);
-assert.ok(shouldUseAiIntentExtraction('不喜欢温泉', { travelStyle: ['温泉'] }));
-assert.ok(shouldUseAiIntentExtraction('受不了暴晒，别安排海边暴走', null));
+assert.deepEqual(collectAvoidHints('不喜欢温泉，讨厌购物团'), ['温泉', '购物团', '购物']);
 assert.ok(buildTourPrimitive(hotSpringTour).seasonalComfortAtoms.some((atom) => atom.includes('高温天气需取舍')));
 
 const auditedAvoid = auditAiRecommendations(
