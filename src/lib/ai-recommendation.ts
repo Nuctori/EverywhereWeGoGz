@@ -313,6 +313,24 @@ function compactWeatherContextForPrompt(context: AiWeatherContext) {
   };
 }
 
+function compactRangeForPrompt(range: ReturnType<typeof formatRange>) {
+  if (!range) return null;
+  return [range.min, range.p25, range.median, range.p75, range.max];
+}
+
+function compactAuditSnapshotForPrompt(
+  snapshot: ReturnType<typeof summarizeToursForAudit> | null | undefined,
+) {
+  if (!snapshot) return null;
+  return {
+    c: snapshot.count,
+    pr: compactRangeForPrompt(snapshot.priceRange),
+    dr: compactRangeForPrompt(snapshot.dayRange),
+    td: snapshot.topDestinations.map((item) => [item.name, item.count]),
+    tt: snapshot.topThemes.map((item) => [item.name, item.count]),
+  };
+}
+
 function compactDestinationWeatherInsightsForPrompt(insights: DestinationWeatherInsight[]) {
   return insights.map((insight) => compactWeatherContextForPrompt(insight));
 }
@@ -322,8 +340,8 @@ function compactRouteAtlasForPrompt(routeAtlas: RouteAtlas) {
     r: group.region,
     t: group.theme,
     c: group.count,
-    pr: group.priceRange,
-    dr: group.dayRange,
+    pr: compactRangeForPrompt(group.priceRange),
+    dr: compactRangeForPrompt(group.dayRange),
     k: group.keywords,
     ex: group.examples.map((example) => [
       example.id,
@@ -340,10 +358,20 @@ function compactAuditContextForPrompt(context: RecommendationAuditContext) {
   const compact = compactRecommendationAuditContext(context);
   return {
     ps: compact.previousSummary,
-    pt: compact.previousTopResultSnapshot,
-    ep: compact.effectivePoolSnapshot,
+    pt: compactAuditSnapshotForPrompt(compact.previousTopResultSnapshot),
+    ep: compactAuditSnapshotForPrompt(compact.effectivePoolSnapshot),
     br: compact.businessRules,
   };
+}
+
+function sortCandidatesForPrompt(candidates: ReturnType<typeof compactCandidates>) {
+  return [...candidates].sort((a, b) =>
+    a.routeGroup.localeCompare(b.routeGroup, 'zh-Hans-CN') ||
+    a.destination.localeCompare(b.destination, 'zh-Hans-CN') ||
+    a.tripDays - b.tripDays ||
+    a.price - b.price ||
+    a.id.localeCompare(b.id),
+  );
 }
 
 function compactCandidatesForPrompt(candidates: ReturnType<typeof compactCandidates>) {
@@ -391,7 +419,7 @@ function buildStablePromptPrefix(params: {
       'pace', 'rating', 'group', 'hot', 'match', 'routeGroup', 'dates', 'weekdays', 'timeHints', 'night',
       'pricePct', 'pricePerDay', 'tags', 'highlights', 'atoms', 'cats', 'seasonAtoms', 'fit', 'conflicts',
     ],
-    candidates: compactCandidatesForPrompt(params.candidates),
+    candidates: compactCandidatesForPrompt(sortCandidatesForPrompt(params.candidates)),
     routeAtlas: compactRouteAtlasForPrompt(params.routeAtlas),
   };
 }
@@ -1508,14 +1536,10 @@ function formatRange(values: number[]) {
   };
 }
 
-function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelIntent | null): RouteAtlas {
-  const intentCacheKey = JSON.stringify({
-    destinationHints: intent?.destinationHints || [],
-    travelStyle: intent?.travelStyle || [],
-    mustHave: intent?.mustHave || [],
-  });
+function buildRouteAtlas(tours: AiRecommendationCandidate[], _intent: AiTravelIntent | null): RouteAtlas {
+  const atlasCacheKey = AI_CACHE_PROMPT_VERSION;
   const atlasCacheByIntent = routeAtlasCache.get(tours);
-  const cached = atlasCacheByIntent?.get(intentCacheKey);
+  const cached = atlasCacheByIntent?.get(atlasCacheKey);
   if (cached) return cached;
 
   const groups = new Map<string, {
@@ -1527,13 +1551,7 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
     days: number[];
     keywords: Map<string, number>;
     examples: Array<{ id: string; title: string; price: number; days: number; destination: string; atoms: string[] }>;
-    relevance: number;
   }>();
-  const intentText = [
-    ...(intent?.destinationHints || []),
-    ...(intent?.travelStyle || []),
-    ...(intent?.mustHave || []),
-  ].join(' ').toLowerCase();
 
   for (const tour of tours) {
     const key = getAtlasGroupKey(tour);
@@ -1548,18 +1566,11 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
       days: [],
       keywords: new Map<string, number>(),
       examples: [],
-      relevance: 0,
     };
-    const corpus = getSearchCorpus(tour);
 
     group.count += 1;
     group.prices.push(tour.price);
     group.days.push(tour.duration);
-    group.relevance +=
-      (intent?.destinationHints?.length && destinationHintsMatchCorpus(intent.destinationHints, `${tour.destination} ${tour.title}`) ? 30 : 0) +
-      (intentText && corpus.includes(intentText) ? 10 : 0) +
-      (tour.isHot ? 3 : 0) +
-      Math.max(0, 8 - Math.min(tour.price / 1000, 8));
 
     for (const keyword of [
       tour.destination,
@@ -1589,7 +1600,11 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
   }
 
   const atlas = [...groups.values()]
-    .sort((a, b) => b.relevance - a.relevance || b.count - a.count)
+    .sort((a, b) =>
+      b.count - a.count ||
+      a.region.localeCompare(b.region, 'zh-Hans-CN') ||
+      a.theme.localeCompare(b.theme, 'zh-Hans-CN'),
+    )
     .slice(0, ROUTE_ATLAS_MAX_GROUPS)
     .map((group) => ({
       region: group.region,
@@ -1605,7 +1620,7 @@ function buildRouteAtlas(tours: AiRecommendationCandidate[], intent: AiTravelInt
     }));
 
   const nextCache = atlasCacheByIntent || new Map<string, RouteAtlas>();
-  nextCache.set(intentCacheKey, atlas);
+  nextCache.set(atlasCacheKey, atlas);
   routeAtlasCache.set(tours, nextCache);
   return atlas;
 }
@@ -2258,6 +2273,36 @@ function getDefaultApiKey() {
   return decodeDefaultApiKey(readRuntimeEnv('VITE_AI_DEFAULT_API_KEY_B64')) || readRuntimeEnv('VITE_AI_DEFAULT_API_KEY') || '';
 }
 
+function getSecondaryApiKey() {
+  return (
+    decodeDefaultApiKey(readRuntimeEnv('VITE_AI_SECONDARY_API_KEY_B64')) ||
+    readRuntimeEnv('VITE_AI_SECONDARY_API_KEY') ||
+    ''
+  );
+}
+
+function getFallbackApiKey() {
+  return (
+    decodeDefaultApiKey(readRuntimeEnv('VITE_AI_FALLBACK_API_KEY_B64')) ||
+    readRuntimeEnv('VITE_AI_FALLBACK_API_KEY') ||
+    decodeDefaultApiKey(readRuntimeEnv('DEEPSEEK_API_KEY_B64')) ||
+    readRuntimeEnv('DEEPSEEK_API_KEY') ||
+    ''
+  );
+}
+
+function buildAiProviderConfig(config: Partial<AiProviderConfig>): AiProviderConfig | null {
+  const apiKey = typeof config.apiKey === 'string' ? config.apiKey.trim() : '';
+  const baseUrl = typeof config.baseUrl === 'string' ? config.baseUrl.trim() : '';
+  const model = typeof config.model === 'string' ? config.model.trim() : '';
+  if (!apiKey || !baseUrl || !model) return null;
+  return { apiKey, baseUrl, model };
+}
+
+function sameAiProviderConfig(left: AiProviderConfig, right: AiProviderConfig) {
+  return left.apiKey === right.apiKey && left.baseUrl === right.baseUrl && left.model === right.model;
+}
+
 export function getAiProviderConfig(): StoredAiProviderConfig {
   const stored = readStoredAiConfig();
   return {
@@ -2286,28 +2331,28 @@ export function clearAiProviderConfig() {
   window.localStorage.removeItem(AI_CONFIG_STORAGE_KEY);
 }
 
-function getResolvedAiConfig(override?: Partial<AiProviderConfig>): AiProviderConfig | null {
+function getResolvedAiConfigs(override?: Partial<AiProviderConfig>): AiProviderConfig[] {
   const stored = readStoredAiConfig();
-  const config = {
-    apiKey:
-      override?.apiKey ||
-      stored.apiKey ||
-      getDefaultApiKey() ||
-      '',
-    baseUrl:
-      override?.baseUrl ||
-      stored.baseUrl ||
-      readRuntimeEnv('VITE_AI_DEFAULT_BASE_URL') ||
-      '',
-    model:
-      override?.model ||
-      stored.model ||
-      readRuntimeEnv('VITE_AI_DEFAULT_MODEL') ||
-      '',
-  };
+  const primaryConfig = buildAiProviderConfig({
+    apiKey: override?.apiKey || stored.apiKey || getDefaultApiKey() || '',
+    baseUrl: override?.baseUrl || stored.baseUrl || readRuntimeEnv('VITE_AI_DEFAULT_BASE_URL') || '',
+    model: override?.model || stored.model || readRuntimeEnv('VITE_AI_DEFAULT_MODEL') || '',
+  });
+  const secondaryConfig = buildAiProviderConfig({
+    apiKey: getSecondaryApiKey(),
+    baseUrl: readRuntimeEnv('VITE_AI_SECONDARY_BASE_URL') || '',
+    model: readRuntimeEnv('VITE_AI_SECONDARY_MODEL') || '',
+  });
+  const fallbackConfig = buildAiProviderConfig({
+    apiKey: getFallbackApiKey(),
+    baseUrl: readRuntimeEnv('VITE_AI_FALLBACK_BASE_URL') || readRuntimeEnv('DEEPSEEK_BASE_URL') || '',
+    model: readRuntimeEnv('VITE_AI_FALLBACK_MODEL') || readRuntimeEnv('DEEPSEEK_MODEL') || '',
+  });
 
-  if (!config.apiKey || !config.baseUrl || !config.model) return null;
-  return config;
+  const configs = [primaryConfig, secondaryConfig, fallbackConfig].filter((config): config is AiProviderConfig => Boolean(config));
+  return configs.filter((config, index) =>
+    configs.findIndex((candidate) => sameAiProviderConfig(candidate, config)) === index,
+  );
 }
 
 function compactCandidates(
@@ -3596,7 +3641,7 @@ function normalizeBaseUrl(baseUrl: string) {
 function getChatCompletionsUrl(baseUrl: string) {
   const normalized = normalizeBaseUrl(baseUrl);
   if (normalized.endsWith('/chat/completions')) return normalized;
-  if (normalized.endsWith('/v1')) return `${normalized}/chat/completions`;
+  if (/\/v\d+$/.test(normalized)) return `${normalized}/chat/completions`;
   return `${normalized}/v1/chat/completions`;
 }
 
@@ -3910,69 +3955,71 @@ function shouldRetryIntentExtraction(
 }
 
 async function callAiApi(params: {
-  config: AiProviderConfig;
+  configs: AiProviderConfig[];
   messages: ReturnType<typeof buildAiMessages> | ReturnType<typeof buildIntentMessages>;
   maxTokens?: number;
 }) {
-  const url = getChatCompletionsUrl(params.config.baseUrl);
-  const requestBody = JSON.stringify({
-    model: params.config.model,
-    messages: params.messages,
-    temperature: 0.25,
-    max_tokens: params.maxTokens ?? 2048,
-    response_format: { type: 'json_object' },
-    thinking: { type: 'disabled' },
-  });
-
   let lastError: unknown = null;
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${params.config.apiKey}`,
-        },
-        body: requestBody,
-      });
+  for (const config of params.configs) {
+    const url = getChatCompletionsUrl(config.baseUrl);
+    const requestBody = JSON.stringify({
+      model: config.model,
+      messages: params.messages,
+      temperature: 0.25,
+      max_tokens: params.maxTokens ?? 2048,
+      response_format: { type: 'json_object' },
+      thinking: { type: 'disabled' },
+    });
 
-      if (!response.ok) {
-        const errorBody = await response.text();
-        let providerMessage = response.statusText || '';
-        if (errorBody) {
-          try {
-            const parsed = JSON.parse(errorBody) as {
-              error?: { message?: string; code?: string; type?: string };
-              message?: string;
-            };
-            providerMessage =
-              parsed.error?.message ||
-              parsed.message ||
-              parsed.error?.code ||
-              parsed.error?.type ||
-              providerMessage;
-          } catch {
-            providerMessage = errorBody.slice(0, 180) || providerMessage;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiKey}`,
+          },
+          body: requestBody,
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          let providerMessage = response.statusText || '';
+          if (errorBody) {
+            try {
+              const parsed = JSON.parse(errorBody) as {
+                error?: { message?: string; code?: string; type?: string };
+                message?: string;
+              };
+              providerMessage =
+                parsed.error?.message ||
+                parsed.message ||
+                parsed.error?.code ||
+                parsed.error?.type ||
+                providerMessage;
+            } catch {
+              providerMessage = errorBody.slice(0, 180) || providerMessage;
+            }
           }
+          throw new Error(
+            providerMessage
+              ? `AI API failed [${config.model}]: ${response.status} ${providerMessage}`
+              : `AI API failed [${config.model}]: ${response.status}`,
+          );
         }
-        throw new Error(
-          providerMessage
-            ? `AI API failed: ${response.status} ${providerMessage}`
-            : `AI API failed: ${response.status}`,
-        );
-      }
 
-      const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
-      if (typeof content !== 'string') {
-        throw new Error('AI API response missing message content');
-      }
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (typeof content !== 'string') {
+          throw new Error(`AI API response missing message content [${config.model}]`);
+        }
 
-      return parseAiJson(content);
-    } catch (error) {
-      lastError = error;
-      if (attempt === 0) {
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        return parseAiJson(content);
+      } catch (error) {
+        lastError = error;
+        if (attempt === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 600));
+        }
       }
     }
   }
@@ -4072,7 +4119,8 @@ export async function requestAiRecommendations({
   };
   let runtimeFallbackItems: AiRecommendationItem[] = [];
   let runtimePreferenceMemory = basePreferenceMemory;
-  const config = getResolvedAiConfig(aiConfig);
+  const configs = getResolvedAiConfigs(aiConfig);
+  const config = configs[0] || null;
   const initialAuditContext = buildRecommendationAuditContext(
     candidatePool,
     previousResult,
@@ -4139,7 +4187,7 @@ export async function requestAiRecommendations({
 
   try {
     const intentResponse = await callAiApi({
-      config,
+      configs,
       messages: buildIntentMessages({
         userText: text,
         messages,
@@ -4155,7 +4203,7 @@ export async function requestAiRecommendations({
     );
     if (shouldRetryIntentExtraction(intent, text, basePreferenceMemory)) {
       const recoveredIntentResponse = await callAiApi({
-        config,
+        configs,
         messages: buildIntentRecoveryMessages({
           userText: text,
           messages,
@@ -4305,7 +4353,7 @@ export async function requestAiRecommendations({
       ),
     });
     const aiResponse = await callAiApi({
-      config,
+      configs,
       messages: buildAiMessages({
         userText: effectiveUserText,
         messages,
