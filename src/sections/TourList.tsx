@@ -482,6 +482,11 @@ export function TourList({ searchQuery }: TourListProps) {
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
 
+  const aiRecommendedCount = useMemo(
+    () => aiRecommendationResult?.items.filter((item) => Boolean(item.reason)).length ?? 0,
+    [aiRecommendationResult],
+  );
+
   const aiRecommendationByTourId = useMemo(
     () =>
       new Map(
@@ -1255,7 +1260,7 @@ export function TourList({ searchQuery }: TourListProps) {
           {aiRecommendationResult && aiRecommendationResult.items.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
               <Sparkles className="h-4 w-4 text-emerald-700" />
-              <span>AI 已推荐 {aiRecommendationResult.items.length} 条线路</span>
+              <span>AI 已给出 {aiRecommendedCount} 条建议，展示 {aiRecommendationResult.items.length} 条线路</span>
               {hiddenAiRecommendationCount > 0 && (
                 <span className="text-xs text-emerald-700">
                   {hiddenAiRecommendationCount} 条被当前筛选隐藏

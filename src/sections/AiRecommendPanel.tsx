@@ -203,6 +203,10 @@ function saveStoredChatState(state: AiChatState) {
   );
 }
 
+function countRecommendedItems(result: AiRecommendationResult | null) {
+  return result?.items.filter((item) => Boolean(item.reason)).length ?? 0;
+}
+
 function getResultStatusMeta(result: AiRecommendationResult | null) {
   if (!result) return null;
 
@@ -212,7 +216,7 @@ function getResultStatusMeta(result: AiRecommendationResult | null) {
     return {
       mode: 'ai' as const,
       label: 'AI 已完成推荐',
-      detail: `已生成 ${result.items.length} 条推荐线路，并按匹配度置顶。`,
+      detail: `已生成 ${countRecommendedItems(result)} 条建议，并展示 ${result.items.length} 条匹配线路。`,
     };
   }
 
@@ -778,7 +782,7 @@ export function AiRecommendPanel({
                       resultStatusMeta.mode === 'ai' ? 'bg-emerald-700 hover:bg-emerald-700' : 'bg-amber-700 hover:bg-amber-700',
                     )}
                   >
-                    置顶 {result?.items.length}
+                    建议 {countRecommendedItems(result)}
                   </Badge>
                 </div>
               </div>

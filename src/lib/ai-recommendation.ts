@@ -15,7 +15,7 @@ import type {
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 const MAX_AI_CANDIDATES = 36;
 const MAX_AI_COMMENTARY_ITEMS = 24;
-const MAX_AI_OUTPUT_ITEMS = 24;
+const MAX_AI_RANKED_ITEMS = 24;
 const MAX_DESTINATION_WEATHER_INSIGHTS = 6;
 const ROUTE_ATLAS_MAX_GROUPS = 8;
 const ROUTE_ATLAS_MAX_EXAMPLES = 2;
@@ -244,6 +244,13 @@ function percentile(sortedValues: number[], ratio: number) {
 
 function normalizeText(value: string) {
   return value.trim().toLowerCase();
+}
+
+function normalizeLooseKey(value: string | number | null | undefined) {
+  return String(value ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\-_/|()[\]【】·.,，。:：'"`]+/g, '');
 }
 
 
@@ -718,8 +725,7 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
           )
         : undefined,
       matchedSignals: tour.isHot ? ['热门线路'] : ['综合排序靠前'],
-    }))
-    .slice(0, MAX_AI_OUTPUT_ITEMS);
+    }));
 }
 
 function localRecommendations(tours: AiRecommendationCandidate[], text: string) {
@@ -731,8 +737,7 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
     .map((item, index) => ({
       ...item,
       reason: index < MAX_AI_COMMENTARY_ITEMS ? item.reason : undefined,
-    }))
-    .slice(0, MAX_AI_OUTPUT_ITEMS);
+    }));
 
   return items.length > 0 ? items : fallbackRecommendations(tours);
 }
@@ -1042,7 +1047,7 @@ function buildIntentLocalRecommendations(
     .sort((a, b) => b.score - a.score)
     .map((item) => item);
 
-  return limitRecommendationCommentary(items).slice(0, MAX_AI_OUTPUT_ITEMS);
+  return limitRecommendationCommentary(items);
 }
 
 function analyzeIntentCoverage(
@@ -1112,7 +1117,7 @@ function mergeAiAndLocalRecommendations(
     return true;
   });
 
-  return limitRecommendationCommentary([...primaryAiItems, ...supplementalLocalItems]).slice(0, MAX_AI_OUTPUT_ITEMS);
+  return limitRecommendationCommentary([...primaryAiItems, ...supplementalLocalItems]);
 }
 
 function uniqueStrings(values: Array<string | undefined | null>) {
@@ -1219,10 +1224,6 @@ function padRecommendationItems(
   items: AiRecommendationItem[],
   fallbackPool: AiRecommendationItem[],
 ) {
-  if (items.length >= MAX_AI_OUTPUT_ITEMS) {
-    return limitRecommendationCommentary(items).slice(0, MAX_AI_OUTPUT_ITEMS);
-  }
-
   const seenTourIds = new Set(items.map((item) => item.tourId));
   const padded = [...items];
 
@@ -1230,10 +1231,13 @@ function padRecommendationItems(
     if (seenTourIds.has(item.tourId)) continue;
     seenTourIds.add(item.tourId);
     padded.push(item);
-    if (padded.length >= MAX_AI_OUTPUT_ITEMS) break;
   }
 
-  return limitRecommendationCommentary(padded).slice(0, MAX_AI_OUTPUT_ITEMS);
+  return limitRecommendationCommentary(padded);
+}
+
+function countCommentaryItems(items: AiRecommendationItem[]) {
+  return items.reduce((count, item) => count + (item.reason ? 1 : 0), 0);
 }
 
 function getWeekday(date: string) {
@@ -3372,7 +3376,7 @@ function buildAiMessages(params: {
     ac: compactAuditContextForPrompt(params.auditContext),
     wx: compactWeatherContextForPrompt(params.weatherContext),
     dw: compactDestinationWeatherInsightsForPrompt(params.destinationWeatherInsights),
-    ol: MAX_AI_OUTPUT_ITEMS,
+    ol: MAX_AI_RANKED_ITEMS,
     cl: MAX_AI_COMMENTARY_ITEMS,
     schema: {
       summary: '2-4 句中文，写推荐方向、天气/季节判断、注意事项或替代逻辑',
@@ -3384,7 +3388,7 @@ function buildAiMessages(params: {
           matchedSignals: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要。3-5 个中文短语，优先具体玩法/地点原子`,
         },
       ],
-      itemCountLimit: MAX_AI_OUTPUT_ITEMS,
+      itemCountLimit: MAX_AI_RANKED_ITEMS,
     },
     rq: [
       '优先具体玩法、地点、原子事实，不要空话。',
@@ -3685,29 +3689,119 @@ export const __aiRecommendationTestHooks = {
   validateAiItems,
 };
 
+function setUniqueLookupValue(map: Map<string, string>, key: string, value: string) {
+  if (!key) return;
+  const existing = map.get(key);
+  if (!existing) {
+    map.set(key, value);
+    return;
+  }
+  if (existing !== value) {
+    map.set(key, '');
+  }
+}
+
+function buildAiCandidateLookup(candidateTours: AiRecommendationCandidate[]) {
+  const byNormalizedId = new Map<string, string>();
+  const byNumericSuffix = new Map<string, string>();
+  const byTitle = new Map<string, string>();
+  const byTitleDestination = new Map<string, string>();
+
+  for (const tour of candidateTours) {
+    const normalizedId = normalizeLooseKey(tour.id);
+    setUniqueLookupValue(byNormalizedId, normalizedId, tour.id);
+
+    const numericSuffix = String(tour.id).match(/\d+/g)?.join('') || '';
+    setUniqueLookupValue(byNumericSuffix, numericSuffix, tour.id);
+
+    const normalizedTitle = normalizeLooseKey(tour.title);
+    setUniqueLookupValue(byTitle, normalizedTitle, tour.id);
+    setUniqueLookupValue(
+      byTitleDestination,
+      `${normalizedTitle}::${normalizeLooseKey(tour.destination)}`,
+      tour.id,
+    );
+  }
+
+  return {
+    byNormalizedId,
+    byNumericSuffix,
+    byTitle,
+    byTitleDestination,
+  };
+}
+
+function resolveAiCandidateTourId(
+  item: Partial<AiRecommendationItem> & {
+    id?: unknown;
+    title?: unknown;
+    destination?: unknown;
+  },
+  candidateTours: AiRecommendationCandidate[],
+  lookup = buildAiCandidateLookup(candidateTours),
+) {
+  const directTourId = typeof item.tourId === 'string' ? item.tourId : typeof item.id === 'string' ? item.id : '';
+  if (directTourId && candidateTours.some((tour) => tour.id === directTourId)) {
+    return directTourId;
+  }
+
+  const normalizedId = normalizeLooseKey(directTourId);
+  const normalizedIdHit = lookup.byNormalizedId.get(normalizedId);
+  if (normalizedIdHit) return normalizedIdHit;
+
+  const numericSuffix = directTourId.match(/\d+/g)?.join('') || normalizedId.match(/\d+/g)?.join('') || '';
+  const numericSuffixHit = lookup.byNumericSuffix.get(numericSuffix);
+  if (numericSuffixHit) return numericSuffixHit;
+
+  const title = typeof item.title === 'string' ? item.title : '';
+  const destination = typeof item.destination === 'string' ? item.destination : '';
+  const titleDestinationHit = lookup.byTitleDestination.get(
+    `${normalizeLooseKey(title)}::${normalizeLooseKey(destination)}`,
+  );
+  if (titleDestinationHit) return titleDestinationHit;
+
+  const titleHit = lookup.byTitle.get(normalizeLooseKey(title));
+  if (titleHit) return titleHit;
+
+  return '';
+}
+
 function validateAiItems(
   value: unknown,
   candidateTours: AiRecommendationCandidate[],
 ): AiRecommendationItem[] {
-  const candidateIds = new Set(candidateTours.map((tour) => tour.id));
   const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
+  const candidateLookup = buildAiCandidateLookup(candidateTours);
   const rawItems = Array.isArray((value as { items?: unknown[] })?.items)
     ? (value as { items: unknown[] }).items
     : [];
+  const seenTourIds = new Set<string>();
+  const validatedItems: AiRecommendationItem[] = [];
 
-  return rawItems
-    .map((item) => item as Partial<AiRecommendationItem>)
-    .filter((item) => item.tourId && candidateIds.has(item.tourId))
-    .map((item, index) => ({
-      tourId: String(item.tourId),
+  for (const [index, rawItem] of rawItems.entries()) {
+    const item = rawItem as Partial<AiRecommendationItem> & {
+      id?: unknown;
+      title?: unknown;
+      destination?: unknown;
+    };
+    const resolvedTourId = resolveAiCandidateTourId(item, candidateTours, candidateLookup);
+    if (!resolvedTourId || seenTourIds.has(resolvedTourId)) continue;
+    seenTourIds.add(resolvedTourId);
+
+    const validatedIndex = validatedItems.length;
+    validatedItems.push({
+      tourId: resolvedTourId,
       score: Number.isFinite(Number(item.score)) ? Number(item.score) : 80 - index,
-      reason: index < MAX_AI_COMMENTARY_ITEMS
-        ? getConcreteAiReason(item.reason, primitiveByTourId.get(String(item.tourId)))
+      reason: validatedIndex < MAX_AI_COMMENTARY_ITEMS
+        ? getConcreteAiReason(item.reason, primitiveByTourId.get(resolvedTourId))
         : undefined,
-      matchedSignals: index < MAX_AI_COMMENTARY_ITEMS
-        ? getConcreteMatchedSignals(item.matchedSignals, primitiveByTourId.get(String(item.tourId)))
+      matchedSignals: validatedIndex < MAX_AI_COMMENTARY_ITEMS
+        ? getConcreteMatchedSignals(item.matchedSignals, primitiveByTourId.get(resolvedTourId))
         : [],
-    }));
+    });
+  }
+
+  return validatedItems;
 }
 
 function getConflictSeverity(reasons: string[]) {
@@ -3790,19 +3884,19 @@ function auditAiRecommendations(
 
   const supplementalItems = rankedSupplementalItems
     .filter((item) => item.score > 0)
-    .slice(0, MAX_AI_OUTPUT_ITEMS);
+    .slice(0, MAX_AI_RANKED_ITEMS);
 
   const reserveItems = rankedSupplementalItems
     .filter((item) => item.score <= 0)
     .map((item, index) => ({
       ...item,
-      score: Math.max(1, MAX_AI_OUTPUT_ITEMS - index),
+      score: Math.max(1, MAX_AI_RANKED_ITEMS - index),
     }))
-    .slice(0, Math.max(0, MAX_AI_OUTPUT_ITEMS - auditedAiItems.length - supplementalItems.length));
+    .slice(0, Math.max(0, MAX_AI_RANKED_ITEMS - auditedAiItems.length - supplementalItems.length));
 
   return [...auditedAiItems, ...supplementalItems, ...reserveItems]
     .sort((a, b) => b.score - a.score)
-    .slice(0, MAX_AI_OUTPUT_ITEMS);
+    .slice(0, MAX_AI_RANKED_ITEMS);
 }
 
 function normalizeIntent(value: unknown): AiTravelIntent | null {
@@ -4030,6 +4124,9 @@ async function callAiApi(params: {
 function getAiFailureDetail(error: unknown) {
   if (!(error instanceof Error)) return 'AI service unavailable';
   const message = error.message.replace(/\s+/g, ' ').trim();
+  if (message === 'AI returned no valid tour ids') {
+    return 'AI 排序结果未能稳定映射到当前候选，已自动切回本地排序';
+  }
   return message || 'AI service unavailable';
 }
 
@@ -4378,14 +4475,16 @@ export async function requestAiRecommendations({
       effectiveIntent,
     );
 
-    if (aiItems.length === 0) {
-      throw new Error('AI returned no valid tour ids');
-    }
+    const rankedAiItems = aiItems.length > 0
+      ? aiItems
+      : compactedLocalItems.slice(0, MAX_AI_RANKED_ITEMS);
 
     const baseMergedItems = padRecommendationItems(
-      mergeAiAndLocalRecommendations(aiItems, compactedLocalItems),
+      mergeAiAndLocalRecommendations(rankedAiItems, compactedLocalItems),
       localItemsForMerge,
     );
+    const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
+    const mergedCandidateTours = wideAvailableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));
     const topWeatherTourIds = new Set(baseMergedItems.slice(0, 8).map((item) => item.tourId));
     const destinationWeatherCandidates = useWeatherResearch
       ? buildDestinationWeatherCandidates(
@@ -4414,10 +4513,10 @@ export async function requestAiRecommendations({
     const mergedItems = rewriteRecommendationCopy({
       items: attachWeatherGuidanceToItems(
         baseMergedItems,
-        compactedCandidateTours,
+        mergedCandidateTours,
         destinationWeatherInsights,
       ),
-      candidateTours: compactedCandidateTours,
+      candidateTours: mergedCandidateTours,
       destinationWeatherInsights,
       intent: effectiveIntent,
       weatherContext,
@@ -4426,12 +4525,12 @@ export async function requestAiRecommendations({
     emitProgress(onProgress, {
       stage: 'completed',
       label: '推荐结果已生成',
-      detail: `已完成排序，并置顶 ${mergedItems.length} 条候选线路。`,
+      detail: `已完成排序，给出 ${countCommentaryItems(mergedItems)} 条建议，并展示 ${mergedItems.length} 条匹配线路。`,
       progress: 100,
       substeps: withActiveSubstep(
         [
           { id: 'ranked', label: '排序结果已完成' },
-          { id: 'top', label: '置顶匹配线路' },
+          { id: 'top', label: '置顶建议线路' },
           { id: 'ready', label: '返回推荐摘要' },
         ],
         'ready',
@@ -4443,7 +4542,7 @@ export async function requestAiRecommendations({
       summary: finalizeRecommendationSummary({
         aiSummary: typeof aiResponse.summary === 'string' ? aiResponse.summary : '',
         items: mergedItems,
-        candidateTours: compactedCandidateTours,
+        candidateTours: mergedCandidateTours,
         weatherContext,
         destinationWeatherInsights,
         intent: effectiveIntent,
@@ -4455,7 +4554,9 @@ export async function requestAiRecommendations({
       status: {
         mode: 'ai',
         label: 'AI 已完成推荐',
-        detail: `已结合需求理解、天气和候选线路排序，输出 ${mergedItems.length} 条结果。`,
+        detail: aiItems.length > 0
+          ? `已结合需求理解、天气和候选排序，给出 ${countCommentaryItems(mergedItems)} 条建议，并展示 ${mergedItems.length} 条匹配结果。`
+          : `AI 已完成需求理解，但排序结果未稳定映射到候选，已自动改用本地排序并展示 ${mergedItems.length} 条匹配结果。`,
       },
       preferenceMemory: nextPreferenceMemory,
     };
