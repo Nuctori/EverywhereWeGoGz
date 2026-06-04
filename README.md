@@ -56,8 +56,12 @@ src/
 
 ## 部署
 
-仓库已配置 GitHub Pages workflow。push 到 `master` 或手动触发 `.github/workflows/deploy.yml` 后，会自动构建并发布 `dist/` 到 GitHub Pages。
+当前仓库默认按 `Vercel` 静态站方式部署：
 
-构建时会注入 `APP_BASE=EverywhereWeGoGz`，这样静态资源路径会自动适配仓库 Pages 路径。
+- 构建命令：`npm run build`
+- 输出目录：`dist`
+- 部署配置：`vercel.json`
 
 部署前构建会重新生成 `public/data` 下的 JSON、详情分片和元信息，并执行数据完整性审计。
+
+如果要在 Vercel 上接管此仓库，直接导入 GitHub 仓库即可；不再依赖 GitHub Pages 或 Cloudflare Workers/Pages 配置。
