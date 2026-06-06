@@ -44,9 +44,15 @@ jobs:
         run: npm run build
         env:
           APP_BASE: EverywhereWeGoGz
-          VITE_AI_DEFAULT_BASE_URL: https://api.deepseek.com/v1
-          VITE_AI_DEFAULT_MODEL: deepseek-v4-flash
-          VITE_AI_DEFAULT_API_KEY_B64: c2stMjVkMjY5ZjNjNGRkNGU4NmFmMDg3YmEzNzE1MTk4Mzk=
+          VITE_AI_DEFAULT_BASE_URL: https://api.z.ai/api/paas/v4
+          VITE_AI_DEFAULT_MODEL: GLM-4.7-Flash
+          VITE_AI_DEFAULT_API_KEY_B64: MmMzZjFiNjZkMDc4NDk5N2E0NmZlYzk5MzllZGU2MDguSlJ0NWJSRFl6T2NVWVVadg==
+          VITE_AI_SECONDARY_BASE_URL: https://api.siliconflow.cn/v1
+          VITE_AI_SECONDARY_MODEL: Qwen/Qwen3.5-4B
+          VITE_AI_SECONDARY_API_KEY_B64: c2stcGF3ZGJzaXhucnhvY2NkY3VkeGVwbWhzZHdrZmtqcm5qeWZpemFlcnJ6eGF0bHdv
+          VITE_AI_FALLBACK_BASE_URL: https://api.deepseek.com/v1
+          VITE_AI_FALLBACK_MODEL: deepseek-v4-flash
+          VITE_AI_FALLBACK_API_KEY_B64: c2stMjVkMjY5ZjNjNGRkNGU4NmFmMDg3YmEzNzE1MTk4Mzk=
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

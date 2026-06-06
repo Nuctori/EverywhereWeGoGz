@@ -4054,6 +4054,7 @@ async function callAiApi(params: {
   maxTokens?: number;
 }) {
   let lastError: unknown = null;
+  const providerErrors: string[] = [];
   for (const config of params.configs) {
     const url = getChatCompletionsUrl(config.baseUrl);
     const requestBody = JSON.stringify({
@@ -4064,6 +4065,7 @@ async function callAiApi(params: {
       response_format: { type: 'json_object' },
       thinking: { type: 'disabled' },
     });
+    let providerLastError: unknown = null;
 
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
@@ -4111,13 +4113,23 @@ async function callAiApi(params: {
         return parseAiJson(content);
       } catch (error) {
         lastError = error;
+        providerLastError = error;
         if (attempt === 0) {
           await new Promise((resolve) => setTimeout(resolve, 600));
         }
       }
     }
+
+    const detail =
+      providerLastError instanceof Error
+        ? providerLastError.message.replace(/\s+/g, ' ').trim()
+        : `AI API failed [${config.model}]`;
+    providerErrors.push(detail || `AI API failed [${config.model}]`);
   }
 
+  if (providerErrors.length > 1) {
+    throw new Error(providerErrors.join(' | '));
+  }
   throw lastError instanceof Error ? lastError : new Error('AI API failed');
 }
 
