@@ -23,6 +23,7 @@ const ROUTE_ATLAS_MAX_EXAMPLES = 2;
 const MAX_RECENT_CONVERSATION_MESSAGES = 4;
 const AI_FAST_FALLBACK_TIMEOUT_MS = 9000;
 const AI_FREE_PROVIDER_TIMEOUT_MS = 18000;
+const AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS = 14000;
 const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 15000;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
@@ -4363,11 +4364,20 @@ async function callAiApi(params: {
   if (primaryConfig && secondaryConfig) {
     const primaryController = new AbortController();
     const secondaryController = new AbortController();
+    let foregroundTimeoutId: ReturnType<typeof setTimeout> | null = null;
+    const freeProviderPromise = Promise.any([
+      callSingleAiProvider({ ...params, config: primaryConfig, signal: primaryController.signal }),
+      callSingleAiProvider({ ...params, config: secondaryConfig, signal: secondaryController.signal }),
+    ]);
+    const foregroundTimeoutPromise = new Promise<never>((_, reject) => {
+      foregroundTimeoutId = setTimeout(() => {
+        primaryController.abort();
+        secondaryController.abort();
+        reject(new Error(`AI free provider foreground timeout after ${AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS}ms`));
+      }, AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS);
+    });
     try {
-      const result = await Promise.any([
-        callSingleAiProvider({ ...params, config: primaryConfig, signal: primaryController.signal }),
-        callSingleAiProvider({ ...params, config: secondaryConfig, signal: secondaryController.signal }),
-      ]);
+      const result = await Promise.race([freeProviderPromise, foregroundTimeoutPromise]);
       primaryController.abort();
       secondaryController.abort();
       return result;
@@ -4377,6 +4387,8 @@ async function callAiApi(params: {
         item instanceof Error ? item.message.replace(/\s+/g, ' ').trim() : 'AI API failed',
       ));
     } finally {
+      if (foregroundTimeoutId) clearTimeout(foregroundTimeoutId);
+      freeProviderPromise.catch(() => undefined);
       primaryController.abort();
       secondaryController.abort();
     }
