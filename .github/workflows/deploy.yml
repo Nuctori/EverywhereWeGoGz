@@ -50,6 +50,9 @@ jobs:
           VITE_AI_SECONDARY_BASE_URL: https://api.siliconflow.cn/v1
           VITE_AI_SECONDARY_MODEL: Qwen/Qwen3.5-4B
           VITE_AI_SECONDARY_API_KEY_B64: c2stcGF3ZGJzaXhucnhvY2NkY3VkeGVwbWhzZHdrZmtqcm5qeWZpemFlcnJ6eGF0bHdv
+          VITE_AI_TERTIARY_BASE_URL: https://openrouter.ai/api/v1
+          VITE_AI_TERTIARY_MODEL: z-ai/glm-4.5-air:free
+          VITE_AI_TERTIARY_API_KEY_B64: c2stb3ItdjEtZTlkNGY2YmViOTk3NzNkZjc5NWEwMDNlM2NlYzQzYzE5NzI5YzQxYmY4MTk0ZGRhMjZmN2RkNTU1NGU5NzMwZg==
           VITE_AI_FALLBACK_BASE_URL: https://api.deepseek.com/v1
           VITE_AI_FALLBACK_MODEL: deepseek-v4-flash
           VITE_AI_FALLBACK_API_KEY_B64: c2stMjVkMjY5ZjNjNGRkNGU4NmFmMDg3YmEzNzE1MTk4Mzk=

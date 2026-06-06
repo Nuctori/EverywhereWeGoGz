@@ -2577,6 +2577,14 @@ function getSecondaryApiKey() {
   );
 }
 
+function getTertiaryApiKey() {
+  return (
+    decodeDefaultApiKey(readRuntimeEnv('VITE_AI_TERTIARY_API_KEY_B64')) ||
+    readRuntimeEnv('VITE_AI_TERTIARY_API_KEY') ||
+    ''
+  );
+}
+
 function getFallbackApiKey() {
   return (
     decodeDefaultApiKey(readRuntimeEnv('VITE_AI_FALLBACK_API_KEY_B64')) ||
@@ -2639,13 +2647,18 @@ function getResolvedAiConfigs(override?: Partial<AiProviderConfig>): AiProviderC
     baseUrl: readRuntimeEnv('VITE_AI_SECONDARY_BASE_URL') || '',
     model: readRuntimeEnv('VITE_AI_SECONDARY_MODEL') || '',
   });
+  const tertiaryConfig = buildAiProviderConfig({
+    apiKey: getTertiaryApiKey(),
+    baseUrl: readRuntimeEnv('VITE_AI_TERTIARY_BASE_URL') || '',
+    model: readRuntimeEnv('VITE_AI_TERTIARY_MODEL') || '',
+  });
   const fallbackConfig = buildAiProviderConfig({
     apiKey: getFallbackApiKey(),
     baseUrl: readRuntimeEnv('VITE_AI_FALLBACK_BASE_URL') || readRuntimeEnv('DEEPSEEK_BASE_URL') || '',
     model: readRuntimeEnv('VITE_AI_FALLBACK_MODEL') || readRuntimeEnv('DEEPSEEK_MODEL') || '',
   });
 
-  const configs = [primaryConfig, secondaryConfig, fallbackConfig].filter((config): config is AiProviderConfig => Boolean(config));
+  const configs = [primaryConfig, secondaryConfig, tertiaryConfig, fallbackConfig].filter((config): config is AiProviderConfig => Boolean(config));
   return configs.filter((config, index) =>
     configs.findIndex((candidate) => sameAiProviderConfig(candidate, config)) === index,
   );
@@ -4259,12 +4272,47 @@ function getProviderTimeoutMs(config: AiProviderConfig) {
   return AI_DEFAULT_PROVIDER_TIMEOUT_MS;
 }
 
+function getProviderRequestHeaders(config: AiProviderConfig): Record<string, string> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${config.apiKey}`,
+  };
+  if (`${config.baseUrl} ${config.model}`.toLowerCase().includes('openrouter')) {
+    headers['HTTP-Referer'] = 'https://nuctori.github.io/EverywhereWeGoGz/';
+    headers['X-OpenRouter-Title'] = 'EverywhereWeGoGz';
+  }
+  return headers;
+}
+
+function buildAiRequestBody(config: AiProviderConfig, messages: ReturnType<typeof buildAiMessages>, maxTokens?: number) {
+  const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
+  const body: Record<string, unknown> = {
+    model: config.model,
+    messages: normalizeMessagesForProvider(messages),
+    temperature: 0.25,
+    max_tokens: maxTokens ?? 2048,
+    response_format: { type: 'json_object' },
+    thinking: { type: 'disabled' },
+  };
+
+  if (providerKey.includes('openrouter')) {
+    body.reasoning = { effort: 'none', exclude: true };
+    body.include_reasoning = false;
+  }
+
+  return JSON.stringify(body);
+}
+
 function normalizeAiProviderError(error: unknown, config: AiProviderConfig) {
   if (error instanceof DOMException && error.name === 'AbortError') {
     return new Error(`AI API timeout [${config.model}] after ${getProviderTimeoutMs(config)}ms`);
   }
   if (error instanceof Error) return error;
   return new Error(`AI API failed [${config.model}]`);
+}
+
+function isPaidFallbackProvider(config: AiProviderConfig) {
+  return `${config.baseUrl} ${config.model}`.toLowerCase().includes('deepseek');
 }
 
 async function callSingleAiProvider(params: {
@@ -4275,14 +4323,7 @@ async function callSingleAiProvider(params: {
 }) {
   const { config } = params;
   const url = getChatCompletionsUrl(config.baseUrl);
-  const requestBody = JSON.stringify({
-    model: config.model,
-    messages: normalizeMessagesForProvider(params.messages),
-    temperature: 0.25,
-    max_tokens: params.maxTokens ?? 2048,
-    response_format: { type: 'json_object' },
-    thinking: { type: 'disabled' },
-  });
+  const requestBody = buildAiRequestBody(config, params.messages, params.maxTokens);
   let providerLastError: Error | null = null;
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -4292,10 +4333,7 @@ async function callSingleAiProvider(params: {
         url,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${config.apiKey}`,
-          },
+          headers: getProviderRequestHeaders(config),
           body: requestBody,
           signal: params.signal,
         },
@@ -4359,27 +4397,26 @@ async function callAiApi(params: {
   maxTokens?: number;
 }) {
   const providerErrors: string[] = [];
-  const [primaryConfig, secondaryConfig, ...fallbackConfigs] = params.configs;
+  const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
+  const fallbackConfigs = params.configs.filter(isPaidFallbackProvider);
 
-  if (primaryConfig && secondaryConfig) {
-    const primaryController = new AbortController();
-    const secondaryController = new AbortController();
+  if (foregroundConfigs.length > 0) {
+    const controllers = foregroundConfigs.map(() => new AbortController());
     let foregroundTimeoutId: ReturnType<typeof setTimeout> | null = null;
-    const freeProviderPromise = Promise.any([
-      callSingleAiProvider({ ...params, config: primaryConfig, signal: primaryController.signal }),
-      callSingleAiProvider({ ...params, config: secondaryConfig, signal: secondaryController.signal }),
-    ]);
+    const foregroundProviderPromise = Promise.any(
+      foregroundConfigs.map((config, index) =>
+        callSingleAiProvider({ ...params, config, signal: controllers[index].signal }),
+      ),
+    );
     const foregroundTimeoutPromise = new Promise<never>((_, reject) => {
       foregroundTimeoutId = setTimeout(() => {
-        primaryController.abort();
-        secondaryController.abort();
+        controllers.forEach((controller) => controller.abort());
         reject(new Error(`AI free provider foreground timeout after ${AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS}ms`));
       }, AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS);
     });
     try {
-      const result = await Promise.race([freeProviderPromise, foregroundTimeoutPromise]);
-      primaryController.abort();
-      secondaryController.abort();
+      const result = await Promise.race([foregroundProviderPromise, foregroundTimeoutPromise]);
+      controllers.forEach((controller) => controller.abort());
       return result;
     } catch (error) {
       const errors = error instanceof AggregateError ? error.errors : [error];
@@ -4388,15 +4425,8 @@ async function callAiApi(params: {
       ));
     } finally {
       if (foregroundTimeoutId) clearTimeout(foregroundTimeoutId);
-      freeProviderPromise.catch(() => undefined);
-      primaryController.abort();
-      secondaryController.abort();
-    }
-  } else if (primaryConfig) {
-    try {
-      return await callSingleAiProvider({ ...params, config: primaryConfig });
-    } catch (error) {
-      providerErrors.push(error instanceof Error ? error.message.replace(/\s+/g, ' ').trim() : 'AI API failed');
+      foregroundProviderPromise.catch(() => undefined);
+      controllers.forEach((controller) => controller.abort());
     }
   }
 

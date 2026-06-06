@@ -271,6 +271,19 @@ export function AiRecommendPanel({
   const hasResult = Boolean(result && result.items.length > 0);
   const toursReady = !toursLoading && tours.length > 0;
   const resultStatusMeta = getResultStatusMeta(result);
+  const lastUserPrompt = useMemo(
+    () => [...messages].reverse().find((message) => message.role === 'user')?.content.trim() || '',
+    [messages],
+  );
+  const trimmedInput = input.trim();
+  const canSubmitPrompt = Boolean(trimmedInput || lastUserPrompt);
+  const submitButtonLabel = loading
+    ? '推荐中'
+    : trimmedInput
+      ? '推荐线路'
+      : lastUserPrompt
+        ? '重新推荐'
+        : '输入需求后推荐';
 
   const stopSpeechRecognition = useCallback((abort = false) => {
     const recognition = speechRecognitionRef.current;
@@ -615,11 +628,11 @@ export function AiRecommendPanel({
             <Button
               type="button"
               className="h-9 rounded-xl bg-emerald-700 px-4 text-xs hover:bg-emerald-800"
-              onClick={() => submitPrompt()}
-              disabled={loading || !input.trim() || !toursReady}
+              onClick={() => submitPrompt(trimmedInput || lastUserPrompt)}
+              disabled={loading || !canSubmitPrompt || !toursReady}
             >
               {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              推荐线路
+              {submitButtonLabel}
             </Button>
           </div>
         </div>
