@@ -2429,15 +2429,19 @@ function normalizeAiSemanticNotes(value: unknown): AiRecommendationSemanticNotes
   if (!value || typeof value !== 'object') return undefined;
   const raw = value as {
     worldKnowledgeUse?: unknown;
+    w?: unknown;
     softCriteria?: unknown;
+    sc?: unknown;
     cannotAssert?: unknown;
+    ca?: unknown;
     caveat?: unknown;
+    cv?: unknown;
   };
   const notes: AiRecommendationSemanticNotes = {
-    worldKnowledgeUse: normalizeAiText(raw.worldKnowledgeUse, 180) || undefined,
-    softCriteria: normalizeAiTextList(raw.softCriteria, 5, 60),
-    cannotAssert: normalizeAiTextList(raw.cannotAssert, 5, 60),
-    caveat: normalizeAiText(raw.caveat, 160) || undefined,
+    worldKnowledgeUse: normalizeAiText(raw.worldKnowledgeUse ?? raw.w, 180) || undefined,
+    softCriteria: normalizeAiTextList(raw.softCriteria ?? raw.sc, 5, 60),
+    cannotAssert: normalizeAiTextList(raw.cannotAssert ?? raw.ca, 5, 60),
+    caveat: normalizeAiText(raw.caveat ?? raw.cv, 160) || undefined,
   };
   return notes.worldKnowledgeUse || notes.softCriteria.length || notes.cannotAssert.length || notes.caveat
     ? notes
@@ -3862,17 +3866,17 @@ function buildLiteAiMessages(params: {
     candidates: compactCandidatesForLitePrompt(params.candidates),
     schema: {
       intentNotes: {
-        worldKnowledgeUse: '一句中文，说明如何用世界知识理解 q 的软语义；没有软语义可省略',
-        softCriteria: 'string[]，最多4个软语义标准',
-        cannotAssert: 'string[]，候选无证据时不能断言的事实',
-        caveat: '一句中文，说明近似替代或证据边界',
+        w: '短句，如何用世界知识理解 q 的软语义',
+        sc: 'string[]，最多4个软语义标准',
+        ca: 'string[]，候选无证据时不能断言的事实',
+        cv: '短句，近似替代或证据边界',
       },
       items: [{
         tourId: '候选 id',
         score: '0-100 number',
-        semanticFit: '最多一句中文，解释该候选如何贴近软语义或为何只是近似替代',
-        semanticSignals: 'string[]，最多3个短词',
-        semanticBoundary: '最多一句中文，候选无证据时说明不能断言什么',
+        sf: '仅前8条需要，24字内，贴近软语义或近似替代',
+        ss: '仅前8条需要，最多3个短词',
+        sb: '仅前8条需要，24字内，不能断言的边界',
       }],
       itemCountLimit: MAX_AI_RANKED_ITEMS,
     },
@@ -3880,12 +3884,14 @@ function buildLiteAiMessages(params: {
       '只输出 JSON，不要 Markdown。',
       '返回 intentNotes 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
+      '必须用紧凑 JSON；所有中文短句不超过24字；不要解释长段落。',
+      `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
       '优先 match，除非没有足够 match 才使用 soft_conflict/fallback。',
       '结合 q、it、wx 和 atoms/cats 判断软语义与天气取舍。',
       '扶贫/公益/贫困/研学/乡村这类软语义可用世界知识做近似判断；但没有候选原文证据时不能断言为扶贫项目、贫困地区或公益活动。',
       '当 q 同时提到天气和扶贫/贫困/公益/乡村时，先按县域、乡村、古村、农家、茶田、山水、红色文化、农文旅、非都市体验找近似候选，再比较天气。',
-      '都市酒店、港澳购物、签证、纯住宿、豪华自助若缺少县域/乡村/农文旅线索，semanticFit 必须标为语义较弱补位，score 不应高于更贴近软语义的候选。',
-      'semanticFit 要写清世界知识下的近似逻辑，例如县域/乡村/非都市/低预算/自然民俗；semanticBoundary 写不能断言的边界。',
+      '都市酒店、港澳购物、签证、纯住宿、豪华自助若缺少县域/乡村/农文旅线索，sf 必须标为语义较弱补位，score 不应高于更贴近软语义的候选。',
+      'sf 写世界知识近似逻辑，如县域/乡村/非都市/低预算/自然民俗；sb 写不能断言的边界。',
     ],
   };
 
@@ -4143,6 +4149,9 @@ function validateAiItems(
       id?: unknown;
       title?: unknown;
       destination?: unknown;
+      sf?: unknown;
+      ss?: unknown;
+      sb?: unknown;
     };
     const resolvedTourId = resolveAiCandidateTourId(item, candidateTours, candidateLookup);
     if (!resolvedTourId || seenTourIds.has(resolvedTourId)) continue;
@@ -4150,9 +4159,9 @@ function validateAiItems(
 
     const validatedIndex = validatedItems.length;
     const primitive = primitiveByTourId.get(resolvedTourId);
-    const semanticFit = normalizeAiText(item.semanticFit, 140);
-    const semanticSignals = normalizeAiTextList(item.semanticSignals, 4, 40);
-    const semanticBoundary = normalizeAiText(item.semanticBoundary, 120);
+    const semanticFit = normalizeAiText(item.semanticFit ?? item.sf, 140);
+    const semanticSignals = normalizeAiTextList(item.semanticSignals ?? item.ss, 4, 40);
+    const semanticBoundary = normalizeAiText(item.semanticBoundary ?? item.sb, 120);
     const matchedSignals = validatedIndex < MAX_AI_COMMENTARY_ITEMS
       ? getConcreteMatchedSignals(item.matchedSignals, primitive)
       : [];
@@ -5037,7 +5046,7 @@ export async function requestAiRecommendations({
         preferenceMemory: nextPreferenceMemory,
       }),
       maxTokens: 1600,
-      liteMaxTokens: 720,
+      liteMaxTokens: 1000,
     }) as { intent?: unknown; intentNotes?: unknown; summary?: unknown; items?: unknown };
     const semanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
     const rankingIntent = normalizeBudgetPriorityByUserText(
