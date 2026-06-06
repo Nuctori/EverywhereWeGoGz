@@ -352,15 +352,7 @@ function compactRouteAtlasForPrompt(routeAtlas: RouteAtlas) {
     c: group.count,
     pr: compactRangeForPrompt(group.priceRange),
     dr: compactRangeForPrompt(group.dayRange),
-    k: group.keywords,
-    ex: group.examples.map((example) => [
-      example.id,
-      example.title,
-      example.price,
-      example.days,
-      example.destination,
-      example.atoms,
-    ]),
+    k: compactPromptStrings(group.keywords, 3, 10),
   }));
 }
 
@@ -384,37 +376,49 @@ function sortCandidatesForPrompt(candidates: ReturnType<typeof compactCandidates
   );
 }
 
+function compactPromptText(value: string | null | undefined, maxLength = 36) {
+  const text = (value || '')
+    .replace(/\s+/g, ' ')
+    .replace(/[＊*｜|＜＞<>【】]/g, ' ')
+    .trim();
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength);
+}
+
+function compactPromptStrings(
+  values: Array<string | null | undefined>,
+  maxItems: number,
+  maxLength = 18,
+) {
+  return uniqueStrings(values)
+    .map((value) => compactPromptText(value, maxLength))
+    .filter(Boolean)
+    .slice(0, maxItems);
+}
+
 function compactCandidatesForPrompt(candidates: ReturnType<typeof compactCandidates>) {
   return candidates.map((candidate) => [
     candidate.id,
-    candidate.title,
+    compactPromptText(candidate.title, 52),
     candidate.destination,
     candidate.tripDays,
     candidate.price,
     candidate.theme,
     candidate.source,
-    candidate.transportType,
-    candidate.accommodationLevel,
-    candidate.meals,
     candidate.leisureLevel,
-    candidate.rating,
-    candidate.groupSize,
     candidate.isHot ? 1 : 0,
     candidate.matchStatus,
-    candidate.routeGroup,
-    candidate.schedule.departureDates.slice(0, 4),
-    candidate.schedule.departureWeekdays.slice(0, 4),
-    candidate.schedule.timeOfDayHints.slice(0, 2),
+    compactPromptText(candidate.routeGroup, 26),
+    candidate.schedule.departureDates.slice(0, 3),
+    candidate.schedule.departureWeekdays.slice(0, 3),
     candidate.schedule.hasEveningOrNightDeparture ? 1 : 0,
-    candidate.priceContext.poolPercentile ?? null,
     candidate.priceContext.pricePerDay ?? null,
-    candidate.tags.slice(0, 4),
-    candidate.highlights.slice(0, 3),
-    candidate.semanticAtoms.slice(0, 6),
-    candidate.experienceCategories.slice(0, 4),
-    candidate.seasonalComfortAtoms.slice(0, 4),
-    candidate.suitableFor.slice(0, 3),
-    candidate.conflictReasons.slice(0, 3),
+    compactPromptStrings(candidate.tags, 2, 10),
+    compactPromptStrings(candidate.highlights, 2, 22),
+    compactPromptStrings(candidate.semanticAtoms, 4, 16),
+    compactPromptStrings(candidate.experienceCategories, 3, 8),
+    compactPromptStrings(candidate.seasonalComfortAtoms, 2, 16),
+    compactPromptStrings(candidate.conflictReasons, 2, 18),
   ]);
 }
 
@@ -425,9 +429,9 @@ function buildStablePromptPrefix(params: {
   return {
     v: AI_CACHE_PROMPT_VERSION,
     ck: [
-      'id', 'title', 'destination', 'days', 'price', 'theme', 'source', 'transport', 'stay', 'meals',
-      'pace', 'rating', 'group', 'hot', 'match', 'routeGroup', 'dates', 'weekdays', 'timeHints', 'night',
-      'pricePct', 'pricePerDay', 'tags', 'highlights', 'atoms', 'cats', 'seasonAtoms', 'fit', 'conflicts',
+      'id', 'title', 'destination', 'days', 'price', 'theme', 'source',
+      'pace', 'hot', 'match', 'routeGroup', 'dates', 'weekdays', 'night',
+      'pricePerDay', 'tags', 'highlights', 'atoms', 'cats', 'seasonAtoms', 'conflicts',
     ],
     candidates: compactCandidatesForPrompt(sortCandidatesForPrompt(params.candidates)),
     routeAtlas: compactRouteAtlasForPrompt(params.routeAtlas),
@@ -3949,103 +3953,142 @@ function normalizeMessagesForProvider(messages: ReturnType<typeof buildAiMessage
   ];
 }
 
+function normalizeAiProviderError(error: unknown, config: AiProviderConfig) {
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    return new Error(`AI API timeout [${config.model}] after ${AI_PROVIDER_TIMEOUT_MS}ms`);
+  }
+  if (error instanceof Error) return error;
+  return new Error(`AI API failed [${config.model}]`);
+}
+
+async function callSingleAiProvider(params: {
+  config: AiProviderConfig;
+  messages: ReturnType<typeof buildAiMessages>;
+  maxTokens?: number;
+}) {
+  const { config } = params;
+  const url = getChatCompletionsUrl(config.baseUrl);
+  const requestBody = JSON.stringify({
+    model: config.model,
+    messages: normalizeMessagesForProvider(params.messages),
+    temperature: 0.25,
+    max_tokens: params.maxTokens ?? 2048,
+    response_format: { type: 'json_object' },
+    thinking: { type: 'disabled' },
+  });
+  let providerLastError: Error | null = null;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    let shouldRetry = attempt === 0;
+    try {
+      const response = await fetchWithTimeout(
+        url,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${config.apiKey}`,
+          },
+          body: requestBody,
+        },
+        AI_PROVIDER_TIMEOUT_MS,
+      );
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        let providerMessage = response.statusText || '';
+        shouldRetry = response.status === 429 || response.status >= 500;
+        if (errorBody) {
+          try {
+            const parsed = JSON.parse(errorBody) as {
+              error?: { message?: string; code?: string; type?: string };
+              message?: string;
+            };
+            providerMessage =
+              parsed.error?.message ||
+              parsed.message ||
+              parsed.error?.code ||
+              parsed.error?.type ||
+              providerMessage;
+          } catch {
+            providerMessage = errorBody.slice(0, 180) || providerMessage;
+          }
+        }
+        throw new Error(
+          providerMessage
+            ? `AI API failed [${config.model}]: ${response.status} ${providerMessage}`
+            : `AI API failed [${config.model}]: ${response.status}`,
+        );
+      }
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content;
+      if (typeof content !== 'string') {
+        shouldRetry = false;
+        throw new Error(`AI API response missing message content [${config.model}]`);
+      }
+
+      return parseAiJson(content);
+    } catch (error) {
+      providerLastError = normalizeAiProviderError(error, config);
+      if (providerLastError.message.includes('timeout')) {
+        shouldRetry = false;
+      }
+      if (shouldRetry && attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, AI_PROVIDER_RETRY_DELAY_MS));
+      } else {
+        break;
+      }
+    }
+  }
+
+  throw providerLastError || new Error(`AI API failed [${config.model}]`);
+}
+
 async function callAiApi(params: {
   configs: AiProviderConfig[];
   messages: ReturnType<typeof buildAiMessages>;
   maxTokens?: number;
 }) {
-  let lastError: unknown = null;
   const providerErrors: string[] = [];
-  for (const config of params.configs) {
-    const url = getChatCompletionsUrl(config.baseUrl);
-    const requestBody = JSON.stringify({
-      model: config.model,
-      messages: normalizeMessagesForProvider(params.messages),
-      temperature: 0.25,
-      max_tokens: params.maxTokens ?? 2048,
-      response_format: { type: 'json_object' },
-      thinking: { type: 'disabled' },
-    });
-    let providerLastError: unknown = null;
+  const [primaryConfig, secondaryConfig, ...fallbackConfigs] = params.configs;
 
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      let shouldRetry = attempt === 0;
-      try {
-        const response = await fetchWithTimeout(
-          url,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${config.apiKey}`,
-            },
-            body: requestBody,
-          },
-          AI_PROVIDER_TIMEOUT_MS,
-        );
-
-        if (!response.ok) {
-          const errorBody = await response.text();
-          let providerMessage = response.statusText || '';
-          shouldRetry = response.status === 429 || response.status >= 500;
-          if (errorBody) {
-            try {
-              const parsed = JSON.parse(errorBody) as {
-                error?: { message?: string; code?: string; type?: string };
-                message?: string;
-              };
-              providerMessage =
-                parsed.error?.message ||
-                parsed.message ||
-                parsed.error?.code ||
-                parsed.error?.type ||
-                providerMessage;
-            } catch {
-              providerMessage = errorBody.slice(0, 180) || providerMessage;
-            }
-          }
-          throw new Error(
-            providerMessage
-              ? `AI API failed [${config.model}]: ${response.status} ${providerMessage}`
-              : `AI API failed [${config.model}]: ${response.status}`,
-          );
-        }
-
-        const data = await response.json();
-        const content = data.choices?.[0]?.message?.content;
-        if (typeof content !== 'string') {
-          shouldRetry = false;
-          throw new Error(`AI API response missing message content [${config.model}]`);
-        }
-
-        return parseAiJson(content);
-      } catch (error) {
-        lastError = error;
-        providerLastError = error;
-        if (error instanceof DOMException && error.name === 'AbortError') {
-          providerLastError = new Error(`AI API timeout [${config.model}] after ${AI_PROVIDER_TIMEOUT_MS}ms`);
-          lastError = providerLastError;
-          shouldRetry = false;
-        }
-        if (shouldRetry && attempt === 0) {
-          await new Promise((resolve) => setTimeout(resolve, AI_PROVIDER_RETRY_DELAY_MS));
-        } else {
-          break;
-        }
-      }
+  if (primaryConfig && secondaryConfig) {
+    try {
+      return await Promise.any([
+        callSingleAiProvider({ ...params, config: primaryConfig }),
+        callSingleAiProvider({ ...params, config: secondaryConfig }),
+      ]);
+    } catch (error) {
+      const errors = error instanceof AggregateError ? error.errors : [error];
+      providerErrors.push(...errors.map((item) =>
+        item instanceof Error ? item.message.replace(/\s+/g, ' ').trim() : 'AI API failed',
+      ));
     }
+  } else if (primaryConfig) {
+    try {
+      return await callSingleAiProvider({ ...params, config: primaryConfig });
+    } catch (error) {
+      providerErrors.push(error instanceof Error ? error.message.replace(/\s+/g, ' ').trim() : 'AI API failed');
+    }
+  }
 
-    const detail =
-      providerLastError instanceof Error
-        ? providerLastError.message.replace(/\s+/g, ' ').trim()
-        : `AI API failed [${config.model}]`;
-    providerErrors.push(detail || `AI API failed [${config.model}]`);
+  for (const config of fallbackConfigs) {
+    try {
+      return await callSingleAiProvider({ ...params, config });
+    } catch (error) {
+      providerErrors.push(
+        error instanceof Error
+          ? error.message.replace(/\s+/g, ' ').trim()
+          : `AI API failed [${config.model}]`,
+      );
+    }
   }
 
   if (providerErrors.length > 1) {
     throw new Error(providerErrors.join(' | '));
   }
-  throw lastError instanceof Error ? lastError : new Error('AI API failed');
+  throw new Error(providerErrors[0] || 'AI API failed');
 }
 
 function getAiFailureDetail(error: unknown) {
