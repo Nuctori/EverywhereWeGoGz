@@ -773,6 +773,31 @@ function buildEffectiveUserText(
   return buildLocalRecommendationText(userText, preferenceMemory);
 }
 
+function shouldInheritPreferenceMemoryForTurn(
+  text: string,
+  intent: AiTravelIntent | null,
+  memory: AiPreferenceMemory | null | undefined,
+) {
+  if (!memory) return false;
+  const normalizedText = text.replace(/\s+/g, '');
+  const isRelativeTurn = /(上一轮|刚才|继续|沿用|保留|类似|这个|这些|上面|前面|再便宜|便宜一点|贵一点|轻松点|换一个|换成|不要|避开|剔除|更接近)/.test(
+    normalizedText,
+  );
+  const hasFreshHardSearch = Boolean(
+    intent?.budgetMax ||
+    intent?.budgetMin ||
+    intent?.tripDays ||
+    intent?.tripDaysMin ||
+    intent?.tripDaysMax ||
+    intent?.departureWithinDays ||
+    intent?.destinationHints?.length,
+  );
+
+  // 经验：新搜索不要继承上一轮目的地/风格，否则“500元以下扶贫路线”会被上一轮“云南/桂林”
+  // 污染成本地 fallback，并出现“阳朔=目的地贴合云南”这类明显错误。只有相对改写才继承记忆。
+  return isRelativeTurn || !hasFreshHardSearch;
+}
+
 function buildHardIntentFromText(
   text: string,
   activeFilters: FilterState,
@@ -3910,6 +3935,20 @@ function normalizeBudgetPriorityByUserText(
   return intent;
 }
 
+function normalizeMessagesForProvider(messages: ReturnType<typeof buildAiMessages>) {
+  const systemMessages = messages.filter((message) => message.role === 'system');
+  const nonSystemMessages = messages.filter((message) => message.role !== 'system');
+  if (systemMessages.length <= 1) return messages;
+
+  return [
+    {
+      role: 'system' as const,
+      content: systemMessages.map((message) => message.content).join('\n\n'),
+    },
+    ...nonSystemMessages,
+  ];
+}
+
 async function callAiApi(params: {
   configs: AiProviderConfig[];
   messages: ReturnType<typeof buildAiMessages>;
@@ -3921,7 +3960,7 @@ async function callAiApi(params: {
     const url = getChatCompletionsUrl(config.baseUrl);
     const requestBody = JSON.stringify({
       model: config.model,
-      messages: params.messages,
+      messages: normalizeMessagesForProvider(params.messages),
       temperature: 0.25,
       max_tokens: params.maxTokens ?? 2048,
       response_format: { type: 'json_object' },
@@ -4167,13 +4206,19 @@ export async function requestAiRecommendations({
 
   try {
     const intent = buildHardIntentFromText(text, activeFilters);
-    const nextPreferenceMemory = mergePreferenceMemory(basePreferenceMemory, intent);
+    const memoryForThisTurn = shouldInheritPreferenceMemoryForTurn(text, intent, basePreferenceMemory)
+      ? basePreferenceMemory
+      : null;
+    const nextPreferenceMemory = mergePreferenceMemory(memoryForThisTurn, intent);
     const effectiveIntent = mergeIntentWithMemory(intent, nextPreferenceMemory);
     const effectiveUserText = buildEffectiveUserText(text, nextPreferenceMemory);
     const intentDateWindow = buildDateWindowFromIntent(effectiveIntent);
     const wideAvailableCandidates = candidatePool.filter((tour) => {
       const primitive = buildTourPrimitive(tour);
-      return primitiveMatchesAvoid(primitive, effectiveIntent?.avoid).length === 0;
+      if (primitiveMatchesAvoid(primitive, effectiveIntent?.avoid).length > 0) return false;
+      if (effectiveIntent?.budgetMin && tour.price < effectiveIntent.budgetMin) return false;
+      if (effectiveIntent?.budgetMax && tour.price > effectiveIntent.budgetMax) return false;
+      return true;
     });
     let availableCandidates = wideAvailableCandidates;
 
@@ -4323,7 +4368,7 @@ export async function requestAiRecommendations({
       mergeAiRankingIntent(intent, rankingIntent),
       nextPreferenceMemory,
     );
-    const finalPreferenceMemory = mergePreferenceMemory(basePreferenceMemory, finalIntent);
+    const finalPreferenceMemory = mergePreferenceMemory(memoryForThisTurn, finalIntent);
     const finalEffectiveUserText = buildEffectiveUserText(text, finalPreferenceMemory);
     const compactedCandidateIds = new Set(aiCandidatePool.map((candidate) => candidate.id));
     const compactedCandidateTours = wideAvailableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
