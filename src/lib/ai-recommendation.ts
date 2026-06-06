@@ -3942,9 +3942,21 @@ function getAiProviderParseErrorLabel(config: AiProviderConfig, stage: string, d
 
 function parseAiProviderResponse(data: unknown, config: AiProviderConfig) {
   const usage = summarizeAiUsage(data);
-  const message = (data as {
-    choices?: Array<{ message?: { content?: unknown; reasoning?: unknown } }>;
-  })?.choices?.[0]?.message;
+  const choice = (data as {
+    choices?: Array<{
+      finish_reason?: unknown;
+      error?: { message?: string; code?: string };
+      message?: { content?: unknown; reasoning?: unknown };
+    }>;
+  })?.choices?.[0];
+  if (choice?.error || choice?.finish_reason === 'error') {
+    throw new Error(getAiProviderParseErrorLabel(
+      config,
+      'provider_error',
+      choice.error?.message || choice.error?.code || 'finish_reason=error',
+    ));
+  }
+  const message = choice?.message;
   const content = message?.content;
 
   if (typeof content !== 'string' || !content.trim()) {
@@ -4496,8 +4508,13 @@ function getProviderRequestHeaders(config: AiProviderConfig): Record<string, str
   return headers;
 }
 
-function isOpenRouterProvider(config: AiProviderConfig) {
-  return `${config.baseUrl} ${config.model}`.toLowerCase().includes('openrouter');
+function shouldUseLiteAiPrompt(config: AiProviderConfig) {
+  const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
+  return (
+    providerKey.includes('openrouter') ||
+    providerKey.includes('siliconflow') ||
+    providerKey.includes('qwen')
+  );
 }
 
 function buildAiRequestBody(
@@ -4545,8 +4562,9 @@ async function callSingleAiProvider(params: {
 }) {
   const { config } = params;
   const url = getChatCompletionsUrl(config.baseUrl);
-  const messages = isOpenRouterProvider(config) && params.liteMessages ? params.liteMessages : params.messages;
-  const maxTokens = isOpenRouterProvider(config) && params.liteMessages
+  const useLitePrompt = shouldUseLiteAiPrompt(config) && Boolean(params.liteMessages);
+  const messages = useLitePrompt && params.liteMessages ? params.liteMessages : params.messages;
+  const maxTokens = useLitePrompt
     ? params.liteMaxTokens ?? Math.min(params.maxTokens ?? 1600, 640)
     : params.maxTokens;
   const requestBody = buildAiRequestBody(config, messages, maxTokens);
