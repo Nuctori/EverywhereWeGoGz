@@ -2200,7 +2200,48 @@ function shouldKeepAiReason(reason: string, primitive: RecommendationPrimitive) 
   const trimmed = stripTerminalPunctuation(reason);
   if (trimmed.length < 18) return false;
   if (isGenericReason(trimmed)) return false;
+  if (hasUnsupportedPublicInterestClaim(trimmed, primitive)) return false;
   return reasonMentionsCandidateFact(trimmed, primitive);
+}
+
+function hasPublicInterestNeed(intent: AiTravelIntent | null, userText: string) {
+  const corpus = [
+    userText,
+    ...(intent?.semanticFocus || []),
+    ...(intent?.travelStyle || []),
+    ...(intent?.mustHave || []),
+  ].join(' ');
+  return /(扶贫|公益|贫穷|贫困|落后|欠发达|乡村振兴|助农)/.test(corpus);
+}
+
+function primitiveHasPublicInterestEvidence(primitive: RecommendationPrimitive) {
+  const corpus = [
+    primitive.title,
+    primitive.destination,
+    primitive.theme,
+    ...primitive.tags,
+    ...primitive.highlights,
+    ...primitive.semanticAtoms,
+  ].join(' ');
+  // 经验：这不是“扶贫路线词表推荐器”，只是一道事实审计。
+  // 模型可以用世界知识做软语义排序，但贫困/公益/扶贫属于事实性强标签；
+  // 候选没有这些证据时，文案只能说低预算/县域/乡村体验的近似替代，不能把普通目的地贴成贫困地区。
+  return /(扶贫|公益|慈善|助农|乡村振兴|乡村|村|古村|瑶寨|苗寨|侗寨|壮寨|民族村|农家|田园|梯田|县|县城|山区|支教|研学)/.test(corpus);
+}
+
+function hasUnsupportedPublicInterestClaim(reason: string, primitive: RecommendationPrimitive) {
+  if (!/(扶贫|公益|贫穷|贫困|落后|欠发达|经济相对|较落后|较弱|助农|乡村振兴)/.test(reason)) {
+    return false;
+  }
+  return !primitiveHasPublicInterestEvidence(primitive);
+}
+
+function buildPublicInterestAlternativeReason(primitive: RecommendationPrimitive) {
+  const baseReason = stripTerminalPunctuation(buildPrimitiveConcreteReason(primitive));
+  const evidence = primitiveHasPublicInterestEvidence(primitive)
+    ? '候选原语里有乡村、县域或公益相关线索，可作为该方向的优先候选'
+    : '候选没有显式扶贫/公益标注，只能按低预算和周边体验做近似替代';
+  return `${baseReason}；${evidence}`;
 }
 
 function getPrimitiveTitleFact(primitive: RecommendationPrimitive) {
@@ -2358,6 +2399,9 @@ function getConcreteMatchedSignals(
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
   const trimmed = typeof reason === 'string' ? reason.trim() : '';
   if (!primitive) return trimmed || '综合用户需求、天气和线路特点后较为合适';
+  if (trimmed && hasUnsupportedPublicInterestClaim(trimmed, primitive)) {
+    return buildPublicInterestAlternativeReason(primitive);
+  }
   // Experience: do not force every AI reason through a fixed price/weather/play checklist.
   // Soft needs such as public-interest, study travel, or rural value often explain fit through
   // world knowledge and candidate wording; overwriting those with local templates degrades copy.
@@ -2977,7 +3021,9 @@ function rewriteRecommendationCopy(params: {
 
     const insight = findWeatherInsightForPrimitive(primitive, params.destinationWeatherInsights);
     const fallbackReason = uniqueStrings([
-      buildPrimitiveConcreteReason(primitive),
+      hasPublicInterestNeed(params.intent, params.userText)
+        ? buildPublicInterestAlternativeReason(primitive)
+        : buildPrimitiveConcreteReason(primitive),
       buildWeatherReasonSuffix(primitive, insight),
     ]).join('。');
 
@@ -3627,6 +3673,7 @@ function buildAiMessages(params: {
     '如果给出了 departureWithinDays，并且候选池有对应未来班期，优先选窗口内未来班期，不要为了凑结果把旧班期排前面。',
     '如果用户否定某类体验，不要把它包装成推荐点；若候选不足，直接说明候选受限和替代逻辑。',
     '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选原语。',
+    '涉及扶贫、公益、贫穷、贫困、落后、欠发达等事实性强标签时，不能把普通城市/区县强行贴标签；候选没有显式证据时，只能写“候选未显式标注，按低预算、县域/乡村体验做近似替代”。',
     'reason 必须引用候选里真实存在的具体事实，例如 title、highlights、semanticAtoms；不要只写性价比高、班期多、综合匹配。',
     'summary 至少交代推荐方向、天气或季节判断，以及下单前最该注意的一件事。',
     '严格输出 JSON，不要 Markdown，不要额外解释。',
@@ -3675,7 +3722,7 @@ function buildAiMessages(params: {
     rq: [
       '优先具体玩法、地点、原子事实，不要空话。',
       '要解释预算、天数、班期、天气、轻松度与用户需求如何匹配。',
-      '如果用户提到扶贫、贫穷地方、公益、研学这类候选池未必显式打标的语义，基于世界知识和候选目的地/玩法做最接近判断，并在 intent.semanticFocus 与 reason 中保留该取舍。',
+      '如果用户提到扶贫、贫穷地方、公益、研学这类候选池未必显式打标的语义，基于世界知识和候选目的地/玩法做最接近判断；但贫困/落后/扶贫/公益只能在候选事实有证据时断言，否则写成近似替代。',
       '天气敏感项必须说清风险和取舍。',
       '可比较时直接说明这次为什么推 A 不推 B。',
       `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；第 ${MAX_AI_PROMPT_REASON_ITEMS + 1}-${MAX_AI_RANKED_ITEMS} 个只需要 tourId 和 score。`,
@@ -3731,6 +3778,13 @@ async function fetchWithTimeout(
   timeoutMs: number,
 ) {
   const controller = new AbortController();
+  const upstreamSignal = init?.signal;
+  const abortFromUpstream = () => controller.abort(upstreamSignal?.reason);
+  if (upstreamSignal?.aborted) {
+    controller.abort(upstreamSignal.reason);
+  } else {
+    upstreamSignal?.addEventListener('abort', abortFromUpstream, { once: true });
+  }
   const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
   try {
     return await fetch(input, {
@@ -3739,6 +3793,7 @@ async function fetchWithTimeout(
     });
   } finally {
     globalThis.clearTimeout(timeoutId);
+    upstreamSignal?.removeEventListener('abort', abortFromUpstream);
   }
 }
 
@@ -3750,6 +3805,7 @@ export const __aiRecommendationTestHooks = {
   collectAvoidHints,
   collectLiteralAvoidHints,
   compactCandidates,
+  getConcreteAiReason,
   getPrimitiveConflictReasons,
   matchesActiveDateFilters,
   matchesDateWindow,
@@ -4214,6 +4270,7 @@ async function callSingleAiProvider(params: {
   config: AiProviderConfig;
   messages: ReturnType<typeof buildAiMessages>;
   maxTokens?: number;
+  signal?: AbortSignal;
 }) {
   const { config } = params;
   const url = getChatCompletionsUrl(config.baseUrl);
@@ -4239,6 +4296,7 @@ async function callSingleAiProvider(params: {
             Authorization: `Bearer ${config.apiKey}`,
           },
           body: requestBody,
+          signal: params.signal,
         },
         getProviderTimeoutMs(config),
       );
@@ -4303,16 +4361,24 @@ async function callAiApi(params: {
   const [primaryConfig, secondaryConfig, ...fallbackConfigs] = params.configs;
 
   if (primaryConfig && secondaryConfig) {
+    const primaryController = new AbortController();
+    const secondaryController = new AbortController();
     try {
-      return await Promise.any([
-        callSingleAiProvider({ ...params, config: primaryConfig }),
-        callSingleAiProvider({ ...params, config: secondaryConfig }),
+      const result = await Promise.any([
+        callSingleAiProvider({ ...params, config: primaryConfig, signal: primaryController.signal }),
+        callSingleAiProvider({ ...params, config: secondaryConfig, signal: secondaryController.signal }),
       ]);
+      primaryController.abort();
+      secondaryController.abort();
+      return result;
     } catch (error) {
       const errors = error instanceof AggregateError ? error.errors : [error];
       providerErrors.push(...errors.map((item) =>
         item instanceof Error ? item.message.replace(/\s+/g, ' ').trim() : 'AI API failed',
       ));
+    } finally {
+      primaryController.abort();
+      secondaryController.abort();
     }
   } else if (primaryConfig) {
     try {

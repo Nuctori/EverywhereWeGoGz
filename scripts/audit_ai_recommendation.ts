@@ -12,6 +12,7 @@ const {
   collectAvoidHints,
   collectLiteralAvoidHints,
   compactCandidates,
+  getConcreteAiReason,
   getPrimitiveConflictReasons,
   matchesActiveDateFilters,
   matchesDateWindow,
@@ -473,6 +474,24 @@ const vagueReasonItems = validateAiItems({
   ],
 }, noisyAlternatives);
 assert.ok(vagueReasonItems[0].reason?.includes('沙扒湾') || vagueReasonItems[0].reason?.includes('沙滩'));
+
+const unsupportedPublicInterestPrimitive = buildTourPrimitive(candidate({
+  id: 'unsupported-public-interest',
+  title: '尚·悠享 增城2天',
+  destination: '广东',
+  duration: 2,
+  price: 399,
+  transportType: '大巴',
+  theme: '休闲度假',
+  tags: ['泳池', '亲子'],
+  highlights: ['恒温泳池', '室内全景天窗'],
+}));
+const sanitizedPublicInterestReason = getConcreteAiReason(
+  '推荐尚·悠享增城2天，增城属珠三角边缘经济相对较弱地区，符合扶贫或贫穷地方需求。',
+  unsupportedPublicInterestPrimitive,
+);
+assert.ok(sanitizedPublicInterestReason.includes('候选没有显式扶贫/公益标注'));
+assert.ok(!sanitizedPublicInterestReason.includes('经济相对较弱'));
 
 const zhHardIntent = buildHardIntentFromText(
   '周末2天，预算800以内，想清凉一点，但不想去海边，也不要坐飞机',
