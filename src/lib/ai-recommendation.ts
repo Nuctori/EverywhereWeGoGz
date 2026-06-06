@@ -3919,10 +3919,119 @@ function parseAiJson(content: string) {
   try {
     return JSON.parse(content);
   } catch {
+    const recovered = recoverPartialAiJson(content);
+    if (recovered) return recovered;
     const match = content.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('AI response is not JSON');
     return JSON.parse(match[0]);
   }
+}
+
+function findMatchingJsonEnd(content: string, startIndex: number, openChar: '{' | '[') {
+  const closeChar = openChar === '{' ? '}' : ']';
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+
+  for (let index = startIndex; index < content.length; index += 1) {
+    const char = content[index];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+    } else if (char === openChar) {
+      depth += 1;
+    } else if (char === closeChar) {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+
+  return -1;
+}
+
+function parseCompleteObjectAfterKey(content: string, key: string) {
+  const keyIndex = content.indexOf(`"${key}"`);
+  if (keyIndex < 0) return null;
+  const objectStart = content.indexOf('{', keyIndex);
+  if (objectStart < 0) return null;
+  const objectEnd = findMatchingJsonEnd(content, objectStart, '{');
+  if (objectEnd < 0) return null;
+
+  try {
+    return JSON.parse(content.slice(objectStart, objectEnd + 1));
+  } catch {
+    return null;
+  }
+}
+
+function parseCompleteObjectsFromArrayAfterKey(content: string, key: string) {
+  const keyIndex = content.indexOf(`"${key}"`);
+  if (keyIndex < 0) return [];
+  const arrayStart = content.indexOf('[', keyIndex);
+  if (arrayStart < 0) return [];
+
+  const objects: unknown[] = [];
+  let inString = false;
+  let escaped = false;
+  let objectDepth = 0;
+  let objectStart = -1;
+
+  for (let index = arrayStart + 1; index < content.length; index += 1) {
+    const char = content[index];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+    if (char === '{') {
+      if (objectDepth === 0) objectStart = index;
+      objectDepth += 1;
+      continue;
+    }
+    if (char === '}') {
+      objectDepth -= 1;
+      if (objectDepth === 0 && objectStart >= 0) {
+        try {
+          objects.push(JSON.parse(content.slice(objectStart, index + 1)));
+        } catch {
+          // Skip malformed objects and keep earlier complete items.
+        }
+        objectStart = -1;
+      }
+    }
+  }
+
+  return objects;
+}
+
+function recoverPartialAiJson(content: string) {
+  const items = parseCompleteObjectsFromArrayAfterKey(content, 'items');
+  if (items.length === 0) return null;
+  const intentNotes = parseCompleteObjectAfterKey(content, 'intentNotes');
+  return {
+    ...(intentNotes ? { intentNotes } : {}),
+    items,
+  };
 }
 
 function summarizeAiUsage(data: unknown) {
