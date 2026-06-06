@@ -22,9 +22,9 @@ const ROUTE_ATLAS_MAX_GROUPS = 8;
 const ROUTE_ATLAS_MAX_EXAMPLES = 2;
 const MAX_RECENT_CONVERSATION_MESSAGES = 4;
 const AI_FAST_FALLBACK_TIMEOUT_MS = 9000;
-const AI_FREE_PROVIDER_TIMEOUT_MS = 32000;
-const AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS = 22000;
-const AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS = 32000;
+const AI_FREE_PROVIDER_TIMEOUT_MS = 60000;
+const AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS = 42000;
+const AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS = 60000;
 const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 15000;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
@@ -4375,12 +4375,13 @@ function normalizeMessagesForProvider(messages: ReturnType<typeof buildAiMessage
 
 function getProviderTimeoutMs(config: AiProviderConfig) {
   const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
-  // Experience note: the real 13KB / ~6.3K-token Qwen ranking prompt returns
-  // around 10-12s in browser. A flat 9s timeout aborts valid free-model replies,
-  // while DeepSeek fallback should stay short because it is paid and often fails fast.
+  // Experience note: free models often spend the first visible tokens on hidden
+  // reasoning or sit behind a cold router. Keep the free tier patient enough to
+  // survive CoT/network jitter; keep DeepSeek short because it is the paid fallback.
   if (providerKey.includes('deepseek')) return AI_FAST_FALLBACK_TIMEOUT_MS;
   if (
     providerKey.includes('siliconflow') ||
+    providerKey.includes('openrouter') ||
     providerKey.includes('qwen') ||
     providerKey.includes('z.ai') ||
     providerKey.includes('glm')
@@ -4504,6 +4505,9 @@ async function callSingleAiProvider(params: {
       return parseAiProviderResponse(data, config);
     } catch (error) {
       providerLastError = normalizeAiProviderError(error, config);
+      if (providerLastError.message.includes('tokens_seen')) {
+        shouldRetry = attempt === 0;
+      }
       if (providerLastError.message.includes('timeout')) {
         shouldRetry = false;
       }
