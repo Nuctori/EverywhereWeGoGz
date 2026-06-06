@@ -1240,6 +1240,15 @@ function countCommentaryItems(items: AiRecommendationItem[]) {
   return items.reduce((count, item) => count + (item.reason ? 1 : 0), 0);
 }
 
+function prioritizeRecommendationItems(items: AiRecommendationItem[]) {
+  return [...items].sort((a, b) => {
+    const aHasReason = a.reason ? 1 : 0;
+    const bHasReason = b.reason ? 1 : 0;
+    if (bHasReason !== aHasReason) return bHasReason - aHasReason;
+    return b.score - a.score;
+  });
+}
+
 function getWeekday(date: string) {
   const parsed = new Date(`${date}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return null;
@@ -4522,18 +4531,20 @@ export async function requestAiRecommendations({
           )
         : Promise.resolve([] as DestinationWeatherInsight[]),
     ]);
-    const mergedItems = rewriteRecommendationCopy({
-      items: attachWeatherGuidanceToItems(
-        baseMergedItems,
-        mergedCandidateTours,
+    const mergedItems = prioritizeRecommendationItems(
+      rewriteRecommendationCopy({
+        items: attachWeatherGuidanceToItems(
+          baseMergedItems,
+          mergedCandidateTours,
+          destinationWeatherInsights,
+        ),
+        candidateTours: mergedCandidateTours,
         destinationWeatherInsights,
-      ),
-      candidateTours: mergedCandidateTours,
-      destinationWeatherInsights,
-      intent: effectiveIntent,
-      weatherContext,
-      userText: effectiveUserText,
-    });
+        intent: effectiveIntent,
+        weatherContext,
+        userText: effectiveUserText,
+      }),
+    );
     emitProgress(onProgress, {
       stage: 'completed',
       label: '推荐结果已生成',
