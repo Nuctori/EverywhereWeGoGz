@@ -14,7 +14,7 @@ import type {
 } from '@/types/tour';
 
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
-const MAX_AI_CANDIDATES = 36;
+const MAX_AI_CANDIDATES = 60;
 const MAX_AI_COMMENTARY_ITEMS = 24;
 const MAX_AI_PROMPT_REASON_ITEMS = 8;
 const MAX_AI_RANKED_ITEMS = 24;
