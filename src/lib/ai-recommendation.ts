@@ -1241,12 +1241,7 @@ function countCommentaryItems(items: AiRecommendationItem[]) {
 }
 
 function prioritizeRecommendationItems(items: AiRecommendationItem[]) {
-  return [...items].sort((a, b) => {
-    const aHasReason = a.reason ? 1 : 0;
-    const bHasReason = b.reason ? 1 : 0;
-    if (bHasReason !== aHasReason) return bHasReason - aHasReason;
-    return b.score - a.score;
-  });
+  return [...items].sort((a, b) => b.score - a.score);
 }
 
 function getWeekday(date: string) {
@@ -1955,12 +1950,11 @@ function isGenericReason(reason: string) {
   return /^(价格|低价|班期|热门|性价比|预算|天数|行程|综合|适合预算)|综合匹配|性价比高|班期多|价格低|自然风光生态|适合轻松|天气取舍/.test(reason);
 }
 
-function hasEnoughReasonSpecificity(reason: string) {
-  const hasPrice = /(?:￥\s*)?\d{2,5}\s*元|预算|价格/.test(reason);
-  const hasWeatherTradeoff = /(天气|高温|闷热|下雨|阵雨|多雨|避雨|避暑|清凉|风浪|夏季|取舍|室内|暴晒|雷暴)/.test(reason);
-  const hasExperienceAction = /(看点|亮点|体验|入住|含|玩|游|逛|吃|赏|泳池|海景房|博物馆|美食|沙滩|浮潜|桨板)/.test(reason);
-
-  return [hasPrice, hasWeatherTradeoff, hasExperienceAction].filter(Boolean).length >= 2;
+function shouldKeepAiReason(reason: string, primitive: RecommendationPrimitive) {
+  const trimmed = stripTerminalPunctuation(reason);
+  if (trimmed.length < 18) return false;
+  if (isGenericReason(trimmed)) return false;
+  return reasonMentionsCandidateFact(trimmed, primitive);
 }
 
 function getPrimitiveTitleFact(primitive: RecommendationPrimitive) {
@@ -2118,12 +2112,10 @@ function getConcreteMatchedSignals(
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
   const trimmed = typeof reason === 'string' ? reason.trim() : '';
   if (!primitive) return trimmed || '综合用户需求、天气和线路特点后较为合适';
-  if (
-    trimmed &&
-    reasonMentionsCandidateFact(trimmed, primitive) &&
-    !isGenericReason(trimmed) &&
-    hasEnoughReasonSpecificity(trimmed)
-  ) {
+  // Experience: do not force every AI reason through a fixed price/weather/play checklist.
+  // Soft needs such as public-interest, study travel, or rural value often explain fit through
+  // world knowledge and candidate wording; overwriting those with local templates degrades copy.
+  if (trimmed && shouldKeepAiReason(trimmed, primitive)) {
     return trimmed;
   }
   return buildPrimitiveConcreteReason(primitive);
@@ -2711,17 +2703,18 @@ function rewriteRecommendationCopy(params: {
 }) {
   const primitiveByTourId = new Map(params.candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
 
-  return params.items.map((item) => {
-    if (!item.reason) return item;
-    const primitive = primitiveByTourId.get(item.tourId);
-    if (!primitive) return item;
+  return params.items.map((item, index) => {
+    if (index >= MAX_AI_COMMENTARY_ITEMS) {
+      return stripRecommendationCommentary(item);
+    }
 
-    const currentReason = stripTerminalPunctuation(item.reason);
+    const primitive = primitiveByTourId.get(item.tourId);
+    if (!primitive) return item.reason ? item : stripRecommendationCommentary(item);
+
+    const currentReason = stripTerminalPunctuation(item.reason || '');
     if (
       currentReason &&
-      reasonMentionsCandidateFact(currentReason, primitive) &&
-      !isGenericReason(currentReason) &&
-      hasEnoughReasonSpecificity(currentReason) &&
+      shouldKeepAiReason(currentReason, primitive) &&
       shouldUseAiSummary(currentReason, params.weatherContext)
     ) {
       return {

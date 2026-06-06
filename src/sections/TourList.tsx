@@ -620,11 +620,6 @@ export function TourList({ searchQuery }: TourListProps) {
       pinned.sort((a, b) => {
         const aItem = aiRecommendationByTourId.get(a.id);
         const bItem = aiRecommendationByTourId.get(b.id);
-        const aHasReason = aItem?.reason ? 1 : 0;
-        const bHasReason = bItem?.reason ? 1 : 0;
-        if (bHasReason !== aHasReason) {
-          return bHasReason - aHasReason;
-        }
         return (bItem?.score ?? 0) - (aItem?.score ?? 0);
       });
 
