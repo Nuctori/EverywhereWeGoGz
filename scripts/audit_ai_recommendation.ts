@@ -5,9 +5,12 @@ import {
 import type { AiRecommendationCandidate } from '../src/types/tour.ts';
 
 const {
+  auditAiRecommendationsStrict,
   auditAiRecommendations,
+  buildHardIntentFromText,
   buildTourPrimitive,
   collectAvoidHints,
+  collectLiteralAvoidHints,
   compactCandidates,
   getPrimitiveConflictReasons,
   matchesActiveDateFilters,
@@ -470,5 +473,92 @@ const vagueReasonItems = validateAiItems({
   ],
 }, noisyAlternatives);
 assert.ok(vagueReasonItems[0].reason?.includes('沙扒湾') || vagueReasonItems[0].reason?.includes('沙滩'));
+
+const zhHardIntent = buildHardIntentFromText(
+  '周末2天，预算800以内，想清凉一点，但不想去海边，也不要坐飞机',
+  baseFilters,
+);
+assert.equal(zhHardIntent?.budgetMax, 800);
+assert.equal(zhHardIntent?.tripDaysMin, 1);
+assert.equal(zhHardIntent?.tripDaysMax, 3);
+assert.ok(collectLiteralAvoidHints('不想去海边，也不要坐飞机').includes('海边'));
+assert.ok(zhHardIntent?.avoid?.includes('飞机'));
+
+const strictMismatchIntent = buildHardIntentFromText(
+  '500元以下，7天以上，住五星酒店，去新疆，还要天气特别好',
+  baseFilters,
+);
+assert.equal(strictMismatchIntent?.budgetMax, 500);
+assert.equal(strictMismatchIntent?.tripDaysMin, 7);
+assert.equal(strictMismatchIntent?.tripDaysMax, null);
+
+const nearBudgetIntent = buildHardIntentFromText(
+  '预算2000以内，但希望接近2000的品质，不要一堆299，想去云南或者桂林看自然风景，5天左右',
+  baseFilters,
+);
+assert.equal(nearBudgetIntent?.budgetMax, 2000);
+assert.equal(nearBudgetIntent?.tripDaysMin, 4);
+assert.equal(nearBudgetIntent?.tripDaysMax, 6);
+assert.equal(nearBudgetIntent?.budgetPriority, 'balanced');
+
+const dirtyDestinationPrimitive = buildTourPrimitive(candidate({
+  id: 'dirty-destination',
+  title: '泰国曼谷芭堤雅6天',
+  destination: '云南',
+  duration: 6,
+  price: 1999,
+  theme: '古镇文化',
+  tags: ['古镇文化'],
+  highlights: ['曼谷', '芭堤雅'],
+}));
+assert.ok(getPrimitiveConflictReasons(nearBudgetIntent, dirtyDestinationPrimitive)
+  .some((reason) => reason.includes('目的地不匹配')));
+
+const strictGoodTour = candidate({
+  id: 'strict-good',
+  title: '广东森林博物馆2天',
+  destination: '广东',
+  duration: 2,
+  price: 760,
+  transportType: '大巴',
+  theme: '古镇文化',
+  tags: ['古镇文化'],
+  highlights: ['博物馆', '森林'],
+});
+const strictOverBudgetTour = candidate({
+  id: 'strict-over-budget',
+  title: '广东森林酒店2天',
+  destination: '广东',
+  duration: 2,
+  price: 1600,
+  transportType: '大巴',
+  theme: '自然风光',
+  tags: ['自然风光'],
+  highlights: ['森林'],
+});
+const strictFlightBeachTour = candidate({
+  id: 'strict-flight-beach',
+  title: '海边飞行度假2天',
+  destination: '广东',
+  duration: 2,
+  price: 700,
+  transportType: '飞机',
+  theme: '海岛度假',
+  tags: ['海边', '海岛'],
+  highlights: ['沙滩'],
+});
+const strictAudited = auditAiRecommendationsStrict(
+  [
+    { tourId: 'strict-over-budget', score: 100, reason: '模型偏好', matchedSignals: ['酒店'] },
+    { tourId: 'strict-flight-beach', score: 98, reason: '模型偏好', matchedSignals: ['海边'] },
+    { tourId: 'strict-good', score: 70, reason: '字段匹配', matchedSignals: ['预算', '天数'] },
+  ],
+  [],
+  [strictGoodTour, strictOverBudgetTour, strictFlightBeachTour],
+  zhHardIntent,
+);
+assert.equal(strictAudited[0].tourId, 'strict-good');
+assert.ok(strictAudited.find((item) => item.tourId === 'strict-over-budget')?.reason?.includes('需放宽条件'));
+assert.ok(strictAudited.find((item) => item.tourId === 'strict-flight-beach')?.reason?.includes('需放宽条件'));
 
 console.log('AI recommendation audit passed');
