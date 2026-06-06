@@ -96,6 +96,9 @@ export interface AiRecommendationItem {
   score: number;
   reason?: string;
   matchedSignals: string[];
+  semanticFit?: string;
+  semanticSignals?: string[];
+  semanticBoundary?: string;
 }
 
 export type AiRecommendationProcessMode = 'ai' | 'fallback' | 'local-only';
@@ -131,6 +134,13 @@ export interface AiRecommendationStatus {
   detail: string;
 }
 
+export interface AiRecommendationSemanticNotes {
+  worldKnowledgeUse?: string;
+  softCriteria: string[];
+  cannotAssert: string[];
+  caveat?: string;
+}
+
 export interface AiRecommendationResult {
   conversationId: string;
   summary: string;
@@ -139,6 +149,7 @@ export interface AiRecommendationResult {
   source: 'local-preview' | 'ai-api';
   status?: AiRecommendationStatus;
   preferenceMemory?: AiPreferenceMemory;
+  semanticNotes?: AiRecommendationSemanticNotes;
 }
 
 export interface AiProviderConfig {

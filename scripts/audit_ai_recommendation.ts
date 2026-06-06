@@ -493,6 +493,29 @@ const sanitizedPublicInterestReason = getConcreteAiReason(
 assert.ok(sanitizedPublicInterestReason.includes('候选没有显式扶贫/公益标注'));
 assert.ok(!sanitizedPublicInterestReason.includes('经济相对较弱'));
 
+const semanticBoundaryTour = candidate({
+  id: 'semantic-boundary',
+  title: '县域山水古村2天',
+  destination: '广东县域',
+  duration: 2,
+  price: 399,
+  theme: '乡村自然',
+  tags: ['古村', '山水'],
+  highlights: ['古村漫游', '山水体验'],
+});
+const semanticBoundaryItems = validateAiItems({
+  items: [{
+    tourId: 'semantic-boundary',
+    score: 92,
+    semanticFit: '候选没有显式扶贫/公益标注，只能按县域、乡村、低预算体验做近似替代',
+    semanticSignals: ['近似替代', '县域乡村'],
+    semanticBoundary: '不能断言这是扶贫项目或贫困地区',
+  }],
+}, [semanticBoundaryTour]);
+assert.ok(semanticBoundaryItems[0].semanticFit?.includes('近似替代'));
+assert.ok(semanticBoundaryItems[0].matchedSignals.includes('近似替代'));
+assert.ok(semanticBoundaryItems[0].semanticBoundary?.includes('不能断言'));
+
 const zhHardIntent = buildHardIntentFromText(
   '周末2天，预算800以内，想清凉一点，但不想去海边，也不要坐飞机',
   baseFilters,

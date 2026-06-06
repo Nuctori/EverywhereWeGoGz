@@ -8,6 +8,7 @@ import type {
   AiRecommendationSubstep,
   AiRecommendationRequest,
   AiRecommendationResult,
+  AiRecommendationSemanticNotes,
   AiWeatherContext,
   FilterState,
 } from '@/types/tour';
@@ -2250,6 +2251,7 @@ function hasUnsupportedPublicInterestClaim(reason: string, primitive: Recommenda
   if (!/(扶贫|公益|贫穷|贫困|落后|欠发达|经济相对|较落后|较弱|助农|乡村振兴)/.test(reason)) {
     return false;
   }
+  if (isBoundedPublicInterestStatement(reason)) return false;
   return !primitiveHasPublicInterestEvidence(primitive);
 }
 
@@ -2411,6 +2413,63 @@ function getConcreteMatchedSignals(
 
   const concreteSignals = buildPrimitiveMatchedSignals(primitive);
   return concreteSignals.length > 0 ? concreteSignals : ['AI综合推荐'];
+}
+
+function normalizeAiText(value: unknown, maxLength = 160) {
+  if (typeof value !== 'string') return '';
+  return stripTerminalPunctuation(value.replace(/\s+/g, ' ').trim()).slice(0, maxLength);
+}
+
+function normalizeAiTextList(value: unknown, limit = 4, maxLength = 80) {
+  if (!Array.isArray(value)) return [];
+  return uniqueStrings(value.map((item) => normalizeAiText(item, maxLength)).filter(Boolean)).slice(0, limit);
+}
+
+function normalizeAiSemanticNotes(value: unknown): AiRecommendationSemanticNotes | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+  const raw = value as {
+    worldKnowledgeUse?: unknown;
+    softCriteria?: unknown;
+    cannotAssert?: unknown;
+    caveat?: unknown;
+  };
+  const notes: AiRecommendationSemanticNotes = {
+    worldKnowledgeUse: normalizeAiText(raw.worldKnowledgeUse, 180) || undefined,
+    softCriteria: normalizeAiTextList(raw.softCriteria, 5, 60),
+    cannotAssert: normalizeAiTextList(raw.cannotAssert, 5, 60),
+    caveat: normalizeAiText(raw.caveat, 160) || undefined,
+  };
+  return notes.worldKnowledgeUse || notes.softCriteria.length || notes.cannotAssert.length || notes.caveat
+    ? notes
+    : undefined;
+}
+
+function buildSemanticNotesLead(notes: AiRecommendationSemanticNotes | undefined) {
+  if (!notes) return '';
+  const parts = uniqueStrings([
+    notes.worldKnowledgeUse || '',
+    notes.softCriteria.length ? `软语义判断：${notes.softCriteria.slice(0, 4).join('、')}` : '',
+    notes.cannotAssert.length ? `边界：${notes.cannotAssert.slice(0, 3).join('、')}` : '',
+    notes.caveat || '',
+  ]).filter(Boolean);
+  return parts.length > 0 ? `${parts.join('。')}。` : '';
+}
+
+function isBoundedPublicInterestStatement(text: string) {
+  return /(候选|原文|显式|证据|没有|未标注|不能|不可|不等于|近似|替代|只能|无法断言)/.test(text);
+}
+
+function buildItemSemanticReason(
+  item: AiRecommendationItem,
+  primitive: RecommendationPrimitive,
+) {
+  const semanticFit = normalizeAiText(item.semanticFit, 140);
+  const semanticBoundary = normalizeAiText(item.semanticBoundary, 120);
+  const parts = uniqueStrings([semanticFit, semanticBoundary]).filter(Boolean);
+  if (parts.length === 0) return '';
+  const text = parts.join('；');
+  if (hasUnsupportedPublicInterestClaim(text, primitive)) return '';
+  return text;
 }
 
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
@@ -3050,7 +3109,9 @@ function rewriteRecommendationCopy(params: {
     }
 
     const insight = findWeatherInsightForPrimitive(primitive, params.destinationWeatherInsights);
+    const semanticReason = buildItemSemanticReason(item, primitive);
     const fallbackReason = uniqueStrings([
+      semanticReason,
       hasPublicInterestNeed(params.intent, params.userText)
         ? buildPublicInterestAlternativeReason(primitive)
         : buildPrimitiveConcreteReason(primitive),
@@ -3129,13 +3190,17 @@ function finalizeRecommendationSummary(params: {
   weatherContext: AiWeatherContext;
   destinationWeatherInsights: DestinationWeatherInsight[];
   intent: AiTravelIntent | null;
+  semanticNotes?: AiRecommendationSemanticNotes;
   userText?: string;
 }) {
   const aiSummary = params.aiSummary.trim();
-  if (shouldUseAiSummary(aiSummary, params.weatherContext)) return aiSummary;
+  const semanticLead = buildSemanticNotesLead(params.semanticNotes);
+  if (shouldUseAiSummary(aiSummary, params.weatherContext)) {
+    return uniqueStrings([semanticLead, aiSummary]).filter(Boolean).join('');
+  }
 
   const fallbackSummary = buildRecommendationSummary(params);
-  return fallbackSummary || aiSummary;
+  return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
 }
 
 function parseDateString(value: string | null | undefined) {
@@ -3729,6 +3794,12 @@ function buildAiMessages(params: {
     cl: MAX_AI_PROMPT_REASON_ITEMS,
     schema: {
       summary: '2-4 句中文，写推荐方向、天气/季节判断、注意事项或替代逻辑',
+      intentNotes: {
+        worldKnowledgeUse: '一句中文，说明软语义如何借助世界知识判断；若只是硬筛选可省略',
+        softCriteria: 'string[]，本轮软语义标准，如县域/乡村/公益近似/研学价值/亲子轻松',
+        cannotAssert: 'string[]，候选无证据时不能断言的事实，如扶贫项目/贫困地区/公益活动',
+        caveat: '一句中文，说明近似替代或证据边界',
+      },
       intent: {
         semanticFocus: 'string[]，保留用户表达或明显隐含的软语义，例如公益/扶贫/研学/贫穷地区/亲子/住好/轻松等',
         travelStyle: 'string[]',
@@ -3788,15 +3859,29 @@ function buildLiteAiMessages(params: {
     ck: ['id', 'title', 'destination', 'days', 'price', 'match', 'atoms', 'cats', 'weather', 'conflict'],
     candidates: compactCandidatesForLitePrompt(params.candidates),
     schema: {
-      items: [{ tourId: '候选 id', score: '0-100 number' }],
+      intentNotes: {
+        worldKnowledgeUse: '一句中文，说明如何用世界知识理解 q 的软语义；没有软语义可省略',
+        softCriteria: 'string[]，最多4个软语义标准',
+        cannotAssert: 'string[]，候选无证据时不能断言的事实',
+        caveat: '一句中文，说明近似替代或证据边界',
+      },
+      items: [{
+        tourId: '候选 id',
+        score: '0-100 number',
+        semanticFit: '最多一句中文，解释该候选如何贴近软语义或为何只是近似替代',
+        semanticSignals: 'string[]，最多3个短词',
+        semanticBoundary: '最多一句中文，候选无证据时说明不能断言什么',
+      }],
       itemCountLimit: MAX_AI_RANKED_ITEMS,
     },
     rq: [
       '只输出 JSON，不要 Markdown。',
-      '只返回 items；不要 summary、reason、matchedSignals。',
+      '返回 intentNotes 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
       '优先 match，除非没有足够 match 才使用 soft_conflict/fallback。',
       '结合 q、it、wx 和 atoms/cats 判断软语义与天气取舍。',
+      '扶贫/公益/贫困/研学/乡村这类软语义可用世界知识做近似判断；但没有候选原文证据时不能断言为扶贫项目、贫困地区或公益活动。',
+      'semanticFit 要写清世界知识下的近似逻辑，例如县域/乡村/非都市/低预算/自然民俗；semanticBoundary 写不能断言的边界。',
     ],
   };
 
@@ -4048,15 +4133,23 @@ function validateAiItems(
     seenTourIds.add(resolvedTourId);
 
     const validatedIndex = validatedItems.length;
+    const primitive = primitiveByTourId.get(resolvedTourId);
+    const semanticFit = normalizeAiText(item.semanticFit, 140);
+    const semanticSignals = normalizeAiTextList(item.semanticSignals, 4, 40);
+    const semanticBoundary = normalizeAiText(item.semanticBoundary, 120);
+    const matchedSignals = validatedIndex < MAX_AI_COMMENTARY_ITEMS
+      ? getConcreteMatchedSignals(item.matchedSignals, primitive)
+      : [];
     validatedItems.push({
       tourId: resolvedTourId,
       score: Number.isFinite(Number(item.score)) ? Number(item.score) : 80 - index,
       reason: validatedIndex < MAX_AI_COMMENTARY_ITEMS
-        ? getConcreteAiReason(item.reason, primitiveByTourId.get(resolvedTourId))
+        ? getConcreteAiReason(item.reason || semanticFit, primitive)
         : undefined,
-      matchedSignals: validatedIndex < MAX_AI_COMMENTARY_ITEMS
-        ? getConcreteMatchedSignals(item.matchedSignals, primitiveByTourId.get(resolvedTourId))
-        : [],
+      matchedSignals: uniqueStrings([...semanticSignals, ...matchedSignals]).slice(0, 5),
+      semanticFit: semanticFit || undefined,
+      semanticSignals,
+      semanticBoundary: semanticBoundary || undefined,
     });
   }
 
@@ -4922,8 +5015,9 @@ export async function requestAiRecommendations({
         preferenceMemory: nextPreferenceMemory,
       }),
       maxTokens: 1600,
-      liteMaxTokens: 520,
-    }) as { intent?: unknown; summary?: unknown; items?: unknown };
+      liteMaxTokens: 720,
+    }) as { intent?: unknown; intentNotes?: unknown; summary?: unknown; items?: unknown };
+    const semanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
     const rankingIntent = normalizeBudgetPriorityByUserText(
       normalizeIntent(aiResponse.intent),
       text,
@@ -5021,6 +5115,7 @@ export async function requestAiRecommendations({
         weatherContext,
         destinationWeatherInsights,
         intent: finalIntent,
+        semanticNotes,
         userText: finalEffectiveUserText,
       }),
       items: mergedItems,
@@ -5034,6 +5129,7 @@ export async function requestAiRecommendations({
           : `AI 已完成需求理解，但排序结果未稳定映射到候选，已自动改用本地排序并展示 ${mergedItems.length} 条匹配结果。`,
       },
       preferenceMemory: finalPreferenceMemory,
+      ...(semanticNotes ? { semanticNotes } : {}),
     };
   } catch (error) {
     const failureDetail = getAiFailureDetail(error);
