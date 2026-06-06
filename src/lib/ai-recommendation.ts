@@ -22,8 +22,9 @@ const ROUTE_ATLAS_MAX_GROUPS = 8;
 const ROUTE_ATLAS_MAX_EXAMPLES = 2;
 const MAX_RECENT_CONVERSATION_MESSAGES = 4;
 const AI_FAST_FALLBACK_TIMEOUT_MS = 9000;
-const AI_FREE_PROVIDER_TIMEOUT_MS = 18000;
-const AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS = 14000;
+const AI_FREE_PROVIDER_TIMEOUT_MS = 32000;
+const AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS = 22000;
+const AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS = 32000;
 const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 15000;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
@@ -428,6 +429,21 @@ function compactCandidatesForPrompt(candidates: ReturnType<typeof compactCandida
     compactPromptStrings(candidate.experienceCategories, 3, 8),
     compactPromptStrings(candidate.seasonalComfortAtoms, 2, 16),
     compactPromptStrings(candidate.conflictReasons, 2, 18),
+  ]);
+}
+
+function compactCandidatesForLitePrompt(candidates: ReturnType<typeof compactCandidates>) {
+  return candidates.map((candidate) => [
+    candidate.id,
+    compactPromptText(candidate.title, 34),
+    candidate.destination,
+    candidate.tripDays,
+    candidate.price,
+    candidate.matchStatus,
+    compactPromptStrings(candidate.semanticAtoms, 2, 12),
+    compactPromptStrings(candidate.experienceCategories, 2, 8),
+    compactPromptStrings(candidate.seasonalComfortAtoms, 1, 14),
+    compactPromptStrings(candidate.conflictReasons, 1, 14),
   ]);
 }
 
@@ -3750,6 +3766,49 @@ function buildAiMessages(params: {
   ];
 }
 
+function buildLiteAiMessages(params: {
+  userText: string;
+  messages: AiRecommendationMessage[];
+  candidates: ReturnType<typeof compactCandidates>;
+  weatherContext: AiWeatherContext;
+  searchQuery: string;
+  intent: AiTravelIntent | null;
+  preferenceMemory: AiPreferenceMemory | null;
+}) {
+  // 经验：OpenRouter 免费模型能通，但大上下文下经常 200 返回后没有可用 JSON。
+  // 这里给免费弱模型只做“排序和软语义取舍”，文案、天气补充和硬约束审计仍由本地完成。
+  const request = {
+    t: 'rank_top24_lite',
+    q: params.userText,
+    sq: params.searchQuery,
+    rc: compactRecentConversation(params.messages).slice(-2),
+    pm: compactPreferenceMemoryForPrompt(params.preferenceMemory),
+    it: compactIntentForPrompt(params.intent),
+    wx: compactWeatherContextForPrompt(params.weatherContext),
+    ck: ['id', 'title', 'destination', 'days', 'price', 'match', 'atoms', 'cats', 'weather', 'conflict'],
+    candidates: compactCandidatesForLitePrompt(params.candidates),
+    schema: {
+      items: [{ tourId: '候选 id', score: '0-100 number' }],
+      itemCountLimit: MAX_AI_RANKED_ITEMS,
+    },
+    rq: [
+      '只输出 JSON，不要 Markdown。',
+      '只返回 items；不要 summary、reason、matchedSignals。',
+      '只允许使用 candidates 中存在的 id。',
+      '优先 match，除非没有足够 match 才使用 soft_conflict/fallback。',
+      '结合 q、it、wx 和 atoms/cats 判断软语义与天气取舍。',
+    ],
+  };
+
+  return [
+    {
+      role: 'system' as const,
+      content: '你是旅行团候选排序器。只基于给定候选排序，严格输出 JSON。不要编造 tourId。',
+    },
+    { role: 'user' as const, content: JSON.stringify(request) },
+  ];
+}
+
 function normalizeBaseUrl(baseUrl: string) {
   return baseUrl.replace(/\/$/, '');
 }
@@ -3769,6 +3828,65 @@ function parseAiJson(content: string) {
     if (!match) throw new Error('AI response is not JSON');
     return JSON.parse(match[0]);
   }
+}
+
+function summarizeAiUsage(data: unknown) {
+  const usage = (data as {
+    usage?: {
+      prompt_tokens?: number;
+      completion_tokens?: number;
+      total_tokens?: number;
+      completion_tokens_details?: { reasoning_tokens?: number };
+    };
+  })?.usage;
+  const completionTokens = Number(usage?.completion_tokens ?? 0);
+  const reasoningTokens = Number(usage?.completion_tokens_details?.reasoning_tokens ?? 0);
+  const totalTokens = Number(usage?.total_tokens ?? 0);
+  return {
+    tokensSeen: completionTokens > 0 || reasoningTokens > 0 || totalTokens > 0,
+    completionTokens,
+    reasoningTokens,
+    totalTokens,
+  };
+}
+
+function getAiProviderParseErrorLabel(config: AiProviderConfig, stage: string, detail = '') {
+  const suffix = detail ? `: ${detail}` : '';
+  return `AI API unusable [${config.model}] ${stage}${suffix}`;
+}
+
+function parseAiProviderResponse(data: unknown, config: AiProviderConfig) {
+  const usage = summarizeAiUsage(data);
+  const message = (data as {
+    choices?: Array<{ message?: { content?: unknown; reasoning?: unknown } }>;
+  })?.choices?.[0]?.message;
+  const content = message?.content;
+
+  if (typeof content !== 'string' || !content.trim()) {
+    throw new Error(getAiProviderParseErrorLabel(
+      config,
+      usage.tokensSeen ? 'tokens_seen/content_missing' : 'content_missing',
+      `completion=${usage.completionTokens}, reasoning=${usage.reasoningTokens}`,
+    ));
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = parseAiJson(content);
+  } catch (error) {
+    throw new Error(getAiProviderParseErrorLabel(
+      config,
+      'json_parse_failed',
+      error instanceof Error ? error.message : '',
+    ));
+  }
+
+  const items = (parsed as { items?: unknown })?.items;
+  if (!Array.isArray(items)) {
+    throw new Error(getAiProviderParseErrorLabel(config, 'schema_invalid', 'items missing'));
+  }
+
+  return parsed;
 }
 
 function emitProgress(
@@ -4284,7 +4402,15 @@ function getProviderRequestHeaders(config: AiProviderConfig): Record<string, str
   return headers;
 }
 
-function buildAiRequestBody(config: AiProviderConfig, messages: ReturnType<typeof buildAiMessages>, maxTokens?: number) {
+function isOpenRouterProvider(config: AiProviderConfig) {
+  return `${config.baseUrl} ${config.model}`.toLowerCase().includes('openrouter');
+}
+
+function buildAiRequestBody(
+  config: AiProviderConfig,
+  messages: ReturnType<typeof buildAiMessages>,
+  maxTokens?: number,
+) {
   const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
   const body: Record<string, unknown> = {
     model: config.model,
@@ -4318,12 +4444,18 @@ function isPaidFallbackProvider(config: AiProviderConfig) {
 async function callSingleAiProvider(params: {
   config: AiProviderConfig;
   messages: ReturnType<typeof buildAiMessages>;
+  liteMessages?: ReturnType<typeof buildLiteAiMessages>;
   maxTokens?: number;
+  liteMaxTokens?: number;
   signal?: AbortSignal;
 }) {
   const { config } = params;
   const url = getChatCompletionsUrl(config.baseUrl);
-  const requestBody = buildAiRequestBody(config, params.messages, params.maxTokens);
+  const messages = isOpenRouterProvider(config) && params.liteMessages ? params.liteMessages : params.messages;
+  const maxTokens = isOpenRouterProvider(config) && params.liteMessages
+    ? params.liteMaxTokens ?? Math.min(params.maxTokens ?? 1600, 640)
+    : params.maxTokens;
+  const requestBody = buildAiRequestBody(config, messages, maxTokens);
   let providerLastError: Error | null = null;
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -4368,13 +4500,8 @@ async function callSingleAiProvider(params: {
       }
 
       const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
-      if (typeof content !== 'string') {
-        shouldRetry = false;
-        throw new Error(`AI API response missing message content [${config.model}]`);
-      }
-
-      return parseAiJson(content);
+      shouldRetry = false;
+      return parseAiProviderResponse(data, config);
     } catch (error) {
       providerLastError = normalizeAiProviderError(error, config);
       if (providerLastError.message.includes('timeout')) {
@@ -4394,7 +4521,9 @@ async function callSingleAiProvider(params: {
 async function callAiApi(params: {
   configs: AiProviderConfig[];
   messages: ReturnType<typeof buildAiMessages>;
+  liteMessages?: ReturnType<typeof buildLiteAiMessages>;
   maxTokens?: number;
+  liteMaxTokens?: number;
 }) {
   const providerErrors: string[] = [];
   const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
@@ -4402,17 +4531,37 @@ async function callAiApi(params: {
 
   if (foregroundConfigs.length > 0) {
     const controllers = foregroundConfigs.map(() => new AbortController());
+    const foregroundErrors: string[] = [];
     let foregroundTimeoutId: ReturnType<typeof setTimeout> | null = null;
     const foregroundProviderPromise = Promise.any(
       foregroundConfigs.map((config, index) =>
-        callSingleAiProvider({ ...params, config, signal: controllers[index].signal }),
+        callSingleAiProvider({ ...params, config, signal: controllers[index].signal })
+          .catch((error) => {
+            const message = error instanceof Error
+              ? error.message.replace(/\s+/g, ' ').trim()
+              : `AI API failed [${config.model}]`;
+            foregroundErrors.push(message);
+            throw error;
+          }),
       ),
     );
     const foregroundTimeoutPromise = new Promise<never>((_, reject) => {
-      foregroundTimeoutId = setTimeout(() => {
-        controllers.forEach((controller) => controller.abort());
-        reject(new Error(`AI free provider foreground timeout after ${AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS}ms`));
-      }, AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS);
+      const timeoutAt = (timeoutMs: number) => {
+        foregroundTimeoutId = setTimeout(() => {
+          const hasActiveTokenSignal = foregroundErrors.some((message) => message.includes('tokens_seen'));
+          if (timeoutMs < AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS && hasActiveTokenSignal) {
+            if (foregroundTimeoutId) clearTimeout(foregroundTimeoutId);
+            timeoutAt(AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS);
+            return;
+          }
+
+          controllers.forEach((controller) => controller.abort());
+          const detail = foregroundErrors.length > 0 ? `; ${foregroundErrors.join(' | ')}` : '';
+          reject(new Error(`AI free provider foreground timeout after ${timeoutMs}ms${detail}`));
+        }, timeoutMs);
+      };
+
+      timeoutAt(AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS);
     });
     try {
       const result = await Promise.race([foregroundProviderPromise, foregroundTimeoutPromise]);
@@ -4759,10 +4908,20 @@ export async function requestAiRecommendations({
         intent: effectiveIntent,
         preferenceMemory: nextPreferenceMemory,
       }),
+      liteMessages: buildLiteAiMessages({
+        userText: effectiveUserText,
+        messages,
+        candidates: aiCandidatePool,
+        weatherContext: weatherContextForRanking,
+        searchQuery,
+        intent: effectiveIntent,
+        preferenceMemory: nextPreferenceMemory,
+      }),
       maxTokens: 1600,
-    });
+      liteMaxTokens: 520,
+    }) as { intent?: unknown; summary?: unknown; items?: unknown };
     const rankingIntent = normalizeBudgetPriorityByUserText(
-      normalizeIntent((aiResponse as { intent?: unknown }).intent),
+      normalizeIntent(aiResponse.intent),
       text,
     );
     const finalIntent = mergeIntentWithMemory(
@@ -4774,8 +4933,12 @@ export async function requestAiRecommendations({
     const compactedCandidateIds = new Set(aiCandidatePool.map((candidate) => candidate.id));
     const compactedCandidateTours = wideAvailableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
     const compactedLocalItems = localItemsForMerge.filter((item) => compactedCandidateIds.has(item.tourId));
+    const validatedAiItems = validateAiItems(aiResponse, compactedCandidateTours);
+    if (validatedAiItems.length === 0 && Array.isArray(aiResponse.items)) {
+      throw new Error('AI API unusable items_unmapped: returned tourIds did not match current candidates');
+    }
     const aiItems = auditAiRecommendationsStrict(
-      validateAiItems(aiResponse, compactedCandidateTours),
+      validatedAiItems,
       compactedLocalItems,
       compactedCandidateTours,
       finalIntent,
