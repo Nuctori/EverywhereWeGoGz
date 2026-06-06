@@ -83,10 +83,21 @@ const audited = auditAiRecommendations(aiItems, [], tours, inheritedIntent);
 assert.equal(audited[0].tourId, 'phuket-budget');
 assert.ok(audited.find((item) => item.tourId === 'guizhou-cheap')?.matchedSignals.some((signal) => signal.startsWith('审计提示')));
 const mergedCapItems = mergeAiAndLocalRecommendations(
-  Array.from({ length: 12 }, (_, index) => ({ tourId: `ai-${index}`, score: 100 - index, matchedSignals: [] })),
-  Array.from({ length: 30 }, (_, index) => ({ tourId: `local-${index}`, score: 80 - index, matchedSignals: [] })),
+  Array.from({ length: 12 }, (_, index) => ({
+    tourId: `ai-${index}`,
+    score: 100 - index,
+    reason: `AI reason ${index}`,
+    matchedSignals: [],
+  })),
+  Array.from({ length: 30 }, (_, index) => ({
+    tourId: `local-${index}`,
+    score: 80 - index,
+    reason: `Local reason ${index}`,
+    matchedSignals: [],
+  })),
 );
-assert.ok(mergedCapItems.length <= 24);
+assert.ok(mergedCapItems.length > 24);
+assert.ok(mergedCapItems.filter((item) => item.reason).length <= 24);
 const auditCapTours = Array.from({ length: 30 }, (_, index) => candidate({
   id: `audit-cap-${index}`,
   title: `广东清凉短线${index}`,
@@ -162,17 +173,32 @@ const baseFilters = {
   sortBy: 'hot' as const,
 };
 assert.ok(matchesActiveDateFilters({ ...nonHotSpringTour, departureDate: tomorrow, departureDates: [tomorrow] }, baseFilters));
-assert.ok(!matchesActiveDateFilters({ ...nonHotSpringTour, departureDate: yesterday, departureDates: [yesterday] }, baseFilters));
+assert.ok(!matchesActiveDateFilters({
+  ...nonHotSpringTour,
+  departureDate: yesterday,
+  departureDates: [yesterday],
+  hotDepartureDates: [],
+}, baseFilters));
 assert.ok(matchesActiveDateFilters({ ...nonHotSpringTour, departureDate: today, departureDates: [today] }, baseFilters));
 
 const promptDateWindow = resolvePromptDateWindow('推荐500元以下未来7天出发的旅行团');
 assert.ok(promptDateWindow);
 assert.ok(matchesDateWindow({ ...nonHotSpringTour, departureDate: tomorrow, departureDates: [tomorrow] }, promptDateWindow));
-assert.ok(!matchesDateWindow({ ...nonHotSpringTour, departureDate: yesterday, departureDates: [yesterday] }, promptDateWindow));
+assert.ok(!matchesDateWindow({
+  ...nonHotSpringTour,
+  departureDate: yesterday,
+  departureDates: [yesterday],
+  hotDepartureDates: [],
+}, promptDateWindow));
 const futureFewDaysWindow = resolvePromptDateWindow('未来几天下雨，500元以下推荐旅行团');
 assert.ok(futureFewDaysWindow);
 assert.ok(matchesDateWindow({ ...nonHotSpringTour, departureDate: tomorrow, departureDates: [tomorrow] }, futureFewDaysWindow));
-assert.ok(!matchesDateWindow({ ...nonHotSpringTour, departureDate: yesterday, departureDates: [yesterday] }, futureFewDaysWindow));
+assert.ok(!matchesDateWindow({
+  ...nonHotSpringTour,
+  departureDate: yesterday,
+  departureDates: [yesterday],
+  hotDepartureDates: [],
+}, futureFewDaysWindow));
 
 const allowHotSpringAgain = mergeIntentWithMemory(
   { travelStyle: ['温泉'], mustHave: ['泡温泉'], avoid: [] },
