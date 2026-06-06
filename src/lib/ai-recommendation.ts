@@ -15,6 +15,7 @@ import type {
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 const MAX_AI_CANDIDATES = 36;
 const MAX_AI_COMMENTARY_ITEMS = 24;
+const MAX_AI_PROMPT_REASON_ITEMS = 8;
 const MAX_AI_RANKED_ITEMS = 24;
 const MAX_DESTINATION_WEATHER_INSIGHTS = 6;
 const ROUTE_ATLAS_MAX_GROUPS = 8;
@@ -3510,7 +3511,7 @@ function buildAiMessages(params: {
     wx: compactWeatherContextForPrompt(params.weatherContext),
     dw: compactDestinationWeatherInsightsForPrompt(params.destinationWeatherInsights),
     ol: MAX_AI_RANKED_ITEMS,
-    cl: MAX_AI_COMMENTARY_ITEMS,
+    cl: MAX_AI_PROMPT_REASON_ITEMS,
     schema: {
       summary: '2-4 句中文，写推荐方向、天气/季节判断、注意事项或替代逻辑',
       intent: {
@@ -3527,8 +3528,8 @@ function buildAiMessages(params: {
         {
           tourId: '候选 id',
           score: '0-100 number',
-          reason: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要。2-3 句中文，引用 1-2 个候选事实并解释需求取舍、天气风险和适配原因`,
-          matchedSignals: `仅前 ${MAX_AI_COMMENTARY_ITEMS} 条需要。3-5 个中文短语，优先具体玩法/地点原子`,
+          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。1 句中文，引用候选事实并解释软语义/天气取舍；其余条目省略`,
+          matchedSignals: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。2-3 个中文短语；其余条目省略`,
         },
       ],
       itemCountLimit: MAX_AI_RANKED_ITEMS,
@@ -3539,6 +3540,7 @@ function buildAiMessages(params: {
       '如果用户提到扶贫、贫穷地方、公益、研学这类候选池未必显式打标的语义，基于世界知识和候选目的地/玩法做最接近判断，并在 intent.semanticFocus 与 reason 中保留该取舍。',
       '天气敏感项必须说清风险和取舍。',
       '可比较时直接说明这次为什么推 A 不推 B。',
+      `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；第 ${MAX_AI_PROMPT_REASON_ITEMS + 1}-${MAX_AI_RANKED_ITEMS} 个只需要 tourId 和 score。`,
     ],
   };
 
@@ -4401,7 +4403,7 @@ export async function requestAiRecommendations({
         intent: effectiveIntent,
         preferenceMemory: nextPreferenceMemory,
       }),
-      maxTokens: 3000,
+      maxTokens: 1600,
     });
     const rankingIntent = normalizeBudgetPriorityByUserText(
       normalizeIntent((aiResponse as { intent?: unknown }).intent),
