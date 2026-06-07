@@ -58,21 +58,55 @@ function getDataUrl(path: string) {
 function useToursData() {
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [total, setTotal] = useState(0);
+  const loadedPagesRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
-    fetch(getDataUrl('tours-list.json'))
-      .then((r) => r.json())
-      .then((data) => {
-        setTours(data);
+    let cancelled = false;
+    async function loadInitial() {
+      try {
+        const pageRes = await fetch(getDataUrl('tours-page-0.json'));
+        if (cancelled) return;
+        const pageData = await pageRes.json();
+        if (cancelled) return;
+        setTours(pageData.items);
+        setTotal(pageData.meta.total);
+        loadedPagesRef.current.add(0);
         setLoading(false);
-      })
-      .catch(() => {
-        setTours([]);
-        setLoading(false);
-      });
+      } catch {
+        try {
+          const fallbackRes = await fetch(getDataUrl('tours-list.json'));
+          if (cancelled) return;
+          const data = await fallbackRes.json();
+          if (cancelled) return;
+          setTours(data);
+          setTotal(data.length);
+          setLoading(false);
+        } catch {
+          if (!cancelled) { setTours([]); setLoading(false); }
+        }
+      }
+    }
+    loadInitial();
+    return () => { cancelled = true; };
   }, []);
 
-  return { tours, loading };
+  const loadMorePages = useCallback(async (neededPage: number) => {
+    if (loadedPagesRef.current.has(neededPage)) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetch(getDataUrl('tours-page-' + neededPage + '.json'));
+      const pageData = await res.json();
+      loadedPagesRef.current.add(neededPage);
+      setTours(function(prev) { return prev.concat(pageData.items); });
+    } catch (e) {
+    } finally {
+      setLoadingMore(false);
+    }
+  }, []);
+
+  return { tours: tours, loading: loading, loadingMore: loadingMore, total: total, loadMorePages: loadMorePages, loadedPagesRef: loadedPagesRef };
 }
 
 

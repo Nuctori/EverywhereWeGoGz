@@ -1,4 +1,4 @@
-export interface Tour {
+﻿export interface Tour {
   id: string;
   title: string;
   source: string;

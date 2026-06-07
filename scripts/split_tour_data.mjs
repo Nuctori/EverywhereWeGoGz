@@ -211,6 +211,33 @@ for (const staleFile of existingDetailFiles) {
 
 writeTextFileWithRetry(listPath, JSON.stringify(listTours));
 
+// ====== Generate tours-index.json + tours-page-*.json chunks ======
+const PAGE_SIZE = 24;
+const indexFields = ['id', 'price', 'destination', 'duration', 'source', 'theme', 'departureDate', 'isHot', 'isNew', 'isFlashSale', 'leisureLevel', 'rating', 'season'];
+const indexTours = listTours.map((tour) => {
+  const idx = {};
+  for (const key of indexFields) {
+    if (key in tour) idx[key] = tour[key];
+  }
+  return idx;
+});
+writeTextFileWithRetry(path.join(dataDir, 'tours-index.json'), JSON.stringify(indexTours));
+
+const totalPages = Math.ceil(listTours.length / PAGE_SIZE);
+const pageDir = path.join(dataDir);
+for (let page = 0; page < totalPages; page++) {
+  const start = page * PAGE_SIZE;
+  const end = Math.min(start + PAGE_SIZE, listTours.length);
+  const pageData = {
+    meta: { page, pageSize: PAGE_SIZE, total: listTours.length },
+    items: listTours.slice(start, end),
+  };
+  writeTextFileWithRetry(path.join(pageDir, `tours-page-${page}.json`), JSON.stringify(pageData));
+}
+console.log(`tours-index.json ${Buffer.byteLength(JSON.stringify(indexTours), 'utf8')} bytes`);
+console.log(`Generated ${totalPages} page chunks (tours-page-0.json ~ tours-page-${totalPages - 1}.json)`);
+
+
 const sourceSize = fs.statSync(sourcePath).size;
 const listSize = fs.statSync(listPath).size;
 const detailFiles = fs.readdirSync(detailsDir).filter((file) => file.endsWith('.json'));
