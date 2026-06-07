@@ -34,6 +34,7 @@ function getDataUrl(path: string) {
   return `${baseUrl}data/${path}?v=${encodeURIComponent(__DATA_VERSION__)}`;
 }
 
+/** @deprecated 此 hook 返回空数组，不再维护。数据加载请改用 TourList.tsx 中的 useToursData() */
 export function useTours() {
   const [loading] = useState(false);
   const [error] = useState<string | null>(null);
