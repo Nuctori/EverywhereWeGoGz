@@ -1,54 +1,19 @@
-import { useEffect, useState } from 'react';
+﻿import { useState } from 'react';
 import { Header } from './sections/Header';
 import { Hero } from './sections/Hero';
 import { TourList } from './sections/TourList';
 
-const HERO_DESTINATION_COUNT = 6;
-
-function getDataUrl(path: string) {
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  return `${baseUrl}data/${path}`;
-}
-
-function getDynamicHeroDestinations(tours: Array<{ destination?: string }>) {
-  const counts = new Map<string, number>();
-
-  for (const tour of tours) {
-    const destination = String(tour.destination || '').trim();
-    if (!destination || destination === '其他') continue;
-    counts.set(destination, (counts.get(destination) || 0) + 1);
-  }
-
-  return Array.from(counts.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, HERO_DESTINATION_COUNT)
-    .map(([destination]) => destination);
-}
+const QUICK_DESTINATIONS = [
+  '广东',
+  '云南',
+  '三亚',
+  '北京',
+  '四川',
+  '新疆',
+];
 
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [quickDestinations, setQuickDestinations] = useState<string[]>([
-    '广东',
-    '云南',
-    '三亚',
-    '北京',
-    '四川',
-    '新疆',
-  ]);
-
-  useEffect(() => {
-    fetch(getDataUrl('tours-list.json'))
-      .then((response) => response.json())
-      .then((data) => {
-        const dynamicDestinations = getDynamicHeroDestinations(Array.isArray(data) ? data : []);
-        if (dynamicDestinations.length > 0) {
-          setQuickDestinations(dynamicDestinations);
-        }
-      })
-      .catch(() => {
-        // Keep the safe static fallback when the list cannot be loaded.
-      });
-  }, []);
 
   const handleSearch = (nextQuery?: string) => {
     if (typeof nextQuery === 'string') {
@@ -71,7 +36,7 @@ function App() {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onSearch={handleSearch}
-            quickDestinations={quickDestinations}
+            quickDestinations={QUICK_DESTINATIONS}
           />
           <div id="tour-list" className="scroll-mt-24">
             <TourList searchQuery={searchQuery} />
