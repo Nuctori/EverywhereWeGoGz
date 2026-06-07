@@ -14,6 +14,8 @@ import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { isDisplayableTour } from '@/lib/tour-filter';
+import { useTourDetail } from '@/hooks/use-tour-detail';
+import { computePriceStats, sliderToPrice, priceToSlider } from '@/lib/price-slider';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Select,
@@ -73,93 +75,10 @@ function useToursData() {
   return { tours, loading };
 }
 
-function useTourDetail() {
-  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
-  const [loadingDetailId, setLoadingDetailId] = useState<string | null>(null);
-  const detailCacheRef = useRef<Record<string, Partial<Tour>>>({});
 
-  const selectTour = useCallback((tour: Tour) => {
-    setSelectedTour(tour);
 
-    if (detailCacheRef.current[tour.id]) {
-      setSelectedTour({ ...tour, ...detailCacheRef.current[tour.id] });
-      return;
-    }
 
-    setLoadingDetailId(tour.id);
-    fetch(getDataUrl(`tour-details/${tour.id}.json`))
-      .then((r) => {
-        if (!r.ok) throw new Error(`Failed to load tour detail: ${r.status}`);
-        return r.json();
-      })
-      .then((detail) => {
-        detailCacheRef.current[tour.id] = detail;
-        setSelectedTour((current) =>
-          current?.id === tour.id ? { ...current, ...detail } : current,
-        );
-      })
-      .catch(() => {
-        detailCacheRef.current[tour.id] = {};
-      })
-      .finally(() => {
-        setLoadingDetailId((current) => (current === tour.id ? null : current));
-      });
-  }, []);
 
-  return {
-    selectedTour,
-    detailLoading: Boolean(selectedTour && loadingDetailId === selectedTour.id),
-    selectTour,
-    clearSelectedTour: () => setSelectedTour(null),
-  };
-}
-
-function computePriceStats(tours: Tour[]) {
-  const prices = tours.map((t) => t.price).sort((a, b) => a - b);
-  const max = prices.length > 0 ? prices[prices.length - 1] : 10000;
-  const p95 = prices[Math.floor(prices.length * 0.95)] || max;
-  const sliderMax = Math.min(
-    Math.ceil(p95 / 1000) * 1000,
-    Math.ceil(max / 1000) * 1000,
-  );
-
-  return {
-    maxPriceAll: sliderMax,
-    priceStats: {
-      min: prices[0] || 0,
-      max,
-      p50: prices[Math.floor(prices.length * 0.5)] || 0,
-      p95,
-    },
-  };
-}
-
-const FOCUS_PRICE = 3000;
-
-function sliderToPrice(sliderValue: number, maxPrice: number): number {
-  if (sliderValue <= 0) return 0;
-  if (sliderValue >= 100) return maxPrice;
-
-  if (sliderValue <= 80) {
-    return Math.round((sliderValue / 80) * FOCUS_PRICE);
-  }
-
-  const t = (sliderValue - 80) / 20;
-  const eased = t * t * (3 - 2 * t);
-  return Math.round(FOCUS_PRICE + eased * (maxPrice - FOCUS_PRICE));
-}
-
-function priceToSlider(price: number, maxPrice: number): number {
-  if (price <= 0) return 0;
-  if (price >= maxPrice) return 100;
-
-  if (price <= FOCUS_PRICE) {
-    return (price / FOCUS_PRICE) * 80;
-  }
-
-  const t = Math.sqrt((price - FOCUS_PRICE) / (maxPrice - FOCUS_PRICE));
-  return 80 + t * 20;
-}
 
 function useDebouncedValue<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
