@@ -3,6 +3,7 @@ import {
   MapPin,
   Search,
   Sparkles,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,29 +38,47 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                 聚合多平台跟团线路。同一个输入框，既能搜目的地，也能直接让 AI 按预算、天数和同行人帮你置顶。
               </p>
 
-              <div className="mt-8 max-w-3xl rounded-[26px] border border-stone-200/80 bg-white/92 p-2 shadow-sm">
+              <form
+                className="mt-8 max-w-3xl rounded-[26px] border border-stone-200/80 bg-white/92 p-2 shadow-sm"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  onSearch(searchQuery);
+                }}
+              >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <div className="relative flex-1">
                     <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
                     <Input
+                      type="search"
+                      enterKeyHint="search"
                       placeholder="搜目的地/主题，或直接说：3天内 2000内 带老人"
-                      className="h-12 rounded-[20px] border-0 bg-stone-50 pl-11 pr-4 text-sm text-stone-800 placeholder:text-stone-400 shadow-none focus-visible:ring-1"
+                      className="h-12 rounded-[20px] border-0 bg-stone-50 pl-11 pr-11 text-sm text-stone-800 placeholder:text-stone-400 shadow-none focus-visible:ring-1"
                       value={searchQuery}
                       onChange={(e) => onSearchChange(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && onSearch(searchQuery)}
                     />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        aria-label="清空搜索"
+                        className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-stone-400 transition-colors hover:bg-stone-200/70 hover:text-stone-700"
+                        onClick={() => onSearchChange('')}
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
                   </div>
                   <div className="flex gap-2 sm:shrink-0">
                     <Button
+                      type="submit"
                       size="lg"
                       className="h-12 flex-1 rounded-[20px] bg-stone-900 px-5 text-sm font-medium text-white hover:bg-stone-800 sm:flex-none"
-                      onClick={() => onSearch(searchQuery)}
                     >
                       <Search className="mr-2 h-4 w-4" />
                       查看结果
                       <ArrowRight className="ml-1 h-4 w-4" />
                     </Button>
                     <Button
+                      type="button"
                       size="lg"
                       variant="outline"
                       className="h-12 flex-1 rounded-[20px] border-stone-200 bg-[#f7f2e8] px-4 text-sm font-medium text-stone-900 hover:border-stone-300 hover:bg-[#efe6d3] sm:flex-none"
@@ -75,24 +94,32 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                   <span className="hidden text-stone-300 sm:inline">/</span>
                   <span>AI 会用同一句话把更合适的团排前面</span>
                 </div>
-              </div>
+              </form>
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="self-center pr-1 text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
                   热门目的地
                 </span>
-                {quickDestinations.map((dest) => (
+                {quickDestinations.map((dest) => {
+                  const isActive = searchQuery.trim() === dest;
+                  return (
                   <button
                     key={dest}
+                    type="button"
                     onClick={() => {
                       onSearchChange(dest);
                       onSearch(dest);
                     }}
-                    className="rounded-full border border-stone-200 bg-white/80 px-3.5 py-2 text-sm text-stone-600 transition-colors hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900"
+                    className={`rounded-full border px-3.5 py-2 text-sm transition-colors ${
+                      isActive
+                        ? 'border-stone-900 bg-stone-900 text-white hover:border-stone-900 hover:bg-stone-900'
+                        : 'border-stone-200 bg-white/80 text-stone-600 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900'
+                    }`}
                   >
                     {dest}
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

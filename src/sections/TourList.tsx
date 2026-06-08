@@ -387,7 +387,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     selectTour,
     clearSelectedTour,
   } = useTourDetail();
-  const [showFilters, setShowFilters] = useState(!isMobile);
+  const [showFilters, setShowFilters] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth >= 768 : false,
+  );
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
@@ -890,8 +892,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     'border-stone-200 bg-white text-stone-600 hover:border-stone-300 hover:bg-stone-50 hover:text-stone-900';
 
   const commonFilters = (
-    <div className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/92 p-5 sm:p-6">
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+    <div className="surface-panel rounded-[24px] border border-stone-200/80 bg-white/92 p-4 sm:rounded-[28px] sm:p-6">
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 sm:mb-5 sm:gap-4">
         <div>
           <h2 className="text-xl font-semibold text-stone-900">筛选</h2>
         </div>
@@ -925,13 +927,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         </div>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-4 sm:space-y-5">
         <div>
           <div className="mb-3 flex items-center gap-2 text-sm font-medium text-stone-700">
             <MapPin className="w-4 h-4 text-stone-500" />
             目的地
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
+          <div className="mobile-chip-scroll flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
             <button
               type="button"
               onClick={() => setFilters({ ...filters, destination: '' })}
@@ -994,7 +996,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
             <Calendar className="w-4 h-4 text-stone-500" />
             出发时间
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
             {dateOptions.map((option) => {
               const selected =
                 filters.departureDate === option.value &&
@@ -1032,7 +1034,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
             <Filter className="w-4 h-4 text-stone-500" />
             预算
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
             {budgetOptions.map((option) => (
               <button
                 key={option.label}
@@ -1056,8 +1058,18 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
   const advancedFilters = (
     <div className="space-y-5">
-      <div className="rounded-[28px] border border-stone-200/80 bg-stone-50/75 p-5 sm:p-6">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div
+        className={cn(
+          'rounded-[28px] border border-stone-200/80 bg-stone-50/75 p-5 sm:p-6',
+          isMobile && 'rounded-none border-0 bg-transparent p-0 shadow-none',
+        )}
+      >
+        <div
+          className={cn(
+            'mb-5 flex flex-wrap items-center justify-between gap-3',
+            isMobile && 'sr-only',
+          )}
+        >
           <h3 className="text-lg font-semibold text-stone-900">更多筛选</h3>
           <Button
             variant="ghost"
@@ -1068,7 +1080,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm font-medium text-stone-700">
               来源平台
@@ -1079,7 +1091,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 setFilters({ ...filters, source: value === 'all' ? '' : value })
               }
             >
-            <SelectTrigger className="h-10 rounded-2xl border-stone-200 bg-white">
+            <SelectTrigger className="h-11 rounded-2xl border-stone-200 bg-white sm:h-10">
                 <SelectValue placeholder="全部平台" />
               </SelectTrigger>
               <SelectContent>
@@ -1112,7 +1124,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 })
               }
             >
-            <SelectTrigger className="h-10 rounded-2xl border-stone-200 bg-white">
+            <SelectTrigger className="h-11 rounded-2xl border-stone-200 bg-white sm:h-10">
                 <SelectValue placeholder="全部天数" />
               </SelectTrigger>
               <SelectContent>
@@ -1137,7 +1149,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 setFilters({ ...filters, theme: value === 'all' ? '' : value })
               }
             >
-            <SelectTrigger className="h-10 rounded-2xl border-stone-200 bg-white">
+            <SelectTrigger className="h-11 rounded-2xl border-stone-200 bg-white sm:h-10">
                 <SelectValue placeholder="全部主题" />
               </SelectTrigger>
               <SelectContent>
@@ -1161,7 +1173,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 setFilters({ ...filters, destination: value === 'all' ? '' : value })
               }
             >
-            <SelectTrigger className="h-10 rounded-2xl border-stone-200 bg-white">
+            <SelectTrigger className="h-11 rounded-2xl border-stone-200 bg-white sm:h-10">
                 <SelectValue placeholder="全部目的地" />
               </SelectTrigger>
               <SelectContent>
@@ -1176,7 +1188,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-5">
+        <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[1.2fr_1fr]">
           <div>
             <label className="mb-2 block text-sm font-medium text-stone-700">
               出发日期范围
@@ -1204,10 +1216,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                       {dateRangeLabel || '自定义日期'}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto rounded-[18px] border-stone-200 p-2 shadow-xl" align="start">
+                  <PopoverContent
+                    className="w-[calc(100vw-2rem)] rounded-[18px] border-stone-200 p-2 shadow-xl sm:w-auto"
+                    align={isMobile ? 'center' : 'start'}
+                  >
                     <CalendarComponent
                       mode="range"
-                      numberOfMonths={2}
+                      numberOfMonths={isMobile ? 1 : 2}
                       locale={zhCN}
                       weekStartsOn={1}
                       selected={{
@@ -1331,25 +1346,26 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
         {isMobile && (
           <Sheet open={showFilters} onOpenChange={setShowFilters}>
-            <SheetContent side="bottom" className="h-[88vh] flex flex-col px-0">
-              <SheetHeader className="border-b px-4 pb-4">
+            <SheetContent side="bottom" className="h-[92dvh] max-h-[92dvh] gap-0 rounded-t-[28px] border-stone-200 bg-stone-50 p-0">
+              <SheetHeader className="border-b border-stone-200 bg-white px-4 pb-4 pt-3">
+                <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-stone-300" />
                 <SheetTitle className="flex items-center gap-2">
                   <SlidersHorizontal className="w-5 h-5" />
                   更多筛选
                 </SheetTitle>
-                <SheetDescription>
+                <SheetDescription className="pr-8 leading-5">
                   常用筛选已经放在首屏，这里保留更细的条件
                 </SheetDescription>
               </SheetHeader>
-              <div className="flex-1 overflow-y-auto px-4 py-4">
+              <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-4 [-webkit-overflow-scrolling:touch]">
                 {advancedFilters}
               </div>
-              <div className="border-t px-4 pt-4 pb-5 flex gap-3">
-                <Button variant="outline" className="h-10 flex-1 rounded-2xl border-stone-200 bg-white" onClick={resetFilters}>
+              <div className="flex gap-3 border-t border-stone-200 bg-white px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3">
+                <Button variant="outline" className="h-11 flex-1 rounded-2xl border-stone-200 bg-white" onClick={resetFilters}>
                   重置全部
                 </Button>
                 <Button
-                  className="h-10 flex-1 rounded-2xl bg-stone-900 hover:bg-stone-800"
+                  className="h-11 flex-1 rounded-2xl bg-stone-900 hover:bg-stone-800"
                   onClick={() => setShowFilters(false)}
                 >
                   查看 {displayTours.length} 条线路

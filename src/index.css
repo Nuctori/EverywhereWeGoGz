@@ -86,7 +86,7 @@
       linear-gradient(180deg, #f7f6f3 0%, #f5f4f0 38%, #f8f8f7 100%);
   }
   h1, h2, h3, h4 {
-    letter-spacing: -0.025em;
+    letter-spacing: 0;
   }
   ::selection {
     background: rgba(217, 181, 114, 0.28);
@@ -110,6 +110,23 @@
 
   .rise-in {
     animation: rise-in 0.55s ease both;
+  }
+
+  .mobile-chip-scroll {
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-chip-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  button,
+  a,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 

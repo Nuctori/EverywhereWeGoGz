@@ -46,10 +46,10 @@ export const TourCard = memo(function TourCard({
 
   return (
     <Card
-      className="group surface-panel cursor-pointer gap-0 overflow-hidden rounded-[26px] border border-stone-200/80 bg-white/95 py-0 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(15,23,42,0.10)]"
+      className="group surface-panel cursor-pointer gap-0 overflow-hidden rounded-[22px] border border-stone-200/80 bg-white/95 py-0 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(15,23,42,0.10)] sm:rounded-[26px]"
       onClick={onClick}
     >
-      <div className="relative h-52 overflow-hidden bg-stone-100">
+      <div className="relative h-44 overflow-hidden bg-stone-100 sm:h-52">
         <img
           src={imageSrc}
           alt={tour.title}
@@ -73,11 +73,11 @@ export const TourCard = memo(function TourCard({
         )}
       </div>
 
-      <CardContent className="p-5">
+      <CardContent className="p-4 sm:p-5">
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <h3 className="line-clamp-3 text-base font-semibold leading-7 text-stone-900 transition-colors group-hover:text-stone-700">
+              <h3 className="line-clamp-2 text-base font-semibold leading-7 text-stone-900 transition-colors group-hover:text-stone-700 sm:line-clamp-3">
                 {tour.title}
               </h3>
             </TooltipTrigger>
@@ -87,7 +87,7 @@ export const TourCard = memo(function TourCard({
           </Tooltip>
         </TooltipProvider>
 
-        <p className="mt-2 text-sm text-stone-500">
+        <p className="mt-2 line-clamp-2 text-sm text-stone-500">
           {titleSummary}
         </p>
 
@@ -141,7 +141,7 @@ export const TourCard = memo(function TourCard({
           </div>
         </div>
 
-        <div className="mt-5 flex items-end justify-between border-t border-stone-100 pt-4">
+        <div className="mt-4 flex items-end justify-between gap-3 border-t border-stone-100 pt-4 sm:mt-5">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-stone-400">参考价格</p>
             <div className="mt-1 flex items-baseline gap-1.5">

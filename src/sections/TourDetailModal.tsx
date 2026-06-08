@@ -17,7 +17,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { resolveAssetUrl } from '@/lib/utils';
+import { cn, resolveAssetUrl } from '@/lib/utils';
 import { getFallbackImage } from '@/lib/image';
 import { getReadableDestination, formatDate } from '@/lib/tour-display';
 import { DepartureDateSelector } from '@/components/ui/departure-date-selector';
@@ -166,11 +166,11 @@ export function TourDetailModal({
       </div>
 
       {(heroImage || heroFallbackImage) && (
-        <div className="mb-6 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100">
+        <div className="mb-5 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 sm:mb-6">
           <img
             src={heroImage || heroFallbackImage}
             alt={tour.title}
-            className="h-56 w-full object-cover sm:h-72"
+            className="h-44 w-full object-cover sm:h-72"
             loading="eager"
             decoding="async"
             onError={(event) => {
@@ -184,25 +184,25 @@ export function TourDetailModal({
       )}
 
       {/* 核心信息 */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
+      <div className="mb-5 grid grid-cols-2 gap-2 sm:mb-6 sm:grid-cols-4 sm:gap-3">
+        <div className="rounded-lg border border-stone-200 bg-white p-2.5 text-center sm:p-3">
           <MapPin className="mx-auto mb-1 h-5 w-5 text-stone-500" />
           <p className="text-xs text-stone-500">目的地</p>
           <p className="text-sm font-semibold text-stone-900">{destinationLabel}</p>
         </div>
-        <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
+        <div className="rounded-lg border border-stone-200 bg-white p-2.5 text-center sm:p-3">
           <Clock className="mx-auto mb-1 h-5 w-5 text-stone-500" />
           <p className="text-xs text-stone-500">行程天数</p>
           <p className="text-sm font-semibold text-stone-900">{tour.duration}天</p>
         </div>
-        <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
+        <div className="rounded-lg border border-stone-200 bg-white p-2.5 text-center sm:p-3">
           <Users className="mx-auto mb-1 h-5 w-5 text-stone-500" />
           <p className="text-xs text-stone-500">剩余名额</p>
           <p className="text-sm font-semibold text-stone-900">
             {hasAvailabilityData ? `${resolvedTour?.availableSeats}/${resolvedTour?.totalSeats}` : '待确认'}
           </p>
         </div>
-        <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
+        <div className="rounded-lg border border-stone-200 bg-white p-2.5 text-center sm:p-3">
           <Star className="mx-auto mb-1 h-5 w-5 text-stone-500" />
           <p className="text-xs text-stone-500">数据状态</p>
           <p className="text-sm font-semibold text-stone-900">
@@ -265,8 +265,8 @@ export function TourDetailModal({
           </div>
         )}
         {/* 移动端Tab可滚动 */}
-        <div className="overflow-x-auto pb-1">
-          <TabsList className="grid min-w-[520px] grid-cols-4 h-auto">
+        <div className="sticky top-0 z-10 bg-background/95 pb-1 pt-1 backdrop-blur sm:static sm:bg-transparent sm:pt-0">
+          <TabsList className="grid h-11 w-full grid-cols-4 rounded-xl p-1">
             <TabsTrigger value="overview" className="text-xs sm:text-sm py-2">概览</TabsTrigger>
             <TabsTrigger value="itinerary" className="text-xs sm:text-sm py-2">每日安排</TabsTrigger>
             <TabsTrigger value="cost" className="text-xs sm:text-sm py-2">费用</TabsTrigger>
@@ -487,16 +487,37 @@ export function TourDetailModal({
   );
 
   const actionButtons = (
-    <div className="flex flex-col sm:flex-row gap-3 p-4 sm:p-6 border-t bg-white shrink-0">
-      <Button className="flex-1 bg-stone-900 hover:bg-stone-800" size="lg" onClick={() => openExternalLink(tour.bookingUrl)}>
+    <div
+      className={cn(
+        'shrink-0 border-t bg-white',
+        isMobile
+          ? 'grid grid-cols-2 gap-2 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3'
+          : 'flex flex-col gap-3 p-4 sm:flex-row sm:p-6',
+      )}
+    >
+      <Button
+        className={cn(
+          'bg-stone-900 hover:bg-stone-800',
+          isMobile ? 'col-span-2 h-11 rounded-2xl' : 'flex-1',
+        )}
+        size="lg"
+        onClick={() => openExternalLink(tour.bookingUrl)}
+      >
         <ExternalLink className="w-4 h-4 mr-2" />打开来源页面
       </Button>
-      <Button variant="outline" size="lg" onClick={() => openExternalLink(searchUrl)}>
+      <Button
+        variant="outline"
+        className={cn(isMobile && 'h-11 rounded-2xl')}
+        size="lg"
+        onClick={() => openExternalLink(searchUrl)}
+      >
         <Search className="w-4 h-4 mr-2" />打开平台搜索
       </Button>
-      {isMobile && <Button variant="outline" size="lg" onClick={onClose}>
-        <X className="w-4 h-4 mr-2" />关闭
-      </Button>}
+      {isMobile && (
+        <Button variant="outline" className="h-11 rounded-2xl" size="lg" onClick={onClose}>
+          <X className="w-4 h-4 mr-2" />关闭
+        </Button>
+      )}
     </div>
   );
 
@@ -505,10 +526,11 @@ export function TourDetailModal({
       {/* 移动端 Sheet - 使用 CSS 隐藏桌面端 */}
       {isMobile && (
         <Sheet open={Boolean(summaryTour)} onOpenChange={(open) => !open && onClose()}>
-          <SheetContent side="bottom" className="h-[100dvh] max-h-[100dvh] overflow-hidden p-0 flex min-h-0 flex-col">
-            <SheetHeader className="p-4 pb-2 border-b shrink-0">
-              <SheetTitle className="pr-8 text-left text-base leading-relaxed">{tour.title}</SheetTitle>
-              <SheetDescription>{tour.title} 的详细信息</SheetDescription>
+          <SheetContent side="bottom" className="h-[100dvh] max-h-[100dvh] min-h-0 gap-0 overflow-hidden rounded-t-[22px] border-stone-200 p-0">
+            <SheetHeader className="shrink-0 border-b border-stone-200 bg-white px-4 pb-3 pt-3 text-left">
+              <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-stone-300" />
+              <SheetTitle className="line-clamp-2 pr-10 text-left text-sm leading-6 text-stone-950">{tour.title}</SheetTitle>
+              <SheetDescription className="sr-only">{tour.title} 的详细信息</SheetDescription>
             </SheetHeader>
             <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain touch-pan-y px-4 py-4 [-webkit-overflow-scrolling:touch]">
               <div className="pb-4">
