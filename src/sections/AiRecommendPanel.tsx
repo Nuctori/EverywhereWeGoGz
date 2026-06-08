@@ -262,6 +262,7 @@ export function AiRecommendPanel({
   const scrollRef = useRef<HTMLDivElement>(null);
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
   const didRestoreStoredResultRef = useRef(false);
+  const requestVersionRef = useRef(0);
   const speechRecognitionCtorRef = useRef<BrowserSpeechRecognitionConstructor | null>(null);
   const speechRecognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const speechBaseInputRef = useRef('');
@@ -449,6 +450,7 @@ export function AiRecommendPanel({
   useEffect(() => {
     if (clearVersion === 0) return;
 
+    requestVersionRef.current += 1;
     stopSpeechRecognition(true);
     setLoading(false);
     setInput('');
@@ -471,6 +473,8 @@ export function AiRecommendPanel({
   const submitPrompt = async (rawPrompt?: string) => {
     const prompt = (rawPrompt ?? input).trim();
     if (!prompt || loading || !toursReady) return;
+    const requestVersion = requestVersionRef.current + 1;
+    requestVersionRef.current = requestVersion;
 
     const userMessage = createMessage('user', prompt);
     const nextMessages = [...messages, userMessage];
@@ -500,8 +504,12 @@ export function AiRecommendPanel({
         aiConfig,
         preferenceMemory,
         previousResult: result,
-        onProgress: (progress) => setProgressState(progress),
+        onProgress: (progress) => {
+          if (requestVersionRef.current !== requestVersion) return;
+          setProgressState(progress);
+        },
       });
+      if (requestVersionRef.current !== requestVersion) return;
       onResultChange(nextResult);
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
       setMessages((current) => [
@@ -510,11 +518,14 @@ export function AiRecommendPanel({
       ]);
       onFocusResults();
     } finally {
-      setLoading(false);
+      if (requestVersionRef.current === requestVersion) {
+        setLoading(false);
+      }
     }
   };
 
   const clearConversation = () => {
+    requestVersionRef.current += 1;
     onResultChange(null);
     setPreferenceMemory(null);
     setProgressState(null);

@@ -1803,7 +1803,7 @@ function formatRange(values: number[]) {
   };
 }
 
-function buildRouteAtlas(tours: AiRecommendationCandidate[], _intent: AiTravelIntent | null): RouteAtlas {
+function buildRouteAtlas(tours: AiRecommendationCandidate[]): RouteAtlas {
   const atlasCacheKey = AI_CACHE_PROMPT_VERSION;
   const atlasCacheByIntent = routeAtlasCache.get(tours);
   const cached = atlasCacheByIntent?.get(atlasCacheKey);
@@ -5073,7 +5073,7 @@ export async function requestAiRecommendations({
           tours: wideAvailableCandidates,
         })
       : Promise.resolve(weatherContextForRanking);
-    const routeAtlasPromise = Promise.resolve(buildRouteAtlas(wideAvailableCandidates, effectiveIntent));
+    const routeAtlasPromise = Promise.resolve(buildRouteAtlas(wideAvailableCandidates));
 
     const compactedCandidates = compactCandidates(
       availableCandidates,

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Tour } from '@/types/tour';
 
 declare const __DATA_VERSION__: string;
@@ -18,6 +18,32 @@ type DataMeta = {
   };
 };
 
+type UseToursState = {
+  tours: Tour[];
+  loading: boolean;
+  error: string | null;
+  total: number;
+};
+
+type CrawlStatus = {
+  lastCrawl: string | null;
+  lastCrawlStatus: 'loading' | 'success' | 'error' | 'never';
+  totalRecords: number;
+  listRecords: number;
+  detailFiles: number;
+  sourceStats: Record<string, number>;
+  destinationStats: Record<string, number>;
+  isCrawling: boolean;
+  cacheExists: boolean;
+  rawExists: boolean;
+  cacheSize: number;
+  rawSize: number;
+  listSize: number;
+  detailSize: number;
+  generatedAt: string | null;
+  latestUpdatedAt: string | null;
+};
+
 const emptyMeta: DataMeta = {
   generatedAt: null,
   latestUpdatedAt: null,
@@ -29,39 +55,98 @@ const emptyMeta: DataMeta = {
   files: {},
 };
 
+const initialToursState: UseToursState = {
+  tours: [],
+  loading: true,
+  error: null,
+  total: 0,
+};
+
+const initialCrawlStatus: CrawlStatus = {
+  lastCrawl: null,
+  lastCrawlStatus: 'loading',
+  totalRecords: 0,
+  listRecords: 0,
+  detailFiles: 0,
+  sourceStats: {},
+  destinationStats: {},
+  isCrawling: false,
+  cacheExists: false,
+  rawExists: false,
+  cacheSize: 0,
+  rawSize: 0,
+  listSize: 0,
+  detailSize: 0,
+  generatedAt: null,
+  latestUpdatedAt: null,
+};
+
 function getDataUrl(path: string) {
   const baseUrl = import.meta.env.BASE_URL || '/';
   return `${baseUrl}data/${path}?v=${encodeURIComponent(__DATA_VERSION__)}`;
 }
 
-/** @deprecated 此 hook 返回空数组，不再维护。数据加载请改用 TourList.tsx 中的 useToursData() */
 export function useTours() {
-  const [loading] = useState(false);
-  const [error] = useState<string | null>(null);
-  const fetchTours = () => {};
-  return { tours: [] as Tour[], loading, error, total: 0, fetchTours };
+  const [state, setState] = useState<UseToursState>(initialToursState);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const fetchTours = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setState((current) => ({
+      ...current,
+      loading: true,
+      error: null,
+    }));
+
+    try {
+      const response = await fetch(getDataUrl('tours-list.json'), {
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to load tours list: ${response.status}`);
+      }
+
+      const tours = await response.json() as Tour[];
+      if (controller.signal.aborted) return;
+
+      setState({
+        tours,
+        loading: false,
+        error: null,
+        total: tours.length,
+      });
+    } catch (error) {
+      if (controller.signal.aborted) return;
+
+      setState({
+        tours: [],
+        loading: false,
+        error: error instanceof Error ? error.message : 'Failed to load tours list.',
+        total: 0,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchTours();
+
+    return () => {
+      abortRef.current?.abort();
+    };
+  }, [fetchTours]);
+
+  return {
+    ...state,
+    fetchTours,
+  };
 }
 
 export function useCrawlStatus() {
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState(() => ({
-    lastCrawl: null as string | null,
-    lastCrawlStatus: 'loading',
-    totalRecords: 0,
-    listRecords: 0,
-    detailFiles: 0,
-    sourceStats: {} as Record<string, number>,
-    destinationStats: {} as Record<string, number>,
-    isCrawling: false,
-    cacheExists: false,
-    rawExists: false,
-    cacheSize: 0,
-    rawSize: 0,
-    listSize: 0,
-    detailSize: 0,
-    generatedAt: null as string | null,
-    latestUpdatedAt: null as string | null,
-  }));
+  const [status, setStatus] = useState<CrawlStatus>(initialCrawlStatus);
 
   const fetchStatus = useCallback(async () => {
     setLoading(true);
@@ -96,13 +181,10 @@ export function useCrawlStatus() {
         latestUpdatedAt: meta.latestUpdatedAt,
       });
     } catch {
-      setStatus((current) => ({
-        ...current,
+      setStatus({
+        ...initialCrawlStatus,
         lastCrawlStatus: 'error',
-        isCrawling: false,
-        cacheExists: false,
-        rawExists: false,
-      }));
+      });
     } finally {
       setLoading(false);
     }

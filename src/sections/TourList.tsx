@@ -61,6 +61,7 @@ function useToursData() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
   const loadedPagesRef = useRef<Set<number>>(new Set());
+  const hasPageChunksRef = useRef(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,6 +74,7 @@ function useToursData() {
         setTours(pageData.items);
         setTotal(pageData.meta.total);
         loadedPagesRef.current.add(0);
+        hasPageChunksRef.current = true;
         setLoading(false);
       } catch {
         try {
@@ -82,6 +84,7 @@ function useToursData() {
           if (cancelled) return;
           setTours(data);
           setTotal(data.length);
+          hasPageChunksRef.current = false;
           setLoading(false);
         } catch {
           if (!cancelled) { setTours([]); setLoading(false); }
@@ -93,20 +96,33 @@ function useToursData() {
   }, []);
 
   const loadMorePages = useCallback(async (neededPage: number) => {
+    if (!hasPageChunksRef.current) return;
     if (loadedPagesRef.current.has(neededPage)) return;
     setLoadingMore(true);
     try {
       const res = await fetch(getDataUrl('tours-page-' + neededPage + '.json'));
+      if (!res.ok) {
+        throw new Error(`Failed to load page ${neededPage}: ${res.status}`);
+      }
       const pageData = await res.json();
       loadedPagesRef.current.add(neededPage);
       setTours(function(prev) { return prev.concat(pageData.items); });
-    } catch (e) {
+    } catch {
+      hasPageChunksRef.current = false;
     } finally {
       setLoadingMore(false);
     }
   }, []);
 
-  return { tours: tours, loading: loading, loadingMore: loadingMore, total: total, loadMorePages: loadMorePages, loadedPagesRef: loadedPagesRef };
+  return {
+    tours,
+    loading,
+    loadingMore,
+    total,
+    loadMorePages,
+    loadedPagesRef,
+    hasPageChunksRef,
+  };
 }
 
 
@@ -154,6 +170,7 @@ function fromDateInputValue(value: string) {
 
 const PAGE_SIZE = 24;
 const INITIAL_LOAD_COUNT = 24;
+const DEFAULT_SLIDER_VALUES: [number, number] = [0, 100];
 const VISIBLE_DESTINATION_COUNT = 14;
 const HERO_DESTINATION_COUNT = 6;
 const SOURCE_COLORS: Record<string, string> = {
@@ -312,23 +329,25 @@ interface TourListProps {
 }
 
 export function TourList({ searchQuery }: TourListProps) {
-  const { tours: localTours, loading } = useToursData();
+  const {
+    tours: localTours,
+    loading,
+    total,
+    loadMorePages,
+    hasPageChunksRef,
+  } = useToursData();
   const isMobile = useIsMobile();
   const { selectedTour, detailLoading, selectTour, clearSelectedTour } = useTourDetail();
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(!isMobile);
   const [displayCount, setDisplayCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
-  const [sliderValues, setSliderValues] = useState<number[]>([0, 100]);
+  const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
-
-  useEffect(() => {
-    setShowFilters(!isMobile);
-  }, [isMobile]);
 
   const { maxPriceAll, priceStats } = useMemo(
     () => computePriceStats(localTours),
@@ -359,10 +378,6 @@ export function TourList({ searchQuery }: TourListProps) {
     [sliderValues, maxPriceAll],
   );
   const debouncedPriceRange = useDebouncedValue(priceRange, 300);
-
-  useEffect(() => {
-    setSliderValues([0, 100]);
-  }, [maxPriceAll]);
 
   const today = toDateInputValue(new Date());
 
@@ -598,34 +613,53 @@ export function TourList({ searchQuery }: TourListProps) {
       aiRecommendationResult?.items.filter((item) => !visibleTourIds.has(item.tourId)).length ?? 0,
     [aiRecommendationResult, visibleTourIds],
   );
+  const activeFilterCount = [
+    filters.destination,
+    filters.source,
+    filters.theme,
+    filters.departureDate || filters.departureDateStart || filters.departureDateEnd,
+    filters.duration,
+    priceRange[0] > 0 || priceRange[1] < maxPriceAll - 1,
+  ].filter(Boolean).length;
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
     setAiClearVersion((current) => current + 1);
   }, []);
 
-  const waterfallTours = useMemo(
-    () => displayTours.slice(0, displayCount),
-    [displayTours, displayCount],
-  );
+  const displayLimit = aiRecommendationResult || activeFilterCount > 0 || normalizedSearchQuery
+    ? INITIAL_LOAD_COUNT
+    : displayCount;
 
-  useEffect(() => {
-    setDisplayCount(INITIAL_LOAD_COUNT);
-  }, [aiRecommendationResult, filters, debouncedPriceRange]);
+  const waterfallTours = useMemo(
+    () => displayTours.slice(0, displayLimit),
+    [displayTours, displayLimit],
+  );
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [target] = entries;
 
-      if (target.isIntersecting && !isLoadingMore && displayCount < displayTours.length) {
+      if (!target.isIntersecting || isLoadingMore) {
+        return;
+      }
+
+      const nextDisplayCount = Math.min(displayCount + PAGE_SIZE, displayTours.length);
+      const nextPage = Math.floor(nextDisplayCount / PAGE_SIZE) - 1;
+
+      if (nextPage >= 0 && hasPageChunksRef.current && localTours.length < total) {
+        void loadMorePages(nextPage);
+      }
+
+      if (displayCount < displayTours.length) {
         setIsLoadingMore(true);
         setTimeout(() => {
-          setDisplayCount((prev) => Math.min(prev + PAGE_SIZE, displayTours.length));
+          setDisplayCount(nextDisplayCount);
           setIsLoadingMore(false);
         }, 300);
       }
     },
-    [displayCount, displayTours.length, isLoadingMore],
+    [displayCount, displayTours.length, hasPageChunksRef, isLoadingMore, loadMorePages, localTours.length, total],
   );
 
   useEffect(() => {
@@ -642,15 +676,6 @@ export function TourList({ searchQuery }: TourListProps) {
       if (currentRef) observer.unobserve(currentRef);
     };
   }, [handleObserver]);
-
-  const activeFilterCount = [
-    filters.destination,
-    filters.source,
-    filters.theme,
-    filters.departureDate || filters.departureDateStart || filters.departureDateEnd,
-    filters.duration,
-    priceRange[0] > 0 || priceRange[1] < maxPriceAll - 1,
-  ].filter(Boolean).length;
 
   const handleCardClick = (tour: Tour) => selectTour(tour);
 

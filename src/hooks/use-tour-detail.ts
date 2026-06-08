@@ -12,11 +12,15 @@ export function useTourDetail() {
   const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
   const [loadingDetailId, setLoadingDetailId] = useState<string | null>(null);
   const detailCacheRef = useRef<Record<string, Partial<Tour>>>({});
+  const requestTokenRef = useRef(0);
 
   const selectTour = useCallback((tour: Tour) => {
+    requestTokenRef.current += 1;
+    const requestToken = requestTokenRef.current;
     setSelectedTour(tour);
 
-    if (detailCacheRef.current[tour.id]) {
+    const cachedDetail = detailCacheRef.current[tour.id];
+    if (cachedDetail) {
       setSelectedTour({ ...tour, ...detailCacheRef.current[tour.id] });
       return;
     }
@@ -28,15 +32,17 @@ export function useTourDetail() {
         return r.json();
       })
       .then((detail) => {
+        if (requestTokenRef.current !== requestToken) return;
         detailCacheRef.current[tour.id] = detail;
         setSelectedTour((current) =>
           current?.id === tour.id ? { ...current, ...detail } : current,
         );
       })
       .catch(() => {
-        detailCacheRef.current[tour.id] = {};
+        if (requestTokenRef.current !== requestToken) return;
       })
       .finally(() => {
+        if (requestTokenRef.current !== requestToken) return;
         setLoadingDetailId((current) => (current === tour.id ? null : current));
       });
   }, []);
@@ -45,6 +51,10 @@ export function useTourDetail() {
     selectedTour,
     detailLoading: Boolean(selectedTour && loadingDetailId === selectedTour.id),
     selectTour,
-    clearSelectedTour: () => setSelectedTour(null),
+    clearSelectedTour: () => {
+      requestTokenRef.current += 1;
+      setLoadingDetailId(null);
+      setSelectedTour(null);
+    },
   };
 }
