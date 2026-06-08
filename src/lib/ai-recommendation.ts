@@ -37,7 +37,7 @@ const AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS = 60000;
 const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 15000;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
-const AI_CACHE_PROMPT_VERSION = '2026-06-04-prefix-v2';
+const AI_CACHE_PROMPT_VERSION = '2026-06-09-price-context-v1';
 const DEFAULT_DEPARTURE_CITY = '广州';
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
@@ -438,6 +438,7 @@ function compactCandidatesForPrompt(candidates: ReturnType<typeof compactCandida
     compactPromptStrings(candidate.experienceCategories, 3, 8),
     compactPromptStrings(candidate.seasonalComfortAtoms, 2, 16),
     compactPromptStrings(candidate.conflictReasons, 2, 18),
+    candidate.priceContext.poolPercentile ?? null,
   ]);
 }
 
@@ -460,13 +461,19 @@ function buildStablePromptPrefix(params: {
   candidates: ReturnType<typeof compactCandidates>;
   routeAtlas: RouteAtlas;
 }) {
+  const prices = params.candidates
+    .map((candidate) => candidate.price)
+    .filter((price) => Number.isFinite(price) && price > 0);
+
   return {
     v: AI_CACHE_PROMPT_VERSION,
     ck: [
       'id', 'title', 'destination', 'days', 'price', 'theme', 'source',
       'pace', 'hot', 'match', 'routeGroup', 'dates', 'weekdays', 'night',
       'pricePerDay', 'tags', 'highlights', 'atoms', 'cats', 'seasonAtoms', 'conflicts',
+      'pricePct',
     ],
+    pc: compactRangeForPrompt(formatRange(prices)),
     candidates: compactCandidatesForPrompt(sortCandidatesForPrompt(params.candidates)),
     routeAtlas: compactRouteAtlasForPrompt(params.routeAtlas),
   };
@@ -2229,10 +2236,11 @@ function isGenericReason(reason: string) {
 
 function shouldKeepAiReason(reason: string, primitive: RecommendationPrimitive) {
   const trimmed = stripTerminalPunctuation(reason);
-  if (trimmed.length < 18) return false;
-  if (isGenericReason(trimmed)) return false;
+  if (trimmed.length < 12) return false;
+  if (hasInternalRecommendationLanguage(trimmed)) return false;
   if (hasUnsupportedPublicInterestClaim(trimmed, primitive)) return false;
-  return reasonMentionsCandidateFact(trimmed, primitive);
+  if (isGenericReason(trimmed) && !reasonMentionsCandidateFact(trimmed, primitive)) return false;
+  return true;
 }
 
 function hasPublicInterestNeed(intent: AiTravelIntent | null, userText: string) {
@@ -2256,7 +2264,7 @@ function primitiveHasPublicInterestEvidence(primitive: RecommendationPrimitive) 
   ].join(' ');
   // 经验：这不是“扶贫路线词表推荐器”，只是一道事实审计。
   // 模型可以用世界知识做软语义排序，但贫困/公益/扶贫属于事实性强标签；
-  // 候选没有这些证据时，文案只能说低预算/县域/乡村体验的近似替代，不能把普通目的地贴成贫困地区。
+  // 候选没有这些证据时，文案只能说证据不足或近似替代，不能把普通目的地贴成贫困地区。
   return /(扶贫|公益|慈善|助农|乡村振兴|乡村|村|古村|瑶寨|苗寨|侗寨|壮寨|民族村|农家|田园|梯田|县|县城|山区|支教|研学)/.test(corpus);
 }
 
@@ -2272,7 +2280,7 @@ function buildPublicInterestAlternativeReason(primitive: RecommendationPrimitive
   const baseReason = stripTerminalPunctuation(buildPrimitiveConcreteReason(primitive));
   const evidence = primitiveHasPublicInterestEvidence(primitive)
     ? '候选原语里有乡村、县域或公益相关线索，可作为该方向的优先候选'
-    : '候选没有显式扶贫/公益标注，只能按低预算和周边体验做近似替代';
+    : '候选没有显式扶贫/公益标注，只能按县域、乡村或周边体验做近似替代';
   return `${baseReason}；${evidence}`;
 }
 
@@ -2280,21 +2288,6 @@ function getPrimitiveTitleFact(primitive: RecommendationPrimitive) {
   return normalizeSemanticAtom(primitive.title)
     .replace(/^\d+/, '')
     .slice(0, 14) || primitive.destination || primitive.theme || '这条线路';
-}
-
-function getPrimitiveCopyLead(primitive: RecommendationPrimitive) {
-  const categories = new Set(primitive.experienceCategories);
-  if (categories.has('温泉泡汤') && categories.has('海边沙滩')) return '想泡汤又想靠近海边，这条更对题';
-  if (categories.has('温泉泡汤') && categories.has('玩水清凉')) return '想放松泡汤又带点水上活动，可以先看这条';
-  if (categories.has('玩水清凉') && categories.has('海边沙滩')) return '海边加水上活动，夏天感更足';
-  if (categories.has('玩水清凉')) return '有水上活动，适合想清爽一点的短途';
-  if (categories.has('海边沙滩')) return '主打海边度假感，适合想换个海风周末';
-  if (categories.has('温泉泡汤')) return '主打泡汤放松，适合低预算找个地方歇一歇';
-  if (categories.has('森林山水')) return '有山水绿意，适合换换空气';
-  if (categories.has('文化逛城')) return '有文化街区或古镇看点，节奏不会太单调';
-  if (categories.has('室内度假')) return '室内外搭配更友好，遇到闷热或阵雨也更稳';
-  if (categories.has('美食体验')) return '吃喝和短途节奏更轻，适合轻松走一趟';
-  return '和这次预算、班期比较贴近，可以作为备选';
 }
 
 function getPrimitiveWeatherNudge(primitive: RecommendationPrimitive) {
@@ -2312,20 +2305,60 @@ function formatPrimitivePrice(primitive: RecommendationPrimitive) {
     : '';
 }
 
-function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive) {
+function hasPositivePriceClaim(text: string) {
+  return /(预算友好|价格友好|低价|便宜|不贵|划算|性价比|省钱|实惠)/.test(text);
+}
+
+function hasExplicitValueIntent(intent: AiTravelIntent | null, userText: string) {
+  const corpus = [
+    userText,
+    ...(intent?.travelStyle || []),
+    ...(intent?.semanticFocus || []),
+    ...(intent?.mustHave || []),
+  ].join(' ');
+  return Boolean(intent?.budgetMax) || /(便宜|预算|性价比|不贵|划算|省钱|实惠|低价|穷游)/.test(corpus);
+}
+
+function hasUnsupportedPositivePriceClaim(params: {
+  reason: string;
+  primitive: RecommendationPrimitive;
+  intent: AiTravelIntent | null;
+  userText: string;
+  sortedPrices: number[];
+}) {
+  if (!hasPositivePriceClaim(params.reason)) return false;
+  if (params.intent?.budgetMax && params.primitive.price > params.intent.budgetMax) return true;
+
+  const pricePercentile = getPricePercentile(params.primitive.price, params.sortedPrices);
+  if (pricePercentile === null) return false;
+
+  if (hasExplicitValueIntent(params.intent, params.userText)) {
+    return pricePercentile > 75;
+  }
+
+  return pricePercentile > 50;
+}
+
+function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive, variant = 0) {
   const atoms = getPrimitiveExperienceAtoms(primitive, 2)
     .filter((atom) => atom !== '综合')
     .filter((atom) => !primitive.experienceCategories.includes(atom));
   const titleFact = getPrimitiveTitleFact(primitive);
   const priceText = formatPrimitivePrice(primitive);
-  const highlightText = atoms.length > 0
-    ? `看点在${atoms.join('、')}`
-    : `看点在${titleFact}`;
-  const valueText = priceText ? `，${priceText}预算友好` : '';
+  const dayText = primitive.tripDays > 0 ? `${primitive.tripDays}天` : '';
+  const routeText = [primitive.destination, dayText].filter(Boolean).join(' · ');
+  const transportText = primitive.transportType ? ` · ${primitive.transportType}` : '';
+  const factText = atoms.length > 0 ? atoms.join('、') : titleFact;
   const weatherNudge = getPrimitiveWeatherNudge(primitive);
-  const cautionText = weatherNudge ? `；${weatherNudge}` : '';
-
-  return `${getPrimitiveCopyLead(primitive)}：${highlightText}${valueText}${cautionText}`;
+  const parts = [
+    factText ? `看点：${factText}` : '',
+    routeText ? `行程：${routeText}${transportText}` : '',
+    priceText ? `参考价：${priceText}` : '',
+    weatherNudge ? `提醒：${weatherNudge}` : '',
+  ].filter(Boolean);
+  if (parts.length <= 1) return parts[0] || '候选事实较少，需打开详情再确认';
+  const offset = Math.abs(variant) % parts.length;
+  return [...parts.slice(offset), ...parts.slice(0, offset)].slice(0, 3).join('；');
 }
 
 function buildCopyIntentProfile(
@@ -2468,7 +2501,7 @@ function buildSemanticNotesLead(
 ) {
   if (!notes) return '';
   if (options.allowPublicInterest && hasPublicInterestNeed(intent, userText)) {
-    return '说明：候选里不一定有明确扶贫或公益标注，我会优先找县域、乡村、低预算体验作最接近替代。';
+    return '说明：候选里不一定有明确扶贫或公益标注，我会按县域、乡村或周边体验找接近替代。';
   }
 
   const visibleCaveat = normalizeAiText(notes.caveat, 80);
@@ -3167,6 +3200,10 @@ function rewriteRecommendationCopy(params: {
   allowPublicInterest: boolean;
 }) {
   const primitiveByTourId = new Map(params.candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
+  const sortedPrices = params.candidateTours
+    .map((tour) => tour.price)
+    .filter((price) => Number.isFinite(price) && price > 0)
+    .sort((a, b) => a - b);
 
   return params.items.map((item, index) => {
     if (index >= MAX_AI_COMMENTARY_ITEMS) {
@@ -3191,6 +3228,13 @@ function rewriteRecommendationCopy(params: {
       currentReason &&
       !(hasTurnPublicInterestNeed && hasPublicInterestSemanticNote) &&
       !hasUnallowedPublicInterestLanguage(currentReason, params) &&
+      !hasUnsupportedPositivePriceClaim({
+        reason: currentReason,
+        primitive,
+        intent: params.intent,
+        userText: params.userText,
+        sortedPrices,
+      }) &&
       shouldKeepAiReason(currentReason, primitive) &&
       shouldUseAiSummary(currentReason, params.weatherContext, params)
     ) {
@@ -3206,7 +3250,7 @@ function rewriteRecommendationCopy(params: {
       semanticReason,
       hasTurnPublicInterestNeed
         ? buildPublicInterestAlternativeReason(primitive)
-        : buildPrimitiveConcreteReason(primitive),
+        : buildPrimitiveConcreteReason(primitive, index),
       buildWeatherReasonSuffix(primitive, insight),
     ]).join('。');
 
@@ -3862,24 +3906,13 @@ function buildAiMessages(params: {
 }) {
   const intentCoverage = analyzeIntentCoverage(params.candidates, params.intent);
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
-  // 经验：想让 provider cache 命中，关键不是少输出，而是让大块静态上下文稳定。
-  // 所以这里把“稳定规则”和“稳定候选上下文”拆成独立 system message，动态请求只保留本轮变化部分。
+  // 经验：想让 provider cache 命中，关键不是少输出，而是让大块稳定上下文稳定。
+  // system message 只放身份、候选边界和输出格式，排序取舍尽量交给模型。
   const systemPrompt = [
-    '你是旅行团推荐顾问，只能基于给定候选池做推荐。',
-    '只允许返回真实存在的 tourId，不允许编造线路、价格、班期、酒店、景点或服务。',
-    '本地层负责硬约束、候选边界和审计；软语义取舍交给你结合用户需求、天气、季节、目的地常识和候选原语完成。',
-    '你需要在同一次响应里返回 intent：硬约束沿用 it，软语义从 q、rc、pm、候选事实和世界知识中理解；不要等待额外意图抽取调用。',
-    '用户需求超出候选池显式承接范围时，可以用世界知识判断最接近的替代方向，但必须明确说明是“最接近的替代”，不能假装已精准满足。',
-    'matchStatus=match 优先；soft_conflict 或 fallback 只有在缺少足够 match，或必须说明取舍时才靠后使用。',
-    '预算上限如“2000 以内”默认表示不要超过上限且尽量贴近预算带，不等于盲目选全站最低价；除非用户明确追求极致低价，不要把明显脱离预算带的 99/299 低价团排在更合适的正常团前面。',
-    '如果给出了 departureWithinDays，并且候选池有对应未来班期，优先选窗口内未来班期，不要为了凑结果把旧班期排前面。',
-    '如果用户否定某类体验，不要把它包装成推荐点；若候选不足，直接说明候选受限和替代逻辑。',
-    '如果用户用“同时、都要、兼具、都有、既…又…、带…和…”表达多个并列偏好，你必须自己把这些偏好抽到 intent.mustHave；排序时优先同时满足全部 mustHave 的候选。',
-    '只满足并列偏好中一部分的候选只能作为靠后的近似替代，不要排在同时满足全部偏好的候选前面；若没有完全满足项，summary 和 reason 要直接说明缺口。',
-    '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选原语。',
+    '你是旅行团推荐顾问，从给定候选池里理解用户需求并排序。',
+    '输出只能引用候选池中真实存在的 tourId；线路事实、价格、班期、酒店、景点和服务来自候选原语。',
+    '可结合 q、rc、pm、it、wx、dw、候选事实、价格上下文 pc/pricePct 和必要的目的地常识理解软语义。',
     ...promptPolicy.systemRules,
-    'reason 必须引用候选里真实存在的具体事实，例如 title、highlights、semanticAtoms；不要只写性价比高、班期多、综合匹配。',
-    'summary 至少交代推荐方向、天气或季节判断，以及下单前最该注意的一件事。',
     '严格输出 JSON，不要 Markdown，不要额外解释。',
   ].join('\n');
 
@@ -3930,12 +3963,9 @@ function buildAiMessages(params: {
       itemCountLimit: MAX_AI_RANKED_ITEMS,
     },
     rq: [
-      '优先具体玩法、地点、原子事实，不要空话。',
-      '要解释预算、天数、班期、天气、轻松度与用户需求如何匹配。',
+      '按用户原话和上下文理解需求，可返回 intent 修正你的理解。',
+      'candidates 里 pc/pricePct 是价格上下文，atoms/cats/seasonAtoms/conflicts 是候选事实摘要。',
       ...promptPolicy.requestRules,
-      '天气敏感项必须说清风险和取舍。',
-      '遇到“同时/都要/兼具/既…又…”这类并列要求时，由你抽取 mustHave，并优先全部满足；部分满足只能作为替代。',
-      '可比较时直接说明这次为什么推 A 不推 B。',
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
         `第 ${MAX_AI_PROMPT_REASON_ITEMS + 1}-${MAX_AI_RANKED_ITEMS} 个只需要 tourId 和 score。`,
@@ -3993,11 +4023,9 @@ function buildLiteAiMessages(params: {
       '只输出 JSON，不要 Markdown。',
       '返回 intentNotes 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
-      '必须用紧凑 JSON；所有中文短句不超过24字；不要解释长段落。',
+      '用紧凑 JSON；中文短句不超过24字。',
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
-      '优先 match，除非没有足够 match 才使用 soft_conflict/fallback。',
-      '并列偏好由你抽 mustHave；先排全部满足项，部分满足靠后。',
-      '结合 q、it、wx 和 atoms/cats 判断软语义与天气取舍。',
+      '结合 q、it、wx、atoms/cats 和 conflict 理解软语义。',
       ...promptPolicy.liteRules,
     ],
   };

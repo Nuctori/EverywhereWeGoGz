@@ -519,9 +519,102 @@ const vagueReasonItems = validateAiItems({
 assert.ok(vagueReasonItems[0].reason?.includes('沙扒湾') || vagueReasonItems[0].reason?.includes('沙滩'));
 assert.ok(!vagueReasonItems[0].reason?.includes('玩水'));
 assert.ok(!/[（(](?:天气敏感|高温天气需取舍|雨天需取舍)：/.test(vagueReasonItems[0].reason || ''));
-assert.ok(vagueReasonItems[0].reason?.includes('看点在'));
-assert.ok(vagueReasonItems[0].reason?.includes('预算友好'));
+assert.ok(vagueReasonItems[0].reason?.includes('看点：'));
+assert.ok(vagueReasonItems[0].reason?.includes('参考价'));
+assert.ok(!vagueReasonItems[0].reason?.includes('预算友好'));
 assert.ok(!/偏海边沙滩|适合作低价酒店型备选|AI综合推荐|取舍：/.test(vagueReasonItems[0].reason || ''));
+
+const highPriceBeachTour = candidate({
+  id: 'high-price-beach',
+  title: '马尔代夫水上别墅7天沙滩度假',
+  destination: '马尔代夫',
+  duration: 7,
+  price: 30999,
+  theme: '海岛度假',
+  tags: ['海岛', '沙滩'],
+  highlights: ['水上别墅', '沙滩'],
+});
+const lowPriceBeachTour = candidate({
+  id: 'low-price-beach',
+  title: '广东海边沙滩2天',
+  destination: '广东',
+  duration: 2,
+  price: 399,
+  theme: '海边',
+  tags: ['海边'],
+  highlights: ['沙滩'],
+});
+const highPriceReasonRewrite = rewriteRecommendationCopy({
+  items: [{
+    tourId: highPriceBeachTour.id,
+    score: 98,
+    reason: '马尔代夫水上别墅和沙滩度假都对题，￥30,999预算友好。',
+    matchedSignals: ['沙滩', '水上别墅'],
+  }],
+  candidateTours: [highPriceBeachTour, lowPriceBeachTour],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '帮我找同时带温泉和沙滩的团',
+  allowPublicInterest: false,
+});
+assert.ok(!highPriceReasonRewrite[0].reason?.includes('预算友好'));
+assert.ok(highPriceReasonRewrite[0].reason?.includes('参考价：￥30,999'));
+const variedReasonTours = [
+  highPriceBeachTour,
+  candidate({
+    id: 'dubrovnik-beach',
+    title: '克罗地亚古城海岸15天',
+    destination: '克罗地亚',
+    duration: 15,
+    price: 30999,
+    theme: '自然风光',
+    tags: ['海边', '古城'],
+    highlights: ['杜布罗夫尼克城墙', '亚得里亚海岸'],
+  }),
+  candidate({
+    id: 'kuda-beach',
+    title: '马尔代夫Kuda含早晚餐7天',
+    destination: '马尔代夫',
+    duration: 7,
+    price: 29999,
+    theme: '海岛度假',
+    tags: ['海岛', '沙滩'],
+    highlights: ['泻湖', '浮潜'],
+  }),
+  lowPriceBeachTour,
+];
+const variedReasonRewrite = rewriteRecommendationCopy({
+  items: variedReasonTours.map((tour, index) => ({
+    tourId: tour.id,
+    score: 95 - index,
+    reason: '综合匹配，性价比高。',
+    matchedSignals: ['综合'],
+  })),
+  candidateTours: variedReasonTours,
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '帮我找海边度假的团',
+  allowPublicInterest: false,
+});
+const reasonOpenings = variedReasonRewrite
+  .map((item) => (item.reason || '').split(/[：；，。]/)[0])
+  .filter(Boolean);
+assert.ok(new Set(reasonOpenings).size >= 3);
+assert.ok(variedReasonRewrite.filter((item) => item.reason?.startsWith('主打')).length <= 1);
 
 const unsupportedPublicInterestPrimitive = buildTourPrimitive(candidate({
   id: 'unsupported-public-interest',
@@ -555,7 +648,7 @@ const semanticBoundaryItems = validateAiItems({
   items: [{
     tourId: 'semantic-boundary',
     score: 92,
-    semanticFit: '候选没有显式扶贫/公益标注，只能按县域、乡村、低预算体验做近似替代',
+    semanticFit: '候选没有显式扶贫/公益标注，只能按县域、乡村体验做近似替代',
     semanticSignals: ['近似替代', '县域乡村'],
     semanticBoundary: '不能断言这是扶贫项目或贫困地区',
   }],
@@ -646,7 +739,7 @@ assert.ok(weirdSemanticSummary.includes('说明：部分偏好在候选里没有
 assert.ok(weirdSemanticSummary.includes('推荐方向：'));
 
 const nonInternalPublicInterestSummary = finalizeRecommendationSummary({
-  aiSummary: '候选没有显式扶贫/公益标注，只能按低预算和周边体验做近似替代。下单前留意天气。',
+  aiSummary: '候选没有显式扶贫/公益标注，只能按周边体验做近似替代。下单前留意天气。',
   items: [{ tourId: 'beach', score: 90, reason: '沙滩短线', matchedSignals: [] }],
   candidateTours: [hotSpringTour, nonHotSpringTour],
   weatherContext: {
@@ -694,8 +787,9 @@ const nonPublicFullPrompt = buildAiMessages({
   preferenceMemory: null,
   allowPublicInterest: false,
 }).map((message) => message.content).join('\n');
-assert.ok(nonPublicFullPrompt.includes('intent.mustHave'));
-assert.ok(nonPublicFullPrompt.includes('同时满足全部'));
+assert.ok(nonPublicFullPrompt.includes('mustHave'));
+assert.ok(nonPublicFullPrompt.includes('pricePct'));
+assert.ok(nonPublicFullPrompt.includes('"pc"'));
 const nonPublicLitePrompt = buildLiteAiMessages({
   userText: '帮我找海边温泉，400以下的，关注天气因素',
   messages: [],
