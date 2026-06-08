@@ -533,7 +533,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         return false;
       }
 
-      if (normalizedSearchQuery) {
+      const isAiRecommendedTour = aiRecommendationByTourId.has(tour.id);
+
+      if (normalizedSearchQuery && !isAiRecommendedTour) {
         const matchesSearch = [
           tour.title,
           tour.destination,
