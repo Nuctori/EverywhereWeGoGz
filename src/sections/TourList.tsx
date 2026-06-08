@@ -326,6 +326,7 @@ export function TourList({ searchQuery }: TourListProps) {
   const {
     tours: localTours,
     loading,
+    loadingMore,
     total,
     loadMorePages,
     hasPageChunksRef,
@@ -646,6 +647,9 @@ export function TourList({ searchQuery }: TourListProps) {
     () => displayTours.slice(0, visibleCount),
     [displayTours, visibleCount],
   );
+  const hasMoreLoadedResults = visibleCount < displayTours.length;
+  const hasMoreRemotePages = hasPageChunksRef.current && localTours.length < total;
+  const shouldRenderLoadMore = hasMoreLoadedResults || hasMoreRemotePages;
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -655,10 +659,8 @@ export function TourList({ searchQuery }: TourListProps) {
         return;
       }
 
-      const nextVisibleCount = Math.min(visibleCount + PAGE_SIZE, displayTours.length);
-      const nextPage = Math.floor(nextVisibleCount / PAGE_SIZE) - 1;
-
-      if (nextPage >= 0 && hasPageChunksRef.current && localTours.length < total) {
+      if (hasPageChunksRef.current && localTours.length < total) {
+        const nextPage = Math.floor(localTours.length / PAGE_SIZE);
         void loadMorePages(nextPage);
       }
 
@@ -1415,7 +1417,7 @@ export function TourList({ searchQuery }: TourListProps) {
       {displayTours.length > 0 && (
         <div className="mb-5 flex items-center justify-between text-sm text-stone-500">
           <span>共 {displayTours.length.toLocaleString()} 条结果</span>
-          {visibleCount < displayTours.length && (
+          {shouldRenderLoadMore && (
             <span className="text-xs text-stone-400">
               已显示 {waterfallTours.length.toLocaleString()} 条
             </span>
@@ -1454,9 +1456,9 @@ export function TourList({ searchQuery }: TourListProps) {
             })}
           </div>
 
-          {visibleCount < displayTours.length && (
+          {shouldRenderLoadMore && (
             <div ref={loadMoreRef} className="flex items-center justify-center py-8">
-              {isLoadingMore ? (
+              {isLoadingMore || loadingMore ? (
                 <div className="flex items-center gap-2 text-stone-500">
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span className="text-sm">正在加载更多...</span>
@@ -1470,7 +1472,7 @@ export function TourList({ searchQuery }: TourListProps) {
             </div>
           )}
 
-          {visibleCount >= displayTours.length && displayTours.length > INITIAL_LOAD_COUNT && (
+          {!shouldRenderLoadMore && displayTours.length > INITIAL_LOAD_COUNT && (
             <div className="py-8 text-center text-sm text-stone-400">
               已加载全部 {displayTours.length.toLocaleString()} 条结果
             </div>
