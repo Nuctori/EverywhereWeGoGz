@@ -2280,24 +2280,34 @@ function getPrimitiveTitleFact(primitive: RecommendationPrimitive) {
     .slice(0, 14) || primitive.destination || primitive.theme || '这条线路';
 }
 
-function getPrimitiveWeatherAppeal(primitive: RecommendationPrimitive) {
+function getPrimitiveCopyLead(primitive: RecommendationPrimitive) {
   const categories = new Set(primitive.experienceCategories);
-  if (categories.has('温泉泡汤') && categories.has('海边沙滩')) return '兼顾海边和温泉，但要看晴雨、风浪和高温泡汤取舍';
-  if (categories.has('温泉泡汤') && categories.has('玩水清凉')) return '有水上活动和温泉，但高温泡汤要取舍';
-  if (categories.has('玩水清凉') && categories.has('海边沙滩')) return '有水上活动和海边体验，但要看晴雨和风浪';
-  if (categories.has('玩水清凉')) return '有水上活动，夏季体感更对题';
-  if (categories.has('森林山水')) return '有森林山水遮阴，比纯室外暴晒稳';
-  if (categories.has('文化逛城') || categories.has('室内度假')) return '室内外搭配更适合闷热或阵雨天';
-  if (categories.has('海边沙滩')) return '海边玩法更有夏天感，但要看晴雨和风浪';
-  if (categories.has('温泉泡汤')) return '高温天气泡汤要取舍，适合作低价酒店型备选';
-  if (categories.has('美食体验')) return '美食和短途节奏轻，受天气影响相对小';
-  return primitive.seasonalComfortAtoms[0] || '按预算和班期可作为备选';
+  if (categories.has('温泉泡汤') && categories.has('海边沙滩')) return '想泡汤又想靠近海边，这条更对题';
+  if (categories.has('温泉泡汤') && categories.has('玩水清凉')) return '想放松泡汤又带点水上活动，可以先看这条';
+  if (categories.has('玩水清凉') && categories.has('海边沙滩')) return '海边加水上活动，夏天感更足';
+  if (categories.has('玩水清凉')) return '有水上活动，适合想清爽一点的短途';
+  if (categories.has('海边沙滩')) return '主打海边度假感，适合想换个海风周末';
+  if (categories.has('温泉泡汤')) return '主打泡汤放松，适合低预算找个地方歇一歇';
+  if (categories.has('森林山水')) return '有山水绿意，适合换换空气';
+  if (categories.has('文化逛城')) return '有文化街区或古镇看点，节奏不会太单调';
+  if (categories.has('室内度假')) return '室内外搭配更友好，遇到闷热或阵雨也更稳';
+  if (categories.has('美食体验')) return '吃喝和短途节奏更轻，适合轻松走一趟';
+  return '和这次预算、班期比较贴近，可以作为备选';
 }
 
-function getPrimitiveComfortNote(primitive: RecommendationPrimitive) {
-  return primitive.seasonalComfortAtoms.find((atom) => /雨天需取舍|高温天气需取舍|天气敏感/.test(atom)) ||
-    primitive.seasonalComfortAtoms[0] ||
-    '';
+function getPrimitiveWeatherNudge(primitive: RecommendationPrimitive) {
+  const categories = new Set(primitive.experienceCategories);
+  if (categories.has('海边沙滩')) return '出发前看一下晴雨和风浪';
+  if (categories.has('玩水清凉')) return '水上活动建议留意降雨和现场开放情况';
+  if (categories.has('温泉泡汤')) return '高温天泡汤体感要稍微取舍';
+  if (categories.has('森林山水') || categories.has('户外强度')) return '山水户外遇到连雨天体验会打折';
+  return '';
+}
+
+function formatPrimitivePrice(primitive: RecommendationPrimitive) {
+  return Number.isFinite(primitive.price) && primitive.price > 0
+    ? `￥${primitive.price.toLocaleString()}`
+    : '';
 }
 
 function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive) {
@@ -2305,31 +2315,15 @@ function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive) {
     .filter((atom) => atom !== '综合')
     .filter((atom) => !primitive.experienceCategories.includes(atom));
   const titleFact = getPrimitiveTitleFact(primitive);
-  const destinationLabel = primitive.destination && primitive.destination !== '其他' && primitive.destination !== '产品特色'
-    ? primitive.destination
-    : titleFact;
-  const categoryText = primitive.experienceCategories.slice(0, 2).join('、');
-  const priceText = Number.isFinite(primitive.price) && primitive.price > 0
-    ? `，${primitive.price.toLocaleString()}元`
-    : '';
-  const factText = atoms.length > 0
-    ? `${destinationLabel}这条带${atoms.join('、')}${priceText}`
-    : categoryText
-      ? `${titleFact}${priceText}，偏${categoryText}`
-      : `${titleFact}${priceText}，${primitive.theme || '短途线路'}`;
-  const comfortText = getPrimitiveComfortNote(primitive);
-  const weatherAppeal = getPrimitiveWeatherAppeal(primitive);
-  const normalizedComfortCore = comfortText
-    .replace(/^雨天需取舍：/, '')
-    .replace(/^高温天气需取舍：/, '')
-    .replace(/^天气敏感：/, '');
-  const shouldAppendComfort =
-    Boolean(comfortText) &&
-    Boolean(normalizedComfortCore) &&
-    !weatherAppeal.includes(comfortText) &&
-    !weatherAppeal.includes(normalizedComfortCore);
+  const priceText = formatPrimitivePrice(primitive);
+  const highlightText = atoms.length > 0
+    ? `看点在${atoms.join('、')}`
+    : `看点在${titleFact}`;
+  const valueText = priceText ? `，${priceText}预算友好` : '';
+  const weatherNudge = getPrimitiveWeatherNudge(primitive);
+  const cautionText = weatherNudge ? `；${weatherNudge}` : '';
 
-  return `${factText}；${weatherAppeal}${shouldAppendComfort ? `（${comfortText}）` : ''}`;
+  return `${getPrimitiveCopyLead(primitive)}：${highlightText}${valueText}${cautionText}`;
 }
 
 function buildCopyIntentProfile(

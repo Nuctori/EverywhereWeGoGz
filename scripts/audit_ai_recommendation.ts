@@ -501,6 +501,10 @@ const vagueReasonItems = validateAiItems({
 }, noisyAlternatives);
 assert.ok(vagueReasonItems[0].reason?.includes('沙扒湾') || vagueReasonItems[0].reason?.includes('沙滩'));
 assert.ok(!vagueReasonItems[0].reason?.includes('玩水'));
+assert.ok(!/[（(](?:天气敏感|高温天气需取舍|雨天需取舍)：/.test(vagueReasonItems[0].reason || ''));
+assert.ok(vagueReasonItems[0].reason?.includes('看点在'));
+assert.ok(vagueReasonItems[0].reason?.includes('预算友好'));
+assert.ok(!/偏海边沙滩|适合作低价酒店型备选|AI综合推荐|取舍：/.test(vagueReasonItems[0].reason || ''));
 
 const unsupportedPublicInterestPrimitive = buildTourPrimitive(candidate({
   id: 'unsupported-public-interest',
