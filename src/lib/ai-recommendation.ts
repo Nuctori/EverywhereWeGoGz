@@ -12,6 +12,7 @@ import type {
   AiWeatherContext,
   FilterState,
 } from '@/types/tour';
+import { storedAiProviderConfigSchema } from '@/lib/runtime-schemas';
 
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 const MAX_AI_CANDIDATES = 60;
@@ -2605,7 +2606,10 @@ function readStoredAiConfig(): StoredAiProviderConfig {
   if (typeof window === 'undefined') return {};
 
   try {
-    return JSON.parse(window.localStorage.getItem(AI_CONFIG_STORAGE_KEY) || '{}');
+    const raw = window.localStorage.getItem(AI_CONFIG_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = storedAiProviderConfigSchema.safeParse(JSON.parse(raw));
+    return parsed.success ? parsed.data : {};
   } catch {
     return {};
   }
@@ -2705,8 +2709,10 @@ export function saveAiProviderConfig(config: StoredAiProviderConfig) {
   const cleaned = Object.fromEntries(
     Object.entries(config).filter(([, value]) => typeof value === 'string' && value.trim()),
   );
+  const parsed = storedAiProviderConfigSchema.safeParse(cleaned);
+  if (!parsed.success) return;
 
-  window.localStorage.setItem(AI_CONFIG_STORAGE_KEY, JSON.stringify(cleaned));
+  window.localStorage.setItem(AI_CONFIG_STORAGE_KEY, JSON.stringify(parsed.data));
 }
 
 export function clearAiProviderConfig() {

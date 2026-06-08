@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
-import type { Tour } from '@/types/tour';
+import type { ResolvedTour, TourDetail, TourSummary } from '@/types/tour';
+import { tourDetailSchema } from '@/lib/runtime-schemas';
 
 declare const __DATA_VERSION__: string;
 
@@ -8,53 +9,79 @@ function getDataUrl(path: string) {
   return `${baseUrl}data/${path}?v=${encodeURIComponent(__DATA_VERSION__)}`;
 }
 
-export function useTourDetail() {
-  const [selectedTour, setSelectedTour] = useState<Tour | null>(null);
-  const [loadingDetailId, setLoadingDetailId] = useState<string | null>(null);
-  const detailCacheRef = useRef<Record<string, Partial<Tour>>>({});
-  const requestTokenRef = useRef(0);
+export type TourDetailStatus = 'closed' | 'loading' | 'ready' | 'error';
 
-  const selectTour = useCallback((tour: Tour) => {
+export function useTourDetail() {
+  const [selectedSummaryTour, setSelectedSummaryTour] = useState<TourSummary | null>(null);
+  const [resolvedTour, setResolvedTour] = useState<ResolvedTour | null>(null);
+  const [detailStatus, setDetailStatus] = useState<TourDetailStatus>('closed');
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const detailCacheRef = useRef<Record<string, TourDetail>>({});
+  const requestTokenRef = useRef(0);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const clearSelectedTour = useCallback(() => {
+    requestTokenRef.current += 1;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setSelectedSummaryTour(null);
+    setResolvedTour(null);
+    setDetailStatus('closed');
+    setDetailError(null);
+  }, []);
+
+  const selectTour = useCallback((tour: TourSummary) => {
     requestTokenRef.current += 1;
     const requestToken = requestTokenRef.current;
-    setSelectedTour(tour);
+    abortRef.current?.abort();
+
+    setSelectedSummaryTour(tour);
+    setResolvedTour(null);
+    setDetailError(null);
 
     const cachedDetail = detailCacheRef.current[tour.id];
     if (cachedDetail) {
-      setSelectedTour({ ...tour, ...detailCacheRef.current[tour.id] });
+      setResolvedTour({ ...tour, ...cachedDetail });
+      setDetailStatus('ready');
       return;
     }
 
-    setLoadingDetailId(tour.id);
-    fetch(getDataUrl(`tour-details/${tour.id}.json`))
-      .then((r) => {
-        if (!r.ok) throw new Error(`Failed to load tour detail: ${r.status}`);
-        return r.json();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    setDetailStatus('loading');
+
+    fetch(getDataUrl(`tour-details/${tour.id}.json`), {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Failed to load tour detail: ${response.status}`);
+        }
+        return response.json();
       })
-      .then((detail) => {
+      .then((rawDetail) => {
         if (requestTokenRef.current !== requestToken) return;
+        const detail = tourDetailSchema.parse(rawDetail);
         detailCacheRef.current[tour.id] = detail;
-        setSelectedTour((current) =>
-          current?.id === tour.id ? { ...current, ...detail } : current,
+        setResolvedTour({ ...tour, ...detail });
+        setDetailStatus('ready');
+      })
+      .catch((error) => {
+        if (controller.signal.aborted || requestTokenRef.current !== requestToken) return;
+        setDetailStatus('error');
+        setDetailError(
+          error instanceof Error ? error.message : 'Failed to load tour detail.',
         );
-      })
-      .catch(() => {
-        if (requestTokenRef.current !== requestToken) return;
-      })
-      .finally(() => {
-        if (requestTokenRef.current !== requestToken) return;
-        setLoadingDetailId((current) => (current === tour.id ? null : current));
       });
   }, []);
 
   return {
-    selectedTour,
-    detailLoading: Boolean(selectedTour && loadingDetailId === selectedTour.id),
+    selectedSummaryTour,
+    resolvedTour,
+    detailStatus,
+    detailError,
+    detailLoading: detailStatus === 'loading',
     selectTour,
-    clearSelectedTour: () => {
-      requestTokenRef.current += 1;
-      setLoadingDetailId(null);
-      setSelectedTour(null);
-    },
+    clearSelectedTour,
   };
 }

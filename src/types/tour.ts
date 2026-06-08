@@ -1,24 +1,68 @@
-﻿export interface Tour {
+export interface DayItinerary {
+  day: number;
+  title: string;
+  description: string;
+  meals: string[];
+  accommodation: string;
+  activities: string[];
+}
+
+export interface DataQuality {
+  hasStructuredDepartureDates?: boolean;
+  isDepartureDateReliable?: boolean;
+  availabilityConfidence?: 'low' | 'medium' | 'high';
+  riskFlags?: string[];
+}
+
+export interface TourMeta {
+  aiTags?: string[];
+  sourceFeatures?: string[];
+  sourceAttributes?: Record<string, unknown>;
+  dataQuality?: DataQuality;
+}
+
+export interface TourSummary {
   id: string;
   title: string;
   source: string;
-  sourceLogo: string;
   destination: string;
   duration: number;
   price: number;
   originalPrice?: number;
   priceUnit: string;
   departureDate: string;
-  returnDate: string;
   transportType: string;
   accommodationLevel: string;
-  accommodationStars: number;
   meals: string;
-  singleSupplement: number;
   singleSupplementNote: string;
+  highlights: string[];
+  rating: number;
+  bookingUrl: string;
+  images: string[];
+  tags: string[];
+  isHot: boolean;
+  isNew: boolean;
+  isFlashSale: boolean;
+  flashSaleEndTime?: string;
+  discountRate?: number;
+  groupSize: string;
+  theme: string;
+  leisureLevel: 'easy' | 'medium' | 'hard';
+  suitableFor: string[];
+  season: string;
+  departureDates?: string[];
+  hotDepartureDates?: string[];
+  meta?: TourMeta;
+  dataQuality?: DataQuality;
+}
+
+export interface TourDetail {
+  sourceLogo: string;
+  returnDate: string;
+  accommodationStars: number;
+  singleSupplement: number;
   availableSeats: number;
   totalSeats: number;
-  highlights: string[];
   itinerary: DayItinerary[];
   inclusions: string[];
   exclusions: string[];
@@ -31,43 +75,18 @@
   childPolicy: string;
   cancellationPolicy: string;
   refundPolicy: string;
-  rating: number;
   reviewCount: number;
-  bookingUrl: string;
-  images: string[];
-  tags: string[];
-  isHot: boolean;
-  isNew: boolean;
-  isFlashSale: boolean;
-  flashSaleEndTime?: string;
-  discountRate?: number;
-  groupSize: string;
-  theme: string;
-  suitableFor: string[];
+  url?: string;
   difficulty: string;
-  leisureLevel: 'easy' | 'medium' | 'hard';
-  season: string;
   language: string;
+  sourceId?: string;
   createdAt: string;
   updatedAt: string;
-  departureDates?: string[];
-  hotDepartureDates?: string[];
-  dataQuality?: {
-    hasStructuredDepartureDates?: boolean;
-    isDepartureDateReliable?: boolean;
-    availabilityConfidence?: 'low' | 'medium' | 'high';
-    riskFlags?: string[];
-  };
 }
 
-export interface DayItinerary {
-  day: number;
-  title: string;
-  description: string;
-  meals: string[];
-  accommodation: string;
-  activities: string[];
-}
+export type ResolvedTour = TourSummary & TourDetail;
+
+export type Tour = TourSummary & Partial<TourDetail>;
 
 export type FilterState = {
   destination: string;
@@ -195,7 +214,7 @@ export interface AiPreferenceMemory {
 }
 
 export type AiRecommendationCandidate = Pick<
-  Tour,
+  TourSummary,
   | 'id'
   | 'title'
   | 'source'

@@ -1,4 +1,4 @@
-import type { Tour } from '@/types/tour';
+import type { DayItinerary, ResolvedTour, TourSummary } from '@/types/tour';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Dialog,
@@ -31,7 +31,10 @@ import {
 } from 'lucide-react';
 
 interface TourDetailModalProps {
-  tour: Tour | null;
+  summaryTour: TourSummary | null;
+  resolvedTour: ResolvedTour | null;
+  status?: 'closed' | 'loading' | 'ready' | 'error';
+  error?: string | null;
   loading?: boolean;
   onClose: () => void;
 }
@@ -63,7 +66,7 @@ function normalizeText(value: string | undefined) {
   return (value || '').trim();
 }
 
-function isLegacyPlaceholderItineraryDay(day: Tour['itinerary'][number]) {
+function isLegacyPlaceholderItineraryDay(day: DayItinerary) {
   const description = normalizeText(day.description);
   const accommodation = normalizeText(day.accommodation);
   const activities = (day.activities || []).map((item) => normalizeText(item)).filter(Boolean);
@@ -88,8 +91,16 @@ function getReliablePolicy(value: string | undefined) {
   return normalized && !LEGACY_POLICY_PLACEHOLDERS.has(normalized) ? normalized : '';
 }
 
-export function TourDetailModal({ tour, loading = false, onClose }: TourDetailModalProps) {
+export function TourDetailModal({
+  summaryTour,
+  resolvedTour,
+  status = 'closed',
+  error = null,
+  loading = false,
+  onClose,
+}: TourDetailModalProps) {
   const isMobile = useIsMobile();
+  const tour = resolvedTour ?? summaryTour;
   if (!tour) return null;
   const heroImage = resolveAssetUrl(tour.images?.[0] || '');
   const heroFallbackImage = getFallbackImage(tour.title);
@@ -105,22 +116,23 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
     '广州去旅行': 'http://gzqlx.360jlb.cn/m/events?q=',
   };
 
-  const searchUrl = searchUrls[tour.source] + encodeURIComponent(tour.title.slice(0, 20));
+  const searchUrl = (searchUrls[tour.source] || '') + encodeURIComponent(tour.title.slice(0, 20));
   const openExternalLink = (url: string) => {
     if (!url) return;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const reliableItinerary = (tour.itinerary || []).filter((day) => !isLegacyPlaceholderItineraryDay(day));
-  const reliableInclusions = filterReliableList(tour.inclusions, LEGACY_FEE_PLACEHOLDERS);
-  const reliableExclusions = filterReliableList(tour.exclusions, LEGACY_FEE_PLACEHOLDERS);
-  const reliableOptionalExpenses = filterReliableList(tour.optionalExpenses, LEGACY_FEE_PLACEHOLDERS);
-  const reliableImportantNotes = filterReliableList(tour.importantNotes, LEGACY_NOTE_PLACEHOLDERS);
-  const cancellationPolicy = getReliablePolicy(tour.cancellationPolicy);
-  const refundPolicy = getReliablePolicy(tour.refundPolicy);
-  const childPolicy = getReliablePolicy(tour.childPolicy);
+  const reliableItinerary = (resolvedTour?.itinerary || []).filter((day) => !isLegacyPlaceholderItineraryDay(day));
+  const reliableInclusions = filterReliableList(resolvedTour?.inclusions, LEGACY_FEE_PLACEHOLDERS);
+  const reliableExclusions = filterReliableList(resolvedTour?.exclusions, LEGACY_FEE_PLACEHOLDERS);
+  const reliableOptionalExpenses = filterReliableList(resolvedTour?.optionalExpenses, LEGACY_FEE_PLACEHOLDERS);
+  const reliableImportantNotes = filterReliableList(resolvedTour?.importantNotes, LEGACY_NOTE_PLACEHOLDERS);
+  const cancellationPolicy = getReliablePolicy(resolvedTour?.cancellationPolicy);
+  const refundPolicy = getReliablePolicy(resolvedTour?.refundPolicy);
+  const childPolicy = getReliablePolicy(resolvedTour?.childPolicy);
   const hasReliableSingleSupplement = Boolean(normalizeText(tour.singleSupplementNote));
-  const hasAvailabilityData = tour.availableSeats > 0 && tour.totalSeats > 0;
+  const hasAvailabilityData =
+    (resolvedTour?.availableSeats ?? 0) > 0 && (resolvedTour?.totalSeats ?? 0) > 0;
   const hasDepartureDates = (tour.departureDates || []).filter(Boolean).length > 0 || Boolean(tour.departureDate);
   const hasReliableCostData =
     reliableInclusions.length > 0 ||
@@ -187,7 +199,7 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
           <Users className="mx-auto mb-1 h-5 w-5 text-stone-500" />
           <p className="text-xs text-stone-500">剩余名额</p>
           <p className="text-sm font-semibold text-stone-900">
-            {hasAvailabilityData ? `${tour.availableSeats}/${tour.totalSeats}` : '待确认'}
+            {hasAvailabilityData ? `${resolvedTour?.availableSeats}/${resolvedTour?.totalSeats}` : '待确认'}
           </p>
         </div>
         <div className="rounded-lg border border-stone-200 bg-white p-3 text-center">
@@ -242,6 +254,11 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
+        {status === 'error' && error && (
+          <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            详情加载失败，当前先展示摘要信息。{error}
+          </div>
+        )}
         {loading && (
           <div className="mb-3 rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-500">
             正在加载详情...
@@ -268,16 +285,16 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InfoItem icon={<Calendar className="w-4 h-4" />} label="返程日期" value={formatDate(tour.returnDate)} />
+            <InfoItem icon={<Calendar className="w-4 h-4" />} label="返程日期" value={resolvedTour?.returnDate ? formatDate(resolvedTour.returnDate) : ''} />
             <InfoItem icon={<Bus className="w-4 h-4" />} label="交通方式" value={tour.transportType} />
-            <InfoItem icon={<Hotel className="w-4 h-4" />} label="住宿标准" value={`${tour.accommodationLevel} (${tour.accommodationStars}星)`} />
+            <InfoItem icon={<Hotel className="w-4 h-4" />} label="住宿标准" value={resolvedTour?.accommodationStars ? `${tour.accommodationLevel} (${resolvedTour.accommodationStars}星)` : tour.accommodationLevel} />
             <InfoItem icon={<Utensils className="w-4 h-4" />} label="餐饮安排" value={tour.meals} />
             <InfoItem icon={<Users className="w-4 h-4" />} label="团队规模" value={tour.groupSize} />
-            <InfoItem icon={<BarChart3 className="w-4 h-4" />} label="难度等级" value={tour.difficulty} />
+            <InfoItem icon={<BarChart3 className="w-4 h-4" />} label="难度等级" value={resolvedTour?.difficulty || ''} />
             <LeisureLevelItem level={tour.leisureLevel} />
             <InfoItem icon={<Globe className="w-4 h-4" />} label="出行季节" value={tour.season} />
-            <InfoItem icon={<HeartHandshake className="w-4 h-4" />} label="导游语言" value={tour.language} />
-            <InfoItem icon={<Plane className="w-4 h-4" />} label="签证要求" value={tour.visaRequirements} />
+            <InfoItem icon={<HeartHandshake className="w-4 h-4" />} label="导游语言" value={resolvedTour?.language || ''} />
+            <InfoItem icon={<Plane className="w-4 h-4" />} label="签证要求" value={resolvedTour?.visaRequirements || ''} />
           </div>
 
           <div className="mt-4">
@@ -438,9 +455,9 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
 
         <TabsContent value="service" className="space-y-4 mt-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <ServiceItem icon={<Shield className="w-5 h-5" />} label="旅游保险" available={tour.travelInsurance} />
-            <ServiceItem icon={<User className="w-5 h-5" />} label="导游服务" available={tour.tourGuideService} />
-            <ServiceItem icon={<Wifi className="w-5 h-5" />} label="免费WiFi" available={tour.freeWiFi} />
+            <ServiceItem icon={<Shield className="w-5 h-5" />} label="旅游保险" available={Boolean(resolvedTour?.travelInsurance)} />
+            <ServiceItem icon={<User className="w-5 h-5" />} label="导游服务" available={Boolean(resolvedTour?.tourGuideService)} />
+            <ServiceItem icon={<Wifi className="w-5 h-5" />} label="免费WiFi" available={Boolean(resolvedTour?.freeWiFi)} />
           </div>
 
           <div className="rounded-lg border border-stone-200 bg-white p-4">
@@ -487,7 +504,7 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
     <>
       {/* 移动端 Sheet - 使用 CSS 隐藏桌面端 */}
       {isMobile && (
-        <Sheet open={!!tour} onOpenChange={(open) => !open && onClose()}>
+        <Sheet open={Boolean(summaryTour)} onOpenChange={(open) => !open && onClose()}>
           <SheetContent side="bottom" className="h-[100dvh] max-h-[100dvh] overflow-hidden p-0 flex min-h-0 flex-col">
             <SheetHeader className="p-4 pb-2 border-b shrink-0">
               <SheetTitle className="pr-8 text-left text-base leading-relaxed">{tour.title}</SheetTitle>
@@ -505,7 +522,7 @@ export function TourDetailModal({ tour, loading = false, onClose }: TourDetailMo
 
       {/* 桌面端 Dialog - 使用 CSS 隐藏移动端 */}
       {!isMobile && (
-        <Dialog open={!!tour} onOpenChange={(open) => !open && onClose()}>
+        <Dialog open={Boolean(summaryTour)} onOpenChange={(open) => !open && onClose()}>
           <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden flex min-h-0 flex-col">
             <DialogHeader className="p-6 pb-0 shrink-0">
               <DialogTitle className="text-xl leading-relaxed">{tour.title}</DialogTitle>

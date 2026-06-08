@@ -2,6 +2,7 @@ import {
   ArrowRight,
   MapPin,
   Search,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,10 +11,11 @@ interface HeroProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onSearch: (value?: string) => void;
+  onAiSearch: (value?: string) => void;
   quickDestinations: string[];
 }
 
-export function Hero({ searchQuery, onSearchChange, onSearch, quickDestinations }: HeroProps) {
+export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickDestinations }: HeroProps) {
   const logoSrc = `${import.meta.env.BASE_URL}brand/laoguang-logo-full.jpg`;
 
   return (
@@ -32,29 +34,47 @@ export function Hero({ searchQuery, onSearchChange, onSearch, quickDestinations 
                 先看班期和预算，再选适合的团。
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
-                聚合多平台跟团线路，先把出发时间、预算和目的地缩小，再决定要不要看 AI 推荐。
+                聚合多平台跟团线路。同一个输入框，既能搜目的地，也能直接让 AI 按预算、天数和同行人帮你置顶。
               </p>
 
-              <div className="mt-8 flex max-w-3xl flex-col gap-3 rounded-[24px] border border-stone-200/80 bg-white/92 p-3 shadow-sm sm:flex-row sm:items-center">
-                <div className="relative flex-1">
-                  <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
-                  <Input
-                    placeholder="搜索目的地、主题或平台，例如：桂林、亲子、广之旅"
-                    className="h-12 rounded-2xl border-0 bg-stone-50 pl-11 pr-4 text-sm text-stone-800 placeholder:text-stone-400 shadow-none focus-visible:ring-1"
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && onSearch(searchQuery)}
-                  />
+              <div className="mt-8 max-w-3xl rounded-[26px] border border-stone-200/80 bg-white/92 p-2 shadow-sm">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <div className="relative flex-1">
+                    <MapPin className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
+                    <Input
+                      placeholder="搜目的地/主题，或直接说：3天内 2000内 带老人"
+                      className="h-12 rounded-[20px] border-0 bg-stone-50 pl-11 pr-4 text-sm text-stone-800 placeholder:text-stone-400 shadow-none focus-visible:ring-1"
+                      value={searchQuery}
+                      onChange={(e) => onSearchChange(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && onSearch(searchQuery)}
+                    />
+                  </div>
+                  <div className="flex gap-2 sm:shrink-0">
+                    <Button
+                      size="lg"
+                      className="h-12 flex-1 rounded-[20px] bg-stone-900 px-5 text-sm font-medium text-white hover:bg-stone-800 sm:flex-none"
+                      onClick={() => onSearch(searchQuery)}
+                    >
+                      <Search className="mr-2 h-4 w-4" />
+                      查看结果
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="h-12 flex-1 rounded-[20px] border-stone-200 bg-[#f7f2e8] px-4 text-sm font-medium text-stone-900 hover:border-stone-300 hover:bg-[#efe6d3] sm:flex-none"
+                      onClick={() => onAiSearch(searchQuery)}
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      AI帮我选
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  size="lg"
-                  className="h-12 rounded-2xl bg-stone-900 px-5 text-sm font-medium text-white hover:bg-stone-800"
-                  onClick={() => onSearch(searchQuery)}
-                >
-                  <Search className="mr-2 h-4 w-4" />
-                  查看结果
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Button>
+                <div className="flex flex-wrap gap-2 px-2 pb-1 pt-2 text-xs text-stone-400">
+                  <span>普通搜索看全部匹配</span>
+                  <span className="hidden text-stone-300 sm:inline">/</span>
+                  <span>AI 会用同一句话把更合适的团排前面</span>
+                </div>
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">

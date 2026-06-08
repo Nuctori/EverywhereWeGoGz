@@ -3,16 +3,19 @@ import type {
   AiRecommendationCandidate,
   AiRecommendationResult,
   Tour,
+  TourSummary,
   FilterState,
 } from '@/types/tour';
 import { TourCard } from './TourCard';
 import { TourDetailModal } from './TourDetailModal';
 import { AiRecommendPanel } from './AiRecommendPanel';
+import type { AiSearchRequest } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
+import { toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { computePriceStats, sliderToPrice, priceToSlider } from '@/lib/price-slider';
@@ -56,10 +59,11 @@ function getDataUrl(path: string) {
 }
 
 function useToursData() {
-  const [tours, setTours] = useState<Tour[]>([]);
+  const [tours, setTours] = useState<TourSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
+  const [hasPageChunks, setHasPageChunks] = useState(true);
   const loadedPagesRef = useRef<Set<number>>(new Set());
   const inFlightPagesRef = useRef<Set<number>>(new Set());
   const hasPageChunksRef = useRef(true);
@@ -70,22 +74,24 @@ function useToursData() {
       try {
         const pageRes = await fetch(getDataUrl('tours-page-0.json'));
         if (cancelled) return;
-        const pageData = await pageRes.json();
+        const pageData = toursPageSchema.parse(await pageRes.json());
         if (cancelled) return;
         setTours(pageData.items);
         setTotal(pageData.meta.total);
         loadedPagesRef.current.add(0);
         hasPageChunksRef.current = true;
+        setHasPageChunks(true);
         setLoading(false);
       } catch {
         try {
           const fallbackRes = await fetch(getDataUrl('tours-list.json'));
           if (cancelled) return;
-          const data = await fallbackRes.json();
+          const data = toursListSchema.parse(await fallbackRes.json());
           if (cancelled) return;
           setTours(data);
           setTotal(data.length);
           hasPageChunksRef.current = false;
+          setHasPageChunks(false);
           setLoading(false);
         } catch {
           if (!cancelled) { setTours([]); setLoading(false); }
@@ -108,15 +114,16 @@ function useToursData() {
       if (!res.ok) {
         throw new Error(`Failed to load page ${neededPage}: ${res.status}`);
       }
-      const pageData = await res.json();
+      const pageData = toursPageSchema.parse(await res.json());
       loadedPagesRef.current.add(neededPage);
       setTours((prev) => {
         const existingIds = new Set(prev.map((tour) => tour.id));
-        const nextItems = pageData.items.filter((tour: Tour) => !existingIds.has(tour.id));
+        const nextItems = pageData.items.filter((tour: TourSummary) => !existingIds.has(tour.id));
         return prev.concat(nextItems);
       });
     } catch {
       hasPageChunksRef.current = false;
+      setHasPageChunks(false);
     } finally {
       inFlightPagesRef.current.delete(neededPage);
       setLoadingMore(false);
@@ -130,6 +137,7 @@ function useToursData() {
     total,
     loadMorePages,
     loadedPagesRef,
+    hasPageChunks,
     hasPageChunksRef,
   };
 }
@@ -212,7 +220,7 @@ function getDaysUntil(dateString: string) {
   return Math.round((target.getTime() - today.getTime()) / 86400000);
 }
 
-function getEffectiveDepartureDates(tour: Tour) {
+function getEffectiveDepartureDates(tour: TourSummary) {
   const dates = (tour.departureDates || []).filter(Boolean);
   if (dates.length > 0) {
     return dates;
@@ -220,7 +228,7 @@ function getEffectiveDepartureDates(tour: Tour) {
   return tour.departureDate ? [tour.departureDate] : [];
 }
 
-function getRecommendationScore(tour: Tour) {
+function getRecommendationScore(tour: TourSummary) {
   let score = 0;
 
   if (RECOMMENDED_TITLE_HINTS.some((token) => tour.title.includes(token))) {
@@ -250,7 +258,7 @@ function getRecommendationScore(tour: Tour) {
   return score;
 }
 
-function compareRecommended(a: Tour, b: Tour) {
+function compareRecommended(a: TourSummary, b: TourSummary) {
   return (
     getRecommendationScore(b) - getRecommendationScore(a) ||
     (b.isHot ? 1 : 0) - (a.isHot ? 1 : 0) ||
@@ -260,7 +268,7 @@ function compareRecommended(a: Tour, b: Tour) {
   );
 }
 
-function getDynamicHeroDestinations(tours: Tour[]) {
+function getDynamicHeroDestinations(tours: TourSummary[]) {
   const counts = new Map<string, number>();
 
   for (const tour of tours) {
@@ -275,7 +283,7 @@ function getDynamicHeroDestinations(tours: Tour[]) {
     .map(([destination]) => destination);
 }
 
-function getDestinationOptions(tours: Tour[]) {
+function getDestinationOptions(tours: TourSummary[]) {
   const counts = new Map<string, number>();
 
   for (const tour of tours) {
@@ -289,7 +297,7 @@ function getDestinationOptions(tours: Tour[]) {
     .map(([destination]) => destination);
 }
 
-function getThemeOptions(tours: Tour[]) {
+function getThemeOptions(tours: TourSummary[]) {
   const counts = new Map<string, number>();
 
   for (const tour of tours) {
@@ -303,7 +311,7 @@ function getThemeOptions(tours: Tour[]) {
     .map(([theme]) => theme);
 }
 
-function getSourceOptions(tours: Tour[]) {
+function getSourceOptions(tours: TourSummary[]) {
   const sourceMeta = new Map<string, { name: string; color?: string }>();
 
   for (const tour of tours) {
@@ -320,19 +328,29 @@ function getSourceOptions(tours: Tour[]) {
 
 interface TourListProps {
   searchQuery: string;
+  aiSearchRequest: AiSearchRequest | null;
 }
 
-export function TourList({ searchQuery }: TourListProps) {
+export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const {
     tours: localTours,
     loading,
     loadingMore,
     total,
     loadMorePages,
+    hasPageChunks,
     hasPageChunksRef,
   } = useToursData();
   const isMobile = useIsMobile();
-  const { selectedTour, detailLoading, selectTour, clearSelectedTour } = useTourDetail();
+  const {
+    selectedSummaryTour,
+    resolvedTour,
+    detailStatus,
+    detailError,
+    detailLoading,
+    selectTour,
+    clearSelectedTour,
+  } = useTourDetail();
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -648,7 +666,7 @@ export function TourList({ searchQuery }: TourListProps) {
     [displayTours, visibleCount],
   );
   const hasMoreLoadedResults = visibleCount < displayTours.length;
-  const hasMoreRemotePages = hasPageChunksRef.current && localTours.length < total;
+  const hasMoreRemotePages = hasPageChunks && localTours.length < total;
   const shouldRenderLoadMore = hasMoreLoadedResults || hasMoreRemotePages;
 
   const handleObserver = useCallback(
@@ -750,7 +768,7 @@ export function TourList({ searchQuery }: TourListProps) {
     };
   }, []);
 
-  const handleCardClick = (tour: Tour) => selectTour(tour);
+  const handleCardClick = (tour: TourSummary) => selectTour(tour);
 
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
@@ -1227,6 +1245,7 @@ export function TourList({ searchQuery }: TourListProps) {
         activeFilters={effectiveFilters}
         searchQuery={searchQuery}
         result={aiRecommendationResult}
+        request={aiSearchRequest}
         clearVersion={aiClearVersion}
         onResultChange={setAiRecommendationResult}
         onFocusResults={focusResults}
@@ -1480,7 +1499,14 @@ export function TourList({ searchQuery }: TourListProps) {
         </>
       )}
 
-      <TourDetailModal tour={selectedTour} loading={detailLoading} onClose={clearSelectedTour} />
+      <TourDetailModal
+        summaryTour={selectedSummaryTour}
+        resolvedTour={resolvedTour}
+        status={detailStatus}
+        error={detailError}
+        loading={detailLoading}
+        onClose={clearSelectedTour}
+      />
     </section>
   );
 }

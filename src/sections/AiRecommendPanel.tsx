@@ -7,9 +7,6 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  Mic,
-  RotateCcw,
-  Send,
   Settings,
   Sparkles,
   TriangleAlert,
@@ -22,7 +19,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import type {
@@ -40,9 +36,14 @@ import {
   requestAiRecommendations,
   saveAiProviderConfig,
 } from '@/lib/ai-recommendation';
-import { AI_CHAT_STORAGE_KEY, clearStoredAiChatState } from '@/lib/ai-chat-storage';
+import {
+  clearStoredAiChatState,
+  readStoredAiChatState,
+  saveStoredAiChatState,
+} from '@/lib/ai-chat-storage';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import type { AiSearchRequest } from '@/App';
 
 interface AiRecommendPanelProps {
   tours: AiRecommendationCandidate[];
@@ -50,60 +51,13 @@ interface AiRecommendPanelProps {
   activeFilters: FilterState;
   searchQuery: string;
   result: AiRecommendationResult | null;
+  request: AiSearchRequest | null;
   clearVersion: number;
   onResultChange: (result: AiRecommendationResult | null) => void;
   onFocusResults: () => void;
 }
 
-const starterPrompts = [
-  '3天内出发，预算2000以内，想轻松一点',
-  '亲子出游，5天左右，别太赶',
-  '想去云南或者桂林，看看自然风景',
-];
-
 const MAX_PERSISTED_MESSAGES = 40;
-interface SpeechRecognitionAlternativeLike {
-  transcript: string;
-}
-
-interface SpeechRecognitionResultLike {
-  isFinal: boolean;
-  length: number;
-  [index: number]: SpeechRecognitionAlternativeLike;
-}
-
-interface SpeechRecognitionEventLike extends Event {
-  results: ArrayLike<SpeechRecognitionResultLike>;
-  resultIndex: number;
-}
-
-interface SpeechRecognitionErrorEventLike extends Event {
-  error?: string;
-  message?: string;
-}
-
-interface BrowserSpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  maxAlternatives: number;
-  onend: ((event: Event) => void) | null;
-  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
-  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
-  start: () => void;
-  stop: () => void;
-  abort: () => void;
-}
-
-type BrowserSpeechRecognitionConstructor = new () => BrowserSpeechRecognition;
-
-declare global {
-  interface Window {
-    SpeechRecognition?: BrowserSpeechRecognitionConstructor;
-    webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor;
-  }
-}
-
 const progressSteps: Array<{
   stage: AiRecommendationProgress['stage'];
   shortLabel: string;
@@ -114,14 +68,6 @@ const progressSteps: Array<{
   { stage: 'ranking', shortLabel: '生成推荐' },
   { stage: 'completed', shortLabel: '已完成' },
 ];
-
-interface AiChatState {
-  conversationId: string;
-  input: string;
-  messages: AiRecommendationMessage[];
-  result: AiRecommendationResult | null;
-  preferenceMemory: AiPreferenceMemory | null;
-}
 
 function getQuestionLead(prompt: string) {
   const normalized = prompt.replace(/\s+/g, '');
@@ -167,42 +113,6 @@ function createConversationId() {
   return `ai-rec-${Date.now().toString(36)}-${Math.random().toString(16).slice(2)}`;
 }
 
-function mergeRecognizedText(base: string, transcript: string) {
-  const trimmedBase = base.trimEnd();
-  const trimmedTranscript = transcript.trim();
-
-  if (!trimmedBase) return trimmedTranscript;
-  if (!trimmedTranscript) return trimmedBase;
-
-  const shouldJoinWithoutSpace =
-    /[\u4e00-\u9fff]$/.test(trimmedBase) || /^[，。！？；：,.!?;:]/.test(trimmedTranscript);
-
-  return shouldJoinWithoutSpace
-    ? `${trimmedBase}${trimmedTranscript}`
-    : `${trimmedBase} ${trimmedTranscript}`;
-}
-
-function readStoredChatState(): Partial<AiChatState> {
-  if (typeof window === 'undefined') return {};
-
-  try {
-    return JSON.parse(window.localStorage.getItem(AI_CHAT_STORAGE_KEY) || '{}');
-  } catch {
-    return {};
-  }
-}
-
-function saveStoredChatState(state: AiChatState) {
-  if (typeof window === 'undefined') return;
-  window.localStorage.setItem(
-    AI_CHAT_STORAGE_KEY,
-    JSON.stringify({
-      ...state,
-      messages: state.messages.slice(-MAX_PERSISTED_MESSAGES),
-    }),
-  );
-}
-
 function countRecommendedItems(result: AiRecommendationResult | null) {
   return result?.items.filter((item) => Boolean(item.reason)).length ?? 0;
 }
@@ -233,13 +143,13 @@ export function AiRecommendPanel({
   activeFilters,
   searchQuery,
   result,
+  request,
   clearVersion,
   onResultChange,
   onFocusResults,
 }: AiRecommendPanelProps) {
-  const storedChatState = useMemo(() => readStoredChatState(), []);
+  const storedChatState = useMemo(() => readStoredAiChatState(), []);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [input, setInput] = useState(storedChatState.input || '');
   const [showApiKey, setShowApiKey] = useState(false);
   const [aiConfig, setAiConfig] = useState<Partial<AiProviderConfig>>(() => getStoredAiProviderConfig());
   const [useCustomAiConfig, setUseCustomAiConfig] = useState(
@@ -255,17 +165,11 @@ export function AiRecommendPanel({
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [progressState, setProgressState] = useState<AiRecommendationProgress | null>(null);
   const [expandedStage, setExpandedStage] = useState<AiRecommendationProgress['stage'] | null>(null);
-  const [speechSupported, setSpeechSupported] = useState(false);
-  const [speechError, setSpeechError] = useState<string | null>(null);
-  const [speechHint, setSpeechHint] = useState('正在检测浏览器语音能力...');
-  const [speechListening, setSpeechListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
   const didRestoreStoredResultRef = useRef(false);
   const requestVersionRef = useRef(0);
-  const speechRecognitionCtorRef = useRef<BrowserSpeechRecognitionConstructor | null>(null);
-  const speechRecognitionRef = useRef<BrowserSpeechRecognition | null>(null);
-  const speechBaseInputRef = useRef('');
+  const handledRequestIdRef = useRef<number | null>(null);
   const conversationId = useMemo(
     () => storedChatState.conversationId || createConversationId(),
     [storedChatState.conversationId],
@@ -273,124 +177,6 @@ export function AiRecommendPanel({
   const hasResult = Boolean(result && result.items.length > 0);
   const toursReady = !toursLoading && tours.length > 0;
   const resultStatusMeta = getResultStatusMeta(result);
-  const lastUserPrompt = useMemo(
-    () => [...messages].reverse().find((message) => message.role === 'user')?.content.trim() || '',
-    [messages],
-  );
-  const trimmedInput = input.trim();
-  const canSubmitPrompt = Boolean(trimmedInput || lastUserPrompt);
-  const submitButtonLabel = loading
-    ? '推荐中'
-    : trimmedInput
-      ? '推荐线路'
-      : lastUserPrompt
-        ? '重新推荐'
-        : '输入需求后推荐';
-
-  const stopSpeechRecognition = useCallback((abort = false) => {
-    const recognition = speechRecognitionRef.current;
-    if (!recognition) return;
-
-    try {
-      if (abort) {
-        recognition.abort();
-      } else {
-        recognition.stop();
-      }
-    } catch {
-      setSpeechListening(false);
-    }
-  }, []);
-
-  const startSpeechRecognition = useCallback(() => {
-    const SpeechRecognitionCtor = speechRecognitionCtorRef.current;
-    if (!SpeechRecognitionCtor || speechListening || loading) return;
-
-    try {
-      if (speechRecognitionRef.current) {
-        try {
-          speechRecognitionRef.current.abort();
-        } catch {
-          // noop
-        }
-        speechRecognitionRef.current = null;
-      }
-
-      const recognition = new SpeechRecognitionCtor();
-      speechRecognitionRef.current = recognition;
-      speechBaseInputRef.current = input;
-      setSpeechError(null);
-      setSpeechHint('正在启动语音识别...');
-
-      recognition.lang = 'zh-CN';
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.maxAlternatives = 1;
-      recognition.onresult = (event) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
-
-        for (let index = 0; index < event.results.length; index += 1) {
-          const segment = event.results[index]?.[0]?.transcript?.trim();
-          if (!segment) continue;
-
-          if (event.results[index].isFinal) {
-            finalTranscript += segment;
-          } else {
-            interimTranscript += segment;
-          }
-        }
-
-        const nextTranscript = `${finalTranscript}${interimTranscript}`.trim();
-        setInput(mergeRecognizedText(speechBaseInputRef.current, nextTranscript));
-      };
-      recognition.onerror = (event) => {
-        const nextError =
-          event.error === 'not-allowed'
-            ? '语音权限未开启，请允许浏览器访问麦克风。'
-            : event.error === 'no-speech'
-              ? '没有识别到语音，可以再试一次。'
-              : event.error === 'audio-capture'
-                ? '没有检测到可用麦克风。'
-                : '语音转文字启动失败，请稍后重试。';
-
-        setSpeechError(nextError);
-        setSpeechHint('当前无法继续语音输入');
-        setSpeechListening(false);
-      };
-      recognition.onend = () => {
-        speechRecognitionRef.current = null;
-        setSpeechListening(false);
-        setSpeechHint(
-          speechRecognitionCtorRef.current
-            ? '浏览器支持语音输入，点击麦克风开始或结束'
-            : '当前浏览器不支持 Web Speech API 语音转文字',
-        );
-      };
-
-      recognition.start();
-      setSpeechListening(true);
-    } catch {
-      speechRecognitionRef.current = null;
-      setSpeechListening(false);
-      setSpeechError('当前浏览器无法启动语音识别。');
-      setSpeechHint('当前浏览器不支持或未开放语音输入');
-    }
-  }, [input, loading, speechListening]);
-
-  const handleSpeechToggle = useCallback(() => {
-    if (!speechRecognitionCtorRef.current || loading) return;
-
-    setSpeechError(null);
-
-    if (speechListening) {
-      stopSpeechRecognition();
-      return;
-    }
-
-    startSpeechRecognition();
-  }, [loading, speechListening, startSpeechRecognition, stopSpeechRecognition]);
-
   useEffect(() => {
     if (didRestoreStoredResultRef.current || !storedChatState.result) return;
 
@@ -404,14 +190,14 @@ export function AiRecommendPanel({
       return;
     }
 
-    saveStoredChatState({
+    saveStoredAiChatState({
       conversationId,
-      input,
+      input: '',
       messages,
       result,
       preferenceMemory,
-    });
-  }, [conversationId, input, messages, preferenceMemory, result]);
+    }, MAX_PERSISTED_MESSAGES);
+  }, [conversationId, messages, preferenceMemory, result]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({
@@ -421,45 +207,16 @@ export function AiRecommendPanel({
   }, [messages]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const SpeechRecognitionCtor =
-      window.SpeechRecognition ?? window.webkitSpeechRecognition ?? null;
-
-    speechRecognitionCtorRef.current = SpeechRecognitionCtor;
-    setSpeechSupported(Boolean(SpeechRecognitionCtor));
-    setSpeechHint(
-      SpeechRecognitionCtor
-        ? '浏览器支持语音输入，点击麦克风开始或结束'
-        : '当前浏览器不支持 Web Speech API 语音转文字',
-    );
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (speechRecognitionRef.current) {
-        try {
-          speechRecognitionRef.current.abort();
-        } catch {
-          // noop
-        }
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (clearVersion === 0) return;
 
     requestVersionRef.current += 1;
-    stopSpeechRecognition(true);
     setLoading(false);
-    setInput('');
     setPreferenceMemory(null);
     setProgressState(null);
     setExpandedStage(null);
     setDetailsOpen(false);
     setMessages([createInitialMessage()]);
-  }, [clearVersion, stopSpeechRecognition]);
+  }, [clearVersion]);
 
   useEffect(() => {
     if (!progressState?.substeps?.length) {
@@ -470,8 +227,8 @@ export function AiRecommendPanel({
     setExpandedStage((current) => (current === progressState.stage ? current : progressState.stage));
   }, [progressState]);
 
-  const submitPrompt = async (rawPrompt?: string) => {
-    const prompt = (rawPrompt ?? input).trim();
+  const submitPrompt = useCallback(async (rawPrompt: string) => {
+    const prompt = rawPrompt.trim();
     if (!prompt || loading || !toursReady) return;
     const requestVersion = requestVersionRef.current + 1;
     requestVersionRef.current = requestVersion;
@@ -479,7 +236,6 @@ export function AiRecommendPanel({
     const userMessage = createMessage('user', prompt);
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
-    setInput('');
     setLoading(true);
     setDetailsOpen(false);
     setProgressState({
@@ -522,7 +278,26 @@ export function AiRecommendPanel({
         setLoading(false);
       }
     }
-  };
+  }, [
+    activeFilters,
+    aiConfig,
+    conversationId,
+    loading,
+    messages,
+    onFocusResults,
+    onResultChange,
+    preferenceMemory,
+    result,
+    searchQuery,
+    tours,
+    toursReady,
+  ]);
+
+  useEffect(() => {
+    if (!request || handledRequestIdRef.current === request.id) return;
+    handledRequestIdRef.current = request.id;
+    void submitPrompt(request.prompt);
+  }, [request, submitPrompt]);
 
   const clearConversation = () => {
     requestVersionRef.current += 1;
@@ -532,7 +307,6 @@ export function AiRecommendPanel({
     setExpandedStage(null);
     setDetailsOpen(false);
     setMessages([createMessage('assistant', '已清空上一轮结果和本地偏好记忆。你可以重新描述这次想怎么出行。')]);
-    setInput('');
     clearStoredAiChatState();
   };
 
@@ -570,24 +344,29 @@ export function AiRecommendPanel({
       : '一句话说预算、天数、同行人和偏好就行。';
 
   return (
-    <div className="mb-4 rounded-[24px] border border-stone-200/80 bg-white/88 p-3 shadow-sm backdrop-blur sm:p-4">
-      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+    <div className={cn(
+      'mb-4 rounded-[24px] border border-stone-200/80 bg-white/88 p-3 shadow-sm backdrop-blur sm:p-4',
+      !hasAiActivity && 'rounded-full py-2',
+    )}>
+      <div className={cn('flex flex-wrap items-start justify-between gap-3', hasAiActivity && 'mb-3')}>
         <div>
           <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-stone-950">
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-stone-900 text-white">
               <Sparkles className="h-3.5 w-3.5" />
             </span>
-            说出需求，AI 帮你筛
+            {hasAiActivity ? 'AI 正在帮你排优先级' : '需要 AI 帮选？用上方同一个搜索框'}
             {preferenceMemory && (
               <Badge className="rounded-full border-stone-200 bg-stone-50 px-2 py-0.5 text-[11px] text-stone-600 hover:bg-stone-50">
                 已记住偏好
               </Badge>
             )}
-            <span className="text-xs font-normal text-stone-400">预算、天数、同行人，一句话就行</span>
+            <span className="text-xs font-normal text-stone-400">
+              {hasAiActivity ? '推荐结果会置顶显示' : '输入预算、天数、同行人后点「AI帮我选」'}
+            </span>
           </div>
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-stone-500 sm:text-sm">
+          {hasAiActivity && <p className="mt-1 max-w-2xl text-xs leading-5 text-stone-500 sm:text-sm">
             先用筛选器缩小范围；拿不准时，让 AI 把更合适的线路排到前面。
-          </p>
+          </p>}
         </div>
         <Button
           type="button"
@@ -598,91 +377,6 @@ export function AiRecommendPanel({
           <Settings className="h-3.5 w-3.5" />
           设置
         </Button>
-      </div>
-
-      <div className="rounded-[20px] border border-stone-200 bg-stone-50/70 p-2">
-        <Textarea
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          placeholder="周五出发，3天，2000内，带老人，轻松一点"
-          className="max-h-24 min-h-11 resize-none border-0 bg-transparent px-3 py-2 text-sm shadow-none focus-visible:ring-0"
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-              submitPrompt();
-            }
-          }}
-        />
-        <div className="flex flex-wrap items-center justify-between gap-3 px-1 pb-1">
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {starterPrompts.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                className="shrink-0 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-600 transition hover:border-stone-300 hover:bg-white hover:text-stone-900 disabled:cursor-not-allowed disabled:opacity-55"
-                onClick={() => submitPrompt(prompt)}
-                disabled={loading || !toursReady}
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className={cn(
-                'h-9 rounded-xl border-stone-200 bg-white px-3 text-xs',
-                speechListening
-                  ? 'border-stone-400 bg-stone-100 text-stone-950 hover:bg-stone-100'
-                  : speechSupported
-                    ? 'text-stone-700 hover:bg-stone-50'
-                    : 'text-stone-400 hover:bg-white',
-              )}
-              disabled={!speechSupported || loading}
-              onClick={handleSpeechToggle}
-            >
-              <Mic className={cn('h-3.5 w-3.5', speechListening && 'animate-pulse')} />
-              {speechListening ? '点击结束' : '点击语音'}
-            </Button>
-            {hasResult && (
-              <Button
-                type="button"
-                variant="ghost"
-                className="h-9 rounded-xl px-3 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
-                onClick={clearConversation}
-                disabled={loading}
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                清空推荐
-              </Button>
-            )}
-            <Button
-              type="button"
-              className="h-9 rounded-xl bg-stone-900 px-4 text-xs hover:bg-stone-800"
-              onClick={() => submitPrompt(trimmedInput || lastUserPrompt)}
-              disabled={loading || !canSubmitPrompt || !toursReady}
-            >
-              {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-              {submitButtonLabel}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="h-9 rounded-xl px-3 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
-              onClick={() => setDetailsOpen((value) => !value)}
-              disabled={!hasAiActivity}
-            >
-              {detailsOpen ? '收起细节' : 'AI细节'}
-              {detailsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-            </Button>
-          </div>
-        </div>
-        <div className="px-1 pb-1 text-[11px] leading-5">
-          <p className={cn('text-stone-500', speechListening && 'text-stone-900')}>
-            {toursReady ? speechHint : '线路数据加载中，请稍候再使用 AI 推荐。'}
-          </p>
-          {speechError && <p className="text-rose-600">{speechError}</p>}
-        </div>
       </div>
 
       {hasAiActivity && (
@@ -702,6 +396,25 @@ export function AiRecommendPanel({
               <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{compactStatusDetail}</p>
             </div>
             <div className="flex items-center gap-2">
+              {hasResult && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+                  onClick={clearConversation}
+                  disabled={loading}
+                >
+                  清空
+                </Button>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+                onClick={() => setDetailsOpen((value) => !value)}
+              >
+                {detailsOpen ? '收起细节' : 'AI细节'}
+              </Button>
               {resultStatusMeta && hasResult && !loading && (
                 <Badge
                   className={cn(

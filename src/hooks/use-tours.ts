@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Tour } from '@/types/tour';
+import type { TourSummary } from '@/types/tour';
+import { dataMetaSchema, toursListSchema } from '@/lib/runtime-schemas';
 
 declare const __DATA_VERSION__: string;
 
@@ -19,7 +20,7 @@ type DataMeta = {
 };
 
 type UseToursState = {
-  tours: Tour[];
+  tours: TourSummary[];
   loading: boolean;
   error: string | null;
   total: number;
@@ -109,7 +110,7 @@ export function useTours() {
         throw new Error(`Failed to load tours list: ${response.status}`);
       }
 
-      const tours = await response.json() as Tour[];
+      const tours = toursListSchema.parse(await response.json());
       if (controller.signal.aborted) return;
 
       setState({
@@ -163,7 +164,7 @@ export function useCrawlStatus() {
         throw new Error(`Failed to load data metadata: ${response.status}`);
       }
 
-      const meta = { ...emptyMeta, ...(await response.json() as Partial<DataMeta>) };
+      const meta = { ...emptyMeta, ...dataMetaSchema.parse(await response.json()) };
       if (controller.signal.aborted) return;
       const rawSize = meta.files.raw?.size ?? 0;
       const listSize = meta.files.list?.size ?? 0;

@@ -12,13 +12,37 @@ const QUICK_DESTINATIONS = [
   '新疆',
 ];
 
+export interface AiSearchRequest {
+  id: number;
+  prompt: string;
+}
+
 function App() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [aiSearchRequest, setAiSearchRequest] = useState<AiSearchRequest | null>(null);
 
   const handleSearch = (nextQuery?: string) => {
     if (typeof nextQuery === 'string') {
       setSearchQuery(nextQuery);
     }
+
+    const listEl = document.getElementById('tour-list');
+    if (listEl) {
+      listEl.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleAiSearch = (nextQuery?: string) => {
+    const prompt = (nextQuery ?? searchQuery).trim();
+    if (!prompt) {
+      handleSearch(nextQuery);
+      return;
+    }
+
+    setAiSearchRequest({
+      id: Date.now(),
+      prompt,
+    });
 
     const listEl = document.getElementById('tour-list');
     if (listEl) {
@@ -36,10 +60,11 @@ function App() {
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onSearch={handleSearch}
+            onAiSearch={handleAiSearch}
             quickDestinations={QUICK_DESTINATIONS}
           />
           <div id="tour-list" className="scroll-mt-24">
-            <TourList searchQuery={searchQuery} />
+            <TourList searchQuery={searchQuery} aiSearchRequest={aiSearchRequest} />
           </div>
         </main>
 
