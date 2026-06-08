@@ -1211,11 +1211,11 @@ export function TourList({ searchQuery }: TourListProps) {
           </div>
 
           {aiRecommendationResult && aiRecommendationResult.items.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900">
-              <Sparkles className="h-4 w-4 text-emerald-700" />
-              <span>AI 已给出 {aiRecommendedCount} 条建议，展示 {aiRecommendationResult.items.length} 条线路</span>
+            <div className="flex flex-wrap items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 shadow-sm">
+              <Sparkles className="h-4 w-4 text-stone-500" />
+              <span>AI 已置顶 {aiRecommendedCount} 条建议，展示 {aiRecommendationResult.items.length} 条线路</span>
               {hiddenAiRecommendationCount > 0 && (
-                <span className="text-xs text-emerald-700">
+                <span className="text-xs text-stone-500">
                   {hiddenAiRecommendationCount} 条被当前筛选隐藏
                 </span>
               )}
@@ -1223,7 +1223,7 @@ export function TourList({ searchQuery }: TourListProps) {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="h-7 rounded-full px-2 text-xs font-medium text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800"
+                className="h-7 rounded-full px-2 text-xs font-medium text-stone-500 hover:bg-stone-100 hover:text-stone-900"
                 onClick={(event) => {
                   event.preventDefault();
                   event.stopPropagation();

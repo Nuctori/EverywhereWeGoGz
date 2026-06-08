@@ -252,6 +252,7 @@ export function AiRecommendPanel({
     storedChatState.preferenceMemory || null,
   );
   const [loading, setLoading] = useState(false);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [progressState, setProgressState] = useState<AiRecommendationProgress | null>(null);
   const [expandedStage, setExpandedStage] = useState<AiRecommendationProgress['stage'] | null>(null);
   const [speechSupported, setSpeechSupported] = useState(false);
@@ -454,6 +455,7 @@ export function AiRecommendPanel({
     setPreferenceMemory(null);
     setProgressState(null);
     setExpandedStage(null);
+    setDetailsOpen(false);
     setMessages([createInitialMessage()]);
   }, [clearVersion, stopSpeechRecognition]);
 
@@ -475,6 +477,7 @@ export function AiRecommendPanel({
     setMessages(nextMessages);
     setInput('');
     setLoading(true);
+    setDetailsOpen(false);
     setProgressState({
       stage: 'queued',
       label: '已收到需求',
@@ -516,6 +519,7 @@ export function AiRecommendPanel({
     setPreferenceMemory(null);
     setProgressState(null);
     setExpandedStage(null);
+    setDetailsOpen(false);
     setMessages([createMessage('assistant', '已清空上一轮结果和本地偏好记忆。你可以重新描述这次想怎么出行。')]);
     setInput('');
     clearStoredAiChatState();
@@ -541,40 +545,56 @@ export function AiRecommendPanel({
     ]);
   };
 
+  const hasAiActivity = Boolean(progressState || resultStatusMeta || messages.length > 1);
+  const recommendedCount = countRecommendedItems(result);
+  const compactStatusLabel = loading
+    ? progressState?.label || '正在筛选'
+    : hasResult
+      ? `已置顶 ${recommendedCount} 条建议`
+      : '描述需求，AI 帮你置顶';
+  const compactStatusDetail = loading
+    ? progressState?.detail || '正在结合班期、预算和线路信息。'
+    : hasResult
+      ? result?.summary || resultStatusMeta?.detail || '推荐线路已排到前面。'
+      : '一句话说预算、天数、同行人和偏好就行。';
+
   return (
-    <div className="mb-5 rounded-[28px] border border-emerald-200/75 bg-[linear-gradient(180deg,rgba(240,253,244,0.92),rgba(255,255,255,0.96))] p-4 shadow-sm sm:p-5">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <div className="mb-4 rounded-[24px] border border-stone-200/80 bg-white/88 p-3 shadow-sm backdrop-blur sm:p-4">
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-emerald-900">
-            <Sparkles className="h-4 w-4 text-emerald-700" />
-            AI 按需求找旅行团
+          <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-stone-950">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-stone-900 text-white">
+              <Sparkles className="h-3.5 w-3.5" />
+            </span>
+            说出需求，AI 帮你筛
             {preferenceMemory && (
-              <Badge className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] text-emerald-800 hover:bg-emerald-100">
+              <Badge className="rounded-full border-stone-200 bg-stone-50 px-2 py-0.5 text-[11px] text-stone-600 hover:bg-stone-50">
                 已记住偏好
               </Badge>
             )}
+            <span className="text-xs font-normal text-stone-400">预算、天数、同行人，一句话就行</span>
           </div>
-          <p className="mt-1 max-w-2xl text-sm leading-6 text-stone-600">
-            直接描述出发时间、天数、预算、同行人和偏好；AI 会结合班期、天气、季节和线路信息置顶推荐。
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-stone-500 sm:text-sm">
+            先用筛选器缩小范围；拿不准时，让 AI 把更合适的线路排到前面。
           </p>
         </div>
         <Button
           type="button"
           variant="outline"
-          className="h-9 rounded-xl border-emerald-200 bg-white px-3 text-xs text-emerald-800 hover:bg-emerald-50"
+          className="h-9 rounded-xl border-stone-200 bg-white px-3 text-xs text-stone-600 hover:bg-stone-50 hover:text-stone-900"
           onClick={() => setSettingsOpen(true)}
         >
           <Settings className="h-3.5 w-3.5" />
-          AI设置
+          设置
         </Button>
       </div>
 
-      <div className="rounded-2xl border border-stone-200 bg-white p-2">
+      <div className="rounded-[20px] border border-stone-200 bg-stone-50/70 p-2">
         <Textarea
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="例如：周五晚上出发的3日游，预算2000以内，想轻松一点；或：带老人去避暑，别太赶"
-          className="max-h-32 min-h-20 resize-none border-0 bg-transparent text-sm shadow-none focus-visible:ring-0"
+          placeholder="周五出发，3天，2000内，带老人，轻松一点"
+          className="max-h-24 min-h-11 resize-none border-0 bg-transparent px-3 py-2 text-sm shadow-none focus-visible:ring-0"
           onKeyDown={(event) => {
             if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
               submitPrompt();
@@ -602,7 +622,7 @@ export function AiRecommendPanel({
               className={cn(
                 'h-9 rounded-xl border-stone-200 bg-white px-3 text-xs',
                 speechListening
-                  ? 'border-emerald-300 bg-emerald-50 text-emerald-900 hover:bg-emerald-50'
+                  ? 'border-stone-400 bg-stone-100 text-stone-950 hover:bg-stone-100'
                   : speechSupported
                     ? 'text-stone-700 hover:bg-stone-50'
                     : 'text-stone-400 hover:bg-white',
@@ -627,36 +647,80 @@ export function AiRecommendPanel({
             )}
             <Button
               type="button"
-              className="h-9 rounded-xl bg-emerald-700 px-4 text-xs hover:bg-emerald-800"
+              className="h-9 rounded-xl bg-stone-900 px-4 text-xs hover:bg-stone-800"
               onClick={() => submitPrompt(trimmedInput || lastUserPrompt)}
               disabled={loading || !canSubmitPrompt || !toursReady}
             >
               {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
               {submitButtonLabel}
             </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-9 rounded-xl px-3 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+              onClick={() => setDetailsOpen((value) => !value)}
+              disabled={!hasAiActivity}
+            >
+              {detailsOpen ? '收起细节' : 'AI细节'}
+              {detailsOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </Button>
           </div>
         </div>
         <div className="px-1 pb-1 text-[11px] leading-5">
-          <p className={cn('text-stone-500', speechListening && 'text-emerald-700')}>
+          <p className={cn('text-stone-500', speechListening && 'text-stone-900')}>
             {toursReady ? speechHint : '线路数据加载中，请稍候再使用 AI 推荐。'}
           </p>
           {speechError && <p className="text-rose-600">{speechError}</p>}
         </div>
       </div>
 
-      {(progressState || resultStatusMeta || messages.length > 1) && (
-        <div className="mt-4 space-y-3">
+      {hasAiActivity && (
+        <div className="mt-3 rounded-[20px] border border-stone-200 bg-[linear-gradient(180deg,rgba(250,250,249,0.94),rgba(255,255,255,0.96))] px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 text-sm font-semibold text-stone-950">
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-stone-700" />
+                ) : hasResult ? (
+                  <CheckCircle2 className="h-4 w-4 text-stone-700" />
+                ) : (
+                  <Sparkles className="h-4 w-4 text-stone-500" />
+                )}
+                {compactStatusLabel}
+              </div>
+              <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{compactStatusDetail}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              {resultStatusMeta && hasResult && !loading && (
+                <Badge
+                  className={cn(
+                    'rounded-full px-2.5 py-1 text-[11px]',
+                    resultStatusMeta.mode === 'ai'
+                      ? 'bg-stone-900 text-white hover:bg-stone-900'
+                      : 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+                  )}
+                >
+                  {resultStatusMeta.mode === 'ai' ? 'AI完成' : '备用推荐'}
+                </Badge>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {detailsOpen && hasAiActivity && (
+        <div className="mt-3 space-y-3 rounded-[22px] border border-stone-200 bg-white/80 p-3">
           {progressState && (
-            <div className="rounded-2xl border border-emerald-200 bg-white/90 p-4 shadow-sm">
+            <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 text-sm font-semibold text-stone-900">
                     {loading ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-emerald-700" />
+                      <Loader2 className="h-4 w-4 animate-spin text-stone-700" />
                     ) : progressState.stage === 'fallback' ? (
                       <TriangleAlert className="h-4 w-4 text-amber-600" />
                     ) : (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-700" />
+                      <CheckCircle2 className="h-4 w-4 text-stone-700" />
                     )}
                     {progressState.label}
                   </div>
@@ -664,7 +728,7 @@ export function AiRecommendPanel({
                   {progressState.substeps?.length ? (
                     <button
                       type="button"
-                      className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 transition-colors hover:text-emerald-800"
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-stone-600 transition-colors hover:text-stone-900"
                       onClick={() =>
                         setExpandedStage((current) => (current === progressState.stage ? null : progressState.stage))
                       }
@@ -687,17 +751,17 @@ export function AiRecommendPanel({
                   className={cn(
                     'rounded-full px-2.5 py-1 text-[11px]',
                     loading
-                      ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100'
+                      ? 'bg-stone-200 text-stone-800 hover:bg-stone-200'
                       : progressState.stage === 'fallback'
                         ? 'bg-amber-100 text-amber-800 hover:bg-amber-100'
-                        : 'bg-emerald-700 text-white hover:bg-emerald-700',
+                        : 'bg-stone-900 text-white hover:bg-stone-900',
                   )}
                 >
                   {loading ? '处理中' : progressState.stage === 'fallback' ? '备用方案' : '已完成'}
                 </Badge>
               </div>
 
-              <Progress value={progressState.progress} className="mt-3 h-2 bg-emerald-100 [&_[data-slot=progress-indicator]]:bg-emerald-600" />
+              <Progress value={progressState.progress} className="mt-3 h-2 bg-stone-200 [&_[data-slot=progress-indicator]]:bg-stone-800" />
 
               <div className="mt-3 grid gap-2 sm:grid-cols-5">
                 {progressSteps.map((step, index) => {
@@ -711,7 +775,7 @@ export function AiRecommendPanel({
                       className={cn(
                         'rounded-xl border px-3 py-2 text-xs transition-colors',
                         isCurrent
-                          ? 'border-emerald-300 bg-emerald-50 text-emerald-900'
+                          ? 'border-stone-300 bg-white text-stone-950'
                           : isDone
                             ? 'border-stone-200 bg-stone-50 text-stone-700'
                             : 'border-stone-200/80 bg-white text-stone-400',
@@ -722,7 +786,7 @@ export function AiRecommendPanel({
                           className={cn(
                             'inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px]',
                             isCurrent
-                              ? 'bg-emerald-600 text-white'
+                              ? 'bg-stone-900 text-white'
                               : isDone
                                 ? 'bg-stone-700 text-white'
                                 : 'bg-stone-100 text-stone-500',
@@ -738,8 +802,8 @@ export function AiRecommendPanel({
               </div>
 
               {progressState.substeps?.length && expandedStage === progressState.stage ? (
-                <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3 py-3">
-                  <div className="text-xs font-medium text-emerald-900">当前阶段拆解</div>
+                <div className="mt-3 rounded-xl border border-stone-200 bg-white px-3 py-3">
+                  <div className="text-xs font-medium text-stone-900">当前阶段拆解</div>
                   <div className="mt-2 space-y-2">
                     {progressState.substeps.map((substep) => (
                       <div key={substep.id} className="flex items-start gap-2 text-xs text-stone-700">
@@ -747,9 +811,9 @@ export function AiRecommendPanel({
                           className={cn(
                             'mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-medium',
                             substep.status === 'done'
-                              ? 'bg-emerald-600 text-white'
+                              ? 'bg-stone-900 text-white'
                               : substep.status === 'active'
-                                ? 'bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300'
+                                ? 'bg-stone-100 text-stone-900 ring-1 ring-stone-300'
                                 : 'bg-white text-stone-500 ring-1 ring-stone-200',
                           )}
                         >
@@ -772,7 +836,7 @@ export function AiRecommendPanel({
               className={cn(
                 'rounded-2xl border px-4 py-4 shadow-sm',
                 resultStatusMeta.mode === 'ai'
-                  ? 'border-emerald-200 bg-emerald-50 text-emerald-950'
+                  ? 'border-stone-200 bg-stone-50 text-stone-950'
                   : 'border-amber-200 bg-amber-50 text-amber-950',
               )}
             >
@@ -792,7 +856,7 @@ export function AiRecommendPanel({
                   <Badge
                     className={cn(
                       'rounded-full px-2 py-0.5 text-[11px] text-white',
-                      resultStatusMeta.mode === 'ai' ? 'bg-emerald-700 hover:bg-emerald-700' : 'bg-amber-700 hover:bg-amber-700',
+                      resultStatusMeta.mode === 'ai' ? 'bg-stone-900 hover:bg-stone-900' : 'bg-amber-700 hover:bg-amber-700',
                     )}
                   >
                     建议 {countRecommendedItems(result)}
@@ -808,7 +872,7 @@ export function AiRecommendPanel({
           {messages.length > 1 && (
             <div
               ref={scrollRef}
-              className="max-h-64 space-y-3 overflow-y-auto rounded-2xl border border-stone-200 bg-white/80 p-3"
+              className="max-h-56 space-y-3 overflow-y-auto rounded-2xl border border-stone-200 bg-stone-50/70 p-3"
             >
               {messages.slice(1).map((message) => (
                 <div
