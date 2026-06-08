@@ -61,6 +61,7 @@ function useToursData() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
   const loadedPagesRef = useRef<Set<number>>(new Set());
+  const inFlightPagesRef = useRef<Set<number>>(new Set());
   const hasPageChunksRef = useRef(true);
 
   useEffect(() => {
@@ -98,6 +99,9 @@ function useToursData() {
   const loadMorePages = useCallback(async (neededPage: number) => {
     if (!hasPageChunksRef.current) return;
     if (loadedPagesRef.current.has(neededPage)) return;
+    if (inFlightPagesRef.current.has(neededPage)) return;
+
+    inFlightPagesRef.current.add(neededPage);
     setLoadingMore(true);
     try {
       const res = await fetch(getDataUrl('tours-page-' + neededPage + '.json'));
@@ -106,10 +110,15 @@ function useToursData() {
       }
       const pageData = await res.json();
       loadedPagesRef.current.add(neededPage);
-      setTours(function(prev) { return prev.concat(pageData.items); });
+      setTours((prev) => {
+        const existingIds = new Set(prev.map((tour) => tour.id));
+        const nextItems = pageData.items.filter((tour: Tour) => !existingIds.has(tour.id));
+        return prev.concat(nextItems);
+      });
     } catch {
       hasPageChunksRef.current = false;
     } finally {
+      inFlightPagesRef.current.delete(neededPage);
       setLoadingMore(false);
     }
   }, []);
@@ -123,22 +132,6 @@ function useToursData() {
     loadedPagesRef,
     hasPageChunksRef,
   };
-}
-
-
-
-
-
-
-function useDebouncedValue<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(timer);
-  }, [value, delay]);
-
-  return debounced;
 }
 
 function formatDateLabel(value: string, today: string) {
@@ -170,6 +163,7 @@ function fromDateInputValue(value: string) {
 
 const PAGE_SIZE = 24;
 const INITIAL_LOAD_COUNT = 24;
+const LONG_TRIP_DURATION_VALUE = 11;
 const DEFAULT_SLIDER_VALUES: [number, number] = [0, 100];
 const VISIBLE_DESTINATION_COUNT = 14;
 const HERO_DESTINATION_COUNT = 6;
@@ -339,10 +333,12 @@ export function TourList({ searchQuery }: TourListProps) {
   const isMobile = useIsMobile();
   const { selectedTour, detailLoading, selectTour, clearSelectedTour } = useTourDetail();
   const [showFilters, setShowFilters] = useState(!isMobile);
-  const [displayCount, setDisplayCount] = useState(INITIAL_LOAD_COUNT);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const loadMoreTimerRef = useRef<number | null>(null);
+  const viewVersionRef = useRef(0);
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
@@ -377,7 +373,15 @@ export function TourList({ searchQuery }: TourListProps) {
     ],
     [sliderValues, maxPriceAll],
   );
-  const debouncedPriceRange = useDebouncedValue(priceRange, 300);
+  const hasPriceFilter = priceRange[0] > 0 || priceRange[1] < maxPriceAll - 1;
+  const effectiveFilters = useMemo(
+    () => ({
+      ...filters,
+      minPrice: priceRange[0],
+      maxPrice: priceRange[1],
+    }),
+    [filters, priceRange],
+  );
 
   const today = toDateInputValue(new Date());
 
@@ -491,15 +495,15 @@ export function TourList({ searchQuery }: TourListProps) {
         }
       }
 
-      if (filters.destination && !tour.destination.includes(filters.destination)) {
+      if (effectiveFilters.destination && !tour.destination.includes(effectiveFilters.destination)) {
         return false;
       }
 
-      if (filters.source && tour.source !== filters.source) {
+      if (effectiveFilters.source && tour.source !== effectiveFilters.source) {
         return false;
       }
 
-      if (filters.theme && tour.theme !== filters.theme) {
+      if (effectiveFilters.theme && tour.theme !== effectiveFilters.theme) {
         return false;
       }
 
@@ -543,15 +547,26 @@ export function TourList({ searchQuery }: TourListProps) {
         }
       }
 
-      if (tour.price < debouncedPriceRange[0] || tour.price > debouncedPriceRange[1]) {
+      if (effectiveFilters.minPrice !== null && tour.price < effectiveFilters.minPrice) {
         return false;
       }
 
-      if (filters.duration === 11 && tour.duration < 11) {
+      if (effectiveFilters.maxPrice !== null && tour.price > effectiveFilters.maxPrice) {
         return false;
       }
 
-      if (filters.duration && filters.duration !== 11 && tour.duration !== filters.duration) {
+      if (
+        effectiveFilters.duration === LONG_TRIP_DURATION_VALUE &&
+        tour.duration < LONG_TRIP_DURATION_VALUE
+      ) {
+        return false;
+      }
+
+      if (
+        effectiveFilters.duration &&
+        effectiveFilters.duration !== LONG_TRIP_DURATION_VALUE &&
+        tour.duration !== effectiveFilters.duration
+      ) {
         return false;
       }
 
@@ -598,8 +613,8 @@ export function TourList({ searchQuery }: TourListProps) {
   }, [
     aiRecommendationByTourId,
     dateFilter,
-    debouncedPriceRange,
-    filters,
+    effectiveFilters,
+    filters.sortBy,
     localTours,
     normalizedSearchQuery,
     today,
@@ -614,12 +629,12 @@ export function TourList({ searchQuery }: TourListProps) {
     [aiRecommendationResult, visibleTourIds],
   );
   const activeFilterCount = [
-    filters.destination,
-    filters.source,
-    filters.theme,
-    filters.departureDate || filters.departureDateStart || filters.departureDateEnd,
-    filters.duration,
-    priceRange[0] > 0 || priceRange[1] < maxPriceAll - 1,
+    effectiveFilters.destination,
+    effectiveFilters.source,
+    effectiveFilters.theme,
+    effectiveFilters.departureDate || effectiveFilters.departureDateStart || effectiveFilters.departureDateEnd,
+    effectiveFilters.duration,
+    hasPriceFilter,
   ].filter(Boolean).length;
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
@@ -627,13 +642,9 @@ export function TourList({ searchQuery }: TourListProps) {
     setAiClearVersion((current) => current + 1);
   }, []);
 
-  const displayLimit = aiRecommendationResult || activeFilterCount > 0 || normalizedSearchQuery
-    ? INITIAL_LOAD_COUNT
-    : displayCount;
-
   const waterfallTours = useMemo(
-    () => displayTours.slice(0, displayLimit),
-    [displayTours, displayLimit],
+    () => displayTours.slice(0, visibleCount),
+    [displayTours, visibleCount],
   );
 
   const handleObserver = useCallback(
@@ -644,22 +655,28 @@ export function TourList({ searchQuery }: TourListProps) {
         return;
       }
 
-      const nextDisplayCount = Math.min(displayCount + PAGE_SIZE, displayTours.length);
-      const nextPage = Math.floor(nextDisplayCount / PAGE_SIZE) - 1;
+      const nextVisibleCount = Math.min(visibleCount + PAGE_SIZE, displayTours.length);
+      const nextPage = Math.floor(nextVisibleCount / PAGE_SIZE) - 1;
 
       if (nextPage >= 0 && hasPageChunksRef.current && localTours.length < total) {
         void loadMorePages(nextPage);
       }
 
-      if (displayCount < displayTours.length) {
+      if (visibleCount < displayTours.length) {
+        const viewVersion = viewVersionRef.current;
         setIsLoadingMore(true);
-        setTimeout(() => {
-          setDisplayCount(nextDisplayCount);
+        loadMoreTimerRef.current = window.setTimeout(() => {
+          if (viewVersionRef.current !== viewVersion) {
+            return;
+          }
+
+          setVisibleCount((current) => Math.min(current + PAGE_SIZE, displayTours.length));
           setIsLoadingMore(false);
+          loadMoreTimerRef.current = null;
         }, 300);
       }
     },
-    [displayCount, displayTours.length, hasPageChunksRef, isLoadingMore, loadMorePages, localTours.length, total],
+    [displayTours.length, hasPageChunksRef, isLoadingMore, loadMorePages, localTours.length, total, visibleCount],
   );
 
   useEffect(() => {
@@ -676,6 +693,60 @@ export function TourList({ searchQuery }: TourListProps) {
       if (currentRef) observer.unobserve(currentRef);
     };
   }, [handleObserver]);
+
+  useEffect(() => {
+    viewVersionRef.current += 1;
+
+    if (loadMoreTimerRef.current !== null) {
+      window.clearTimeout(loadMoreTimerRef.current);
+      loadMoreTimerRef.current = null;
+    }
+  }, [
+    aiRecommendationResult,
+    effectiveFilters.departureDate,
+    effectiveFilters.departureDateEnd,
+    effectiveFilters.departureDateStart,
+    effectiveFilters.destination,
+    effectiveFilters.duration,
+    effectiveFilters.maxPrice,
+    effectiveFilters.minPrice,
+    effectiveFilters.source,
+    effectiveFilters.theme,
+    normalizedSearchQuery,
+  ]);
+
+  const displayContextKey = [
+    aiRecommendationResult ? 'ai' : 'plain',
+    effectiveFilters.destination,
+    effectiveFilters.source,
+    effectiveFilters.theme,
+    effectiveFilters.departureDate,
+    effectiveFilters.departureDateStart,
+    effectiveFilters.departureDateEnd,
+    effectiveFilters.duration ?? '',
+    effectiveFilters.minPrice ?? '',
+    effectiveFilters.maxPrice ?? '',
+    normalizedSearchQuery,
+  ].join('|');
+
+  useEffect(() => {
+    const resetTimer = window.setTimeout(() => {
+      setIsLoadingMore(false);
+      setVisibleCount(INITIAL_LOAD_COUNT);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(resetTimer);
+    };
+  }, [displayContextKey]);
+
+  useEffect(() => {
+    return () => {
+      if (loadMoreTimerRef.current !== null) {
+        window.clearTimeout(loadMoreTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleCardClick = (tour: Tour) => selectTour(tour);
 
@@ -968,7 +1039,7 @@ export function TourList({ searchQuery }: TourListProps) {
                     {day}天
                   </SelectItem>
                 ))}
-                <SelectItem value="11">10天以上</SelectItem>
+                <SelectItem value={LONG_TRIP_DURATION_VALUE.toString()}>10天以上</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1151,7 +1222,7 @@ export function TourList({ searchQuery }: TourListProps) {
       <AiRecommendPanel
         tours={aiCandidateTours}
         toursLoading={loading}
-        activeFilters={filters}
+        activeFilters={effectiveFilters}
         searchQuery={searchQuery}
         result={aiRecommendationResult}
         clearVersion={aiClearVersion}
@@ -1210,7 +1281,15 @@ export function TourList({ searchQuery }: TourListProps) {
             <Select
               value={filters.sortBy}
               onValueChange={(value) =>
-                setFilters({ ...filters, sortBy: value as FilterState['sortBy'] })
+                setFilters({
+                  ...filters,
+                  sortBy:
+                    value === 'price_asc' ||
+                    value === 'price_desc' ||
+                    value === 'new'
+                      ? value
+                      : 'hot',
+                })
               }
             >
               <SelectTrigger className="h-10 w-[170px] rounded-full border-stone-200 bg-white">
@@ -1282,7 +1361,7 @@ export function TourList({ searchQuery }: TourListProps) {
                   />
                 </Badge>
               )}
-              {(priceRange[0] > 0 || priceRange[1] < maxPriceAll - 1) && (
+              {hasPriceFilter && (
                 <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
                   {priceRange[0].toLocaleString()}-{priceRange[1].toLocaleString()} 元
                   <X
@@ -1312,7 +1391,7 @@ export function TourList({ searchQuery }: TourListProps) {
               )}
               {filters.duration && (
                 <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
-                  {filters.duration === 11 ? '10天以上' : `${filters.duration}天`}
+                  {filters.duration === LONG_TRIP_DURATION_VALUE ? '10天以上' : `${filters.duration}天`}
                   <X
                     className="w-3 h-3 cursor-pointer"
                     onClick={() => setFilters({ ...filters, duration: null })}
@@ -1336,7 +1415,7 @@ export function TourList({ searchQuery }: TourListProps) {
       {displayTours.length > 0 && (
         <div className="mb-5 flex items-center justify-between text-sm text-stone-500">
           <span>共 {displayTours.length.toLocaleString()} 条结果</span>
-          {displayCount < displayTours.length && (
+          {visibleCount < displayTours.length && (
             <span className="text-xs text-stone-400">
               已显示 {waterfallTours.length.toLocaleString()} 条
             </span>
@@ -1375,7 +1454,7 @@ export function TourList({ searchQuery }: TourListProps) {
             })}
           </div>
 
-          {displayCount < displayTours.length && (
+          {visibleCount < displayTours.length && (
             <div ref={loadMoreRef} className="flex items-center justify-center py-8">
               {isLoadingMore ? (
                 <div className="flex items-center gap-2 text-stone-500">
@@ -1391,7 +1470,7 @@ export function TourList({ searchQuery }: TourListProps) {
             </div>
           )}
 
-          {displayCount >= displayTours.length && displayTours.length > INITIAL_LOAD_COUNT && (
+          {visibleCount >= displayTours.length && displayTours.length > INITIAL_LOAD_COUNT && (
             <div className="py-8 text-center text-sm text-stone-400">
               已加载全部 {displayTours.length.toLocaleString()} 条结果
             </div>

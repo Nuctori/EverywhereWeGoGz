@@ -147,17 +147,24 @@ export function useTours() {
 export function useCrawlStatus() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<CrawlStatus>(initialCrawlStatus);
+  const abortRef = useRef<AbortController | null>(null);
 
   const fetchStatus = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
     setLoading(true);
 
     try {
-      const response = await fetch(getDataUrl('tours-meta.json'));
+      const response = await fetch(getDataUrl('tours-meta.json'), {
+        signal: controller.signal,
+      });
       if (!response.ok) {
         throw new Error(`Failed to load data metadata: ${response.status}`);
       }
 
       const meta = { ...emptyMeta, ...(await response.json() as Partial<DataMeta>) };
+      if (controller.signal.aborted) return;
       const rawSize = meta.files.raw?.size ?? 0;
       const listSize = meta.files.list?.size ?? 0;
       const detailSize = meta.files.details?.size ?? 0;
@@ -181,17 +188,23 @@ export function useCrawlStatus() {
         latestUpdatedAt: meta.latestUpdatedAt,
       });
     } catch {
+      if (controller.signal.aborted) return;
       setStatus({
         ...initialCrawlStatus,
         lastCrawlStatus: 'error',
       });
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     void fetchStatus();
+    return () => {
+      abortRef.current?.abort();
+    };
   }, [fetchStatus]);
 
   const triggerCrawl = async () => { throw new Error('静态站点不支持爬虫功能'); };
