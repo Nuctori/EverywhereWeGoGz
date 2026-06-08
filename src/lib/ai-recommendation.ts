@@ -2449,15 +2449,34 @@ function normalizeAiSemanticNotes(value: unknown): AiRecommendationSemanticNotes
     : undefined;
 }
 
-function buildSemanticNotesLead(notes: AiRecommendationSemanticNotes | undefined) {
+function hasInternalRecommendationLanguage(text: string) {
+  return /(?:\batoms?\b|semanticAtoms|matchStatus|soft_conflict|候选原语|软语义判断|无法判断某候选|不能断言某候选|atoms\s*中|cats\s*判断)/i.test(text);
+}
+
+function buildSemanticNotesLead(
+  notes: AiRecommendationSemanticNotes | undefined,
+  intent: AiTravelIntent | null,
+  userText: string,
+) {
   if (!notes) return '';
-  const parts = uniqueStrings([
-    notes.worldKnowledgeUse || '',
-    notes.softCriteria.length ? `软语义判断：${notes.softCriteria.slice(0, 4).join('、')}` : '',
-    notes.cannotAssert.length ? `边界：${notes.cannotAssert.slice(0, 3).join('、')}` : '',
-    notes.caveat || '',
-  ]).filter(Boolean);
-  return parts.length > 0 ? `${parts.join('。')}。` : '';
+  if (hasPublicInterestNeed(intent, userText)) {
+    return '说明：候选里不一定有明确扶贫或公益标注，我会优先找县域、乡村、低预算体验作最接近替代。';
+  }
+
+  const visibleCaveat = normalizeAiText(notes.caveat, 80);
+  if (
+    visibleCaveat &&
+    !hasInternalRecommendationLanguage(visibleCaveat) &&
+    /(近似|替代|未标注|没有明确|无法精准|不完全)/.test(visibleCaveat)
+  ) {
+    return `说明：${stripTerminalPunctuation(visibleCaveat)}。`;
+  }
+
+  if (notes.cannotAssert.length > 0 || notes.softCriteria.length > 0 || notes.worldKnowledgeUse) {
+    return '说明：部分偏好在候选里没有明确标签，我会按目的地、玩法、预算和天气做接近匹配。';
+  }
+
+  return '';
 }
 
 function isBoundedPublicInterestStatement(text: string) {
@@ -3139,6 +3158,7 @@ function shouldUseAiSummary(summary: string, weatherContext: AiWeatherContext) {
   const trimmed = summary.trim();
   if (trimmed.length < 24) return false;
   if (!/[。！？；]/u.test(trimmed)) return false;
+  if (hasInternalRecommendationLanguage(trimmed)) return false;
   if (/^(综合匹配|热门|性价比|班期多|预算内)/.test(trimmed) && trimmed.length < 40) return false;
   if (/(当前|现在).*(春季|夏季|秋季|冬季)/.test(trimmed)) return false;
   if (/(回南天|梅雨|春季踏青|冬季适合)/.test(trimmed)) return false;
@@ -3204,7 +3224,7 @@ function finalizeRecommendationSummary(params: {
   userText?: string;
 }) {
   const aiSummary = params.aiSummary.trim();
-  const semanticLead = buildSemanticNotesLead(params.semanticNotes);
+  const semanticLead = buildSemanticNotesLead(params.semanticNotes, params.intent, params.userText || '');
   if (shouldUseAiSummary(aiSummary, params.weatherContext)) {
     return uniqueStrings([semanticLead, aiSummary]).filter(Boolean).join('');
   }
@@ -4159,6 +4179,7 @@ export const __aiRecommendationTestHooks = {
   collectAvoidHints,
   collectLiteralAvoidHints,
   compactCandidates,
+  finalizeRecommendationSummary,
   getConcreteAiReason,
   getPrimitiveConflictReasons,
   matchesActiveDateFilters,

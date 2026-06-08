@@ -12,6 +12,7 @@ const {
   collectAvoidHints,
   collectLiteralAvoidHints,
   compactCandidates,
+  finalizeRecommendationSummary,
   getConcreteAiReason,
   getPrimitiveConflictReasons,
   matchesActiveDateFilters,
@@ -515,6 +516,31 @@ const semanticBoundaryItems = validateAiItems({
 assert.ok(semanticBoundaryItems[0].semanticFit?.includes('近似替代'));
 assert.ok(semanticBoundaryItems[0].matchedSignals.includes('近似替代'));
 assert.ok(semanticBoundaryItems[0].semanticBoundary?.includes('不能断言'));
+
+const weirdSemanticSummary = finalizeRecommendationSummary({
+  aiSummary: '用户寻找海边温泉、预算400元以内，关注天气因素。软语义判断：海边、温泉、400元以内、天气敏感。边界：候选中无明确标注海边的温泉，需结合目的地判断，无法断言某候选为扶贫或公益项目。温泉需匹配atoms中的温泉泡汤。',
+  items: [{ tourId: 'beach', score: 90, reason: '沙滩短线', matchedSignals: [] }],
+  candidateTours: [hotSpringTour, nonHotSpringTour],
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: ['华南夏季闷热多雨，海边和玩水线路要关注风浪和雷雨。'],
+    source: 'seasonal-rule',
+  },
+  destinationWeatherInsights: [],
+  intent: { budgetMax: 400, weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+  semanticNotes: {
+    worldKnowledgeUse: '用户寻找海边温泉、预算400元以内，关注天气因素。',
+    softCriteria: ['海边', '温泉', '400元以内', '天气敏感'],
+    cannotAssert: ['无法断言某候选为扶贫或公益项目'],
+    caveat: '海边需结合目的地及类别近似判断；温泉需匹配atoms中的温泉泡汤。',
+  },
+  userText: '帮我找海边温泉，400以下的，关注天气因素',
+});
+assert.ok(!/atoms|软语义判断|扶贫|公益项目/.test(weirdSemanticSummary));
+assert.ok(weirdSemanticSummary.includes('说明：部分偏好在候选里没有明确标签'));
+assert.ok(weirdSemanticSummary.includes('推荐方向：'));
 
 const zhHardIntent = buildHardIntentFromText(
   '周末2天，预算800以内，想清凉一点，但不想去海边，也不要坐飞机',
