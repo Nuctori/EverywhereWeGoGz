@@ -2306,7 +2306,7 @@ function formatPrimitivePrice(primitive: RecommendationPrimitive) {
 }
 
 function hasPositivePriceClaim(text: string) {
-  return /(预算友好|价格友好|低价|便宜|不贵|划算|性价比|省钱|实惠)/.test(text);
+  return /(预算友好|价格友好|预算贴边|预算内|预算达到|低于预算带|低价|便宜|不贵|划算|性价比|省钱|实惠)/.test(text);
 }
 
 function hasExplicitValueIntent(intent: AiTravelIntent | null, userText: string) {
@@ -2327,12 +2327,14 @@ function hasUnsupportedPositivePriceClaim(params: {
   sortedPrices: number[];
 }) {
   if (!hasPositivePriceClaim(params.reason)) return false;
+  const hasValueIntent = hasExplicitValueIntent(params.intent, params.userText);
+  if (/预算/.test(params.reason) && !hasValueIntent) return true;
   if (params.intent?.budgetMax && params.primitive.price > params.intent.budgetMax) return true;
 
   const pricePercentile = getPricePercentile(params.primitive.price, params.sortedPrices);
   if (pricePercentile === null) return false;
 
-  if (hasExplicitValueIntent(params.intent, params.userText)) {
+  if (hasValueIntent) {
     return pricePercentile > 75;
   }
 

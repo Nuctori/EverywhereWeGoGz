@@ -566,6 +566,28 @@ const highPriceReasonRewrite = rewriteRecommendationCopy({
 });
 assert.ok(!highPriceReasonRewrite[0].reason?.includes('预算友好'));
 assert.ok(highPriceReasonRewrite[0].reason?.includes('参考价：￥30,999'));
+const noBudgetReasonRewrite = rewriteRecommendationCopy({
+  items: [{
+    tourId: highPriceBeachTour.id,
+    score: 97,
+    reason: '水上别墅和沙滩度假都对题，预算贴边：￥30,999。',
+    matchedSignals: ['沙滩', '水上别墅'],
+  }],
+  candidateTours: [highPriceBeachTour, lowPriceBeachTour],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '帮我找同时带温泉和沙滩的团',
+  allowPublicInterest: false,
+});
+assert.ok(!/预算贴边|预算内/.test(noBudgetReasonRewrite[0].reason || ''));
+assert.ok(noBudgetReasonRewrite[0].reason?.includes('参考价：￥30,999'));
 const variedReasonTours = [
   highPriceBeachTour,
   candidate({
