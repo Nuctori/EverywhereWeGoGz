@@ -12,6 +12,13 @@ import type {
   AiWeatherContext,
   FilterState,
 } from '@/types/tour';
+import {
+  allowsPublicInterestForTurn,
+  buildPublicInterestPromptPolicy,
+  hasPublicInterestLanguage,
+  hasUnallowedPublicInterestLanguage,
+  sanitizeAiIntentForTurn,
+} from '@/lib/ai-semantic-policy';
 import { storedAiProviderConfigSchema } from '@/lib/runtime-schemas';
 
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
@@ -267,58 +274,6 @@ function normalizeLooseKey(value: string | number | null | undefined) {
     .toLowerCase()
     .replace(/[\s\-_/|()[\]【】·.,，。:：'"`]+/g, '');
 }
-
-const PUBLIC_INTEREST_PATTERN = /(扶贫|公益|慈善|助农|乡村振兴|贫穷|贫困|落后|欠发达|经济相对较弱|经济相对弱)/;
-
-function hasPublicInterestLanguage(text: string | null | undefined) {
-  return PUBLIC_INTEREST_PATTERN.test(text || '');
-}
-
-function isPublicInterestTerm(term: string) {
-  return hasPublicInterestLanguage(term);
-}
-
-function stripPublicInterestTerms(values: string[] | undefined) {
-  return (values || []).filter((term) => !isPublicInterestTerm(term));
-}
-
-function hasPublicInterestMemory(memory: AiPreferenceMemory | null | undefined) {
-  if (!memory) return false;
-  return [
-    ...(memory.semanticFocus || []),
-    ...(memory.travelStyle || []),
-    ...(memory.mustHave || []),
-  ].some(hasPublicInterestLanguage);
-}
-
-function allowsPublicInterestForTurn(
-  userText: string,
-  inheritedMemory: AiPreferenceMemory | null | undefined,
-) {
-  return hasPublicInterestLanguage(userText) || hasPublicInterestMemory(inheritedMemory);
-}
-
-function sanitizeAiIntentForTurn(
-  intent: AiTravelIntent | null,
-  options: { allowPublicInterest: boolean },
-): AiTravelIntent | null {
-  if (!intent || options.allowPublicInterest) return intent;
-
-  return {
-    ...intent,
-    semanticFocus: stripPublicInterestTerms(intent.semanticFocus),
-    travelStyle: stripPublicInterestTerms(intent.travelStyle),
-    mustHave: stripPublicInterestTerms(intent.mustHave),
-  };
-}
-
-function hasUnallowedPublicInterestLanguage(
-  text: string,
-  options: { allowPublicInterest: boolean },
-) {
-  return !options.allowPublicInterest && hasPublicInterestLanguage(text);
-}
-
 
 function compactPreferenceMemoryForPrompt(memory: AiPreferenceMemory | null) {
   if (!memory) return null;
@@ -3859,18 +3814,7 @@ function buildAiMessages(params: {
   allowPublicInterest: boolean;
 }) {
   const intentCoverage = analyzeIntentCoverage(params.candidates, params.intent);
-  const publicInterestSystemRules = params.allowPublicInterest
-    ? [
-        '涉及扶贫、公益、贫穷、贫困、落后、欠发达等事实性强标签时，不能把普通城市/区县强行贴标签；候选没有显式证据时，只能写“候选未显式标注，按低预算、县域/乡村体验做近似替代”。',
-      ]
-    : [];
-  const publicInterestRequestRules = params.allowPublicInterest
-    ? [
-        '如果用户提到扶贫、贫穷地方、公益、研学这类候选池未必显式打标的语义，基于世界知识和候选目的地/玩法做最接近判断；但贫困/落后/扶贫/公益只能在候选事实有证据时断言，否则写成近似替代。',
-        '当扶贫/贫困/公益/乡村这类软语义与天气同时出现时，软语义不是装饰项：先找县域、乡村、古村、农家、茶田、山水、红色文化、农文旅、非都市体验等近似方向，再在这些候选里比较天气。',
-        '都市酒店、港澳购物、签证、纯住宿、豪华自助这类候选如果缺少县域/乡村/农文旅线索，只能标为语义较弱的补位，不应排在更贴近软语义的候选前面。',
-      ]
-    : [];
+  const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
   // 经验：想让 provider cache 命中，关键不是少输出，而是让大块静态上下文稳定。
   // 所以这里把“稳定规则”和“稳定候选上下文”拆成独立 system message，动态请求只保留本轮变化部分。
   const systemPrompt = [
@@ -3884,7 +3828,7 @@ function buildAiMessages(params: {
     '如果给出了 departureWithinDays，并且候选池有对应未来班期，优先选窗口内未来班期，不要为了凑结果把旧班期排前面。',
     '如果用户否定某类体验，不要把它包装成推荐点；若候选不足，直接说明候选受限和替代逻辑。',
     '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选原语。',
-    ...publicInterestSystemRules,
+    ...promptPolicy.systemRules,
     'reason 必须引用候选里真实存在的具体事实，例如 title、highlights、semanticAtoms；不要只写性价比高、班期多、综合匹配。',
     'summary 至少交代推荐方向、天气或季节判断，以及下单前最该注意的一件事。',
     '严格输出 JSON，不要 Markdown，不要额外解释。',
@@ -3912,18 +3856,12 @@ function buildAiMessages(params: {
       summary: '2-4 句中文，写推荐方向、天气/季节判断、注意事项或替代逻辑',
       intentNotes: {
         worldKnowledgeUse: '一句中文，说明软语义如何借助世界知识判断；若只是硬筛选可省略',
-        softCriteria: params.allowPublicInterest
-          ? 'string[]，本轮软语义标准，如县域/乡村/公益近似/研学价值/亲子轻松'
-          : 'string[]，本轮软语义标准，如天气稳定/亲子轻松/住得更好/少折腾',
-        cannotAssert: params.allowPublicInterest
-          ? 'string[]，候选无证据时不能断言的事实，如扶贫项目/贫困地区/公益活动'
-          : 'string[]，候选无证据时不能断言的事实，如酒店等级/服务承诺/活动性质',
+        softCriteria: promptPolicy.softCriteriaDescription,
+        cannotAssert: promptPolicy.cannotAssertDescription,
         caveat: '一句中文，说明近似替代或证据边界',
       },
       intent: {
-        semanticFocus: params.allowPublicInterest
-          ? 'string[]，保留用户表达或明显隐含的软语义，例如公益/扶贫/研学/贫穷地区/亲子/住好/轻松等'
-          : 'string[]，保留用户表达或明显隐含的软语义，例如亲子/住好/轻松/海边/温泉等',
+        semanticFocus: promptPolicy.semanticFocusDescription,
         travelStyle: 'string[]',
         mustHave: 'string[]',
         weatherSensitivity: 'string[]',
@@ -3945,10 +3883,13 @@ function buildAiMessages(params: {
     rq: [
       '优先具体玩法、地点、原子事实，不要空话。',
       '要解释预算、天数、班期、天气、轻松度与用户需求如何匹配。',
-      ...publicInterestRequestRules,
+      ...promptPolicy.requestRules,
       '天气敏感项必须说清风险和取舍。',
       '可比较时直接说明这次为什么推 A 不推 B。',
-      `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；第 ${MAX_AI_PROMPT_REASON_ITEMS + 1}-${MAX_AI_RANKED_ITEMS} 个只需要 tourId 和 score。`,
+      [
+        `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
+        `第 ${MAX_AI_PROMPT_REASON_ITEMS + 1}-${MAX_AI_RANKED_ITEMS} 个只需要 tourId 和 score。`,
+      ].join(''),
     ],
   };
 
@@ -3971,16 +3912,7 @@ function buildLiteAiMessages(params: {
 }) {
   // 经验：OpenRouter 免费模型能通，但大上下文下经常 200 返回后没有可用 JSON。
   // 这里给免费弱模型只做“排序和软语义取舍”，文案、天气补充和硬约束审计仍由本地完成。
-  const publicInterestLiteRules = params.allowPublicInterest
-    ? [
-        '扶贫/公益/贫困/研学/乡村这类软语义可用世界知识做近似判断；但没有候选原文证据时不能断言为扶贫项目、贫困地区或公益活动。',
-        '当 q 同时提到天气和扶贫/贫困/公益/乡村时，先按县域、乡村、古村、农家、茶田、山水、红色文化、农文旅、非都市体验找近似候选，再比较天气。',
-        '都市酒店、港澳购物、签证、纯住宿、豪华自助若缺少县域/乡村/农文旅线索，sf 必须标为语义较弱补位，score 不应高于更贴近软语义的候选。',
-        'sf 写世界知识近似逻辑，如县域/乡村/非都市/低预算/自然民俗；sb 写不能断言的边界。',
-      ]
-    : [
-        'sf 写本轮需求与候选事实的贴合点，如预算、天气、玩法、节奏、住宿或目的地；sb 只写候选证据不足的边界。',
-      ];
+  const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
   const request = {
     t: 'rank_top24_lite',
     q: params.userText,
@@ -4015,7 +3947,7 @@ function buildLiteAiMessages(params: {
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
       '优先 match，除非没有足够 match 才使用 soft_conflict/fallback。',
       '结合 q、it、wx 和 atoms/cats 判断软语义与天气取舍。',
-      ...publicInterestLiteRules,
+      ...promptPolicy.liteRules,
     ],
   };
 
