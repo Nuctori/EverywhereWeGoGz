@@ -399,6 +399,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
+  const [clearedAiRequestId, setClearedAiRequestId] = useState<number | null>(null);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
   const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
@@ -511,6 +512,15 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   ]);
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const isAiSearchMode = Boolean(
+    aiRecommendationResult ||
+    (
+      aiSearchRequest &&
+      aiSearchRequest.id !== clearedAiRequestId &&
+      aiSearchRequest.prompt.trim() === searchQuery.trim() &&
+      aiSearchRequest.prompt.trim().length > 0
+    ),
+  );
 
   const aiRecommendedCount = useMemo(
     () => aiRecommendationResult?.items.filter((item) => Boolean(item.reason)).length ?? 0,
@@ -537,7 +547,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
       const isAiRecommendedTour = aiRecommendationByTourId.has(tour.id);
 
-      if (normalizedSearchQuery && !isAiRecommendedTour) {
+      if (normalizedSearchQuery && !isAiSearchMode && !isAiRecommendedTour) {
         const matchesSearch = [
           tour.title,
           tour.destination,
@@ -672,6 +682,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     return result;
   }, [
     aiRecommendationByTourId,
+    isAiSearchMode,
     catalogSourceTours,
     dateFilter,
     effectiveFilters,
@@ -699,8 +710,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
+    setClearedAiRequestId(aiSearchRequest?.id ?? null);
     setAiClearVersion((current) => current + 1);
-  }, []);
+  }, [aiSearchRequest?.id]);
 
   const waterfallTours = useMemo(
     () => displayTours.slice(0, visibleCount),

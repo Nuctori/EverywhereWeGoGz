@@ -79,6 +79,7 @@ interface RecommendationContext {
   weatherSensitivity?: string[];
   weatherContext?: AiWeatherContext;
   intent?: AiTravelIntent | null;
+  userText?: string;
 }
 
 interface RecommendationCopyProfile {
@@ -944,6 +945,10 @@ function buildHardIntentFromText(
   const budget = parseBudget(normalizedText);
   const duration = parseDuration(normalizedText);
   const promptDateWindow = resolvePromptDateWindow(normalizedText);
+  const avoid = uniqueStrings([
+    ...collectAvoidHints(normalizedText),
+    ...collectLiteralAvoidHints(normalizedText),
+  ]);
   const weatherSensitivity = /(天气|气温|温度|下雨|降雨|暴雨|雷暴|台风|预报|季节|避暑|怕热|闷热|风浪)/.test(normalizedText)
     ? ['天气敏感']
     : [];
@@ -952,10 +957,7 @@ function buildHardIntentFromText(
       ...collectDestinationHints(normalizedText),
       activeFilters.destination || '',
     ]),
-    avoid: uniqueStrings([
-      ...collectAvoidHints(normalizedText),
-      ...collectLiteralAvoidHints(normalizedText),
-    ]),
+    avoid,
     weatherSensitivity,
     budgetMin: budget?.min && Number.isFinite(budget.min) ? budget.min : activeFilters.minPrice,
     budgetMax: budget?.max && Number.isFinite(budget.max) ? budget.max : activeFilters.maxPrice,
@@ -2629,6 +2631,24 @@ function limitWeatherSensitiveCandidateMix(
   });
 }
 
+function extractCandidateCoverageTerms(text: string | undefined) {
+  if (!text) return [];
+  return uniqueStrings(
+    text
+      .toLowerCase()
+      .replace(/[^\p{Script=Han}a-z0-9]+/gu, ' ')
+      .split(/(?:\s+|同时|都要|都得|都想|兼具|兼有|都有|既|又|带有|带|含有|包含|包括|有|和|与|及|以及|或者|或|的|旅行团|旅游团|线路|跟团|推荐|帮我|帮忙|想要|想|要|找|看)+/gu)
+      .map((term) => term.trim())
+      .filter((term) => term.length >= 2 && term.length <= 12),
+  ).slice(0, 12);
+}
+
+function getPrimitiveCoverageScore(primitive: RecommendationPrimitive, terms: string[]) {
+  if (terms.length === 0) return 0;
+  const corpus = getPrimitiveIntentCorpus(primitive);
+  return terms.reduce((score, term) => score + (corpus.includes(term) ? 1 : 0), 0);
+}
+
 function readStoredAiConfig(): StoredAiProviderConfig {
   if (typeof window === 'undefined') return {};
 
@@ -2797,6 +2817,21 @@ function compactCandidates(
     ? primitives.filter((primitive) => primitiveMatchesDestination(intent, primitive))
     : primitives;
   const strictMatches = destinationMatches.filter((primitive) => intentMatchesPrimitive(intent, primitive));
+  const coverageTerms = extractCandidateCoverageTerms(context?.userText);
+  const coverageMatches = coverageTerms.length > 0
+    ? selectDiversePrimitives(
+        [...primitives]
+          .filter((primitive) => getPrimitiveCoverageScore(primitive, coverageTerms) > 0)
+          .sort((a, b) =>
+            getPrimitiveCoverageScore(b, coverageTerms) - getPrimitiveCoverageScore(a, coverageTerms) ||
+            rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context),
+          ),
+        Math.min(16, MAX_AI_CANDIDATES),
+        localItems,
+        context,
+      )
+    : [];
+  const coverageMatchIds = new Set(coverageMatches.map((primitive) => primitive.id));
   const strictLimit = strictMatches.length > 0
     ? Math.max(18, MAX_AI_CANDIDATES - 12)
     : 0;
@@ -2832,10 +2867,23 @@ function compactCandidates(
   );
 
   const annotatedCandidates = [
+    ...coverageMatches.map((primitive) =>
+      annotateCandidatePrimitive(
+        primitive,
+        intent,
+        sortedPrices,
+        intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
+      ),
+    ),
     ...diverseStrictMatches
+      .filter((primitive) => !coverageMatchIds.has(primitive.id))
       .map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'match')),
-    ...diverseSoftConflicts.map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'soft_conflict')),
-    ...diverseFallbackPool.map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'fallback')),
+    ...diverseSoftConflicts
+      .filter((primitive) => !coverageMatchIds.has(primitive.id))
+      .map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'soft_conflict')),
+    ...diverseFallbackPool
+      .filter((primitive) => !coverageMatchIds.has(primitive.id))
+      .map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'fallback')),
   ]
     .slice(0, MAX_AI_CANDIDATES);
 
@@ -3826,6 +3874,8 @@ function buildAiMessages(params: {
     '预算上限如“2000 以内”默认表示不要超过上限且尽量贴近预算带，不等于盲目选全站最低价；除非用户明确追求极致低价，不要把明显脱离预算带的 99/299 低价团排在更合适的正常团前面。',
     '如果给出了 departureWithinDays，并且候选池有对应未来班期，优先选窗口内未来班期，不要为了凑结果把旧班期排前面。',
     '如果用户否定某类体验，不要把它包装成推荐点；若候选不足，直接说明候选受限和替代逻辑。',
+    '如果用户用“同时、都要、兼具、都有、既…又…、带…和…”表达多个并列偏好，你必须自己把这些偏好抽到 intent.mustHave；排序时优先同时满足全部 mustHave 的候选。',
+    '只满足并列偏好中一部分的候选只能作为靠后的近似替代，不要排在同时满足全部偏好的候选前面；若没有完全满足项，summary 和 reason 要直接说明缺口。',
     '天气和世界知识只用于判断舒适度、风险和适配理由；线路事实必须来自候选原语。',
     ...promptPolicy.systemRules,
     'reason 必须引用候选里真实存在的具体事实，例如 title、highlights、semanticAtoms；不要只写性价比高、班期多、综合匹配。',
@@ -3884,6 +3934,7 @@ function buildAiMessages(params: {
       '要解释预算、天数、班期、天气、轻松度与用户需求如何匹配。',
       ...promptPolicy.requestRules,
       '天气敏感项必须说清风险和取舍。',
+      '遇到“同时/都要/兼具/既…又…”这类并列要求时，由你抽取 mustHave，并优先全部满足；部分满足只能作为替代。',
       '可比较时直接说明这次为什么推 A 不推 B。',
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
@@ -3945,6 +3996,7 @@ function buildLiteAiMessages(params: {
       '必须用紧凑 JSON；所有中文短句不超过24字；不要解释长段落。',
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
       '优先 match，除非没有足够 match 才使用 soft_conflict/fallback。',
+      '并列偏好由你抽 mustHave；先排全部满足项，部分满足靠后。',
       '结合 q、it、wx 和 atoms/cats 判断软语义与天气取舍。',
       ...promptPolicy.liteRules,
     ],
@@ -5146,6 +5198,7 @@ export async function requestAiRecommendations({
       {
         budgetPriority: effectiveIntent?.budgetPriority,
         intent: effectiveIntent,
+        userText: effectiveUserText,
         weatherSensitivity: effectiveIntent?.weatherSensitivity,
         weatherContext: weatherContextForRanking,
       },
@@ -5157,6 +5210,7 @@ export async function requestAiRecommendations({
       {
         budgetPriority: effectiveIntent?.budgetPriority,
         intent: effectiveIntent,
+        userText: effectiveUserText,
         weatherSensitivity: effectiveIntent?.weatherSensitivity,
         weatherContext: weatherContextForRanking,
       },

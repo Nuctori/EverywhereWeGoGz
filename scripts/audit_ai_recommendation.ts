@@ -145,6 +145,23 @@ const nonHotSpringTour = candidate({
   tags: ['海边', '休闲'],
   highlights: ['沙滩'],
 });
+const hotSpringBeachTour = candidate({
+  id: 'hot-spring-beach',
+  title: '广东海边温泉沙滩3天',
+  destination: '广东',
+  duration: 3,
+  price: 699,
+  theme: '休闲度假',
+  tags: ['温泉', '沙滩'],
+  highlights: ['海边温泉', '沙滩散步'],
+});
+const compoundNeedCompacted = compactCandidates(
+  [hotSpringTour, nonHotSpringTour, hotSpringBeachTour, ...tours],
+  [],
+  null,
+  { userText: '帮我找同时带温泉和沙滩的团' },
+);
+assert.ok(compoundNeedCompacted.slice(0, 4).some((item) => item.id === 'hot-spring-beach'));
 const beachPrimitive = buildTourPrimitive(nonHotSpringTour);
 assert.ok(beachPrimitive.experienceCategories.includes('海边沙滩'));
 assert.ok(!beachPrimitive.experienceCategories.includes('玩水清凉'));
@@ -677,6 +694,8 @@ const nonPublicFullPrompt = buildAiMessages({
   preferenceMemory: null,
   allowPublicInterest: false,
 }).map((message) => message.content).join('\n');
+assert.ok(nonPublicFullPrompt.includes('intent.mustHave'));
+assert.ok(nonPublicFullPrompt.includes('同时满足全部'));
 const nonPublicLitePrompt = buildLiteAiMessages({
   userText: '帮我找海边温泉，400以下的，关注天气因素',
   messages: [],
