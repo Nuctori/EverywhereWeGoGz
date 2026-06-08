@@ -8,6 +8,7 @@ const outputFiles = {
   list: path.join(root, 'public', 'data', 'tours-list.json'),
   meta: path.join(root, 'public', 'data', 'tours-meta.json'),
 };
+const auditReportFile = path.join(root, 'audit', 'data-integrity-report.json');
 
 const rawFiles = [
   'src/data/raw_jrt365_full.json',
@@ -224,6 +225,11 @@ function fail(errors, message) {
   errors.push(message);
 }
 
+function writeAuditReport(report) {
+  fs.mkdirSync(path.dirname(auditReportFile), { recursive: true });
+  fs.writeFileSync(auditReportFile, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+}
+
 const errors = [];
 const warnings = [];
 
@@ -417,6 +423,28 @@ console.log(`- source counts: ${JSON.stringify(outputCounts)}`);
 console.log(`- raw unique counts: ${JSON.stringify(rawCounts)}`);
 console.log(`- gzl schedule price checks: ${gzlSchedulePriceChecks}`);
 
+const report = {
+  generatedAt: new Date().toISOString(),
+  status: errors.length > 0 ? 'failed' : 'passed',
+  files: {
+    full: path.relative(root, outputFiles.full),
+    list: path.relative(root, outputFiles.list),
+    meta: path.relative(root, outputFiles.meta),
+    details: path.relative(root, detailDir),
+    report: path.relative(root, auditReportFile),
+  },
+  counts: {
+    totalTours: fullTours.length,
+    listTours: listTours.length,
+    detailShards: detailFiles.length,
+    gzlSchedulePriceChecks,
+  },
+  sourceCounts: outputCounts,
+  rawUniqueCounts: rawCounts,
+  warnings,
+  errors,
+};
+
 if (warnings.length) {
   console.warn(`Warnings (${warnings.length}):`);
   for (const warning of warnings.slice(0, 20)) {
@@ -425,6 +453,8 @@ if (warnings.length) {
 }
 
 if (errors.length) {
+  writeAuditReport(report);
+  console.error(`Audit report written to: ${path.relative(root, auditReportFile)}`);
   console.error(`Errors (${errors.length}):`);
   for (const error of errors) {
     console.error(`- ${error}`);
@@ -432,4 +462,6 @@ if (errors.length) {
   process.exit(1);
 }
 
+writeAuditReport(report);
+console.log(`Audit report written to: ${path.relative(root, auditReportFile)}`);
 console.log('Data integrity audit passed');

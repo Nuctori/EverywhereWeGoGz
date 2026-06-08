@@ -56,6 +56,48 @@ jobs:
       - name: Audit merged data
         run: npm run audit:data-integrity
 
+      - name: Summarize audit report
+        if: always()
+        run: |
+          if [ ! -f audit/data-integrity-report.json ]; then
+            echo "## Data integrity audit" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "Audit report was not generated." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          node --input-type=module - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import fs from 'node:fs';
+
+          const report = JSON.parse(fs.readFileSync('audit/data-integrity-report.json', 'utf8'));
+          const errors = Array.isArray(report.errors) ? report.errors : [];
+          const warnings = Array.isArray(report.warnings) ? report.warnings : [];
+
+          console.log('## Data integrity audit');
+          console.log('');
+          console.log(`- Status: ${report.status}`);
+          console.log(`- Total tours: ${report.counts?.totalTours ?? 'n/a'}`);
+          console.log(`- Detail shards: ${report.counts?.detailShards ?? 'n/a'}`);
+          console.log(`- Errors: ${errors.length}`);
+          console.log(`- Warnings: ${warnings.length}`);
+
+          if (errors.length > 0) {
+            console.log('');
+            console.log('Top errors:');
+            for (const error of errors.slice(0, 10)) {
+              console.log(`- ${error}`);
+            }
+          }
+          EOF
+
+      - name: Upload audit report
+        if: always() && hashFiles('audit/data-integrity-report.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: data-integrity-report
+          path: audit/data-integrity-report.json
+          if-no-files-found: error
+
       - name: Check if data changed
         id: check_changes
         run: |
