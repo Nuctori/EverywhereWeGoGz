@@ -1605,7 +1605,7 @@ function extractExperienceCategories(tour: AiRecommendationCandidate) {
   if (lodgingOnly) return ['非跟团产品'];
 
   if (/温泉|泡汤|汤泉|热泉|铁泉|御泉|颐和|银盏|聚龙湾|云天海|雅泡|带池|私汤|依泉楼|spa/i.test(corpus)) categories.push('温泉泡汤');
-  if (hasWaterPlaySignal || hasBeachSignal) {
+  if (hasWaterPlaySignal) {
     categories.push('玩水清凉');
   }
   if (hasBeachSignal) {
@@ -1650,31 +1650,35 @@ function extractSeasonalComfortAtoms(tour: AiRecommendationCandidate) {
     tour.title,
     ...(tour.highlights || []).filter((highlight) => !SEMANTIC_ATOM_STOPWORDS.has(highlight)),
   ].filter(Boolean).join(' ').toLowerCase();
-  const atoms: string[] = [];
+  const comfortAtoms: string[] = [];
+  const riskAtoms: string[] = [];
 
-  if (/冰|水上|水世界|漂流|嬉水|亲水|沙滩|海边|游泳|泳池/.test(corpus)) {
-    atoms.push('夏季友好：玩水或清凉体验');
+  if (/水上|水世界|漂流|嬉水|亲水|游泳|泳池|溯溪|冲浪/.test(corpus)) {
+    comfortAtoms.push('夏季友好：水上活动');
+  }
+  if (/冰|冰雪|室内/.test(corpus)) {
+    comfortAtoms.push('夏季友好：清凉室内体验');
   }
   if (/森林|氧吧|山泉|瀑布|溶洞|峡谷|湿地|绿道|星湖|丹霞|九瀑|云门山|白水寨|古龙峡|黄腾峡|三百山|天露山|紫云谷|姑婆山/.test(corpus)) {
-    atoms.push('夏季友好：森林山水遮阴');
+    comfortAtoms.push('夏季友好：森林山水遮阴');
   }
   if (/博物馆|室内|冰世界|冰雪世界/.test(corpus)) {
-    atoms.push('夏季友好：室内或避暑点');
+    comfortAtoms.push('夏季友好：室内或避暑点');
   }
   if (/温泉|泡汤|汤泉|热泉|铁泉|御泉|颐和|银盏|聚龙湾|云天海|雅泡|带池|私汤|依泉楼|spa/i.test(corpus)) {
-    atoms.push('高温天气需取舍：温泉泡汤');
+    riskAtoms.push('高温天气需取舍：温泉泡汤');
   }
   if (/徒步|爬山|登山|暴走/.test(corpus)) {
-    atoms.push('高温天气需取舍：户外强度');
+    riskAtoms.push('高温天气需取舍：户外强度');
   }
   if (/徒步|登山|爬山|穿越|峡谷|瀑布|溯溪|漂流|山峰|古龙峡|黄腾峡|白水寨|紫云谷|天露山|云门山|姑婆山|三百山/.test(corpus)) {
-    atoms.push('雨天需取舍：山水户外或涉水风险');
+    riskAtoms.push('雨天需取舍：山水户外或涉水风险');
   }
   if (/海边|海滩|沙滩|海景|海岛|双月湾|巽寮湾|沙扒湾|盐洲岛|南澳岛|海陵岛/.test(corpus)) {
-    atoms.push('天气敏感：海边晴雨和风浪');
+    riskAtoms.push('天气敏感：海边晴雨和风浪');
   }
 
-  return uniqueStrings(atoms).slice(0, 3);
+  return uniqueStrings([...riskAtoms, ...comfortAtoms]).slice(0, 3);
 }
 
 function getReasonAtomsForTour(tour: AiRecommendationCandidate) {
@@ -2278,9 +2282,10 @@ function getPrimitiveTitleFact(primitive: RecommendationPrimitive) {
 
 function getPrimitiveWeatherAppeal(primitive: RecommendationPrimitive) {
   const categories = new Set(primitive.experienceCategories);
-  if (categories.has('温泉泡汤') && categories.has('玩水清凉')) return '有玩水清凉点，但高温泡汤要取舍';
-  if (categories.has('玩水清凉') && categories.has('海边沙滩')) return '有玩水和海边夏天感，但要看晴雨和风浪';
-  if (categories.has('玩水清凉')) return '有玩水清凉点，夏季体感更对题';
+  if (categories.has('温泉泡汤') && categories.has('海边沙滩')) return '兼顾海边和温泉，但要看晴雨、风浪和高温泡汤取舍';
+  if (categories.has('温泉泡汤') && categories.has('玩水清凉')) return '有水上活动和温泉，但高温泡汤要取舍';
+  if (categories.has('玩水清凉') && categories.has('海边沙滩')) return '有水上活动和海边体验，但要看晴雨和风浪';
+  if (categories.has('玩水清凉')) return '有水上活动，夏季体感更对题';
   if (categories.has('森林山水')) return '有森林山水遮阴，比纯室外暴晒稳';
   if (categories.has('文化逛城') || categories.has('室内度假')) return '室内外搭配更适合闷热或阵雨天';
   if (categories.has('海边沙滩')) return '海边玩法更有夏天感，但要看晴雨和风浪';
@@ -2343,7 +2348,7 @@ function buildCopyIntentProfile(
   const wantsRelaxed = /(轻松|别太赶|慢一点|老人|长辈|休闲|不折腾)/.test(joinedStyle);
   const hasFamilyNeed = /(亲子|孩子|小朋友|家庭)/.test(joinedStyle);
   const hasSeniorNeed = /(老人|长辈|爸妈)/.test(joinedStyle);
-  const wantsWater = /(玩水|漂流|泳池|水上乐园|亲水|沙滩|海边)/.test(joinedStyle);
+  const wantsWater = /(玩水|漂流|泳池|水上乐园|亲水|溯溪|冲浪|水世界)/.test(joinedStyle);
   const wantsBeach = /(海边|海岛|沙滩|海景)/.test(joinedStyle);
   const wantsNature = /(风景|山水|自然|森林|草原|雪山|湖)/.test(joinedStyle);
   const prefersValue = /(便宜|预算|性价比|不贵|划算|值)/.test(joinedStyle) || Boolean(intent?.budgetMax);
@@ -2875,7 +2880,7 @@ function buildSummaryTopDestinations(
 
   const categoryLabelMap: Record<string, string> = {
     '海边沙滩': '海边度假',
-    '玩水清凉': '清凉玩水',
+    '玩水清凉': '水上活动',
     '森林山水': '山水避暑',
     '文化逛城': '城市休闲',
     '室内度假': '酒店度假',
@@ -3043,7 +3048,7 @@ function buildDestinationWeatherLine(insights: DestinationWeatherInsight[]) {
 function buildWeatherActivityLabel(primitive: RecommendationPrimitive) {
   const categories = new Set(primitive.experienceCategories);
   if (categories.has('海边沙滩')) return '海边活动';
-  if (categories.has('玩水清凉')) return '玩水体验';
+  if (categories.has('玩水清凉')) return '水上活动';
   if (categories.has('森林山水')) return '山水户外';
   if (categories.has('文化逛城') || categories.has('室内度假')) return '行程完整度';
   if (categories.has('温泉泡汤')) return '酒店放松体验';
@@ -3576,7 +3581,7 @@ function getSeasonAdvice(destination: string, travelDate?: string) {
 
   if (isSouthChinaHotRainySeason(destination, month)) {
     advice.push('华南此时通常已经进入闷热多雨阶段，体感更接近夏季，选线路时应优先考虑避暑、遮阳、防雨和室内外搭配。');
-    advice.push('广东、海南和沿海线路要额外关注强降雨、雷暴和台风预警，海边、玩水和长时间暴晒项目不宜盲目优先。');
+    advice.push('广东、海南和沿海线路要额外关注强降雨、雷暴和台风预警，海边、漂流/水上活动和长时间暴晒项目不宜盲目优先。');
   }
 
   if ([6, 7, 8, 9].includes(month)) {

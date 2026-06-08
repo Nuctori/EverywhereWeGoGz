@@ -145,6 +145,24 @@ const nonHotSpringTour = candidate({
   tags: ['海边', '休闲'],
   highlights: ['沙滩'],
 });
+const beachPrimitive = buildTourPrimitive(nonHotSpringTour);
+assert.ok(beachPrimitive.experienceCategories.includes('海边沙滩'));
+assert.ok(!beachPrimitive.experienceCategories.includes('玩水清凉'));
+assert.ok(!beachPrimitive.seasonalComfortAtoms.some((atom) => atom.includes('玩水')));
+const indoorCoolPrimitive = buildTourPrimitive(candidate({
+  id: 'indoor-cool',
+  title: '广州冰雪世界室内1天',
+  destination: '广东',
+  duration: 1,
+  price: 199,
+  theme: '亲子休闲',
+  tags: ['亲子'],
+  highlights: ['冰雪世界', '室内体验'],
+}));
+assert.ok(indoorCoolPrimitive.experienceCategories.includes('室内度假'));
+assert.ok(!indoorCoolPrimitive.experienceCategories.includes('玩水清凉'));
+assert.ok(indoorCoolPrimitive.seasonalComfortAtoms.some((atom) => atom.includes('清凉室内')));
+assert.ok(!indoorCoolPrimitive.seasonalComfortAtoms.some((atom) => atom.includes('玩水')));
 const avoidCompacted = compactCandidates([hotSpringTour, nonHotSpringTour], [], avoidIntent);
 assert.ok(!avoidCompacted.some((item) => item.id === 'hot-spring'));
 assert.ok(avoidCompacted.some((item) => item.id === 'beach'));
@@ -482,6 +500,7 @@ const vagueReasonItems = validateAiItems({
   ],
 }, noisyAlternatives);
 assert.ok(vagueReasonItems[0].reason?.includes('沙扒湾') || vagueReasonItems[0].reason?.includes('沙滩'));
+assert.ok(!vagueReasonItems[0].reason?.includes('玩水'));
 
 const unsupportedPublicInterestPrimitive = buildTourPrimitive(candidate({
   id: 'unsupported-public-interest',
@@ -588,7 +607,7 @@ const weirdSemanticSummary = finalizeRecommendationSummary({
     destination: '广州',
     travelDate: '2026-06-12',
     forecastSummary: '广州未来几天闷热多雨。',
-    seasonAdvice: ['华南夏季闷热多雨，海边和玩水线路要关注风浪和雷雨。'],
+    seasonAdvice: ['华南夏季闷热多雨，海边和水上活动线路要关注风浪和雷雨。'],
     source: 'seasonal-rule',
   },
   destinationWeatherInsights: [],
@@ -613,7 +632,7 @@ const nonInternalPublicInterestSummary = finalizeRecommendationSummary({
     destination: '广州',
     travelDate: '2026-06-12',
     forecastSummary: '广州未来几天闷热多雨。',
-    seasonAdvice: ['华南夏季闷热多雨，海边和玩水线路要关注风浪和雷雨。'],
+    seasonAdvice: ['华南夏季闷热多雨，海边和水上活动线路要关注风浪和雷雨。'],
     source: 'seasonal-rule',
   },
   destinationWeatherInsights: [],
@@ -636,7 +655,7 @@ const promptWeatherContext = {
   destination: '广州',
   travelDate: '2026-06-12',
   forecastSummary: '广州未来几天闷热多雨。',
-  seasonAdvice: ['华南夏季闷热多雨，海边和玩水线路要关注风浪和雷雨。'],
+  seasonAdvice: ['华南夏季闷热多雨，海边和水上活动线路要关注风浪和雷雨。'],
   source: 'seasonal-rule' as const,
 };
 const promptAuditContext = buildRecommendationAuditContext(promptTours, null, promptIntent);
@@ -666,6 +685,10 @@ const nonPublicLitePrompt = buildLiteAiMessages({
 }).map((message) => message.content).join('\n');
 assert.ok(!promptPublicInterestPattern.test(nonPublicFullPrompt));
 assert.ok(!promptPublicInterestPattern.test(nonPublicLitePrompt));
+assert.ok(!/玩水清凉|清凉玩水/.test(nonPublicFullPrompt));
+assert.ok(!/玩水清凉|清凉玩水/.test(nonPublicLitePrompt));
+assert.ok(!/玩水/.test(nonPublicFullPrompt));
+assert.ok(!/玩水/.test(nonPublicLitePrompt));
 
 const explicitPublicFullPrompt = buildAiMessages({
   userText: '我要扶贫或者公益属性更强的路线，没有就直说最接近替代',
