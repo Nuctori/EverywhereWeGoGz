@@ -60,7 +60,9 @@ function getDataUrl(path: string) {
 
 function useToursData() {
   const [tours, setTours] = useState<TourSummary[]>([]);
+  const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
   const [hasPageChunks, setHasPageChunks] = useState(true);
@@ -70,6 +72,28 @@ function useToursData() {
 
   useEffect(() => {
     let cancelled = false;
+
+    async function loadCatalog() {
+      try {
+        const listRes = await fetch(getDataUrl('tours-list.json'));
+        if (!listRes.ok) {
+          throw new Error(`Failed to load tours catalog: ${listRes.status}`);
+        }
+        const data = toursListSchema.parse(await listRes.json());
+        if (cancelled) return;
+        setCatalogTours(data);
+        setTotal(data.length);
+      } catch {
+        if (!cancelled) {
+          setCatalogTours([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setCatalogLoading(false);
+        }
+      }
+    }
+
     async function loadInitial() {
       try {
         const pageRes = await fetch(getDataUrl('tours-page-0.json'));
@@ -82,6 +106,7 @@ function useToursData() {
         hasPageChunksRef.current = true;
         setHasPageChunks(true);
         setLoading(false);
+        void loadCatalog();
       } catch {
         try {
           const fallbackRes = await fetch(getDataUrl('tours-list.json'));
@@ -89,12 +114,19 @@ function useToursData() {
           const data = toursListSchema.parse(await fallbackRes.json());
           if (cancelled) return;
           setTours(data);
+          setCatalogTours(data);
           setTotal(data.length);
           hasPageChunksRef.current = false;
           setHasPageChunks(false);
+          setCatalogLoading(false);
           setLoading(false);
         } catch {
-          if (!cancelled) { setTours([]); setLoading(false); }
+          if (!cancelled) {
+            setTours([]);
+            setCatalogTours([]);
+            setCatalogLoading(false);
+            setLoading(false);
+          }
         }
       }
     }
@@ -132,7 +164,9 @@ function useToursData() {
 
   return {
     tours,
+    catalogTours,
     loading,
+    catalogLoading,
     loadingMore,
     total,
     loadMorePages,
@@ -334,7 +368,9 @@ interface TourListProps {
 export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const {
     tours: localTours,
+    catalogTours,
     loading,
+    catalogLoading,
     loadingMore,
     total,
     loadMorePages,
@@ -363,26 +399,27 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const [aiClearVersion, setAiClearVersion] = useState(0);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
+  const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
 
   const { maxPriceAll, priceStats } = useMemo(
-    () => computePriceStats(localTours),
-    [localTours],
+    () => computePriceStats(catalogSourceTours),
+    [catalogSourceTours],
   );
   const heroDestinations = useMemo(
-    () => getDynamicHeroDestinations(localTours),
-    [localTours],
+    () => getDynamicHeroDestinations(catalogSourceTours),
+    [catalogSourceTours],
   );
   const destinationOptions = useMemo(
-    () => getDestinationOptions(localTours),
-    [localTours],
+    () => getDestinationOptions(catalogSourceTours),
+    [catalogSourceTours],
   );
   const themeOptions = useMemo(
-    () => getThemeOptions(localTours),
-    [localTours],
+    () => getThemeOptions(catalogSourceTours),
+    [catalogSourceTours],
   );
   const sourceOptions = useMemo(
-    () => getSourceOptions(localTours),
-    [localTours],
+    () => getSourceOptions(catalogSourceTours),
+    [catalogSourceTours],
   );
 
   const priceRange = useMemo(
@@ -489,9 +526,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     [aiRecommendationResult],
   );
   const displayTours = useMemo(() => {
-    if (localTours.length === 0) return [];
+    if (catalogSourceTours.length === 0) return [];
 
-    const result = localTours.filter((tour) => {
+    const result = catalogSourceTours.filter((tour) => {
       if (!isDisplayableTour(tour)) {
         return false;
       }
@@ -631,10 +668,10 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     return result;
   }, [
     aiRecommendationByTourId,
+    catalogSourceTours,
     dateFilter,
     effectiveFilters,
     filters.sortBy,
-    localTours,
     normalizedSearchQuery,
     today,
   ]);
@@ -666,20 +703,15 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     [displayTours, visibleCount],
   );
   const hasMoreLoadedResults = visibleCount < displayTours.length;
-  const hasMoreRemotePages = hasPageChunks && localTours.length < total;
+  const hasMoreRemotePages = hasPageChunks && catalogTours.length === 0 && localTours.length < total;
   const shouldRenderLoadMore = hasMoreLoadedResults || hasMoreRemotePages;
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
       const [target] = entries;
 
-      if (!target.isIntersecting || isLoadingMore) {
+      if (!target.isIntersecting || isLoadingMore || loadingMore) {
         return;
-      }
-
-      if (hasPageChunksRef.current && localTours.length < total) {
-        const nextPage = Math.floor(localTours.length / PAGE_SIZE);
-        void loadMorePages(nextPage);
       }
 
       if (visibleCount < displayTours.length) {
@@ -687,6 +719,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         setIsLoadingMore(true);
         loadMoreTimerRef.current = window.setTimeout(() => {
           if (viewVersionRef.current !== viewVersion) {
+            setIsLoadingMore(false);
+            loadMoreTimerRef.current = null;
             return;
           }
 
@@ -694,9 +728,36 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
           setIsLoadingMore(false);
           loadMoreTimerRef.current = null;
         }, 300);
+        return;
+      }
+
+      if (hasPageChunksRef.current && catalogTours.length === 0 && localTours.length < total) {
+        const nextPage = Math.floor(localTours.length / PAGE_SIZE);
+        const viewVersion = viewVersionRef.current;
+
+        setIsLoadingMore(true);
+        void loadMorePages(nextPage).finally(() => {
+          if (viewVersionRef.current !== viewVersion) {
+            setIsLoadingMore(false);
+            return;
+          }
+
+          setVisibleCount((current) => current + PAGE_SIZE);
+          setIsLoadingMore(false);
+        });
       }
     },
-    [displayTours.length, hasPageChunksRef, isLoadingMore, loadMorePages, localTours.length, total, visibleCount],
+    [
+      catalogTours.length,
+      displayTours.length,
+      hasPageChunksRef,
+      isLoadingMore,
+      loadMorePages,
+      loadingMore,
+      localTours.length,
+      total,
+      visibleCount,
+    ],
   );
 
   useEffect(() => {
@@ -781,7 +842,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
   const aiCandidateTours = useMemo<AiRecommendationCandidate[]>(
     () =>
-      localTours.map((tour) => ({
+      catalogSourceTours.map((tour) => ({
         id: tour.id,
         title: tour.title,
         source: tour.source,
@@ -804,7 +865,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         groupSize: tour.groupSize,
         hotDepartureDates: tour.hotDepartureDates,
       })),
-    [localTours],
+    [catalogSourceTours],
   );
 
   const focusResults = useCallback(() => {
@@ -1241,7 +1302,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <AiRecommendPanel
         tours={aiCandidateTours}
-        toursLoading={loading}
+        toursLoading={loading || catalogLoading}
         activeFilters={effectiveFilters}
         searchQuery={searchQuery}
         result={aiRecommendationResult}
