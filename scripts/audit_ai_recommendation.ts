@@ -7,11 +7,16 @@ import type { AiRecommendationCandidate } from '../src/types/tour.ts';
 const {
   auditAiRecommendationsStrict,
   auditAiRecommendations,
+  buildAiMessages,
   buildHardIntentFromText,
+  buildLiteAiMessages,
+  buildRecommendationAuditContext,
+  buildRouteAtlas,
   buildTourPrimitive,
   collectAvoidHints,
   collectLiteralAvoidHints,
   compactCandidates,
+  allowsPublicInterestForTurn,
   finalizeRecommendationSummary,
   getConcreteAiReason,
   getPrimitiveConflictReasons,
@@ -19,7 +24,9 @@ const {
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
   mergeIntentWithMemory,
+  rewriteRecommendationCopy,
   resolvePromptDateWindow,
+  sanitizeAiIntentForTurn,
   validateAiItems,
 } = __aiRecommendationTestHooks;
 
@@ -517,6 +524,62 @@ assert.ok(semanticBoundaryItems[0].semanticFit?.includes('近似替代'));
 assert.ok(semanticBoundaryItems[0].matchedSignals.includes('近似替代'));
 assert.ok(semanticBoundaryItems[0].semanticBoundary?.includes('不能断言'));
 
+const pollutedPublicInterestIntent = sanitizeAiIntentForTurn({
+  semanticFocus: ['扶贫', '海边'],
+  travelStyle: ['公益', '温泉'],
+  mustHave: ['贫困地区', '天气稳定'],
+  weatherSensitivity: [],
+  departureWeekdays: [],
+}, { allowPublicInterest: false });
+assert.deepEqual(pollutedPublicInterestIntent?.semanticFocus, ['海边']);
+assert.deepEqual(pollutedPublicInterestIntent?.travelStyle, ['温泉']);
+assert.deepEqual(pollutedPublicInterestIntent?.mustHave, ['天气稳定']);
+assert.ok(!allowsPublicInterestForTurn('帮我找海边温泉，400以下的，关注天气因素', null));
+assert.ok(allowsPublicInterestForTurn('我要扶贫或者公益属性更强的路线', null));
+
+const noPublicInterestRewrite = rewriteRecommendationCopy({
+  items: semanticBoundaryItems,
+  candidateTours: [semanticBoundaryTour],
+  destinationWeatherInsights: [],
+  intent: {
+    semanticFocus: ['扶贫', '海边'],
+    weatherSensitivity: [],
+    departureWeekdays: [],
+  },
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '帮我找海边温泉，400以下的，关注天气因素',
+  allowPublicInterest: false,
+});
+assert.ok(!/扶贫|公益|贫困/.test(noPublicInterestRewrite[0].reason || ''));
+assert.ok(/古村|山水|广东县域/.test(noPublicInterestRewrite[0].reason || ''));
+
+const explicitPublicInterestRewrite = rewriteRecommendationCopy({
+  items: semanticBoundaryItems,
+  candidateTours: [semanticBoundaryTour],
+  destinationWeatherInsights: [],
+  intent: {
+    semanticFocus: ['扶贫'],
+    weatherSensitivity: [],
+    departureWeekdays: [],
+  },
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '我要扶贫或者公益属性更强的路线，没有就直说最接近替代',
+  allowPublicInterest: true,
+});
+assert.ok(/扶贫|公益|近似替代/.test(explicitPublicInterestRewrite[0].reason || ''));
+
 const weirdSemanticSummary = finalizeRecommendationSummary({
   aiSummary: '用户寻找海边温泉、预算400元以内，关注天气因素。软语义判断：海边、温泉、400元以内、天气敏感。边界：候选中无明确标注海边的温泉，需结合目的地判断，无法断言某候选为扶贫或公益项目。温泉需匹配atoms中的温泉泡汤。',
   items: [{ tourId: 'beach', score: 90, reason: '沙滩短线', matchedSignals: [] }],
@@ -541,6 +604,94 @@ const weirdSemanticSummary = finalizeRecommendationSummary({
 assert.ok(!/atoms|软语义判断|扶贫|公益项目/.test(weirdSemanticSummary));
 assert.ok(weirdSemanticSummary.includes('说明：部分偏好在候选里没有明确标签'));
 assert.ok(weirdSemanticSummary.includes('推荐方向：'));
+
+const nonInternalPublicInterestSummary = finalizeRecommendationSummary({
+  aiSummary: '候选没有显式扶贫/公益标注，只能按低预算和周边体验做近似替代。下单前留意天气。',
+  items: [{ tourId: 'beach', score: 90, reason: '沙滩短线', matchedSignals: [] }],
+  candidateTours: [hotSpringTour, nonHotSpringTour],
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: ['华南夏季闷热多雨，海边和玩水线路要关注风浪和雷雨。'],
+    source: 'seasonal-rule',
+  },
+  destinationWeatherInsights: [],
+  intent: { budgetMax: 400, weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+  userText: '帮我找海边温泉，400以下的，关注天气因素',
+  allowPublicInterest: false,
+});
+assert.ok(!/扶贫|公益/.test(nonInternalPublicInterestSummary));
+assert.ok(nonInternalPublicInterestSummary.includes('推荐方向：'));
+
+const promptTours = [hotSpringTour, nonHotSpringTour];
+const promptIntent = { budgetMax: 400, weatherSensitivity: ['天气敏感'], departureWeekdays: [] };
+const promptCandidates = compactCandidates(promptTours, [], promptIntent, {
+  intent: promptIntent,
+  budgetPriority: 'balanced',
+  weatherSensitivity: ['天气敏感'],
+  weatherContext: hotRainyWeatherContext,
+});
+const promptWeatherContext = {
+  destination: '广州',
+  travelDate: '2026-06-12',
+  forecastSummary: '广州未来几天闷热多雨。',
+  seasonAdvice: ['华南夏季闷热多雨，海边和玩水线路要关注风浪和雷雨。'],
+  source: 'seasonal-rule' as const,
+};
+const promptAuditContext = buildRecommendationAuditContext(promptTours, null, promptIntent);
+const promptPublicInterestPattern = /扶贫|公益|贫困|贫穷|欠发达|乡村振兴|助农|县域|乡村|农文旅/;
+const nonPublicFullPrompt = buildAiMessages({
+  userText: '帮我找海边温泉，400以下的，关注天气因素',
+  messages: [],
+  candidates: promptCandidates,
+  routeAtlas: buildRouteAtlas(promptTours),
+  auditContext: promptAuditContext,
+  weatherContext: promptWeatherContext,
+  destinationWeatherInsights: [],
+  searchQuery: '',
+  intent: promptIntent,
+  preferenceMemory: null,
+  allowPublicInterest: false,
+}).map((message) => message.content).join('\n');
+const nonPublicLitePrompt = buildLiteAiMessages({
+  userText: '帮我找海边温泉，400以下的，关注天气因素',
+  messages: [],
+  candidates: promptCandidates,
+  weatherContext: promptWeatherContext,
+  searchQuery: '',
+  intent: promptIntent,
+  preferenceMemory: null,
+  allowPublicInterest: false,
+}).map((message) => message.content).join('\n');
+assert.ok(!promptPublicInterestPattern.test(nonPublicFullPrompt));
+assert.ok(!promptPublicInterestPattern.test(nonPublicLitePrompt));
+
+const explicitPublicFullPrompt = buildAiMessages({
+  userText: '我要扶贫或者公益属性更强的路线，没有就直说最接近替代',
+  messages: [],
+  candidates: promptCandidates,
+  routeAtlas: buildRouteAtlas(promptTours),
+  auditContext: promptAuditContext,
+  weatherContext: promptWeatherContext,
+  destinationWeatherInsights: [],
+  searchQuery: '',
+  intent: { semanticFocus: ['扶贫'], weatherSensitivity: [], departureWeekdays: [] },
+  preferenceMemory: null,
+  allowPublicInterest: true,
+}).map((message) => message.content).join('\n');
+const explicitPublicLitePrompt = buildLiteAiMessages({
+  userText: '我要扶贫或者公益属性更强的路线，没有就直说最接近替代',
+  messages: [],
+  candidates: promptCandidates,
+  weatherContext: promptWeatherContext,
+  searchQuery: '',
+  intent: { semanticFocus: ['扶贫'], weatherSensitivity: [], departureWeekdays: [] },
+  preferenceMemory: null,
+  allowPublicInterest: true,
+}).map((message) => message.content).join('\n');
+assert.ok(promptPublicInterestPattern.test(explicitPublicFullPrompt));
+assert.ok(promptPublicInterestPattern.test(explicitPublicLitePrompt));
 
 const zhHardIntent = buildHardIntentFromText(
   '周末2天，预算800以内，想清凉一点，但不想去海边，也不要坐飞机',
