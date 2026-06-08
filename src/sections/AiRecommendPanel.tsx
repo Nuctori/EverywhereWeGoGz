@@ -343,30 +343,31 @@ export function AiRecommendPanel({
       ? result?.summary || resultStatusMeta?.detail || '推荐线路已排到前面。'
       : '一句话说预算、天数、同行人和偏好就行。';
 
+  if (!hasAiActivity) {
+    return null;
+  }
+
   return (
-    <div className={cn(
-      'mb-4 rounded-[24px] border border-stone-200/80 bg-white/88 p-3 shadow-sm backdrop-blur sm:p-4',
-      !hasAiActivity && 'rounded-full py-2',
-    )}>
-      <div className={cn('flex flex-wrap items-start justify-between gap-3', hasAiActivity && 'mb-3')}>
+    <div className="mb-4 rounded-[24px] border border-stone-200/80 bg-white/88 p-3 shadow-sm backdrop-blur sm:p-4">
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-stone-950">
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-stone-900 text-white">
               <Sparkles className="h-3.5 w-3.5" />
             </span>
-            {hasAiActivity ? 'AI 正在帮你排优先级' : '需要 AI 帮选？用上方同一个搜索框'}
+            AI 正在帮你排优先级
             {preferenceMemory && (
               <Badge className="rounded-full border-stone-200 bg-stone-50 px-2 py-0.5 text-[11px] text-stone-600 hover:bg-stone-50">
                 已记住偏好
               </Badge>
             )}
             <span className="text-xs font-normal text-stone-400">
-              {hasAiActivity ? '推荐结果会置顶显示' : '输入预算、天数、同行人后点「AI帮我选」'}
+              推荐结果会置顶显示
             </span>
           </div>
-          {hasAiActivity && <p className="mt-1 max-w-2xl text-xs leading-5 text-stone-500 sm:text-sm">
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-stone-500 sm:text-sm">
             先用筛选器缩小范围；拿不准时，让 AI 把更合适的线路排到前面。
-          </p>}
+          </p>
         </div>
         <Button
           type="button"
@@ -379,60 +380,58 @@ export function AiRecommendPanel({
         </Button>
       </div>
 
-      {hasAiActivity && (
-        <div className="mt-3 rounded-[20px] border border-stone-200 bg-[linear-gradient(180deg,rgba(250,250,249,0.94),rgba(255,255,255,0.96))] px-4 py-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 text-sm font-semibold text-stone-950">
-                {loading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-stone-700" />
-                ) : hasResult ? (
-                  <CheckCircle2 className="h-4 w-4 text-stone-700" />
-                ) : (
-                  <Sparkles className="h-4 w-4 text-stone-500" />
-                )}
-                {compactStatusLabel}
-              </div>
-              <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{compactStatusDetail}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {hasResult && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
-                  onClick={clearConversation}
-                  disabled={loading}
-                >
-                  清空
-                </Button>
+      <div className="mt-3 rounded-[20px] border border-stone-200 bg-[linear-gradient(180deg,rgba(250,250,249,0.94),rgba(255,255,255,0.96))] px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-sm font-semibold text-stone-950">
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin text-stone-700" />
+              ) : hasResult ? (
+                <CheckCircle2 className="h-4 w-4 text-stone-700" />
+              ) : (
+                <Sparkles className="h-4 w-4 text-stone-500" />
               )}
+              {compactStatusLabel}
+            </div>
+            <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{compactStatusDetail}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {hasResult && (
               <Button
                 type="button"
                 variant="ghost"
                 className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
-                onClick={() => setDetailsOpen((value) => !value)}
+                onClick={clearConversation}
+                disabled={loading}
               >
-                {detailsOpen ? '收起细节' : 'AI细节'}
+                清空
               </Button>
-              {resultStatusMeta && hasResult && !loading && (
-                <Badge
-                  className={cn(
-                    'rounded-full px-2.5 py-1 text-[11px]',
-                    resultStatusMeta.mode === 'ai'
-                      ? 'bg-stone-900 text-white hover:bg-stone-900'
-                      : 'bg-amber-100 text-amber-800 hover:bg-amber-100',
-                  )}
-                >
-                  {resultStatusMeta.mode === 'ai' ? 'AI完成' : '备用推荐'}
-                </Badge>
-              )}
-            </div>
+            )}
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+              onClick={() => setDetailsOpen((value) => !value)}
+            >
+              {detailsOpen ? '收起细节' : 'AI细节'}
+            </Button>
+            {resultStatusMeta && hasResult && !loading && (
+              <Badge
+                className={cn(
+                  'rounded-full px-2.5 py-1 text-[11px]',
+                  resultStatusMeta.mode === 'ai'
+                    ? 'bg-stone-900 text-white hover:bg-stone-900'
+                    : 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+                )}
+              >
+                {resultStatusMeta.mode === 'ai' ? 'AI完成' : '备用推荐'}
+              </Badge>
+            )}
           </div>
         </div>
-      )}
+      </div>
 
-      {detailsOpen && hasAiActivity && (
+      {detailsOpen && (
         <div className="mt-3 space-y-3 rounded-[22px] border border-stone-200 bg-white/80 p-3">
           {progressState && (
             <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-4">
