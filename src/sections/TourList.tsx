@@ -70,6 +70,10 @@ function useToursData() {
   const inFlightPagesRef = useRef<Set<number>>(new Set());
   const hasPageChunksRef = useRef(true);
 
+  const syncLoadingMoreState = useCallback(() => {
+    setLoadingMore(inFlightPagesRef.current.size > 0);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -140,7 +144,7 @@ function useToursData() {
     if (inFlightPagesRef.current.has(neededPage)) return;
 
     inFlightPagesRef.current.add(neededPage);
-    setLoadingMore(true);
+    syncLoadingMoreState();
     try {
       const res = await fetch(getDataUrl('tours-page-' + neededPage + '.json'));
       if (!res.ok) {
@@ -158,9 +162,9 @@ function useToursData() {
       setHasPageChunks(false);
     } finally {
       inFlightPagesRef.current.delete(neededPage);
-      setLoadingMore(false);
+      syncLoadingMoreState();
     }
-  }, []);
+  }, [syncLoadingMoreState]);
 
   return {
     tours,

@@ -509,6 +509,15 @@ function parseBudget(text: string) {
     }
   }
 
+  const hasBudgetContext =
+    /(?:预算|人均|价格|价位|花费|费用|花销|开销|多少钱|价钱|cost|budget|rmb|人民币|元|块)/i.test(text);
+  const hasNonBudgetNumericContext =
+    /(?:分钟|小时|天|日|晚|月|年|号|点|期|班|车程|公里|km|页|次)/i.test(text);
+
+  if (!hasBudgetContext || hasNonBudgetNumericContext) {
+    return null;
+  }
+
   const match = text.match(/(\d{3,6})\s*(?:元|块|以内|以下|左右)?/);
   if (!match) return null;
   const value = Number(match[1]);
@@ -1711,8 +1720,15 @@ function buildLocalTourReason(
 ) {
   const primitive = buildTourPrimitive(tour);
   const baseReason = buildPrimitiveConcreteReason(primitive, variant);
+  const coverageSignal = signals.find((signal) => signal.startsWith('完整覆盖：'));
   const signalText = buildReadableSignalClause(signals);
 
+  if (coverageSignal && signalText) {
+    return `${coverageSignal}；${stripTerminalPunctuation(baseReason)}；${signalText}。`;
+  }
+  if (coverageSignal) {
+    return `${coverageSignal}；${baseReason}`;
+  }
   if (signalText) return `${stripTerminalPunctuation(baseReason)}；${signalText}。`;
   return baseReason || fallback;
 }

@@ -1252,6 +1252,14 @@ assert.equal(nearBudgetIntent?.budgetMax, 2000);
 assert.equal(nearBudgetIntent?.tripDaysMin, 4);
 assert.equal(nearBudgetIntent?.tripDaysMax, 6);
 assert.equal(nearBudgetIntent?.budgetPriority, null);
+const numericNoiseBudgetIntent = buildHardIntentFromText(
+  '202606出发，想找温泉团',
+);
+assert.equal(numericNoiseBudgetIntent?.budgetMax ?? null, null);
+const durationNoiseBudgetIntent = buildHardIntentFromText(
+  '120分钟车程内，想找温泉团',
+);
+assert.equal(durationNoiseBudgetIntent?.budgetMax ?? null, null);
 
 const dirtyDestinationPrimitive = buildTourPrimitive(candidate({
   id: 'dirty-destination',
