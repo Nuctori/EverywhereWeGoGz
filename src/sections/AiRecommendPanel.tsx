@@ -133,7 +133,7 @@ function getResultStatusMeta(result: AiRecommendationResult | null) {
   return {
     mode: 'fallback' as const,
     label: '本次使用备用推荐结果',
-    detail: `AI 没有顺利完成时，先返回了 ${result.items.length} 条本地规则筛选结果。`,
+    detail: `AI 没有顺利完成时，先返回了 ${result.items.length} 条本地候选补位结果。`,
   };
 }
 
@@ -237,6 +237,7 @@ export function AiRecommendPanel({
     const nextMessages = [...messages, userMessage];
     setMessages(nextMessages);
     setLoading(true);
+    onResultChange(null);
     setDetailsOpen(false);
     setProgressState({
       stage: 'queued',

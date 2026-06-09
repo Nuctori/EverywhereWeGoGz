@@ -935,10 +935,7 @@ function shouldInheritPreferenceMemoryForTurn(
   return isRelativeTurn;
 }
 
-function buildHardIntentFromText(
-  text: string,
-  activeFilters: FilterState,
-): AiTravelIntent | null {
+function buildHardIntentFromText(text: string): AiTravelIntent | null {
   const normalizedText = normalizeText(text);
   const budget = parseBudget(normalizedText);
   const hasTextBudget = Boolean(budget);
@@ -954,7 +951,6 @@ function buildHardIntentFromText(
   const intent: AiTravelIntent = {
     destinationHints: uniqueStrings([
       ...collectDestinationHints(normalizedText),
-      activeFilters.destination || '',
     ]),
     avoid,
     weatherSensitivity,
@@ -974,14 +970,8 @@ function buildHardIntentFromText(
     refinementMode: 'new_search',
   };
 
-  if (activeFilters.duration) {
-    intent.tripDays = activeFilters.duration === 11 ? null : activeFilters.duration;
-    intent.tripDaysMin = activeFilters.duration === 11 ? 11 : intent.tripDaysMin;
-    intent.tripDaysMax = activeFilters.duration === 11 ? null : intent.tripDaysMax;
-  }
-
   // 经验：本地只提取可审计约束。扶贫/公益/研学/贫穷地方等软语义不要在这里做词表规则，
-  // 保留在 q/rc/pm 中交给模型结合世界知识和候选原语判断，避免规则器和智能互相打架。
+  // 页面筛选器也不注入硬意图；它只作为 UI 上下文和展示筛选，避免规则器和智能互相打架。
   const normalizedIntent = normalizeBudgetPriorityByUserText(normalizeIntent(intent), text);
   return getHardIntentSignalCount(normalizedIntent) > 0 ? normalizedIntent : null;
 }
@@ -1419,7 +1409,7 @@ function padRecommendationItems(
     padded.push(item);
   }
 
-  return limitRecommendationCommentary(padded);
+  return limitRecommendationCommentary(padded).slice(0, MAX_AI_RANKED_ITEMS);
 }
 
 function countCommentaryItems(items: AiRecommendationItem[]) {
@@ -1427,7 +1417,7 @@ function countCommentaryItems(items: AiRecommendationItem[]) {
 }
 
 function prioritizeRecommendationItems(items: AiRecommendationItem[]) {
-  return [...items].sort((a, b) => b.score - a.score);
+  return limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
 }
 
 function getWeekday(date: string) {
@@ -1884,8 +1874,8 @@ function compactRecommendationAuditContext(context: RecommendationAuditContext) 
     previousTopResultSnapshot: context.previousResult?.topResultSnapshot ?? null,
     effectivePoolSnapshot: context.effectivePoolSnapshot,
     businessRules: [
-      '用户明确说不要或避开某主题时，该主题是硬排除条件。',
-      '低价、班期多和热门只能排序加权，不能覆盖预算、时间、目的地和避开条件。',
+      '用户明确说不要或避开某主题时，把它作为强偏好和风险提示；如果作为近似替代，必须明说取舍。',
+      '低价、班期多和热门只能作为候选事实，是否采用由 AI 结合用户原话取舍。',
     ],
   };
 }
@@ -4157,6 +4147,7 @@ export const __aiRecommendationTestHooks = {
   mergeAiAndLocalRecommendations,
   mergeIntentWithMemory,
   normalizeIntent,
+  prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
   sanitizeAiBudgetBoundsForTurn,
@@ -4377,40 +4368,26 @@ function auditAiRecommendationsStrict(
 ): AiRecommendationItem[] {
   const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
   const seenTourIds = new Set<string>();
-  const exactItems: AiRecommendationItem[] = [];
-  const alternativeItems: AiRecommendationItem[] = [];
+  const auditedItems: AiRecommendationItem[] = [];
 
-  const pushAudited = (item: AiRecommendationItem, source: 'ai' | 'local') => {
+  const pushAudited = (item: AiRecommendationItem) => {
     if (seenTourIds.has(item.tourId)) return;
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive) return;
     seenTourIds.add(item.tourId);
 
     const conflictReasons = getPrimitiveConflictReasons(intent, primitive);
-
-    if (conflictReasons.length === 0) {
-      exactItems.push(item);
-      return;
-    }
-
-    const alternativeScore = Math.min(Math.max(1, item.score), source === 'ai' ? 28 : 18);
-    alternativeItems.push(markAsAlternativeRecommendation(
-      {
-        ...item,
-        score: alternativeScore,
-      },
-      conflictReasons,
-    ));
+    auditedItems.push(
+      conflictReasons.length > 0
+        ? markAsAlternativeRecommendation(item, conflictReasons)
+        : item,
+    );
   };
 
-  aiItems.forEach((item) => pushAudited(item, 'ai'));
-  localItems.forEach((item) => pushAudited(item, 'local'));
+  aiItems.forEach((item) => pushAudited(item));
+  localItems.forEach((item) => pushAudited(item));
 
-  const exactRanked = exactItems.slice(0, MAX_AI_RANKED_ITEMS);
-  const alternativeRanked = alternativeItems
-    .slice(0, Math.max(0, MAX_AI_RANKED_ITEMS - exactRanked.length));
-
-  return [...exactRanked, ...alternativeRanked].slice(0, MAX_AI_RANKED_ITEMS);
+  return auditedItems.slice(0, MAX_AI_RANKED_ITEMS);
 }
 
 function normalizeIntent(value: unknown): AiTravelIntent | null {
@@ -4830,34 +4807,7 @@ export async function requestAiRecommendations({
   const basePreferenceMemory = preferenceMemory ?? null;
   const baseEffectiveUserText = buildEffectiveUserText(text, basePreferenceMemory);
   const normalizedCandidateTours = candidateTours.map(normalizeCandidateTour);
-  const uiFilteredCandidates = normalizedCandidateTours.filter((tour) => {
-    if (activeFilters.destination && !tour.destination.includes(activeFilters.destination)) {
-      return false;
-    }
-    if (activeFilters.source && tour.source !== activeFilters.source) return false;
-    if (activeFilters.theme && tour.theme !== activeFilters.theme) return false;
-    if (activeFilters.duration && activeFilters.duration !== 11 && tour.duration !== activeFilters.duration) return false;
-    if (activeFilters.duration === 11 && tour.duration < 11) return false;
-    if (activeFilters.minPrice !== null && tour.price < activeFilters.minPrice) return false;
-    if (activeFilters.maxPrice !== null && tour.price > activeFilters.maxPrice) return false;
-    if (!matchesActiveDateFilters(tour, activeFilters)) return false;
-    return true;
-  });
-  const hasActiveCandidateConstraint = Boolean(
-    activeFilters.destination ||
-    activeFilters.source ||
-    activeFilters.theme ||
-    activeFilters.duration ||
-    activeFilters.minPrice !== null ||
-    activeFilters.maxPrice !== null ||
-    activeFilters.departureDate ||
-    activeFilters.departureDateStart ||
-    activeFilters.departureDateEnd,
-  );
-  const scopedCandidates = uiFilteredCandidates.length > 0 || hasActiveCandidateConstraint
-    ? uiFilteredCandidates
-    : normalizedCandidateTours;
-  const candidatePool = filterPastOnlyCandidatesWhenFutureExists(scopedCandidates);
+  const candidatePool = filterPastOnlyCandidatesWhenFutureExists(normalizedCandidateTours);
   const memoryBackedIntent = mergeIntentWithMemory(null, basePreferenceMemory);
   let cachedMemoryBackedLocalItems: AiRecommendationItem[] | null = null;
   let cachedFallbackLocalItems: AiRecommendationItem[] | null = null;
@@ -4906,17 +4856,17 @@ export async function requestAiRecommendations({
       : withActiveSubstep(
           [
             { id: 'scope', label: '圈定候选范围' },
-            { id: 'rules', label: '按规则筛选线路' },
+            { id: 'backup', label: '准备本地候选补位' },
             { id: 'fallback', label: '生成备用结果' },
           ],
-          'rules',
+          'backup',
         ),
   });
 
   if (candidatePool.length === 0) {
     return {
       conversationId,
-      summary: '按当前预算、时间和避开条件没有找到完全匹配的旅行团；建议放宽预算、出发时间或更换玩法方向。',
+      summary: '当前没有可交给 AI 判断的候选线路；请稍后刷新数据或换个说法再试。',
       items: [],
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
@@ -4932,7 +4882,7 @@ export async function requestAiRecommendations({
   if (!config) {
     return {
       conversationId,
-      summary: '当前未配置 AI 接口，已先按目的地、预算、天数和行程强度做本地预匹配。',
+      summary: '当前未配置 AI 接口，已先返回本地候选补位结果。',
       items: getMemoryBackedLocalItems(),
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
@@ -4946,7 +4896,7 @@ export async function requestAiRecommendations({
   }
 
   try {
-    const intent = buildHardIntentFromText(text, activeFilters);
+    const intent = buildHardIntentFromText(text);
     const memoryForThisTurn = shouldInheritPreferenceMemoryForTurn(text, intent, basePreferenceMemory)
       ? basePreferenceMemory
       : null;

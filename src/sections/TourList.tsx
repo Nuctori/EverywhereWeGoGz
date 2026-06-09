@@ -547,6 +547,10 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
       const isAiRecommendedTour = aiRecommendationByTourId.has(tour.id);
 
+      if (isAiRecommendedTour) {
+        return true;
+      }
+
       if (normalizedSearchQuery && !isAiSearchMode && !isAiRecommendedTour) {
         const matchesSearch = [
           tour.title,
@@ -673,7 +677,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       pinned.sort((a, b) => {
         const aItem = aiRecommendationByTourId.get(a.id);
         const bItem = aiRecommendationByTourId.get(b.id);
-        return (bItem?.score ?? 0) - (aItem?.score ?? 0);
+        return (aItem?.rank ?? Number.MAX_SAFE_INTEGER) - (bItem?.rank ?? Number.MAX_SAFE_INTEGER);
       });
 
       return [...pinned, ...rest];
@@ -1429,7 +1433,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
           {aiRecommendationResult && aiRecommendationResult.items.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 shadow-sm">
               <Sparkles className="h-4 w-4 text-stone-500" />
-              <span>AI 已置顶 {aiRecommendedCount} 条建议，展示 {aiRecommendationResult.items.length} 条线路</span>
+              <span>AI 已置顶 {aiRecommendedCount} 条建议</span>
               {hiddenAiRecommendationCount > 0 && (
                 <span className="text-xs text-stone-500">
                   {hiddenAiRecommendationCount} 条被当前筛选隐藏

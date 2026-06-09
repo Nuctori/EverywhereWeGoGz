@@ -24,6 +24,7 @@ const {
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
   mergeIntentWithMemory,
+  prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
   sanitizeAiBudgetBoundsForTurn,
@@ -1058,7 +1059,6 @@ assert.ok(promptPublicInterestPattern.test(explicitPublicLitePrompt));
 
 const zhHardIntent = buildHardIntentFromText(
   '周末2天，预算800以内，想清凉一点，但不想去海边，也不要坐飞机',
-  baseFilters,
 );
 assert.equal(zhHardIntent?.budgetMax, 800);
 assert.equal(zhHardIntent?.tripDaysMin, 1);
@@ -1067,16 +1067,21 @@ assert.ok(collectLiteralAvoidHints('不想去海边，也不要坐飞机').inclu
 assert.ok(zhHardIntent?.avoid?.includes('飞机'));
 const defaultSliderBudgetIntent = buildHardIntentFromText(
   '帮我找同时带温泉和沙滩的团',
-  {
-    ...baseFilters,
-    maxPrice: 35000,
-  },
 );
 assert.equal(defaultSliderBudgetIntent?.budgetMax ?? null, null);
 
+const uiFilterOnlyIntent = buildHardIntentFromText(
+  '找个轻松一点的团',
+);
+assert.deepEqual(uiFilterOnlyIntent?.destinationHints ?? [], []);
+assert.equal(uiFilterOnlyIntent?.tripDays ?? null, null);
+assert.equal(uiFilterOnlyIntent?.tripDaysMin ?? null, null);
+assert.equal(uiFilterOnlyIntent?.tripDaysMax ?? null, null);
+assert.equal(uiFilterOnlyIntent?.budgetMin ?? null, null);
+assert.equal(uiFilterOnlyIntent?.budgetMax ?? null, null);
+
 const strictMismatchIntent = buildHardIntentFromText(
   '500元以下，7天以上，住五星酒店，去新疆，还要天气特别好',
-  baseFilters,
 );
 assert.equal(strictMismatchIntent?.budgetMax, 500);
 assert.equal(strictMismatchIntent?.tripDaysMin, 7);
@@ -1084,7 +1089,6 @@ assert.equal(strictMismatchIntent?.tripDaysMax, null);
 
 const nearBudgetIntent = buildHardIntentFromText(
   '预算2000以内，但希望接近2000的品质，不要一堆299，想去云南或者桂林看自然风景，5天左右',
-  baseFilters,
 );
 assert.equal(nearBudgetIntent?.budgetMax, 2000);
 assert.equal(nearBudgetIntent?.tripDaysMin, 4);
@@ -1147,8 +1151,26 @@ const strictAudited = auditAiRecommendationsStrict(
   [strictGoodTour, strictOverBudgetTour, strictFlightBeachTour],
   zhHardIntent,
 );
-assert.equal(strictAudited[0].tourId, 'strict-good');
+assert.equal(strictAudited[0].tourId, 'strict-over-budget');
+assert.equal(strictAudited[1].tourId, 'strict-flight-beach');
+assert.equal(strictAudited[2].tourId, 'strict-good');
 assert.ok(strictAudited.find((item) => item.tourId === 'strict-over-budget')?.reason?.includes('需放宽条件'));
 assert.ok(strictAudited.find((item) => item.tourId === 'strict-flight-beach')?.reason?.includes('需放宽条件'));
+
+const priorityPreserved = prioritizeRecommendationItems([
+  { tourId: 'model-first', score: 10, reason: 'AI order first', matchedSignals: [] },
+  { tourId: 'model-second', score: 99, reason: 'AI order second', matchedSignals: [] },
+]);
+assert.equal(priorityPreserved[0].tourId, 'model-first');
+assert.equal(priorityPreserved[1].tourId, 'model-second');
+const cappedPriority = prioritizeRecommendationItems(
+  Array.from({ length: 32 }, (_, index) => ({
+    tourId: `cap-${index}`,
+    score: 100 - index,
+    reason: index < 8 ? `reason ${index}` : undefined,
+    matchedSignals: [],
+  })),
+);
+assert.equal(cappedPriority.length, 24);
 
 console.log('AI recommendation audit passed');
