@@ -2326,9 +2326,9 @@ function hasUnsupportedPositivePriceClaim(params: {
   userText: string;
   sortedPrices: number[];
 }) {
-  if (!hasPositivePriceClaim(params.reason)) return false;
   const hasValueIntent = hasExplicitValueIntent(params.intent, params.userText);
   if (/预算/.test(params.reason) && !hasValueIntent) return true;
+  if (!hasPositivePriceClaim(params.reason)) return false;
   if (params.intent?.budgetMax && params.primitive.price > params.intent.budgetMax) return true;
 
   const pricePercentile = getPricePercentile(params.primitive.price, params.sortedPrices);
