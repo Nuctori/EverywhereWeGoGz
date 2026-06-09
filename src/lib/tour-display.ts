@@ -1,5 +1,57 @@
 import type { Tour } from '@/types/tour';
 
+const GENERIC_DESTINATION_FALLBACK = '以线路标题为准';
+const HIGHLIGHT_PLACEHOLDERS = new Set([
+  '其他必打卡',
+  '特色美食',
+  '精品住宿',
+]);
+const GENERIC_HIGHLIGHT_TERMS = new Set([
+  '其他',
+  '纯玩',
+  '品质',
+  '亲子',
+  '情侣',
+  '家庭',
+  '行程',
+  '线路',
+  '推荐线路',
+  '自然风光',
+  '海岛度假',
+  '美食之旅',
+  '古镇文化',
+  '摄影之旅',
+  '户外徒步',
+  '温泉泡汤',
+  '森林山水',
+  '文化逛城',
+  '玩水清凉',
+]);
+
+function normalizeDisplayText(value: string | undefined) {
+  return (value || '').trim();
+}
+
+function isMeaningfulHighlight(value: string) {
+  const normalized = normalizeDisplayText(value).replace(/必打卡$/, '');
+  if (!normalized) return false;
+  if (HIGHLIGHT_PLACEHOLDERS.has(value) || HIGHLIGHT_PLACEHOLDERS.has(normalized)) return false;
+  if (GENERIC_HIGHLIGHT_TERMS.has(normalized)) return false;
+  return normalized.length >= 2;
+}
+
+export function getReadableHighlights(tour: Tour) {
+  const seen = new Set<string>();
+  return (tour.highlights || [])
+    .map((item) => normalizeDisplayText(item).replace(/必打卡$/, ''))
+    .filter((item) => isMeaningfulHighlight(item))
+    .filter((item) => {
+      if (seen.has(item)) return false;
+      seen.add(item);
+      return true;
+    });
+}
+
 /**
  * 获取可读的目的地名称
  */
@@ -7,8 +59,8 @@ export function getReadableDestination(tour: Tour) {
   if (tour.destination && tour.destination !== '其他') {
     return tour.destination;
   }
-  const candidate = tour.highlights?.find((item) => item && item !== '其他必打卡');
-  return candidate ? candidate.replace(/必打卡$/, '') : '目的地待确认';
+  const candidate = getReadableHighlights(tour)[0];
+  return candidate || GENERIC_DESTINATION_FALLBACK;
 }
 
 /**
@@ -36,6 +88,18 @@ export function getUpcomingDepartureDate(tour: Tour) {
 
   const futureDate = dates.find((date) => date.getTime() >= today.getTime());
   return futureDate ? futureDate.toISOString().slice(0, 10) : tour.departureDate;
+}
+
+export function getDepartureDateBadgeLabel(tour: Tour) {
+  const upcomingDate = getUpcomingDepartureDate(tour);
+  if (upcomingDate) return formatShortDate(upcomingDate);
+  if (
+    tour.dataQuality?.isDepartureDateReliable === false ||
+    tour.dataQuality?.hasStructuredDepartureDates === false
+  ) {
+    return '班期待确认';
+  }
+  return '待定';
 }
 
 /**
@@ -72,30 +136,45 @@ const THEME_MISMATCH_CHECKS = [
  * 从线路数据推断可读主题
  */
 export function getReadableTheme(tour: Tour) {
-  const corpus = [
-    tour.destination,
+  const readableHighlights = getReadableHighlights(tour);
+  const evidenceCorpus = [
     tour.title,
-    ...(tour.highlights || []),
-    ...(tour.tags || []),
+    ...readableHighlights,
   ].join(' ');
-
-  const inferred = THEME_SIGNALS.find((item) => item.pattern.test(corpus))?.label || '';
+  const weightedSources = [
+    { text: normalizeDisplayText(tour.title), weight: 3 },
+    { text: readableHighlights.join(' '), weight: 2 },
+    { text: normalizeDisplayText(tour.destination), weight: 1 },
+    { text: (tour.tags || []).join(' '), weight: 1 },
+  ];
+  const inferred = THEME_SIGNALS
+    .map((item) => ({
+      label: item.label,
+      score: weightedSources.reduce((total, source) => (
+        source.text && item.pattern.test(source.text) ? total + source.weight : total
+      ), 0),
+    }))
+    .sort((left, right) => right.score - left.score)[0];
   const theme = tour.theme?.trim();
 
-  if (!theme) return inferred;
+  if (!theme) return inferred?.score ? inferred.label : '';
 
   const mismatched = THEME_MISMATCH_CHECKS.some(
-    (item) => item.pattern.test(theme) && !item.requires.test(corpus),
+    (item) => item.pattern.test(theme) && evidenceCorpus && !item.requires.test(evidenceCorpus),
   );
 
-  return mismatched && inferred ? inferred : theme;
+  return mismatched && inferred?.score ? inferred.label : theme;
 }
 
 /**
  * 构建标题摘要
  */
 export function buildTitleSummary(tour: Tour) {
-  const chunks = [getReadableDestination(tour), `${tour.duration}天`];
+  const destinationLabel = getReadableDestination(tour);
+  const chunks = [
+    destinationLabel !== GENERIC_DESTINATION_FALLBACK ? destinationLabel : '',
+    `${tour.duration}天`,
+  ];
   const readableTheme = getReadableTheme(tour);
   if (readableTheme) chunks.push(readableTheme);
   if (tour.transportType) chunks.push(tour.transportType.replace('往返', ''));

@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn, resolveAssetUrl } from '@/lib/utils';
 import { getFallbackImage } from '@/lib/image';
-import { getReadableDestination, formatDate } from '@/lib/tour-display';
+import { getReadableDestination, getReadableHighlights, formatDate } from '@/lib/tour-display';
 import { DepartureDateSelector } from '@/components/ui/departure-date-selector';
 import {
   MapPin, Clock, Users, Star, Flame, Sparkles, Zap,
@@ -105,6 +105,7 @@ export function TourDetailModal({
   const heroImage = resolveAssetUrl(tour.images?.[0] || '');
   const heroFallbackImage = getFallbackImage(tour.title);
   const destinationLabel = getReadableDestination(tour);
+  const readableHighlights = getReadableHighlights(tour);
 
   const searchUrls: Record<string, string> = {
     '广之旅': 'https://www.gzl.com.cn/search?keyword=',
@@ -299,13 +300,19 @@ export function TourDetailModal({
 
           <div className="mt-4">
             <h4 className="font-semibold text-stone-800 mb-2">行程要点</h4>
-            <div className="flex flex-wrap gap-2">
-              {tour.highlights.map((h) => (
-                <Badge key={h} variant="outline" className="border-stone-200 bg-white text-sm py-1 px-3 text-stone-600">
-                  {h}
-                </Badge>
-              ))}
-            </div>
+            {readableHighlights.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {readableHighlights.map((highlight) => (
+                  <Badge key={highlight} variant="outline" className="border-stone-200 bg-white text-sm py-1 px-3 text-stone-600">
+                    {highlight}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-500">
+                该线路暂未抓取到足够具体的行程要点，避免把模板标签当成真实卖点展示，请以来源页面为准。
+              </div>
+            )}
           </div>
 
           <div className="mt-4">

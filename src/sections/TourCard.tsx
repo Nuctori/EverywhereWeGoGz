@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { memo } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { getReadableDestination, formatShortDate, getUpcomingDepartureDate, buildTitleSummary } from '@/lib/tour-display';
+import { getReadableDestination, getDepartureDateBadgeLabel, buildTitleSummary } from '@/lib/tour-display';
 
 interface TourCardProps {
   tour: Tour;
@@ -42,7 +42,7 @@ export const TourCard = memo(function TourCard({
   const hasReliableSingleSupplement = Boolean(tour.singleSupplementNote?.trim());
   const titleSummary = buildTitleSummary(tour);
   const destinationLabel = getReadableDestination(tour);
-  const displayDepartureDate = getUpcomingDepartureDate(tour);
+  const departureDateLabel = getDepartureDateBadgeLabel(tour);
 
   return (
     <Card
@@ -141,7 +141,7 @@ export const TourCard = memo(function TourCard({
             <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{tour.duration}天</span>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-500">
-            <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{formatShortDate(displayDepartureDate)}</span>
+            <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{departureDateLabel}</span>
             {tour.groupSize && <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{tour.groupSize}</span>}
           </div>
         </div>
