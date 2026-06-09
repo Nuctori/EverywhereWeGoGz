@@ -244,6 +244,74 @@ const RECOMMENDED_TITLE_HINTS = [
   '精选',
 ];
 
+const SEARCH_SPLIT_PATTERN =
+  /(?:\s+|推荐|帮我|帮忙|给我|想要|想找|想去|看看|安排|同时|具有|带有|带|含有|包含|包括|适合|可以|有没有|和|与|及|以及|或者|或|的|旅行团|旅游团|跟团|线路|产品|主题|玩法|一下|一个|一些)+/gu;
+const searchCorpusCache = new WeakMap<TourSummary, string>();
+
+function normalizeSearchText(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function extractSearchTerms(query: string) {
+  const normalized = normalizeSearchText(query).replace(/[^\p{Script=Han}a-z0-9]+/gu, ' ');
+  const parts = normalized
+    .split(SEARCH_SPLIT_PATTERN)
+    .map((part) => part.trim())
+    .filter((part) => part.length >= 2 && part.length <= 16 && !/^\d+$/.test(part));
+
+  if (parts.length > 0) {
+    return [...new Set(parts)].slice(0, 8);
+  }
+
+  return normalized && normalized.length <= 16 ? [normalized] : [];
+}
+
+function getTourSearchCorpus(tour: TourSummary) {
+  const cached = searchCorpusCache.get(tour);
+  if (cached) return cached;
+
+  const corpus = [
+    tour.title,
+    tour.destination,
+    tour.theme,
+    tour.source,
+    tour.transportType,
+    ...tour.tags,
+    ...tour.highlights,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+
+  searchCorpusCache.set(tour, corpus);
+  return corpus;
+}
+
+function getTourSearchRelevance(
+  tour: TourSummary,
+  search: { normalized: string; terms: string[] },
+) {
+  if (!search.normalized) return 0;
+
+  const corpus = getTourSearchCorpus(tour);
+  let score = 0;
+
+  if (tour.title.toLowerCase().includes(search.normalized)) score += 32;
+  else if (corpus.includes(search.normalized)) score += 18;
+
+  for (const term of search.terms) {
+    if (tour.destination.toLowerCase().includes(term)) score += 18;
+    else if (tour.theme.toLowerCase().includes(term)) score += 15;
+    else if (tour.title.toLowerCase().includes(term)) score += 14;
+    else if (tour.tags.some((tag) => tag.toLowerCase().includes(term))) score += 12;
+    else if (tour.highlights.some((highlight) => highlight.toLowerCase().includes(term))) score += 10;
+    else if (tour.source.toLowerCase().includes(term) || tour.transportType.toLowerCase().includes(term)) score += 8;
+    else if (corpus.includes(term)) score += 4;
+  }
+
+  return score;
+}
+
 function getDaysUntil(dateString: string) {
   if (!dateString) return null;
   const today = new Date();
@@ -300,6 +368,25 @@ function compareRecommended(a: TourSummary, b: TourSummary) {
     (b.departureDates?.length ?? 0) - (a.departureDates?.length ?? 0) ||
     a.price - b.price
   );
+}
+
+function compareToursBySortMode(
+  sortBy: FilterState['sortBy'],
+  a: TourSummary,
+  b: TourSummary,
+) {
+  switch (sortBy) {
+    case 'price_asc':
+      return a.price - b.price;
+    case 'price_desc':
+      return b.price - a.price;
+    case 'hot':
+      return compareRecommended(a, b);
+    case 'new':
+      return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
+    default:
+      return 0;
+  }
 }
 
 function getDynamicHeroDestinations(tours: TourSummary[]) {
@@ -512,6 +599,12 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   ]);
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const searchTerms = useMemo(() => extractSearchTerms(searchQuery), [searchQuery]);
+  const hasNaturalLanguageQuery = normalizedSearchQuery.length >= 8 || searchTerms.length >= 2;
+  const searchContext = useMemo(
+    () => ({ normalized: normalizedSearchQuery, terms: searchTerms }),
+    [normalizedSearchQuery, searchTerms],
+  );
   const isAiSearchMode = Boolean(
     aiRecommendationResult ||
     (
@@ -551,19 +644,10 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       }
 
       if (normalizedSearchQuery && !isAiSearchMode && !isAiRecommendedTour) {
-        const matchesSearch = [
-          tour.title,
-          tour.destination,
-          tour.theme,
-          tour.source,
-          tour.transportType,
-          ...tour.tags,
-          ...tour.highlights,
-        ]
-          .filter(Boolean)
-          .some((value) => value.toLowerCase().includes(normalizedSearchQuery));
+        const relevance = getTourSearchRelevance(tour, searchContext);
+        const minRelevance = hasNaturalLanguageQuery ? 4 : 12;
 
-        if (!matchesSearch) {
+        if (relevance < minRelevance) {
           return false;
         }
       }
@@ -646,19 +730,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       return true;
     });
 
-    switch (filters.sortBy) {
-      case 'price_asc':
-        result.sort((a, b) => a.price - b.price);
-        break;
-      case 'price_desc':
-        result.sort((a, b) => b.price - a.price);
-        break;
-      case 'hot':
-        result.sort(compareRecommended);
-        break;
-      case 'new':
-        result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-        break;
+    if (normalizedSearchQuery && !isAiSearchMode) {
+      result.sort((a, b) =>
+        getTourSearchRelevance(b, searchContext) - getTourSearchRelevance(a, searchContext) ||
+        compareToursBySortMode(filters.sortBy, a, b),
+      );
+    } else {
+      result.sort((a, b) => compareToursBySortMode(filters.sortBy, a, b));
     }
 
     if (aiRecommendationByTourId.size > 0) {
@@ -690,6 +768,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     dateFilter,
     effectiveFilters,
     filters.sortBy,
+    hasNaturalLanguageQuery,
+    searchContext,
     normalizedSearchQuery,
     today,
   ]);
@@ -724,6 +804,16 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const hasMoreLoadedResults = visibleCount < displayTours.length;
   const hasMoreRemotePages = hasPageChunks && catalogTours.length === 0 && localTours.length < total;
   const shouldRenderLoadMore = hasMoreLoadedResults || hasMoreRemotePages;
+  const emptyStateTitle = normalizedSearchQuery && !isAiSearchMode
+    ? hasNaturalLanguageQuery
+      ? '这句需求没有直接卡死结果'
+      : '没有找到直接匹配的旅行团'
+    : '没有找到符合条件的旅行团';
+  const emptyStateDescription = normalizedSearchQuery && !isAiSearchMode
+    ? hasNaturalLanguageQuery
+      ? '当前会优先按关键词相关度展示线路；如果还不够准，试试右上的 AI 帮我选，它会按这句话重新排序。'
+      : '可以换个关键词，或者先放宽时间、预算、天数这些条件。'
+    : '可以先放宽时间或预算条件，再看看更多线路';
 
   const handleObserver = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -1547,9 +1637,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         <div className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/90 py-20 text-center">
           <div className="mb-4 text-5xl">暂无结果</div>
           <h3 className="mb-2 text-lg font-semibold text-stone-700">
-            没有找到符合条件的旅行团
+            {emptyStateTitle}
           </h3>
-          <p className="text-stone-500">可以先放宽时间或预算条件，再看看更多线路</p>
+          <p className="mx-auto max-w-xl text-stone-500">{emptyStateDescription}</p>
         </div>
       ) : (
         <>

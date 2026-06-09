@@ -1,7 +1,9 @@
 import { strict as assert } from 'node:assert';
+import fs from 'node:fs';
 import {
   __aiRecommendationTestHooks,
 } from '../src/lib/ai-recommendation.ts';
+import { requestAiRecommendations } from '../src/lib/ai-recommendation.ts';
 import type { AiRecommendationCandidate } from '../src/types/tour.ts';
 
 const {
@@ -20,6 +22,7 @@ const {
   finalizeRecommendationSummary,
   getConcreteAiReason,
   getPrimitiveConflictReasons,
+  localRecommendations,
   matchesActiveDateFilters,
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
@@ -31,6 +34,19 @@ const {
   sanitizeAiIntentForTurn,
   validateAiItems,
 } = __aiRecommendationTestHooks;
+
+const EMPTY_FILTERS = {
+  destination: '',
+  minPrice: null,
+  maxPrice: null,
+  duration: null,
+  source: '',
+  departureDate: '',
+  departureDateStart: '',
+  departureDateEnd: '',
+  theme: '',
+  sortBy: 'hot' as const,
+};
 
 function candidate(overrides: Partial<AiRecommendationCandidate> & { id: string; title: string; destination: string; price: number }): AiRecommendationCandidate {
   return {
@@ -64,6 +80,7 @@ const tours = [
   candidate({ id: 'bali-budget', title: '巴厘岛6天轻松度假', destination: '巴厘岛', duration: 6, price: 3999 }),
   candidate({ id: 'guizhou-cheap', title: '贵州山水5天', destination: '贵州', price: 1599, tags: ['自然'], theme: '自然风光' }),
 ];
+const realTours = JSON.parse(fs.readFileSync('public/data/tours-list.json', 'utf8')) as AiRecommendationCandidate[];
 
 const inheritedIntent = mergeIntentWithMemory(
   { budgetPriority: 'low', refinementMode: 'refine_previous' },
@@ -224,8 +241,8 @@ assert.ok(priceContextCompacted.some((item) => item.priceContext.poolPercentile 
 assert.ok(priceContextCompacted.some((item) => item.priceContext.poolBand === 'upper'));
 assert.ok(priceContextCompacted.some((item) => item.priceContext.poolBand !== 'upper'));
 assert.ok(priceContextCompacted.some((item) => item.userTermCoverage > 0));
-assert.ok(priceContextCompacted.some((item) => item.userTermHits.includes('温泉')));
-assert.ok(priceContextCompacted.some((item) => item.userTermHits.includes('沙滩')));
+assert.ok(priceContextCompacted.some((item) => item.userTermHits.includes('温泉泡汤')));
+assert.ok(priceContextCompacted.some((item) => item.userTermHits.includes('海边沙滩')));
 const beachPrimitive = buildTourPrimitive(nonHotSpringTour);
 assert.ok(beachPrimitive.experienceCategories.includes('海边沙滩'));
 assert.ok(!beachPrimitive.experienceCategories.includes('玩水清凉'));
@@ -587,8 +604,9 @@ const vagueReasonItems = validateAiItems({
 assert.ok(vagueReasonItems[0].reason?.includes('沙扒湾') || vagueReasonItems[0].reason?.includes('沙滩'));
 assert.ok(!vagueReasonItems[0].reason?.includes('玩水'));
 assert.ok(!/[（(](?:天气敏感|高温天气需取舍|雨天需取舍)：/.test(vagueReasonItems[0].reason || ''));
-assert.ok(vagueReasonItems[0].reason?.includes('看点：'));
-assert.ok(vagueReasonItems[0].reason?.includes('参考价'));
+assert.ok(!/看点：|行程：|参考价：|可作为具体玩法备选/.test(vagueReasonItems[0].reason || ''));
+assert.ok(vagueReasonItems[0].reason?.includes('参考价￥'));
+assert.ok(!/主要卖点|这条更像|亮点集中|先锁定具体体验|我会把它看作/.test(vagueReasonItems[0].reason || ''));
 assert.ok(!vagueReasonItems[0].reason?.includes('预算友好'));
 assert.ok(!/偏海边沙滩|适合作低价酒店型备选|AI综合推荐|取舍：/.test(vagueReasonItems[0].reason || ''));
 
@@ -633,7 +651,7 @@ const highPriceReasonRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!highPriceReasonRewrite[0].reason?.includes('预算友好'));
-assert.ok(highPriceReasonRewrite[0].reason?.includes('参考价：￥30,999'));
+assert.ok(highPriceReasonRewrite[0].reason?.includes('参考价￥30,999'));
 const noBudgetReasonRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -655,7 +673,7 @@ const noBudgetReasonRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/预算贴边|预算内/.test(noBudgetReasonRewrite[0].reason || ''));
-assert.ok(noBudgetReasonRewrite[0].reason?.includes('参考价：￥30,999'));
+assert.ok(noBudgetReasonRewrite[0].reason?.includes('参考价￥30,999'));
 const inventedBudgetFitRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -677,7 +695,7 @@ const inventedBudgetFitRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/符合预算|预算内|预算贴边/.test(inventedBudgetFitRewrite[0].reason || ''));
-assert.ok(inventedBudgetFitRewrite[0].reason?.includes('参考价：￥30,999'));
+assert.ok(inventedBudgetFitRewrite[0].reason?.includes('参考价￥30,999'));
 const staleMemoryBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -699,7 +717,7 @@ const staleMemoryBudgetRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/符合预算|预算内|预算贴边/.test(staleMemoryBudgetRewrite[0].reason || ''));
-assert.ok(staleMemoryBudgetRewrite[0].reason?.includes('参考价：￥30,999'));
+assert.ok(staleMemoryBudgetRewrite[0].reason?.includes('参考价￥30,999'));
 const closeToBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -721,7 +739,7 @@ const closeToBudgetRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/预算/.test(closeToBudgetRewrite[0].reason || ''));
-assert.ok(closeToBudgetRewrite[0].reason?.includes('参考价：￥30,999'));
+assert.ok(closeToBudgetRewrite[0].reason?.includes('参考价￥30,999'));
 const approximateBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -743,7 +761,145 @@ const approximateBudgetRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/预算约|预算大约|预算\s*\d/.test(approximateBudgetRewrite[0].reason || ''));
-assert.ok(approximateBudgetRewrite[0].reason?.includes('参考价：￥30,999'));
+assert.ok(approximateBudgetRewrite[0].reason?.includes('参考价￥30,999'));
+const beachHotSpringLocal = localRecommendations([
+  candidate({
+    id: 'only-hot-spring',
+    title: '广东金水台温泉2天',
+    destination: '广东',
+    duration: 2,
+    price: 299,
+    theme: '温泉',
+    tags: ['温泉'],
+    highlights: ['金水台温泉'],
+  }),
+  candidate({
+    id: 'beach-hot-spring',
+    title: '惠州双湾盐洲岛温泉联游3天',
+    destination: '广东',
+    duration: 3,
+    price: 399,
+    theme: '海岛度假',
+    tags: ['温泉', '海滩'],
+    highlights: ['盐洲岛', '沙滩', '温泉'],
+  }),
+], '同时具有海滩和温泉的旅行团');
+assert.equal(beachHotSpringLocal[0].tourId, 'beach-hot-spring');
+assert.ok(beachHotSpringLocal[0].reason?.includes('完整覆盖'));
+assert.ok(!/可作为具体玩法备选|看点：|行程：|参考价：|这条更像|我会把它看作|具体体验/.test(beachHotSpringLocal[0].reason || ''));
+const beachHotSpringAliasLocal = localRecommendations([
+  candidate({
+    id: 'only-hot-spring-alias',
+    title: '金水台温泉2天',
+    destination: '广东',
+    duration: 2,
+    price: 299,
+    theme: '温泉',
+    tags: ['泡汤'],
+    highlights: ['私汤泡池'],
+  }),
+  candidate({
+    id: 'bay-spa',
+    title: '巽寮湾私汤海景3天',
+    destination: '惠州',
+    duration: 3,
+    price: 699,
+    theme: '海边度假',
+    tags: ['海景', '私汤'],
+    highlights: ['巽寮湾', '海滩', '泡池'],
+  }),
+], '想找海边能泡汤的跟团');
+assert.equal(beachHotSpringAliasLocal[0].tourId, 'bay-spa');
+assert.ok(beachHotSpringAliasLocal[0].matchedSignals.some((signal) => signal.includes('完整覆盖')));
+const realBeachHotSpringLocal = localRecommendations(
+  realTours,
+  '给我推荐同时具有海滩和温泉的旅行团',
+).slice(0, 5);
+assert.ok(
+  realBeachHotSpringLocal.some((item) => item.tourId === 'tour_17'),
+  `expected 惠州双湾盐洲岛温泉联游3天 in top 5, got ${realBeachHotSpringLocal.map((item) => item.tourId).join(', ')}`,
+);
+const staleMemoryFallbackResult = await requestAiRecommendations({
+  conversationId: 'audit-fresh-turn-fallback',
+  messages: [
+    {
+      id: 'fresh-user-turn',
+      role: 'user',
+      content: '给我推荐同时具有海滩和温泉的旅行团',
+      createdAt: '2026-06-09T00:00:00.000Z',
+    },
+  ],
+  candidateTours: [
+    candidate({
+      id: 'memory-hot-spring-only',
+      title: '广东金水台温泉2天',
+      destination: '广东',
+      duration: 2,
+      price: 299,
+      theme: '温泉',
+      tags: ['温泉'],
+      highlights: ['金水台温泉'],
+      isHot: true,
+    }),
+    candidate({
+      id: 'fresh-query-both',
+      title: '惠州双湾盐洲岛温泉联游3天',
+      destination: '广东',
+      duration: 3,
+      price: 399,
+      theme: '海岛度假',
+      tags: ['温泉', '海滩'],
+      highlights: ['盐洲岛', '沙滩', '温泉'],
+    }),
+  ],
+  activeFilters: EMPTY_FILTERS,
+  searchQuery: '',
+  aiConfig: {},
+  preferenceMemory: {
+    destinationHints: ['广东'],
+    travelStyle: ['温泉'],
+    mustHave: ['温泉'],
+    avoid: [],
+    weatherSensitivity: [],
+    departureWeekdays: [],
+    updatedAt: '2026-06-08T00:00:00.000Z',
+  },
+  previousResult: null,
+});
+assert.equal(staleMemoryFallbackResult.source, 'local-preview');
+assert.equal(staleMemoryFallbackResult.items[0]?.tourId, 'fresh-query-both');
+assert.equal(staleMemoryFallbackResult.preferenceMemory ?? null, null);
+const failedAiFallbackResult = await requestAiRecommendations({
+  conversationId: 'audit-failed-ai-fallback',
+  messages: [
+    {
+      id: 'failed-ai-user-turn',
+      role: 'user',
+      content: '给我推荐同时具有海滩和温泉的旅行团',
+      createdAt: '2026-06-09T00:05:00.000Z',
+    },
+  ],
+  candidateTours: realTours,
+  activeFilters: EMPTY_FILTERS,
+  searchQuery: '',
+  aiConfig: {
+    provider: 'openai-compatible',
+    baseUrl: 'http://127.0.0.1:9/v1',
+    apiKey: 'test-key',
+    model: 'test-model',
+  },
+  preferenceMemory: null,
+  previousResult: null,
+});
+assert.equal(failedAiFallbackResult.source, 'local-preview');
+assert.equal(failedAiFallbackResult.items[0]?.tourId, 'tour_17');
+assert.ok(
+  failedAiFallbackResult.items[0]?.matchedSignals.some((signal) =>
+    signal.includes('完整覆盖') || signal.includes('部分命中：温泉泡汤、海边沙滩'),
+  ),
+  `expected tour_17 to carry beach + hot spring evidence, got ${failedAiFallbackResult.items[0]?.matchedSignals.join(', ')}`,
+);
+assert.equal(failedAiFallbackResult.preferenceMemory ?? null, null);
 const sanitizedInventedBudget = sanitizeAiBudgetBoundsForTurn(
   {
     budgetMax: 35000,
@@ -953,8 +1109,9 @@ const weirdSemanticSummary = finalizeRecommendationSummary({
   userText: '帮我找海边温泉，400以下的，关注天气因素',
 });
 assert.ok(!/atoms|软语义判断|扶贫|公益项目/.test(weirdSemanticSummary));
-assert.ok(weirdSemanticSummary.includes('说明：部分偏好在候选里没有明确标签'));
-assert.ok(weirdSemanticSummary.includes('推荐方向：'));
+assert.ok(weirdSemanticSummary.includes('说明：候选标签不完整'));
+assert.ok(/我先把|我先按/.test(weirdSemanticSummary));
+assert.ok(!weirdSemanticSummary.includes('推荐方向：'));
 
 const nonInternalPublicInterestSummary = finalizeRecommendationSummary({
   aiSummary: '候选没有显式扶贫/公益标注，只能按周边体验做近似替代。下单前留意天气。',
@@ -973,7 +1130,8 @@ const nonInternalPublicInterestSummary = finalizeRecommendationSummary({
   allowPublicInterest: false,
 });
 assert.ok(!/扶贫|公益/.test(nonInternalPublicInterestSummary));
-assert.ok(nonInternalPublicInterestSummary.includes('推荐方向：'));
+assert.ok(/我先把|我先按/.test(nonInternalPublicInterestSummary));
+assert.ok(!nonInternalPublicInterestSummary.includes('推荐方向：'));
 
 const promptTours = [hotSpringTour, nonHotSpringTour];
 const promptIntent = { budgetMax: 400, weatherSensitivity: ['天气敏感'], departureWeekdays: [] };

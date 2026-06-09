@@ -92,11 +92,16 @@ export const TourCard = memo(function TourCard({
         </p>
 
         {recommendationReason && (
-          <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-800">
-            <span className="font-medium">
-              AI推荐{recommendationRank ? ` TOP ${recommendationRank}` : ''}：
-            </span>
-            {recommendationReason}
+          <div
+            className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-800"
+            title={recommendationReason}
+          >
+            <p className="line-clamp-3">
+              <span className="font-medium">
+                AI推荐{recommendationRank ? ` TOP ${recommendationRank}` : ''}：
+              </span>
+              {recommendationReason}
+            </p>
           </div>
         )}
 

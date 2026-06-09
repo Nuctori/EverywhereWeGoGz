@@ -297,8 +297,11 @@ export function AiRecommendPanel({
   useEffect(() => {
     if (!request || handledRequestIdRef.current === request.id) return;
     handledRequestIdRef.current = request.id;
+    onResultChange(null);
+    setProgressState(null);
+    setExpandedStage(null);
     void submitPrompt(request.prompt);
-  }, [request, submitPrompt]);
+  }, [onResultChange, request, submitPrompt]);
 
   const clearConversation = () => {
     requestVersionRef.current += 1;
