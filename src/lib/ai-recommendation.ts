@@ -4380,6 +4380,7 @@ export const __aiRecommendationTestHooks = {
   normalizeIntent,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
+  sanitizeAiBudgetBoundsForTurn,
   sanitizeAiIntentForTurn,
   validateAiItems,
 };
@@ -4804,6 +4805,19 @@ function normalizeBudgetPriorityByUserText(
   }
 
   return intent;
+}
+
+function sanitizeAiBudgetBoundsForTurn(
+  intent: AiTravelIntent | null,
+  userText: string,
+): AiTravelIntent | null {
+  if (!intent?.budgetMax && !intent?.budgetMin) return intent;
+  if (parseBudget(normalizeText(userText))) return intent;
+  return {
+    ...intent,
+    budgetMin: null,
+    budgetMax: null,
+  };
 }
 
 function normalizeMessagesForProvider(messages: ReturnType<typeof buildAiMessages>) {
@@ -5383,8 +5397,12 @@ export async function requestAiRecommendations({
       liteMaxTokens: 1000,
     }) as { intent?: unknown; intentNotes?: unknown; summary?: unknown; items?: unknown };
     const semanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
+    const normalizedAiIntent = sanitizeAiBudgetBoundsForTurn(
+      normalizeIntent(aiResponse.intent),
+      text,
+    );
     const rankingIntent = normalizeBudgetPriorityByUserText(
-      sanitizeAiIntentForTurn(normalizeIntent(aiResponse.intent), {
+      sanitizeAiIntentForTurn(normalizedAiIntent, {
         allowPublicInterest: allowPublicInterestForTurn,
       }),
       text,

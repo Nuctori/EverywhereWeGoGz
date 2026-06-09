@@ -26,6 +26,7 @@ const {
   mergeIntentWithMemory,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
+  sanitizeAiBudgetBoundsForTurn,
   sanitizeAiIntentForTurn,
   validateAiItems,
 } = __aiRecommendationTestHooks;
@@ -618,6 +619,27 @@ const noBudgetReasonRewrite = rewriteRecommendationCopy({
 });
 assert.ok(!/预算贴边|预算内/.test(noBudgetReasonRewrite[0].reason || ''));
 assert.ok(noBudgetReasonRewrite[0].reason?.includes('参考价：￥30,999'));
+const sanitizedInventedBudget = sanitizeAiBudgetBoundsForTurn(
+  {
+    budgetMax: 35000,
+    budgetPriority: 'premium',
+    weatherSensitivity: [],
+    departureWeekdays: [],
+  },
+  '帮我找同时带温泉和沙滩的团',
+);
+assert.equal(sanitizedInventedBudget?.budgetMax, null);
+assert.equal(sanitizedInventedBudget?.budgetPriority, 'premium');
+const keptUserBudget = sanitizeAiBudgetBoundsForTurn(
+  {
+    budgetMax: 3000,
+    budgetPriority: 'balanced',
+    weatherSensitivity: [],
+    departureWeekdays: [],
+  },
+  '预算3000以内，帮我找同时带温泉和沙滩的团',
+);
+assert.equal(keptUserBudget?.budgetMax, 3000);
 const variedReasonTours = [
   highPriceBeachTour,
   candidate({
