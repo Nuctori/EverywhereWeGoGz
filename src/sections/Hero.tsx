@@ -1,6 +1,7 @@
 import {
   ArrowRight,
   CalendarDays,
+  ClipboardCheck,
   Map,
   MapPin,
   Search,
@@ -30,13 +31,29 @@ const destinationIntents: Record<string, { label: string; hint: string }> = {
 };
 
 const planningStats = [
-  { label: '预算', value: '500+', icon: WalletCards },
+  { label: '预算', value: '3000 内', icon: WalletCards },
   { label: '班期', value: '60 条', icon: CalendarDays },
-  { label: '路线', value: '8 平台', icon: Map },
+  { label: '来源', value: '8 平台', icon: Map },
+];
+
+const planningSteps = [
+  { title: '先筛出可选线路', detail: '目的地、天数、出发地先对上' },
+  { title: '再比较价格和班期', detail: '预算接近、日期合适排前面' },
+  { title: '最后把合适的团置顶', detail: '不用自己一页页翻' },
 ];
 
 export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickDestinations }: HeroProps) {
   const logoSrc = `${import.meta.env.BASE_URL}brand/laoguang-logo-full.jpg`;
+
+  const handlePrimarySearch = () => {
+    const query = searchQuery.trim();
+    if (query) {
+      onAiSearch(query);
+      return;
+    }
+
+    onSearch(searchQuery);
+  };
 
   return (
     <section className="px-4 pb-4 pt-5 sm:px-6 sm:pt-7 lg:px-8">
@@ -51,17 +68,17 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                 老广去边度 · 广州出发
               </p>
               <h1 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-stone-950 sm:text-5xl">
-                先看班期和预算，再选适合的团。
+                说清楚想怎么玩，直接找合适的团。
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
-                聚合多平台跟团线路。同一个输入框，既能搜目的地，也能直接让 AI 按预算、天数和同行人帮你置顶。
+                输入目的地、预算、天数或同行人。系统会先找匹配线路，再把更适合的团排到前面。
               </p>
 
               <form
                 className="mt-8 max-w-4xl rounded-[24px] border border-stone-200/80 bg-white/95 p-2 shadow-[0_18px_45px_rgba(28,25,23,0.08)]"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  onSearch(searchQuery);
+                  handlePrimarySearch();
                 }}
               >
                 <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
@@ -70,7 +87,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                     <Input
                       type="search"
                       enterKeyHint="search"
-                      placeholder="想去云南，5天，3000以内，爸妈同行"
+                      placeholder="例如：帮我找同时带温泉和沙滩的团，预算600以内"
                       className="h-[52px] min-h-[52px] rounded-[18px] border-0 bg-stone-50 pl-11 pr-11 text-sm text-stone-800 placeholder:text-stone-400 shadow-inner shadow-stone-200/50 focus-visible:ring-2 focus-visible:ring-orange-200"
                       value={searchQuery}
                       onChange={(e) => onSearchChange(e.target.value)}
@@ -86,32 +103,20 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                       </button>
                     )}
                   </div>
-                  <div className="grid grid-cols-2 gap-2 lg:flex lg:shrink-0">
-                    <Button
-                      type="submit"
-                      size="lg"
-                      className="h-[52px] min-h-[52px] rounded-[18px] bg-stone-950 px-5 text-sm font-medium text-white shadow-sm hover:bg-stone-800 lg:min-w-[132px]"
-                    >
-                      <Search className="h-4 w-4" />
-                      查看结果
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="lg"
-                      variant="outline"
-                      className="h-[52px] min-h-[52px] rounded-[18px] border-orange-200 bg-orange-50 px-4 text-sm font-medium text-stone-950 shadow-sm hover:border-orange-300 hover:bg-orange-100 lg:min-w-[132px]"
-                      onClick={() => onAiSearch(searchQuery)}
-                    >
-                      <Sparkles className="h-4 w-4 text-orange-600" />
-                      AI 帮我选
-                    </Button>
-                  </div>
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="h-[52px] min-h-[52px] rounded-[18px] bg-stone-950 px-6 text-sm font-medium text-white shadow-sm hover:bg-stone-800 lg:min-w-[168px]"
+                  >
+                    <Search className="h-4 w-4" />
+                    找合适的团
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
                 </div>
                 <div className="flex flex-wrap gap-2 px-2 pb-1 pt-3 text-xs text-stone-400">
-                  <span>普通搜索看全部匹配</span>
+                  <span>输入越具体，排序越准</span>
                   <span className="hidden text-stone-300 sm:inline">/</span>
-                  <span>AI 会按预算、天数和同行人重新排序</span>
+                  <span>只输入目的地也可以直接看结果</span>
                 </div>
               </form>
 
@@ -157,18 +162,21 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                 <div className="flex items-center justify-between gap-4 border-b border-stone-200/70 pb-4">
                   <img src={logoSrc} alt="老广去边度" className="h-20 w-auto object-contain" />
                   <div className="rounded-full border border-orange-200 bg-orange-50 px-3 py-1 text-xs font-medium text-orange-700">
-                    AI 先排合适度
+                    输入后自动排序
                   </div>
                 </div>
 
                 <div className="mt-4 space-y-3">
                   <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-3">
-                    <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="text-sm font-semibold text-stone-950">广州出发 · 云南 5 天</div>
+                        <div className="text-sm font-semibold text-stone-950">示例：广州出发 · 云南 5 天</div>
                         <div className="mt-1 text-xs text-stone-500">预算 3000 内 / 爸妈同行 / 节奏轻松</div>
                       </div>
-                      <div className="rounded-full bg-stone-950 px-2.5 py-1 text-xs font-medium text-white">92%</div>
+                      <div className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-700">
+                        <Sparkles className="h-3 w-3" />
+                        示例
+                      </div>
                     </div>
                     <div className="mt-3 grid grid-cols-3 gap-2">
                       {planningStats.map((item) => {
@@ -185,18 +193,16 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                   </div>
 
                   <div className="space-y-2">
-                    {['筛选线路', '比较预算', '排序推荐'].map((step, index) => (
-                      <div key={step} className="flex items-center gap-3 rounded-2xl border border-stone-200/80 bg-white px-3 py-2.5">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 text-xs font-semibold text-orange-700">
+                    {planningSteps.map((step, index) => (
+                      <div key={step.title} className="flex items-start gap-3 rounded-2xl border border-stone-200/80 bg-white px-3 py-2.5">
+                        <span className="mt-0.5 flex h-6 w-6 items-center justify-center rounded-full bg-orange-100 text-xs font-semibold text-orange-700">
                           {index + 1}
                         </span>
-                        <span className="text-sm font-medium text-stone-700">{step}</span>
-                        <span className="ml-auto h-1.5 w-16 rounded-full bg-stone-100">
-                          <span
-                            className="block h-1.5 rounded-full bg-orange-400"
-                            style={{ width: `${92 - index * 18}%` }}
-                          />
+                        <span className="min-w-0">
+                          <span className="block text-sm font-medium text-stone-800">{step.title}</span>
+                          <span className="mt-0.5 block text-xs leading-5 text-stone-500">{step.detail}</span>
                         </span>
+                        <ClipboardCheck className="ml-auto mt-1 h-4 w-4 shrink-0 text-orange-500" />
                       </div>
                     ))}
                   </div>
