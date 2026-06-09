@@ -94,7 +94,25 @@ const aiItems = validateAiItems({
 
 const audited = auditAiRecommendations(aiItems, [], tours, inheritedIntent);
 assert.equal(audited[0].tourId, 'phuket-budget');
-assert.ok(audited.find((item) => item.tourId === 'guizhou-cheap')?.matchedSignals.some((signal) => signal.startsWith('审计提示')));
+assert.ok(audited.find((item) => item.tourId === 'guizhou-cheap')?.matchedSignals.some((signal) => signal.startsWith('需放宽条件')));
+const aiOrderTours = [
+  candidate({ id: 'ai-first', title: '广东温泉沙滩3天', destination: '广东', duration: 3, price: 1299, tags: ['温泉', '沙滩'], highlights: ['温泉', '沙滩'] }),
+  candidate({ id: 'local-favorite', title: '广东温泉沙滩3天', destination: '广东', duration: 3, price: 399, tags: ['温泉', '沙滩'], highlights: ['温泉', '沙滩'] }),
+];
+const aiOrderAudited = auditAiRecommendationsStrict(
+  [
+    { tourId: 'ai-first', score: 70, reason: 'AI 更看重体验完整度', matchedSignals: ['体验完整'] },
+    { tourId: 'local-favorite', score: 69, reason: 'AI 认为也可选', matchedSignals: ['价格较低'] },
+  ],
+  [
+    { tourId: 'local-favorite', score: 999, reason: '本地补位高分', matchedSignals: ['本地补位'] },
+    { tourId: 'ai-first', score: 1, reason: '本地补位低分', matchedSignals: ['本地补位'] },
+  ],
+  aiOrderTours,
+  { weatherSensitivity: [], departureWeekdays: [] },
+);
+assert.equal(aiOrderAudited[0].tourId, 'ai-first');
+assert.equal(aiOrderAudited[1].tourId, 'local-favorite');
 const mergedCapItems = mergeAiAndLocalRecommendations(
   Array.from({ length: 12 }, (_, index) => ({
     tourId: `ai-${index}`,
@@ -190,9 +208,14 @@ const priceContextCompacted = compactCandidates(
   { userText: '帮我找同时带温泉和沙滩的团' },
 );
 const topPriceContextIds = priceContextCompacted.slice(0, 8).map((item) => item.id);
-assert.ok(topPriceContextIds.includes('premium-hot-spring-beach'));
 assert.ok(topPriceContextIds.includes('mid-hot-spring-beach') || topPriceContextIds.includes('hot-spring-beach'));
+assert.ok(topPriceContextIds.includes('premium-hot-spring-beach'));
 assert.ok(priceContextCompacted.some((item) => item.priceContext.poolPercentile !== null));
+assert.ok(priceContextCompacted.some((item) => item.priceContext.poolBand === 'upper'));
+assert.ok(priceContextCompacted.some((item) => item.priceContext.poolBand !== 'upper'));
+assert.ok(priceContextCompacted.some((item) => item.userTermCoverage > 0));
+assert.ok(priceContextCompacted.some((item) => item.userTermHits.includes('温泉')));
+assert.ok(priceContextCompacted.some((item) => item.userTermHits.includes('沙滩')));
 const beachPrimitive = buildTourPrimitive(nonHotSpringTour);
 assert.ok(beachPrimitive.experienceCategories.includes('海边沙滩'));
 assert.ok(!beachPrimitive.experienceCategories.includes('玩水清凉'));
@@ -212,7 +235,10 @@ assert.ok(!indoorCoolPrimitive.experienceCategories.includes('玩水清凉'));
 assert.ok(indoorCoolPrimitive.seasonalComfortAtoms.some((atom) => atom.includes('清凉室内')));
 assert.ok(!indoorCoolPrimitive.seasonalComfortAtoms.some((atom) => atom.includes('玩水')));
 const avoidCompacted = compactCandidates([hotSpringTour, nonHotSpringTour], [], avoidIntent);
-assert.ok(!avoidCompacted.some((item) => item.id === 'hot-spring'));
+assert.ok(avoidCompacted.some((item) =>
+  item.id === 'hot-spring' &&
+  item.conflictReasons.some((reason) => reason.startsWith('命中需避开条件')),
+));
 assert.ok(avoidCompacted.some((item) => item.id === 'beach'));
 assert.deepEqual(collectAvoidHints('500元以内，不要漂流、爬山'), ['漂流', '爬山']);
 assert.deepEqual(collectAvoidHints('不喜欢温泉，讨厌购物团'), ['温泉', '购物团', '购物']);
@@ -224,7 +250,8 @@ const auditedAvoid = auditAiRecommendations(
   [hotSpringTour, nonHotSpringTour],
   avoidIntent,
 );
-assert.equal(auditedAvoid.length, 0);
+assert.equal(auditedAvoid.length, 1);
+assert.ok(auditedAvoid[0]?.reason?.includes('需放宽条件'));
 
 function toLocalDateInput(value: Date) {
   return [
@@ -357,7 +384,7 @@ const diverseCompacted = compactCandidates(
 assert.ok(diverseCompacted.some((item) => item.id === 'culture-day'));
 assert.ok(diverseCompacted.some((item) => item.id === 'beach-three-day'));
 assert.ok(diverseCompacted.some((item) => item.id === 'nature-day'));
-assert.ok(diverseCompacted.filter((item) => item.experienceCategories.includes('温泉泡汤')).length <= 2);
+assert.ok(diverseCompacted.filter((item) => item.experienceCategories.includes('温泉泡汤')).length >= 3);
 const culturePrimitive = buildTourPrimitive(diverseAlternatives[0]);
 assert.ok(culturePrimitive.semanticAtoms.includes('博物馆'));
 assert.ok(diverseCompacted.every((item) => Array.isArray(item.semanticAtoms)));
@@ -422,7 +449,7 @@ const noisyCompacted = compactCandidates(
 assert.ok(noisyCompacted.some((item) => item.id === 'noisy-culture'));
 assert.ok(noisyCompacted.some((item) => item.id === 'noisy-beach'));
 assert.ok(noisyCompacted.some((item) => item.id === 'noisy-forest'));
-assert.ok(noisyCompacted.filter((item) => item.experienceCategories.includes('温泉泡汤')).length <= 2);
+assert.ok(noisyCompacted.filter((item) => item.experienceCategories.includes('温泉泡汤')).length >= 20);
 
 const noHighlightHotSpringCluster = Array.from({ length: 30 }, (_, index) => candidate({
   id: `no-highlight-hot-spring-${index}`,
@@ -451,7 +478,7 @@ assert.ok(noHighlightCompacted.some((item) => item.id === 'noisy-culture'));
 assert.ok(noHighlightCompacted.some((item) => item.id === 'noisy-beach'));
 assert.ok(noHighlightCompacted.some((item) => item.id === 'noisy-forest'));
 assert.ok(!noHighlightCompacted.some((item) => /温泉度假\d/.test(item.routeGroup)));
-assert.ok(noHighlightCompacted.filter((item) => item.experienceCategories.includes('温泉泡汤')).length <= 2);
+assert.ok(noHighlightCompacted.filter((item) => item.experienceCategories.includes('温泉泡汤')).length >= 20);
 
 const implicitHotSpringPrimitive = buildTourPrimitive(candidate({
   id: 'implicit-hot-spring',
@@ -527,7 +554,7 @@ const rainyCompacted = compactCandidates(
 );
 assert.ok(buildTourPrimitive(rainyMountainTour).seasonalComfortAtoms.includes('雨天需取舍：山水户外或涉水风险'));
 assert.ok(rainyCompacted.some((item) => item.id === 'rainy-indoor'));
-assert.ok(!rainyCompacted.some((item) => item.id === 'rainy-mountain'));
+assert.ok(rainyCompacted.some((item) => item.id === 'rainy-mountain'));
 
 const genericReasonItems = validateAiItems({
   items: [
@@ -695,7 +722,7 @@ const sanitizedInventedBudget = sanitizeAiBudgetBoundsForTurn(
   '帮我找同时带温泉和沙滩的团',
 );
 assert.equal(sanitizedInventedBudget?.budgetMax, null);
-assert.equal(sanitizedInventedBudget?.budgetPriority, 'premium');
+assert.equal(sanitizedInventedBudget?.budgetPriority, null);
 const keptUserBudget = sanitizeAiBudgetBoundsForTurn(
   {
     budgetMax: 3000,
@@ -706,6 +733,25 @@ const keptUserBudget = sanitizeAiBudgetBoundsForTurn(
   '预算3000以内，帮我找同时带温泉和沙滩的团',
 );
 assert.equal(keptUserBudget?.budgetMax, 3000);
+assert.equal(keptUserBudget?.budgetPriority, null);
+const sanitizedInventedBudgetPriority = sanitizeAiBudgetBoundsForTurn(
+  {
+    budgetPriority: 'premium',
+    weatherSensitivity: [],
+    departureWeekdays: [],
+  },
+  '帮我找同时带温泉和沙滩的团',
+);
+assert.equal(sanitizedInventedBudgetPriority?.budgetPriority, null);
+const keptUserBudgetPriority = sanitizeAiBudgetBoundsForTurn(
+  {
+    budgetPriority: 'premium',
+    weatherSensitivity: [],
+    departureWeekdays: [],
+  },
+  '预算不限，想要高端一点的温泉沙滩团',
+);
+assert.equal(keptUserBudgetPriority?.budgetPriority, 'premium');
 const variedReasonTours = [
   highPriceBeachTour,
   candidate({
@@ -930,6 +976,9 @@ const nonPublicFullPrompt = buildAiMessages({
 assert.ok(nonPublicFullPrompt.includes('mustHave'));
 assert.ok(nonPublicFullPrompt.includes('pricePct'));
 assert.ok(nonPublicFullPrompt.includes('"pc"'));
+assert.ok(nonPublicFullPrompt.includes('priceBand'));
+assert.ok(nonPublicFullPrompt.includes('termCoverage'));
+assert.ok(nonPublicFullPrompt.includes('termHits'));
 const nonPublicLitePrompt = buildLiteAiMessages({
   userText: '帮我找海边温泉，400以下的，关注天气因素',
   messages: [],
@@ -940,6 +989,9 @@ const nonPublicLitePrompt = buildLiteAiMessages({
   preferenceMemory: null,
   allowPublicInterest: false,
 }).map((message) => message.content).join('\n');
+assert.ok(nonPublicLitePrompt.includes('priceBand'));
+assert.ok(nonPublicLitePrompt.includes('termCoverage'));
+assert.ok(nonPublicLitePrompt.includes('termHits'));
 assert.ok(!promptPublicInterestPattern.test(nonPublicFullPrompt));
 assert.ok(!promptPublicInterestPattern.test(nonPublicLitePrompt));
 assert.ok(!/玩水清凉|清凉玩水/.test(nonPublicFullPrompt));
@@ -998,7 +1050,7 @@ const nearBudgetIntent = buildHardIntentFromText(
 assert.equal(nearBudgetIntent?.budgetMax, 2000);
 assert.equal(nearBudgetIntent?.tripDaysMin, 4);
 assert.equal(nearBudgetIntent?.tripDaysMax, 6);
-assert.equal(nearBudgetIntent?.budgetPriority, 'balanced');
+assert.equal(nearBudgetIntent?.budgetPriority, null);
 
 const dirtyDestinationPrimitive = buildTourPrimitive(candidate({
   id: 'dirty-destination',

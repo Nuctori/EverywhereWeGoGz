@@ -123,8 +123,11 @@ interface CandidateAuditPrimitive extends RecommendationPrimitive {
   matchStatus: 'match' | 'soft_conflict' | 'fallback';
   routeGroup: string;
   conflictReasons: string[];
+  userTermHits: string[];
+  userTermCoverage: number;
   priceContext: {
     poolPercentile: number | null;
+    poolBand: string;
     pricePerDay: number | null;
   };
 }
@@ -385,16 +388,6 @@ function compactAuditContextForPrompt(context: RecommendationAuditContext) {
   };
 }
 
-function sortCandidatesForPrompt(candidates: ReturnType<typeof compactCandidates>) {
-  return [...candidates].sort((a, b) =>
-    a.routeGroup.localeCompare(b.routeGroup, 'zh-Hans-CN') ||
-    a.destination.localeCompare(b.destination, 'zh-Hans-CN') ||
-    a.tripDays - b.tripDays ||
-    a.price - b.price ||
-    a.id.localeCompare(b.id),
-  );
-}
-
 function compactPromptText(value: string | null | undefined, maxLength = 36) {
   const text = (value || '')
     .replace(/\s+/g, ' ')
@@ -439,6 +432,9 @@ function compactCandidatesForPrompt(candidates: ReturnType<typeof compactCandida
     compactPromptStrings(candidate.seasonalComfortAtoms, 2, 16),
     compactPromptStrings(candidate.conflictReasons, 2, 18),
     candidate.priceContext.poolPercentile ?? null,
+    candidate.priceContext.poolBand,
+    candidate.userTermCoverage,
+    compactPromptStrings(candidate.userTermHits, 4, 12),
   ]);
 }
 
@@ -454,6 +450,10 @@ function compactCandidatesForLitePrompt(candidates: ReturnType<typeof compactCan
     compactPromptStrings(candidate.experienceCategories, 2, 8),
     compactPromptStrings(candidate.seasonalComfortAtoms, 1, 14),
     compactPromptStrings(candidate.conflictReasons, 1, 14),
+    candidate.priceContext.poolPercentile ?? null,
+    candidate.priceContext.poolBand,
+    candidate.userTermCoverage,
+    compactPromptStrings(candidate.userTermHits, 3, 10),
   ]);
 }
 
@@ -471,10 +471,10 @@ function buildStablePromptPrefix(params: {
       'id', 'title', 'destination', 'days', 'price', 'theme', 'source',
       'pace', 'hot', 'match', 'routeGroup', 'dates', 'weekdays', 'night',
       'pricePerDay', 'tags', 'highlights', 'atoms', 'cats', 'seasonAtoms', 'conflicts',
-      'pricePct',
+      'pricePct', 'priceBand', 'termCoverage', 'termHits',
     ],
     pc: compactRangeForPrompt(formatRange(prices)),
-    candidates: compactCandidatesForPrompt(sortCandidatesForPrompt(params.candidates)),
+    candidates: compactCandidatesForPrompt(params.candidates),
     routeAtlas: compactRouteAtlasForPrompt(params.routeAtlas),
   };
 }
@@ -924,24 +924,15 @@ function shouldInheritPreferenceMemoryForTurn(
   intent: AiTravelIntent | null,
   memory: AiPreferenceMemory | null | undefined,
 ) {
+  void intent;
   if (!memory) return false;
   const normalizedText = text.replace(/\s+/g, '');
   const isRelativeTurn = /(上一轮|刚才|继续|沿用|保留|类似|这个|这些|上面|前面|再便宜|便宜一点|贵一点|轻松点|换一个|换成|不要|避开|剔除|更接近)/.test(
     normalizedText,
   );
-  const hasFreshHardSearch = Boolean(
-    intent?.budgetMax ||
-    intent?.budgetMin ||
-    intent?.tripDays ||
-    intent?.tripDaysMin ||
-    intent?.tripDaysMax ||
-    intent?.departureWithinDays ||
-    intent?.destinationHints?.length,
-  );
-
-  // 经验：新搜索不要继承上一轮目的地/风格，否则“500元以下扶贫路线”会被上一轮“云南/桂林”
-  // 污染成本地 fallback，并出现“阳朔=目的地贴合云南”这类明显错误。只有相对改写才继承记忆。
-  return isRelativeTurn || !hasFreshHardSearch;
+  // 经验：只有相对续写才继承上一轮偏好，普通新搜索不要把旧预算/目的地/风格
+  // 注入本轮硬意图，否则会把 AI 的判断空间偷偷收窄。
+  return isRelativeTurn;
 }
 
 function buildHardIntentFromText(
@@ -988,7 +979,7 @@ function buildHardIntentFromText(
     intent.tripDaysMax = activeFilters.duration === 11 ? null : intent.tripDaysMax;
   }
 
-  // 经验：本地只提取可审计硬约束。扶贫/公益/研学/贫穷地方等软语义不要在这里做词表规则，
+  // 经验：本地只提取可审计约束。扶贫/公益/研学/贫穷地方等软语义不要在这里做词表规则，
   // 保留在 q/rc/pm 中交给模型结合世界知识和候选原语判断，避免规则器和智能互相打架。
   const normalizedIntent = normalizeBudgetPriorityByUserText(normalizeIntent(intent), text);
   return getHardIntentSignalCount(normalizedIntent) > 0 ? normalizedIntent : null;
@@ -1094,16 +1085,6 @@ function getPrimitiveMatchedIntentTerms(
   return terms.filter((term) => corpus.includes(term.toLowerCase()));
 }
 
-function clamp01(value: number) {
-  return Math.max(0, Math.min(1, value));
-}
-
-function getBudgetTargetRatio(intent: AiTravelIntent) {
-  if (intent.budgetPriority === 'low') return 0.62;
-  if (intent.budgetPriority === 'premium') return 0.95;
-  return 0.88;
-}
-
 function scoreBudgetFit(
   price: number,
   intent: AiTravelIntent,
@@ -1112,11 +1093,8 @@ function scoreBudgetFit(
     if (price < intent.budgetMin) return { score: -14 };
     if (price > intent.budgetMax) return { score: -18 };
 
-    const center = (intent.budgetMin + intent.budgetMax) / 2;
-    const radius = Math.max((intent.budgetMax - intent.budgetMin) / 2, 300);
-    const closeness = clamp01(1 - Math.abs(price - center) / radius);
     return {
-      score: Math.round(10 + closeness * 12),
+      score: 10,
       signal: `预算区间内：￥${price.toLocaleString()}`,
     };
   }
@@ -1124,34 +1102,8 @@ function scoreBudgetFit(
   if (intent.budgetMax) {
     if (price > intent.budgetMax) return { score: -18 };
 
-    const ratio = price / intent.budgetMax;
-    const targetRatio = getBudgetTargetRatio(intent);
-    const closeness = clamp01(1 - Math.abs(ratio - targetRatio) / 0.42);
-    let score = 8 + closeness * 18;
-
-    if (!intent.budgetMin) {
-      if (ratio < 0.18) score -= intent.budgetPriority === 'low' ? 12 : 28;
-      else if (ratio < 0.3) score -= intent.budgetPriority === 'low' ? 8 : 20;
-      else if (ratio < 0.45) score -= intent.budgetPriority === 'low' ? 4 : 12;
-      else if (ratio < 0.6 && intent.budgetPriority !== 'low') score -= 6;
-    }
-
-    if (ratio >= Math.max(0.72, targetRatio - 0.1)) {
-      return {
-        score: Math.round(score),
-        signal: `预算贴边：￥${price.toLocaleString()}`,
-      };
-    }
-
-    if (ratio < 0.5 && intent.budgetPriority !== 'low') {
-      return {
-        score: Math.round(score),
-        signal: `明显低于预算带：￥${price.toLocaleString()}`,
-      };
-    }
-
     return {
-      score: Math.round(score),
+      score: 8,
       signal: `预算内：￥${price.toLocaleString()}`,
     };
   }
@@ -1165,44 +1117,11 @@ function scoreBudgetFit(
   return { score: 0 };
 }
 
-function getUnderBudgetBandPenalty(
-  primitive: RecommendationPrimitive,
-  intent: AiTravelIntent | null,
-) {
-  if (!intent?.budgetMax || intent.budgetMin) return 0;
-  const ratio = primitive.price / intent.budgetMax;
-  const priorityScale = intent.budgetPriority === 'low'
-    ? 0.55
-    : intent.budgetPriority === 'premium'
-      ? 1.1
-      : 1;
-  let penalty = 0;
-  if (ratio < 0.08) penalty = 64;
-  else if (ratio < 0.18) penalty = 52;
-  else if (ratio < 0.25) penalty = 42;
-  else if (ratio < 0.35) penalty = 30;
-  else if (ratio < 0.45) penalty = 20;
-  else if (ratio < 0.6) penalty = 10;
-  return Math.round(penalty * priorityScale);
-}
-
-function getUnderBudgetBandSignal(
-  primitive: RecommendationPrimitive,
-  intent: AiTravelIntent | null,
-) {
-  if (!intent?.budgetMax || intent.budgetMin) return '';
-  const ratio = primitive.price / intent.budgetMax;
-  if (ratio < 0.18) return `明显低于预算带：￥${primitive.price.toLocaleString()}`;
-  if (ratio < 0.35) return `偏低于预算带：￥${primitive.price.toLocaleString()}`;
-  if (ratio < 0.45) return `低于预算带：￥${primitive.price.toLocaleString()}`;
-  return '';
-}
-
 function buildIntentLocalRecommendations(
   tours: AiRecommendationCandidate[],
   intent: AiTravelIntent | null,
 ): AiRecommendationItem[] {
-  // 经验：本地意图排序只做硬约束、预算带、班期和显式避开项这类可审计信号。
+  // 经验：本地意图排序只做候选补位和可审计信号。
   // 像公益/研学/住好一点/更像上一轮需求/海边但怕风浪这类软语义，交给模型结合
   // semanticFocus、上下文和候选原语去理解；不要继续在这里长出新的软语义规则器。
   if (!intent) return [];
@@ -1263,14 +1182,6 @@ function buildIntentLocalRecommendations(
         score += budgetFit.score;
         if (budgetFit.signal && budgetFit.score > 0) {
           signals.push(budgetFit.signal);
-        }
-        const underBudgetPenalty = getUnderBudgetBandPenalty(primitive, intent);
-        if (underBudgetPenalty > 0) {
-          score -= underBudgetPenalty;
-          const underBudgetSignal = getUnderBudgetBandSignal(primitive, intent);
-          if (underBudgetSignal && !signals.includes(underBudgetSignal)) {
-            signals.push(underBudgetSignal);
-          }
         }
       }
 
@@ -1641,17 +1552,6 @@ function extractExperienceCategories(tour: AiRecommendationCandidate) {
 
 function isLikelyAiNonTour(primitive: RecommendationPrimitive) {
   return primitive.experienceCategories.includes('非跟团产品');
-}
-
-function isDominantHotSpringCandidate(primitive: RecommendationPrimitive) {
-  if (!primitive.experienceCategories.includes('温泉泡汤')) return false;
-  return !primitive.experienceCategories.some((category) =>
-    ['玩水清凉', '森林山水', '文化逛城', '海边沙滩'].includes(category),
-  );
-}
-
-function isWeatherSensitiveHotSpringCandidate(primitive: RecommendationPrimitive) {
-  return primitive.experienceCategories.includes('温泉泡汤');
 }
 
 function extractSeasonalComfortAtoms(tour: AiRecommendationCandidate) {
@@ -2052,10 +1952,6 @@ function getPrimitiveConflictReasons(intent: AiTravelIntent | null, primitive: R
   return reasons;
 }
 
-function primitiveMatchesDestination(intent: AiTravelIntent | null, primitive: RecommendationPrimitive) {
-  return candidateMatchesDestinationIntent(intent, primitive);
-}
-
 function getMatchedDestinationHint(intent: AiTravelIntent | null, primitive: RecommendationPrimitive) {
   if (!intent?.destinationHints?.length) return '';
   if (primitiveHasConflictingTitleDestination(intent, primitive)) return '';
@@ -2063,91 +1959,14 @@ function getMatchedDestinationHint(intent: AiTravelIntent | null, primitive: Rec
   return intent.destinationHints.find((hint) => destinationHintsMatchCorpus([hint], corpus)) || '';
 }
 
-function isHotRainyRecommendationContext(context?: RecommendationContext) {
-  const weatherText = [
-    ...(context?.weatherSensitivity || []),
-    context?.weatherContext?.forecastSummary,
-    context?.weatherContext?.seasonAdvice,
-  ].filter(Boolean).join(' ');
-  const travelMonth = context?.weatherContext?.travelDate
-    ? new Date(context.weatherContext.travelDate).getMonth() + 1
-    : new Date().getMonth() + 1;
-
-  return (
-    /(怕热|避雨|关注天气|天气|高温|闷热|暴雨|降雨|多雨|台风|夏季|华南)/.test(weatherText) ||
-    [6, 7, 8, 9].includes(travelMonth)
-  );
-}
-
-function isRainyRecommendationContext(context?: RecommendationContext) {
-  const weatherText = [
-    ...(context?.weatherSensitivity || []),
-    context?.weatherContext?.forecastSummary,
-    context?.weatherContext?.seasonAdvice,
-  ].filter(Boolean).join(' ');
-
-  return /(避雨|下雨|阵雨|降雨|多雨|暴雨|雷暴|台风|风浪|涨水)/.test(weatherText);
-}
-
-function isRainRiskPrimitive(primitive: RecommendationPrimitive) {
-  const corpus = [
-    primitive.title,
-    ...primitive.semanticAtoms,
-    ...primitive.experienceCategories,
-    ...primitive.seasonalComfortAtoms,
-  ].join(' ');
-
-  return /(徒步|登山|爬山|穿越|峡谷|瀑布|溯溪|漂流|山峰|古龙峡|黄腾峡|白水寨|紫云谷|天露山|云门山|姑婆山|三百山)/.test(corpus);
-}
-
-function getWeatherSuitabilityScore(primitive: RecommendationPrimitive, context?: RecommendationContext) {
-  if (!isHotRainyRecommendationContext(context)) return 0;
-
-  const categories = new Set(primitive.experienceCategories);
-  const rainyContext = isRainyRecommendationContext(context);
-  let score = 0;
-
-  if (categories.has('非跟团产品')) score -= 160;
-  if (categories.has('玩水清凉')) score += 82;
-  if (categories.has('森林山水')) score += 58;
-  if (categories.has('室内度假') || categories.has('文化逛城')) score += 44;
-  if (categories.has('海边沙滩')) score += 36;
-  if (categories.has('美食体验')) score += 8;
-  if (categories.has('温泉泡汤')) {
-    score -= isDominantHotSpringCandidate(primitive) ? 96 : 62;
-  }
-  if (categories.has('户外强度')) score -= 36;
-  if (rainyContext) {
-    if (categories.has('室内度假') || categories.has('文化逛城')) score += 42;
-    if (categories.has('美食体验')) score += 24;
-    if (categories.has('海边沙滩')) score -= 24;
-    if (categories.has('森林山水') && !categories.has('室内度假') && !categories.has('文化逛城')) score -= 28;
-    if (isRainRiskPrimitive(primitive)) score -= 140;
-  }
-
-  return score;
-}
-
 function rankPrimitive(
   primitive: RecommendationPrimitive,
   localItems: AiRecommendationItem[],
   context?: RecommendationContext,
 ) {
+  void context;
   const localRank = localItems.findIndex((item) => item.tourId === primitive.id);
-  const localRankBoost = localRank >= 0
-    ? Math.max(0, (isHotRainyRecommendationContext(context) ? 120 : 200) - localRank * 6)
-    : 0;
-  const pricePenalty = context?.budgetPriority === 'low'
-    ? Math.min(primitive.price / 250, 80)
-    : context?.budgetPriority === 'premium'
-      ? Math.max(0, 12 - Math.min(primitive.price / 1000, 12))
-      : Math.min(primitive.price / 1000, 12);
-  const conflictPenalty = context?.intent
-    ? getConflictSeverity(getPrimitiveConflictReasons(context.intent, primitive)) * 1.6
-    : 0;
-  const underBudgetPenalty = context?.intent
-    ? getUnderBudgetBandPenalty(primitive, context.intent) * 1.35
-    : 0;
+  const localRankBoost = localRank >= 0 ? Math.max(0, 200 - localRank * 6) : 0;
   const nearestDeparture = primitive.schedule.departureDates[0];
   const todayTimestamp = parseDateString(getTodayInputValue())?.getTime() ?? 0;
   const nearestDepartureTimestamp = parseDateString(nearestDeparture)?.getTime() ?? 0;
@@ -2165,12 +1984,7 @@ function rankPrimitive(
     Math.min(primitive.schedule.departureDates.length, 6) * 3 +
     (primitive.schedule.hasRecurringScheduleText ? 5 : 0) +
     departureBonus +
-    getWeatherSuitabilityScore(primitive, context) +
-    (isLikelyAiNonTour(primitive) ? -180 : 0) +
-    (primitive.rating || 0) * 2 -
-    pricePenalty -
-    underBudgetPenalty -
-    conflictPenalty
+    (primitive.rating || 0) * 2
   );
 }
 
@@ -2651,15 +2465,20 @@ function selectPriceBandRepresentatives(
     groups.set(key, group);
   }
 
-  const orderedKeys = ['middle', 'lower', 'upper', 'unknown'];
-  for (const key of orderedKeys) {
-    if (selected.length >= limit) break;
-    const group = (groups.get(key) || [])
+  const coverageTerms = extractCandidateCoverageTerms(context?.userText);
+  const groupEntries = [...groups.values()]
+    .map((group) => group
       .sort((a, b) =>
-        getPrimitiveCoverageScore(b, extractCandidateCoverageTerms(context?.userText)) -
-          getPrimitiveCoverageScore(a, extractCandidateCoverageTerms(context?.userText)) ||
+        getPrimitiveCoverageScore(b, coverageTerms) -
+          getPrimitiveCoverageScore(a, coverageTerms) ||
         rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context),
-      );
+      ))
+    .sort((a, b) =>
+      getPrimitiveCoverageScore(b[0], coverageTerms) - getPrimitiveCoverageScore(a[0], coverageTerms) ||
+      rankPrimitive(b[0], localItems, context) - rankPrimitive(a[0], localItems, context),
+    );
+  for (const group of groupEntries) {
+    if (selected.length >= limit) break;
     const next = group.find((primitive) => !selectedIds.has(primitive.id));
     if (!next) continue;
     selected.push(next);
@@ -2673,7 +2492,10 @@ function selectPriceBandRepresentatives(
     selectedIds.add(primitive.id);
   }
 
-  return selected;
+  return selected.sort((a, b) =>
+    getPrimitiveCoverageScore(b, coverageTerms) - getPrimitiveCoverageScore(a, coverageTerms) ||
+    rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context),
+  );
 }
 
 function annotateCandidatePrimitive(
@@ -2681,41 +2503,24 @@ function annotateCandidatePrimitive(
   intent: AiTravelIntent | null,
   sortedPrices: number[],
   matchStatus: CandidateAuditPrimitive['matchStatus'],
+  coverageTerms: string[] = [],
 ) {
+  const userTermHits = coverageTerms.filter((term) => getPrimitiveCoverageScore(primitive, [term]) > 0);
   return {
     ...primitive,
     matchStatus,
     routeGroup: getDiversityGroupKey(primitive),
     conflictReasons: getPrimitiveConflictReasons(intent, primitive),
+    userTermHits,
+    userTermCoverage: coverageTerms.length > 0
+      ? Math.round((userTermHits.length / coverageTerms.length) * 100)
+      : 0,
     priceContext: {
       poolPercentile: getPricePercentile(primitive.price, sortedPrices),
+      poolBand: getPriceBandKey(primitive.price, sortedPrices),
       pricePerDay: primitive.tripDays > 0 ? Math.round(primitive.price / primitive.tripDays) : null,
     },
   } satisfies CandidateAuditPrimitive;
-}
-
-function limitWeatherSensitiveCandidateMix(
-  candidates: CandidateAuditPrimitive[],
-  context?: RecommendationContext,
-) {
-  if (!isHotRainyRecommendationContext(context)) return candidates;
-
-  const maxHotSpringItems = Math.max(1, Math.min(2, Math.ceil(candidates.length * 0.12)));
-  let hotSpringCount = 0;
-  const maxRainRiskItems = isRainyRecommendationContext(context) ? 0 : Number.POSITIVE_INFINITY;
-  const hasNonHotSpring = candidates.some((candidate) => !isWeatherSensitiveHotSpringCandidate(candidate));
-  const hasNonRainRisk = candidates.some((candidate) => !isRainRiskPrimitive(candidate));
-  let rainRiskCount = 0;
-
-  return candidates.filter((candidate) => {
-    if (hasNonRainRisk && isRainRiskPrimitive(candidate)) {
-      rainRiskCount += 1;
-      if (rainRiskCount > maxRainRiskItems) return false;
-    }
-    if (!hasNonHotSpring || !isWeatherSensitiveHotSpringCandidate(candidate)) return true;
-    hotSpringCount += 1;
-    return hotSpringCount <= maxHotSpringItems;
-  });
 }
 
 function extractCandidateCoverageTerms(text: string | undefined) {
@@ -2892,18 +2697,11 @@ function compactCandidates(
   const allPrimitives = tours.map(buildTourPrimitive);
   const tourPrimitives = allPrimitives.filter((primitive) => !isLikelyAiNonTour(primitive));
   const eligiblePrimitives = tourPrimitives.length > 0 ? tourPrimitives : allPrimitives;
-  const primitives = intent?.avoid?.length
-    ? eligiblePrimitives.filter((primitive) => primitiveMatchesAvoid(primitive, intent.avoid).length === 0)
-    : eligiblePrimitives;
+  const primitives = eligiblePrimitives;
   const sortedPrices = primitives
     .map((primitive) => primitive.price)
     .filter((price) => Number.isFinite(price) && price > 0)
     .sort((a, b) => a - b);
-  const hasDestinationIntent = Boolean(intent?.destinationHints?.length);
-  const destinationMatches = hasDestinationIntent
-    ? primitives.filter((primitive) => primitiveMatchesDestination(intent, primitive))
-    : primitives;
-  const strictMatches = destinationMatches.filter((primitive) => intentMatchesPrimitive(intent, primitive));
   const coverageTerms = extractCandidateCoverageTerms(context?.userText);
   const coveragePool = coverageTerms.length > 0
     ? [...primitives]
@@ -2928,76 +2726,54 @@ function compactCandidates(
     localItems,
     context,
   );
+  const diversePool = selectDiversePrimitives(
+    primitives,
+    MAX_AI_CANDIDATES,
+    localItems,
+    context,
+  );
   const coverageMatchIds = new Set([
     ...coverageMatches.map((primitive) => primitive.id),
     ...coveragePriceRepresentatives.map((primitive) => primitive.id),
   ]);
-  const strictLimit = strictMatches.length > 0
-    ? Math.max(18, MAX_AI_CANDIDATES - 12)
-    : 0;
-  const diverseStrictMatches = selectDiversePrimitives(
-    strictMatches,
-    Math.min(strictLimit, MAX_AI_CANDIDATES),
-    localItems,
-    context,
-  );
-  const softConflicts = (hasDestinationIntent && destinationMatches.length > 0
-    ? destinationMatches.filter((primitive) => !strictMatches.some((match) => match.id === primitive.id))
-    : primitives.filter((primitive) => !strictMatches.some((match) => match.id === primitive.id)))
-    .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context));
-  const softLimit = Math.max(6, Math.floor(MAX_AI_CANDIDATES * 0.18));
-  const diverseSoftConflicts = selectDiversePrimitives(
-    softConflicts,
-    softLimit,
-    localItems,
-    context,
-  );
-  const fallbackPool = primitives
-    .filter((primitive) =>
-      !strictMatches.some((match) => match.id === primitive.id) &&
-      !diverseSoftConflicts.some((match) => match.id === primitive.id),
-    )
-    .sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context));
-  const fallbackLimit = Math.max(4, MAX_AI_CANDIDATES - diverseStrictMatches.length - diverseSoftConflicts.length);
-  const diverseFallbackPool = selectDiversePrimitives(
-    fallbackPool,
-    fallbackLimit,
-    localItems,
-    context,
-  );
 
   const annotatedCandidates = [
-    ...coveragePriceRepresentatives.map((primitive) =>
-      annotateCandidatePrimitive(
-        primitive,
-        intent,
-        sortedPrices,
-        intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
-      ),
-    ),
     ...coverageMatches
-      .filter((primitive) => !coveragePriceRepresentatives.some((representative) => representative.id === primitive.id))
       .map((primitive) =>
         annotateCandidatePrimitive(
           primitive,
           intent,
           sortedPrices,
           intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
+          coverageTerms,
         ),
       ),
-    ...diverseStrictMatches
+    ...coveragePriceRepresentatives
+      .filter((primitive) => !coverageMatches.some((match) => match.id === primitive.id))
+      .map((primitive) =>
+        annotateCandidatePrimitive(
+          primitive,
+          intent,
+          sortedPrices,
+          intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
+          coverageTerms,
+        ),
+      ),
+    ...diversePool
       .filter((primitive) => !coverageMatchIds.has(primitive.id))
-      .map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'match')),
-    ...diverseSoftConflicts
-      .filter((primitive) => !coverageMatchIds.has(primitive.id))
-      .map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'soft_conflict')),
-    ...diverseFallbackPool
-      .filter((primitive) => !coverageMatchIds.has(primitive.id))
-      .map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'fallback')),
+      .map((primitive) =>
+        annotateCandidatePrimitive(
+          primitive,
+          intent,
+          sortedPrices,
+          intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
+          coverageTerms,
+        ),
+      ),
   ]
     .slice(0, MAX_AI_CANDIDATES);
 
-  return limitWeatherSensitiveCandidateMix(annotatedCandidates, context);
+  return annotatedCandidates;
 }
 
 function extractRecentUserTexts(messages: AiRecommendationMessage[], limit = 6) {
@@ -4068,7 +3844,7 @@ function buildLiteAiMessages(params: {
   allowPublicInterest: boolean;
 }) {
   // 经验：OpenRouter 免费模型能通，但大上下文下经常 200 返回后没有可用 JSON。
-  // 这里给免费弱模型只做“排序和软语义取舍”，文案、天气补充和硬约束审计仍由本地完成。
+  // 这里给免费弱模型只做“排序和软语义取舍”，文案、天气补充和约束审计仍由本地完成。
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
   const request = {
     t: 'rank_top24_lite',
@@ -4078,7 +3854,10 @@ function buildLiteAiMessages(params: {
     pm: compactPreferenceMemoryForPrompt(params.preferenceMemory),
     it: compactIntentForPrompt(params.intent),
     wx: compactWeatherContextForPrompt(params.weatherContext),
-    ck: ['id', 'title', 'destination', 'days', 'price', 'match', 'atoms', 'cats', 'weather', 'conflict'],
+    ck: [
+      'id', 'title', 'destination', 'days', 'price', 'match', 'atoms', 'cats', 'weather', 'conflict',
+      'pricePct', 'priceBand', 'termCoverage', 'termHits',
+    ],
     candidates: compactCandidatesForLitePrompt(params.candidates),
     schema: {
       intentNotes: {
@@ -4102,7 +3881,7 @@ function buildLiteAiMessages(params: {
       '只允许使用 candidates 中存在的 id。',
       '用紧凑 JSON；中文短句不超过24字。',
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
-      '结合 q、it、wx、atoms/cats 和 conflict 理解软语义。',
+      '结合 q、it、wx、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 理解软语义。',
       ...promptPolicy.liteRules,
     ],
   };
@@ -4511,20 +4290,6 @@ function validateAiItems(
   return validatedItems;
 }
 
-function getConflictSeverity(reasons: string[]) {
-  return reasons.reduce((severity, reason) => {
-    if (reason.startsWith('命中需避开条件')) return severity + 120;
-    if (reason.startsWith('目的地不匹配')) return severity + 60;
-    if (reason.startsWith('价格高于') || reason.startsWith('价格低于')) return severity + 22;
-    if (reason.startsWith('天数超过')) return severity + 44;
-    if (reason.startsWith('天数不是')) return severity + 30;
-    if (reason.startsWith('天数少于')) return severity + 18;
-    if (reason.startsWith('缺少') && reason.includes('天内可出发班期')) return severity + 56;
-    if (reason.startsWith('缺少') || reason.startsWith('未识别')) return severity + 12;
-    return severity + 8;
-  }, 0);
-}
-
 function getAuditNote(reasons: string[]) {
   if (reasons.length === 0) return null;
   const visibleReasons = reasons.slice(0, 2).join('；');
@@ -4561,33 +4326,28 @@ function auditAiRecommendations(
   intent: AiTravelIntent | null,
 ): AiRecommendationItem[] {
   const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
-  const localMetaByTourId = new Map(localItems.map((item, index) => [
-    item.tourId,
-    {
-      rank: index,
-      score: item.score,
-    },
-  ]));
   const auditedAiItems: AiRecommendationItem[] = [];
+  const alternativeItems: AiRecommendationItem[] = [];
 
   for (const item of aiItems) {
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive) continue;
 
     const conflictReasons = getPrimitiveConflictReasons(intent, primitive);
-    const conflictSeverity = getConflictSeverity(conflictReasons);
-    const budgetBandPenalty = getUnderBudgetBandPenalty(primitive, intent);
-    const localMeta = localMetaByTourId.get(item.tourId);
-    const localSupport = localMeta
-      ? Math.max(0, 18 - localMeta.rank * 1.5) + localMeta.score * 0.12
-      : 0;
     const auditNote = getAuditNote(conflictReasons);
-    const score = Math.max(0, item.score + localSupport - conflictSeverity - budgetBandPenalty * 4.5);
-    if (score <= 0) continue;
+    if (conflictReasons.length > 0) {
+      alternativeItems.push(markAsAlternativeRecommendation(
+        {
+          ...item,
+          score: Math.min(Math.max(1, item.score), 28),
+        },
+        conflictReasons,
+      ));
+      continue;
+    }
 
     auditedAiItems.push({
       ...item,
-      score,
       reason: auditNote && item.reason
         ? `${item.reason}（${auditNote.replace('审计提示：', '')}）`
         : item.reason,
@@ -4598,34 +4358,11 @@ function auditAiRecommendations(
   }
 
   const auditedIds = new Set(auditedAiItems.map((item) => item.tourId));
-  const rankedSupplementalItems = localItems
+  const supplementalItems = localItems
     .filter((item) => !auditedIds.has(item.tourId))
-    .map((item, index) => {
-      const primitive = primitiveByTourId.get(item.tourId);
-      const conflictReasons = primitive ? getPrimitiveConflictReasons(intent, primitive) : [];
-      const conflictSeverity = getConflictSeverity(conflictReasons);
-      const budgetBandPenalty = primitive ? getUnderBudgetBandPenalty(primitive, intent) : 0;
-      const localSupport = Math.max(0, 18 - index * 1.5) + item.score * 0.12;
-      return {
-        ...item,
-        score: Math.max(0, item.score + localSupport - conflictSeverity - budgetBandPenalty * 4.5),
-      };
-    });
-
-  const supplementalItems = rankedSupplementalItems
-    .filter((item) => item.score > 0)
     .slice(0, MAX_AI_RANKED_ITEMS);
 
-  const reserveItems = rankedSupplementalItems
-    .filter((item) => item.score <= 0)
-    .map((item, index) => ({
-      ...item,
-      score: Math.max(1, MAX_AI_RANKED_ITEMS - index),
-    }))
-    .slice(0, Math.max(0, MAX_AI_RANKED_ITEMS - auditedAiItems.length - supplementalItems.length));
-
-  return [...auditedAiItems, ...supplementalItems, ...reserveItems]
-    .sort((a, b) => b.score - a.score)
+  return [...auditedAiItems, ...alternativeItems, ...supplementalItems]
     .slice(0, MAX_AI_RANKED_ITEMS);
 }
 
@@ -4636,43 +4373,24 @@ function auditAiRecommendationsStrict(
   intent: AiTravelIntent | null,
 ): AiRecommendationItem[] {
   const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
-  const localMetaByTourId = new Map(localItems.map((item, index) => [
-    item.tourId,
-    {
-      rank: index,
-      score: item.score,
-    },
-  ]));
   const seenTourIds = new Set<string>();
   const exactItems: AiRecommendationItem[] = [];
   const alternativeItems: AiRecommendationItem[] = [];
 
-  const pushAudited = (item: AiRecommendationItem, sourceIndex: number, source: 'ai' | 'local') => {
+  const pushAudited = (item: AiRecommendationItem, source: 'ai' | 'local') => {
     if (seenTourIds.has(item.tourId)) return;
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive) return;
     seenTourIds.add(item.tourId);
 
     const conflictReasons = getPrimitiveConflictReasons(intent, primitive);
-    const conflictSeverity = getConflictSeverity(conflictReasons);
-    const budgetBandPenalty = getUnderBudgetBandPenalty(primitive, intent);
-    const localMeta = localMetaByTourId.get(item.tourId);
-    const localSupport = localMeta
-      ? Math.max(0, 18 - localMeta.rank * 1.5) + localMeta.score * 0.12
-      : 0;
-    const sourceBase = source === 'ai' ? item.score : item.score + Math.max(0, 10 - sourceIndex * 0.4);
-    const auditedScore = Math.max(0, sourceBase + localSupport - conflictSeverity - budgetBandPenalty * 4.5);
-    if (auditedScore <= 0 && conflictReasons.length === 0) return;
 
     if (conflictReasons.length === 0) {
-      exactItems.push({
-        ...item,
-        score: auditedScore,
-      });
+      exactItems.push(item);
       return;
     }
 
-    const alternativeScore = Math.min(Math.max(1, auditedScore), source === 'ai' ? 28 : 18);
+    const alternativeScore = Math.min(Math.max(1, item.score), source === 'ai' ? 28 : 18);
     alternativeItems.push(markAsAlternativeRecommendation(
       {
         ...item,
@@ -4682,14 +4400,11 @@ function auditAiRecommendationsStrict(
     ));
   };
 
-  aiItems.forEach((item, index) => pushAudited(item, index, 'ai'));
-  localItems.forEach((item, index) => pushAudited(item, index, 'local'));
+  aiItems.forEach((item) => pushAudited(item, 'ai'));
+  localItems.forEach((item) => pushAudited(item, 'local'));
 
-  const exactRanked = exactItems
-    .sort((a, b) => b.score - a.score)
-    .slice(0, MAX_AI_RANKED_ITEMS);
+  const exactRanked = exactItems.slice(0, MAX_AI_RANKED_ITEMS);
   const alternativeRanked = alternativeItems
-    .sort((a, b) => b.score - a.score)
     .slice(0, Math.max(0, MAX_AI_RANKED_ITEMS - exactRanked.length));
 
   return [...exactRanked, ...alternativeRanked].slice(0, MAX_AI_RANKED_ITEMS);
@@ -4781,42 +4496,45 @@ function normalizeBudgetPriorityByUserText(
   intent: AiTravelIntent | null,
   userText: string,
 ): AiTravelIntent | null {
-  if (!intent?.budgetMax || intent.budgetMin) return intent;
+  if (!intent?.budgetPriority) return intent;
+  if (hasExplicitBudgetPriorityText(userText)) return intent;
+  return {
+    ...intent,
+    budgetPriority: null,
+  };
+}
 
+function hasExplicitBudgetBoundsText(userText: string) {
+  return Boolean(parseBudget(normalizeText(userText)));
+}
+
+function hasExplicitBudgetPriorityText(userText: string) {
   const normalizedText = userText.replace(/\s+/g, '');
-  const mentionsBudgetCap = /(预算|控制在|不超过|别超过|以内|以下)/.test(normalizedText);
-  const explicitLowPriceIntent = /(便宜点|再便宜|越便宜越好|最低价|性价比|省钱|穷游|压低预算|能省则省|越低越好)/.test(
-    normalizedText,
-  );
-  const upperBandIntent = /(以内|以下|不超过|别超过|控制在)/.test(normalizedText);
-
-  if (mentionsBudgetCap && upperBandIntent && !explicitLowPriceIntent && intent.budgetPriority === 'low') {
-    return {
-      ...intent,
-      budgetPriority: 'balanced',
-    };
-  }
-
-  if (mentionsBudgetCap && !explicitLowPriceIntent && !intent.budgetPriority) {
-    return {
-      ...intent,
-      budgetPriority: 'balanced',
-    };
-  }
-
-  return intent;
+  return /便宜|低价|性价比|省钱|穷游|划算|实惠|不贵|越低越好|能省则省|高端|奢华|豪华|贵一点|品质|不差钱|预算不限/.test(normalizedText);
 }
 
 function sanitizeAiBudgetBoundsForTurn(
   intent: AiTravelIntent | null,
   userText: string,
 ): AiTravelIntent | null {
-  if (!intent?.budgetMax && !intent?.budgetMin) return intent;
-  if (parseBudget(normalizeText(userText))) return intent;
+  const hasBudgetBounds = hasExplicitBudgetBoundsText(userText);
+  const hasBudgetPriority = hasExplicitBudgetPriorityText(userText);
+  if (!intent?.budgetMax && !intent?.budgetMin && (!intent || !intent.budgetPriority || hasBudgetPriority)) {
+    return intent;
+  }
+  if (hasBudgetBounds) {
+    return hasBudgetPriority
+      ? intent
+      : {
+          ...intent,
+          budgetPriority: null,
+        };
+  }
   return {
     ...intent,
     budgetMin: null,
     budgetMax: null,
+    budgetPriority: null,
   };
 }
 
@@ -5168,16 +4886,16 @@ export async function requestAiRecommendations({
 
   emitProgress(onProgress, {
     stage: config ? 'intent' : 'fallback',
-    label: config ? '准备调用 AI' : '未配置 AI，改用本地推荐',
+    label: config ? '准备调用 AI' : '未配置 AI，改用本地候选补位',
     detail: config
       ? `将从 ${candidatePool.length} 条候选线路中理解需求并生成推荐。`
-      : `正在按当前条件从 ${candidatePool.length} 条候选线路中做规则匹配。`,
+      : `正在按当前条件从 ${candidatePool.length} 条候选线路中做候选补位。`,
     progress: config ? 20 : 100,
     substeps: config
       ? withActiveSubstep(
           [
             { id: 'scope', label: '圈定候选范围' },
-            { id: 'intent', label: '整理硬约束' },
+            { id: 'intent', label: '整理约束和偏好' },
             { id: 'handoff', label: '准备上下文补充' },
           ],
           'intent',
@@ -5217,7 +4935,7 @@ export async function requestAiRecommendations({
       source: 'local-preview',
       status: {
         mode: 'local-only',
-        label: '本次使用本地规则推荐',
+        label: '本次使用本地候选补位',
         detail: `因为没有可用的 AI 配置，已直接筛出 ${getFallbackLocalItems().length} 条候选线路。`,
       },
       preferenceMemory: basePreferenceMemory ?? undefined,
@@ -5233,43 +4951,15 @@ export async function requestAiRecommendations({
     const nextPreferenceMemory = mergePreferenceMemory(memoryForThisTurn, intent);
     const effectiveIntent = mergeIntentWithMemory(intent, nextPreferenceMemory);
     const effectiveUserText = buildEffectiveUserText(text, nextPreferenceMemory);
-    const intentDateWindow = buildDateWindowFromIntent(effectiveIntent);
-    const wideAvailableCandidates = candidatePool.filter((tour) => {
-      const primitive = buildTourPrimitive(tour);
-      if (primitiveMatchesAvoid(primitive, effectiveIntent?.avoid).length > 0) return false;
-      return true;
-    });
-    const strictAvailableCandidates = wideAvailableCandidates.filter((tour) =>
-      getPrimitiveConflictReasons(effectiveIntent, buildTourPrimitive(tour)).length === 0,
-    );
-    let availableCandidates = strictAvailableCandidates.length > 0 ? strictAvailableCandidates : wideAvailableCandidates;
-
-    if (effectiveIntent?.destinationHints?.length) {
-      const destinationMatched = availableCandidates.filter((tour) =>
-        candidateMatchesDestinationIntent(effectiveIntent, buildTourPrimitive(tour)),
-      );
-      if (destinationMatched.length > 0) {
-        availableCandidates = destinationMatched;
-      }
-    }
-
-    if (intentDateWindow) {
-      const dateMatched = availableCandidates.filter((tour) => matchesDateWindow(tour, intentDateWindow));
-      const datedCandidates = availableCandidates.filter((tour) => getCandidateDepartureDates(tour).length > 0);
-      if (dateMatched.length > 0 || datedCandidates.length > 0) {
-        availableCandidates = dateMatched;
-      }
-    }
-
+    const availableCandidates = candidatePool;
     const localItems = buildIntentLocalRecommendations(availableCandidates, effectiveIntent);
-    const wideLocalItems = buildIntentLocalRecommendations(wideAvailableCandidates, effectiveIntent);
     const strictLocalItems = localItems.length > 0
       ? localItems
       : localRecommendations(availableCandidates, effectiveUserText);
-    const broadLocalFallbackItems = wideLocalItems.length > 0
-      ? wideLocalItems
-      : localRecommendations(wideAvailableCandidates, effectiveUserText);
-    const localItemsForMerge = padRecommendationItems(strictLocalItems, broadLocalFallbackItems);
+    const localItemsForMerge = padRecommendationItems(
+      strictLocalItems,
+      fallbackRecommendations(availableCandidates),
+    );
     runtimeFallbackItems = localItemsForMerge;
     runtimePreferenceMemory = nextPreferenceMemory;
     const auditContext = buildRecommendationAuditContext(availableCandidates, previousResult, effectiveIntent);
@@ -5295,7 +4985,7 @@ export async function requestAiRecommendations({
           searchQuery,
           activeFilters,
           preferenceMemory: nextPreferenceMemory,
-          tours: wideAvailableCandidates,
+          tours: availableCandidates,
         })
       : buildNoWeatherContext();
     const weatherContextPromise = useWeatherResearch
@@ -5305,12 +4995,12 @@ export async function requestAiRecommendations({
           searchQuery,
           activeFilters,
           preferenceMemory: nextPreferenceMemory,
-          tours: wideAvailableCandidates,
+          tours: availableCandidates,
         })
       : Promise.resolve(weatherContextForRanking);
-    const routeAtlasPromise = Promise.resolve(buildRouteAtlas(wideAvailableCandidates));
+    const routeAtlasPromise = Promise.resolve(buildRouteAtlas(availableCandidates));
 
-    const compactedCandidates = compactCandidates(
+    const aiCandidatePool = compactCandidates(
       availableCandidates,
       localItemsForMerge,
       effectiveIntent,
@@ -5322,34 +5012,17 @@ export async function requestAiRecommendations({
         weatherContext: weatherContextForRanking,
       },
     );
-    const wideCompactedCandidates = compactCandidates(
-      wideAvailableCandidates,
-      localItemsForMerge,
-      effectiveIntent,
-      {
-        budgetPriority: effectiveIntent?.budgetPriority,
-        intent: effectiveIntent,
-        userText: effectiveUserText,
-        weatherSensitivity: effectiveIntent?.weatherSensitivity,
-        weatherContext: weatherContextForRanking,
-      },
-    );
-    const mergedCompactedCandidates = [
-      ...compactedCandidates,
-      ...wideCompactedCandidates.filter((candidate) => !compactedCandidates.some((item) => item.id === candidate.id)),
-    ].slice(0, MAX_AI_CANDIDATES);
-    const aiCandidatePool = compactedCandidates.length > 0 ? compactedCandidates : mergedCompactedCandidates;
-    if (mergedCompactedCandidates.length === 0) {
+    if (aiCandidatePool.length === 0) {
       return {
         conversationId,
-        summary: '按当前避开条件没有可推荐的候选线路；已避免继续调用 AI 生成不合适结果。',
+        summary: '当前没有可交给 AI 排序的候选线路；建议先放宽页面筛选条件。',
         items: localItemsForMerge,
         generatedAt: new Date().toISOString(),
         source: 'local-preview',
         status: {
           mode: 'local-only',
-          label: '候选已被硬约束排除',
-          detail: '本次没有可交给 AI 排序的合规候选，已返回本地筛选结果。',
+          label: '没有可用候选',
+          detail: '本次没有可交给 AI 排序的候选，已返回本地候选补位结果。',
         },
         preferenceMemory: nextPreferenceMemory,
       };
@@ -5357,7 +5030,7 @@ export async function requestAiRecommendations({
     emitProgress(onProgress, {
       stage: 'ranking',
       label: '正在生成推荐结果',
-      detail: `AI 正在对 ${compactedCandidates.length} 条高相关候选线路做排序和取舍。`,
+      detail: `AI 正在对 ${aiCandidatePool.length} 条候选线路做排序和取舍。`,
       progress: 82,
       substeps: withActiveSubstep(
         [
@@ -5414,7 +5087,7 @@ export async function requestAiRecommendations({
     const finalPreferenceMemory = mergePreferenceMemory(memoryForThisTurn, finalIntent);
     const finalEffectiveUserText = buildEffectiveUserText(text, finalPreferenceMemory);
     const compactedCandidateIds = new Set(aiCandidatePool.map((candidate) => candidate.id));
-    const compactedCandidateTours = wideAvailableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
+    const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
     const compactedLocalItems = localItemsForMerge.filter((item) => compactedCandidateIds.has(item.tourId));
     const validatedAiItems = validateAiItems(aiResponse, compactedCandidateTours);
     if (validatedAiItems.length === 0 && Array.isArray(aiResponse.items)) {
@@ -5436,7 +5109,7 @@ export async function requestAiRecommendations({
       localItemsForMerge,
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
-    const mergedCandidateTours = wideAvailableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));
+    const mergedCandidateTours = availableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));
     const topWeatherTourIds = new Set(baseMergedItems.slice(0, 8).map((item) => item.tourId));
     const destinationWeatherCandidates = useWeatherResearch
       ? buildDestinationWeatherCandidates(
@@ -5527,12 +5200,12 @@ export async function requestAiRecommendations({
     emitProgress(onProgress, {
       stage: 'fallback',
       label: 'AI 暂不可用，已切换备用方案',
-      detail: `正在按本地规则从 ${candidatePool.length} 条候选线路里给出可用结果。`,
+      detail: `正在从 ${candidatePool.length} 条候选线路里给出本地补位结果。`,
       progress: 100,
       substeps: withActiveSubstep(
         [
           { id: 'detect', label: '检测 AI 不可用' },
-          { id: 'rules', label: '切换本地规则' },
+          { id: 'rules', label: '切换本地补位' },
           { id: 'return', label: '返回备用推荐' },
         ],
         'return',
@@ -5541,14 +5214,14 @@ export async function requestAiRecommendations({
 
     return {
       conversationId,
-      summary: 'AI 接口暂时不可用，已先使用本地规则按需求做预匹配。',
+      summary: 'AI 接口暂时不可用，已先返回本地候选补位结果。',
       items: fallbackItems,
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
       status: {
         mode: 'fallback',
         label: 'AI 未完成，本次已降级到本地推荐',
-        detail: `为了不中断结果展示，已先返回 ${fallbackItems.length} 条本地规则筛选结果。${failureDetail ? ` (${failureDetail})` : ''}`,
+        detail: `为了不中断结果展示，已先返回 ${fallbackItems.length} 条本地候选补位结果。${failureDetail ? ` (${failureDetail})` : ''}`,
       },
       preferenceMemory: runtimePreferenceMemory ?? undefined,
     };
