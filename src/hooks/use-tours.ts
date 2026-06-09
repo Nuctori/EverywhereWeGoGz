@@ -1,9 +1,8 @@
 ﻿// 从 public/data/tours-list.json 和 tours-meta.json 读取数据的 hook，提供 useTours（列表）和 useCrawlStatus（元信息）
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { getDataUrl } from '@/lib/utils';
 import type { TourSummary } from '@/types/tour';
 import { dataMetaSchema, toursListSchema } from '@/lib/runtime-schemas';
-
-declare const __DATA_VERSION__: string;
 
 type DataMeta = {
   generatedAt: string | null;
@@ -82,13 +81,6 @@ const initialCrawlStatus: CrawlStatus = {
   generatedAt: null,
   latestUpdatedAt: null,
 };
-
-// 附加缓存版本号 __DATA_VERSION__，确保静态站点更新后浏览器不缓存旧数据
-function getDataUrl(path: string) {
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-  return `${normalizedBaseUrl}data/${path}?v=${__DATA_VERSION__}`;
-}
 
 export function useTours() {
   const [state, setState] = useState<UseToursState>(initialToursState);

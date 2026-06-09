@@ -29,3 +29,11 @@ export function resolveAssetUrl(path: string) {
 
   return `${baseUrl}${normalizedPath}`
 }
+// 附加缓存版本号 __DATA_VERSION__，确保静态站点更新后浏览器不缓存旧数据
+declare const __DATA_VERSION__: string;
+
+export function getDataUrl(path: string) {
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  return `${normalizedBaseUrl}data/${path}?v=${encodeURIComponent(__DATA_VERSION__ || Date.now().toString())}`;
+}

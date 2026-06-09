@@ -1,15 +1,8 @@
 ﻿// 点击卡片后按 id 异步加载 tour-details/{id}.json，带内存缓存和请求竞争 token
+import { getDataUrl } from '@/lib/utils';
 import { useState, useRef, useCallback } from 'react';
 import type { ResolvedTour, TourDetail, TourSummary } from '@/types/tour';
 import { tourDetailSchema } from '@/lib/runtime-schemas';
-
-declare const __DATA_VERSION__: string;
-
-function getDataUrl(path: string) {
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-  return `${normalizedBaseUrl}data/${path}?v=${__DATA_VERSION__}`;
-}
 
 export type TourDetailStatus = 'closed' | 'loading' | 'ready' | 'error';
 
