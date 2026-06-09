@@ -113,6 +113,15 @@ const aiOrderAudited = auditAiRecommendationsStrict(
 );
 assert.equal(aiOrderAudited[0].tourId, 'ai-first');
 assert.equal(aiOrderAudited[1].tourId, 'local-favorite');
+const mergedAiOrder = mergeAiAndLocalRecommendations(
+  [
+    { tourId: 'ai-lower-score-first', score: 10, reason: 'AI 排第一', matchedSignals: [] },
+    { tourId: 'ai-higher-score-second', score: 99, reason: 'AI 排第二', matchedSignals: [] },
+  ],
+  [],
+);
+assert.equal(mergedAiOrder[0].tourId, 'ai-lower-score-first');
+assert.equal(mergedAiOrder[1].tourId, 'ai-higher-score-second');
 const mergedCapItems = mergeAiAndLocalRecommendations(
   Array.from({ length: 12 }, (_, index) => ({
     tourId: `ai-${index}`,
@@ -246,7 +255,7 @@ assert.ok(buildTourPrimitive(hotSpringTour).seasonalComfortAtoms.some((atom) => 
 
 const auditedAvoid = auditAiRecommendations(
   [{ tourId: 'hot-spring', score: 100, reason: '便宜', matchedSignals: ['低价'] }],
-  [],
+  [{ tourId: 'hot-spring', score: 99, reason: '本地补位', matchedSignals: ['本地'] }],
   [hotSpringTour, nonHotSpringTour],
   avoidIntent,
 );

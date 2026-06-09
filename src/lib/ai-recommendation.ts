@@ -1291,8 +1291,7 @@ function mergeAiAndLocalRecommendations(
   // 经验：合并阶段保持 AI 排序主导，只拿本地结果做补位。
   // 如果这里让本地分数反向覆盖 AI，规则器和智能会互相打架，复杂软语义会被拉回低价/热门启发式。
   const seenTourIds = new Set<string>();
-  const primaryAiItems = [...aiItems]
-    .sort((a, b) => b.score - a.score)
+  const primaryAiItems = aiItems
     .filter((item) => {
       if (seenTourIds.has(item.tourId)) return false;
       seenTourIds.add(item.tourId);
@@ -4358,7 +4357,10 @@ function auditAiRecommendations(
     });
   }
 
-  const auditedIds = new Set(auditedAiItems.map((item) => item.tourId));
+  const auditedIds = new Set([
+    ...auditedAiItems.map((item) => item.tourId),
+    ...alternativeItems.map((item) => item.tourId),
+  ]);
   const supplementalItems = localItems
     .filter((item) => !auditedIds.has(item.tourId))
     .slice(0, MAX_AI_RANKED_ITEMS);
