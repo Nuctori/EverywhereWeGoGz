@@ -941,6 +941,7 @@ function buildHardIntentFromText(
 ): AiTravelIntent | null {
   const normalizedText = normalizeText(text);
   const budget = parseBudget(normalizedText);
+  const hasTextBudget = Boolean(budget);
   const duration = parseDuration(normalizedText);
   const promptDateWindow = resolvePromptDateWindow(normalizedText);
   const avoid = uniqueStrings([
@@ -957,8 +958,8 @@ function buildHardIntentFromText(
     ]),
     avoid,
     weatherSensitivity,
-    budgetMin: budget?.min && Number.isFinite(budget.min) ? budget.min : activeFilters.minPrice,
-    budgetMax: budget?.max && Number.isFinite(budget.max) ? budget.max : activeFilters.maxPrice,
+    budgetMin: hasTextBudget && budget?.min && Number.isFinite(budget.min) ? budget.min : null,
+    budgetMax: hasTextBudget && budget?.max && Number.isFinite(budget.max) ? budget.max : null,
     tripDaysMin: duration?.min && Number.isFinite(duration.min) ? duration.min : null,
     tripDaysMax: duration?.max && Number.isFinite(duration.max) ? duration.max : null,
     departureWithinDays: promptDateWindow

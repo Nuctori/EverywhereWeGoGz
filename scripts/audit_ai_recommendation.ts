@@ -1034,6 +1034,14 @@ assert.equal(zhHardIntent?.tripDaysMin, 1);
 assert.equal(zhHardIntent?.tripDaysMax, 3);
 assert.ok(collectLiteralAvoidHints('不想去海边，也不要坐飞机').includes('海边'));
 assert.ok(zhHardIntent?.avoid?.includes('飞机'));
+const defaultSliderBudgetIntent = buildHardIntentFromText(
+  '帮我找同时带温泉和沙滩的团',
+  {
+    ...baseFilters,
+    maxPrice: 35000,
+  },
+);
+assert.equal(defaultSliderBudgetIntent?.budgetMax ?? null, null);
 
 const strictMismatchIntent = buildHardIntentFromText(
   '500元以下，7天以上，住五星酒店，去新疆，还要天气特别好',
