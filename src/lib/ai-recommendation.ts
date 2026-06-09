@@ -1507,7 +1507,7 @@ function normalizePreferenceMemory(memory: AiPreferenceMemory | null | undefined
   return memory;
 }
 
-function getDepartureDates(tour: AiRecommendationCandidate) {
+function getDepartureDatesWithHotDates(tour: AiRecommendationCandidate) {
   return [
     ...(tour.departureDates || []),
     ...(tour.hotDepartureDates || []),
@@ -2080,9 +2080,7 @@ function getMatchedDestinationHint(intent: AiTravelIntent | null, primitive: Rec
 function rankPrimitive(
   primitive: RecommendationPrimitive,
   localItems: AiRecommendationItem[],
-  context?: RecommendationContext,
 ) {
-  void context;
   const localRank = localItems.findIndex((item) => item.tourId === primitive.id);
   const localRankBoost = localRank >= 0 ? Math.max(0, 200 - localRank * 6) : 0;
   const nearestDeparture = primitive.schedule.departureDates[0];
@@ -2583,11 +2581,10 @@ function selectDiversePrimitives(
   primitives: RecommendationPrimitive[],
   limit: number,
   localItems: AiRecommendationItem[],
-  context?: RecommendationContext,
 ) {
   if (primitives.length <= limit) return primitives;
 
-  const ranked = [...primitives].sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context));
+  const ranked = [...primitives].sort((a, b) => rankPrimitive(b, localItems) - rankPrimitive(a, localItems));
   const groups = new Map<string, RecommendationPrimitive[]>();
 
   for (const primitive of ranked) {
@@ -2598,7 +2595,7 @@ function selectDiversePrimitives(
   }
 
   const groupEntries = [...groups.entries()].sort(([, a], [, b]) =>
-    rankPrimitive(b[0], localItems, context) - rankPrimitive(a[0], localItems, context),
+    rankPrimitive(b[0], localItems) - rankPrimitive(a[0], localItems),
   );
   const selected: RecommendationPrimitive[] = [];
   const selectedIds = new Set<string>();
@@ -2625,7 +2622,7 @@ function selectDiversePrimitives(
     selectedIds.add(primitive.id);
   }
 
-  return selected.sort((a, b) => rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context));
+  return selected.sort((a, b) => rankPrimitive(b, localItems) - rankPrimitive(a, localItems));
 }
 
 function getPricePercentile(price: number, sortedPrices: number[]) {
@@ -2667,11 +2664,11 @@ function selectPriceBandRepresentatives(
       .sort((a, b) =>
         getPrimitiveCoverageScore(b, coverageTerms) -
           getPrimitiveCoverageScore(a, coverageTerms) ||
-        rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context),
+        rankPrimitive(b, localItems) - rankPrimitive(a, localItems),
       ))
     .sort((a, b) =>
       getPrimitiveCoverageScore(b[0], coverageTerms) - getPrimitiveCoverageScore(a[0], coverageTerms) ||
-      rankPrimitive(b[0], localItems, context) - rankPrimitive(a[0], localItems, context),
+      rankPrimitive(b[0], localItems) - rankPrimitive(a[0], localItems),
     );
   for (const group of groupEntries) {
     if (selected.length >= limit) break;
@@ -2690,7 +2687,7 @@ function selectPriceBandRepresentatives(
 
   return selected.sort((a, b) =>
     getPrimitiveCoverageScore(b, coverageTerms) - getPrimitiveCoverageScore(a, coverageTerms) ||
-    rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context),
+    rankPrimitive(b, localItems) - rankPrimitive(a, localItems),
   );
 }
 
@@ -2923,7 +2920,7 @@ function compactCandidates(
         .filter((primitive) => getPrimitiveCoverageScore(primitive, coverageTerms) > 0)
         .sort((a, b) =>
           getPrimitiveCoverageScore(b, coverageTerms) - getPrimitiveCoverageScore(a, coverageTerms) ||
-          rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context),
+          rankPrimitive(b, localItems) - rankPrimitive(a, localItems),
         )
     : [];
   const coverageMatches = coverageTerms.length > 0
@@ -2931,7 +2928,6 @@ function compactCandidates(
         coveragePool,
         Math.min(16, MAX_AI_CANDIDATES),
         localItems,
-        context,
       )
     : [];
   const coveragePriceRepresentatives = selectPriceBandRepresentatives(
@@ -2945,7 +2941,6 @@ function compactCandidates(
     primitives,
     MAX_AI_CANDIDATES,
     localItems,
-    context,
   );
   const coverageMatchIds = new Set([
     ...coverageMatches.map((primitive) => primitive.id),
@@ -3484,7 +3479,7 @@ function resolvePromptDateWindow(text: string) {
 
 function getCandidateDepartureDates(tour: AiRecommendationCandidate) {
   const today = getTodayInputValue();
-  return getDepartureDates(tour)
+  return getDepartureDatesWithHotDates(tour)
     .filter(Boolean)
     .filter((date) => date >= today)
     .sort();
@@ -3495,7 +3490,7 @@ function filterPastOnlyCandidatesWhenFutureExists(tours: AiRecommendationCandida
   if (!hasUpcomingPool) return tours;
 
   const filtered = tours.filter((tour) => {
-    const allDates = getDepartureDates(tour);
+    const allDates = getDepartureDatesWithHotDates(tour);
     if (allDates.length === 0) return true;
     return getCandidateDepartureDates(tour).length > 0;
   });
@@ -3614,7 +3609,7 @@ function resolveWeatherContext(params: {
         params.activeFilters.departureDateEnd,
       ]) ||
       getEarliestDate(params.tours.flatMap((tour) => getCandidateDepartureDates(tour))) ||
-      getEarliestDate(params.tours.flatMap((tour) => getDepartureDates(tour))) ||
+      getEarliestDate(params.tours.flatMap((tour) => getDepartureDatesWithHotDates(tour))) ||
       getLikelyTravelDate(params.text, params.tours);
 
     if (travelDate) {

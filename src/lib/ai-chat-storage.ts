@@ -29,18 +29,22 @@ export function readStoredAiChatState(): StoredAiChatState {
   }
 }
 
-// 保存聊天状态时只保留末尾 N 条消息，避免本地缓存无限增长。
+// 保存聊天状态时只保留末尾 N 条消息；非正数不裁剪，避免误清空历史。
 export function saveStoredAiChatState(
   state: StoredAiChatState,
   maxPersistedMessages?: number,
 ) {
   if (typeof window === 'undefined') return;
+  const messageLimit =
+    typeof maxPersistedMessages === 'number' && Number.isInteger(maxPersistedMessages) && maxPersistedMessages > 0
+      ? maxPersistedMessages
+      : null;
 
   const normalizedState = {
     ...state,
     messages:
-      typeof maxPersistedMessages === 'number' && Array.isArray(state.messages)
-        ? state.messages.slice(-maxPersistedMessages)
+      messageLimit !== null && Array.isArray(state.messages)
+        ? state.messages.slice(-messageLimit)
         : state.messages,
   };
   const parsed = storedAiChatStateSchema.safeParse(normalizedState);

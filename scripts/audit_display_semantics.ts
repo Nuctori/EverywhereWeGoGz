@@ -48,7 +48,7 @@ assert.equal(
     destination: '其他',
     highlights: ['其他必打卡', '特色美食', '精品住宿'],
   })),
-  '以线路标题为准',
+  '目的地待确认',
 );
 
 assert.equal(

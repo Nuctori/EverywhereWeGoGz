@@ -12,6 +12,7 @@
     "build": "npm run data:split && npm run audit:data-integrity && tsc -b && vite build",
     "data:split": "node scripts/split_tour_data.mjs",
     "audit:data-integrity": "node scripts/audit_data_integrity.mjs",
+    "audit:ai-chat-storage": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_chat_storage.ts",
     "audit:ai-recommendation": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_recommendation.ts",
     "audit:display-semantics": "node --experimental-strip-types scripts/audit_display_semantics.ts",
     "audit:availability": "python scripts/validate_tour_availability.py",

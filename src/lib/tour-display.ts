@@ -1,7 +1,7 @@
 // 线路展示层：负责标题摘要、目的地兜底、主题推断和日期展示文案。
 import type { Tour } from '@/types/tour';
 
-const GENERIC_DESTINATION_FALLBACK = '以线路标题为准';
+const GENERIC_DESTINATION_FALLBACK = '目的地待确认';
 const HIGHLIGHT_PLACEHOLDERS = new Set([
   '其他必打卡',
   '特色美食',

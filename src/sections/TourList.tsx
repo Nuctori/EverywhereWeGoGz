@@ -15,7 +15,7 @@ import type { AiSearchRequest } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { cn } from '@/lib/utils';
+import { cn, getDataUrl } from '@/lib/utils';
 import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
@@ -53,14 +53,6 @@ import {
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { zhCN } from 'date-fns/locale';
-
-declare const __DATA_VERSION__: string;
-
-function getDataUrl(path: string) {
-  const baseUrl = import.meta.env.BASE_URL || '/';
-  return `${baseUrl}data/${path}?v=${encodeURIComponent(__DATA_VERSION__ || Date.now().toString())}`;
-}
-
 
 // 数据加载核心 hook：分页优先（tours-page-0.json），失败后回退全量列表
 function useToursData() {
