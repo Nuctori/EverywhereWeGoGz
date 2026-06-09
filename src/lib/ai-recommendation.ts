@@ -1110,6 +1110,18 @@ function mergeAiRankingIntent(
     destinationHints: hardIntent.destinationHints?.length
       ? hardIntent.destinationHints
       : aiIntent.destinationHints || [],
+    semanticFocus: uniqueStrings([
+      ...(hardIntent.semanticFocus || []),
+      ...(aiIntent.semanticFocus || []),
+    ]),
+    travelStyle: uniqueStrings([
+      ...(hardIntent.travelStyle || []),
+      ...(aiIntent.travelStyle || []),
+    ]),
+    mustHave: uniqueStrings([
+      ...(hardIntent.mustHave || []),
+      ...(aiIntent.mustHave || []),
+    ]),
     avoid: uniqueStrings([...(hardIntent.avoid || []), ...(aiIntent.avoid || [])]),
     weatherSensitivity: uniqueStrings([
       ...(hardIntent.weatherSensitivity || []),
@@ -1726,15 +1738,8 @@ function buildLocalTourReason(
 ) {
   const primitive = buildTourPrimitive(tour);
   const baseReason = buildPrimitiveConcreteReason(primitive, variant);
-  const coverageSignal = signals.find((signal) => signal.startsWith('完整覆盖：'));
   const signalText = buildReadableSignalClause(signals);
 
-  if (coverageSignal && signalText) {
-    return `${coverageSignal}；${stripTerminalPunctuation(baseReason)}；${signalText}。`;
-  }
-  if (coverageSignal) {
-    return `${coverageSignal}；${baseReason}`;
-  }
   if (signalText) return `${stripTerminalPunctuation(baseReason)}；${signalText}。`;
   return baseReason || fallback;
 }
@@ -2067,6 +2072,15 @@ function getPrimitiveConflictReasons(intent: AiTravelIntent | null, primitive: R
     reasons.push(`命中需避开条件：${avoidMatches.join('/')}`);
   }
 
+  if (hasPublicInterestNeedFromIntent(intent) && !primitiveHasPublicInterestEvidence(primitive)) {
+    const contradictionLabels: string[] = [];
+    if (primitiveHasUrbanLeisureEvidence(primitive)) contradictionLabels.push('城市休闲');
+    if (primitiveHasLuxuryResortEvidence(primitive)) contradictionLabels.push('品质度假');
+    if (contradictionLabels.length > 0) {
+      reasons.push(`更像${contradictionLabels.join('和')}，不像县域乡村或公益方向`);
+    }
+  }
+
   return reasons;
 }
 
@@ -2161,7 +2175,7 @@ function reasonMentionsCandidateFact(reason: string, primitive: RecommendationPr
 }
 
 function isGenericReason(reason: string) {
-  return /^(价格|低价|班期|热门|性价比|预算|天数|行程|综合|适合预算)|综合匹配|性价比高|班期多|价格低|自然风光生态|适合轻松|天气取舍/.test(reason);
+  return /^(价格|低价|班期|热门|性价比|预算|天数|行程|综合)|综合匹配|性价比高|班期多|价格低|自然风光生态|适合轻松|天气取舍/.test(reason);
 }
 
 function hasMetaRecommendationLanguage(reason: string) {
@@ -2170,7 +2184,7 @@ function hasMetaRecommendationLanguage(reason: string) {
 
 function shouldKeepAiReason(reason: string, primitive: RecommendationPrimitive) {
   const trimmed = stripTerminalPunctuation(reason);
-  if (trimmed.length < 10 || trimmed.length > 80) return false;
+  if (trimmed.length < 6) return false;
   if (hasInternalRecommendationLanguage(trimmed)) return false;
   if (hasMetaRecommendationLanguage(trimmed)) return false;
   if (hasUnsupportedPublicInterestClaim(trimmed, primitive)) return false;
@@ -2188,16 +2202,6 @@ function hasPublicInterestNeed(intent: AiTravelIntent | null, userText: string) 
   return hasPublicInterestLanguage(corpus);
 }
 
-function hasStrictPovertyNeed(intent: AiTravelIntent | null, userText: string) {
-  const corpus = [
-    userText,
-    ...(intent?.semanticFocus || []),
-    ...(intent?.travelStyle || []),
-    ...(intent?.mustHave || []),
-  ].join(' ');
-  return /(贫穷|贫困|落后地区|落后一点|欠发达|经济相对较弱|经济较弱|穷地方|穷一点)/.test(corpus);
-}
-
 function primitiveHasPublicInterestEvidence(primitive: RecommendationPrimitive) {
   const corpus = [
     primitive.title,
@@ -2213,7 +2217,7 @@ function primitiveHasPublicInterestEvidence(primitive: RecommendationPrimitive) 
   return /(扶贫|公益|慈善|助农|乡村振兴|乡村|村|古村|瑶寨|苗寨|侗寨|壮寨|民族村|农家|田园|梯田|县|县城|山区|支教|研学)/.test(corpus);
 }
 
-function primitiveHasRuralCountyEvidence(primitive: RecommendationPrimitive) {
+function primitiveHasUrbanLeisureEvidence(primitive: RecommendationPrimitive) {
   const corpus = [
     primitive.title,
     primitive.destination,
@@ -2222,13 +2226,10 @@ function primitiveHasRuralCountyEvidence(primitive: RecommendationPrimitive) {
     ...primitive.highlights,
     ...primitive.semanticAtoms,
   ].join(' ');
-  return /(乡村|乡镇|村寨|村落|古村|农家|田园|梯田|县域|县城|[^市]县|山区|山村|瑶寨|苗寨|侗寨|壮寨|民族村)/.test(corpus);
+  return /(都市|城市|citywalk|cbd|商圈|地标|夜景|步行街|购物|外滩|陆家嘴|三里屯|太古里|烤鸭|故宫|天安门|长城|博物馆|环球影城|迪士尼)/i.test(corpus);
 }
 
-function getPublicInterestSemanticScore(
-  primitive: RecommendationPrimitive,
-  strictPovertyNeed: boolean,
-) {
+function primitiveHasLuxuryResortEvidence(primitive: RecommendationPrimitive) {
   const corpus = [
     primitive.title,
     primitive.destination,
@@ -2237,59 +2238,16 @@ function getPublicInterestSemanticScore(
     ...primitive.highlights,
     ...primitive.semanticAtoms,
   ].join(' ');
-  const explicitPublicInterest = /(扶贫|公益|慈善|助农|乡村振兴|支教)/.test(corpus);
-  const publicInterestEvidence = primitiveHasPublicInterestEvidence(primitive);
-  const ruralCountyEvidence = primitiveHasRuralCountyEvidence(primitive);
-  const urbanContradictions = (corpus.match(/都市|城市|citywalk|cbd|商圈|地标|夜景|乐园|步行街|购物|外滩|陆家嘴|三里屯|太古里|烤鸭/g) || []).length;
-  const luxuryResortSignals = (corpus.match(/豪华|奢华|度假村|水上别墅|五星|国际都会/g) || []).length;
-
-  let score = 0;
-  if (explicitPublicInterest) score += 18;
-  if (publicInterestEvidence) score += strictPovertyNeed ? 8 : 10;
-  if (ruralCountyEvidence) score += strictPovertyNeed ? 14 : 6;
-  if (urbanContradictions > 0) score -= urbanContradictions * (strictPovertyNeed ? 8 : 5);
-  if (strictPovertyNeed && luxuryResortSignals > 0) score -= luxuryResortSignals * 6;
-
-  return score;
+  return /(豪华|奢华|五星|超豪华|国际酒店|度假村|水上别墅|私享团)/.test(corpus);
 }
 
-function filterCandidateToursForPublicInterestNeed(
-  tours: AiRecommendationCandidate[],
-  intent: AiTravelIntent | null,
-  userText: string,
-  allowPublicInterest: boolean,
-) {
-  if (!allowPublicInterest) return tours;
-
-  const publicInterestNeed = hasPublicInterestNeed(intent, userText);
-  const strictPovertyNeed = hasStrictPovertyNeed(intent, userText);
-  if (!publicInterestNeed && !strictPovertyNeed) return tours;
-
-  // Experience: keep the model in charge of the final recommendation, but narrow the
-  // candidate pool for high-risk semantics so obviously contradictory city/leisure
-  // routes do not dominate before the model can reason over the remaining options.
-  const candidates = tours.map((tour) => ({
-    tour,
-    primitive: buildTourPrimitive(tour),
-  }));
-  const scoredMatches = candidates
-    .map(({ tour, primitive }) => ({
-      tour,
-      score: getPublicInterestSemanticScore(primitive, strictPovertyNeed),
-    }))
-    .filter(({ score }) => score > 0)
-    .sort((left, right) => right.score - left.score)
-    .map(({ tour }) => tour);
-  if (scoredMatches.length > 0) return scoredMatches;
-
-  const fallbackEvidenceMatches = candidates
-    .filter(({ primitive }) =>
-      primitiveHasPublicInterestEvidence(primitive),
-    )
-    .map(({ tour }) => tour);
-  if (fallbackEvidenceMatches.length > 0) return fallbackEvidenceMatches;
-
-  return strictPovertyNeed ? [] : tours;
+function hasPublicInterestNeedFromIntent(intent: AiTravelIntent | null) {
+  if (!intent) return false;
+  return hasPublicInterestLanguage([
+    ...(intent.semanticFocus || []),
+    ...(intent.travelStyle || []),
+    ...(intent.mustHave || []),
+  ].join(' '));
 }
 
 function hasUnsupportedPublicInterestClaim(reason: string, primitive: RecommendationPrimitive) {
@@ -2379,8 +2337,8 @@ function buildReadableSignalClause(signals: string[], variant = 0) {
   const phrases = uniqueStrings([
     coverageSignal
       ? coverageSignal.startsWith('完整覆盖：')
-        ? `标题和玩法里同时能对上${coverageSignal.replace('完整覆盖：', '')}`
-        : `标题和玩法里能对上${coverageSignal.replace('部分命中：', '')}这组需求`
+        ? `${coverageSignal.replace('完整覆盖：', '')}`
+        : `${coverageSignal.replace('部分命中：', '')}这组需求`
       : '',
     mustHaveSignal ? `更接近你这次明说的${mustHaveSignal.replace('核心诉求命中：', '')}` : '',
     styleSignal ? `整体调性也更靠近${styleSignal.replace('偏好贴近：', '')}` : '',
@@ -2389,7 +2347,7 @@ function buildReadableSignalClause(signals: string[], variant = 0) {
   ]).filter(Boolean).slice(0, 2);
 
   if (phrases.length === 0) return '';
-  const leads = ['我把它放前面，主要因为', '这条会排得更靠前，主要是因为', '优先给到前面，是因为'];
+  const leads = ['另外', '再看一点', '补一句'];
   return `${leads[Math.abs(variant) % leads.length]}${phrases.join('，')}`;
 }
 
@@ -2448,12 +2406,12 @@ function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive, varian
   const routePart = routeText ? `${routeText}，${paceText}` : paceText;
   const pricePart = priceText ? `参考价${priceText}` : '';
   const leadTemplates = [
-    `${titleFact}这条更像是冲着${experienceText}去的，${routePart}`,
-    `如果你更看重${experienceText}，这条会更对路，${routePart}`,
-    `${titleFact}把${experienceText}放得比较集中，${routePart}`,
-    `${routePart}，亮点基本都落在${experienceText}`,
-    `同类线路里，这条最有辨识度的就是${experienceText}，${routePart}`,
-    `拿来做同类对比时，${experienceText}会比目的地名字更出彩，${routePart}`,
+    `${titleFact}主打${experienceText}，${routePart}`,
+    `${titleFact}的重点是${experienceText}，${routePart}`,
+    `${routePart}，核心体验就是${experienceText}`,
+    `${experienceText}是这条线最具体的亮点，${routePart}`,
+    `${titleFact}这条线把${experienceText}放得更靠前，${routePart}`,
+    `${routePart}，更适合冲着${experienceText}去`,
   ];
   const leadIndex = (getStableTextIndex(`${primitive.id}:${primitive.title}`, leadTemplates.length) + variant)
     % leadTemplates.length;
@@ -2605,7 +2563,7 @@ function buildSemanticNotesLead(
 ) {
   if (!notes) return '';
   if (options.allowPublicInterest && hasPublicInterestNeed(intent, userText)) {
-    return '说明：候选里不一定有明确扶贫或公益标注，我会按县域、乡村或周边体验找接近替代。';
+    return '说明：候选里不一定会把这类语义写得很直白，我会按目的地和玩法找更接近的方向。';
   }
 
   const visibleCaveat = normalizeAiText(notes.caveat, 80);
@@ -2618,7 +2576,7 @@ function buildSemanticNotesLead(
   }
 
   if (notes.cannotAssert.length > 0 || notes.softCriteria.length > 0 || notes.worldKnowledgeUse) {
-    return '说明：候选标签不完整，我会优先看标题和行程事实；证据不足的点会当作取舍而不是硬说命中。';
+    return '说明：候选信息有限，我优先按标题和行程里的具体内容来判断。';
   }
 
   return '';
@@ -3220,8 +3178,8 @@ function buildRecommendationSummary(params: {
   const profile = buildCopyIntentProfile(params.intent, params.userText || '');
   const topDestinations = buildSummaryTopDestinations(params.items, params.candidateTours);
   const topLine = topDestinations
-    ? `我先把${topDestinations}里证据更明显的线路放前面；${buildSummaryPreferenceText(params.intent)}只是判断线索，具体还要看标题里的真实玩法。`
-    : `我先按${buildSummaryPreferenceText(params.intent)}找更接近的线路；没有明确证据的偏好会降为取舍说明。`;
+    ? `这次更值得先看${topDestinations}，${buildSummaryPreferenceText(params.intent)}只是参考，最终还是看具体玩法。`
+    : `这次我主要按${buildSummaryPreferenceText(params.intent)}来排。`;
   const normalizedWeatherLead = getRenderableWeatherLead(params.weatherContext, params.destinationWeatherInsights);
   const weatherLead = normalizedWeatherLead
     ? `天气判断：${normalizedWeatherLead}。`
@@ -3423,26 +3381,12 @@ function shouldUseAiSummary(
   weatherContext: AiWeatherContext,
   options: { allowPublicInterest?: boolean } = {},
 ) {
+  void weatherContext;
   const trimmed = summary.trim();
   if (trimmed.length < 24) return false;
   if (!/[。！？；]/u.test(trimmed)) return false;
   if (hasInternalRecommendationLanguage(trimmed)) return false;
   if (hasUnallowedPublicInterestLanguage(trimmed, { allowPublicInterest: Boolean(options.allowPublicInterest) })) return false;
-  if (/^(综合匹配|热门|性价比|班期多|预算内)/.test(trimmed) && trimmed.length < 40) return false;
-  if (/(当前|现在).*(春季|夏季|秋季|冬季)/.test(trimmed)) return false;
-  if (/(回南天|梅雨|春季踏青|冬季适合)/.test(trimmed)) return false;
-  const travelMonth = weatherContext.travelDate
-    ? new Date(weatherContext.travelDate).getMonth() + 1
-    : new Date().getMonth() + 1;
-  const expectedSeason = travelMonth >= 3 && travelMonth <= 5
-    ? '春'
-    : travelMonth >= 6 && travelMonth <= 8
-      ? '夏'
-      : travelMonth >= 9 && travelMonth <= 11
-        ? '秋'
-        : '冬';
-  const mentionedSeason = trimmed.match(/(春|夏|秋|冬)季/)?.[1];
-  if (mentionedSeason && mentionedSeason !== expectedSeason) return false;
   return true;
 }
 
@@ -3501,6 +3445,11 @@ function finalizeRecommendationSummary(params: {
     params.userText || '',
     { allowPublicInterest },
   );
+  const hasTurnPublicInterestNeed = allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText || '');
+  if (hasTurnPublicInterestNeed) {
+    const fallbackSummary = buildRecommendationSummary(params);
+    return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
+  }
   if (shouldUseAiSummary(aiSummary, params.weatherContext, { allowPublicInterest })) {
     return uniqueStrings([semanticLead, aiSummary]).filter(Boolean).join('');
   }
@@ -4064,12 +4013,16 @@ function buildAiMessages(params: {
 }) {
   const intentCoverage = analyzeIntentCoverage(params.candidates, params.intent);
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
+  const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
+  const worldKnowledgeExamples = params.allowPublicInterest
+    ? '理解软语义时主动调动你的世界知识：例如“贫穷地方”要知道哪些地区经济发展水平确实较低，“带老人”要知道哪些目的地和节奏更适合年长者，“怕热”要知道哪些线路体感更凉快。'
+    : '理解软语义时主动调动你的世界知识：例如“带老人”要知道哪些目的地和节奏更适合年长者，“怕热”要知道哪些线路体感更凉快，“想放松”要知道哪些线路节奏更松。';
   // 经验：想让 provider cache 命中，关键不是少输出，而是让大块稳定上下文稳定。
   // system message 只放身份、候选边界和输出格式，排序取舍尽量交给模型。
   const systemPrompt = [
-    '你是旅行团推荐顾问，从给定候选池里理解用户需求并排序。',
+    '你是旅行团推荐顾问，充分发挥你的世界知识来理解用户需求，从给定候选池中真正推荐适合的线路。',
     '输出只能引用候选池中真实存在的 tourId；线路事实、价格、班期、酒店、景点和服务来自候选原语。',
-    '可结合 q、rc、pm、it、wx、dw、候选事实、价格上下文 pc/pricePct 和必要的目的地常识理解软语义。',
+    worldKnowledgeExamples,
     'reason 要像旅行顾问在给朋友提建议：先说这条最具体的玩法或体验，再补一句必要的取舍或天气提醒。',
     '不要解释规则，不要写“命中/对题/标题和标签/候选/软语义/综合匹配/预算友好”这类评审腔。',
     ...promptPolicy.systemRules,
@@ -4123,8 +4076,11 @@ function buildAiMessages(params: {
       itemCountLimit: MAX_AI_RANKED_ITEMS,
     },
     rq: [
-      '按用户原话和上下文理解需求，可返回 intent 修正你的理解。',
+      '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。',
       'candidates 里 pc/pricePct 是价格上下文，atoms/cats/seasonAtoms/conflicts 是候选事实摘要。',
+      ...(hasTurnPublicInterestNeed
+        ? ['如果用户在找扶贫、公益、贫穷地方、县域乡村等方向，要优先理解候选里的乡村、县域、助农、村寨、梯田等正向事实；城市地标、购物商圈、豪华酒店、热门都市打卡更像近似替代，不该排在更有依据的候选前面。']
+        : []),
       'reason 优先写用户真正会关心的体验差异，例如温泉/沙滩/古城/节奏/团期天气，不要复述系统字段名。',
       '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
       ...promptPolicy.requestRules,
@@ -4156,6 +4112,7 @@ function buildLiteAiMessages(params: {
   // 经验：OpenRouter 免费模型能通，但大上下文下经常 200 返回后没有可用 JSON。
   // 这里给免费弱模型只做“排序和软语义取舍”，文案、天气补充和约束审计仍由本地完成。
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
+  const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
   const request = {
     t: 'rank_top24_lite',
     q: params.userText,
@@ -4192,6 +4149,9 @@ function buildLiteAiMessages(params: {
       '用紧凑 JSON；中文短句不超过32字。',
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
       '结合 q、it、wx、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 理解软语义。',
+      ...(hasTurnPublicInterestNeed
+        ? ['如果用户在找扶贫、公益、贫穷地方、县域乡村等方向，要优先理解候选里的乡村、县域、助农、村寨、梯田等正向事实；城市地标、购物商圈、豪华酒店、热门都市打卡更像近似替代，不该排在更有依据的候选前面。']
+        : ['像带老人、怕热、想放松这类软语义，要借助世界知识理解节奏、气候和体验差异。']),
       'sf 不要写命中、对题、候选、标签、软语义、预算友好这类系统化说法。',
       ...promptPolicy.liteRules,
     ],
@@ -4450,7 +4410,6 @@ async function fetchWithTimeout(
 export const __aiRecommendationTestHooks = {
   auditAiRecommendationsStrict,
   auditAiRecommendations,
-  filterCandidateToursForPublicInterestNeed,
   buildAiMessages,
   buildHardIntentFromText,
   buildLiteAiMessages,
@@ -4617,6 +4576,10 @@ function buildHardConflictReason(reasons: string[]) {
   return `需放宽条件：${reasons.slice(0, 3).join('；')}`;
 }
 
+function isAlternativeRecommendation(item: AiRecommendationItem) {
+  return (item.reason || '').startsWith('需放宽条件：');
+}
+
 function markAsAlternativeRecommendation(
   item: AiRecommendationItem,
   reasons: string[],
@@ -4728,6 +4691,8 @@ function auditAiRecommendationsStrict(
     const rightLocalIndex = localIndexByTourId.get(right.tourId) ?? Number.MAX_SAFE_INTEGER;
     const leftLocal = localItems[leftLocalIndex];
     const rightLocal = localItems[rightLocalIndex];
+    const leftAlternative = isAlternativeRecommendation(left) ? 1 : 0;
+    const rightAlternative = isAlternativeRecommendation(right) ? 1 : 0;
     const leftCoverage = leftLocal?.matchedSignals.some((signal) => signal.startsWith('完整覆盖')) ? 1 : 0;
     const rightCoverage = rightLocal?.matchedSignals.some((signal) => signal.startsWith('完整覆盖')) ? 1 : 0;
     const leftAiCoverage = aiCoverageTourIds.has(left.tourId) ? 1 : 0;
@@ -4735,6 +4700,7 @@ function auditAiRecommendationsStrict(
     const shouldUseLocalOrdering = Boolean(leftAiCoverage || rightAiCoverage || leftCoverage || rightCoverage);
 
     return (
+      leftAlternative - rightAlternative ||
       rightAiCoverage - leftAiCoverage ||
       rightCoverage - leftCoverage ||
       (shouldUseLocalOrdering
@@ -4778,6 +4744,22 @@ function normalizeIntent(value: unknown): AiTravelIntent | null {
       : null,
     confidence: Number.isFinite(Number(raw.confidence)) ? Number(raw.confidence) : undefined,
   };
+}
+
+function attachTurnSemanticContext(
+  intent: AiTravelIntent | null,
+  userText: string,
+  options: { allowPublicInterest: boolean },
+): AiTravelIntent | null {
+  if (!intent && !userText) return null;
+  const nextIntent: AiTravelIntent = intent ? { ...intent } : { departureWeekdays: [] };
+  if (options.allowPublicInterest && hasPublicInterestLanguage(userText)) {
+    nextIntent.semanticFocus = uniqueStrings([
+      ...(nextIntent.semanticFocus || []),
+      userText,
+    ]);
+  }
+  return nextIntent;
 }
 
 function normalizeDepartureTimeOfDay(value: unknown): AiTravelIntent['departureTimeOfDay'] {
@@ -5171,13 +5153,7 @@ export async function requestAiRecommendations({
   const baseCandidatePool = filterPastOnlyCandidatesWhenFutureExists(normalizedCandidateTours);
   const memoryBackedIntent = mergeIntentWithMemory(baseHardIntent, memoryForThisTurn);
   const allowPublicInterestForCurrentTurn = allowsPublicInterestForTurn(text, memoryForThisTurn);
-  const strictPovertyNeedForCurrentTurn = hasStrictPovertyNeed(memoryBackedIntent, baseEffectiveUserText);
-  const candidatePool = filterCandidateToursForPublicInterestNeed(
-    baseCandidatePool,
-    memoryBackedIntent,
-    baseEffectiveUserText,
-    allowPublicInterestForCurrentTurn,
-  );
+  const candidatePool = baseCandidatePool;
   let cachedMemoryBackedLocalItems: AiRecommendationItem[] | null = null;
   let cachedFallbackLocalItems: AiRecommendationItem[] | null = null;
   const getFallbackLocalItems = () => {
@@ -5235,18 +5211,14 @@ export async function requestAiRecommendations({
   if (candidatePool.length === 0) {
     return {
       conversationId,
-      summary: strictPovertyNeedForCurrentTurn
-        ? '当前候选里没有足够支撑“贫穷地方/县域乡村/公益方向”的线路证据，我先不硬推明显不对路的城市休闲团。'
-        : '当前没有可交给 AI 判断的候选线路；请稍后刷新数据或换个说法再试。',
+      summary: '当前没有可用的候选线路；请稍后刷新数据或换个说法再试。',
       items: [],
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
       status: {
         mode: 'local-only',
-        label: strictPovertyNeedForCurrentTurn ? '当前候选证据不足' : '没有完全匹配的候选',
-        detail: strictPovertyNeedForCurrentTurn
-          ? '这次需求依赖县域/乡村/公益等高风险语义线索；当前候选缺少足够证据，所以没有继续硬排无关线路。'
-          : '已停止 AI 调用，避免在无候选时继续产生调研成本。',
+        label: '没有可用的候选线路',
+        detail: '已停止 AI 调用，避免在无候选时继续产生调研成本。',
       },
       preferenceMemory: memoryForThisTurn ?? undefined,
     };
@@ -5403,9 +5375,13 @@ export async function requestAiRecommendations({
       }),
       text,
     );
-    const finalIntent = mergeIntentWithMemory(
-      mergeAiRankingIntent(intent, rankingIntent),
-      nextPreferenceMemory,
+    const finalIntent = attachTurnSemanticContext(
+      mergeIntentWithMemory(
+        mergeAiRankingIntent(intent, rankingIntent),
+        nextPreferenceMemory,
+      ),
+      text,
+      { allowPublicInterest: allowPublicInterestForTurn },
     );
     const finalPreferenceMemory = normalizePreferenceMemory(mergePreferenceMemory(memoryForThisTurn, finalIntent));
     const finalEffectiveUserText = buildEffectiveUserText(text, finalPreferenceMemory);
