@@ -1213,6 +1213,20 @@ assert.equal(
   ).some((reason) => reason.includes('不像县域乡村或公益方向')),
   false,
 );
+const publicInterestAuditedOrder = auditAiRecommendationsStrict(
+  [
+    { tourId: 'major-city', score: 99, reason: '北京文化地标很多', matchedSignals: ['文化'] },
+    { tourId: 'public-interest-tour', score: 92, reason: '助农古寨体验更贴近公益方向', matchedSignals: ['助农', '古寨'] },
+    { tourId: 'rural-county', score: 91, reason: '县域古村山水更接近乡村方向', matchedSignals: ['县域', '古村'] },
+  ],
+  [],
+  [majorCityTour, ruralCountyTour, explicitPublicTour],
+  { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+);
+assert.equal(publicInterestAuditedOrder[0]?.tourId, 'public-interest-tour');
+assert.equal(publicInterestAuditedOrder[1]?.tourId, 'rural-county');
+assert.equal(publicInterestAuditedOrder[2]?.tourId, 'major-city');
+assert.ok(publicInterestAuditedOrder[2]?.reason?.includes('需放宽条件'));
 
 const weirdSemanticSummary = finalizeRecommendationSummary({
   aiSummary: '用户寻找海边温泉、预算400元以内，关注天气因素。软语义判断：海边、温泉、400元以内、天气敏感。边界：候选中无明确标注海边的温泉，需结合目的地判断，无法断言某候选为扶贫或公益项目。温泉需匹配atoms中的温泉泡汤。',

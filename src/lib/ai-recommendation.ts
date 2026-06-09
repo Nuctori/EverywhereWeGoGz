@@ -3059,6 +3059,7 @@ function compactRecentConversation(messages: AiRecommendationMessage[]) {
 function buildSummaryTopDestinations(
   items: AiRecommendationItem[],
   candidateTours: AiRecommendationCandidate[],
+  intent?: AiTravelIntent | null,
 ) {
   const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
   const topPrimitives = items
@@ -3068,11 +3069,12 @@ function buildSummaryTopDestinations(
 
   if (topPrimitives.length === 0) return '';
 
+  const prioritizePublicInterest = hasPublicInterestNeedFromIntent(intent || null);
   const categoryLabelMap: Record<string, string> = {
     '海边沙滩': '海边度假',
     '玩水清凉': '水上活动',
     '森林山水': '山水避暑',
-    '文化逛城': '城市休闲',
+    '文化逛城': prioritizePublicInterest ? '人文村寨' : '城市休闲',
     '室内度假': '酒店度假',
     '温泉泡汤': '酒店放松',
     '美食体验': '吃住轻松',
@@ -3092,7 +3094,9 @@ function buildSummaryTopDestinations(
       }
     }
 
-    const category = categoryLabelMap[getPrimitivePrimaryCategory(primitive)];
+    const category = prioritizePublicInterest && primitiveHasPublicInterestEvidence(primitive)
+      ? '乡村风貌'
+      : categoryLabelMap[getPrimitivePrimaryCategory(primitive)];
     if (category) {
       categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
     }
@@ -3176,7 +3180,7 @@ function buildRecommendationSummary(params: {
   userText?: string;
 }) {
   const profile = buildCopyIntentProfile(params.intent, params.userText || '');
-  const topDestinations = buildSummaryTopDestinations(params.items, params.candidateTours);
+  const topDestinations = buildSummaryTopDestinations(params.items, params.candidateTours, params.intent);
   const topLine = topDestinations
     ? `这次更值得先看${topDestinations}，${buildSummaryPreferenceText(params.intent)}只是参考，最终还是看具体玩法。`
     : `这次我主要按${buildSummaryPreferenceText(params.intent)}来排。`;
@@ -4658,6 +4662,7 @@ function auditAiRecommendationsStrict(
   const localIndexByTourId = new Map(localItems.map((item, index) => [item.tourId, index]));
   const seenTourIds = new Set<string>();
   const auditedItems: AiRecommendationItem[] = [];
+  const prioritizePublicInterestEvidence = hasPublicInterestNeedFromIntent(intent);
 
   const pushAudited = (item: AiRecommendationItem) => {
     if (seenTourIds.has(item.tourId)) return;
@@ -4691,8 +4696,12 @@ function auditAiRecommendationsStrict(
     const rightLocalIndex = localIndexByTourId.get(right.tourId) ?? Number.MAX_SAFE_INTEGER;
     const leftLocal = localItems[leftLocalIndex];
     const rightLocal = localItems[rightLocalIndex];
+    const leftPrimitive = primitiveByTourId.get(left.tourId);
+    const rightPrimitive = primitiveByTourId.get(right.tourId);
     const leftAlternative = isAlternativeRecommendation(left) ? 1 : 0;
     const rightAlternative = isAlternativeRecommendation(right) ? 1 : 0;
+    const leftPublicInterestEvidence = prioritizePublicInterestEvidence && leftPrimitive && primitiveHasPublicInterestEvidence(leftPrimitive) ? 1 : 0;
+    const rightPublicInterestEvidence = prioritizePublicInterestEvidence && rightPrimitive && primitiveHasPublicInterestEvidence(rightPrimitive) ? 1 : 0;
     const leftCoverage = leftLocal?.matchedSignals.some((signal) => signal.startsWith('完整覆盖')) ? 1 : 0;
     const rightCoverage = rightLocal?.matchedSignals.some((signal) => signal.startsWith('完整覆盖')) ? 1 : 0;
     const leftAiCoverage = aiCoverageTourIds.has(left.tourId) ? 1 : 0;
@@ -4700,6 +4709,7 @@ function auditAiRecommendationsStrict(
     const shouldUseLocalOrdering = Boolean(leftAiCoverage || rightAiCoverage || leftCoverage || rightCoverage);
 
     return (
+      rightPublicInterestEvidence - leftPublicInterestEvidence ||
       leftAlternative - rightAlternative ||
       rightAiCoverage - leftAiCoverage ||
       rightCoverage - leftCoverage ||
