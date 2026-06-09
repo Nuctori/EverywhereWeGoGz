@@ -162,6 +162,36 @@ const compoundNeedCompacted = compactCandidates(
   { userText: '帮我找同时带温泉和沙滩的团' },
 );
 assert.ok(compoundNeedCompacted.slice(0, 4).some((item) => item.id === 'hot-spring-beach'));
+const premiumHotSpringBeachTour = candidate({
+  id: 'premium-hot-spring-beach',
+  title: '海岛温泉沙滩水上别墅7天',
+  destination: '马尔代夫',
+  duration: 7,
+  price: 30999,
+  theme: '海岛度假',
+  tags: ['温泉', '沙滩'],
+  highlights: ['海边温泉', '沙滩', '水上别墅'],
+});
+const midPriceHotSpringBeachTour = candidate({
+  id: 'mid-hot-spring-beach',
+  title: '惠州海边温泉沙滩3天',
+  destination: '广东',
+  duration: 3,
+  price: 2599,
+  theme: '休闲度假',
+  tags: ['温泉', '沙滩'],
+  highlights: ['海边温泉', '沙滩散步'],
+});
+const priceContextCompacted = compactCandidates(
+  [premiumHotSpringBeachTour, midPriceHotSpringBeachTour, hotSpringBeachTour, hotSpringTour, nonHotSpringTour, ...tours],
+  [],
+  null,
+  { userText: '帮我找同时带温泉和沙滩的团' },
+);
+const topPriceContextIds = priceContextCompacted.slice(0, 8).map((item) => item.id);
+assert.ok(topPriceContextIds.includes('premium-hot-spring-beach'));
+assert.ok(topPriceContextIds.includes('mid-hot-spring-beach') || topPriceContextIds.includes('hot-spring-beach'));
+assert.ok(priceContextCompacted.some((item) => item.priceContext.poolPercentile !== null));
 const beachPrimitive = buildTourPrimitive(nonHotSpringTour);
 assert.ok(beachPrimitive.experienceCategories.includes('海边沙滩'));
 assert.ok(!beachPrimitive.experienceCategories.includes('玩水清凉'));

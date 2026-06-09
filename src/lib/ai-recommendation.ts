@@ -869,11 +869,11 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
       reason: index < MAX_AI_COMMENTARY_ITEMS
         ? buildLocalTourReason(
             tour,
-            tour.isHot ? ['热门线路'] : ['价格和热度表现较稳'],
-            tour.isHot ? '热门线路，适合作为推荐备选' : '综合热度和价格表现较稳',
+            tour.isHot ? ['候选池排序靠前'] : ['候选池补充结果'],
+            '候选池补充结果，建议打开详情核对行程',
           )
         : undefined,
-      matchedSignals: tour.isHot ? ['热门线路'] : ['综合排序靠前'],
+      matchedSignals: tour.isHot ? ['候选池排序靠前'] : ['候选池补充结果'],
     }));
 }
 
@@ -2624,6 +2624,58 @@ function getPricePercentile(price: number, sortedPrices: number[]) {
   return Math.round((cheaperOrEqualCount / sortedPrices.length) * 100);
 }
 
+function getPriceBandKey(price: number, sortedPrices: number[]) {
+  const percentileValue = getPricePercentile(price, sortedPrices);
+  if (percentileValue === null) return 'unknown';
+  if (percentileValue <= 30) return 'lower';
+  if (percentileValue <= 70) return 'middle';
+  return 'upper';
+}
+
+function selectPriceBandRepresentatives(
+  primitives: RecommendationPrimitive[],
+  limit: number,
+  sortedPrices: number[],
+  localItems: AiRecommendationItem[],
+  context?: RecommendationContext,
+) {
+  if (limit <= 0 || primitives.length === 0) return [];
+  const selected: RecommendationPrimitive[] = [];
+  const selectedIds = new Set<string>();
+  const groups = new Map<string, RecommendationPrimitive[]>();
+
+  for (const primitive of primitives) {
+    const key = getPriceBandKey(primitive.price, sortedPrices);
+    const group = groups.get(key) || [];
+    group.push(primitive);
+    groups.set(key, group);
+  }
+
+  const orderedKeys = ['middle', 'lower', 'upper', 'unknown'];
+  for (const key of orderedKeys) {
+    if (selected.length >= limit) break;
+    const group = (groups.get(key) || [])
+      .sort((a, b) =>
+        getPrimitiveCoverageScore(b, extractCandidateCoverageTerms(context?.userText)) -
+          getPrimitiveCoverageScore(a, extractCandidateCoverageTerms(context?.userText)) ||
+        rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context),
+      );
+    const next = group.find((primitive) => !selectedIds.has(primitive.id));
+    if (!next) continue;
+    selected.push(next);
+    selectedIds.add(next.id);
+  }
+
+  for (const primitive of primitives) {
+    if (selected.length >= limit) break;
+    if (selectedIds.has(primitive.id)) continue;
+    selected.push(primitive);
+    selectedIds.add(primitive.id);
+  }
+
+  return selected;
+}
+
 function annotateCandidatePrimitive(
   primitive: RecommendationPrimitive,
   intent: AiTravelIntent | null,
@@ -2853,20 +2905,33 @@ function compactCandidates(
     : primitives;
   const strictMatches = destinationMatches.filter((primitive) => intentMatchesPrimitive(intent, primitive));
   const coverageTerms = extractCandidateCoverageTerms(context?.userText);
+  const coveragePool = coverageTerms.length > 0
+    ? [...primitives]
+        .filter((primitive) => getPrimitiveCoverageScore(primitive, coverageTerms) > 0)
+        .sort((a, b) =>
+          getPrimitiveCoverageScore(b, coverageTerms) - getPrimitiveCoverageScore(a, coverageTerms) ||
+          rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context),
+        )
+    : [];
   const coverageMatches = coverageTerms.length > 0
     ? selectDiversePrimitives(
-        [...primitives]
-          .filter((primitive) => getPrimitiveCoverageScore(primitive, coverageTerms) > 0)
-          .sort((a, b) =>
-            getPrimitiveCoverageScore(b, coverageTerms) - getPrimitiveCoverageScore(a, coverageTerms) ||
-            rankPrimitive(b, localItems, context) - rankPrimitive(a, localItems, context),
-          ),
+        coveragePool,
         Math.min(16, MAX_AI_CANDIDATES),
         localItems,
         context,
       )
     : [];
-  const coverageMatchIds = new Set(coverageMatches.map((primitive) => primitive.id));
+  const coveragePriceRepresentatives = selectPriceBandRepresentatives(
+    coveragePool,
+    6,
+    sortedPrices,
+    localItems,
+    context,
+  );
+  const coverageMatchIds = new Set([
+    ...coverageMatches.map((primitive) => primitive.id),
+    ...coveragePriceRepresentatives.map((primitive) => primitive.id),
+  ]);
   const strictLimit = strictMatches.length > 0
     ? Math.max(18, MAX_AI_CANDIDATES - 12)
     : 0;
@@ -2902,7 +2967,7 @@ function compactCandidates(
   );
 
   const annotatedCandidates = [
-    ...coverageMatches.map((primitive) =>
+    ...coveragePriceRepresentatives.map((primitive) =>
       annotateCandidatePrimitive(
         primitive,
         intent,
@@ -2910,6 +2975,16 @@ function compactCandidates(
         intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
       ),
     ),
+    ...coverageMatches
+      .filter((primitive) => !coveragePriceRepresentatives.some((representative) => representative.id === primitive.id))
+      .map((primitive) =>
+        annotateCandidatePrimitive(
+          primitive,
+          intent,
+          sortedPrices,
+          intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
+        ),
+      ),
     ...diverseStrictMatches
       .filter((primitive) => !coverageMatchIds.has(primitive.id))
       .map((primitive) => annotateCandidatePrimitive(primitive, intent, sortedPrices, 'match')),
