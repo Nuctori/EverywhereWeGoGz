@@ -517,7 +517,6 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     (
       aiSearchRequest &&
       aiSearchRequest.id !== clearedAiRequestId &&
-      aiSearchRequest.prompt.trim() === searchQuery.trim() &&
       aiSearchRequest.prompt.trim().length > 0
     ),
   );

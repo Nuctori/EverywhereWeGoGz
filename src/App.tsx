@@ -18,13 +18,16 @@ export interface AiSearchRequest {
 }
 
 function App() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [draftSearchQuery, setDraftSearchQuery] = useState('');
+  const [submittedSearchQuery, setSubmittedSearchQuery] = useState('');
   const [aiSearchRequest, setAiSearchRequest] = useState<AiSearchRequest | null>(null);
 
   const handleSearch = (nextQuery?: string) => {
+    const query = typeof nextQuery === 'string' ? nextQuery : draftSearchQuery;
     if (typeof nextQuery === 'string') {
-      setSearchQuery(nextQuery);
+      setDraftSearchQuery(nextQuery);
     }
+    setSubmittedSearchQuery(query);
 
     const listEl = document.getElementById('tour-list');
     if (listEl) {
@@ -33,7 +36,7 @@ function App() {
   };
 
   const handleAiSearch = (nextQuery?: string) => {
-    const prompt = (nextQuery ?? searchQuery).trim();
+    const prompt = (nextQuery ?? draftSearchQuery).trim();
     if (!prompt) {
       handleSearch(nextQuery);
       return;
@@ -57,14 +60,14 @@ function App() {
 
         <main className="pb-16">
           <Hero
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            searchQuery={draftSearchQuery}
+            onSearchChange={setDraftSearchQuery}
             onSearch={handleSearch}
             onAiSearch={handleAiSearch}
             quickDestinations={QUICK_DESTINATIONS}
           />
           <div id="tour-list" className="scroll-mt-24">
-            <TourList searchQuery={searchQuery} aiSearchRequest={aiSearchRequest} />
+            <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} />
           </div>
         </main>
 
