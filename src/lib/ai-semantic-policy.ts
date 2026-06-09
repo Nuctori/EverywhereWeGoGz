@@ -1,5 +1,6 @@
 import type { AiPreferenceMemory } from '@/types/tour';
 
+// AI 语义策略：识别公益、扶贫、助农等敏感语义，并决定本轮是否允许进入推荐链路。
 interface SemanticIntent {
   semanticFocus?: string[];
   travelStyle?: string[];
@@ -15,6 +16,8 @@ interface PublicInterestPromptPolicy {
   semanticFocusDescription: string;
 }
 
+// 匹配公益、扶贫、助农等敏感语义。
+// 这类词在旅游推荐场景里容易触发误分类，因此需要单独决策是否保留。
 const PUBLIC_INTEREST_PATTERN =
   /(扶贫|公益|慈善|助农|乡村振兴|贫穷|贫困|落后|欠发达|经济相对较弱|经济相对弱)/;
 
@@ -78,7 +81,9 @@ export function buildPublicInterestPromptPolicy(
     return {
       systemRules: [],
       requestRules: [],
-      liteRules: [
+      // 轻量模型只允许基于预算、天气、玩法等客观条件推荐，
+      // 避免凭空假设用户存在公益、扶贫、助农等特殊偏好。
+  liteRules: [
         joinCopy([
           'sf 写本轮需求与候选事实的贴合点，如预算、天气、玩法、',
           '节奏、住宿或目的地；sb 只写候选证据不足的边界。',
@@ -93,7 +98,8 @@ export function buildPublicInterestPromptPolicy(
   return {
     systemRules: [],
     requestRules: [],
-    liteRules: [],
+    // 已允许公益语义时，不再额外施加轻量模型的保守限制。
+  liteRules: [],
     softCriteriaDescription: 'string[]，本轮软语义标准，保留用户表达或你的语义理解',
     cannotAssertDescription: 'string[]，候选无证据时不能断言的事实',
     semanticFocusDescription:

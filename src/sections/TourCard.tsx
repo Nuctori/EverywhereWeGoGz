@@ -1,4 +1,5 @@
-import type { Tour } from '@/types/tour';
+﻿import type { Tour } from '@/types/tour';
+// 线路卡片组件件：展示标題、图片、价格、强度标签和 AI推荐理由的容器单元。
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,11 +25,6 @@ interface TourCardProps {
   recommendationRank?: number;
 }
 
-
-
-
-
-
 export const TourCard = memo(function TourCard({
   tour,
   onClick,
@@ -36,9 +32,11 @@ export const TourCard = memo(function TourCard({
   recommendationRank,
 }: TourCardProps) {
   const hasImage = tour.images && tour.images.length > 0;
+  // 图片不可用时（含模板占位图或加载失败），用 getFallbackImage 生成来源占位图冒底。
   const rawImageSrc = hasImage ? tour.images[0] : getFallbackImage(tour.title);
   const imageSrc = resolveAssetUrl(rawImageSrc);
   const tags = tour.tags?.slice(0, 2) || [];
+  // 单房差说明非空时标注“已提供”，否则提示“单人出行费用待确认”。
   const hasReliableSingleSupplement = Boolean(tour.singleSupplementNote?.trim());
   const titleSummary = buildTitleSummary(tour);
   const destinationLabel = getReadableDestination(tour);
@@ -68,7 +66,7 @@ export const TourCard = memo(function TourCard({
         </div>
         {tour.discountRate && tour.discountRate > 0 && (
           <div className="absolute bottom-4 right-4 rounded-full border border-white/85 bg-white/96 px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-stone-800 shadow-[0_8px_24px_rgba(15,23,42,0.18)] ring-1 ring-black/6 backdrop-blur-md">
-            参考降幅 {tour.discountRate}%
+            参考降价 {tour.discountRate}%
           </div>
         )}
       </div>
@@ -91,6 +89,7 @@ export const TourCard = memo(function TourCard({
           {titleSummary}
         </p>
 
+        {/* AI 推荐理由，来自 AiRecommendPanel 结果 */}
         {recommendationReason && (
           <div
             className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-800"
@@ -98,7 +97,7 @@ export const TourCard = memo(function TourCard({
           >
             <p className="line-clamp-3">
               <span className="font-medium">
-                AI推荐{recommendationRank ? ` TOP ${recommendationRank}` : ''}：
+                AI推荐{recommendationRank ? ' TOP ' : ''}：
               </span>
               {recommendationReason}
             </p>
@@ -159,7 +158,7 @@ export const TourCard = memo(function TourCard({
                 </span>
               )}
             </div>
-            <p className={`mt-1 text-xs ${hasReliableSingleSupplement ? 'text-amber-700' : 'text-stone-500'}`}>
+            <p className={'mt-1 text-xs '}>
               {hasReliableSingleSupplement ? (
                 <>已提供单房差说明</>
               ) : (

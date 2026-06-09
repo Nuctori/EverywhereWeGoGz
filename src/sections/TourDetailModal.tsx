@@ -1,3 +1,4 @@
+// 统一加载态/错误态/就绪态、移动端 Sheet vs 桌面端 Dialog
 import type { DayItinerary, ResolvedTour, TourSummary } from '@/types/tour';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -82,6 +83,7 @@ function isLegacyPlaceholderItineraryDay(day: DayItinerary) {
   return hasPlaceholderDescription && hasPlaceholderActivities && hasPlaceholderAccommodation && hasPlaceholderMeals;
 }
 
+// 从数组中过滤掉属于占位符集合的文本项
 function filterReliableList(items: string[] | undefined, placeholders: Set<string>) {
   return (items || []).map((item) => normalizeText(item)).filter((item) => item && !placeholders.has(item));
 }
@@ -123,6 +125,7 @@ export function TourDetailModal({
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  // 过滤管道：逐一清洗行程/费用/退改/备注字段，移除爬虫遗留占位文本（仅过滤不修改原始数据）
   const reliableItinerary = (resolvedTour?.itinerary || []).filter((day) => !isLegacyPlaceholderItineraryDay(day));
   const reliableInclusions = filterReliableList(resolvedTour?.inclusions, LEGACY_FEE_PLACEHOLDERS);
   const reliableExclusions = filterReliableList(resolvedTour?.exclusions, LEGACY_FEE_PLACEHOLDERS);
@@ -143,6 +146,8 @@ export function TourDetailModal({
     Boolean(refundPolicy) ||
     Boolean(childPolicy);
 
+
+  // 根据 detailStatus 切换加载态/错误态/就绪态
   const content = (
     <>
       <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -493,6 +498,8 @@ export function TourDetailModal({
     </>
   );
 
+
+  // 底部操作按钮：打开来源/平台搜索，移动端额外有关闭按钮
   const actionButtons = (
     <div
       className={cn(

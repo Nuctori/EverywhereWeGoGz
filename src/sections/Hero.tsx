@@ -1,5 +1,5 @@
+﻿// 搜索表单——普通搜索 vs AI 搜索触发路由
 import {
-  ArrowRight,
   CalendarDays,
   ClipboardCheck,
   Map,
@@ -21,6 +21,7 @@ interface HeroProps {
   quickDestinations: string[];
 }
 
+// 展示给用户的示例目的地：label 为按钮显示文本，hint 为场景说明
 const destinationIntents: Record<string, { label: string; hint: string }> = {
   广东: { label: '广东周边', hint: '短途省心' },
   云南: { label: '云南避暑', hint: '5-7 天游' },
@@ -37,14 +38,15 @@ const planningStats = [
 ];
 
 const planningSteps = [
-  { title: '先筛出可选线路', detail: '目的地、天数、出发地先对上' },
+  { title: '先筛出可选线路', detail: '目的地、天数、出发地先对齐' },
   { title: '再比较价格和班期', detail: '预算接近、日期合适排前面' },
   { title: '最后把合适的团置顶', detail: '不用自己一页页翻' },
 ];
 
 export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickDestinations }: HeroProps) {
-  const logoSrc = `${import.meta.env.BASE_URL}brand/laoguang-logo-full.jpg`;
+  const logoSrc = 'brand/laoguang-logo-full.jpg';
 
+  // 主搜索按钮逻辑：非空时走 AI 搜索，空值降级普通搜索
   const handlePrimarySearch = () => {
     const query = searchQuery.trim();
     if (query) {
@@ -87,7 +89,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                     <Input
                       type="search"
                       enterKeyHint="search"
-                      placeholder="例如：帮我找同时带温泉和沙滩的团，预算600以内"
+                      placeholder="例如：帮我找同时带温泉和沙滩的团，预算800内"
                       className="h-[52px] min-h-[52px] rounded-[18px] border-0 bg-stone-50 pl-11 pr-11 text-sm text-stone-800 placeholder:text-stone-400 shadow-inner shadow-stone-200/50 focus-visible:ring-2 focus-visible:ring-orange-200"
                       value={searchQuery}
                       onChange={(e) => onSearchChange(e.target.value)}
@@ -103,20 +105,25 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                       </button>
                     )}
                   </div>
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="h-[52px] min-h-[52px] rounded-[18px] bg-stone-950 px-6 text-sm font-medium text-white shadow-sm hover:bg-stone-800 lg:min-w-[168px]"
-                  >
-                    <Search className="h-4 w-4" />
-                    找合适的团
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </div>
-                <div className="flex flex-wrap gap-2 px-2 pb-1 pt-3 text-xs text-stone-400">
-                  <span>输入越具体，排序越准</span>
-                  <span className="hidden text-stone-300 sm:inline">/</span>
-                  <span>只输入目的地也可以直接看结果</span>
+                  <div className="flex gap-2">
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="h-[52px] min-h-[52px] rounded-[18px] bg-stone-900 px-6 text-sm font-medium text-white shadow-[0_8px_28px_rgba(28,25,23,0.20)] hover:bg-stone-800"
+                    >
+                      <Search className="mr-1.5 h-4 w-4" />
+                      搜索
+                    </Button>
+                    <Button
+                      type="button"
+                      size="lg"
+                      className="h-[52px] min-h-[52px] rounded-[18px] bg-gradient-to-br from-orange-500 to-orange-600 px-6 text-sm font-medium text-white shadow-[0_8px_28px_rgba(234,88,12,0.25)] hover:from-orange-600 hover:to-orange-700"
+                      onClick={() => handlePrimarySearch()}
+                    >
+                      <Sparkles className="mr-1.5 h-4 w-4" />
+                      AI 找团
+                    </Button>
+                  </div>
                 </div>
               </form>
 
@@ -170,8 +177,8 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                   <div className="rounded-2xl border border-stone-200 bg-stone-50/80 p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <div className="text-sm font-semibold text-stone-950">示例：广州出发 · 云南 5 天</div>
-                        <div className="mt-1 text-xs text-stone-500">预算 3000 内 / 爸妈同行 / 节奏轻松</div>
+                        <div className="text-sm font-semibold text-stone-950">示例：广州出发· 云南 5 天</div>
+                        <div className="mt-1 text-xs text-stone-500">预算 3000 内 / 爸妈同行 / 节凑轻松</div>
                       </div>
                       <div className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-700">
                         <Sparkles className="h-3 w-3" />

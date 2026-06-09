@@ -1,3 +1,4 @@
+// 图片不可用时的 SVG 回退占位图，显示“图片暂不可用”及线路标题
 export function getFallbackImage(title: string): string {
   const safeTitle = title.replace(/[<>&"]/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[char] || char));
   const svg = `

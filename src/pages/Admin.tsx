@@ -1,3 +1,4 @@
+﻿// 读取 tours-meta.json 展示缓存快照，仅展示不发起爬虫
 import { useState } from 'react';
 import { useCrawlStatus } from '@/hooks/use-tours';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ export default function Admin({ onBackHome }: AdminProps) {
   const [message, setMessage] = useState<string | null>(null);
   const baseUrl = import.meta.env.BASE_URL || '/';
 
+  // 刷新元信息，不含爬虫——仅重新读取 tours-meta.json
   const handleRefresh = async () => {
     setMessage(null);
     await fetchStatus();
@@ -42,22 +44,9 @@ export default function Admin({ onBackHome }: AdminProps) {
   };
 
   const formatSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-  };
-
-  const statusColor = (value?: string) => {
-    switch (value) {
-      case 'success':
-        return 'bg-green-500';
-      case 'loading':
-        return 'bg-blue-500';
-      case 'error':
-        return 'bg-red-500';
-      default:
-        return 'bg-slate-400';
-    }
+    if (bytes < 1024) return ' B';
+    if (bytes < 1024 * 1024) return ' KB';
+    return ' MB';
   };
 
   const statusLabel = (value?: string) => {
@@ -115,7 +104,7 @@ export default function Admin({ onBackHome }: AdminProps) {
                 <div>
                   <p className="text-sm text-slate-500">元信息状态</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <div className={`w-2.5 h-2.5 rounded-full ${statusColor(status?.lastCrawlStatus)}`} />
+                    <div className={'w-2.5 h-2.5 rounded-full '} />
                     <span className="text-sm font-medium">{statusLabel(status?.lastCrawlStatus)}</span>
                   </div>
                 </div>
@@ -171,7 +160,7 @@ export default function Admin({ onBackHome }: AdminProps) {
 
             <div className="flex gap-3 flex-wrap">
               <Button onClick={handleRefresh} variant="outline" className="gap-2" disabled={loading}>
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={'w-4 h-4 '} />
                 重新读取元信息
               </Button>
             </div>
@@ -202,7 +191,7 @@ export default function Admin({ onBackHome }: AdminProps) {
               <div className="flex justify-between gap-4">
                 <span className="text-slate-500">详情分片 public/data/tour-details/</span>
                 <span className="font-medium">
-                  {status.detailFiles.toLocaleString()} 个 / {formatSize(status.detailSize)}
+                  {status.detailFiles.toLocaleString()} 个/ {formatSize(status.detailSize)}
                 </span>
               </div>
               <div className="flex justify-between gap-4">

@@ -1,3 +1,4 @@
+// AI 推荐主链路：负责意图理解、天气补充、候选筛选、排序融合、文案润色和失败回退。
 import type {
   AiProviderConfig,
   AiPreferenceMemory,
@@ -21,6 +22,7 @@ import {
 } from '@/lib/ai-semantic-policy';
 import { storedAiProviderConfigSchema } from '@/lib/runtime-schemas';
 
+// 常量区统一描述推荐链路的容量、超时和缓存策略，避免各阶段各自硬编码。
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 const MAX_AI_CANDIDATES = 60;
 const MAX_AI_COMMENTARY_ITEMS = 24;
@@ -41,6 +43,7 @@ const AI_CACHE_PROMPT_VERSION = '2026-06-09-price-context-v1';
 const DEFAULT_DEPARTURE_CITY = '广州';
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
+// 把一组步骤标记为 pending/active/done，供前端稳定渲染进度条。
 function withActiveSubstep(
   items: Array<{ id: string; label: string; detail?: string }>,
   activeId: string,
@@ -1034,6 +1037,7 @@ function shouldInheritPreferenceMemoryForTurn(
   return isRelativeTurn;
 }
 
+// 从自由文本中抽取可结构化的旅行意图，供筛选和 Prompt 复用。
 function buildHardIntentFromText(text: string): AiTravelIntent | null {
   const normalizedText = normalizeText(text);
   const budget = parseBudget(normalizedText);
@@ -1377,6 +1381,7 @@ function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecomme
   });
 }
 
+// 把 AI 排名结果与本地候选池融合，优先保留 AI 判断，同时补齐可解释的兜底项。
 function mergeAiAndLocalRecommendations(
   aiItems: AiRecommendationItem[],
   localItems: AiRecommendationItem[],
@@ -1548,6 +1553,7 @@ function countCommentaryItems(items: AiRecommendationItem[]) {
   return items.reduce((count, item) => count + (item.reason ? 1 : 0), 0);
 }
 
+// 对推荐结果做最终裁剪和去重，保证榜单稳定且理由不过载。
 function prioritizeRecommendationItems(items: AiRecommendationItem[]) {
   return limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
 }
@@ -3252,6 +3258,7 @@ function buildWeatherReasonSuffix(
   return buildWeatherReasonSentence(primitive, insight).replace(/[。；]+$/u, '');
 }
 
+// 将排序结果改写成更贴近用户语境的说明文案，但不改变事实约束。
 function rewriteRecommendationCopy(params: {
   items: AiRecommendationItem[];
   candidateTours: AiRecommendationCandidate[];
@@ -3831,6 +3838,7 @@ async function fetchWeatherContext(
   });
 }
 
+// 并发获取出发地或目的地天气洞察；失败时回退到季节规则，避免整条链路阻塞。
 async function fetchDestinationWeatherInsight(params: {
   destination: string;
   travelDate?: string;
@@ -4042,6 +4050,7 @@ function buildAiMessages(params: {
   ];
 }
 
+// 为轻量模型构造最小必要 Prompt，尽量保留事实证据并减少幻觉空间。
 function buildLiteAiMessages(params: {
   userText: string;
   messages: AiRecommendationMessage[];

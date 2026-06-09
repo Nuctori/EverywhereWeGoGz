@@ -1,3 +1,4 @@
+// AI 聊天状态持久化：负责 localStorage 的读写、版本隔离和消息裁剪。
 import type {
   AiPreferenceMemory,
   AiRecommendationMessage,
@@ -28,6 +29,7 @@ export function readStoredAiChatState(): StoredAiChatState {
   }
 }
 
+// 保存聊天状态时只保留末尾 N 条消息，避免本地缓存无限增长。
 export function saveStoredAiChatState(
   state: StoredAiChatState,
   maxPersistedMessages?: number,

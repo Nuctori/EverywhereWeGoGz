@@ -1,3 +1,4 @@
+// 线路展示层：负责标题摘要、目的地兜底、主题推断和日期展示文案。
 import type { Tour } from '@/types/tour';
 
 const GENERIC_DESTINATION_FALLBACK = '以线路标题为准';
@@ -100,6 +101,7 @@ export function getUpcomingDepartureDate(tour: Tour) {
   return futureDate ? futureDate.toISOString().slice(0, 10) : '';
 }
 
+// 根据最近未来出发日期返回徽标文本：有未来日期则显示日期，无则输“班期已过”或“班期待确认”或“待定”
 export function getDepartureDateBadgeLabel(tour: Tour) {
   const upcomingDate = getUpcomingDepartureDate(tour);
   if (upcomingDate) return formatShortDate(upcomingDate);
@@ -149,6 +151,7 @@ const THEME_MISMATCH_CHECKS = [
 /**
  * 从线路数据推断可读主题
  */
+// 基于标题/目的地/标签加权推断主题，若标签主题与内容矛盾则信任推断结果
 export function getReadableTheme(tour: Tour) {
   const readableHighlights = getReadableHighlights(tour);
   const evidenceCorpus = [

@@ -1,3 +1,4 @@
+// Zod 运行时校验 schema：与 tour.ts 一一对应，用于反序列化防御。
 import { z } from 'zod';
 
 const nonNegativeNumber = z.coerce.number().finite().nonnegative();
@@ -90,6 +91,7 @@ export const tourDetailSchema = z.object({
   updatedAt: z.string().optional().default(''),
 });
 
+// 由 tourSummarySchema.and(tourDetailSchema) 组合而成，对应 ResolvedTour。
 export const resolvedTourSchema = tourSummarySchema.and(tourDetailSchema);
 export const toursListSchema = z.array(tourSummarySchema);
 
@@ -124,6 +126,7 @@ export const dataMetaSchema = z.object({
     .record(z.string(), z.coerce.number().int().nonnegative())
     .optional()
     .default({}),
+  // files: raw=原始数据，list=列表数据，details=详情数据。
   files: z
     .object({
       raw: dataFileSchema.optional(),

@@ -22,6 +22,7 @@ function App() {
   const [submittedSearchQuery, setSubmittedSearchQuery] = useState('');
   const [aiSearchRequest, setAiSearchRequest] = useState<AiSearchRequest | null>(null);
 
+  // handleSearch 全文检索文本匹配；handleAiSearch 触发 AI 推荐→无结果时自动回退 handleSearch
   const handleSearch = (nextQuery?: string) => {
     const query = typeof nextQuery === 'string' ? nextQuery : draftSearchQuery;
     if (typeof nextQuery === 'string') {
@@ -38,6 +39,7 @@ function App() {
   const handleAiSearch = (nextQuery?: string) => {
     const prompt = (nextQuery ?? draftSearchQuery).trim();
     if (!prompt) {
+      // 空输入降级为普通全文检索
       handleSearch(nextQuery);
       return;
     }

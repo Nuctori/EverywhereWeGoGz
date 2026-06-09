@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Flame, ChevronRight } from 'lucide-react';
 import type { Tour } from '@/types/tour';
@@ -8,6 +8,7 @@ interface DepartureDateSelectorProps {
   tour: Tour;
 }
 
+// 出发日期选择器，用于旅游线路详情页展示可选团期
 export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
   const dates = (tour.departureDates || []).filter(Boolean);
   const fallbackDate = tour.departureDate || dates[0] || '';
@@ -16,18 +17,20 @@ export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
   const allDates = dates.length > 0 ? dates : (fallbackDate ? [fallbackDate] : []);
   const hotDates = tour.hotDepartureDates || [];
 
+  // 无可用团期时直接隐藏组件
   if (allDates.length === 0 || !selectedDate) {
     return null;
   }
 
-  // 计算返程日期
+  // 计算返程日期 departureDate + duration
   const getReturnDate = (departStr: string) => {
     const d = new Date(departStr);
     d.setDate(d.getDate() + tour.duration);
     return `${d.getMonth() + 1}月${d.getDate()}日`;
   };
 
-  // 格式化显示：今天、明天、周几
+  // 格式化日期标签：今天/明天/周几/N天后/已过期
+  // 返回值 tag 含义：hot=热门/past=已过期/near=临近出发/normal=普通
   const formatDateLabel = (dateStr: string) => {
     const d = new Date(dateStr);
     const today = new Date();
@@ -54,8 +57,9 @@ export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
         <h4 className="font-semibold text-slate-800 flex items-center gap-2">
           <Calendar className="w-4 h-4 text-blue-500" />
           选择出团日期
-          <span className="text-xs font-normal text-slate-400">（{allDates.length}个可选团期）</span>
+          <span className="text-xs font-normal text-slate-400">（共{allDates.length}个可选团期）</span>
         </h4>
+        {/* 已选日期非默认值时，显示"恢复默认"按钮 */}
         {selectedDate !== fallbackDate && (
           <button
             className="text-xs text-blue-500 hover:text-blue-600"
@@ -72,6 +76,7 @@ export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
           const label = formatDateLabel(date);
           const isSelected = selectedDate === date;
           const isHot = hotDates.includes(date);
+          // 已过期团期禁用点击
           const isPast = label.tag === 'past';
 
           return (
@@ -91,6 +96,7 @@ export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
                 <span className={`text-sm font-semibold ${isSelected ? 'text-blue-700' : 'text-slate-700'}`}>
                   {label.main}
                 </span>
+                {/* 热门团期显示火焰图标 */}
                 {isHot && !isPast && (
                   <Flame className="w-3 h-3 text-orange-500" />
                 )}
@@ -98,6 +104,7 @@ export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
               <p className={`text-xs mt-0.5 ${isSelected ? 'text-blue-500' : 'text-slate-400'}`}>
                 {label.sub}
               </p>
+              {/* 选中项显示返程日期 */}
               {isSelected && (
                 <p className="text-[10px] text-blue-400 mt-1">
                   返程 {getReturnDate(date)}
@@ -114,7 +121,7 @@ export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
           onClick={() => setShowAll(!showAll)}
           className="w-full mt-3 py-2 text-xs text-slate-500 hover:text-blue-500 flex items-center justify-center gap-1 transition-colors"
         >
-          {showAll ? '收起' : `查看全部 ${allDates.length} 个团期`}
+          {showAll ? '收起' : `查看全部 ${allDates} 个团期`}
           <ChevronRight className={`w-3 h-3 transition-transform ${showAll ? 'rotate-90' : ''}`} />
         </button>
       )}

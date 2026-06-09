@@ -5,6 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// 将 http 强制升级为 https，防止混合内容安全警告
 export function normalizeImageUrl(path: string) {
   if (!path) return path
   if (path.startsWith('http://')) {
@@ -13,6 +14,7 @@ export function normalizeImageUrl(path: string) {
   return path
 }
 
+// 拼接 BASE_URL 以兼容 Vite 部署路径（子目录部署场景）
 export function resolveAssetUrl(path: string) {
   if (!path) return path
   const normalizedPath = normalizeImageUrl(path)

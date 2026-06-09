@@ -1,5 +1,7 @@
+// 价格滑块使用非线性映射：0-80% 对应 0~3000 元，80-100% 对应 3000~P95。
 import type { Tour } from '@/types/tour';
 
+// 焦点价格阈值：0-3000 元占据滑条 80% 空间以便精细调节
 const FOCUS_PRICE = 3000;
 
 export { FOCUS_PRICE };

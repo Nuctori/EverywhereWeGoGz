@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 
+// 将 Input/Select/Button 水平组合成视觉整体的容器
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

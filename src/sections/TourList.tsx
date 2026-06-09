@@ -1,3 +1,5 @@
+// 数据加载链：loadCatalog（全量列表）→ loadInitial（分页加载，失败回退 loadCatalog）→ loadMorePages（滚动懒加载）
+// 筛选/排序/瀑布流、AI 推荐叠加、滚动监听加载更多
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import type {
   AiRecommendationCandidate,
@@ -59,6 +61,8 @@ function getDataUrl(path: string) {
   return `${baseUrl}data/${path}?v=${encodeURIComponent(__DATA_VERSION__ || Date.now().toString())}`;
 }
 
+
+// 数据加载核心 hook：分页优先（tours-page-0.json），失败后回退全量列表
 function useToursData() {
   const [tours, setTours] = useState<TourSummary[]>([]);
   const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
@@ -430,6 +434,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const loadMoreTimerRef = useRef<number | null>(null);
   const viewVersionRef = useRef(0);
+// filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
@@ -763,6 +768,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     : '可以先放宽时间或预算条件，再看看更多线路';
 
   const handleObserver = useCallback(
+
+        // IntersectionObserver 监听底部占位元素，进入视口时触发 loadMorePages
     (entries: IntersectionObserverEntry[]) => {
       const [target] = entries;
 
@@ -817,6 +824,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   );
 
   useEffect(() => {
+
+        // IntersectionObserver 监听底部占位元素，进入视口时触发 loadMorePages
     const observer = new IntersectionObserver(handleObserver, {
       root: null,
       rootMargin: '100px',
@@ -885,6 +894,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     };
   }, []);
 
+// 点击卡片后调用 selectTour 异步加载详情，触发 TourDetailModal
   const handleCardClick = (tour: TourSummary) => selectTour(tour);
 
   const resetFilters = () => {

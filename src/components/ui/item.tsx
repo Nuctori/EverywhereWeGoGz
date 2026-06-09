@@ -1,10 +1,11 @@
-import * as React from "react"
+﻿import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
 
+// 通用列表项组件集，统一列表级布局
 function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

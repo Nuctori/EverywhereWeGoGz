@@ -1,7 +1,8 @@
-import { cva, type VariantProps } from "class-variance-authority"
+﻿import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+// 空状态占位组件，无数据时展示图标/标题/描述/操作区
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

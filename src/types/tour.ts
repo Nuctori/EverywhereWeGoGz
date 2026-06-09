@@ -1,3 +1,5 @@
+// 全域旅游数据类型定义：TourSummary 面向列表，TourDetail 面向详情。
+// ResolvedTour 表示完整数据，Tour 表示前端运行时可能只拿到摘要的宽类型。
 export interface DayItinerary {
   day: number;
   title: string;
@@ -10,6 +12,7 @@ export interface DayItinerary {
 export interface DataQuality {
   hasStructuredDepartureDates?: boolean;
   isDepartureDateReliable?: boolean;
+  // availabilityConfidence 取值：low=结构化数据不可信，medium=部分可信，high=来源稳定可信
   availabilityConfidence?: 'low' | 'medium' | 'high';
   riskFlags?: string[];
 }
@@ -30,6 +33,7 @@ export interface TourSummary {
   price: number;
   originalPrice?: number;
   priceUnit: string;
+  // departureDate 是默认展示班期；departureDates 是全部班期；hotDepartureDates 是热门班期子集。
   departureDate: string;
   transportType: string;
   accommodationLevel: string;
@@ -94,6 +98,7 @@ export type FilterState = {
   maxPrice: number | null;
   duration: number | null;
   source: string;
+  // 筛选条件里的 departureDate 表示单点选中班期，起止范围由 departureDateStart/End 表达。
   departureDate: string;
   departureDateStart: string;
   departureDateEnd: string;
@@ -120,8 +125,10 @@ export interface AiRecommendationItem {
   semanticBoundary?: string;
 }
 
+// AI 推荐流程模式：ai=正常调用模型，fallback=模型失败后降级，local-only=只走本地规则。
 export type AiRecommendationProcessMode = 'ai' | 'fallback' | 'local-only';
 
+// AI 推荐阶段按 queued → intent → context → ranking → completed/fallback 流转。
 export type AiRecommendationProgressStage =
   | 'queued'
   | 'intent'
@@ -130,6 +137,7 @@ export type AiRecommendationProgressStage =
   | 'completed'
   | 'fallback';
 
+// 子步骤状态按 pending → active → done 演进。
 export type AiRecommendationSubstepStatus = 'pending' | 'active' | 'done';
 
 export interface AiRecommendationSubstep {

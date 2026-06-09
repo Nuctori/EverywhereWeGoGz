@@ -1,3 +1,4 @@
+// 线路过滤引擎：用标题、价格、来源和链接启发式识别真实旅游线路，排除广告、票务和商品噪音。
 import type { Tour } from '@/types/tour';
 
 const AD_HINTS = ['\u626b\u7801\u53ef\u8fdb', '\u6d3b\u52a8\u7fa4', '\u5df2\u7ed3\u675f'];
@@ -22,6 +23,7 @@ const TRANSPORT_ONLY_ROUTES = ['\u53bb\u7a0b\u5355\u7a0b', '\u8fd4\u7a0b\u5355\u
 const MERCHANDISE_BRANDS = ['\u5c0f\u7ea2\u82b1', '\u7b2c\u4e00\u798f', 'NUSPA', 'ankale', 'FunVee'];
 const GARBLED_TRANSPORT_HINTS = ['\u9419\u6394', '\u69c4\u68a1\u5a6b\u50fc', '\u95a8\u6d96\u6d62\u7d99', '\u95a8\u6d96\u9a53\u7d99', '\u7456\u672c\u6328\u9289\u5c25', '\u95bc\u5b98\u7269\u7a7a'];
 
+// 这些关键词用于识别纯商品或特产；新增前要确认不会误伤真实旅游线路。
 const MERCHANDISE_HINTS = [
   '\u4f18\u54c1',
   '\u7279\u4ea7',
@@ -188,6 +190,7 @@ function includesAny(text: string, hints: string[]) {
   return hints.some((hint) => text.includes(hint));
 }
 
+// 强旅游信号用于给模糊标题兜底，避免把真实线路误杀。
 function hasStrongTourSignal(title: string) {
   const compactTitle = compact(title);
   const dynamicTourHints = compactTitle.includes('\u5c0f\u7ea2\u82b1')
@@ -196,6 +199,7 @@ function hasStrongTourSignal(title: string) {
   return DAY_PATTERN.test(compactTitle) || includesAny(compactTitle, dynamicTourHints);
 }
 
+// 商品识别同时看关键词、包装规格和多件装模式。
 function looksLikeMerchandise(title: string) {
   return (
     includesAny(title, MERCHANDISE_HINTS) ||
@@ -211,10 +215,12 @@ export function isLikelyNonTour(tour: TourFilterCandidate) {
   const title = compact(tour.title);
   const bookingUrl = (tour.bookingUrl || '').toLowerCase();
 
+  // 标题为空通常就是脏数据，直接过滤。
   if (!title) {
     return true;
   }
 
+  // 广告拉群类文案直接过滤，避免营销内容进入线路列表。
   if (includesAny(title, AD_HINTS)) {
     return true;
   }
@@ -248,10 +254,12 @@ export function isLikelyNonTour(tour: TourFilterCandidate) {
     return true;
   }
 
+  // 已知乱码交通词也视为交通噪音，防止历史脏编码漏网。
   if (includesAny(title, GARBLED_TRANSPORT_HINTS)) {
     return true;
   }
 
+  // 商品或特产命中后通常过滤，但若同时有强旅游信号则宁可保守保留。
   if (looksLikeMerchandise(title) && !hasStrongTourSignal(title)) {
     return true;
   }

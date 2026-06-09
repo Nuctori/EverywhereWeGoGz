@@ -1,11 +1,11 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
 
-// Format: { THEME_NAME: CSS_SELECTOR }
+// 主题映射：{ 主题名: CSS 选择器 }
 const THEMES = { light: "", dark: ".dark" } as const
 
 export type ChartConfig = {
@@ -308,7 +308,7 @@ function ChartLegendContent({
   )
 }
 
-// Helper to extract item config from a payload.
+// 从 payload 中提取图表项的配置
 function getPayloadConfigFromPayload(
   config: ChartConfig,
   payload: unknown,
@@ -355,3 +355,4 @@ export {
   ChartLegendContent,
   ChartStyle,
 }
+

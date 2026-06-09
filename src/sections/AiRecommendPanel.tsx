@@ -1,3 +1,4 @@
+// AI 推荐流完整生命周期：输入→requestAiRecommendations→进度回调→结果落地→本地缓存回放 + fallback 降级机制
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Bot,
@@ -58,6 +59,7 @@ interface AiRecommendPanelProps {
 }
 
 const MAX_PERSISTED_MESSAGES = 40;
+// 进度步骤定义，对应 AiRecommendationProgress.stage，面板进度条按此顺序推进
 const progressSteps: Array<{
   stage: AiRecommendationProgress['stage'];
   shortLabel: string;
@@ -69,6 +71,7 @@ const progressSteps: Array<{
   { stage: 'completed', shortLabel: '已完成' },
 ];
 
+// 识别天气/气温类查询，返回特殊引导文案；非天气查询返回 null
 function getQuestionLead(prompt: string) {
   const normalized = prompt.replace(/\s+/g, '');
   const asksWeatherCapability =
@@ -82,6 +85,7 @@ function getQuestionLead(prompt: string) {
   return null;
 }
 
+// 根据用户输入类型拼接 AI 回复文案，区分疑问句 vs 陈述句
 function buildResultAssistantReply(result: AiRecommendationResult, prompt: string) {
   const questionLead = getQuestionLead(prompt);
   if (questionLead) {
@@ -105,6 +109,7 @@ function createMessage(role: AiRecommendationMessage['role'], content: string): 
   };
 }
 
+// 创建 AI 助手的初始欢迎消息
 function createInitialMessage() {
   return createMessage('assistant', '告诉我预算、天数、目的地和同行人，我会先帮你把合适线路筛出来。');
 }
@@ -117,6 +122,7 @@ function countRecommendedItems(result: AiRecommendationResult | null) {
   return result?.items.filter((item) => Boolean(item.reason)).length ?? 0;
 }
 
+// 判断结果来源：ai-api（AI 正常完成）vs fallback（本地替补），返回对应状态元信息
 function getResultStatusMeta(result: AiRecommendationResult | null) {
   if (!result) return null;
 
@@ -314,6 +320,7 @@ export function AiRecommendPanel({
     clearStoredAiChatState();
   };
 
+// 保存自定义 AI 接口配置到 localStorage
   const saveSettings = () => {
     saveAiProviderConfig(aiConfig);
     setUseCustomAiConfig(true);
@@ -323,6 +330,7 @@ export function AiRecommendPanel({
     ]);
   };
 
+// 清除自定义 AI 接口配置，恢复默认内置服务
   const clearSettings = () => {
     clearAiProviderConfig();
     setAiConfig({});

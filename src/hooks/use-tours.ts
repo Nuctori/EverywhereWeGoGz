@@ -1,3 +1,4 @@
+﻿// 从 public/data/tours-list.json 和 tours-meta.json 读取数据的 hook，提供 useTours（列表）和 useCrawlStatus（元信息）
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { TourSummary } from '@/types/tour';
 import { dataMetaSchema, toursListSchema } from '@/lib/runtime-schemas';
@@ -82,9 +83,11 @@ const initialCrawlStatus: CrawlStatus = {
   latestUpdatedAt: null,
 };
 
+// 附加缓存版本号 __DATA_VERSION__，确保静态站点更新后浏览器不缓存旧数据
 function getDataUrl(path: string) {
   const baseUrl = import.meta.env.BASE_URL || '/';
-  return `${baseUrl}data/${path}?v=${encodeURIComponent(__DATA_VERSION__)}`;
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  return `${normalizedBaseUrl}data/${path}?v=${__DATA_VERSION__}`;
 }
 
 export function useTours() {
@@ -92,6 +95,7 @@ export function useTours() {
   const abortRef = useRef<AbortController | null>(null);
 
   const fetchTours = useCallback(async () => {
+    // 取消上一次未完成的请求；AbortController 在 React 严格模式双调用来临时也正确清理
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -161,7 +165,7 @@ export function useCrawlStatus() {
         signal: controller.signal,
       });
       if (!response.ok) {
-        throw new Error(`Failed to load data metadata: ${response.status}`);
+        throw new Error('Failed to load data metadata: ');
       }
 
       const meta = { ...emptyMeta, ...dataMetaSchema.parse(await response.json()) };
@@ -208,6 +212,7 @@ export function useCrawlStatus() {
     };
   }, [fetchStatus]);
 
+  // 仅在非静态站点可用——静态构建站点不提供爬虫端点
   const triggerCrawl = async () => { throw new Error('静态站点不支持爬虫功能'); };
   const generateMock = async () => { throw new Error('静态站点不支持生成模拟数据'); };
   return { status, loading, fetchStatus, triggerCrawl, generateMock };

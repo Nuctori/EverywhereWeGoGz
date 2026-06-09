@@ -1,3 +1,4 @@
+// 本地推荐评分算法：综合标题命中、班期丰富度、近期出发和新品权重对线路排序。
 import type { TourSummary } from '@/types/tour';
 
 function getDaysUntil(dateString: string) {
@@ -29,6 +30,7 @@ export function getEffectiveDepartureDates(tour: Pick<TourSummary, 'departureDat
   return Array.from(uniqueDates).sort((left, right) => left.localeCompare(right));
 }
 
+// 综合分先看标题匹配，再叠加班期数量、热门班期、近期出发和新品加权。
 export function getRecommendationScore(
   tour: Pick<TourSummary, 'title' | 'departureDate' | 'departureDates' | 'hotDepartureDates' | 'isNew'>,
   titleHints: readonly string[],
@@ -69,6 +71,7 @@ export function getRecommendationScore(
   return score;
 }
 
+// 排序链先比较综合推荐分，再比较热度、班期丰富度，最后才比较价格。
 export function compareRecommended(
   a: Pick<TourSummary, 'title' | 'departureDate' | 'departureDates' | 'hotDepartureDates' | 'isNew' | 'isHot' | 'price'>,
   b: Pick<TourSummary, 'title' | 'departureDate' | 'departureDates' | 'hotDepartureDates' | 'isNew' | 'isHot' | 'price'>,
