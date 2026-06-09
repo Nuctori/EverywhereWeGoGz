@@ -2188,6 +2188,16 @@ function hasPublicInterestNeed(intent: AiTravelIntent | null, userText: string) 
   return hasPublicInterestLanguage(corpus);
 }
 
+function hasStrictPovertyNeed(intent: AiTravelIntent | null, userText: string) {
+  const corpus = [
+    userText,
+    ...(intent?.semanticFocus || []),
+    ...(intent?.travelStyle || []),
+    ...(intent?.mustHave || []),
+  ].join(' ');
+  return /(贫穷|贫困|落后地区|落后一点|欠发达|经济相对较弱|经济较弱|穷地方|穷一点)/.test(corpus);
+}
+
 function primitiveHasPublicInterestEvidence(primitive: RecommendationPrimitive) {
   const corpus = [
     primitive.title,
@@ -2201,6 +2211,85 @@ function primitiveHasPublicInterestEvidence(primitive: RecommendationPrimitive) 
   // 模型可以用世界知识做软语义排序，但贫困/公益/扶贫属于事实性强标签；
   // 候选没有这些证据时，文案只能说证据不足或近似替代，不能把普通目的地贴成贫困地区。
   return /(扶贫|公益|慈善|助农|乡村振兴|乡村|村|古村|瑶寨|苗寨|侗寨|壮寨|民族村|农家|田园|梯田|县|县城|山区|支教|研学)/.test(corpus);
+}
+
+function primitiveHasRuralCountyEvidence(primitive: RecommendationPrimitive) {
+  const corpus = [
+    primitive.title,
+    primitive.destination,
+    primitive.theme,
+    ...primitive.tags,
+    ...primitive.highlights,
+    ...primitive.semanticAtoms,
+  ].join(' ');
+  return /(乡村|乡镇|村寨|村落|古村|农家|田园|梯田|县域|县城|[^市]县|山区|山村|瑶寨|苗寨|侗寨|壮寨|民族村)/.test(corpus);
+}
+
+function getPublicInterestSemanticScore(
+  primitive: RecommendationPrimitive,
+  strictPovertyNeed: boolean,
+) {
+  const corpus = [
+    primitive.title,
+    primitive.destination,
+    primitive.theme,
+    ...primitive.tags,
+    ...primitive.highlights,
+    ...primitive.semanticAtoms,
+  ].join(' ');
+  const explicitPublicInterest = /(扶贫|公益|慈善|助农|乡村振兴|支教)/.test(corpus);
+  const publicInterestEvidence = primitiveHasPublicInterestEvidence(primitive);
+  const ruralCountyEvidence = primitiveHasRuralCountyEvidence(primitive);
+  const urbanContradictions = (corpus.match(/都市|城市|citywalk|cbd|商圈|地标|夜景|乐园|步行街|购物|外滩|陆家嘴|三里屯|太古里|烤鸭/g) || []).length;
+  const luxuryResortSignals = (corpus.match(/豪华|奢华|度假村|水上别墅|五星|国际都会/g) || []).length;
+
+  let score = 0;
+  if (explicitPublicInterest) score += 18;
+  if (publicInterestEvidence) score += strictPovertyNeed ? 8 : 10;
+  if (ruralCountyEvidence) score += strictPovertyNeed ? 14 : 6;
+  if (urbanContradictions > 0) score -= urbanContradictions * (strictPovertyNeed ? 8 : 5);
+  if (strictPovertyNeed && luxuryResortSignals > 0) score -= luxuryResortSignals * 6;
+
+  return score;
+}
+
+function filterCandidateToursForPublicInterestNeed(
+  tours: AiRecommendationCandidate[],
+  intent: AiTravelIntent | null,
+  userText: string,
+  allowPublicInterest: boolean,
+) {
+  if (!allowPublicInterest) return tours;
+
+  const publicInterestNeed = hasPublicInterestNeed(intent, userText);
+  const strictPovertyNeed = hasStrictPovertyNeed(intent, userText);
+  if (!publicInterestNeed && !strictPovertyNeed) return tours;
+
+  // Experience: keep the model in charge of the final recommendation, but narrow the
+  // candidate pool for high-risk semantics so obviously contradictory city/leisure
+  // routes do not dominate before the model can reason over the remaining options.
+  const candidates = tours.map((tour) => ({
+    tour,
+    primitive: buildTourPrimitive(tour),
+  }));
+  const scoredMatches = candidates
+    .map(({ tour, primitive }) => ({
+      tour,
+      score: getPublicInterestSemanticScore(primitive, strictPovertyNeed),
+    }))
+    .filter(({ score }) => score > 0)
+    .sort((left, right) => right.score - left.score)
+    .map(({ tour }) => tour);
+  if (scoredMatches.length > 0) return scoredMatches;
+
+  const fallbackEvidenceMatches = candidates
+    .filter(({ primitive }) =>
+      primitiveHasPublicInterestEvidence(primitive),
+    )
+    .map(({ tour }) => tour);
+  if (fallbackEvidenceMatches.length > 0) return fallbackEvidenceMatches;
+
+  return strictPovertyNeed ? [] : tours;
 }
 
 function hasUnsupportedPublicInterestClaim(reason: string, primitive: RecommendationPrimitive) {
@@ -4361,6 +4450,7 @@ async function fetchWithTimeout(
 export const __aiRecommendationTestHooks = {
   auditAiRecommendationsStrict,
   auditAiRecommendations,
+  filterCandidateToursForPublicInterestNeed,
   buildAiMessages,
   buildHardIntentFromText,
   buildLiteAiMessages,
@@ -5078,8 +5168,16 @@ export async function requestAiRecommendations({
     : null;
   const baseEffectiveUserText = buildEffectiveUserText(text, memoryForThisTurn);
   const normalizedCandidateTours = candidateTours.map(normalizeCandidateTour);
-  const candidatePool = filterPastOnlyCandidatesWhenFutureExists(normalizedCandidateTours);
+  const baseCandidatePool = filterPastOnlyCandidatesWhenFutureExists(normalizedCandidateTours);
   const memoryBackedIntent = mergeIntentWithMemory(baseHardIntent, memoryForThisTurn);
+  const allowPublicInterestForCurrentTurn = allowsPublicInterestForTurn(text, memoryForThisTurn);
+  const strictPovertyNeedForCurrentTurn = hasStrictPovertyNeed(memoryBackedIntent, baseEffectiveUserText);
+  const candidatePool = filterCandidateToursForPublicInterestNeed(
+    baseCandidatePool,
+    memoryBackedIntent,
+    baseEffectiveUserText,
+    allowPublicInterestForCurrentTurn,
+  );
   let cachedMemoryBackedLocalItems: AiRecommendationItem[] | null = null;
   let cachedFallbackLocalItems: AiRecommendationItem[] | null = null;
   const getFallbackLocalItems = () => {
@@ -5137,14 +5235,18 @@ export async function requestAiRecommendations({
   if (candidatePool.length === 0) {
     return {
       conversationId,
-      summary: '当前没有可交给 AI 判断的候选线路；请稍后刷新数据或换个说法再试。',
+      summary: strictPovertyNeedForCurrentTurn
+        ? '当前候选里没有足够支撑“贫穷地方/县域乡村/公益方向”的线路证据，我先不硬推明显不对路的城市休闲团。'
+        : '当前没有可交给 AI 判断的候选线路；请稍后刷新数据或换个说法再试。',
       items: [],
       generatedAt: new Date().toISOString(),
       source: 'local-preview',
       status: {
         mode: 'local-only',
-        label: '没有完全匹配的候选',
-        detail: '已停止 AI 调用，避免在无候选时继续产生调研成本。',
+        label: strictPovertyNeedForCurrentTurn ? '当前候选证据不足' : '没有完全匹配的候选',
+        detail: strictPovertyNeedForCurrentTurn
+          ? '这次需求依赖县域/乡村/公益等高风险语义线索；当前候选缺少足够证据，所以没有继续硬排无关线路。'
+          : '已停止 AI 调用，避免在无候选时继续产生调研成本。',
       },
       preferenceMemory: memoryForThisTurn ?? undefined,
     };
@@ -5168,7 +5270,7 @@ export async function requestAiRecommendations({
 
   try {
     const intent = baseHardIntent;
-    const allowPublicInterestForTurn = allowsPublicInterestForTurn(text, memoryForThisTurn);
+    const allowPublicInterestForTurn = allowPublicInterestForCurrentTurn;
     const nextPreferenceMemory = normalizePreferenceMemory(mergePreferenceMemory(memoryForThisTurn, intent));
     const effectiveIntent = mergeIntentWithMemory(intent, nextPreferenceMemory);
     const effectiveUserText = buildEffectiveUserText(text, nextPreferenceMemory);

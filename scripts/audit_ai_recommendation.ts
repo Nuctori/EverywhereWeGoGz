@@ -10,6 +10,7 @@ import type { AiRecommendationCandidate } from '../src/types/tour.ts';
 const {
   auditAiRecommendationsStrict,
   auditAiRecommendations,
+  filterCandidateToursForPublicInterestNeed,
   buildAiMessages,
   buildHardIntentFromText,
   buildLiteAiMessages,
@@ -1133,6 +1134,90 @@ const explicitPublicInterestRewrite = rewriteRecommendationCopy({
   allowPublicInterest: true,
 });
 assert.ok(/扶贫|公益|近似替代/.test(explicitPublicInterestRewrite[0].reason || ''));
+
+const majorCityTour = candidate({
+  id: 'major-city',
+  title: '北京魔幻一日游（含烤鸭）等待确认',
+  destination: '北京',
+  duration: 1,
+  price: 115,
+  theme: '都市休闲',
+  tags: ['城市', '美食'],
+  highlights: ['CBD', '烤鸭'],
+});
+const ruralCountyTour = candidate({
+  id: 'rural-county',
+  title: '粤北县域古村山水2天',
+  destination: '广东县域',
+  duration: 2,
+  price: 188,
+  theme: '乡村自然',
+  tags: ['古村', '山水'],
+  highlights: ['古村漫游', '县城周边', '山水体验'],
+});
+const publicInterestFiltered = filterCandidateToursForPublicInterestNeed(
+  [majorCityTour, ruralCountyTour],
+  { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+  '想去贫穷落后一点的地方看看',
+  true,
+);
+assert.deepEqual(publicInterestFiltered.map((tour) => tour.id), ['rural-county']);
+
+const noEvidencePublicInterestFiltered = filterCandidateToursForPublicInterestNeed(
+  [majorCityTour],
+  { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+  '想去贫穷落后一点的地方看看',
+  true,
+);
+assert.equal(noEvidencePublicInterestFiltered.length, 0);
+
+const explicitPublicTour = candidate({
+  id: 'public-interest-tour',
+  title: '助农古寨体验2天',
+  destination: '广西县域',
+  duration: 2,
+  price: 168,
+  theme: '乡村体验',
+  tags: ['助农', '古寨'],
+  highlights: ['苗寨', '乡村振兴'],
+});
+const rankedPublicInterestFiltered = filterCandidateToursForPublicInterestNeed(
+  [majorCityTour, ruralCountyTour, explicitPublicTour],
+  { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+  '想去贫穷落后一点的地方看看',
+  true,
+);
+assert.deepEqual(rankedPublicInterestFiltered.map((tour) => tour.id), ['public-interest-tour', 'rural-county']);
+
+const povertyFallbackResult = await requestAiRecommendations({
+  conversationId: 'audit-poverty-fallback',
+  messages: [
+    {
+      id: 'poverty-user-turn',
+      role: 'user',
+      content: '想去贫穷落后一点的地方看看',
+      createdAt: '2026-06-09T00:06:00.000Z',
+    },
+  ],
+  candidateTours: [
+    majorCityTour,
+    ruralCountyTour,
+    explicitPublicTour,
+  ],
+  activeFilters: EMPTY_FILTERS,
+  searchQuery: '',
+  aiConfig: {
+    provider: 'openai-compatible',
+    baseUrl: 'http://127.0.0.1:9/v1',
+    apiKey: 'test-key',
+    model: 'test-model',
+  },
+  preferenceMemory: null,
+  previousResult: null,
+});
+assert.equal(povertyFallbackResult.source, 'local-preview');
+assert.deepEqual(povertyFallbackResult.items.slice(0, 2).map((item) => item.tourId), ['public-interest-tour', 'rural-county']);
+assert.ok(!povertyFallbackResult.items.some((item) => item.tourId === 'major-city'));
 
 const weirdSemanticSummary = finalizeRecommendationSummary({
   aiSummary: '用户寻找海边温泉、预算400元以内，关注天气因素。软语义判断：海边、温泉、400元以内、天气敏感。边界：候选中无明确标注海边的温泉，需结合目的地判断，无法断言某候选为扶贫或公益项目。温泉需匹配atoms中的温泉泡汤。',
