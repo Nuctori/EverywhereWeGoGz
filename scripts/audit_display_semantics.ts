@@ -6,6 +6,7 @@ import {
   getReadableHighlights,
   getReadableTheme,
 } from '../src/lib/tour-display.ts';
+import { compareRecommended } from '../src/lib/tour-recommendation.ts';
 import type { Tour } from '../src/types/tour.ts';
 
 function candidate(overrides: Partial<Tour> = {}): Tour {
@@ -64,6 +65,14 @@ assert.deepEqual(
   ['盐洲岛'],
 );
 
+assert.deepEqual(
+  getReadableHighlights(candidate({
+    destination: '广东',
+    highlights: ['广东必打卡', '精品住宿'],
+  })),
+  [],
+);
+
 assert.equal(
   getDepartureDateBadgeLabel(candidate({
     departureDate: '',
@@ -76,6 +85,14 @@ assert.equal(
     },
   })),
   '班期待确认',
+);
+
+assert.equal(
+  getDepartureDateBadgeLabel(candidate({
+    departureDate: '2026-05-30',
+    departureDates: ['2026-05-30', '2026-06-01'],
+  })),
+  '班期已过',
 );
 
 assert.equal(
@@ -98,5 +115,22 @@ assert.equal(
   })),
   '3天 · 温泉 · 大巴',
 );
+
+const tourWithUpcoming = candidate({
+  title: '普通线路',
+  departureDate: '2026-05-30',
+  departureDates: ['2026-05-30', '2026-06-18'],
+});
+const tourWithPastOnly = candidate({
+  title: '已过期线路',
+  departureDate: '2026-05-30',
+  departureDates: ['2026-05-30'],
+});
+
+assert.equal(
+  compareRecommended(tourWithUpcoming, tourWithPastOnly, []),
+  -compareRecommended(tourWithPastOnly, tourWithUpcoming, []),
+);
+assert.ok(compareRecommended(tourWithUpcoming, tourWithPastOnly, []) < 0);
 
 console.log('Display semantics audit passed');

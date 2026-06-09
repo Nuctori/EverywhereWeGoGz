@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
+import { compareRecommended, getEffectiveDepartureDates } from '@/lib/tour-recommendation';
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { computePriceStats, sliderToPrice, priceToSlider } from '@/lib/price-slider';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -316,64 +317,6 @@ function getTourSearchRelevance(
   return score;
 }
 
-function getDaysUntil(dateString: string) {
-  if (!dateString) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(dateString);
-  if (Number.isNaN(target.getTime())) return null;
-  target.setHours(0, 0, 0, 0);
-  return Math.round((target.getTime() - today.getTime()) / 86400000);
-}
-
-function getEffectiveDepartureDates(tour: TourSummary) {
-  const dates = (tour.departureDates || []).filter(Boolean);
-  if (dates.length > 0) {
-    return dates;
-  }
-  return tour.departureDate ? [tour.departureDate] : [];
-}
-
-function getRecommendationScore(tour: TourSummary) {
-  let score = 0;
-
-  if (RECOMMENDED_TITLE_HINTS.some((token) => tour.title.includes(token))) {
-    score += 4;
-  }
-
-  score += Math.min(tour.departureDates?.length ?? 0, 4);
-  score += Math.min(tour.hotDepartureDates?.length ?? 0, 2);
-
-  const daysUntil = getDaysUntil(tour.departureDate);
-  if (daysUntil !== null) {
-    if (daysUntil < 0) {
-      score -= 1;
-    } else if (daysUntil <= 7) {
-      score += 3;
-    } else if (daysUntil <= 30) {
-      score += 2;
-    } else if (daysUntil <= 90) {
-      score += 1;
-    }
-  }
-
-  if (tour.isNew) {
-    score += 1;
-  }
-
-  return score;
-}
-
-function compareRecommended(a: TourSummary, b: TourSummary) {
-  return (
-    getRecommendationScore(b) - getRecommendationScore(a) ||
-    (b.isHot ? 1 : 0) - (a.isHot ? 1 : 0) ||
-    (b.hotDepartureDates?.length ?? 0) - (a.hotDepartureDates?.length ?? 0) ||
-    (b.departureDates?.length ?? 0) - (a.departureDates?.length ?? 0) ||
-    a.price - b.price
-  );
-}
-
 function compareToursBySortMode(
   sortBy: FilterState['sortBy'],
   a: TourSummary,
@@ -385,7 +328,7 @@ function compareToursBySortMode(
     case 'price_desc':
       return b.price - a.price;
     case 'hot':
-      return compareRecommended(a, b);
+      return compareRecommended(a, b, RECOMMENDED_TITLE_HINTS);
     case 'new':
       return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
     default:

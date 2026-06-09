@@ -40,9 +40,19 @@ function isMeaningfulHighlight(value: string) {
   return normalized.length >= 2;
 }
 
+function isDestinationOnlyHighlight(tour: Tour, value: string) {
+  const normalized = normalizeDisplayText(value);
+  if (!normalized.includes('必打卡')) return false;
+
+  const stripped = normalized.replace(/必打卡/g, '').trim();
+  const destination = normalizeDisplayText(tour.destination);
+  return Boolean(stripped && destination && stripped === destination);
+}
+
 export function getReadableHighlights(tour: Tour) {
   const seen = new Set<string>();
   return (tour.highlights || [])
+    .filter((item) => !isDestinationOnlyHighlight(tour, item))
     .map((item) => normalizeDisplayText(item).replace(/必打卡$/, ''))
     .filter((item) => isMeaningfulHighlight(item))
     .filter((item) => {
@@ -87,12 +97,16 @@ export function getUpcomingDepartureDate(tour: Tour) {
     .sort((a, b) => a.getTime() - b.getTime());
 
   const futureDate = dates.find((date) => date.getTime() >= today.getTime());
-  return futureDate ? futureDate.toISOString().slice(0, 10) : tour.departureDate;
+  return futureDate ? futureDate.toISOString().slice(0, 10) : '';
 }
 
 export function getDepartureDateBadgeLabel(tour: Tour) {
   const upcomingDate = getUpcomingDepartureDate(tour);
   if (upcomingDate) return formatShortDate(upcomingDate);
+  const hasAnyStructuredDate = [tour.departureDate, ...(tour.departureDates || [])].some(Boolean);
+  if (hasAnyStructuredDate) {
+    return '班期已过';
+  }
   if (
     tour.dataQuality?.isDepartureDateReliable === false ||
     tour.dataQuality?.hasStructuredDepartureDates === false
