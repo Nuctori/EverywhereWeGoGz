@@ -990,6 +990,52 @@ const reasonOpenings = variedReasonRewrite
   .filter(Boolean);
 assert.ok(new Set(reasonOpenings).size >= 3);
 assert.ok(variedReasonRewrite.filter((item) => item.reason?.startsWith('主打')).length <= 1);
+assert.ok(!variedReasonRewrite.some((item) => /标题和标签|更值得核对|综合匹配|对题/.test(item.reason || '')));
+
+const naturalAiReasonRewrite = rewriteRecommendationCopy({
+  items: [{
+    tourId: hotSpringBeachTour.id,
+    score: 96,
+    reason: '这条把海边散步和温泉都放进去了，3天节奏也不赶。',
+    matchedSignals: ['温泉', '沙滩'],
+  }],
+  candidateTours: [hotSpringBeachTour, hotSpringTour, nonHotSpringTour],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '帮我找同时带温泉和沙滩的团',
+  allowPublicInterest: false,
+});
+assert.equal(naturalAiReasonRewrite[0].reason, '这条把海边散步和温泉都放进去了，3天节奏也不赶。');
+
+const metaAiReasonRewrite = rewriteRecommendationCopy({
+  items: [{
+    tourId: hotSpringBeachTour.id,
+    score: 95,
+    reason: '从标题和标签看，这条同时命中温泉和沙滩需求，对题度最高。',
+    matchedSignals: ['温泉', '沙滩'],
+  }],
+  candidateTours: [hotSpringBeachTour, hotSpringTour, nonHotSpringTour],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '帮我找同时带温泉和沙滩的团',
+  allowPublicInterest: false,
+});
+assert.ok(!/标题和标签|命中|对题度/.test(metaAiReasonRewrite[0].reason || ''));
+assert.ok(/温泉|沙滩|海边/.test(metaAiReasonRewrite[0].reason || ''));
 
 const unsupportedPublicInterestPrimitive = buildTourPrimitive(candidate({
   id: 'unsupported-public-interest',

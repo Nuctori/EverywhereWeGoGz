@@ -39,7 +39,7 @@ const AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS = 60000;
 const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 15000;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
-const AI_CACHE_PROMPT_VERSION = '2026-06-09-price-context-v1';
+const AI_CACHE_PROMPT_VERSION = '2026-06-10-copy-quality-v2';
 const DEFAULT_DEPARTURE_CITY = '广州';
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
@@ -2164,10 +2164,15 @@ function isGenericReason(reason: string) {
   return /^(价格|低价|班期|热门|性价比|预算|天数|行程|综合|适合预算)|综合匹配|性价比高|班期多|价格低|自然风光生态|适合轻松|天气取舍/.test(reason);
 }
 
+function hasMetaRecommendationLanguage(reason: string) {
+  return /(从标题和标签看|标题和标签|候选池|候选里|对题|命中|完整覆盖|部分命中|软语义|更值得核对|排序靠前|规则|匹配度|标签党)/.test(reason);
+}
+
 function shouldKeepAiReason(reason: string, primitive: RecommendationPrimitive) {
   const trimmed = stripTerminalPunctuation(reason);
-  if (trimmed.length < 12) return false;
+  if (trimmed.length < 10 || trimmed.length > 80) return false;
   if (hasInternalRecommendationLanguage(trimmed)) return false;
+  if (hasMetaRecommendationLanguage(trimmed)) return false;
   if (hasUnsupportedPublicInterestClaim(trimmed, primitive)) return false;
   if (isGenericReason(trimmed) && !reasonMentionsCandidateFact(trimmed, primitive)) return false;
   return true;
@@ -2354,12 +2359,12 @@ function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive, varian
   const routePart = routeText ? `${routeText}，${paceText}` : paceText;
   const pricePart = priceText ? `参考价${priceText}` : '';
   const leadTemplates = [
-    `${titleFact}这条看点落在${experienceText}，${routePart}`,
-    `${routePart}，核心体验是${experienceText}`,
-    `先看玩法的话，${experienceText}比泛泛的目的地标签更明确，${routePart}`,
-    `${experienceText}和行程节奏都比较清楚，${routePart}`,
-    `${titleFact}适合拿来对比${experienceText}这一类需求，${routePart}`,
-    `从标题和标签看，${experienceText}是更值得核对的部分，${routePart}`,
+    `${titleFact}这条更像是冲着${experienceText}去的，${routePart}`,
+    `如果你更看重${experienceText}，这条会更对路，${routePart}`,
+    `${titleFact}把${experienceText}放得比较集中，${routePart}`,
+    `${routePart}，亮点基本都落在${experienceText}`,
+    `同类线路里，这条最有辨识度的就是${experienceText}，${routePart}`,
+    `拿来做同类对比时，${experienceText}会比目的地名字更出彩，${routePart}`,
   ];
   const leadIndex = (getStableTextIndex(`${primitive.id}:${primitive.title}`, leadTemplates.length) + variant)
     % leadTemplates.length;
@@ -3299,8 +3304,7 @@ function rewriteRecommendationCopy(params: {
         userText: params.userText,
         sortedPrices,
       }) &&
-      shouldKeepAiReason(currentReason, primitive) &&
-      shouldUseAiSummary(currentReason, params.weatherContext, params)
+      shouldKeepAiReason(currentReason, primitive)
     ) {
       return {
         ...item,
@@ -3977,6 +3981,8 @@ function buildAiMessages(params: {
     '你是旅行团推荐顾问，从给定候选池里理解用户需求并排序。',
     '输出只能引用候选池中真实存在的 tourId；线路事实、价格、班期、酒店、景点和服务来自候选原语。',
     '可结合 q、rc、pm、it、wx、dw、候选事实、价格上下文 pc/pricePct 和必要的目的地常识理解软语义。',
+    'reason 要像旅行顾问在给朋友提建议：先说这条最具体的玩法或体验，再补一句必要的取舍或天气提醒。',
+    '不要解释规则，不要写“命中/对题/标题和标签/候选/软语义/综合匹配/预算友好”这类评审腔。',
     ...promptPolicy.systemRules,
     '严格输出 JSON，不要 Markdown，不要额外解释。',
   ].join('\n');
@@ -4021,7 +4027,7 @@ function buildAiMessages(params: {
         {
           tourId: '候选 id',
           score: '0-100 number',
-          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。1 句中文，引用候选事实并解释软语义/天气取舍；其余条目省略`,
+          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。1 句中文，像旅行顾问推荐朋友出行；必须点出候选里的具体玩法/场景，再补一句必要取舍；不要写命中规则或评审话术；其余条目省略`,
           matchedSignals: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。2-3 个中文短语；其余条目省略`,
         },
       ],
@@ -4030,6 +4036,8 @@ function buildAiMessages(params: {
     rq: [
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解。',
       'candidates 里 pc/pricePct 是价格上下文，atoms/cats/seasonAtoms/conflicts 是候选事实摘要。',
+      'reason 优先写用户真正会关心的体验差异，例如温泉/沙滩/古城/节奏/团期天气，不要复述系统字段名。',
+      '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
       ...promptPolicy.requestRules,
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
@@ -4082,7 +4090,7 @@ function buildLiteAiMessages(params: {
       items: [{
         tourId: '候选 id',
         score: '0-100 number',
-        sf: '仅前8条需要，24字内，贴近软语义或近似替代',
+        sf: '仅前8条需要，32字内，像旅行顾问的自然短句，点出具体玩法或取舍',
         ss: '仅前8条需要，最多3个短词',
         sb: '仅前8条需要，24字内，不能断言的边界',
       }],
@@ -4092,9 +4100,10 @@ function buildLiteAiMessages(params: {
       '只输出 JSON，不要 Markdown。',
       '返回 intentNotes 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
-      '用紧凑 JSON；中文短句不超过24字。',
+      '用紧凑 JSON；中文短句不超过32字。',
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
       '结合 q、it、wx、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 理解软语义。',
+      'sf 不要写命中、对题、候选、标签、软语义、预算友好这类系统化说法。',
       ...promptPolicy.liteRules,
     ],
   };
