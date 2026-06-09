@@ -2306,7 +2306,7 @@ function formatPrimitivePrice(primitive: RecommendationPrimitive) {
 }
 
 function hasPositivePriceClaim(text: string) {
-  return /(预算友好|价格友好|预算贴边|预算内|预算达到|低于预算带|低价|便宜|不贵|划算|性价比|省钱|实惠)/.test(text);
+  return /(预算友好|价格友好|预算贴边|预算内|预算达到|符合预算|预算符合|在预算|低于预算带|低价|便宜|不贵|划算|性价比|省钱|实惠)/.test(text);
 }
 
 function hasExplicitValueIntent(intent: AiTravelIntent | null, userText: string) {
