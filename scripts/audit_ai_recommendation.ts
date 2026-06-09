@@ -721,6 +721,28 @@ const closeToBudgetRewrite = rewriteRecommendationCopy({
 });
 assert.ok(!/预算/.test(closeToBudgetRewrite[0].reason || ''));
 assert.ok(closeToBudgetRewrite[0].reason?.includes('参考价：￥30,999'));
+const approximateBudgetRewrite = rewriteRecommendationCopy({
+  items: [{
+    tourId: highPriceBeachTour.id,
+    score: 93,
+    reason: '含温泉和沙滩，预算约4000，体验完整。',
+    matchedSignals: ['温泉', '沙滩'],
+  }],
+  candidateTours: [highPriceBeachTour, lowPriceBeachTour],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '广州未来几天闷热多雨。',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '帮我找同时带温泉和沙滩的团',
+  allowPublicInterest: false,
+});
+assert.ok(!/预算约|预算大约|预算\s*\d/.test(approximateBudgetRewrite[0].reason || ''));
+assert.ok(approximateBudgetRewrite[0].reason?.includes('参考价：￥30,999'));
 const sanitizedInventedBudget = sanitizeAiBudgetBoundsForTurn(
   {
     budgetMax: 35000,
