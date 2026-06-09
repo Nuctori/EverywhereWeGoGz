@@ -5473,7 +5473,7 @@ export async function requestAiRecommendations({
         destinationWeatherInsights,
         intent: finalIntent,
         weatherContext,
-        userText: finalEffectiveUserText,
+        userText: text,
         allowPublicInterest: allowPublicInterestForTurn,
       }),
     );
