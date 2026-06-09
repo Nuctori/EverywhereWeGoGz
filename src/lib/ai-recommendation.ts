@@ -1488,8 +1488,9 @@ function hasMeaningfulPreferenceMemory(memory: AiPreferenceMemory | null | undef
   );
 }
 
-function normalizePreferenceMemory(memory: AiPreferenceMemory | null | undefined) {
-  return hasMeaningfulPreferenceMemory(memory) ? memory : null;
+function normalizePreferenceMemory(memory: AiPreferenceMemory | null | undefined): AiPreferenceMemory | null {
+  if (!memory || !hasMeaningfulPreferenceMemory(memory)) return null;
+  return memory;
 }
 
 function getDepartureDates(tour: AiRecommendationCandidate) {
@@ -5215,7 +5216,7 @@ export async function requestAiRecommendations({
           label: '没有可用候选',
           detail: '本次没有可交给 AI 排序的候选，已返回本地候选补位结果。',
         },
-        preferenceMemory: nextPreferenceMemory,
+        ...(nextPreferenceMemory ? { preferenceMemory: nextPreferenceMemory } : {}),
       };
     }
     emitProgress(onProgress, {
@@ -5379,7 +5380,7 @@ export async function requestAiRecommendations({
           ? `已结合需求理解、天气和候选排序，给出 ${countCommentaryItems(mergedItems)} 条建议，并展示 ${mergedItems.length} 条匹配结果。`
           : `AI 已完成需求理解，但排序结果未稳定映射到候选，已自动改用本地排序并展示 ${mergedItems.length} 条匹配结果。`,
       },
-      preferenceMemory: finalPreferenceMemory,
+      ...(finalPreferenceMemory ? { preferenceMemory: finalPreferenceMemory } : {}),
       ...(semanticNotes ? { semanticNotes } : {}),
     };
   } catch (error) {
@@ -5414,7 +5415,7 @@ export async function requestAiRecommendations({
         label: 'AI 未完成，本次已降级到本地推荐',
         detail: `为了不中断结果展示，已先返回 ${fallbackItems.length} 条本地候选补位结果。${failureDetail ? ` (${failureDetail})` : ''}`,
       },
-      preferenceMemory: runtimePreferenceMemory ?? undefined,
+      ...(runtimePreferenceMemory ? { preferenceMemory: runtimePreferenceMemory } : {}),
     };
   }
 }

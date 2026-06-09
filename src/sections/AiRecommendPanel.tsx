@@ -352,14 +352,14 @@ export function AiRecommendPanel({
   }
 
   return (
-    <div className="mb-4 rounded-[24px] border border-stone-200/80 bg-white/88 p-3 shadow-sm backdrop-blur sm:p-4">
+    <div className="mb-4 rounded-[24px] border border-orange-100/80 bg-white/90 p-3 shadow-[0_16px_40px_rgba(28,25,23,0.05)] backdrop-blur sm:p-4">
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-stone-950">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-stone-900 text-white">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-orange-700 ring-1 ring-orange-200">
               <Sparkles className="h-3.5 w-3.5" />
             </span>
-            AI 正在帮你排优先级
+            AI 优先级助手
             {preferenceMemory && (
               <Badge className="rounded-full border-stone-200 bg-stone-50 px-2 py-0.5 text-[11px] text-stone-600 hover:bg-stone-50">
                 已记住偏好
@@ -376,24 +376,24 @@ export function AiRecommendPanel({
         <Button
           type="button"
           variant="outline"
-          className="h-9 rounded-xl border-stone-200 bg-white px-3 text-xs text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+          className="h-9 rounded-xl border-orange-100 bg-orange-50 px-3 text-xs text-orange-700 hover:border-orange-200 hover:bg-orange-100 hover:text-orange-800"
           onClick={() => setSettingsOpen(true)}
         >
           <Settings className="h-3.5 w-3.5" />
-          设置
+          调整偏好
         </Button>
       </div>
 
-      <div className="mt-3 rounded-[20px] border border-stone-200 bg-[linear-gradient(180deg,rgba(250,250,249,0.94),rgba(255,255,255,0.96))] px-4 py-3">
+      <div className="mt-3 rounded-[20px] border border-stone-200 bg-[linear-gradient(180deg,rgba(255,247,237,0.82),rgba(255,255,255,0.96))] px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-sm font-semibold text-stone-950">
               {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin text-stone-700" />
+                <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
               ) : hasResult ? (
-                <CheckCircle2 className="h-4 w-4 text-stone-700" />
+                <CheckCircle2 className="h-4 w-4 text-orange-600" />
               ) : (
-                <Sparkles className="h-4 w-4 text-stone-500" />
+                <Sparkles className="h-4 w-4 text-orange-600" />
               )}
               {compactStatusLabel}
             </div>
@@ -414,10 +414,10 @@ export function AiRecommendPanel({
             <Button
               type="button"
               variant="ghost"
-              className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+              className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-orange-50 hover:text-orange-700"
               onClick={() => setDetailsOpen((value) => !value)}
             >
-              {detailsOpen ? '收起细节' : 'AI细节'}
+              {detailsOpen ? '收起细节' : 'AI 调节'}
             </Button>
             {resultStatusMeta && hasResult && !loading && (
               <Badge
@@ -488,7 +488,7 @@ export function AiRecommendPanel({
                 </Badge>
               </div>
 
-              <Progress value={progressState.progress} className="mt-3 h-2 bg-stone-200 [&_[data-slot=progress-indicator]]:bg-stone-800" />
+              <Progress value={progressState.progress} className="mt-3 h-2 bg-orange-100 [&_[data-slot=progress-indicator]]:bg-orange-500" />
 
               <div className="mt-3 grid gap-2 sm:grid-cols-5">
                 {progressSteps.map((step, index) => {
@@ -502,9 +502,9 @@ export function AiRecommendPanel({
                       className={cn(
                         'rounded-xl border px-3 py-2 text-xs transition-colors',
                         isCurrent
-                          ? 'border-stone-300 bg-white text-stone-950'
+                          ? 'border-orange-200 bg-orange-50 text-stone-950'
                           : isDone
-                            ? 'border-stone-200 bg-stone-50 text-stone-700'
+                            ? 'border-orange-100 bg-white text-stone-700'
                             : 'border-stone-200/80 bg-white text-stone-400',
                       )}
                     >
@@ -513,9 +513,9 @@ export function AiRecommendPanel({
                           className={cn(
                             'inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px]',
                             isCurrent
-                              ? 'bg-stone-900 text-white'
+                              ? 'bg-orange-600 text-white'
                               : isDone
-                                ? 'bg-stone-700 text-white'
+                                ? 'bg-orange-400 text-white'
                                 : 'bg-stone-100 text-stone-500',
                           )}
                         >
