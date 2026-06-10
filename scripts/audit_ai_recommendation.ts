@@ -21,6 +21,7 @@ const {
   compactCandidates,
   allowsPublicInterestForTurn,
   finalizeRecommendationSummary,
+  getAiResponseIntentQualityIssue,
   getConcreteAiReason,
   getPrimitiveConflictReasons,
   localRecommendations,
@@ -902,6 +903,34 @@ assert.ok(
   `expected tour_17 reason to mention concrete beach + hot spring facts, got ${failedAiFallbackResult.items[0]?.reason || ''}`,
 );
 assert.equal(failedAiFallbackResult.preferenceMemory ?? null, null);
+const naturalPhraseFallbackResult = await requestAiRecommendations({
+  conversationId: 'audit-natural-phrase-fallback',
+  messages: [
+    {
+      id: 'natural-phrase-user-turn',
+      role: 'user',
+      content: '帮我找同时带温泉和沙滩的团，最好轻松一点',
+      createdAt: '2026-06-09T00:10:00.000Z',
+    },
+  ],
+  candidateTours: realTours,
+  activeFilters: EMPTY_FILTERS,
+  searchQuery: '',
+  aiConfig: {
+    provider: 'openai-compatible',
+    baseUrl: 'http://127.0.0.1:9/v1',
+    apiKey: 'test-key',
+    model: 'test-model',
+  },
+  preferenceMemory: null,
+  previousResult: null,
+});
+assert.equal(naturalPhraseFallbackResult.source, 'local-preview');
+assert.equal(naturalPhraseFallbackResult.items[0]?.tourId, 'tour_17');
+assert.ok(
+  /(温泉|海滩|沙滩|盐洲岛)/.test(naturalPhraseFallbackResult.items[0]?.reason || ''),
+  `expected natural phrase fallback top reason to mention concrete beach + hot spring facts, got ${naturalPhraseFallbackResult.items[0]?.reason || ''}`,
+);
 const sanitizedInventedBudget = sanitizeAiBudgetBoundsForTurn(
   {
     budgetMax: 35000,
@@ -1228,6 +1257,31 @@ assert.equal(publicInterestAuditedOrder[1]?.tourId, 'rural-county');
 assert.equal(publicInterestAuditedOrder[2]?.tourId, 'major-city');
 assert.ok(publicInterestAuditedOrder[2]?.reason?.includes('需放宽条件'));
 
+const publicInterestQualityIssue = getAiResponseIntentQualityIssue({
+  response: {
+    items: [
+      { tourId: 'major-city', score: 99, reason: '北京文化地标很多', matchedSignals: ['文化'] },
+    ],
+  },
+  candidateTours: [majorCityTour, ruralCountyTour, explicitPublicTour],
+  intent: { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+});
+assert.ok(publicInterestQualityIssue?.includes('public-interest_need_missed'));
+assert.ok(publicInterestQualityIssue?.includes('助农古寨'));
+assert.equal(
+  getAiResponseIntentQualityIssue({
+    response: {
+      items: [
+        { tourId: 'public-interest-tour', score: 99, reason: '助农古寨体验更贴近公益方向', matchedSignals: ['助农', '古寨'] },
+        { tourId: 'rural-county', score: 95, reason: '县域古村山水更接近乡村方向', matchedSignals: ['县域', '古村'] },
+      ],
+    },
+    candidateTours: [majorCityTour, ruralCountyTour, explicitPublicTour],
+    intent: { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+  }),
+  null,
+);
+
 const weirdSemanticSummary = finalizeRecommendationSummary({
   aiSummary: '用户寻找海边温泉、预算400元以内，关注天气因素。软语义判断：海边、温泉、400元以内、天气敏感。边界：候选中无明确标注海边的温泉，需结合目的地判断，无法断言某候选为扶贫或公益项目。温泉需匹配atoms中的温泉泡汤。',
   items: [{ tourId: 'beach', score: 90, reason: '沙滩短线', matchedSignals: [] }],
@@ -1355,6 +1409,14 @@ const explicitPublicLitePrompt = buildLiteAiMessages({
 }).map((message) => message.content).join('\n');
 assert.ok(promptPublicInterestPattern.test(explicitPublicFullPrompt));
 assert.ok(promptPublicInterestPattern.test(explicitPublicLitePrompt));
+assert.ok(explicitPublicFullPrompt.includes('"sg"'));
+assert.ok(explicitPublicLitePrompt.includes('"sg"'));
+assert.ok(explicitPublicFullPrompt.includes('理解镜头'));
+assert.ok(explicitPublicLitePrompt.includes('理解镜头'));
+assert.ok(explicitPublicFullPrompt.includes('不是目的地白名单'));
+assert.ok(explicitPublicLitePrompt.includes('不是硬过滤规则'));
+assert.ok(/县域|乡村|梯田|助农/.test(explicitPublicFullPrompt));
+assert.ok(/县域|乡村|梯田|助农/.test(explicitPublicLitePrompt));
 
 const zhHardIntent = buildHardIntentFromText(
   '周末2天，预算800以内，想清凉一点，但不想去海边，也不要坐飞机',

@@ -392,6 +392,58 @@ function compactAuditContextForPrompt(context: RecommendationAuditContext) {
   };
 }
 
+function buildPublicInterestReasoningContext(
+  candidates: ReturnType<typeof compactCandidates>,
+  intent: AiTravelIntent | null,
+  userText: string,
+) {
+  if (!hasPublicInterestNeed(intent, userText)) return null;
+
+  const stronger = candidates
+    .filter((candidate) =>
+      primitiveHasPublicInterestEvidence(candidate) &&
+      getPrimitiveConflictReasons(intent, candidate).length === 0,
+    )
+    .slice(0, 4)
+    .map((candidate) => [
+      candidate.id,
+      compactPromptText(candidate.title, 26),
+      compactPromptStrings([
+        ...candidate.tags,
+        ...candidate.highlights,
+        ...candidate.semanticAtoms,
+        ...candidate.experienceCategories,
+      ], 3, 10),
+    ]);
+
+  const nearAlternatives = candidates
+    .filter((candidate) =>
+      candidate.conflictReasons.some((reason) => reason.includes('不像县域乡村或公益方向')) ||
+      primitiveHasUrbanLeisureEvidence(candidate) ||
+      primitiveHasLuxuryResortEvidence(candidate),
+    )
+    .slice(0, 4)
+    .map((candidate) => [
+      candidate.id,
+      compactPromptText(candidate.title, 26),
+      compactPromptStrings(candidate.conflictReasons, 1, 18),
+    ]);
+
+  return {
+    mode: 'public_interest',
+    meaning:
+      '这类表达通常不是在找一线城市地标或纯酒店放松，而是在找更接近县域、乡村、村寨、梯田、民族聚落或商业化更弱的在地体验。',
+    positiveEvidence: ['县域', '乡村', '村寨', '梯田', '助农', '非遗', '研学', '民族村'],
+    nearAlternativeSignals: ['城市地标', '购物商圈', '豪华酒店', '温泉度假', '热门都市打卡'],
+    decisionRule:
+      '把它当成理解镜头而不是硬过滤器。只有当更像县域乡村的候选在预算、天数、班期或天气上明显不合适时，才把城市休闲或酒店放松线排到前面。',
+    noEvidenceRule:
+      '如果候选里没有足够证据，不要硬说扶贫或公益项目，只能如实说明它是更接近县域乡村体验的替代。',
+    strongerExamples: stronger,
+    nearAlternativeExamples: nearAlternatives,
+  };
+}
+
 function compactPromptText(value: string | null | undefined, maxLength = 36) {
   const text = (value || '')
     .replace(/\s+/g, ' ')
@@ -644,7 +696,7 @@ function collectThemeHints(text: string) {
 const COVERAGE_TERM_GROUPS = [
   {
     label: '温泉泡汤',
-    aliases: ['温泉', '泡汤', '汤泉', '热泉', '铁泉', '御泉', '私汤', '带池', '泡池', 'spa'],
+    aliases: ['温泉', '泡汤', '汤泉', '热泉', '铁泉', '御泉', '私汤', '带池', '泡池'],
   },
   {
     label: '海边沙滩',
@@ -676,6 +728,42 @@ const COVERAGE_TERM_GROUPS = [
   },
 ] as const;
 
+const PUBLIC_INTEREST_EVIDENCE_TERMS = [
+  '扶贫',
+  '公益',
+  '慈善',
+  '助农',
+  '乡村振兴',
+  '乡村',
+  '古村',
+  '古镇',
+  '县域',
+  '县城',
+  '村寨',
+  '苗寨',
+  '侗寨',
+  '瑶寨',
+  '壮寨',
+  '民族村',
+  '农家',
+  '田园',
+  '梯田',
+  '山区',
+  '山村',
+  '非遗',
+  '研学',
+] as const;
+
+function getPublicInterestSemanticAnchors(text: string) {
+  if (!hasPublicInterestLanguage(text)) return [];
+
+  return uniqueStrings([
+    /(扶贫|公益|慈善|助农|乡村振兴)/.test(text) ? '公益方向' : '',
+    /(贫穷|贫困|落后|欠发达|经济相对较弱|经济相对弱)/.test(text) ? '贫穷地方' : '',
+    '县域乡村',
+  ]);
+}
+
 function normalizeCoverageToken(value: string) {
   return normalizeSemanticAtom(value)
     .replace(/^(推荐|考虑|选择|参加|体验|安排|适合|适配|同时|兼具|兼有|带有|包含|包括|具有|拥有|想要|想找|要找|找)+/g, '')
@@ -700,6 +788,11 @@ function collectCoverageTermsFromAliases(text: string) {
   return COVERAGE_TERM_GROUPS
     .filter((group) => group.aliases.some((alias) => text.includes(alias)) || text.includes(group.label))
     .map((group) => group.label);
+}
+
+function getCoverageTermAliases(term: string) {
+  const group = COVERAGE_TERM_GROUPS.find((candidate) => candidate.label === term);
+  return group ? [group.label, ...group.aliases] : [term];
 }
 
 function collectLocalCoverageTerms(text: string) {
@@ -960,7 +1053,8 @@ function scoreTour(
 function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommendationItem[] {
   return [...tours]
     .sort((a, b) =>
-      (b.isHot ? 1 : 0) - (a.isHot ? 1 : 0) ||
+      (b.hotDepartureDates?.length ?? 0) - (a.hotDepartureDates?.length ?? 0) ||
+      (b.departureDates?.length ?? 0) - (a.departureDates?.length ?? 0) ||
       (b.rating || 0) - (a.rating || 0) ||
       a.price - b.price,
     )
@@ -970,12 +1064,12 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
       reason: index < MAX_AI_COMMENTARY_ITEMS
         ? buildLocalTourReason(
             tour,
-            tour.isHot ? ['候选池排序靠前'] : ['候选池补充结果'],
+            ['候选池补充结果'],
             '候选池补充结果，建议打开详情核对行程',
             index,
           )
         : undefined,
-      matchedSignals: tour.isHot ? ['候选池排序靠前'] : ['候选池补充结果'],
+      matchedSignals: ['候选池补充结果'],
     }));
 }
 
@@ -1565,9 +1659,86 @@ function countCommentaryItems(items: AiRecommendationItem[]) {
   return items.reduce((count, item) => count + (item.reason ? 1 : 0), 0);
 }
 
+function getCoverageTermsForQuality(userText: string | undefined) {
+  const text = normalizeText(userText || '');
+  if (!text) return [];
+
+  const aliasTerms = collectCoverageTermsFromAliases(text);
+  const themeTerms = collectThemeHints(text)
+    .map(canonicalizeCoverageTerm)
+    .filter((term) => COVERAGE_TERM_GROUPS.some((group) => group.label === term));
+
+  return uniqueStrings([...aliasTerms, ...themeTerms]).slice(0, 4);
+}
+
+function getItemCoverageMetrics(
+  primitive: RecommendationPrimitive,
+  coverageTerms: string[],
+) {
+  const matchedTerms = coverageTerms.filter((term) => getPrimitiveCoverageScore(primitive, [term]) > 0);
+  return {
+    matchedTerms,
+    coverageCount: matchedTerms.length,
+    coveragePercent: coverageTerms.length > 0
+      ? Math.round((matchedTerms.length / coverageTerms.length) * 100)
+      : 0,
+  };
+}
+
 // 对推荐结果做最终裁剪和去重，保证榜单稳定且理由不过载。
-function prioritizeRecommendationItems(items: AiRecommendationItem[]) {
-  return limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
+function prioritizeRecommendationItems(
+  items: AiRecommendationItem[],
+  context?: {
+    candidateTours?: AiRecommendationCandidate[];
+    intent?: AiTravelIntent | null;
+    userText?: string;
+  },
+) {
+  const prioritized = limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
+  const coverageTerms = getCoverageTermsForQuality(context?.userText);
+  if (coverageTerms.length < 2 || !context?.candidateTours?.length) {
+    return prioritized;
+  }
+
+  const primitiveByTourId = new Map(context.candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
+  const metrics = prioritized.map((item, index) => {
+    const primitive = primitiveByTourId.get(item.tourId);
+    if (!primitive) {
+      return {
+        item,
+        index,
+        coverageCount: 0,
+        coveragePercent: 0,
+        isAlternative: isAlternativeRecommendation(item),
+        hasConflict: false,
+      };
+    }
+
+    const coverage = getItemCoverageMetrics(primitive, coverageTerms);
+    return {
+      item,
+      index,
+      coverageCount: coverage.coverageCount,
+      coveragePercent: coverage.coveragePercent,
+      isAlternative: isAlternativeRecommendation(item),
+      hasConflict: getPrimitiveConflictReasons(context.intent || null, primitive).length > 0,
+    };
+  });
+
+  const maxCoverageCount = Math.max(...metrics.map((metric) => metric.coverageCount));
+  const originalTopCoverage = metrics[0]?.coverageCount ?? 0;
+  if (maxCoverageCount < 2 || maxCoverageCount <= originalTopCoverage) {
+    return prioritized;
+  }
+
+  return [...metrics]
+    .sort((left, right) =>
+      Number(left.isAlternative) - Number(right.isAlternative) ||
+      Number(left.hasConflict) - Number(right.hasConflict) ||
+      right.coverageCount - left.coverageCount ||
+      right.coveragePercent - left.coveragePercent ||
+      left.index - right.index)
+    .map(({ item }) => item);
 }
 
 function getWeekday(date: string) {
@@ -1656,7 +1827,7 @@ function extractExperienceCategories(tour: AiRecommendationCandidate) {
   ].filter(Boolean).join(' ').toLowerCase();
   const categories: string[] = [];
   const lodgingOnly = /住宿套餐|酒店住宿|门票|门票套餐|景点套票|接载|单程接送|摄影写真/.test(corpus);
-  const hasBeachSignal = /海边|海滩|沙滩|海景|海岛|双月湾|巽寮湾|沙扒湾|盐洲岛|南澳岛|海陵岛|上下川|放鸡岛|游艇|浮潜|潜水/.test(corpus);
+  const hasBeachSignal = /海滩|沙滩|海景|海岛|双月湾|巽寮湾|沙扒湾|盐洲岛|南澳岛|海陵岛|上下川|放鸡岛|游艇|浮潜|潜水|私家海滩|滨海度假/.test(corpus);
   const hasIndoorSignal = /冰世界|冰雪世界|室内|度假村|别墅|庄园|亲子|乐园/.test(corpus);
   const hasMountainSignal = /森林|氧吧|瀑布|峡谷|溶洞|山水|山泉|湿地|绿道|星湖|丹霞|九瀑|云门山|白水寨|古龙峡|黄腾峡|三百山|天露山|紫云谷|姑婆山|草原|长白山|呼伦贝尔|喀纳斯|香格里拉|玉龙雪山|九寨沟/.test(corpus);
   const hasWaterPlaySignal = /漂流|溯溪|桨板|浆板|sup|水上乐园|水世界|冲浪|游泳|嬉水|亲水|山泉水泳道/.test(corpus);
@@ -1664,7 +1835,7 @@ function extractExperienceCategories(tour: AiRecommendationCandidate) {
 
   if (lodgingOnly) return ['非跟团产品'];
 
-  if (/温泉|泡汤|汤泉|热泉|铁泉|御泉|颐和|银盏|聚龙湾|云天海|雅泡|带池|私汤|依泉楼|spa/i.test(corpus)) categories.push('温泉泡汤');
+  if (/温泉|泡汤|汤泉|热泉|铁泉|御泉|颐和|银盏|聚龙湾|云天海|雅泡|带池|私汤|依泉楼/i.test(corpus)) categories.push('温泉泡汤');
   if (hasWaterPlaySignal) {
     categories.push('玩水清凉');
   }
@@ -1714,7 +1885,7 @@ function extractSeasonalComfortAtoms(tour: AiRecommendationCandidate) {
   if (/博物馆|室内|冰世界|冰雪世界/.test(corpus)) {
     comfortAtoms.push('夏季友好：室内或避暑点');
   }
-  if (/温泉|泡汤|汤泉|热泉|铁泉|御泉|颐和|银盏|聚龙湾|云天海|雅泡|带池|私汤|依泉楼|spa/i.test(corpus)) {
+  if (/温泉|泡汤|汤泉|热泉|铁泉|御泉|颐和|银盏|聚龙湾|云天海|雅泡|带池|私汤|依泉楼/i.test(corpus)) {
     riskAtoms.push('高温天气需取舍：温泉泡汤');
   }
   if (/徒步|爬山|登山|暴走/.test(corpus)) {
@@ -2582,6 +2753,12 @@ function buildSemanticNotesLead(
   return '';
 }
 
+function isMeaningfulSemanticBoundary(text: string) {
+  const normalized = stripTerminalPunctuation(text).replace(/\s+/g, '');
+  if (!normalized) return false;
+  return !/^(无|暂无|没有|无特殊边界|无明显边界|无额外边界|无特别边界)$/u.test(normalized);
+}
+
 function isBoundedPublicInterestStatement(text: string) {
   return /(候选|原文|显式|证据|没有|未标注|不能|不可|不等于|近似|替代|只能|无法断言)/.test(text);
 }
@@ -2589,16 +2766,37 @@ function isBoundedPublicInterestStatement(text: string) {
 function buildItemSemanticReason(
   item: AiRecommendationItem,
   primitive: RecommendationPrimitive,
-  options: { allowPublicInterest: boolean },
+  options: { allowPublicInterest: boolean; userText?: string },
 ) {
   const semanticFit = normalizeAiText(item.semanticFit, 140);
   const semanticBoundary = normalizeAiText(item.semanticBoundary, 120);
-  const parts = uniqueStrings([semanticFit, semanticBoundary]).filter(Boolean);
+  const parts = uniqueStrings([
+    semanticFit,
+    isMeaningfulSemanticBoundary(semanticBoundary) ? semanticBoundary : '',
+  ]).filter(Boolean);
   if (parts.length === 0) return '';
   const text = parts.join('；');
   if (hasUnallowedPublicInterestLanguage(text, options)) return '';
   if (hasUnsupportedPublicInterestClaim(text, primitive)) return '';
+  if (hasUnsupportedCompoundCoverageClaim(text, primitive, options.userText)) return '';
   return text;
+}
+
+function hasUnsupportedCompoundCoverageClaim(
+  text: string,
+  primitive: RecommendationPrimitive,
+  userText: string | undefined,
+) {
+  const requestedTerms = getCoverageTermsForQuality(userText);
+  if (requestedTerms.length < 2) return false;
+
+  const normalizedText = normalizeText(text);
+  const claimedTerms = requestedTerms.filter((term) =>
+    getCoverageTermAliases(term).some((alias) => normalizedText.includes(normalizeText(alias)))
+  );
+  if (claimedTerms.length < 2) return false;
+
+  return claimedTerms.some((term) => getPrimitiveCoverageScore(primitive, [term]) <= 0);
 }
 
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
@@ -3038,6 +3236,84 @@ function compactCandidates(
   return annotatedCandidates;
 }
 
+function getPublicInterestEvidenceScore(primitive: RecommendationPrimitive) {
+  const corpus = normalizeText([
+    primitive.title,
+    primitive.destination,
+    primitive.theme,
+    ...primitive.tags,
+    ...primitive.highlights,
+    ...primitive.semanticAtoms,
+    ...primitive.experienceCategories,
+  ].join(' '));
+  const matchedTerms = PUBLIC_INTEREST_EVIDENCE_TERMS.filter((term) => corpus.includes(normalizeText(term)));
+  return matchedTerms.reduce((score, term) => {
+    if (/(扶贫|公益|慈善|助农|乡村振兴)/.test(term)) return score + 4;
+    if (/(苗寨|侗寨|瑶寨|壮寨|民族村|梯田|县域|古村|乡村)/.test(term)) return score + 3;
+    return score + 1;
+  }, 0);
+}
+
+function selectPublicInterestSemanticEvidenceCandidates(
+  tours: AiRecommendationCandidate[],
+  localItems: AiRecommendationItem[],
+  intent: AiTravelIntent | null,
+  userText: string,
+  limit = 8,
+) {
+  if (!hasPublicInterestNeed(intent, userText)) return [] as CandidateAuditPrimitive[];
+
+  const primitives = tours.map(buildTourPrimitive);
+  const sortedPrices = primitives
+    .map((primitive) => primitive.price)
+    .filter((price) => Number.isFinite(price) && price > 0)
+    .sort((a, b) => a - b);
+  const evidencePrimitives = primitives
+    .filter((primitive) =>
+      primitiveHasPublicInterestEvidence(primitive) &&
+      getPrimitiveConflictReasons(intent, primitive).length === 0,
+    )
+    .sort((left, right) =>
+      getPublicInterestEvidenceScore(right) - getPublicInterestEvidenceScore(left) ||
+      rankPrimitive(right, localItems) - rankPrimitive(left, localItems),
+    );
+
+  return selectDiversePrimitives(evidencePrimitives, limit, localItems)
+    .map((primitive) =>
+      annotateCandidatePrimitive(
+        primitive,
+        intent,
+        sortedPrices,
+        'match',
+        [],
+      ),
+    );
+}
+
+function enrichPromptCandidatesWithSemanticEvidence(
+  baseCandidates: ReturnType<typeof compactCandidates>,
+  tours: AiRecommendationCandidate[],
+  localItems: AiRecommendationItem[],
+  intent: AiTravelIntent | null,
+  userText: string,
+) {
+  const evidenceCandidates = selectPublicInterestSemanticEvidenceCandidates(
+    tours,
+    localItems,
+    intent,
+    userText,
+  );
+  if (evidenceCandidates.length === 0) return baseCandidates;
+
+  const seenIds = new Set<string>();
+  const merged = [...evidenceCandidates, ...baseCandidates].filter((candidate) => {
+    if (seenIds.has(candidate.id)) return false;
+    seenIds.add(candidate.id);
+    return true;
+  });
+  return merged.slice(0, MAX_AI_CANDIDATES);
+}
+
 function extractRecentUserTexts(messages: AiRecommendationMessage[], limit = 6) {
   return messages
     .filter((message) => message.role === 'user')
@@ -3060,6 +3336,7 @@ function buildSummaryTopDestinations(
   items: AiRecommendationItem[],
   candidateTours: AiRecommendationCandidate[],
   intent?: AiTravelIntent | null,
+  userText?: string,
 ) {
   const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
   const topPrimitives = items
@@ -3070,6 +3347,14 @@ function buildSummaryTopDestinations(
   if (topPrimitives.length === 0) return '';
 
   const prioritizePublicInterest = hasPublicInterestNeedFromIntent(intent || null);
+  const coverageTerms = getCoverageTermsForQuality(userText);
+  const matchedCoverageTerms = uniqueStrings(
+    topPrimitives.flatMap((primitive) => getItemCoverageMetrics(primitive, coverageTerms).matchedTerms),
+  );
+  if (matchedCoverageTerms.length >= 2) {
+    return matchedCoverageTerms.slice(0, 3).join('、');
+  }
+
   const categoryLabelMap: Record<string, string> = {
     '海边沙滩': '海边度假',
     '玩水清凉': '水上活动',
@@ -3180,7 +3465,12 @@ function buildRecommendationSummary(params: {
   userText?: string;
 }) {
   const profile = buildCopyIntentProfile(params.intent, params.userText || '');
-  const topDestinations = buildSummaryTopDestinations(params.items, params.candidateTours, params.intent);
+  const topDestinations = buildSummaryTopDestinations(
+    params.items,
+    params.candidateTours,
+    params.intent,
+    params.userText,
+  );
   const topLine = topDestinations
     ? `这次更值得先看${topDestinations}，${buildSummaryPreferenceText(params.intent)}只是参考，最终还是看具体玩法。`
     : `这次我主要按${buildSummaryPreferenceText(params.intent)}来排。`;
@@ -3348,6 +3638,7 @@ function rewriteRecommendationCopy(params: {
       currentReason &&
       !(hasTurnPublicInterestNeed && hasPublicInterestSemanticNote) &&
       !hasUnallowedPublicInterestLanguage(currentReason, params) &&
+      !hasUnsupportedCompoundCoverageClaim(currentReason, primitive, params.userText) &&
       !hasUnsupportedPositivePriceClaim({
         reason: currentReason,
         primitive,
@@ -3392,6 +3683,16 @@ function shouldUseAiSummary(
   if (hasInternalRecommendationLanguage(trimmed)) return false;
   if (hasUnallowedPublicInterestLanguage(trimmed, { allowPublicInterest: Boolean(options.allowPublicInterest) })) return false;
   return true;
+}
+
+function aiSummaryMissesCoverage(summary: string, userText: string | undefined) {
+  const coverageTerms = getCoverageTermsForQuality(userText);
+  if (coverageTerms.length < 2) return false;
+  const normalizedSummary = normalizeText(summary);
+  const mentionedCount = coverageTerms.filter((term) =>
+    normalizedSummary.includes(normalizeText(term))
+  ).length;
+  return mentionedCount < 2;
 }
 
 function attachWeatherGuidanceToItems(
@@ -3451,6 +3752,10 @@ function finalizeRecommendationSummary(params: {
   );
   const hasTurnPublicInterestNeed = allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText || '');
   if (hasTurnPublicInterestNeed) {
+    const fallbackSummary = buildRecommendationSummary(params);
+    return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
+  }
+  if (aiSummaryMissesCoverage(aiSummary, params.userText)) {
     const fallbackSummary = buildRecommendationSummary(params);
     return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
   }
@@ -4037,6 +4342,11 @@ function buildAiMessages(params: {
     candidates: params.candidates,
     routeAtlas: params.routeAtlas,
   });
+  const semanticGuidance = buildPublicInterestReasoningContext(
+    params.candidates,
+    params.intent,
+    params.userText,
+  );
 
   const dynamicRequest = {
     t: 'rank_top24',
@@ -4049,6 +4359,7 @@ function buildAiMessages(params: {
     ac: compactAuditContextForPrompt(params.auditContext),
     wx: compactWeatherContextForPrompt(params.weatherContext),
     dw: compactDestinationWeatherInsightsForPrompt(params.destinationWeatherInsights),
+    sg: semanticGuidance,
     ol: MAX_AI_RANKED_ITEMS,
     cl: MAX_AI_PROMPT_REASON_ITEMS,
     schema: {
@@ -4083,7 +4394,7 @@ function buildAiMessages(params: {
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。',
       'candidates 里 pc/pricePct 是价格上下文，atoms/cats/seasonAtoms/conflicts 是候选事实摘要。',
       ...(hasTurnPublicInterestNeed
-        ? ['如果用户在找扶贫、公益、贫穷地方、县域乡村等方向，要优先理解候选里的乡村、县域、助农、村寨、梯田等正向事实；城市地标、购物商圈、豪华酒店、热门都市打卡更像近似替代，不该排在更有依据的候选前面。']
+        ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
         : []),
       'reason 优先写用户真正会关心的体验差异，例如温泉/沙滩/古城/节奏/团期天气，不要复述系统字段名。',
       '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
@@ -4117,6 +4428,11 @@ function buildLiteAiMessages(params: {
   // 这里给免费弱模型只做“排序和软语义取舍”，文案、天气补充和约束审计仍由本地完成。
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
   const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
+  const semanticGuidance = buildPublicInterestReasoningContext(
+    params.candidates,
+    params.intent,
+    params.userText,
+  );
   const request = {
     t: 'rank_top24_lite',
     q: params.userText,
@@ -4125,6 +4441,7 @@ function buildLiteAiMessages(params: {
     pm: compactPreferenceMemoryForPrompt(params.preferenceMemory),
     it: compactIntentForPrompt(params.intent),
     wx: compactWeatherContextForPrompt(params.weatherContext),
+    sg: semanticGuidance,
     ck: [
       'id', 'title', 'destination', 'days', 'price', 'match', 'atoms', 'cats', 'weather', 'conflict',
       'pricePct', 'priceBand', 'termCoverage', 'termHits',
@@ -4152,9 +4469,9 @@ function buildLiteAiMessages(params: {
       '只允许使用 candidates 中存在的 id。',
       '用紧凑 JSON；中文短句不超过32字。',
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
-      '结合 q、it、wx、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 理解软语义。',
+      '结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 理解软语义。',
       ...(hasTurnPublicInterestNeed
-        ? ['如果用户在找扶贫、公益、贫穷地方、县域乡村等方向，要优先理解候选里的乡村、县域、助农、村寨、梯田等正向事实；城市地标、购物商圈、豪华酒店、热门都市打卡更像近似替代，不该排在更有依据的候选前面。']
+        ? ['如果 sg 存在，优先按 sg 去理解这类软语义；它是理解镜头，不是硬过滤规则。']
         : ['像带老人、怕热、想放松这类软语义，要借助世界知识理解节奏、气候和体验差异。']),
       'sf 不要写命中、对题、候选、标签、软语义、预算友好这类系统化说法。',
       ...promptPolicy.liteRules,
@@ -4428,6 +4745,7 @@ export const __aiRecommendationTestHooks = {
   buildIntentLocalRecommendations,
   finalizeRecommendationSummary,
   getConcreteAiReason,
+  getAiResponseIntentQualityIssue,
   getPrimitiveConflictReasons,
   localRecommendations,
   matchesActiveDateFilters,
@@ -4567,6 +4885,138 @@ function validateAiItems(
   }
 
   return validatedItems;
+}
+
+function getAiResponseIntentQualityIssue(params: {
+  response: unknown;
+  candidateTours: Array<AiRecommendationCandidate | CandidateAuditPrimitive>;
+  intent: AiTravelIntent | null;
+}) {
+  const { response, candidateTours, intent } = params;
+  if (!hasPublicInterestNeedFromIntent(intent)) return null;
+
+  const asPrimitive = (tour: AiRecommendationCandidate | CandidateAuditPrimitive) =>
+    'matchStatus' in tour ? tour : buildTourPrimitive(tour);
+  const primitives = candidateTours.map(asPrimitive);
+  const primitiveByTourId = new Map(primitives.map((primitive) => [primitive.id, primitive]));
+  const evidenceTourIds = primitives
+    .filter((primitive) =>
+      primitiveHasPublicInterestEvidence(primitive) &&
+      getPrimitiveConflictReasons(intent, primitive).length === 0,
+    )
+    .map((primitive) => primitive.id);
+
+  if (evidenceTourIds.length === 0) return null;
+
+  const lookup = buildAiCandidateLookup(candidateTours as unknown as AiRecommendationCandidate[]);
+  const rawItems = Array.isArray((response as { items?: unknown[] })?.items)
+    ? (response as { items: unknown[] }).items
+    : [];
+  const seenTourIds = new Set<string>();
+  const mappedAiTourIds = rawItems
+    .map((rawItem) => resolveAiCandidateTourId(
+      rawItem as Partial<AiRecommendationItem> & {
+        id?: unknown;
+        title?: unknown;
+        destination?: unknown;
+      },
+      candidateTours as unknown as AiRecommendationCandidate[],
+      lookup,
+    ))
+    .filter((tourId): tourId is string => Boolean(tourId))
+    .filter((tourId) => {
+      if (seenTourIds.has(tourId)) return false;
+      seenTourIds.add(tourId);
+      return true;
+    });
+  if (mappedAiTourIds.length === 0) {
+    return 'public-interest_need_missed: no mapped AI items';
+  }
+
+  const topWindow = mappedAiTourIds.slice(0, Math.min(4, mappedAiTourIds.length));
+  const hasEvidenceNearTop = topWindow.some((tourId) => {
+    const primitive = primitiveByTourId.get(tourId);
+    return Boolean(
+      primitive &&
+      primitiveHasPublicInterestEvidence(primitive) &&
+      getPrimitiveConflictReasons(intent, primitive).length === 0,
+    );
+  });
+
+  if (hasEvidenceNearTop) return null;
+
+  const exampleTitles = uniqueStrings(
+    evidenceTourIds
+      .slice(0, 2)
+      .map((tourId) => primitiveByTourId.get(tourId)?.title || '')
+      .filter(Boolean),
+  );
+  return exampleTitles.length > 0
+    ? `public-interest_need_missed: evidence-backed routes available but top results ignored them (${exampleTitles.join(' / ')})`
+    : 'public-interest_need_missed: evidence-backed routes available but top results ignored them';
+}
+
+function getAiResponseSemanticCoverageIssue(params: {
+  response: unknown;
+  candidateTours: Array<AiRecommendationCandidate | CandidateAuditPrimitive>;
+  userText: string;
+}) {
+  const coverageTerms = getCoverageTermsForQuality(params.userText);
+  if (coverageTerms.length < 2) return null;
+
+  const asPrimitive = (tour: AiRecommendationCandidate | CandidateAuditPrimitive) =>
+    'matchStatus' in tour ? tour : buildTourPrimitive(tour);
+  const primitives = params.candidateTours.map(asPrimitive);
+  const primitiveByTourId = new Map(primitives.map((primitive) => [primitive.id, primitive]));
+  const maxCoverageCount = Math.max(
+    0,
+    ...primitives.map((primitive) => getItemCoverageMetrics(primitive, coverageTerms).coverageCount),
+  );
+  const requiredCoverageCount = Math.min(maxCoverageCount, 2);
+  if (requiredCoverageCount < 2) return null;
+
+  const lookup = buildAiCandidateLookup(params.candidateTours as unknown as AiRecommendationCandidate[]);
+  const rawItems = Array.isArray((params.response as { items?: unknown[] })?.items)
+    ? (params.response as { items: unknown[] }).items
+    : [];
+  const seenTourIds = new Set<string>();
+  const mappedAiTourIds = rawItems
+    .map((rawItem) => resolveAiCandidateTourId(
+      rawItem as Partial<AiRecommendationItem> & {
+        id?: unknown;
+        title?: unknown;
+        destination?: unknown;
+      },
+      params.candidateTours as unknown as AiRecommendationCandidate[],
+      lookup,
+    ))
+    .filter((tourId): tourId is string => Boolean(tourId))
+    .filter((tourId) => {
+      if (seenTourIds.has(tourId)) return false;
+      seenTourIds.add(tourId);
+      return true;
+    });
+  if (mappedAiTourIds.length === 0) return null;
+
+  const topWindow = mappedAiTourIds.slice(0, Math.min(4, mappedAiTourIds.length));
+  const topCoverageCount = Math.max(
+    0,
+    ...topWindow.map((tourId) => {
+      const primitive = primitiveByTourId.get(tourId);
+      return primitive ? getItemCoverageMetrics(primitive, coverageTerms).coverageCount : 0;
+    }),
+  );
+  if (topCoverageCount >= requiredCoverageCount) return null;
+
+  const exampleTitles = uniqueStrings(
+    primitives
+      .filter((primitive) => getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= requiredCoverageCount)
+      .slice(0, 2)
+      .map((primitive) => primitive.title),
+  );
+  return exampleTitles.length > 0
+    ? `semantic_need_missed: top results under-covered compound request (${coverageTerms.join(' / ')}; examples: ${exampleTitles.join(' / ')})`
+    : `semantic_need_missed: top results under-covered compound request (${coverageTerms.join(' / ')})`;
 }
 
 function getAuditNote(reasons: string[]) {
@@ -4766,7 +5216,7 @@ function attachTurnSemanticContext(
   if (options.allowPublicInterest && hasPublicInterestLanguage(userText)) {
     nextIntent.semanticFocus = uniqueStrings([
       ...(nextIntent.semanticFocus || []),
-      userText,
+      ...getPublicInterestSemanticAnchors(userText),
     ]);
   }
   return nextIntent;
@@ -4961,6 +5411,7 @@ async function callSingleAiProvider(params: {
   liteMessages?: ReturnType<typeof buildLiteAiMessages>;
   maxTokens?: number;
   liteMaxTokens?: number;
+  qualityCheck?: (response: unknown, config: AiProviderConfig) => string | null;
   signal?: AbortSignal;
 }) {
   const { config } = params;
@@ -5016,7 +5467,12 @@ async function callSingleAiProvider(params: {
 
       const data = await response.json();
       shouldRetry = false;
-      return parseAiProviderResponse(data, config);
+      const parsed = parseAiProviderResponse(data, config);
+      const qualityIssue = params.qualityCheck?.(parsed, config);
+      if (qualityIssue) {
+        throw new Error(getAiProviderParseErrorLabel(config, 'quality_check_failed', qualityIssue));
+      }
+      return parsed;
     } catch (error) {
       providerLastError = normalizeAiProviderError(error, config);
       if (providerLastError.message.includes('tokens_seen')) {
@@ -5042,6 +5498,7 @@ async function callAiApi(params: {
   liteMessages?: ReturnType<typeof buildLiteAiMessages>;
   maxTokens?: number;
   liteMaxTokens?: number;
+  qualityCheck?: (response: unknown, config: AiProviderConfig) => string | null;
 }) {
   const providerErrors: string[] = [];
   const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
@@ -5254,7 +5711,11 @@ export async function requestAiRecommendations({
     const intent = baseHardIntent;
     const allowPublicInterestForTurn = allowPublicInterestForCurrentTurn;
     const nextPreferenceMemory = normalizePreferenceMemory(mergePreferenceMemory(memoryForThisTurn, intent));
-    const effectiveIntent = mergeIntentWithMemory(intent, nextPreferenceMemory);
+    const effectiveIntent = attachTurnSemanticContext(
+      mergeIntentWithMemory(intent, nextPreferenceMemory),
+      text,
+      { allowPublicInterest: allowPublicInterestForTurn },
+    );
     const effectiveUserText = buildEffectiveUserText(text, nextPreferenceMemory);
     const availableCandidates = candidatePool;
     const localItems = buildIntentLocalRecommendations(availableCandidates, effectiveIntent);
@@ -5305,17 +5766,23 @@ export async function requestAiRecommendations({
       : Promise.resolve(weatherContextForRanking);
     const routeAtlasPromise = Promise.resolve(buildRouteAtlas(availableCandidates));
 
-    const aiCandidatePool = compactCandidates(
+    const aiCandidatePool = enrichPromptCandidatesWithSemanticEvidence(
+      compactCandidates(
+        availableCandidates,
+        localItemsForMerge,
+        effectiveIntent,
+        {
+          budgetPriority: effectiveIntent?.budgetPriority,
+          intent: effectiveIntent,
+          userText: effectiveUserText,
+          weatherSensitivity: effectiveIntent?.weatherSensitivity,
+          weatherContext: weatherContextForRanking,
+        },
+      ),
       availableCandidates,
       localItemsForMerge,
       effectiveIntent,
-      {
-        budgetPriority: effectiveIntent?.budgetPriority,
-        intent: effectiveIntent,
-        userText: effectiveUserText,
-        weatherSensitivity: effectiveIntent?.weatherSensitivity,
-        weatherContext: weatherContextForRanking,
-      },
+      effectiveUserText,
     );
     if (aiCandidatePool.length === 0) {
       return {
@@ -5332,6 +5799,7 @@ export async function requestAiRecommendations({
         ...(nextPreferenceMemory ? { preferenceMemory: nextPreferenceMemory } : {}),
       };
     }
+    const compactedCandidateIds = new Set(aiCandidatePool.map((candidate) => candidate.id));
     emitProgress(onProgress, {
       stage: 'ranking',
       label: '正在生成推荐结果',
@@ -5373,6 +5841,16 @@ export async function requestAiRecommendations({
       }),
       maxTokens: 1600,
       liteMaxTokens: 1000,
+      qualityCheck: (response) =>
+        getAiResponseIntentQualityIssue({
+          response,
+          candidateTours: aiCandidatePool,
+          intent: effectiveIntent,
+        }) || getAiResponseSemanticCoverageIssue({
+          response,
+          candidateTours: aiCandidatePool,
+          userText: effectiveUserText,
+        }),
     }) as { intent?: unknown; intentNotes?: unknown; summary?: unknown; items?: unknown };
     const semanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
     const normalizedAiIntent = sanitizeAiBudgetBoundsForTurn(
@@ -5395,7 +5873,6 @@ export async function requestAiRecommendations({
     );
     const finalPreferenceMemory = normalizePreferenceMemory(mergePreferenceMemory(memoryForThisTurn, finalIntent));
     const finalEffectiveUserText = buildEffectiveUserText(text, finalPreferenceMemory);
-    const compactedCandidateIds = new Set(aiCandidatePool.map((candidate) => candidate.id));
     const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
     const compactedLocalItems = localItemsForMerge.filter((item) => compactedCandidateIds.has(item.tourId));
     const validatedAiItems = validateAiItems(aiResponse, compactedCandidateTours);
@@ -5458,6 +5935,11 @@ export async function requestAiRecommendations({
         userText: text,
         allowPublicInterest: allowPublicInterestForTurn,
       }),
+      {
+        candidateTours: mergedCandidateTours,
+        intent: finalIntent,
+        userText: finalEffectiveUserText,
+      },
     );
     emitProgress(onProgress, {
       stage: 'completed',
