@@ -103,6 +103,8 @@ interface RecommendationCopyProfile {
   wantsNature: boolean;
   prefersValue: boolean;
   shortTrip: boolean;
+  wantsLongerCompleteTrip: boolean;
+  explicitlyPrefersShortTrip: boolean;
 }
 
 interface LocalRecommendationQuery {
@@ -1685,6 +1687,17 @@ function getItemCoverageMetrics(
   };
 }
 
+function getRecommendationCopyPriority(item: AiRecommendationItem) {
+  const reason = stripTerminalPunctuation(item.reason || '');
+  if (!reason) return 0;
+
+  const normalizedLength = reason.replace(/\s+/g, '').length;
+  const sentenceCount = (reason.match(/[。！？；]/gu) || []).length;
+  const signalBonus = Math.min(18, (item.matchedSignals?.length || 0) * 4);
+
+  return normalizedLength + sentenceCount * 12 + signalBonus;
+}
+
 // 对推荐结果做最终裁剪和去重，保证榜单稳定且理由不过载。
 function prioritizeRecommendationItems(
   items: AiRecommendationItem[],
@@ -1695,10 +1708,10 @@ function prioritizeRecommendationItems(
   },
 ) {
   const prioritized = limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
-  const coverageTerms = getCoverageTermsForQuality(context?.userText);
-  if (coverageTerms.length < 2 || !context?.candidateTours?.length) {
+  if (!context?.candidateTours?.length) {
     return prioritized;
   }
+  const coverageTerms = getCoverageTermsForQuality(context?.userText);
 
   const primitiveByTourId = new Map(context.candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
   const metrics = prioritized.map((item, index) => {
@@ -1711,6 +1724,7 @@ function prioritizeRecommendationItems(
         coveragePercent: 0,
         isAlternative: isAlternativeRecommendation(item),
         hasConflict: false,
+        copyPriority: getRecommendationCopyPriority(item),
       };
     }
 
@@ -1722,12 +1736,18 @@ function prioritizeRecommendationItems(
       coveragePercent: coverage.coveragePercent,
       isAlternative: isAlternativeRecommendation(item),
       hasConflict: getPrimitiveConflictReasons(context.intent || null, primitive).length > 0,
+      copyPriority: getRecommendationCopyPriority(item),
     };
   });
 
-  const maxCoverageCount = Math.max(...metrics.map((metric) => metric.coverageCount));
+  const maxCoverageCount = metrics.length > 0 ? Math.max(...metrics.map((metric) => metric.coverageCount)) : 0;
   const originalTopCoverage = metrics[0]?.coverageCount ?? 0;
-  if (maxCoverageCount < 2 || maxCoverageCount <= originalTopCoverage) {
+  const hasCoverageUpgrade = coverageTerms.length >= 2 && maxCoverageCount >= 2 && maxCoverageCount > originalTopCoverage;
+  const maxCopyPriority = metrics.length > 0 ? Math.max(...metrics.map((metric) => metric.copyPriority)) : 0;
+  const originalTopCopyPriority = metrics[0]?.copyPriority ?? 0;
+  const hasCopyUpgrade = maxCopyPriority > originalTopCopyPriority + 8;
+
+  if (!hasCoverageUpgrade && !hasCopyUpgrade) {
     return prioritized;
   }
 
@@ -1735,8 +1755,9 @@ function prioritizeRecommendationItems(
     .sort((left, right) =>
       Number(left.isAlternative) - Number(right.isAlternative) ||
       Number(left.hasConflict) - Number(right.hasConflict) ||
-      right.coverageCount - left.coverageCount ||
+      (hasCoverageUpgrade ? right.coverageCount - left.coverageCount : 0) ||
       right.coveragePercent - left.coveragePercent ||
+      right.copyPriority - left.copyPriority ||
       left.index - right.index)
     .map(({ item }) => item);
 }
@@ -1908,7 +1929,12 @@ function buildLocalTourReason(
   variant = 0,
 ) {
   const primitive = buildTourPrimitive(tour);
-  const baseReason = buildPrimitiveConcreteReason(primitive, variant);
+  const profile = buildCopyIntentProfile(null, [
+    primitive.title,
+    primitive.destination,
+    ...signals,
+  ].join(' '));
+  const baseReason = buildExpandedFallbackReason(primitive, profile, variant);
   const signalText = buildReadableSignalClause(signals);
 
   if (signalText) return `${stripTerminalPunctuation(baseReason)}；${signalText}。`;
@@ -2594,6 +2620,87 @@ function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive, varian
   return `${lead}${tail ? `；${tail}` : ''}。`;
 }
 
+function buildTripLengthNarration(primitive: RecommendationPrimitive, profile?: RecommendationCopyProfile) {
+  const dayText = primitive.tripDays > 0 ? `${primitive.tripDays}天` : '';
+  if (!dayText) return '';
+
+  if (profile?.shortTrip || primitive.tripDays <= 2) {
+    return primitive.tripDays <= 2
+      ? `${dayText}能把节奏收得比较紧凑，周末出发也不容易太折腾`
+      : `${dayText}能把行程铺开一点，但整体还算短线好安排`;
+  }
+
+  if (profile?.wantsLongerCompleteTrip || primitive.tripDays >= 4) {
+    return primitive.tripDays >= 5
+      ? `${dayText}通常能把路程、住宿和核心玩法衔接得更完整`
+      : `${dayText}比纯打卡式短线更从容，主要体验不会太赶`;
+  }
+
+  if (primitive.tripDays === 3) {
+    return `${dayText}通常能兼顾主要景点和休息，不会只剩赶路打卡`;
+  }
+
+  return `${dayText}的节奏相对均衡，比较容易把主要体验走完整`;
+}
+
+function buildExpandedFallbackReason(
+  primitive: RecommendationPrimitive,
+  profile: RecommendationCopyProfile,
+  variant = 0,
+) {
+  const baseReason = stripTerminalPunctuation(buildPrimitiveConcreteReason(primitive, variant));
+  const tripLengthLead = buildTripLengthNarration(primitive, profile);
+  const weatherNudge = getPrimitiveWeatherNudge(primitive);
+  const secondSentence = uniqueStrings([
+    tripLengthLead,
+    weatherNudge ? `出发前再留意一下${weatherNudge.replace(/^出发前看一下/, '').replace(/^建议留意/, '').replace(/^高温天/, '高温天').replace(/^山水户外/, '山水户外')}` : '',
+  ]).join('，');
+
+  if (!secondSentence) return `${baseReason}。`;
+  return `${baseReason}。${secondSentence}。`;
+}
+
+function isTooShortRecommendationCopy(reason: string) {
+  const normalized = stripTerminalPunctuation(reason).replace(/\s+/g, '');
+  const sentenceCount = (reason.match(/[。！？；]/gu) || []).length;
+  return normalized.length < 28 || sentenceCount < 1;
+}
+
+function shouldExpandShortRecommendationCopy(
+  reason: string,
+  primitive: RecommendationPrimitive,
+) {
+  if (!isTooShortRecommendationCopy(reason)) return false;
+
+  const normalized = stripTerminalPunctuation(reason).replace(/\s+/g, '');
+  const hasNaturalCompleteTone = /这条|这趟|节奏|不赶|轻松|完整|适合|舒服|放松|稳妥/.test(reason);
+  const hasCandidateFact = reasonMentionsCandidateFact(reason, primitive);
+  const hasConcreteTheme = /温泉|沙滩|海边|山水|亲子|避暑|古镇|美食|玩水|度假/.test(reason);
+  const looksLikeMetaOrGeneric = hasMetaRecommendationLanguage(reason) || isGenericReason(reason);
+
+  if (hasNaturalCompleteTone) return false;
+  if (looksLikeMetaOrGeneric) return true;
+  if (hasCandidateFact && hasConcreteTheme && normalized.length >= 22) return false;
+  return normalized.length < 24;
+}
+
+function expandShortRecommendationCopy(
+  reason: string,
+  primitive: RecommendationPrimitive,
+  profile: RecommendationCopyProfile,
+) {
+  const normalizedReason = stripTerminalPunctuation(reason);
+  const tripLengthLead = buildTripLengthNarration(primitive, profile);
+  const weatherNudge = getPrimitiveWeatherNudge(primitive);
+  const tail = uniqueStrings([
+    tripLengthLead,
+    weatherNudge ? `出发前再留意一下${weatherNudge.replace(/^出发前看一下/, '').replace(/^建议留意/, '')}` : '',
+  ]).join('，');
+
+  if (!tail) return `${normalizedReason}。`;
+  return `${normalizedReason}。${tail}。`;
+}
+
 function buildCopyIntentProfile(
   intent: AiTravelIntent | null,
   userText: string,
@@ -2619,6 +2726,19 @@ function buildCopyIntentProfile(
     (intent?.tripDaysMax && intent.tripDaysMax <= 4) ||
     /周末|3天|4天|短途/.test(joinedStyle),
   );
+  const explicitlyPrefersShortTrip = Boolean(
+    (intent?.tripDays && intent.tripDays <= 3) ||
+    (intent?.tripDaysMax && intent.tripDaysMax <= 3) ||
+    /周末|短途|当天来回|一日|两日|2天|3天|别太久|时间不多/.test(joinedStyle),
+  );
+  const wantsLongerCompleteTrip = Boolean(
+    !explicitlyPrefersShortTrip &&
+    (
+      /轻松|别太赶|慢一点|悠闲|从容|完整|玩透|住好一点|多住一晚|深度|别折腾|舒展|带爸妈|带老人|适合长辈/.test(joinedStyle) ||
+      Boolean(intent?.tripDaysMin && intent.tripDaysMin >= 4) ||
+      Boolean(intent?.tripDays && intent.tripDays >= 4)
+    )
+  );
 
   let key: RecommendationCopyProfile['key'] = 'general';
   if ((hasSeniorNeed || wantsRelaxed) && wantsCool) key = 'elderly_cool_relaxed';
@@ -2639,6 +2759,8 @@ function buildCopyIntentProfile(
     wantsNature,
     prefersValue,
     shortTrip,
+    wantsLongerCompleteTrip,
+    explicitlyPrefersShortTrip,
   };
 }
 
@@ -3614,6 +3736,7 @@ function rewriteRecommendationCopy(params: {
     .map((tour) => tour.price)
     .filter((price) => Number.isFinite(price) && price > 0)
     .sort((a, b) => a - b);
+  const profile = buildCopyIntentProfile(params.intent, params.userText);
 
   return params.items.map((item, index) => {
     if (index >= MAX_AI_COMMENTARY_ITEMS) {
@@ -3648,9 +3771,12 @@ function rewriteRecommendationCopy(params: {
       }) &&
       shouldKeepAiReason(currentReason, primitive)
     ) {
+      const finalizedReason = shouldExpandShortRecommendationCopy(currentReason, primitive)
+        ? expandShortRecommendationCopy(currentReason, primitive, profile)
+        : `${currentReason}。`;
       return {
         ...item,
-        reason: `${currentReason}。`,
+        reason: finalizedReason,
       };
     }
 
@@ -3660,7 +3786,7 @@ function rewriteRecommendationCopy(params: {
       semanticReason,
       hasTurnPublicInterestNeed
         ? buildPublicInterestAlternativeReason(primitive)
-        : buildPrimitiveConcreteReason(primitive, index),
+        : buildExpandedFallbackReason(primitive, profile, index),
       buildWeatherReasonSuffix(primitive, insight),
     ]).join('。');
 

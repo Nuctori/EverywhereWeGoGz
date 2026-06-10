@@ -1542,6 +1542,51 @@ const cappedPriority = prioritizeRecommendationItems(
 );
 assert.equal(cappedPriority.length, 24);
 
+{
+  const copyPriorityTours = [
+    candidate({
+      id: 'copy-short',
+      title: '惠州海边温泉2天',
+      destination: '广东',
+      duration: 2,
+      price: 499,
+      tags: ['温泉', '沙滩'],
+      highlights: ['海边', '温泉'],
+      theme: '海岛度假',
+      leisureLevel: 'easy',
+    }),
+    candidate({
+      id: 'copy-long',
+      title: '惠州双湾温泉3天',
+      destination: '广东',
+      duration: 3,
+      price: 699,
+      tags: ['温泉', '沙滩'],
+      highlights: ['海边', '温泉', '慢节奏'],
+      theme: '海岛度假',
+      leisureLevel: 'easy',
+    }),
+  ];
+  const reordered = prioritizeRecommendationItems(
+    [
+      { tourId: 'copy-short', score: 99, reason: '有温泉和沙滩。', matchedSignals: ['温泉'] },
+      {
+        tourId: 'copy-long',
+        score: 95,
+        reason: '这条线同时带温泉和沙滩，节奏更松一点，适合想玩得完整些的人。',
+        matchedSignals: ['温泉', '沙滩', '轻松'],
+      },
+    ],
+    {
+      candidateTours: copyPriorityTours,
+      intent: { weatherSensitivity: [], departureWeekdays: [] },
+      userText: '帮我找同时带温泉和沙滩的团，最好轻松一点',
+    },
+  );
+  assert.equal(reordered[0].tourId, 'copy-long',
+    'longer and more complete recommendation copy should move ahead');
+}
+
 // ─── 回归测试：reason 不应保留程序腔 ───
 {
   const poorReasonTours = [
@@ -1563,6 +1608,40 @@ assert.equal(cappedPriority.length, 24);
   });
   assert.ok(!/(从标题和标签看|命中|匹配度|完整覆盖|对题)/.test(poorReasonRewrite[0].reason || ''),
     'reason should not retain internal/recommendation language');
+}
+
+{
+  const shortCopyTours = [
+    candidate({
+      id: 'short-copy-2d',
+      title: '巽寮湾沙滩度假2天',
+      destination: '广东',
+      duration: 2,
+      price: 399,
+      tags: ['沙滩', '休闲'],
+      highlights: ['海边', '沙滩'],
+      theme: '海岛度假',
+      leisureLevel: 'easy',
+    }),
+  ];
+  const shortCopyRewrite = rewriteRecommendationCopy({
+    items: [{
+      tourId: 'short-copy-2d',
+      score: 88,
+      reason: '匹配度较高',
+      matchedSignals: ['沙滩'],
+    }],
+    candidateTours: shortCopyTours,
+    destinationWeatherInsights: [],
+    intent: { weatherSensitivity: [], departureWeekdays: [], tripDaysMax: 3 },
+    weatherContext: { destination: '广州', travelDate: '2026-06-12', forecastSummary: '多云', seasonAdvice: [], source: 'seasonal-rule' },
+    userText: '找周末放松的沙滩短途团',
+    allowPublicInterest: false,
+  });
+  assert.ok((shortCopyRewrite[0].reason || '').length >= 28,
+    'short fallback recommendation copy should be expanded beyond a terse template');
+  assert.ok(/2天|周末|节奏|紧凑/.test(shortCopyRewrite[0].reason || ''),
+    'short fallback recommendation copy should mention concrete trip rhythm');
 }
 
 // ─── 回归测试：贫穷地方/公益诉求应通过 prompt 交给模型判断 ───
