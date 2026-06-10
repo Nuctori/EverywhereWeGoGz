@@ -1,6 +1,7 @@
 // ?? public/data ????????????????????????
 import fs from 'node:fs';
 import path from 'node:path';
+import { computeRequiredOutputCount } from './audit_data_integrity_rules.mjs';
 
 const root = process.cwd();
 
@@ -325,8 +326,7 @@ const rawStructuredJrtKeys = new Set(
 for (const [source, rule] of Object.entries(sourceRules)) {
   const outputCount = outputCounts[source] || 0;
   const rawCount = rawCounts[source] || 0;
-  const dynamicMin = rawCount > 0 ? Math.floor(rawCount * rule.ratio) : 0;
-  const required = Math.max(rule.min, dynamicMin);
+  const required = computeRequiredOutputCount(rule, rawCount);
 
   if (outputCount < required) {
     fail(
