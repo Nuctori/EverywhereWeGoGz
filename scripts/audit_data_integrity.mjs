@@ -40,6 +40,7 @@ const invalidImageTokens = [
   '}}',
   'data:image/gif;base64,r0lgodlhaqabaia',
 ];
+const allowedCachedImageExtensions = new Set(['.webp', '.svg', '.gif']);
 
 function readJson(filePath) {
   if (!fs.existsSync(filePath)) {
@@ -218,6 +219,43 @@ function imageFileExists(imageUrl) {
   return fs.existsSync(localPath);
 }
 
+function hasAllowedCachedImageExtension(imageUrl) {
+  const cleanPath = imageUrl.split('?')[0].replace(/^\/+/, '');
+  if (!cleanPath.startsWith('data/image-cache/')) return true;
+  const ext = path.extname(cleanPath).toLowerCase();
+  return allowedCachedImageExtensions.has(ext);
+}
+
+function collectLegacyCachedImages() {
+  const legacyFiles = [];
+  const cacheRoot = path.join(root, 'public', 'data', 'image-cache');
+  if (!fs.existsSync(cacheRoot)) {
+    return legacyFiles;
+  }
+
+  const stack = [cacheRoot];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+        continue;
+      }
+      if (!entry.isFile()) {
+        continue;
+      }
+      const ext = path.extname(entry.name).toLowerCase();
+      if (ext === '.jpg' || ext === '.jpeg' || ext === '.png') {
+        legacyFiles.push(path.relative(root, fullPath));
+      }
+    }
+  }
+
+  return legacyFiles;
+}
+
 function normalizeUrl(value) {
   return String(value || '').trim().toLowerCase();
 }
@@ -244,6 +282,14 @@ const rawJrtFile = path.join(root, 'src/data/raw_jrt365_full.json');
 const rawJrtTours = fs.existsSync(rawJrtFile)
   ? asArray(readJson(rawJrtFile), rawJrtFile)
   : [];
+const legacyCachedImages = collectLegacyCachedImages();
+
+if (legacyCachedImages.length > 0) {
+  fail(
+    errors,
+    `Legacy cached images remain in public/data/image-cache: ${legacyCachedImages.slice(0, 10).join(', ')}${legacyCachedImages.length > 10 ? ' ...' : ''}`,
+  );
+}
 
 if (fullTours.length !== listTours.length) {
   fail(errors, `List/full count mismatch: tours.json=${fullTours.length}, tours-list.json=${listTours.length}`);
@@ -343,6 +389,10 @@ for (const tour of fullTours) {
 
     if (image.startsWith('/data/image-cache/') && !imageFileExists(image)) {
       fail(errors, `Missing cached image for ${tour.id}: ${image}`);
+    }
+
+    if (image.startsWith('/data/image-cache/') && !hasAllowedCachedImageExtension(image)) {
+      fail(errors, `Non-webp cached image for ${tour.id}: ${image}`);
     }
   }
 }
