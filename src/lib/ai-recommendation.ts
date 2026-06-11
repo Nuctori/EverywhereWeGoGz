@@ -20,6 +20,10 @@ import {
   hasUnallowedPublicInterestLanguage,
   sanitizeAiIntentForTurn,
 } from '@/lib/ai-semantic-policy';
+import {
+  DESTINATION_ALIASES as DESTINATION_HINT_ALIASES,
+  isBlockedDestinationAliasMatch,
+} from '@/lib/destination-resolver';
 import { storedAiProviderConfigSchema } from '@/lib/runtime-schemas';
 
 // 常量区统一描述推荐链路的容量、超时和缓存策略，避免各阶段各自硬编码。
@@ -628,19 +632,34 @@ function parseDuration(text: string) {
 }
 
 function collectDestinationHints(text: string) {
-  return Object.entries(DESTINATION_ALIASES)
-    .filter(([, aliases]) => aliases.some((alias) => text.includes(alias)))
-    .map(([destination]) => destination);
+  const matched = Object.entries(DESTINATION_HINT_ALIASES)
+    .map(([destination, aliases]) => ({
+      destination,
+      index: aliases.reduce((bestIndex, alias) => {
+        const index = text.indexOf(alias);
+        if (index === -1 || isBlockedDestinationAliasMatch(destination, alias, text, index)) return bestIndex;
+        return Math.min(bestIndex, index);
+      }, Number.POSITIVE_INFINITY),
+    }))
+    .filter((entry) => Number.isFinite(entry.index))
+    .sort((left, right) => left.index - right.index)
+    .map(({ destination }) => destination);
+
+  return matched.filter((destination) =>
+    !matched.some((other) =>
+      other !== destination &&
+      (DESTINATION_HINT_ALIASES[destination] || []).includes(other),
+    ));
 }
 
 function getDestinationAliasesForHint(hint: string) {
   const normalizedHint = hint.trim().toLowerCase();
   if (!normalizedHint) return [];
 
-  const directAliases = DESTINATION_ALIASES[hint];
+  const directAliases = DESTINATION_HINT_ALIASES[hint];
   if (directAliases) return [hint, ...directAliases];
 
-  const aliasEntry = Object.entries(DESTINATION_ALIASES).find(([, aliases]) =>
+  const aliasEntry = Object.entries(DESTINATION_HINT_ALIASES).find(([, aliases]) =>
     aliases.some((alias) => alias.toLowerCase() === normalizedHint),
   );
 
@@ -653,15 +672,34 @@ function destinationHintsMatchCorpus(destinationHints: string[] | undefined, cor
 
   return destinationHints.some((hint) =>
     getDestinationAliasesForHint(hint).some((alias) =>
-      normalizedCorpus.includes(alias.toLowerCase()),
+      (() => {
+        const aliasIndex = normalizedCorpus.indexOf(alias.toLowerCase());
+        if (aliasIndex === -1) return false;
+        return !isBlockedDestinationAliasMatch(hint, alias, corpus, aliasIndex);
+      })(),
     ),
   );
 }
 
 function collectDestinationHintsFromCorpus(corpus: string) {
-  return Object.entries(DESTINATION_ALIASES)
-    .filter(([, aliases]) => aliases.some((alias) => corpus.toLowerCase().includes(alias.toLowerCase())))
-    .map(([destination]) => destination);
+  const matched = Object.entries(DESTINATION_HINT_ALIASES)
+    .map(([destination, aliases]) => ({
+      destination,
+      index: aliases.reduce((bestIndex, alias) => {
+        const index = corpus.toLowerCase().indexOf(alias.toLowerCase());
+        if (index === -1 || isBlockedDestinationAliasMatch(destination, alias, corpus, index)) return bestIndex;
+        return Math.min(bestIndex, index);
+      }, Number.POSITIVE_INFINITY),
+    }))
+    .filter((entry) => Number.isFinite(entry.index))
+    .sort((left, right) => left.index - right.index)
+    .map(({ destination }) => destination);
+
+  return matched.filter((destination) =>
+    !matched.some((other) =>
+      other !== destination &&
+      (DESTINATION_HINT_ALIASES[destination] || []).includes(other),
+    ));
 }
 
 function collectTitleDestinationHints(title: string) {
@@ -1661,6 +1699,21 @@ function countCommentaryItems(items: AiRecommendationItem[]) {
   return items.reduce((count, item) => count + (item.reason ? 1 : 0), 0);
 }
 
+function shouldKeepRecommendationListIntentBound(intent: AiTravelIntent | null) {
+  return Boolean(intent?.destinationHints?.length);
+}
+
+function buildPaddedRecommendationItems(
+  items: AiRecommendationItem[],
+  fallbackPool: AiRecommendationItem[],
+  intent: AiTravelIntent | null,
+) {
+  if (shouldKeepRecommendationListIntentBound(intent) && items.length > 0) {
+    return limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
+  }
+  return padRecommendationItems(items, fallbackPool);
+}
+
 function getCoverageTermsForQuality(userText: string | undefined) {
   const text = normalizeText(userText || '');
   if (!text) return [];
@@ -1687,18 +1740,7 @@ function getItemCoverageMetrics(
   };
 }
 
-function getRecommendationCopyPriority(item: AiRecommendationItem) {
-  const reason = stripTerminalPunctuation(item.reason || '');
-  if (!reason) return 0;
-
-  const normalizedLength = reason.replace(/\s+/g, '').length;
-  const sentenceCount = (reason.match(/[。！？；]/gu) || []).length;
-  const signalBonus = Math.min(18, (item.matchedSignals?.length || 0) * 4);
-
-  return normalizedLength + sentenceCount * 12 + signalBonus;
-}
-
-// 对推荐结果做最终裁剪和去重，保证榜单稳定且理由不过载。
+// ??????????????????????????????????????????
 function prioritizeRecommendationItems(
   items: AiRecommendationItem[],
   context?: {
@@ -1708,61 +1750,55 @@ function prioritizeRecommendationItems(
   },
 ) {
   const prioritized = limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
-  if (!context?.candidateTours?.length) {
-    return prioritized;
+  if (!context?.candidateTours?.length || !context.intent) {
+    const regularItems = prioritized.filter((item) => !isAlternativeRecommendation(item));
+    const alternativeItems = prioritized.filter((item) => isAlternativeRecommendation(item));
+    return [...regularItems, ...alternativeItems];
   }
-  const coverageTerms = getCoverageTermsForQuality(context?.userText);
 
-  const primitiveByTourId = new Map(context.candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
-  const metrics = prioritized.map((item, index) => {
+  const primitiveByTourId = new Map(
+    context.candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]),
+  );
+  const regularItems: AiRecommendationItem[] = [];
+  const alternativeItems: AiRecommendationItem[] = [];
+
+  for (const item of prioritized) {
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive) {
-      return {
-        item,
-        index,
-        coverageCount: 0,
-        coveragePercent: 0,
-        isAlternative: isAlternativeRecommendation(item),
-        hasConflict: false,
-        copyPriority: getRecommendationCopyPriority(item),
-      };
+      if (isAlternativeRecommendation(item)) {
+        alternativeItems.push(item);
+      } else {
+        regularItems.push(item);
+      }
+      continue;
     }
 
-    const coverage = getItemCoverageMetrics(primitive, coverageTerms);
-    return {
-      item,
-      index,
-      coverageCount: coverage.coverageCount,
-      coveragePercent: coverage.coveragePercent,
-      isAlternative: isAlternativeRecommendation(item),
-      hasConflict: getPrimitiveConflictReasons(context.intent || null, primitive).length > 0,
-      copyPriority: getRecommendationCopyPriority(item),
-    };
-  });
+    const conflictReasons = getPrimitiveConflictReasons(context.intent, primitive);
+    if (conflictReasons.length > 0) {
+      alternativeItems.push(
+        isAlternativeRecommendation(item)
+          ? item
+          : markAsAlternativeRecommendation(item, conflictReasons),
+      );
+      continue;
+    }
 
-  const maxCoverageCount = metrics.length > 0 ? Math.max(...metrics.map((metric) => metric.coverageCount)) : 0;
-  const originalTopCoverage = metrics[0]?.coverageCount ?? 0;
-  const hasCoverageUpgrade = coverageTerms.length >= 2 && maxCoverageCount >= 2 && maxCoverageCount > originalTopCoverage;
-  const maxCopyPriority = metrics.length > 0 ? Math.max(...metrics.map((metric) => metric.copyPriority)) : 0;
-  const originalTopCopyPriority = metrics[0]?.copyPriority ?? 0;
-  const hasCopyUpgrade = maxCopyPriority > originalTopCopyPriority + 8;
-
-  if (!hasCoverageUpgrade && !hasCopyUpgrade) {
-    return prioritized;
+    if (isAlternativeRecommendation(item)) {
+      alternativeItems.push(item);
+    } else {
+      regularItems.push(item);
+    }
   }
 
-  return [...metrics]
-    .sort((left, right) =>
-      Number(left.isAlternative) - Number(right.isAlternative) ||
-      Number(left.hasConflict) - Number(right.hasConflict) ||
-      (hasCoverageUpgrade ? right.coverageCount - left.coverageCount : 0) ||
-      right.coveragePercent - left.coveragePercent ||
-      right.copyPriority - left.copyPriority ||
-      left.index - right.index)
-    .map(({ item }) => item);
+  if (shouldKeepRecommendationListIntentBound(context.intent) && regularItems.length >= 8) {
+    return regularItems.slice(0, MAX_AI_RANKED_ITEMS);
+  }
+
+  return [...regularItems, ...alternativeItems];
 }
 
 function getWeekday(date: string) {
+
   const parsed = new Date(`${date}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return null;
   return parsed.getDay();
@@ -3468,6 +3504,14 @@ function buildSummaryTopDestinations(
 
   if (topPrimitives.length === 0) return '';
 
+  const explicitDestinations = uniqueStrings([
+    ...getExplicitDestinationHintsFromText(userText || ''),
+    ...(intent?.destinationHints || []),
+  ]).slice(0, 3);
+  if (explicitDestinations.length > 0) {
+    return explicitDestinations.join('、');
+  }
+
   const prioritizePublicInterest = hasPublicInterestNeedFromIntent(intent || null);
   const coverageTerms = getCoverageTermsForQuality(userText);
   const matchedCoverageTerms = uniqueStrings(
@@ -3593,9 +3637,12 @@ function buildRecommendationSummary(params: {
     params.intent,
     params.userText,
   );
+  const preferenceText = buildSummaryPreferenceText(params.intent);
   const topLine = topDestinations
-    ? `这次更值得先看${topDestinations}，${buildSummaryPreferenceText(params.intent)}只是参考，最终还是看具体玩法。`
-    : `这次我主要按${buildSummaryPreferenceText(params.intent)}来排。`;
+    ? (preferenceText === '当前条件'
+        ? `这次先围绕${topDestinations}来找，最终还是看具体玩法。`
+        : `这次更值得先看${topDestinations}，${preferenceText}只是参考，最终还是看具体玩法。`)
+    : `这次我主要按${preferenceText}来排。`;
   const normalizedWeatherLead = getRenderableWeatherLead(params.weatherContext, params.destinationWeatherInsights);
   const weatherLead = normalizedWeatherLead
     ? `天气判断：${normalizedWeatherLead}。`
@@ -4884,6 +4931,8 @@ export const __aiRecommendationTestHooks = {
   resolvePromptDateWindow,
   sanitizeAiBudgetBoundsForTurn,
   sanitizeAiIntentForTurn,
+  sanitizeAiPreferenceArraysForTurn,
+  sanitizeAiSemanticNotesForTurn,
   validateAiItems,
 };
 
@@ -5235,71 +5284,44 @@ function auditAiRecommendationsStrict(
   intent: AiTravelIntent | null,
 ): AiRecommendationItem[] {
   const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
-  const localIndexByTourId = new Map(localItems.map((item, index) => [item.tourId, index]));
   const seenTourIds = new Set<string>();
-  const auditedItems: AiRecommendationItem[] = [];
-  const prioritizePublicInterestEvidence = hasPublicInterestNeedFromIntent(intent);
+  const validAiItems: AiRecommendationItem[] = [];
+  const alternativeAiItems: AiRecommendationItem[] = [];
+  const validLocalItems: AiRecommendationItem[] = [];
+  const alternativeLocalItems: AiRecommendationItem[] = [];
 
-  const pushAudited = (item: AiRecommendationItem) => {
+  const pushAudited = (
+    item: AiRecommendationItem,
+    preferredBucket: AiRecommendationItem[],
+    alternativeBucket: AiRecommendationItem[],
+  ) => {
     if (seenTourIds.has(item.tourId)) return;
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive) return;
     seenTourIds.add(item.tourId);
 
     const conflictReasons = getPrimitiveConflictReasons(intent, primitive);
-    auditedItems.push(
-      conflictReasons.length > 0
-        ? markAsAlternativeRecommendation(item, conflictReasons)
-        : item,
-    );
+    if (conflictReasons.length > 0) {
+      alternativeBucket.push(markAsAlternativeRecommendation(item, conflictReasons));
+      return;
+    }
+
+    preferredBucket.push(item);
   };
 
-  aiItems.forEach((item) => pushAudited(item));
-  localItems.forEach((item) => pushAudited(item));
-  const originalOrderByTourId = new Map(auditedItems.map((item, index) => [item.tourId, index]));
+  aiItems.forEach((item) => pushAudited(item, validAiItems, alternativeAiItems));
+  localItems.forEach((item) => pushAudited(item, validLocalItems, alternativeLocalItems));
 
-  const aiCoverageTourIds = new Set(
-    aiItems
-      .map((item) => {
-        const localMatch = localItems.find((localItem) => localItem.tourId === item.tourId);
-        return localMatch?.matchedSignals.some((signal) => signal.startsWith('完整覆盖')) ? item.tourId : null;
-      })
-      .filter((tourId): tourId is string => Boolean(tourId)),
-  );
-
-  const sortedItems = [...auditedItems].sort((left, right) => {
-    const leftLocalIndex = localIndexByTourId.get(left.tourId) ?? Number.MAX_SAFE_INTEGER;
-    const rightLocalIndex = localIndexByTourId.get(right.tourId) ?? Number.MAX_SAFE_INTEGER;
-    const leftLocal = localItems[leftLocalIndex];
-    const rightLocal = localItems[rightLocalIndex];
-    const leftPrimitive = primitiveByTourId.get(left.tourId);
-    const rightPrimitive = primitiveByTourId.get(right.tourId);
-    const leftAlternative = isAlternativeRecommendation(left) ? 1 : 0;
-    const rightAlternative = isAlternativeRecommendation(right) ? 1 : 0;
-    const leftPublicInterestEvidence = prioritizePublicInterestEvidence && leftPrimitive && primitiveHasPublicInterestEvidence(leftPrimitive) ? 1 : 0;
-    const rightPublicInterestEvidence = prioritizePublicInterestEvidence && rightPrimitive && primitiveHasPublicInterestEvidence(rightPrimitive) ? 1 : 0;
-    const leftCoverage = leftLocal?.matchedSignals.some((signal) => signal.startsWith('完整覆盖')) ? 1 : 0;
-    const rightCoverage = rightLocal?.matchedSignals.some((signal) => signal.startsWith('完整覆盖')) ? 1 : 0;
-    const leftAiCoverage = aiCoverageTourIds.has(left.tourId) ? 1 : 0;
-    const rightAiCoverage = aiCoverageTourIds.has(right.tourId) ? 1 : 0;
-    const shouldUseLocalOrdering = Boolean(leftAiCoverage || rightAiCoverage || leftCoverage || rightCoverage);
-
-    return (
-      rightPublicInterestEvidence - leftPublicInterestEvidence ||
-      leftAlternative - rightAlternative ||
-      rightAiCoverage - leftAiCoverage ||
-      rightCoverage - leftCoverage ||
-      (shouldUseLocalOrdering
-        ? leftLocalIndex - rightLocalIndex
-        : (originalOrderByTourId.get(left.tourId) ?? Number.MAX_SAFE_INTEGER) -
-          (originalOrderByTourId.get(right.tourId) ?? Number.MAX_SAFE_INTEGER))
-    );
-  });
-
-  return sortedItems.slice(0, MAX_AI_RANKED_ITEMS);
+  return [
+    ...validAiItems,
+    ...validLocalItems,
+    ...alternativeAiItems,
+    ...alternativeLocalItems,
+  ].slice(0, MAX_AI_RANKED_ITEMS);
 }
 
 function normalizeIntent(value: unknown): AiTravelIntent | null {
+
   if (!value || typeof value !== 'object') return null;
   const raw = value as AiTravelIntent;
   return {
@@ -5440,6 +5462,140 @@ function sanitizeAiBudgetBoundsForTurn(
     budgetMin: null,
     budgetMax: null,
     budgetPriority: null,
+  };
+}
+
+function hasExplicitWeatherLanguage(userText: string) {
+  const normalizedText = normalizeText(userText);
+  return /(天气|气温|温度|下雨|降雨|暴雨|雷暴|台风|预报|季节|避暑|怕热|闷热|风浪)/.test(normalizedText);
+}
+
+function hasExplicitDepartureUrgencyText(userText: string) {
+  const normalizedText = userText.replace(/\s+/g, '');
+  return /(近期|最近|尽快|马上|本周|这周|这几天|未来\d+天|下周|端午|暑假|周末)/.test(normalizedText);
+}
+
+function getExplicitDestinationHintsFromText(userText: string) {
+  return collectDestinationHints(normalizeText(userText));
+}
+
+function normalizeGroundingText(value: string) {
+  return normalizeText(value).replace(/[\s,，。！？、:：;；"'“”‘’()（）[\]【】/\\|`-]+/g, '');
+}
+
+function isAiInferredPreferenceGrounded(term: string, params: {
+  userText: string;
+  hardIntent: AiTravelIntent | null;
+}) {
+  const normalizedTerm = normalizeGroundingText(term);
+  if (!normalizedTerm) return false;
+
+  const normalizedUserText = normalizeGroundingText(params.userText);
+  if (normalizedUserText.includes(normalizedTerm)) return true;
+
+  const hardTerms = uniqueStrings([
+    ...(params.hardIntent?.destinationHints || []),
+    ...(params.hardIntent?.travelStyle || []),
+    ...(params.hardIntent?.mustHave || []),
+    ...(params.hardIntent?.semanticFocus || []),
+    ...(params.hardIntent?.avoid || []),
+    ...(params.hardIntent?.weatherSensitivity || []),
+  ]).map((value) => normalizeGroundingText(value));
+  if (hardTerms.includes(normalizedTerm)) return true;
+
+  if (/联游|深度游|深度|近期可走|近期出发|尽快出发/.test(term)) {
+    return normalizedUserText.includes(normalizedTerm);
+  }
+
+  if (/天气|气温|温度|下雨|降雨|暴雨|雷暴|台风|季节|避暑|怕热|闷热|风浪/.test(term)) {
+    return hasExplicitWeatherLanguage(params.userText);
+  }
+
+  const termDestinations = collectDestinationHints(normalizeText(term));
+  if (termDestinations.length > 0) {
+    const explicitDestinations = uniqueStrings([
+      ...getExplicitDestinationHintsFromText(params.userText),
+      ...(params.hardIntent?.destinationHints || []),
+    ]);
+    return termDestinations.every((destination) => explicitDestinations.includes(destination));
+  }
+
+  if (/预算|元|便宜|低价|高端|豪华|性价比/.test(term)) {
+    return hasExplicitBudgetBoundsText(params.userText) || hasExplicitBudgetPriorityText(params.userText);
+  }
+
+  if (/近期|最近|本周|下周|马上|尽快/.test(term)) {
+    return hasExplicitDepartureUrgencyText(params.userText);
+  }
+
+  return normalizedUserText.includes(normalizedTerm);
+}
+
+function sanitizeAiPreferenceArraysForTurn(
+  intent: AiTravelIntent | null,
+  params: {
+    userText: string;
+    hardIntent: AiTravelIntent | null;
+  },
+): AiTravelIntent | null {
+  if (!intent) return intent;
+
+  return {
+    ...intent,
+    travelStyle: (intent.travelStyle || []).filter((term) => isAiInferredPreferenceGrounded(term, params)),
+    mustHave: (intent.mustHave || []).filter((term) => isAiInferredPreferenceGrounded(term, params)),
+    semanticFocus: (intent.semanticFocus || []).filter((term) => isAiInferredPreferenceGrounded(term, params)),
+    weatherSensitivity: hasExplicitWeatherLanguage(params.userText)
+      ? intent.weatherSensitivity || []
+      : [],
+  };
+}
+
+function sanitizeAiSemanticNotesForTurn(
+  notes: AiRecommendationSemanticNotes | undefined,
+  params: {
+    userText: string;
+    hardIntent: AiTravelIntent | null;
+  },
+): AiRecommendationSemanticNotes | undefined {
+  if (!notes) return undefined;
+
+  const softCriteria = notes.softCriteria.filter((term) => isAiInferredPreferenceGrounded(term, params));
+  const cannotAssert = notes.cannotAssert.filter((term) => isAiInferredPreferenceGrounded(term, params));
+  const worldKnowledgeUse = notes.worldKnowledgeUse && isAiInferredPreferenceGrounded(notes.worldKnowledgeUse, params)
+    ? notes.worldKnowledgeUse
+    : undefined;
+  const caveat = notes.caveat && isAiInferredPreferenceGrounded(notes.caveat, params)
+    ? notes.caveat
+    : undefined;
+
+  return worldKnowledgeUse || softCriteria.length > 0 || cannotAssert.length > 0 || caveat
+    ? {
+        worldKnowledgeUse,
+        softCriteria,
+        cannotAssert,
+        caveat,
+      }
+    : undefined;
+}
+
+function buildPreferenceMemoryIntentForTurn(
+  intent: AiTravelIntent | null,
+  params: {
+    userText: string;
+    hardIntent: AiTravelIntent | null;
+  },
+): AiTravelIntent | null {
+  if (!intent) return intent;
+
+  const sanitized = sanitizeAiPreferenceArraysForTurn(intent, params);
+  if (!sanitized) return sanitized;
+
+  return {
+    ...sanitized,
+    weatherSensitivity: hasExplicitWeatherLanguage(params.userText)
+      ? sanitized.weatherSensitivity || []
+      : [],
   };
 }
 
@@ -5848,9 +6004,10 @@ export async function requestAiRecommendations({
     const strictLocalItems = localItems.length > 0
       ? localItems
       : localRecommendations(availableCandidates, effectiveUserText);
-    const localItemsForMerge = padRecommendationItems(
+    const localItemsForMerge = buildPaddedRecommendationItems(
       strictLocalItems,
       fallbackRecommendations(availableCandidates),
+      effectiveIntent,
     );
     runtimeFallbackItems = localItemsForMerge;
     runtimePreferenceMemory = nextPreferenceMemory;
@@ -5978,16 +6135,22 @@ export async function requestAiRecommendations({
           userText: effectiveUserText,
         }),
     }) as { intent?: unknown; intentNotes?: unknown; summary?: unknown; items?: unknown };
-    const semanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
+    const rawSemanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
     const normalizedAiIntent = sanitizeAiBudgetBoundsForTurn(
       normalizeIntent(aiResponse.intent),
       text,
     );
-    const rankingIntent = normalizeBudgetPriorityByUserText(
-      sanitizeAiIntentForTurn(normalizedAiIntent, {
-        allowPublicInterest: allowPublicInterestForTurn,
-      }),
-      text,
+    const rankingIntent = sanitizeAiPreferenceArraysForTurn(
+      normalizeBudgetPriorityByUserText(
+        sanitizeAiIntentForTurn(normalizedAiIntent, {
+          allowPublicInterest: allowPublicInterestForTurn,
+        }),
+        text,
+      ),
+      {
+        userText: text,
+        hardIntent: intent,
+      },
     );
     const finalIntent = attachTurnSemanticContext(
       mergeIntentWithMemory(
@@ -5997,7 +6160,19 @@ export async function requestAiRecommendations({
       text,
       { allowPublicInterest: allowPublicInterestForTurn },
     );
-    const finalPreferenceMemory = normalizePreferenceMemory(mergePreferenceMemory(memoryForThisTurn, finalIntent));
+    const semanticNotes = sanitizeAiSemanticNotesForTurn(rawSemanticNotes, {
+      userText: text,
+      hardIntent: intent,
+    });
+    const finalPreferenceMemory = normalizePreferenceMemory(
+      mergePreferenceMemory(
+        memoryForThisTurn,
+        buildPreferenceMemoryIntentForTurn(finalIntent, {
+          userText: text,
+          hardIntent: intent,
+        }),
+      ),
+    );
     const finalEffectiveUserText = buildEffectiveUserText(text, finalPreferenceMemory);
     const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
     const compactedLocalItems = localItemsForMerge.filter((item) => compactedCandidateIds.has(item.tourId));
@@ -6016,9 +6191,10 @@ export async function requestAiRecommendations({
       ? aiItems
       : compactedLocalItems.slice(0, MAX_AI_RANKED_ITEMS);
 
-    const baseMergedItems = padRecommendationItems(
+    const baseMergedItems = buildPaddedRecommendationItems(
       mergeAiAndLocalRecommendations(rankedAiItems, compactedLocalItems),
       localItemsForMerge,
+      finalIntent,
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
     const mergedCandidateTours = availableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));

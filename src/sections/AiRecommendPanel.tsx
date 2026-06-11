@@ -86,18 +86,18 @@ function getQuestionLead(prompt: string) {
 }
 
 // 根据用户输入类型拼接 AI 回复文案，区分疑问句 vs 陈述句
-function buildResultAssistantReply(result: AiRecommendationResult, prompt: string) {
+function buildResultAssistantReply(prompt: string) {
   const questionLead = getQuestionLead(prompt);
   if (questionLead) {
-    return `${questionLead}${result.summary}`;
+    return questionLead;
   }
 
   const isQuestion = /[？?]$/.test(prompt) || /^(你能|你会|可以|能不能|有没有|怎么|如何|为啥|为什么)/.test(prompt);
   if (isQuestion) {
-    return `可以，我先按这个问题帮你判断一下。${result.summary}`;
+    return '可以，我先按这个问题帮你判断一下。上面的摘要里是这轮推荐的结论，下面我继续保留对话。';
   }
 
-  return result.summary;
+  return '我先按你这轮条件排好了，结论看上面的摘要；下面这块继续保留对话记录。';
 }
 
 function createMessage(role: AiRecommendationMessage['role'], content: string): AiRecommendationMessage {
@@ -277,7 +277,7 @@ export function AiRecommendPanel({
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
       setMessages((current) => [
         ...current,
-        createMessage('assistant', buildResultAssistantReply(nextResult, prompt)),
+        createMessage('assistant', buildResultAssistantReply(prompt)),
       ]);
       onFocusResults();
     } finally {

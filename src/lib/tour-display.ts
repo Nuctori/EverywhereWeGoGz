@@ -1,12 +1,8 @@
 // 线路展示层：负责标题摘要、目的地兜底、主题推断和日期展示文案。
 import type { Tour } from '@/types/tour';
+import { resolveTourDestination, sanitizeTourHighlights } from '@/lib/destination-resolver';
 
 const GENERIC_DESTINATION_FALLBACK = '目的地待确认';
-const HIGHLIGHT_PLACEHOLDERS = new Set([
-  '其他必打卡',
-  '特色美食',
-  '精品住宿',
-]);
 const GENERIC_HIGHLIGHT_TERMS = new Set([
   '其他',
   '纯玩',
@@ -34,27 +30,16 @@ function normalizeDisplayText(value: string | undefined) {
 }
 
 function isMeaningfulHighlight(value: string) {
-  const normalized = normalizeDisplayText(value).replace(/必打卡$/, '');
+  const normalized = normalizeDisplayText(value);
   if (!normalized) return false;
-  if (HIGHLIGHT_PLACEHOLDERS.has(value) || HIGHLIGHT_PLACEHOLDERS.has(normalized)) return false;
   if (GENERIC_HIGHLIGHT_TERMS.has(normalized)) return false;
   return normalized.length >= 2;
 }
 
-function isDestinationOnlyHighlight(tour: Tour, value: string) {
-  const normalized = normalizeDisplayText(value);
-  if (!normalized.includes('必打卡')) return false;
-
-  const stripped = normalized.replace(/必打卡/g, '').trim();
-  const destination = normalizeDisplayText(tour.destination);
-  return Boolean(stripped && destination && stripped === destination);
-}
-
 export function getReadableHighlights(tour: Tour) {
   const seen = new Set<string>();
-  return (tour.highlights || [])
-    .filter((item) => !isDestinationOnlyHighlight(tour, item))
-    .map((item) => normalizeDisplayText(item).replace(/必打卡$/, ''))
+  return sanitizeTourHighlights(tour)
+    .map((item) => normalizeDisplayText(item))
     .filter((item) => isMeaningfulHighlight(item))
     .filter((item) => {
       if (seen.has(item)) return false;
@@ -67,8 +52,9 @@ export function getReadableHighlights(tour: Tour) {
  * 获取可读的目的地名称
  */
 export function getReadableDestination(tour: Tour) {
-  if (tour.destination && tour.destination !== '其他') {
-    return tour.destination;
+  const resolvedDestination = resolveTourDestination(tour);
+  if (resolvedDestination && resolvedDestination !== '其他') {
+    return resolvedDestination;
   }
   const candidate = getReadableHighlights(tour)[0];
   return candidate || GENERIC_DESTINATION_FALLBACK;

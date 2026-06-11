@@ -34,6 +34,8 @@ const {
   resolvePromptDateWindow,
   sanitizeAiBudgetBoundsForTurn,
   sanitizeAiIntentForTurn,
+  sanitizeAiPreferenceArraysForTurn,
+  sanitizeAiSemanticNotesForTurn,
   validateAiItems,
 } = __aiRecommendationTestHooks;
 
@@ -971,6 +973,52 @@ const keptUserBudgetPriority = sanitizeAiBudgetBoundsForTurn(
   '预算不限，想要高端一点的温泉沙滩团',
 );
 assert.equal(keptUserBudgetPriority?.budgetPriority, 'premium');
+
+const sanitizedImplicitSemanticIntent = sanitizeAiPreferenceArraysForTurn(
+  {
+    destinationHints: ['\u5e7f\u897f', '\u8d8a\u5357'],
+    travelStyle: ['\u8054\u6e38', '\u6df1\u5ea6\u6e38'],
+    mustHave: ['\u5c71\u6c34'],
+    semanticFocus: ['\u4e1c\u5357\u4e9a'],
+    weatherSensitivity: ['\u5929\u6c14\u654f\u611f'],
+    departureWeekdays: [],
+  },
+  {
+    userText: '\u6211\u60f3\u73a9\u5e7f\u897f\u548c\u8d8a\u5357',
+    hardIntent: {
+      destinationHints: ['\u5e7f\u897f', '\u8d8a\u5357'],
+      weatherSensitivity: [],
+      departureWeekdays: [],
+    },
+  },
+);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.travelStyle ?? [], []);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.mustHave ?? [], []);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.semanticFocus ?? [], []);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.weatherSensitivity ?? [], []);
+
+const sanitizedImplicitSemanticNotes = sanitizeAiSemanticNotesForTurn(
+  {
+    worldKnowledgeUse: '\u5148\u628a\u8d8a\u5357\u6269\u5199\u6210\u4e1c\u5357\u4e9a\u65b9\u5411',
+    softCriteria: [
+      '\u533a\u57df\uff1a\u4e1c\u5357\u4e9a',
+      '\u504f\u597d\uff1a\u8054\u6e38\u3001\u6df1\u5ea6\u6e38',
+      '\u6f5c\u5728\u7ea6\u675f\uff1a\u5929\u6c14\u654f\u611f\uff08\u6d77\u8fb9/\u6237\u5916\uff09',
+    ],
+    cannotAssert: ['\u8fd1\u671f\u53ef\u8d70'],
+    caveat: '\u5f53\u524d\u5019\u9009\u91cc\u4e5f\u53ef\u4ee5\u987a\u624b\u627e\u6cf0\u56fd',
+  },
+  {
+    userText: '\u6211\u60f3\u73a9\u5e7f\u897f\u548c\u8d8a\u5357',
+    hardIntent: {
+      destinationHints: ['\u5e7f\u897f', '\u8d8a\u5357'],
+      weatherSensitivity: [],
+      departureWeekdays: [],
+    },
+  },
+);
+assert.equal(sanitizedImplicitSemanticNotes, undefined);
+
 const variedReasonTours = [
   highPriceBeachTour,
   candidate({
@@ -1441,6 +1489,15 @@ assert.equal(uiFilterOnlyIntent?.tripDaysMax ?? null, null);
 assert.equal(uiFilterOnlyIntent?.budgetMin ?? null, null);
 assert.equal(uiFilterOnlyIntent?.budgetMax ?? null, null);
 
+const guangxiVietnamIntent = buildHardIntentFromText(
+  '\u6211\u60f3\u73a9\u5e7f\u897f\u548c\u8d8a\u5357',
+);
+assert.deepEqual(
+  guangxiVietnamIntent?.destinationHints ?? [],
+  ['\u5e7f\u897f', '\u8d8a\u5357'],
+  'explicit destinations should stay specific instead of broadening into regional presets',
+);
+
 const strictMismatchIntent = buildHardIntentFromText(
   '500元以下，7天以上，住五星酒店，去新疆，还要天气特别好',
 );
@@ -1542,6 +1599,60 @@ const cappedPriority = prioritizeRecommendationItems(
 );
 assert.equal(cappedPriority.length, 24);
 
+const explicitDestinationPriority = prioritizeRecommendationItems(
+  [
+    { tourId: 'gx-border-1', score: 95, reason: '德天瀑布边境线更贴题。', matchedSignals: ['广西'] },
+    { tourId: 'vn-route-1', score: 93, reason: '越南下龙湾能补足另一半目的地。', matchedSignals: ['越南'] },
+    { tourId: 'gx-border-2', score: 91, reason: '明仕田园和崇左一线更稳。', matchedSignals: ['广西'] },
+    { tourId: 'vn-route-2', score: 89, reason: '河内和下龙湾这条更完整。', matchedSignals: ['越南'] },
+    { tourId: 'gx-sea', score: 87, reason: '北海涠洲岛适合补海岛玩法。', matchedSignals: ['广西'] },
+    { tourId: 'gx-city', score: 84, reason: '南宁和德天一线更顺路。', matchedSignals: ['广西'] },
+    { tourId: 'vn-route-3', score: 82, reason: '越南多城线适合想一次玩开。', matchedSignals: ['越南'] },
+    { tourId: 'gx-border-3', score: 80, reason: '巴马和崇左适合再补一个广西向。', matchedSignals: ['广西'] },
+    { tourId: 'gd-detour', score: 35, reason: '广东温泉线只是邻近方向补位。', matchedSignals: ['广东'] },
+    { tourId: 'yn-detour', score: 35, reason: '云南长线只是相近南方方向补位。', matchedSignals: ['云南'] },
+  ],
+  {
+    candidateTours: [
+      candidate({ id: 'gx-border-1', title: '广西德天瀑布4天', destination: '广西', duration: 4, price: 1999, theme: '自然风光' }),
+      candidate({ id: 'vn-route-1', title: '越南下龙湾5天', destination: '越南', duration: 5, price: 2999, theme: '海岛度假' }),
+      candidate({ id: 'gx-border-2', title: '广西崇左明仕田园3天', destination: '广西', duration: 3, price: 1599, theme: '自然风光' }),
+      candidate({ id: 'vn-route-2', title: '越南河内下龙湾5天', destination: '越南', duration: 5, price: 3299, theme: '古镇文化' }),
+      candidate({ id: 'gx-sea', title: '广西北海涠洲岛4天', destination: '广西', duration: 4, price: 2399, theme: '海岛度假' }),
+      candidate({ id: 'gx-city', title: '广西南宁德天4天', destination: '广西', duration: 4, price: 1799, theme: '自然风光' }),
+      candidate({ id: 'vn-route-3', title: '越南会安芽庄6天', destination: '越南', duration: 6, price: 3999, theme: '海岛度假' }),
+      candidate({ id: 'gx-border-3', title: '广西巴马崇左4天', destination: '广西', duration: 4, price: 1899, theme: '自然风光' }),
+      candidate({ id: 'gd-detour', title: '广东清远温泉3天', destination: '广东', duration: 3, price: 699, theme: '温泉度假' }),
+      candidate({ id: 'yn-detour', title: '云南腾冲芒市5天', destination: '云南', duration: 5, price: 3699, theme: '自然风光' }),
+    ],
+    intent: { destinationHints: ['广西', '越南'], weatherSensitivity: [], departureWeekdays: [] },
+    userText: '我想玩广西和越南',
+  },
+);
+assert.deepEqual(
+  explicitDestinationPriority.map((item) => item.tourId),
+  ['gx-border-1', 'vn-route-1', 'gx-border-2', 'vn-route-2', 'gx-sea', 'gx-city', 'vn-route-3', 'gx-border-3'],
+  'when explicit destination hits are already sufficient, conflicting detours should not be reinserted into the final list',
+);
+
+const ambiguousWetlandPrimitive = buildTourPrimitive(candidate({
+  id: 'yn-wetland',
+  title: '云南腾冲瑞丽芒市5天 北海湿地 和顺古镇',
+  destination: '云南',
+  duration: 5,
+  price: 3699,
+  theme: '自然风光',
+  tags: ['自然风光'],
+  highlights: ['北海湿地', '和顺古镇'],
+}));
+assert.ok(
+  getPrimitiveConflictReasons(
+    { destinationHints: ['广西', '越南'], weatherSensitivity: [], departureWeekdays: [] },
+    ambiguousWetlandPrimitive,
+  ).some((reason) => reason.includes('目的地不匹配')),
+  'ambiguous scenic spots like 北海湿地 should not be mistaken for 广西北海',
+);
+
 {
   const copyPriorityTours = [
     candidate({
@@ -1583,8 +1694,8 @@ assert.equal(cappedPriority.length, 24);
       userText: '帮我找同时带温泉和沙滩的团，最好轻松一点',
     },
   );
-  assert.equal(reordered[0].tourId, 'copy-long',
-    'longer and more complete recommendation copy should move ahead');
+  assert.equal(reordered[0].tourId, 'copy-short',
+    'valid AI order should stay ahead instead of being rewritten by longer copy');
 }
 
 // ─── 回归测试：reason 不应保留程序腔 ───
@@ -1737,6 +1848,61 @@ assert.equal(cappedPriority.length, 24);
   if (hasProgrammaticPattern) {
     console.log('  [audit note] fallback summary contains programmatic language (not a failure, but worth monitoring)');
   }
+}
+
+// ─── 回归测试：显式目的地 summary 不应被候选统计带偏 ───
+{
+  const explicitDestinationSummary = finalizeRecommendationSummary({
+    aiSummary: '',
+    items: [
+      { tourId: 'gx-waterfall', score: 93, reason: '广西边境线更贴题。', matchedSignals: ['广西'] },
+      { tourId: 'gd-detour', score: 88, reason: '只是邻近方向补位。', matchedSignals: ['广东'] },
+      { tourId: 'vn-bay', score: 84, reason: '越南这条能补足另一半需求。', matchedSignals: ['越南'] },
+    ],
+    candidateTours: [
+      candidate({
+        id: 'gx-waterfall',
+        title: '广西德天瀑布3天',
+        destination: '广西',
+        duration: 3,
+        price: 1399,
+        tags: ['山水'],
+        highlights: ['德天瀑布', '边境风光'],
+        theme: '自然风光',
+      }),
+      candidate({
+        id: 'gd-detour',
+        title: '广东清远山水2天',
+        destination: '广东',
+        duration: 2,
+        price: 699,
+        tags: ['山水'],
+        highlights: ['山水', '漂流'],
+        theme: '自然风光',
+      }),
+      candidate({
+        id: 'vn-bay',
+        title: '越南下龙湾5天',
+        destination: '越南',
+        duration: 5,
+        price: 2599,
+        tags: ['海湾'],
+        highlights: ['下龙湾', '河内'],
+        theme: '境外度假',
+      }),
+    ],
+    weatherContext: { destination: '南宁', travelDate: '2026-06-12', forecastSummary: '多云', seasonAdvice: [], source: 'seasonal-rule' },
+    destinationWeatherInsights: [],
+    intent: { destinationHints: ['广西', '越南'], weatherSensitivity: [], departureWeekdays: [] },
+    userText: '我想玩广西和越南',
+    allowPublicInterest: false,
+  });
+  assert.ok(explicitDestinationSummary.includes('广西、越南'),
+    'summary should keep explicit destination intent ahead of candidate-derived geography');
+  assert.ok(!explicitDestinationSummary.includes('广东'),
+    'summary should not broaden explicit 广西/越南 intent into neighboring provinces');
+  assert.ok(!explicitDestinationSummary.includes('山水避暑'),
+    'summary should not inject unrequested theme labels for explicit destination turns');
 }
 
 console.log('AI recommendation audit passed');
