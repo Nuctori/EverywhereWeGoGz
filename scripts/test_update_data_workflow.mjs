@@ -12,6 +12,12 @@ function stepIndex(stepName) {
   return index;
 }
 
+function stepBlock(stepName) {
+  const start = stepIndex(stepName);
+  const nextStep = workflow.indexOf('\n      - name:', start + 1);
+  return workflow.slice(start, nextStep === -1 ? undefined : nextStep);
+}
+
 const jrtIndex = stepIndex('Crawl JRT365 full');
 const saihuitongIndex = stepIndex('Crawl Saihuitong full');
 const pintuIndex = stepIndex('Crawl Pintu full');
@@ -31,6 +37,19 @@ assert.ok(
   workflow.includes("if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'"),
   'expected crawl steps to be skippable only for manual verification runs',
 );
+for (const stepName of [
+  'Crawl JRT365 full',
+  'Crawl Saihuitong full',
+  'Crawl Pintu full',
+  'Crawl GZL API full',
+  'Crawl Outdoors full',
+  'Crawl HTTP aggregate sources',
+]) {
+  assert.ok(
+    stepBlock(stepName).includes('timeout-minutes: 60'),
+    `expected ${stepName} to have a timeout budget`,
+  );
+}
 assert.ok(
   jrtIndex < saihuitongIndex &&
     saihuitongIndex < pintuIndex &&
