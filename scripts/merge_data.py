@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-鍚堝苟鎵€鏈夋暟鎹簮锛岀敓鎴?tours.ts 鍜?tours.json
+合并所有数据源，生成 tours.ts 和 tours.json
 """
 
 import hashlib
@@ -21,19 +21,16 @@ from detail_parsers import detail_has_content, empty_detail, fetch_detail_data
 from tour_blacklist import is_blacklisted_title
 from validate_tour_availability import DEFAULT_CACHE, HTTP_ERROR, UNAVAILABLE, run_validation_jobs
 
-if hasattr(sys.stdout, "reconfigure"):
-    sys.stdout.reconfigure(line_buffering=True)
-
-# 鏉ユ簮棰滆壊鏄犲皠
+# 来源颜色映射
 SOURCE_COLORS = {
-    '鍋囨棩閫?: '#FF6B35',
-    '骞垮窞鍘绘梾琛?: '#4ECDC4',
-    '搴疯緣': '#1A535C',
-    '鏆磋蛋鏉?: '#B8860B',
-    '骞夸箣鏃?: '#FF006E',
-    '骞夸笢涓梾': '#8338EC',
-    '鍝侀€?: '#3A86FF',
-    '澶╂动鎴峰': '#2F855A',
+    '假日通': '#FF6B35',
+    '广州去旅行': '#4ECDC4',
+    '康辉': '#1A535C',
+    '暴走村': '#B8860B',
+    '广之旅': '#FF006E',
+    '广东中旅': '#8338EC',
+    '品途': '#3A86FF',
+    '天涯户外': '#2F855A',
 }
 
 DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
@@ -100,8 +97,8 @@ def normalize_image_path(url: str, source: str) -> str:
     if parsed.scheme not in {'http', 'https'}:
         return normalized_url
     force_cache = (
-        (source == "澶╂动鎴峰" and OUTDOORS_HOST_TOKEN in parsed.netloc) or
-        (source == "鍋囨棩閫? and parsed.netloc == "jrttp.jrt365.com:8066")
+        (source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc) or
+        (source == "假日通" and parsed.netloc == "jrttp.jrt365.com:8066")
     )
     if image_cache_mode in {"remote", "skip", "off"} and not force_cache:
         return normalized_url
@@ -128,9 +125,9 @@ def normalize_image_path(url: str, source: str) -> str:
 
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
-        if source == "澶╂动鎴峰" and OUTDOORS_HOST_TOKEN in parsed.netloc:
+        if source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc:
             headers["Referer"] = f"https://www.{OUTDOORS_HOST_TOKEN}/"
-        elif source == "鍋囨棩閫? and parsed.netloc == "jrttp.jrt365.com:8066":
+        elif source == "假日通" and parsed.netloc == "jrttp.jrt365.com:8066":
             headers["Referer"] = "http://www.jrt365.com/"
         resp = requests.get(normalized_url, headers=headers, timeout=20)
         resp.raise_for_status()
@@ -141,7 +138,7 @@ def normalize_image_path(url: str, source: str) -> str:
             f.write(resp.content)
         return public_path
     except Exception as exc:
-        print(f"[鍥剧墖缂撳瓨] {source} {normalized_url} -> {exc}")
+        print(f"[图片缓存] {source} {normalized_url} -> {exc}")
         return ensure_placeholder_image(source)
 
 
@@ -173,7 +170,7 @@ def ensure_placeholder_image(source: str) -> str:
   </defs>
   <rect width="800" height="600" fill="url(#g)" />
   <rect x="60" y="60" width="680" height="480" rx="32" fill="#f8fafc" opacity="0.88" />
-  <text x="400" y="290" text-anchor="middle" font-size="42" fill="#475569" font-family="Arial, sans-serif">鍥剧墖鏆備笉鍙敤</text>
+  <text x="400" y="290" text-anchor="middle" font-size="42" fill="#475569" font-family="Arial, sans-serif">图片暂不可用</text>
   <text x="400" y="350" text-anchor="middle" font-size="26" fill="#64748b" font-family="Arial, sans-serif">{safe_source}</text>
 </svg>'''
     with open(local_path, 'w', encoding='utf-8') as f:
@@ -194,11 +191,11 @@ def normalize_images(images, source: str):
 
 def extract_title_dates(title: str):
     normalized = (
-        title.replace('锛?, '/')
-        .replace('锛?, '.')
-        .replace('锛?, '-')
-        .replace('鈥?, '-')
-        .replace('鈥?, '-')
+        title.replace('／', '/')
+        .replace('．', '.')
+        .replace('－', '-')
+        .replace('—', '-')
+        .replace('–', '-')
     )
     dates = []
     year = datetime.now().year
@@ -207,7 +204,7 @@ def extract_title_dates(title: str):
         start, end = match.span()
         prev_char = normalized[start - 1] if start > 0 else ''
         next_char = normalized[end] if end < len(normalized) else ''
-        if prev_char in {'-', '~', '鑷?, '鍒?} or next_char in {'-', '~', '鑷?, '鍒?}:
+        if prev_char in {'-', '~', '至', '到'} or next_char in {'-', '~', '至', '到'}:
             continue
         try:
             parsed = datetime(year, int(month), int(day))
@@ -318,13 +315,13 @@ def build_ai_meta(raw, source: str, departure_date: str, departure_dates: list[s
     risk_flags = []
     if not departure_dates:
         risk_flags.append("missing_structured_schedule")
-    if source == "鍋囨棩閫?:
+    if source == "假日通":
         risk_flags.append("supplier_requires_strict_schedule_validation")
 
     data_quality = {
         "hasStructuredDepartureDates": bool(departure_dates),
         "isDepartureDateReliable": bool(departure_date),
-        "availabilityConfidence": "high" if departure_dates else ("medium" if source != "鍋囨棩閫? else "low"),
+        "availabilityConfidence": "high" if departure_dates else ("medium" if source != "假日通" else "low"),
         "riskFlags": risk_flags,
     }
 
@@ -337,7 +334,7 @@ def build_ai_meta(raw, source: str, departure_date: str, departure_dates: list[s
 
 
 def extract_days(title):
-    m = re.search(r"(\d+(?:\.\d+)?)\s*[澶╂棩]", title)
+    m = re.search(r"(\d+(?:\.\d+)?)\s*[天日]", title)
     if m:
         return int(float(m.group(1)))
     return 0
@@ -345,75 +342,75 @@ def extract_days(title):
 
 def guess_destination(title):
     dest_keywords = {
-        '妗傛灄': ['妗傛灄', '闃虫湐', '婕撴睙'],
-        '寮犲鐣?: ['寮犲鐣?, '鍑ゅ嚢鍙ゅ煄'],
-        '浜戝崡': ['浜戝崡', '澶х悊', '涓芥睙', '瑗垮弻鐗堢撼'],
-        '涓変簹': ['涓変簹', '娴峰崡'],
-        '鍘﹂棬': ['鍘﹂棬', '榧撴氮灞?],
-        '瑗胯棌': ['瑗胯棌', '鎷夎惃', '甯冭揪鎷夊'],
-        '鏂扮枂': ['鏂扮枂', '澶╁北', '鍠€绾虫柉'],
-        '鍖椾含': ['鍖椾含', '鏁呭', '闀垮煄'],
-        '瑗垮畨': ['瑗垮畨', '鍏甸┈淇?],
-        '鍥涘窛': ['鍥涘窛', '鎴愰兘', '涔濆娌?],
-        '璐靛窞': ['璐靛窞', '榛勬灉鏍?],
-        '骞夸笢': ['骞夸笢', '骞垮窞', '娣卞湷', '鐝犳捣'],
+        '桂林': ['桂林', '阳朔', '漓江'],
+        '张家界': ['张家界', '凤凰古城'],
+        '云南': ['云南', '大理', '丽江', '西双版纳'],
+        '三亚': ['三亚', '海南'],
+        '厦门': ['厦门', '鼓浪屿'],
+        '西藏': ['西藏', '拉萨', '布达拉宫'],
+        '新疆': ['新疆', '天山', '喀纳斯'],
+        '北京': ['北京', '故宫', '长城'],
+        '西安': ['西安', '兵马俑'],
+        '四川': ['四川', '成都', '九寨沟'],
+        '贵州': ['贵州', '黄果树'],
+        '广东': ['广东', '广州', '深圳', '珠海'],
     }
     t = title.lower()
     for dest, keywords in dest_keywords.items():
         if any(k in t for k in keywords):
             return dest
-    return '鍏朵粬'
+    return '其他'
 
 
 def guess_theme(title):
     t = title.lower()
-    if any(k in t for k in ['娓╂硥', '娴锋哗', '娴峰矝', '娌欐哗']):
-        return '娴峰矝搴﹀亣'
-    if any(k in t for k in ['寰掓', '鐧诲北', '绌胯秺', '鎴峰']):
-        return '鎴峰寰掓'
-    if any(k in t for k in ['鍙ら晣', '鍙ゅ煄', '鏂囧寲']):
-        return '鍙ら晣鏂囧寲'
-    if any(k in t for k in ['缇庨', '鍚?, '灏忓悆']):
-        return '缇庨涔嬫梾'
-    if any(k in t for k in ['浜插瓙', '瀹跺涵', '鍎跨']):
-        return '浜插瓙娓?
-    if any(k in t for k in ['鎽勫奖', '鎷嶇収', '鎵撳崱']):
-        return '鎽勫奖涔嬫梾'
-    if any(k in t for k in ['闆?, '鍐?, '婊戦洩']):
-        return '鍐伴洩涓栫晫'
-    if any(k in t for k in ['姘戞棌', '椋庢儏', '姘戜織']):
-        return '姘戞棌椋庢儏'
-    return '鑷劧椋庡厜'
+    if any(k in t for k in ['温泉', '海滩', '海岛', '沙滩']):
+        return '海岛度假'
+    if any(k in t for k in ['徒步', '登山', '穿越', '户外']):
+        return '户外徒步'
+    if any(k in t for k in ['古镇', '古城', '文化']):
+        return '古镇文化'
+    if any(k in t for k in ['美食', '吃', '小吃']):
+        return '美食之旅'
+    if any(k in t for k in ['亲子', '家庭', '儿童']):
+        return '亲子游'
+    if any(k in t for k in ['摄影', '拍照', '打卡']):
+        return '摄影之旅'
+    if any(k in t for k in ['雪', '冰', '滑雪']):
+        return '冰雪世界'
+    if any(k in t for k in ['民族', '风情', '民俗']):
+        return '民族风情'
+    return '自然风光'
 
 
 def guess_leisure_level(title: str, days: int, theme: str) -> str:
     t = title.lower()
-    if any(k in t for k in ['寰掓', '鐧诲北', '绌胯秺', '鎴峰', '鎺㈤櫓', '闇茶惀', '婕傛祦', '瓒婇噹', '鎴胯溅鏃呰']):
+    if any(k in t for k in ['徒步', '登山', '穿越', '户外', '探险', '露营', '漂流', '越野', '房车旅行']):
         return 'hard'
-    if days >= 8 or any(k in t for k in ['闀跨嚎', '娣卞害', '鐜嚎', '閭疆', '涓撳垪']):
+    if days >= 8 or any(k in t for k in ['长线', '深度', '环线', '邮轮', '专列']):
         return 'medium'
-    if theme in ['娴峰矝搴﹀亣', '浜插瓙娓?, '鍙ら晣鏂囧寲', '缇庨涔嬫梾', '鎽勫奖涔嬫梾']:
+    if theme in ['海岛度假', '亲子游', '古镇文化', '美食之旅', '摄影之旅']:
         return 'easy'
     return 'easy'
 
 
 RECOMMENDED_TITLE_HINTS = (
-    "宸叉垚鍥?,
-    "鍗冲皢鎴愬洟",
-    "鐑崠",
-    "鐖嗘",
-    "棣栧彂",
-    "闄愭椂",
-    "鐢勯€?,
-    "绮鹃€?,
+    "已成团",
+    "即将成团",
+    "热卖",
+    "爆款",
+    "首发",
+    "限时",
+    "甄选",
+    "精选",
 )
 
 NEW_TITLE_HINTS = (
-    "鏂板搧",
-    "鏂颁笂绾?,
-    "鍏ㄦ柊涓婄嚎",
-    "棣栧彂",
-    "鏂板紑",
+    "新品",
+    "新上线",
+    "全新上线",
+    "首发",
+    "新开",
 )
 
 
@@ -460,14 +457,14 @@ def compute_recommendation_score(
 
 def raw_to_tour_legacy(raw, id_counter, detail=None):
     return raw_to_tour(raw, id_counter, detail=detail)
-    source = raw.get('source', '鏈煡')
+    source = raw.get('source', '未知')
     title = raw.get('title', '')
     price = raw.get('price', 0)
     detail = detail or empty_detail()
 
     if is_blacklisted_title(title):
         return None
-    if source == '骞夸箣鏃? and '/hotel/' in str(raw.get('url', '')).lower():
+    if source == '广之旅' and '/hotel/' in str(raw.get('url', '')).lower():
         return None
 
     days = raw.get('days', 0) or extract_days(title)
@@ -518,11 +515,11 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
     for d in range(1, (days or 2) + 1):
         itinerary.append({
             "day": d,
-            "title": f"绗瑊d}澶╋細{destination}娓歌" if d > 1 and d < (days or 2) else (f"鍑哄彂鍓嶅線{destination}" if d == 1 else f"鍛婂埆{destination}锛岃繑鍥炴俯棣ㄧ殑瀹?),
-            "description": f"浠婃棩瀹夋帓{destination}绮惧僵娲诲姩锛屾劅鍙楀綋鍦扮嫭鐗归瓍鍔涖€?,
-            "meals": ["鏃╅", "鍗堥"] if d < (days or 2) else ["鏃╅"],
-            "accommodation": "褰撳湴閰掑簵" if d < (days or 2) else "娓╅Θ鐨勫",
-            "activities": ["鏅偣娓歌", "鑷敱娲诲姩"],
+            "title": f"第{d}天：{destination}游览" if d > 1 and d < (days or 2) else (f"出发前往{destination}" if d == 1 else f"告别{destination}，返回温馨的家"),
+            "description": f"今日安排{destination}精彩活动，感受当地独特魅力。",
+            "meals": ["早餐", "午餐"] if d < (days or 2) else ["早餐"],
+            "accommodation": "当地酒店" if d < (days or 2) else "温馨的家",
+            "activities": ["景点游览", "自由活动"],
         })
 
     available_seats = max(3, 20 - int(price / 1000))
@@ -532,50 +529,50 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
         "id": f"tour_{id_counter}",
         "title": title,
         "source": source,
-        "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('涔嬫梾', '').replace('鏃呰', '')}.png",
+        "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png",
         "destination": destination,
         "duration": days or 2,
         "price": int(price),
         "originalPrice": original_price,
-        "priceUnit": "浜?,
+        "priceUnit": "人",
         "departureDate": departure.strftime("%Y-%m-%d"),
         "returnDate": return_date.strftime("%Y-%m-%d"),
-        "transportType": "澶у反寰€杩? if days and days <= 3 else ("楂橀搧寰€杩? if days and days <= 5 else "椋炴満寰€杩?),
-        "accommodationLevel": "鑸掗€傚瀷",
+        "transportType": "大巴往返" if days and days <= 3 else ("高铁往返" if days and days <= 5 else "飞机往返"),
+        "accommodationLevel": "舒适型",
         "accommodationStars": 3,
-        "meals": f"{days or 2}鏃╅{max(0, (days or 2) - 1)}姝ｉ",
+        "meals": f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐",
         "singleSupplement": single_supplement,
         "singleSupplementNote": detail.get("singleSupplementNote", ""),
         "availableSeats": available_seats,
         "totalSeats": total_seats,
-        "highlights": [f"{destination}蹇呮墦鍗?, "鐗硅壊缇庨", "绮惧搧浣忓"],
+        "highlights": [f"{destination}必打卡", "特色美食", "精品住宿"],
         "itinerary": itinerary,
-        "inclusions": ["寰€杩斾氦閫?, "閰掑簵浣忓", "鏅偣闂ㄧエ", "瀵兼父鏈嶅姟"],
-        "exclusions": ["涓汉娑堣垂", "鍗曟埧宸?, "鑷垂椤圭洰"],
-        "importantNotes": ["璇锋惡甯︽湁鏁堣韩浠借瘉浠?, "琛岀▼鍙兘鍥犲ぉ姘旇皟鏁?],
-        "visaRequirements": "鏃犻渶绛捐瘉锛堝浗鍐呮父锛?,
+        "inclusions": ["往返交通", "酒店住宿", "景点门票", "导游服务"],
+        "exclusions": ["个人消费", "单房差", "自费项目"],
+        "importantNotes": ["请携带有效身份证件", "行程可能因天气调整"],
+        "visaRequirements": "无需签证（国内游）",
         "travelInsurance": True,
         "tourGuideService": True,
         "freeWiFi": stable_hash(title) % 2 == 0,
-        "childPolicy": "2-12宀佸効绔ヤ笉鍗犲簥浜崐浠?,
-        "cancellationPolicy": "鍑哄彂鍓?澶╁彲鏃犳崯閫€鏀?,
-        "refundPolicy": "鏈秷璐归」鐩寜瀹炵粨绠楅€€杩?,
+        "childPolicy": "2-12岁儿童不占床享半价",
+        "cancellationPolicy": "出发前7天可无损退改",
+        "refundPolicy": "未消费项目按实结算退还",
         "rating": rating,
         "reviewCount": review_count,
         "bookingUrl": raw.get('url', '#'),
         "images": images,
-        "tags": [theme, "绾帺", "鍝佽川"],
+        "tags": [theme, "纯玩", "品质"],
         "isHot": stable_hash(title + source) % 3 == 0,
         "isNew": stable_hash(title + source) % 5 == 0,
         "isFlashSale": stable_hash(title + source) % 10 == 0,
         "discountRate": discount_rate if discount_rate is not None else None,
-        "groupSize": "30浜哄父瑙勫洟",
+        "groupSize": "30人常规团",
         "theme": theme,
         "leisureLevel": leisure_level,
-        "suitableFor": ["浜插瓙", "鎯呬荆"],
-        "difficulty": "杞绘澗",
-        "season": "鍏ㄥ勾",
-        "language": "涓枃瀵兼父",
+        "suitableFor": ["亲子", "情侣"],
+        "difficulty": "轻松",
+        "season": "全年",
+        "language": "中文导游",
         "departureDate": departure_date,
         "departureDates": departure_dates,
         "hotDepartureDates": departure_dates[:4],
@@ -586,14 +583,14 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
 
 # ??????????????? Tour ??????????????
 def raw_to_tour(raw, id_counter, detail=None):
-    source = raw.get('source', '鏈煡')
+    source = raw.get('source', '未知')
     title = raw.get('title', '')
     price = raw.get('price', 0)
     detail = detail or empty_detail()
 
     if is_blacklisted_title(title):
         return None
-    if source == '骞夸箣鏃? and '/hotel/' in str(raw.get('url', '')).lower():
+    if source == '广之旅' and '/hotel/' in str(raw.get('url', '')).lower():
         return None
 
     days = raw.get('days', 0) or extract_days(title)
@@ -611,7 +608,7 @@ def raw_to_tour(raw, id_counter, detail=None):
     structured_departure_date, raw_structured_dates = extract_structured_departure_dates(raw)
     departure_date = structured_departure_date
     departure_dates = list(raw_structured_dates)
-    if source != "鍋囨棩閫? and not departure_dates:
+    if source != "假日通" and not departure_dates:
         parsed_dates = extract_title_dates(title)
         if parsed_dates:
             departure_dates = parsed_dates
@@ -619,9 +616,9 @@ def raw_to_tour(raw, id_counter, detail=None):
         else:
             departure_date = ""
             departure_dates = []
-    if source == "骞夸箣鏃? and not raw_structured_dates:
+    if source == "广之旅" and not raw_structured_dates:
         return None
-    if source == "鍋囨棩閫? and not raw_structured_dates:
+    if source == "假日通" and not raw_structured_dates:
         return None
 
     single_supplement_amount = detail.get("singleSupplementAmount")
@@ -642,7 +639,7 @@ def raw_to_tour(raw, id_counter, detail=None):
     is_new = is_new_tour(title)
 
     source_id = str(raw.get("sourceId") or raw.get("pdId") or raw.get("prodcode") or raw.get("groupno") or "").strip()
-    if not source_id and source == "鍋囨棩閫?:
+    if not source_id and source == "假日通":
         source_id = extract_jrt365_groupno(raw.get("url", ""))
     ai_meta = build_ai_meta(raw, source, departure_date, departure_dates)
 
@@ -650,29 +647,29 @@ def raw_to_tour(raw, id_counter, detail=None):
         "id": f"tour_{id_counter}",
         "title": title,
         "source": source,
-        "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('涔嬫梾', '').replace('鏃呰', '')}.png",
+        "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png",
         "destination": destination,
         "duration": days or 2,
         "price": int(price),
         "originalPrice": None,
-        "priceUnit": "浜?,
+        "priceUnit": "人",
         "departureDate": departure_date,
         "returnDate": return_date,
-        "transportType": "澶у反寰€杩? if days and days <= 3 else ("楂橀搧寰€杩? if days and days <= 5 else "椋炴満寰€杩?),
-        "accommodationLevel": "鑸掗€傚瀷",
+        "transportType": "大巴往返" if days and days <= 3 else ("高铁往返" if days and days <= 5 else "飞机往返"),
+        "accommodationLevel": "舒适型",
         "accommodationStars": 3,
-        "meals": f"{days or 2}鏃╅{max(0, (days or 2) - 1)}姝ｉ",
+        "meals": f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐",
         "singleSupplement": single_supplement,
         "singleSupplementNote": detail.get("singleSupplementNote", ""),
         "availableSeats": 0,
         "totalSeats": 0,
-        "highlights": detail.get("highlights") or [f"{destination}蹇呮墦鍗?, "鐗硅壊缇庨", "绮惧搧浣忓"],
+        "highlights": detail.get("highlights") or [f"{destination}必打卡", "特色美食", "精品住宿"],
         "itinerary": detail.get("itinerary", []),
         "inclusions": detail.get("inclusions", []),
         "exclusions": detail.get("exclusions", []),
         "optionalExpenses": detail.get("optionalExpenses", []),
         "importantNotes": detail.get("importantNotes", []),
-        "visaRequirements": "鏃犻渶绛捐瘉锛堝浗鍐呮父锛?,
+        "visaRequirements": "无需签证（国内游）",
         "travelInsurance": True,
         "tourGuideService": True,
         "freeWiFi": stable_hash(title) % 2 == 0,
@@ -684,18 +681,18 @@ def raw_to_tour(raw, id_counter, detail=None):
         "bookingUrl": raw.get('url', '#'),
         "url": raw.get('url', '#'),
         "images": images,
-        "tags": [theme, "绾帺", "鍝佽川"],
+        "tags": [theme, "纯玩", "品质"],
         "isHot": recommendation_score >= 5,
         "isNew": is_new,
         "isFlashSale": False,
         "discountRate": None,
-        "groupSize": "30浜哄父瑙勫洟",
+        "groupSize": "30人常规团",
         "theme": theme,
         "leisureLevel": leisure_level,
-        "suitableFor": ["浜插瓙", "鎯呬荆"],
-        "difficulty": "杞绘澗",
-        "season": "鍏ㄥ勾",
-        "language": "涓枃瀵兼父",
+        "suitableFor": ["亲子", "情侣"],
+        "difficulty": "轻松",
+        "season": "全年",
+        "language": "中文导游",
         "sourceId": source_id,
         "departureDates": departure_dates,
         "hotDepartureDates": departure_dates[:4],
@@ -719,11 +716,11 @@ def make_tour_key(item):
     source_id = str(item.get("sourceId") or item.get("pdId") or item.get("prodcode") or item.get("groupno") or "").strip()
     source = item.get("source", "")
     url = str(item.get("url") or item.get("bookingUrl") or "").strip()
-    if not source_id and source == "鍋囨棩閫?:
+    if not source_id and source == "假日通":
         source_id = extract_jrt365_groupno(url)
     if source_id:
         return f"{item.get('source', '')}|id:{source_id}"
-    if source == "鍋囨棩閫? and url:
+    if source == "假日通" and url:
         return f"{source}|url:{url.lower()}"
     title = item.get("title", "")
     price = item.get("price", 0)
@@ -806,7 +803,7 @@ def load_detail_results(deduped, existing_tours):
     detail_results = {}
 
     if detail_mode in {"cache", "cached", "existing"}:
-        print(f"[璇︽儏] 浣跨敤宸叉湁 tours.json 璇︽儏缂撳瓨锛屽叡 {len(existing_tours)} 鏉?)
+        print(f"[详情] 使用已有 tours.json 详情缓存，共 {len(existing_tours)} 条")
         for raw in deduped:
             key = make_tour_key(raw)
             existing = existing_tours.get(key)
@@ -815,11 +812,11 @@ def load_detail_results(deduped, existing_tours):
         return detail_results
 
     if detail_mode in {"off", "skip", "none"}:
-        print("[璇︽儏] 宸茬鐢ㄨ繙绋嬭鎯呮姄鍙?)
+        print("[详情] 已禁用远程详情抓取")
         return detail_results
 
     detail_workers = max(4, min(16, int(os.environ.get("DETAIL_WORKERS", "10") or "10")))
-    print(f"[璇︽儏] 寮€濮嬫姄鍙?{len(deduped)} 鏉★紝绾跨▼鏁?{detail_workers}")
+    print(f"[详情] 开始抓取 {len(deduped)} 条，线程数 {detail_workers}")
     with ThreadPoolExecutor(max_workers=detail_workers) as executor:
         future_map = {
             executor.submit(fetch_detail_data, raw): make_tour_key(raw)
@@ -831,7 +828,7 @@ def load_detail_results(deduped, existing_tours):
             try:
                 detail = future.result() or empty_detail()
             except Exception as exc:
-                print(f"[璇︽儏] {key} -> {exc}")
+                print(f"[详情] {key} -> {exc}")
                 detail = empty_detail()
             if key in existing_tours:
                 existing_detail = extract_existing_detail(existing_tours[key])
@@ -839,7 +836,7 @@ def load_detail_results(deduped, existing_tours):
                     detail = merge_detail_with_existing(detail, existing_detail)
             detail_results[key] = detail
             if idx % 50 == 0 or idx == total:
-                print(f"[璇︽儏] {idx}/{total}")
+                print(f"[详情] {idx}/{total}")
 
     return detail_results
 
@@ -864,8 +861,8 @@ def apply_availability_filter(tours, label="all tours"):
     cache_path = os.environ.get("AVAILABILITY_CACHE_PATH", str(DEFAULT_CACHE)).strip()
     cache_ttl_hours = float(os.environ.get("AVAILABILITY_CACHE_TTL_HOURS", "24") or "24")
     print(
-        f"[鍙敤鎬 {label}: 寮€濮嬫牎楠?{len(jobs)} 涓敮涓€ URL锛岀嚎绋嬫暟 {workers}锛岃秴鏃?{timeout}s锛?
-        f"缂撳瓨 {cache_path}锛圱TL {cache_ttl_hours}h锛?
+        f"[可用性] {label}: 开始校验 {len(jobs)} 个唯一 URL，线程数 {workers}，超时 {timeout}s，"
+        f"缓存 {cache_path}（TTL {cache_ttl_hours}h）"
     )
 
     url_results, cache_stats = run_validation_jobs(
@@ -878,8 +875,8 @@ def apply_availability_filter(tours, label="all tours"):
         write_cache=bool(cache_path),
     )
     print(
-        f"[鍙敤鎬 缂撳瓨鍛戒腑 {cache_stats['cache_hits']} | "
-        f"鍒锋柊 {cache_stats['validated']} | 鏈懡涓?{cache_stats['cache_misses']}"
+        f"[可用性] 缓存命中 {cache_stats['cache_hits']} | "
+        f"刷新 {cache_stats['validated']} | 未命中 {cache_stats['cache_misses']}"
     )
 
     filtered = []
@@ -907,16 +904,16 @@ def apply_availability_filter(tours, label="all tours"):
         filtered.append(tour)
 
     print(
-        f"[鍙敤鎬 淇濈暀 {len(filtered)}/{len(tours)} 鏉★紝"
-        f"绉婚櫎 {len(removed_rows)} 鏉℃槑纭笅鏋?404 绾胯矾"
+        f"[可用性] 保留 {len(filtered)}/{len(tours)} 条，"
+        f"移除 {len(removed_rows)} 条明确下架/404 线路"
     )
     for category, count in sorted(kept_by_category.items()):
-        print(f"[鍙敤鎬 淇濈暀 {category}: {count}")
+        print(f"[可用性] 保留 {category}: {count}")
     for category, count in sorted(removed_by_category.items()):
-        print(f"[鍙敤鎬 绉婚櫎 {category}: {count}")
+        print(f"[可用性] 移除 {category}: {count}")
 
     if removed_rows:
-        print("[鍙敤鎬 绉婚櫎鏍锋湰:")
+        print("[可用性] 移除样本:")
         for row in removed_rows[:10]:
             print(
                 f"  [{row['category']}] {row['source']} | {row['title'][:40]} | "
@@ -958,7 +955,7 @@ def filter_unavailable_tours(tours):
             enabled_predicates.append(("360JLB", is_360jlb_tour))
 
         if not enabled_predicates:
-            print("[鍙敤鎬 宸茶烦杩囪嚜鍔ㄤ笅鏋惰繃婊?)
+            print("[可用性] 已跳过自动下架过滤")
             return tours
 
         scoped_tours = [
@@ -967,11 +964,11 @@ def filter_unavailable_tours(tours):
             if any(predicate(tour) for _, predicate in enabled_predicates)
         ]
         if not scoped_tours:
-            print("[鍙敤鎬 鍏ㄥ眬杩囨护宸插叧闂紝涓旀病鏈夐渶瑕佸崟鐙牎楠岀殑绾胯矾")
+            print("[可用性] 全局过滤已关闭，且没有需要单独校验的线路")
             return tours
 
         scope_names = ", ".join(name for name, _ in enabled_predicates)
-        print(f"[鍙敤鎬 鍏ㄥ眬杩囨护宸插叧闂紝浠呮牎楠?{scope_names} 绾胯矾 {len(scoped_tours)} 鏉?)
+        print(f"[可用性] 全局过滤已关闭，仅校验 {scope_names} 线路 {len(scoped_tours)} 条")
         filtered_scoped = apply_availability_filter(scoped_tours, label=f"{scope_names} only")
         kept_ids = {tour.get("id") for tour in filtered_scoped}
         return [
@@ -988,12 +985,14 @@ def main():
 
     def log_stage(label: str, started: float) -> None:
         elapsed = time.perf_counter() - started
-        print(f"[闃舵] {label}: {elapsed:.1f}s")
+        print(f"[??] {label}: {elapsed:.1f}s")
+
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(line_buffering=True)
 
     print("=" * 60)
-    print("鏁版嵁鍚堝苟鑴氭湰")
+    print("数据合并脚本")
     print("=" * 60)
-    print(f"[寮€濮媇 {datetime.utcnow().isoformat()}Z")
 
     all_raw = []
     existing_tours = {}
@@ -1009,12 +1008,11 @@ def main():
             with open(existing_json_path, "r", encoding="utf-8-sig") as f:
                 existing_data = json.load(f)
             existing_tours = {make_tour_key(item): item for item in existing_data}
-            print(f"[existing tours.json] {len(existing_tours)}鏉?)
+            print(f"[existing tours.json] {len(existing_tours)}条")
         except Exception as e:
-            print(f"[existing tours.json] 璇诲彇澶辫触: {e}")
-        log_stage("read existing tours.json", stage_started)
+            print(f"[existing tours.json] 读取失败: {e}")
 
-    # 1. 灏濊瘯璇诲彇鏃у浠芥暟鎹?(962鏉?
+    # 1. 尝试读取旧备份数据 (962条)
     backup_path = os.path.join(os.path.dirname(__file__), "..", "tours_json_backup.json")
     backup_path = os.path.abspath(backup_path)
     if os.path.exists(backup_path):
@@ -1022,8 +1020,8 @@ def main():
         try:
             with open(backup_path, 'r', encoding='utf-16') as f:
                 old_data = json.load(f)
-            print(f"[鏃ф暟鎹甝 {len(old_data)}鏉?)
-            # 灏嗘棫鏁版嵁杞崲涓簉aw鏍煎紡
+            print(f"[旧数据] {len(old_data)}条")
+            # 将旧数据转换为raw格式
             for item in old_data:
                 raw = {
                     "source": item.get("source", ""),
@@ -1035,11 +1033,12 @@ def main():
                 }
                 all_raw.append(raw)
         except Exception as e:
-            print(f"[鏃ф暟鎹甝 璇诲彇澶辫触: {e}")
-        log_stage("read legacy backup", stage_started)
+            print(f"[旧数据] 读取失败: {e}")
 
-    # 2. 璇诲彇鏂扮殑raw鏁版嵁
-    # 鍋囨棩閫氫粎淇濈暀 unified crawl 鍒锋柊鐨?raw_jrt365_full.json銆?    # raw_jrt365.json 宸蹭笉鍦ㄧ粺涓€鎶撳彇閾捐矾涓埛鏂帮紝缁х画娣峰叆浼氭妸闄堟棫绾胯矾閲嶆柊甯﹀洖浜х墿銆?    raw_files = [
+    # 2. 读取新的raw数据
+    # 假日通仅保留 unified crawl 刷新的 raw_jrt365_full.json。
+    # raw_jrt365.json 已不在统一抓取链路中刷新，继续混入会把陈旧线路重新带回产物。
+    raw_files = [
         "raw_jrt365_full.json",
         "raw_kanghui.json",
         "raw_gdcts_full.json",
@@ -1059,7 +1058,7 @@ def main():
                 if fname == "raw_http_full.json":
                     data = [
                         item for item in data
-                        if item.get("source") not in {"鍝侀€?, "骞夸箣鏃?}
+                        if item.get("source") not in {"品途", "广之旅"}
                     ]
                 priority = RAW_FILE_PRIORITIES.get(fname, 0)
                 enriched = []
@@ -1069,15 +1068,14 @@ def main():
                     candidate = dict(item)
                     candidate["_merge_priority"] = priority
                     enriched.append(candidate)
-                print(f"[{fname}] {len(enriched)}鏉?)
+                print(f"[{fname}] {len(enriched)}条")
                 all_raw.extend(enriched)
             except Exception as e:
-                print(f"[{fname}] 璇诲彇澶辫触: {e}")
-            log_stage(f"read {fname}", stage_started)
+                print(f"[{fname}] 读取失败: {e}")
 
-    print(f"\n[姹囨€籡 鍘熷鏁版嵁: {len(all_raw)}鏉?)
+    print(f"\n[汇总] 原始数据: {len(all_raw)}条")
 
-    # 鍘婚噸
+    # 去重
     stage_started = time.perf_counter()
     seen = {}
     for it in all_raw:
@@ -1086,20 +1084,17 @@ def main():
         if previous is None or prefer_raw_candidate(previous, it):
             seen[key] = it
     deduped = list(seen.values())
-    print(f"[鍘婚噸] 鍚? {len(deduped)}鏉?)
-    log_stage("dedupe raw records", stage_started)
+    print(f"[去重] 后: {len(deduped)}条")
 
-    # 杩囨护
-    stage_started = time.perf_counter()
+    # 过滤
     deduped = [r for r in deduped if r.get('price', 0) > 0 and len(r.get('title', '')) > 5]
-    print(f"[杩囨护] 鏈夋晥鏁版嵁: {len(deduped)}鏉?)
-    log_stage("filter valid raw records", stage_started)
+    print(f"[过滤] 有效数据: {len(deduped)}条")
 
     stage_started = time.perf_counter()
     detail_results = load_detail_results(deduped, existing_tours)
     log_stage("load detail results", stage_started)
 
-    # 杞崲涓哄墠绔牸寮?    stage_started = time.perf_counter()
+    # 转换为前端格式
     tours = []
     for i, raw in enumerate(deduped, 1):
         tour = raw_to_tour(raw, i, detail_results.get(make_tour_key(raw), empty_detail()))
@@ -1109,23 +1104,22 @@ def main():
                 tour["createdAt"] = existing["createdAt"]
             tours.append(tour)
 
-    print(f"[杞崲] 鐢熸垚 {len(tours)} 鏉?Tour 鏁版嵁")
+    print(f"[转换] 生成 {len(tours)} 条 Tour 数据")
     for source in sorted(set(t["source"] for t in tours)):
         subset = [tour for tour in tours if tour["source"] == source]
         print(
-            f"[璇︽儏瑕嗙洊] {source}: "
+            f"[详情覆盖] {source}: "
             f"itinerary={sum(1 for tour in subset if tour.get('itinerary'))}/{len(subset)} "
             f"inclusions={sum(1 for tour in subset if tour.get('inclusions'))}/{len(subset)} "
             f"exclusions={sum(1 for tour in subset if tour.get('exclusions'))}/{len(subset)} "
             f"notes={sum(1 for tour in subset if tour.get('importantNotes'))}/{len(subset)}"
         )
 
-    stage_started = time.perf_counter()
     tours = filter_unavailable_tours(tours)
-    print(f"[杈撳嚭] 鑷姩杩囨护鍚?{len(tours)} 鏉?Tour 鏁版嵁")
-    log_stage("availability filter", stage_started)
+    print(f"[输出] 自动过滤后 {len(tours)} 条 Tour 数据")
 
-    # 鐢熸垚鍏冩暟鎹?    tours_clean = clean_nulls(tours)
+    # 生成元数据
+    tours_clean = clean_nulls(tours)
     sources = sorted(set(t["source"] for t in tours_clean))
     destinations = sorted(set(t["destination"] for t in tours_clean if t.get("destination")))
     themes = sorted(set(t["theme"] for t in tours_clean if t.get("theme")))
@@ -1135,7 +1129,7 @@ def main():
         for s in sources
     ]
 
-    # 鍐欏叆 tours.ts (鍏冩暟鎹?
+    # 写入 tours.ts (元数据)
     ts_content = f'''import type {{ Tour }} from '@/types/tour';
 
 export const sources = {json.dumps(sources_def, ensure_ascii=False, indent=2)};
@@ -1150,9 +1144,9 @@ export const tours: Tour[] = [];
     ts_path = os.path.join(data_dir, "tours.ts")
     with open(ts_path, "w", encoding="utf-8") as f:
         f.write(ts_content)
-    print(f"[淇濆瓨] tours.ts -> {ts_path}")
+    print(f"[保存] tours.ts -> {ts_path}")
 
-    # 鍐欏叆 tours.json (鏁版嵁锛屾棤BOM)
+    # 写入 tours.json (数据，无BOM)
     json_path = os.path.join(os.path.dirname(__file__), "..", "public", "data", "tours.json")
     json_path = os.path.abspath(json_path)
     os.makedirs(os.path.dirname(json_path), exist_ok=True)
@@ -1161,15 +1155,12 @@ export const tours: Tour[] = [];
         json.dump(tours_clean, f, ensure_ascii=False, separators=(',', ':'))
     split_script = os.path.abspath(os.path.join(os.path.dirname(__file__), "split_tour_data.mjs"))
     if os.path.exists(split_script):
-        print("[鍒嗙墖] 瑙﹀彂 split_tour_data.mjs")
         os.system(f'node "{split_script}"')
-    print(f"[淇濆瓨] tours.json -> {json_path}")
-    print(f"[鏂囦欢澶у皬] {os.path.getsize(json_path) / 1024:.1f} KB")
+    print(f"[保存] tours.json -> {json_path}")
+    print(f"[文件大小] {os.path.getsize(json_path) / 1024:.1f} KB")
 
     print("=" * 60)
-    print("瀹屾垚锛?)
-    log_stage("merge_data main", started_at)
-    print(f"[缁撴潫] {datetime.utcnow().isoformat()}Z")
+    print("完成！")
 
 
 if __name__ == "__main__":
