@@ -216,6 +216,7 @@ export interface AiPreferenceMemory {
   tripDaysMax?: number | null;
   departureWithinDays?: number | null;
   departureWeekdays: number[];
+  returnWeekdays?: number[];
   departureTimeOfDay?: string | null;
   refinementMode?: 'new_search' | 'refine_previous' | 'broaden' | 'replace_destination' | null;
   updatedAt: string;

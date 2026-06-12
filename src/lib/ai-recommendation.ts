@@ -66,6 +66,7 @@ interface AiTravelIntent {
   tripDaysMax?: number | null;
   departureWithinDays?: number | null;
   departureWeekdays?: number[];
+  returnWeekdays?: number[];
   departureTimeOfDay?: 'morning' | 'afternoon' | 'evening' | 'night' | 'any' | null;
   destinationHints?: string[];
   budgetMax?: number | null;
@@ -121,6 +122,15 @@ interface LocalRecommendationQuery {
   duration: ReturnType<typeof parseDuration>;
   prefersEasyPace: boolean;
   prefersRecentDeparture: boolean;
+  departureWeekdays: number[];
+  returnWeekdays: number[];
+  departureTimeOfDay: 'morning' | 'afternoon' | 'evening' | 'night' | null;
+}
+
+interface CandidateScheduleWindow {
+  departureDate: string;
+  departureWeekday: number;
+  returnWeekday: number | null;
 }
 
 interface DestinationWeatherInsight extends AiWeatherContext {
@@ -308,6 +318,7 @@ function compactPreferenceMemoryForPrompt(memory: AiPreferenceMemory | null) {
     t1: memory.tripDaysMax ?? null,
     dd: memory.departureWithinDays ?? null,
     dw: memory.departureWeekdays,
+    rw: memory.returnWeekdays || [],
     dt: memory.departureTimeOfDay ?? null,
     rm: memory.refinementMode ?? null,
   };
@@ -322,6 +333,7 @@ function compactIntentForPrompt(intent: AiTravelIntent | null) {
     t1: intent.tripDaysMax ?? null,
     dd: intent.departureWithinDays ?? null,
     dw: intent.departureWeekdays || [],
+    rw: intent.returnWeekdays || [],
     dt: intent.departureTimeOfDay ?? null,
     d: intent.destinationHints || [],
     b0: intent.budgetMin ?? null,
@@ -631,6 +643,104 @@ function parseDuration(text: string) {
   return { min: Math.max(0, value - 1), max: value + 1 };
 }
 
+function getWeekdayCandidatesFromText(text: string) {
+  return WEEKDAY_LABELS
+    .map((label, weekday) => {
+      const short = label.replace('周', '');
+      const matched =
+        text.includes(label) ||
+        text.includes(`星期${short}`) ||
+        text.includes(`礼拜${short}`) ||
+        (weekday === 0 && (text.includes('周天') || text.includes('星期天')));
+      return matched ? weekday : null;
+    })
+    .filter((weekday): weekday is number => weekday !== null);
+}
+
+function collectDepartureWeekdays(text: string) {
+  const normalized = text.replace(/\s+/g, '');
+  const returnWeekdays = new Set(collectReturnWeekdays(normalized));
+  return getWeekdayCandidatesFromText(normalized)
+    .filter((weekday) => {
+      if (!returnWeekdays.has(weekday)) return true;
+      const tokens = [
+        WEEKDAY_LABELS[weekday],
+        `星期${WEEKDAY_LABELS[weekday].replace('周', '')}`,
+        `礼拜${WEEKDAY_LABELS[weekday].replace('周', '')}`,
+      ];
+      const hasExplicitDepartureCue = tokens.some((token) =>
+        new RegExp(`${token}(?:晚|晚上|早上|上午|下午|夜里)?(?:出发|走|启程|发团|动身)`).test(normalized),
+      );
+      const hasExplicitReturnCue = tokens.some((token) =>
+        new RegExp(`${token}(?:晚|晚上)?(?:回|回来|返程|返回|回程|结束|收工)`).test(normalized),
+      );
+      if (hasExplicitDepartureCue) return true;
+      if (hasExplicitReturnCue) return false;
+      return true;
+    });
+}
+
+function collectReturnWeekdays(text: string) {
+  const normalized = text.replace(/\s+/g, '');
+  const weekdays = new Set<number>();
+  const weekdayPatterns = [
+    '周日', '周天', '周末', '周六', '周五', '周四', '周三', '周二', '周一',
+    '星期日', '星期天', '星期六', '星期五', '星期四', '星期三', '星期二', '星期一',
+    '礼拜天', '礼拜日', '礼拜六', '礼拜五', '礼拜四', '礼拜三', '礼拜二', '礼拜一',
+  ];
+
+  for (const token of weekdayPatterns) {
+    const pattern = new RegExp(`${token}(?:晚|晚上)?(?:回|回来|返程|返回|回程|结束|收工)`);
+    if (!pattern.test(normalized)) continue;
+    for (const weekday of getWeekdayCandidatesFromText(token)) {
+      weekdays.add(weekday);
+    }
+  }
+
+  if (/周末(?:回|回来|返程|返回|回程|结束|收工)/.test(normalized)) {
+    weekdays.add(0);
+  }
+
+  return [...weekdays];
+}
+
+function inferWeekendTripWindow(text: string, params: {
+  departureWeekdays: number[];
+  returnWeekdays: number[];
+  tripDaysMin: number | null;
+  tripDaysMax: number | null;
+}) {
+  if (params.tripDaysMin || params.tripDaysMax) {
+    return {
+      tripDaysMin: params.tripDaysMin,
+      tripDaysMax: params.tripDaysMax,
+    };
+  }
+
+  const normalized = text.replace(/\s+/g, '');
+  const departureWeekday = params.departureWeekdays[0];
+  const returnWeekday = params.returnWeekdays[0];
+  const mentionsWeekend = /周末/.test(normalized);
+  const wantsWeekendRoundTrip = departureWeekday === 5 && returnWeekday === 0;
+
+  if (mentionsWeekend || wantsWeekendRoundTrip) {
+    return { tripDaysMin: 2, tripDaysMax: 3 };
+  }
+
+  return {
+    tripDaysMin: params.tripDaysMin,
+    tripDaysMax: params.tripDaysMax,
+  };
+}
+
+function collectDepartureTimeOfDay(text: string) {
+  if (/(晚|晚上|夜间|夜发|夜游|卧铺|夕发|夜宿)/.test(text)) return 'evening' as const;
+  if (/(夜里|凌晨|半夜)/.test(text)) return 'night' as const;
+  if (/(上午|早上|清晨|晨发)/.test(text)) return 'morning' as const;
+  if (/(下午|午后|傍晚)/.test(text)) return 'afternoon' as const;
+  return null;
+}
+
 function collectDestinationHints(text: string) {
   const matched = Object.entries(DESTINATION_HINT_ALIASES)
     .map(([destination, aliases]) => ({
@@ -843,6 +953,13 @@ function collectLocalCoverageTerms(text: string) {
   ]).filter((term) => term.length >= 2 && term.length <= 12);
 }
 
+function hasExplicitExperienceCoverageNeed(text: string) {
+  const normalized = text.replace(/\s+/g, '');
+  return /(同时|都要|都得|都想|兼具|兼有|都有|既|又|带有|含有|包含|包括|以及)/.test(normalized)
+    || collectCoverageTermsFromAliases(normalized).length > 0
+    || /(温泉|泡汤|海边|海滩|沙滩|美食|亲子|徒步|摄影|漂流|玩水|避暑|古镇|山水|文化)/.test(normalized);
+}
+
 function cleanAvoidTerm(value: string) {
   return value
     .replace(/^(推荐|考虑|选择|参加|体验|安排|去|玩)+/, '')
@@ -984,15 +1101,33 @@ function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
     ...collectAvoidHints(normalizedText),
     ...collectLiteralAvoidHints(normalizedText),
   ]);
+  const departureWeekdays = collectDepartureWeekdays(normalizedText);
+  const returnWeekdays = collectReturnWeekdays(normalizedText);
+  const departureTimeOfDay = collectDepartureTimeOfDay(normalizedText);
+  const duration = parseDuration(normalizedText);
+  const inferredTripWindow = inferWeekendTripWindow(normalizedText, {
+    departureWeekdays,
+    returnWeekdays,
+    tripDaysMin: duration?.min && Number.isFinite(duration.min) ? duration.min : null,
+    tripDaysMax: duration?.max && Number.isFinite(duration.max) ? duration.max : null,
+  });
+  const hasExperienceCoverageNeed = hasExplicitExperienceCoverageNeed(normalizedText);
 
   return {
     normalizedText,
     destinationHints: collectDestinationHints(normalizedText),
     avoidHints,
     themeHints: collectThemeHints(normalizedText).filter((hint) => !avoidHints.includes(hint)),
-    coverageTerms: collectLocalCoverageTerms(normalizedText).filter((hint) => !avoidHints.includes(hint)),
+    coverageTerms: hasExperienceCoverageNeed
+      ? collectLocalCoverageTerms(normalizedText).filter((hint) => !avoidHints.includes(hint))
+      : [],
     budget: parseBudget(normalizedText),
-    duration: parseDuration(normalizedText),
+    duration: inferredTripWindow.tripDaysMin || inferredTripWindow.tripDaysMax
+      ? {
+          min: inferredTripWindow.tripDaysMin ?? 0,
+          max: inferredTripWindow.tripDaysMax ?? Number.POSITIVE_INFINITY,
+        }
+      : duration,
     prefersEasyPace:
       normalizedText.includes('轻松') ||
       normalizedText.includes('休闲') ||
@@ -1001,6 +1136,9 @@ function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
       normalizedText.includes('近期') ||
       normalizedText.includes('马上') ||
       normalizedText.includes('本周'),
+    departureWeekdays,
+    returnWeekdays,
+    departureTimeOfDay,
   };
 }
 
@@ -1010,6 +1148,14 @@ function scoreTour(
   variant = 0,
 ): AiRecommendationItem | null {
   const corpus = getSearchCorpus(tour);
+  const primitive = buildTourPrimitive(tour);
+  const matchedScheduleWindows = findMatchingScheduleWindows(tour, query);
+  const hasStrictScheduleNeed = Boolean(
+    query.departureWeekdays.length ||
+    query.returnWeekdays.length ||
+    query.departureTimeOfDay ||
+    query.duration,
+  );
   if (query.avoidHints.some((hint) => corpus.includes(normalizeText(hint)))) {
     return null;
   }
@@ -1033,7 +1179,6 @@ function scoreTour(
   }
 
   if (query.coverageTerms.length > 0) {
-    const primitive = buildTourPrimitive(tour);
     const matchedTerms = query.coverageTerms.filter((term) => getPrimitiveCoverageScore(primitive, [term]) > 0);
     if (matchedTerms.length > 0) {
       const coverageRatio = matchedTerms.length / query.coverageTerms.length;
@@ -1056,9 +1201,68 @@ function scoreTour(
     }
   }
 
-  if (query.duration && tour.duration >= query.duration.min && tour.duration <= query.duration.max) {
-    score += 10;
-    signals.push(`天数合适：${tour.duration}天`);
+  if (query.duration) {
+    if (tour.duration >= query.duration.min && tour.duration <= query.duration.max) {
+      score += 10;
+      signals.push(`天数合适：${tour.duration}天`);
+    } else {
+      score -= 10;
+    }
+  }
+
+  if (query.departureWeekdays.length > 0) {
+    const hasDepartureWeekday = matchedScheduleWindows.length > 0
+      || primitive.schedule.departureWeekdays.some((weekday) => query.departureWeekdays.includes(weekday));
+    if (hasDepartureWeekday) {
+      score += 15;
+      const preferredDeparture = matchedScheduleWindows[0]?.departureWeekday;
+      signals.push(`出发节奏匹配：${preferredDeparture !== undefined ? WEEKDAY_LABELS[preferredDeparture] : primitive.schedule.departureWeekdayLabels[0] || '指定出发日'}`);
+    } else if (primitive.schedule.departureWeekdays.length > 0) {
+      score -= 6;
+    }
+  }
+
+  if (query.returnWeekdays.length > 0) {
+    const candidateReturnWeekdays = matchedScheduleWindows.length > 0
+      ? matchedScheduleWindows
+          .map((window) => window.returnWeekday)
+          .filter((weekday): weekday is number => weekday !== null)
+      : primitive.schedule.returnWeekdays.length > 0
+        ? primitive.schedule.returnWeekdays
+        : getCandidateReturnWeekdays(tour);
+    if (candidateReturnWeekdays.length > 0) {
+      const hasReturnWeekday = candidateReturnWeekdays.some((weekday) => query.returnWeekdays.includes(weekday));
+      if (hasReturnWeekday) {
+        score += 14;
+        signals.push(`返程节奏匹配：${query.returnWeekdays.map((weekday) => WEEKDAY_LABELS[weekday]).join('/')}`);
+      } else {
+        score -= 5;
+      }
+    }
+  }
+
+  if (query.departureTimeOfDay && query.departureTimeOfDay !== 'morning') {
+    const hasEveningDeparture = primitive.schedule.hasEveningOrNightDeparture;
+    if (query.departureTimeOfDay === 'evening' || query.departureTimeOfDay === 'night') {
+      if (hasEveningDeparture) {
+        score += 14;
+        signals.push('支持晚间出发');
+      } else if (primitive.schedule.departureWeekdays.length > 0) {
+        score -= 4;
+      }
+    }
+  }
+
+  if (query.departureWeekdays.includes(5) && query.returnWeekdays.includes(0)) {
+    const hasFridayNightSundayReturn = matchedScheduleWindows.some((window) =>
+      window.departureWeekday === 5 && window.returnWeekday === 0,
+    ) && primitive.schedule.hasEveningOrNightDeparture;
+    if (hasFridayNightSundayReturn) {
+      score += 18;
+      signals.push('周五晚出发、周日回');
+    } else if (hasStrictScheduleNeed) {
+      score -= 12;
+    }
   }
 
   if (query.prefersEasyPace) {
@@ -1079,6 +1283,10 @@ function scoreTour(
 
   if (tour.isHot) score += 4;
   if (tour.rating >= 4.7) score += 3;
+
+  if (hasStrictScheduleNeed && matchedScheduleWindows.length === 0) {
+    score -= 18;
+  }
 
   if (score <= 0) return null;
 
@@ -1171,6 +1379,65 @@ function shouldInheritPreferenceMemoryForTurn(
   return isRelativeTurn;
 }
 
+function getCandidateReturnWeekdays(tour: AiRecommendationCandidate) {
+  const primitive = buildTourPrimitive(tour);
+  if (primitive.schedule.returnWeekdays.length > 0) return primitive.schedule.returnWeekdays;
+  if (!tour.departureDate || !tour.duration) return [];
+  const parsed = parseDateString(tour.departureDate);
+  if (!parsed) return [];
+  const returnDate = new Date(parsed);
+  returnDate.setDate(returnDate.getDate() + tour.duration);
+  return [returnDate.getDay()];
+}
+
+function getCandidateScheduleWindows(tour: AiRecommendationCandidate): CandidateScheduleWindow[] {
+  const dates = getCandidateDepartureDates(tour);
+  if (dates.length === 0) return [];
+  const duration = Number.isFinite(tour.duration) ? tour.duration : 0;
+
+  return dates
+    .map((date) => {
+      const departure = parseDateString(date);
+      if (!departure) return null;
+      const departureWeekday = departure.getDay();
+      const returnDate = new Date(departure);
+      returnDate.setDate(returnDate.getDate() + duration);
+      return {
+        departureDate: date,
+        departureWeekday,
+        returnWeekday: Number.isFinite(duration) && duration > 0 ? returnDate.getDay() : null,
+      } satisfies CandidateScheduleWindow;
+    })
+    .filter((window): window is CandidateScheduleWindow => Boolean(window));
+}
+
+function findMatchingScheduleWindows(
+  tour: AiRecommendationCandidate,
+  query: Pick<LocalRecommendationQuery, 'departureWeekdays' | 'returnWeekdays' | 'duration'>,
+) {
+  const windows = getCandidateScheduleWindows(tour);
+  if (windows.length === 0) return [];
+
+  return windows.filter((window) => {
+    if (query.departureWeekdays.length > 0 && !query.departureWeekdays.includes(window.departureWeekday)) {
+      return false;
+    }
+    if (query.returnWeekdays.length > 0) {
+      if (window.returnWeekday === null || !query.returnWeekdays.includes(window.returnWeekday)) {
+        return false;
+      }
+    }
+    if (query.duration) {
+      const minDays = query.duration.min ?? 0;
+      const maxDays = query.duration.max ?? Number.POSITIVE_INFINITY;
+      if (tour.duration < minDays || tour.duration > maxDays) {
+        return false;
+      }
+    }
+    return true;
+  });
+}
+
 // 从自由文本中抽取可结构化的旅行意图，供筛选和 Prompt 复用。
 function buildHardIntentFromText(text: string): AiTravelIntent | null {
   const normalizedText = normalizeText(text);
@@ -1178,6 +1445,15 @@ function buildHardIntentFromText(text: string): AiTravelIntent | null {
   const hasTextBudget = Boolean(budget);
   const duration = parseDuration(normalizedText);
   const promptDateWindow = resolvePromptDateWindow(normalizedText);
+  const departureWeekdays = collectDepartureWeekdays(normalizedText);
+  const returnWeekdays = collectReturnWeekdays(normalizedText);
+  const departureTimeOfDay = collectDepartureTimeOfDay(normalizedText);
+  const inferredTripWindow = inferWeekendTripWindow(normalizedText, {
+    departureWeekdays,
+    returnWeekdays,
+    tripDaysMin: duration?.min && Number.isFinite(duration.min) ? duration.min : null,
+    tripDaysMax: duration?.max && Number.isFinite(duration.max) ? duration.max : null,
+  });
   const avoid = uniqueStrings([
     ...collectAvoidHints(normalizedText),
     ...collectLiteralAvoidHints(normalizedText),
@@ -1193,8 +1469,8 @@ function buildHardIntentFromText(text: string): AiTravelIntent | null {
     weatherSensitivity,
     budgetMin: hasTextBudget && budget?.min && Number.isFinite(budget.min) ? budget.min : null,
     budgetMax: hasTextBudget && budget?.max && Number.isFinite(budget.max) ? budget.max : null,
-    tripDaysMin: duration?.min && Number.isFinite(duration.min) ? duration.min : null,
-    tripDaysMax: duration?.max && Number.isFinite(duration.max) ? duration.max : null,
+    tripDaysMin: inferredTripWindow.tripDaysMin,
+    tripDaysMax: inferredTripWindow.tripDaysMax,
     departureWithinDays: promptDateWindow
       ? Math.max(
           1,
@@ -1204,6 +1480,9 @@ function buildHardIntentFromText(text: string): AiTravelIntent | null {
           ),
         )
       : null,
+    departureWeekdays,
+    returnWeekdays,
+    departureTimeOfDay,
     refinementMode: 'new_search',
   };
 
@@ -1225,6 +1504,7 @@ function getHardIntentSignalCount(intent: AiTravelIntent | null) {
     intent.budgetMin,
     intent.budgetMax,
     ...(intent.departureWeekdays || []),
+    ...(intent.returnWeekdays || []),
     ...(intent.destinationHints || []),
     ...(intent.avoid || []),
     ...(intent.weatherSensitivity || []),
@@ -1270,6 +1550,9 @@ function mergeAiRankingIntent(
     departureWeekdays: hardIntent.departureWeekdays?.length
       ? hardIntent.departureWeekdays
       : aiIntent.departureWeekdays || [],
+    returnWeekdays: hardIntent.returnWeekdays?.length
+      ? hardIntent.returnWeekdays
+      : aiIntent.returnWeekdays || [],
     departureTimeOfDay: hardIntent.departureTimeOfDay ?? aiIntent.departureTimeOfDay ?? null,
     refinementMode: hardIntent.refinementMode ?? aiIntent.refinementMode ?? null,
   };
@@ -1378,6 +1661,16 @@ function buildIntentLocalRecommendations(
   const scoredItems = tours
     .map((tour) => {
       const primitive = buildTourPrimitive(tour);
+      const matchedScheduleWindows = findMatchingScheduleWindows(tour, {
+        departureWeekdays: intent.departureWeekdays || [],
+        returnWeekdays: intent.returnWeekdays || [],
+        duration: intent.tripDaysMin || intent.tripDaysMax
+          ? {
+              min: intent.tripDaysMin ?? 0,
+              max: intent.tripDaysMax ?? Number.POSITIVE_INFINITY,
+            }
+          : null,
+      });
       if (primitiveMatchesAvoid(primitive, intent.avoid).length > 0) return null;
 
       const signals: string[] = [];
@@ -1440,14 +1733,33 @@ function buildIntentLocalRecommendations(
       }
 
       if (intent.departureWeekdays?.length) {
-        const hasWeekday = primitive.schedule.departureWeekdays.some((weekday) =>
-          intent.departureWeekdays?.includes(weekday),
-        );
+        const hasWeekday = matchedScheduleWindows.length > 0
+          || primitive.schedule.departureWeekdays.some((weekday) => intent.departureWeekdays?.includes(weekday));
         if (hasWeekday) {
           score += 8;
-          signals.push(`班期匹配：${primitive.schedule.departureWeekdayLabels[0] || '指定出发日'}`);
+          const preferredDeparture = matchedScheduleWindows[0]?.departureWeekday;
+          signals.push(`班期匹配：${preferredDeparture !== undefined ? WEEKDAY_LABELS[preferredDeparture] : primitive.schedule.departureWeekdayLabels[0] || '指定出发日'}`);
         } else if (primitive.schedule.departureWeekdays.length > 0) {
           score -= 6;
+        }
+      }
+
+      if (intent.returnWeekdays?.length) {
+        const candidateReturnWeekdays = matchedScheduleWindows.length > 0
+          ? matchedScheduleWindows
+              .map((window) => window.returnWeekday)
+              .filter((weekday): weekday is number => weekday !== null)
+          : getCandidateReturnWeekdays(tour);
+        if (candidateReturnWeekdays.length > 0) {
+          const hasReturnWeekday = candidateReturnWeekdays.some((weekday) =>
+            intent.returnWeekdays?.includes(weekday),
+          );
+          if (hasReturnWeekday) {
+            score += 6;
+            signals.push(`返程节奏匹配：${intent.returnWeekdays.map((weekday) => WEEKDAY_LABELS[weekday]).join('/')}`);
+          } else {
+            score -= 5;
+          }
         }
       }
 
@@ -1457,6 +1769,30 @@ function buildIntentLocalRecommendations(
       ) {
         score += 6;
         signals.push('支持晚间出发');
+      } else if (intent.departureTimeOfDay === 'evening' || intent.departureTimeOfDay === 'night') {
+        score -= 4;
+      }
+
+      if (
+        intent.departureWeekdays?.includes(5) &&
+        intent.returnWeekdays?.includes(0)
+      ) {
+        const hasWeekendWindow = matchedScheduleWindows.some((window) =>
+          window.departureWeekday === 5 && window.returnWeekday === 0,
+        );
+        if (hasWeekendWindow && primitive.schedule.hasEveningOrNightDeparture) {
+          score += 12;
+          signals.push('周五晚出发、周日回');
+        } else {
+          score -= 10;
+        }
+      }
+
+      if (
+        (intent.departureWeekdays?.length || intent.returnWeekdays?.length || intent.departureTimeOfDay) &&
+        matchedScheduleWindows.length === 0
+      ) {
+        score -= 12;
       }
 
       score += Math.min(6, primitive.rating || 0);
@@ -1618,6 +1954,10 @@ function mergePreferenceMemory(
       ...(previous?.departureWeekdays || []),
       ...(intent?.departureWeekdays || []),
     ]).filter((weekday) => weekday >= 0 && weekday <= 6),
+    returnWeekdays: uniqueNumbers([
+      ...(previous?.returnWeekdays || []),
+      ...(intent?.returnWeekdays || []),
+    ]).filter((weekday) => weekday >= 0 && weekday <= 6),
     departureTimeOfDay: intent?.departureTimeOfDay ?? previous?.departureTimeOfDay ?? null,
     refinementMode: intent?.refinementMode ?? previous?.refinementMode ?? null,
     updatedAt: new Date().toISOString(),
@@ -1635,6 +1975,7 @@ function hasMeaningfulPreferenceMemory(memory: AiPreferenceMemory | null | undef
     memory.avoid?.length ||
     memory.weatherSensitivity?.length ||
     memory.departureWeekdays?.length ||
+    memory.returnWeekdays?.length ||
     memory.nearestAlternativeOkay !== null ||
     memory.budgetMin !== null ||
     memory.budgetMax !== null ||
@@ -1790,11 +2131,47 @@ function prioritizeRecommendationItems(
     }
   }
 
-  if (shouldKeepRecommendationListIntentBound(context.intent) && regularItems.length >= 8) {
-    return regularItems.slice(0, MAX_AI_RANKED_ITEMS);
-  }
+  const regularRanked = regularItems
+    .map((item, index) => {
+      const primitive = primitiveByTourId.get(item.tourId);
+      const localRank = context.candidateTours?.findIndex((tour) => tour.id === item.tourId) ?? -1;
+      const reason = stripTerminalPunctuation(item.reason || '');
+      const reasonLength = reason.replace(/\s+/g, '').length;
+      const detailScore = primitive
+        ? Math.min(20, Math.floor(reasonLength / 10))
+          + (reasonMentionsCandidateFact(reason, primitive) ? 4 : 0)
+          + (/(温泉|沙滩|海边|山水|古镇|美食|徒步|夜游|返程|周末|日出|住宿|玩水|亲子|避暑|周五|周日|晚出发|晚班|返程)/.test(reason) ? 3 : 0)
+          + (primitive.schedule.hasEveningOrNightDeparture ? 2 : 0)
+        : Math.min(12, Math.floor(reasonLength / 12));
+      return {
+        item,
+        index,
+        detailScore,
+        reasonLength,
+        hasReason: Boolean(item.reason),
+        localRank,
+        aiScore: item.score,
+      };
+    })
+    .sort((left, right) => {
+      const aiGap = right.aiScore - left.aiScore;
+      if (Math.abs(aiGap) > 6) return aiGap;
 
-  return [...regularItems, ...alternativeItems];
+      const detailGap = right.detailScore - left.detailScore;
+      if (Math.abs(detailGap) > 0) return detailGap;
+
+      const reasonGap = right.reasonLength - left.reasonLength;
+      if (Math.abs(reasonGap) > 4) return reasonGap;
+
+      if (left.hasReason !== right.hasReason) return left.hasReason ? -1 : 1;
+      if (left.localRank >= 0 && right.localRank >= 0 && left.localRank !== right.localRank) {
+        return left.localRank - right.localRank;
+      }
+      return left.index - right.index;
+    })
+    .map(({ item }) => item);
+
+  return [...regularRanked, ...alternativeItems];
 }
 
 function getWeekday(date: string) {
@@ -2002,6 +2379,12 @@ function inferScheduleHints(tour: AiRecommendationCandidate) {
     departureDates: dates.slice(0, 6),
     departureWeekdays: uniqueWeekdays.slice(0, 5),
     departureWeekdayLabels: uniqueWeekdays.slice(0, 5).map((weekday: number) => WEEKDAY_LABELS[weekday]),
+    returnWeekdays: uniqueWeekdays.length > 0 && tour.duration > 0
+      ? uniqueWeekdays
+          .map((weekday) => (weekday + (tour.duration || 0)) % 7)
+          .filter((weekday, index, all) => all.indexOf(weekday) === index)
+          .slice(0, 5)
+      : [],
     timeOfDayHints: eveningDeparture ? ['evening', 'night'] : [],
     hasEveningOrNightDeparture: eveningDeparture,
     hasRecurringScheduleText: recurringText,
@@ -2287,6 +2670,17 @@ function getPrimitiveConflictReasons(intent: AiTravelIntent | null, primitive: R
     }
   }
 
+  const returnWeekdays = intent.returnWeekdays?.filter((day) => Number.isInteger(day)) ?? [];
+  if (returnWeekdays.length > 0) {
+    const candidateReturnWeekdays = primitive.schedule.returnWeekdays || [];
+    if (candidateReturnWeekdays.length > 0) {
+      const hasReturnWeekday = candidateReturnWeekdays.some((weekday) => returnWeekdays.includes(weekday));
+      if (!hasReturnWeekday) {
+        reasons.push(`缺少${returnWeekdays.map((weekday) => WEEKDAY_LABELS[weekday]).join('/')}返程节奏`);
+      }
+    }
+  }
+
   if (
     (intent.departureTimeOfDay === 'evening' || intent.departureTimeOfDay === 'night') &&
     !primitive.schedule.hasEveningOrNightDeparture
@@ -2350,6 +2744,7 @@ function rankPrimitive(
     (primitive.rating || 0) * 2
   );
 }
+
 
 function getPrimitiveExperienceAtoms(primitive: RecommendationPrimitive, limit = 2) {
   const broadTerms = new Set([
@@ -5331,6 +5726,9 @@ function normalizeIntent(value: unknown): AiTravelIntent | null {
     departureWithinDays: raw.departureWithinDays ? Number(raw.departureWithinDays) : null,
     departureWeekdays: Array.isArray(raw.departureWeekdays)
       ? raw.departureWeekdays.map(Number).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+      : [],
+    returnWeekdays: Array.isArray(raw.returnWeekdays)
+      ? raw.returnWeekdays.map(Number).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)
       : [],
     departureTimeOfDay: raw.departureTimeOfDay || null,
     destinationHints: Array.isArray(raw.destinationHints) ? raw.destinationHints.map(String).filter(Boolean) : [],

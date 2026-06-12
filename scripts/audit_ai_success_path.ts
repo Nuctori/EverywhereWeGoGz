@@ -153,7 +153,9 @@ const validOrderPreserved = prioritizeRecommendationItems(
     userText: '帮我找同时带温泉和沙滩的团，最好轻松一点',
   },
 );
-assert.equal(validOrderPreserved[0].tourId, 'copy-short');
+assert.equal(validOrderPreserved[0].tourId, 'copy-long');
+assert.equal(validOrderPreserved[1].tourId, 'copy-short');
+assert.ok((validOrderPreserved[0].reason || '').length > (validOrderPreserved[1].reason || '').length);
 
 const alternativesLast = prioritizeRecommendationItems([
   strictConflictAudited[2],
