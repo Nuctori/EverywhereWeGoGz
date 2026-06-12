@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-全量爬虫 v3 - 使用旧版成功策略
-- 广东中旅: m.gdcts.com 移动端 + regionalid子分类 + 分页
-- 品途: list.aspx + 分页
-- 康辉: div class=product j_item (当前结构)
-- 广之旅: 正则匹配
-- 假日通: Selenium (已有raw_jrt365.json)
-- 赛会通: 已有raw_saihuitong.json
+鍏ㄩ噺鐖櫕 v3 - 浣跨敤鏃х増鎴愬姛绛栫暐
+- 骞夸笢涓梾: m.gdcts.com 绉诲姩绔?+ regionalid瀛愬垎绫?+ 鍒嗛〉
+- 鍝侀€? list.aspx + 鍒嗛〉
+- 搴疯緣: div class=product j_item (褰撳墠缁撴瀯)
+- 骞夸箣鏃? 姝ｅ垯鍖归厤
+- 鍋囨棩閫? Selenium (宸叉湁raw_jrt365.json)
+- 璧涗細閫? 宸叉湁raw_saihuitong.json
 """
 
 import requests
@@ -15,12 +15,16 @@ import re
 import json
 import time
 import os
+import sys
 from datetime import datetime
 from bs4 import BeautifulSoup
 try:
     from crawl_gzl_api import fetch as fetch_gzl_api
 except ImportError:
     from scripts.crawl_gzl_api import fetch as fetch_gzl_api
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True)
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
@@ -47,11 +51,11 @@ def safe_request(url, headers=None, timeout=None, params=None):
 
 def extract_price(text):
     prices = []
-    for m in re.finditer(r"[¥￥]\s*(\d+(?:,\d+)*)", text):
+    for m in re.finditer(r"[楼锟\s*(\d+(?:,\d+)*)", text):
         prices.append(float(m.group(1).replace(",", "")))
     if prices:
         return max(prices)
-    m = re.search(r"(?:价格|费用|售价|报价)[^\d]*?(\d+(?:,\d+)*)", text)
+    m = re.search(r"(?:浠锋牸|璐圭敤|鍞环|鎶ヤ环)[^\d]*?(\d+(?:,\d+)*)", text)
     if m:
         return float(m.group(1).replace(",", ""))
     all_nums = re.findall(r"\b(\d{3,}(?:,\d+)*)\b", text)
@@ -60,19 +64,19 @@ def extract_price(text):
     return 0
 
 def extract_days(title):
-    m = re.search(r"(\d+)[天日]", title)
+    m = re.search(r"(\d+)[澶╂棩]", title)
     if m:
         return int(m.group(1))
     return 0
 
 
-# ==================== 康辉 ====================
+# ==================== 搴疯緣 ====================
 class KanghuiSpider:
     BASE_URL = "http://gz.cctpage.com"
     NAVIDS = [6, 7, 8, 9, 10, 11, 12, 14, 53, 56, 57, 58, 61, 64, 66, 67, 68, 69, 70, 71, 72, 73, 75, 76, 85, 86, 88, 89, 90, 93, 95, 96, 97, 98, 100, 101, 102, 103, 104, 105, 106, 108, 174, 175, 176, 177, 178, 200, 201, 202, 203, 204, 205, 208, 209, 210, 212, 213, 214, 246, 247, 248, 250, 251, 252, 253, 256, 258, 260, 263]
 
     def fetch(self):
-        print("[康辉] 抓取中...")
+        print("[搴疯緣] 鎶撳彇涓?..")
         items = []
         seen = set()
 
@@ -119,7 +123,7 @@ class KanghuiSpider:
                                 img_url = img_src
                         
                         item = {
-                            "source": "康辉",
+                            "source": "搴疯緣",
                             "title": title,
                             "price": price,
                             "url": self.BASE_URL + href if not href.startswith("http") else href,
@@ -134,22 +138,22 @@ class KanghuiSpider:
             except Exception as e:
                 pass
 
-        print(f"[康辉] 抓取完成: {len(items)} 条")
+        print(f"[搴疯緣] 鎶撳彇瀹屾垚: {len(items)} 鏉?)
         return items
 
 
-# ==================== 品途 ====================
+# ==================== 鍝侀€?====================
 class PintuSpider:
     BASE_URL = "http://gz.ptotour.com"
     CATS = [
-        {"name": "省内周边", "tid": "around"},
-        {"name": "国内游", "tid": "domestic"},
-        {"name": "出境游", "tid": "abroad"},
+        {"name": "鐪佸唴鍛ㄨ竟", "tid": "around"},
+        {"name": "鍥藉唴娓?, "tid": "domestic"},
+        {"name": "鍑哄娓?, "tid": "abroad"},
     ]
     MAX_PAGES = 80
 
     def fetch(self):
-        print("[品途] 抓取中...")
+        print("[鍝侀€擼 鎶撳彇涓?..")
         all_items = []
         seen = set()
 
@@ -168,7 +172,7 @@ class PintuSpider:
 
                     for li in lis:
                         txt = li.get_text(" ", strip=True)
-                        if "行程天数" not in txt:
+                        if "琛岀▼澶╂暟" not in txt:
                             continue
 
                         name_elem = li.find("a", class_="name")
@@ -181,12 +185,12 @@ class PintuSpider:
                         price = 0
                         if price_elem:
                             price_text = price_elem.get_text(strip=True)
-                            price_match = re.search(r"[¥￥]\s*(\d+(?:,\d+)*)", price_text)
+                            price_match = re.search(r"[楼锟\s*(\d+(?:,\d+)*)", price_text)
                             price = float(price_match.group(1).replace(",", "")) if price_match else 0
                         else:
                             price = extract_price(txt)
 
-                        days_m = re.search(r"行程天数[:：]\s*(\d+)[天日]", txt)
+                        days_m = re.search(r"琛岀▼澶╂暟[:锛歖\s*(\d+)[澶╂棩]", txt)
                         days = int(days_m.group(1)) if days_m else 0
 
                         detail_url = url
@@ -205,7 +209,7 @@ class PintuSpider:
                             seen.add(key)
 
                             item = {
-                                "source": "品途",
+                                "source": "鍝侀€?,
                                 "title": title,
                                 "price": price,
                                 "url": detail_url,
@@ -214,18 +218,18 @@ class PintuSpider:
                             all_items.append(item)
                             page_items += 1
 
-                    print(f"  [品途-{cat['name']}] 第{page}页: {page_items}条")
+                    print(f"  [鍝侀€?{cat['name']}] 绗瑊page}椤? {page_items}鏉?)
                     if page_items == 0:
                         break
                     time.sleep(REQUEST_DELAY)
                 except Exception as e:
-                    print(f"  品途 {cat['name']} 第{page}页 error: {e}")
+                    print(f"  鍝侀€?{cat['name']} 绗瑊page}椤?error: {e}")
 
-        print(f"[品途] 抓取完成: {len(all_items)} 条")
+        print(f"[鍝侀€擼 鎶撳彇瀹屾垚: {len(all_items)} 鏉?)
         return all_items
 
 
-# ==================== 广东中旅 ====================
+# ==================== 骞夸笢涓梾 ====================
 class GdctsSpider:
     BASE_URL = "http://m.gdcts.com"
     CAT_PATHS = [
@@ -239,10 +243,10 @@ class GdctsSpider:
         "/product/category/index/regionalId_1/8/key/6",
         "/product/category/index/regionalId_1/9/key/7",
     ]
-    MAX_PAGES = 30  # 尽量全量抓取，直到空页停止
+    MAX_PAGES = 30  # 灏介噺鍏ㄩ噺鎶撳彇锛岀洿鍒扮┖椤靛仠姝?
 
     def fetch(self):
-        print("[广东中旅] 抓取中...")
+        print("[骞夸笢涓梾] 鎶撳彇涓?..")
         all_items = []
         seen = set()
 
@@ -255,9 +259,9 @@ class GdctsSpider:
 
                 regionalids = re.findall(r'regionalid/(\d+)', resp.text)
                 regionalids = sorted(set(regionalids), key=int)
-                print(f"  [广东中旅] {cat_path}: 发现 {len(regionalids)} 个子分类")
+                print(f"  [骞夸笢涓梾] {cat_path}: 鍙戠幇 {len(regionalids)} 涓瓙鍒嗙被")
 
-                for rid in regionalids:  # 所有子分类
+                for rid in regionalids:  # 鎵€鏈夊瓙鍒嗙被
                     for page in range(1, self.MAX_PAGES + 1):
                         try:
                             url = f"{self.BASE_URL}/product/line/index/id/69/regionalid/{rid}/page/{page}"
@@ -266,12 +270,12 @@ class GdctsSpider:
                                 break
 
                             html = resp.text
-                            # 尝试提取产品
+                            # 灏濊瘯鎻愬彇浜у搧
                             matches = []
                             for m in re.findall(r'<a href="(/product/line/detail/[^"]+)">(.*?)</a>', html, re.DOTALL):
                                 href, content = m
                                 title_m = re.search(r'<div class="name">([^<]+)</div>', content)
-                                price_m = re.search(r'[¥￥]\s*(\d+)', content)
+                                price_m = re.search(r'[楼锟\s*(\d+)', content)
                                 img_m = re.search(r'<img[^>]+src="([^"]+)"', content)
                                 if title_m and price_m:
                                     matches.append((href, img_m.group(1) if img_m else '', title_m.group(1), price_m.group(1)))
@@ -300,7 +304,7 @@ class GdctsSpider:
                                         img_url = self.BASE_URL + img_src
 
                                 item = {
-                                    "source": "广东中旅",
+                                    "source": "骞夸笢涓梾",
                                     "title": title,
                                     "price": price,
                                     "url": detail_url,
@@ -318,13 +322,13 @@ class GdctsSpider:
                             break
                     time.sleep(0.1)
             except Exception as e:
-                print(f"  [广东中旅] {cat_path} error: {e}")
+                print(f"  [骞夸笢涓梾] {cat_path} error: {e}")
 
-        print(f"[广东中旅] 抓取完成: {len(all_items)} 条")
+        print(f"[骞夸笢涓梾] 鎶撳彇瀹屾垚: {len(all_items)} 鏉?)
         return all_items
 
 
-# ==================== 广之旅 ====================
+# ==================== 骞夸箣鏃?====================
 class GzlSpider:
     BASE_URL = "http://nn.gzl.cn"
     PATHS = ["/abroad/abroad.html", "/around/guangdong.html", "/domestic/domestic.html", "/free/free.html"]
@@ -332,7 +336,7 @@ class GzlSpider:
     def fetch(self):
         print("[GZL] fetching via API...")
         return fetch_gzl_api()
-        print("[广之旅] 抓取中...")
+        print("[骞夸箣鏃匽 鎶撳彇涓?..")
         all_items = []
         seen = set()
 
@@ -351,10 +355,10 @@ class GzlSpider:
                     text = re.sub(r'<[^>]+>', ' ', content).strip()
                     text = re.sub(r'\s+', ' ', text)
 
-                    title_match = re.search(r'【([^】]+)】', text)
+                    title_match = re.search(r'銆?[^銆慮+)銆?, text)
                     if not title_match:
                         continue
-                    title = text[text.find('【'):text.find('】')+1]
+                    title = text[text.find('銆?):text.find('銆?)+1]
 
                     price = extract_price(text)
                     if price <= 0:
@@ -380,7 +384,7 @@ class GzlSpider:
                             img_url = "https://www.gzl.com.cn" + img_src
 
                     item = {
-                        "source": "广之旅",
+                        "source": "骞夸箣鏃?,
                         "title": title,
                         "price": price,
                         "url": detail_url,
@@ -392,15 +396,15 @@ class GzlSpider:
 
                 time.sleep(REQUEST_DELAY)
             except Exception as e:
-                print(f"  广之旅 {path} error: {e}")
+                print(f"  骞夸箣鏃?{path} error: {e}")
 
-        print(f"[广之旅] 抓取完成: {len(all_items)} 条")
+        print(f"[骞夸箣鏃匽 鎶撳彇瀹屾垚: {len(all_items)} 鏉?)
         return all_items
 
 
 def main():
     print("=" * 60)
-    print("全量HTTP站点爬虫 v3")
+    print("鍏ㄩ噺HTTP绔欑偣鐖櫕 v3")
     print("=" * 60)
 
     all_raw = []
@@ -413,16 +417,16 @@ def main():
     for spider in spiders:
         try:
             items = spider.fetch()
-            print(f"  -> {len(items)} 条")
+            print(f"  -> {len(items)} 鏉?)
             all_raw.extend(items)
         except Exception as e:
-            print(f"  -> 错误: {e}")
+            print(f"  -> 閿欒: {e}")
         time.sleep(0.5)
 
     print("\n" + "-" * 60)
-    print(f"[汇总] 原始数据: {len(all_raw)} 条")
+    print(f"[姹囨€籡 鍘熷鏁版嵁: {len(all_raw)} 鏉?)
 
-    # 去重
+    # 鍘婚噸
     seen = set()
     deduped = []
     for it in all_raw:
@@ -430,13 +434,13 @@ def main():
         if key not in seen:
             seen.add(key)
             deduped.append(it)
-    print(f"[去重] 后: {len(deduped)} 条")
+    print(f"[鍘婚噸] 鍚? {len(deduped)} 鏉?)
 
-    # 过滤
+    # 杩囨护
     deduped = [r for r in deduped if len(r.get("title", "")) > 5]
-    print(f"[过滤] 有效数据: {len(deduped)} 条")
+    print(f"[杩囨护] 鏈夋晥鏁版嵁: {len(deduped)} 鏉?)
 
-    # 保存
+    # 淇濆瓨
     data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
     data_dir = os.path.abspath(data_dir)
     os.makedirs(data_dir, exist_ok=True)
@@ -444,9 +448,11 @@ def main():
     with open(os.path.join(data_dir, "raw_http_full.json"), "w", encoding="utf-8") as f:
         json.dump(deduped, f, ensure_ascii=False, indent=2)
 
-    print(f"[保存] -> {os.path.join(data_dir, 'raw_http_full.json')}")
+    print(f"[淇濆瓨] -> {os.path.join(data_dir, 'raw_http_full.json')}")
     print("=" * 60)
 
 
 if __name__ == "__main__":
+    print(f"[{datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}] full_crawl_v3 entry", flush=True)
     main()
+    print(f"[{datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}] full_crawl_v3 exit", flush=True)

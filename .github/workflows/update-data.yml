@@ -1,11 +1,16 @@
 name: Update Tour Data
 
 on:
-  # 定时触发：每天凌晨 3 点（UTC）
+  # 瀹氭椂瑙﹀彂锛氭瘡澶╁噷鏅?3 鐐癸紙UTC锛?
   schedule:
     - cron: '0 3 * * *'
-  # 手动触发
+  # 鎵嬪姩瑙﹀彂
   workflow_dispatch:
+    inputs:
+      skip_crawls:
+        description: 'Skip external crawls and validate downstream processing only'
+        required: false
+        default: 'false'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -41,14 +46,35 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Run full source crawls
-        run: |
-          python scripts/crawl_jrt365_full.py
-          python scripts/crawl_saihuitong_full.py
-          python scripts/crawl_pintu_full.py
-          python scripts/crawl_gzl_api.py
-          python scripts/crawl_outdoors_full.py
-          python scripts/full_crawl_v3.py
+      - name: Crawl JRT365 full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_jrt365_full.py
+
+      - name: Crawl Saihuitong full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_saihuitong_full.py
+
+      - name: Crawl Pintu full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_pintu_full.py
+
+      - name: Crawl GZL API full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_gzl_api.py
+
+      - name: Crawl Outdoors full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_outdoors_full.py
+
+      - name: Crawl HTTP aggregate sources
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/full_crawl_v3.py
 
       - name: Merge crawled data
         run: python scripts/merge_data.py
