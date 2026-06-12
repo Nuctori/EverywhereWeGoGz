@@ -15,12 +15,16 @@ import re
 import json
 import time
 import os
+import sys
 from datetime import datetime
 from bs4 import BeautifulSoup
 try:
     from crawl_gzl_api import fetch as fetch_gzl_api
 except ImportError:
     from scripts.crawl_gzl_api import fetch as fetch_gzl_api
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True)
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1",
@@ -449,4 +453,6 @@ def main():
 
 
 if __name__ == "__main__":
+    print(f"[{datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}] full_crawl_v3 entry", flush=True)
     main()
+    print(f"[{datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}] full_crawl_v3 exit", flush=True)
