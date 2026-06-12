@@ -183,6 +183,7 @@ export const aiPreferenceMemorySchema = z.object({
   tripDaysMax: z.coerce.number().nullable().optional(),
   departureWithinDays: z.coerce.number().nullable().optional(),
   departureWeekdays: z.array(z.coerce.number().int()).optional().default([]),
+  returnWeekdays: z.array(z.coerce.number().int()).optional().default([]),
   departureTimeOfDay: z.string().nullable().optional(),
   refinementMode: z
     .enum(['new_search', 'refine_previous', 'broaden', 'replace_destination'])
