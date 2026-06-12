@@ -3,6 +3,24 @@ import assert from 'node:assert/strict';
 import { computeRequiredOutputCount } from './audit_data_integrity_rules.mjs';
 
 assert.equal(
+  computeRequiredOutputCount({ min: 70, ratio: 0.28 }, 261),
+  73,
+  'holiday source should stay aligned with the current stable merged baseline',
+);
+
+assert.equal(
+  computeRequiredOutputCount({ min: 40, ratio: 0.35 }, 118),
+  41,
+  'outbound village baseline should never exceed the current stable minimum',
+);
+
+assert.equal(
+  computeRequiredOutputCount({ min: 1700, ratio: 0.7 }, 2433),
+  1703,
+  'GZL baseline should be driven by the configured ratio when it is stricter',
+);
+
+assert.equal(
   computeRequiredOutputCount({ min: 35, ratio: 0.75 }, 34),
   34,
   'required count should not exceed the raw unique count',
