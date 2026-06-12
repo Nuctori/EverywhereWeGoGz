@@ -1,11 +1,16 @@
 name: Update Tour Data
 
 on:
-  # 定时触发：每天凌晨 3 点（UTC）
+  # 瀹氭椂瑙﹀彂锛氭瘡澶╁噷鏅?3 鐐癸紙UTC锛?
   schedule:
     - cron: '0 3 * * *'
-  # 手动触发
+  # 鎵嬪姩瑙﹀彂
   workflow_dispatch:
+    inputs:
+      skip_crawls:
+        description: 'Skip external crawls and validate downstream processing only'
+        required: false
+        default: 'false'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -41,17 +46,44 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Run full source crawls
-        run: |
-          python scripts/crawl_jrt365_full.py
-          python scripts/crawl_saihuitong_full.py
-          python scripts/crawl_pintu_full.py
-          python scripts/crawl_gzl_api.py
-          python scripts/crawl_outdoors_full.py
-          python scripts/full_crawl_v3.py
+      - name: Crawl JRT365 full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_jrt365_full.py
+
+      - name: Crawl Saihuitong full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_saihuitong_full.py
+
+      - name: Crawl Pintu full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_pintu_full.py
+
+      - name: Crawl GZL API full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_gzl_api.py
+
+      - name: Crawl Outdoors full
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/crawl_outdoors_full.py
+
+      - name: Crawl HTTP aggregate sources
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        timeout-minutes: 60
+        run: python -u scripts/full_crawl_v3.py
 
       - name: Merge crawled data
-        run: python scripts/merge_data.py
+        run: python -u scripts/merge_data.py
+
+      - name: Split merged data
+        run: npm run data:split
+
+      - name: Optimize cached images
+        run: npm run data:images:webp
 
       - name: Audit merged data
         run: npm run audit:data-integrity
@@ -101,7 +133,7 @@ jobs:
       - name: Check if data changed
         id: check_changes
         run: |
-          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tour-details src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json src/data/tour-availability-cache.json public/data/image-cache
+          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tours-page-*.json public/data/tour-details src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json src/data/tour-availability-cache.json public/data/image-cache
           if git diff --cached --quiet; then
             echo "Data unchanged, skipping build and deploy"
             echo "changed=false" >> $GITHUB_OUTPUT
