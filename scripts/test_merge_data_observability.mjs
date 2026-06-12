@@ -7,10 +7,13 @@ const mergeScript = fs.readFileSync(mergePath, 'utf8');
 
 for (const marker of [
   'import time',
+  'import subprocess',
   'if hasattr(sys.stdout, "reconfigure")',
   'sys.stdout.reconfigure(line_buffering=True)',
   'def log_stage(',
   'log_stage("load detail results"',
+  'log_stage("merge pipeline complete"',
+  '[transform]',
 ]) {
   assert.ok(mergeScript.includes(marker), `expected merge_data.py to include ${marker}`);
 }
