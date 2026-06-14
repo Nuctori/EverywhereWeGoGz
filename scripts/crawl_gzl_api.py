@@ -41,16 +41,13 @@ DESTINATIONS = [
 ]
 
 # 产品类型
+# GZL 的多个 searchtype 会重复返回同一批产品。
+# 保留经抽样验证仍可能提供增量数据的类型，避免在 CI 中为重复结果重复分页和补 schedule。
 SEARCH_TYPES = [
     ("ALL", "全部"),
     ("PRODUCTGROUP", "跟团游"),
     ("FREETRAVEL", "自由行"),
     ("YJYT", "一家一团"),
-    ("LOCAL", "当地玩乐"),
-    ("HOTEL", "酒店"),
-    ("TICKET", "门票"),
-    ("VISA", "签证"),
-    ("CRUISE", "邮轮"),
 ]
 
 

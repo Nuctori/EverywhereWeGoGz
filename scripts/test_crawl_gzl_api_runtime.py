@@ -14,6 +14,12 @@ def load_module():
 
 def main():
     mod = load_module()
+    assert mod.SEARCH_TYPES == [
+        ("ALL", "全部"),
+        ("PRODUCTGROUP", "跟团游"),
+        ("FREETRAVEL", "自由行"),
+        ("YJYT", "一家一团"),
+    ]
 
     endpoint, payload = mod.resolve_schedule_request(
         "12345",
