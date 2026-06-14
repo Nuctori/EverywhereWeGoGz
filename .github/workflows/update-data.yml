@@ -166,7 +166,7 @@ jobs:
 
       - name: Crawl HTTP aggregate sources
         timeout-minutes: 60
-        run: python -u scripts/full_crawl_v3.py
+        run: python -u scripts/full_crawl_final.py
 
       - name: Upload HTTP aggregate raw data
         uses: actions/upload-artifact@v4
@@ -324,3 +324,4 @@ jobs:
           git commit -m "chore: update tour data [$(date +%Y-%m-%d)]"
           git push
         continue-on-error: true
+

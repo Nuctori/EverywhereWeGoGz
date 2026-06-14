@@ -38,6 +38,11 @@ for (const stepName of [
   assert.ok(stepChunk.includes('timeout-minutes: 60'), `expected ${stepName} to have a timeout budget`);
 }
 
+mustInclude(
+  'run: python -u scripts/full_crawl_final.py',
+  'expected HTTP aggregate crawl job to use the compileable full_crawl_final.py entrypoint',
+);
+
 for (const artifactName of [
   'name: raw-jrt365',
   'name: raw-saihuitong',
@@ -93,3 +98,4 @@ for (const requiredPath of [
 }
 
 console.log('update-data workflow audit passed');
+
