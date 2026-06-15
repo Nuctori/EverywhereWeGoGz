@@ -1390,14 +1390,14 @@ function getCandidateReturnWeekdays(tour: AiRecommendationCandidate) {
   const parsed = parseDateString(tour.departureDate);
   if (!parsed) return [];
   const returnDate = new Date(parsed);
-  returnDate.setDate(returnDate.getDate() + tour.duration);
+  returnDate.setDate(returnDate.getDate() + tour.duration - 1);
   return [returnDate.getDay()];
 }
 
 function getCandidateScheduleWindows(tour: AiRecommendationCandidate): CandidateScheduleWindow[] {
   const dates = getCandidateDepartureDates(tour);
   if (dates.length === 0) return [];
-  const duration = Number.isFinite(tour.duration) ? tour.duration : 0;
+  const duration = Number.isFinite(tour.duration) && tour.duration > 0 ? tour.duration : 0;
 
   return dates
     .map((date) => {
@@ -1405,7 +1405,7 @@ function getCandidateScheduleWindows(tour: AiRecommendationCandidate): Candidate
       if (!departure) return null;
       const departureWeekday = departure.getDay();
       const returnDate = new Date(departure);
-      returnDate.setDate(returnDate.getDate() + duration);
+      returnDate.setDate(returnDate.getDate() + duration - 1);
       return {
         departureDate: date,
         departureWeekday,
@@ -2106,6 +2106,70 @@ function getNonBudgetConflictCount(reasons: string[]) {
   return reasons.filter((reason) => !/^价格(?:高于|低于)预算/.test(reason)).length;
 }
 
+function getScheduleCoverageMetrics(
+  intent: AiTravelIntent | null,
+  primitive: RecommendationPrimitive | undefined,
+) {
+  if (!intent || !primitive) {
+    return { count: 0, total: 0, percent: 0 };
+  }
+
+  let count = 0;
+  let total = 0;
+
+  if (intent.departureWeekdays?.length) {
+    total += 1;
+    if (primitive.schedule.departureWeekdays.some((weekday) => intent.departureWeekdays?.includes(weekday))) {
+      count += 1;
+    }
+  }
+
+  if (intent.returnWeekdays?.length) {
+    total += 1;
+    const candidateReturnWeekdays = primitive.schedule.returnWeekdays.length > 0
+      ? primitive.schedule.returnWeekdays
+      : getCandidateReturnWeekdays(primitive as unknown as AiRecommendationCandidate);
+    if (candidateReturnWeekdays.some((weekday) => intent.returnWeekdays?.includes(weekday))) {
+      count += 1;
+    }
+  }
+
+  if (intent.departureTimeOfDay === 'evening' || intent.departureTimeOfDay === 'night') {
+    total += 1;
+    if (primitive.schedule.hasEveningOrNightDeparture) {
+      count += 1;
+    }
+  }
+
+  if (intent.tripDaysMin || intent.tripDaysMax) {
+    total += 1;
+    const min = intent.tripDaysMin ?? 0;
+    const max = intent.tripDaysMax ?? Number.POSITIVE_INFINITY;
+    if (primitive.tripDays >= min && primitive.tripDays <= max) {
+      count += 1;
+    }
+  }
+
+  if (intent.departureWithinDays) {
+    total += 1;
+    const dateWindow = buildDateWindowFromIntent(intent);
+    if (
+      dateWindow &&
+      primitive.schedule.departureDates.some(
+        (date) => date >= dateWindow.start && date <= dateWindow.end,
+      )
+    ) {
+      count += 1;
+    }
+  }
+
+  return {
+    count,
+    total,
+    percent: total > 0 ? Math.round((count / total) * 100) : 0,
+  };
+}
+
 function getRecommendationRelevanceMetrics(
   item: AiRecommendationItem,
   primitive: RecommendationPrimitive | undefined,
@@ -2120,11 +2184,14 @@ function getRecommendationRelevanceMetrics(
     : { matchedTerms: [], coverageCount: 0, coveragePercent: 0 };
   const budgetFitTier = primitive ? getBudgetFitTier(primitive.price, context.intent) : 0;
   const nonBudgetConflictCount = getNonBudgetConflictCount(context.conflictReasons);
+  const scheduleCoverage = getScheduleCoverageMetrics(context.intent, primitive);
 
   return {
     coverageCount: coverage.coverageCount,
     coveragePercent: coverage.coveragePercent,
     matchedTerms: coverage.matchedTerms,
+    scheduleCoverageCount: scheduleCoverage.count,
+    scheduleCoveragePercent: scheduleCoverage.percent,
     budgetFitTier,
     nonBudgetConflictCount,
     totalConflictCount: context.conflictReasons.length,
@@ -2192,10 +2259,12 @@ function prioritizeRecommendationItems(
           + (/(温泉|沙滩|海边|山水|古镇|美食|徒步|夜游|返程|周末|日出|住宿|玩水|亲子|避暑|周五|周日|晚出发|晚班|返程)/.test(reason) ? 3 : 0)
           + (primitive.schedule.hasEveningOrNightDeparture ? 2 : 0)
         : Math.min(12, Math.floor(reasonLength / 12));
+      const genericBriefReason = reasonLength < 12 || /^价格|低价|便宜|班期|热门|性价比|预算|轻松|自然风光|综合|AI综合推荐/.test(reason);
       return {
         item,
         index,
         detailScore,
+        reasonQualityScore: detailScore + (genericBriefReason ? -4 : 0) + (item.reason ? 2 : 0) + Math.min(3, Math.floor(reasonLength / 30)),
         reasonLength,
         hasReason: Boolean(item.reason),
         localRank,
@@ -2211,6 +2280,12 @@ function prioritizeRecommendationItems(
         if (coveragePercentGap !== 0) return coveragePercentGap;
       }
 
+      const scheduleCoverageGap = right.scheduleCoverageCount - left.scheduleCoverageCount;
+      if (scheduleCoverageGap !== 0) return scheduleCoverageGap;
+
+      const scheduleCoveragePercentGap = right.scheduleCoveragePercent - left.scheduleCoveragePercent;
+      if (scheduleCoveragePercentGap !== 0) return scheduleCoveragePercentGap;
+
       const budgetGap = right.budgetFitTier - left.budgetFitTier;
       if (budgetGap !== 0) return budgetGap;
 
@@ -2220,8 +2295,8 @@ function prioritizeRecommendationItems(
       const conflictGap = left.totalConflictCount - right.totalConflictCount;
       if (conflictGap !== 0) return conflictGap;
 
-      const aiGap = right.aiScore - left.aiScore;
-      if (Math.abs(aiGap) > 6) return aiGap;
+      const reasonQualityGap = right.reasonQualityScore - left.reasonQualityScore;
+      if (reasonQualityGap !== 0) return reasonQualityGap;
 
       const detailGap = right.detailScore - left.detailScore;
       if (Math.abs(detailGap) > 0) return detailGap;
@@ -2230,6 +2305,8 @@ function prioritizeRecommendationItems(
       if (Math.abs(reasonGap) > 4) return reasonGap;
 
       if (left.hasReason !== right.hasReason) return left.hasReason ? -1 : 1;
+      const aiGap = right.aiScore - left.aiScore;
+      if (aiGap !== 0) return aiGap;
       if (left.localRank >= 0 && right.localRank >= 0 && left.localRank !== right.localRank) {
         return left.localRank - right.localRank;
       }
@@ -2445,7 +2522,7 @@ function inferScheduleHints(tour: AiRecommendationCandidate) {
     departureWeekdayLabels: uniqueWeekdays.slice(0, 5).map((weekday: number) => WEEKDAY_LABELS[weekday]),
     returnWeekdays: uniqueWeekdays.length > 0 && tour.duration > 0
       ? uniqueWeekdays
-          .map((weekday) => (weekday + (tour.duration || 0)) % 7)
+          .map((weekday) => (weekday + tour.duration - 1) % 7)
           .filter((weekday, index, all) => all.indexOf(weekday) === index)
           .slice(0, 5)
       : [],

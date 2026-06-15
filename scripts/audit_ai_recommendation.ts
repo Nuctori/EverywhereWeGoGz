@@ -2051,4 +2051,76 @@ const reordered = prioritizeRecommendationItems(
     'summary should not inject unrequested theme labels for explicit destination turns');
 }
 
+// ─── 回归测试：详细推荐应排在简介推荐前面 ───
+{
+  const detailedVsBriefTours = [
+    candidate({
+      id: 'detail-weekend',
+      title: '桂林阳朔动车3天晚出发',
+      destination: '桂林',
+      duration: 3,
+      price: 999,
+      departureDate: '2026-06-05',
+      departureDates: ['2026-06-05'],
+      tags: ['山水'],
+      theme: '自然风光',
+    }),
+    candidate({
+      id: 'brief-weekend',
+      title: '广州从化温泉3天晚出发',
+      destination: '广东',
+      duration: 3,
+      price: 399,
+      departureDate: '2026-06-05',
+      departureDates: ['2026-06-05'],
+      tags: ['温泉'],
+      theme: '温泉度假',
+    }),
+  ];
+  const weekendIntent = buildHardIntentFromText('周五晚上出发，周日返回');
+  assert.ok(weekendIntent?.departureWeekdays?.includes(5));
+  assert.ok(weekendIntent?.returnWeekdays?.includes(0));
+  const reasonQualitySorted = prioritizeRecommendationItems(
+    [
+      {
+        tourId: 'brief-weekend',
+        score: 95,
+        reason: '性价比高',
+        matchedSignals: ['低价'],
+      },
+      {
+        tourId: 'detail-weekend',
+        score: 78,
+        reason: '这条线周五晚从广州南站动车出发，周日下午返程，3天2晚覆盖象鼻山、阳朔西街和遇龙河竹筏，节奏轻松适合周末出行。',
+        matchedSignals: ['周末'],
+      },
+    ],
+    {
+      candidateTours: detailedVsBriefTours,
+      intent: weekendIntent,
+      userText: '周五晚上出发，周日返回',
+    },
+  );
+  assert.equal(
+    reasonQualitySorted[0].tourId,
+    'detail-weekend',
+    'detailed recommendation should outrank a brief recommendation even when its aiScore is lower',
+  );
+}
+
+// ─── 回归测试：周五晚出发周日回应能找出桂林/广西的 3 天团 ───
+{
+  const weekendQuery = '帮我寻找周五晚上出发的团，最好周日返回';
+  const weekendLocalItems = localRecommendations(realTours, weekendQuery);
+  assert.ok(weekendLocalItems.length > 0, 'weekend query should return candidates');
+  const firstGuilinIndex = weekendLocalItems.findIndex((item) => {
+    const tour = realTours.find((t) => t.id === item.tourId);
+    return /广西|桂林/.test(`${tour?.destination} ${tour?.title}`);
+  });
+  assert.ok(
+    firstGuilinIndex >= 0 && firstGuilinIndex < 10,
+    `expected a Guilin/Guangxi tour in top 10 for Friday-evening/Sunday-return query, first found at ${firstGuilinIndex + 1}`,
+  );
+}
+
 console.log('AI recommendation audit passed');
