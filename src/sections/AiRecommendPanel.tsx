@@ -161,6 +161,7 @@ export function AiRecommendPanel({
   const [useCustomAiConfig, setUseCustomAiConfig] = useState(
     () => Object.keys(getStoredAiProviderConfig()).length > 0,
   );
+  const [followUpInput, setFollowUpInput] = useState(storedChatState.input || '');
   const [messages, setMessages] = useState<AiRecommendationMessage[]>(() =>
     storedChatState.messages?.length ? storedChatState.messages : [createInitialMessage()],
   );
@@ -198,19 +199,20 @@ export function AiRecommendPanel({
 
     saveStoredAiChatState({
       conversationId,
-      input: '',
+      input: followUpInput,
       messages,
       result,
       preferenceMemory,
     }, MAX_PERSISTED_MESSAGES);
-  }, [conversationId, messages, preferenceMemory, result]);
+  }, [conversationId, followUpInput, messages, preferenceMemory, result]);
 
   useEffect(() => {
+    if (!detailsOpen) return;
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
       behavior: 'smooth',
     });
-  }, [messages]);
+  }, [detailsOpen, messages]);
 
   useEffect(() => {
     if (clearVersion === 0) return;
@@ -221,6 +223,7 @@ export function AiRecommendPanel({
     setProgressState(null);
     setExpandedStage(null);
     setDetailsOpen(false);
+    setFollowUpInput('');
     setMessages([createInitialMessage()]);
   }, [clearVersion]);
 
@@ -233,18 +236,24 @@ export function AiRecommendPanel({
     setExpandedStage((current) => (current === progressState.stage ? current : progressState.stage));
   }, [progressState]);
 
-  const submitPrompt = useCallback(async (rawPrompt: string) => {
+  const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean }) => {
     const prompt = rawPrompt.trim();
     if (!prompt || loading || !toursReady) return;
     const requestVersion = requestVersionRef.current + 1;
     requestVersionRef.current = requestVersion;
+    const preserveResult = options?.preserveResult ?? false;
 
     const userMessage = createMessage('user', prompt);
-    const nextMessages = [...messages, userMessage];
+    const nextMessages = preserveResult
+      ? [...messages, userMessage]
+      : [createInitialMessage(), userMessage];
     setMessages(nextMessages);
     setLoading(true);
-    onResultChange(null);
-    setDetailsOpen(false);
+    if (!preserveResult) {
+      onResultChange(null);
+    }
+    setDetailsOpen(true);
+    setFollowUpInput('');
     setProgressState({
       stage: 'queued',
       label: '已收到需求',
@@ -263,10 +272,10 @@ export function AiRecommendPanel({
         messages: nextMessages,
         candidateTours: tours,
         activeFilters,
-        searchQuery,
+        searchQuery: request?.searchQuery || searchQuery,
         aiConfig,
         preferenceMemory,
-        previousResult: result,
+        previousResult: preserveResult ? result : null,
         onProgress: (progress) => {
           if (requestVersionRef.current !== requestVersion) return;
           setProgressState(progress);
@@ -294,6 +303,7 @@ export function AiRecommendPanel({
     onFocusResults,
     onResultChange,
     preferenceMemory,
+    request?.searchQuery,
     result,
     searchQuery,
     tours,
@@ -306,7 +316,9 @@ export function AiRecommendPanel({
     onResultChange(null);
     setProgressState(null);
     setExpandedStage(null);
-    void submitPrompt(request.prompt);
+    setDetailsOpen(false);
+    setFollowUpInput('');
+    void submitPrompt(request.prompt, { preserveResult: false });
   }, [onResultChange, request, submitPrompt]);
 
   const clearConversation = () => {
@@ -316,6 +328,7 @@ export function AiRecommendPanel({
     setProgressState(null);
     setExpandedStage(null);
     setDetailsOpen(false);
+    setFollowUpInput('');
     setMessages([createMessage('assistant', '已清空上一轮结果和本地偏好记忆。你可以重新描述这次想怎么出行。')]);
     clearStoredAiChatState();
   };
@@ -354,6 +367,9 @@ export function AiRecommendPanel({
     : hasResult
       ? result?.summary || resultStatusMeta?.detail || '推荐线路已排到前面。'
       : '一句话说预算、天数、同行人和偏好就行。';
+  const followUpPlaceholder = hasResult
+    ? '在这里接着细调，比如：预算压到600内，优先海边，别太赶'
+    : '补充一点条件也行，比如：带温泉、沙滩，周末短线';
 
   if (!hasAiActivity) {
     return null;
@@ -628,6 +644,36 @@ export function AiRecommendPanel({
               ))}
             </div>
           )}
+
+          <form
+            className="flex flex-col gap-2 sm:flex-row sm:items-center"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void submitPrompt(followUpInput, { preserveResult: hasResult });
+            }}
+          >
+            <Input
+              value={followUpInput}
+              onChange={(event) => setFollowUpInput(event.target.value)}
+              placeholder={followUpPlaceholder}
+              className="h-11 rounded-xl border-stone-200 bg-stone-50 text-sm"
+              disabled={loading || !toursReady}
+            />
+            <Button
+              type="submit"
+              className="h-11 rounded-xl bg-stone-900 px-4 text-sm hover:bg-stone-800 sm:min-w-[104px]"
+              disabled={loading || !followUpInput.trim() || !toursReady}
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Sparkles className="mr-1.5 h-4 w-4" />
+                  继续细调
+                </>
+              )}
+            </Button>
+          </form>
         </div>
       )}
 

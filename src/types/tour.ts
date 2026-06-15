@@ -123,6 +123,7 @@ export interface AiRecommendationItem {
   semanticFit?: string;
   semanticSignals?: string[];
   semanticBoundary?: string;
+  recommendationTier?: 'ai-detailed' | 'ai-brief' | 'local-supplement';
 }
 
 // AI 推荐流程模式：ai=正常调用模型，fallback=模型失败后降级，local-only=只走本地规则。

@@ -1852,6 +1852,19 @@ function stripRecommendationCommentary(item: AiRecommendationItem): AiRecommenda
   };
 }
 
+function getRecommendationTierWeight(item: AiRecommendationItem) {
+  switch (item.recommendationTier) {
+    case 'ai-detailed':
+      return 3;
+    case 'ai-brief':
+      return 2;
+    case 'local-supplement':
+      return 1;
+    default:
+      return item.reason ? 2 : 1;
+  }
+}
+
 function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecommendationItem[] {
   let commentaryCount = 0;
 
@@ -1880,12 +1893,19 @@ function mergeAiAndLocalRecommendations(
       if (seenTourIds.has(item.tourId)) return false;
       seenTourIds.add(item.tourId);
       return true;
-    });
+    })
+    .map((item) => ({
+      ...item,
+      recommendationTier: item.reason ? 'ai-detailed' : 'ai-brief',
+    } satisfies AiRecommendationItem));
   const supplementalLocalItems = localItems.filter((item) => {
     if (seenTourIds.has(item.tourId)) return false;
     seenTourIds.add(item.tourId);
     return true;
-  });
+  }).map((item) => ({
+    ...item,
+    recommendationTier: 'local-supplement',
+  } satisfies AiRecommendationItem));
 
   return limitRecommendationCommentary([...primaryAiItems, ...supplementalLocalItems]);
 }
@@ -2241,7 +2261,7 @@ function prioritizeRecommendationItems(
     rankedItems.push(item);
   }
 
-  return rankedItems
+  const sortedRankedItems = rankedItems
     .map((item, index) => {
       const primitive = primitiveByTourId.get(item.tourId);
       const localRank = context.candidateTours?.findIndex((tour) => tour.id === item.tourId) ?? -1;
@@ -2263,15 +2283,23 @@ function prioritizeRecommendationItems(
       return {
         item,
         index,
+        recommendationTierWeight: getRecommendationTierWeight(item),
         detailScore,
         reasonQualityScore: detailScore + (genericBriefReason ? -4 : 0) + (item.reason ? 2 : 0) + Math.min(3, Math.floor(reasonLength / 30)),
         reasonLength,
         hasReason: Boolean(item.reason),
         localRank,
+        matchedDestinationHints: primitive ? getMatchedDestinationHints(intent, primitive) : [],
         ...relevance,
       };
     })
     .sort((left, right) => {
+      const tierGap = right.recommendationTierWeight - left.recommendationTierWeight;
+      if (tierGap !== 0) return tierGap;
+
+      const destinationCoverageGap = right.matchedDestinationHints.length - left.matchedDestinationHints.length;
+      if (destinationCoverageGap !== 0) return destinationCoverageGap;
+
       if (coverageTerms.length > 0) {
         const coverageGap = right.coverageCount - left.coverageCount;
         if (coverageGap !== 0) return coverageGap;
@@ -2312,7 +2340,61 @@ function prioritizeRecommendationItems(
       }
       return left.index - right.index;
     })
+    .map(({ item, matchedDestinationHints, index }) => ({
+      item,
+      matchedDestinationHints,
+      index,
+    }));
+
+  return rebalanceItemsForExplicitDestinationCoverage(sortedRankedItems, intent)
     .map(({ item }) => item);
+}
+
+function rebalanceItemsForExplicitDestinationCoverage(
+  rankedItems: Array<{ item: AiRecommendationItem; matchedDestinationHints: string[]; index: number }>,
+  intent: AiTravelIntent | null,
+) {
+  const explicitDestinations = uniqueStrings(intent?.destinationHints || []).slice(0, 4);
+  if (explicitDestinations.length < 2 || rankedItems.length < 2) return rankedItems;
+
+  const availableDestinations = new Set(
+    rankedItems.flatMap((entry) => entry.matchedDestinationHints),
+  );
+  if (availableDestinations.size < 2) return rankedItems;
+
+  const diversifiedCount = Math.min(rankedItems.length, Math.max(4, explicitDestinations.length * 3));
+  const uncovered = new Set(explicitDestinations.filter((hint) => availableDestinations.has(hint)));
+  if (uncovered.size < 2) return rankedItems;
+
+  const pool = [...rankedItems];
+  const diversified: typeof rankedItems = [];
+
+  while (diversified.length < diversifiedCount && pool.length > 0) {
+    let bestIndex = 0;
+    let bestNewCoverage = -1;
+    let bestCoverageCount = -1;
+
+    for (let index = 0; index < pool.length; index += 1) {
+      const entry = pool[index];
+      const newCoverage = entry.matchedDestinationHints.filter((hint) => uncovered.has(hint)).length;
+      const coverageCount = entry.matchedDestinationHints.length;
+      if (
+        newCoverage > bestNewCoverage ||
+        (newCoverage === bestNewCoverage && coverageCount > bestCoverageCount)
+      ) {
+        bestIndex = index;
+        bestNewCoverage = newCoverage;
+        bestCoverageCount = coverageCount;
+      }
+    }
+
+    const [selected] = pool.splice(bestIndex, 1);
+    diversified.push(selected);
+    selected.matchedDestinationHints.forEach((hint) => uncovered.delete(hint));
+  }
+
+  if (diversified.length === 0) return rankedItems;
+  return [...diversified, ...pool];
 }
 
 function getWeekday(date: string) {
@@ -2857,6 +2939,13 @@ function getMatchedDestinationHint(intent: AiTravelIntent | null, primitive: Rec
   if (primitiveHasConflictingTitleDestination(intent, primitive)) return '';
   const corpus = `${primitive.destination} ${primitive.title}`;
   return intent.destinationHints.find((hint) => destinationHintsMatchCorpus([hint], corpus)) || '';
+}
+
+function getMatchedDestinationHints(intent: AiTravelIntent | null, primitive: RecommendationPrimitive) {
+  if (!intent?.destinationHints?.length) return [];
+  if (primitiveHasConflictingTitleDestination(intent, primitive)) return [];
+  const corpus = `${primitive.destination} ${primitive.title}`;
+  return intent.destinationHints.filter((hint) => destinationHintsMatchCorpus([hint], corpus));
 }
 
 function rankPrimitive(

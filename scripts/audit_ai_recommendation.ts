@@ -1742,6 +1742,76 @@ assert.ok(explicitDestinationPriority.slice(0, 8).every((item) => ['gx-border-1'
 assert.ok(!explicitDestinationPriority.slice(0, 8).some((item) => ['gd-detour', 'yn-detour'].includes(item.tourId)));
 assert.ok(true, 'when explicit destination hits are already sufficient, conflicting detours should not be reinserted into the final list');
 
+{
+  const destinationCoverageTours = [
+    candidate({
+      id: 'gx-detailed',
+      title: '广西德天瀑布中越边境4天',
+      destination: '广西',
+      duration: 4,
+      price: 1899,
+      tags: ['边境', '山水'],
+      highlights: ['德天瀑布', '中越边境'],
+      theme: '自然风光',
+    }),
+    candidate({
+      id: 'vn-detailed',
+      title: '越南下龙湾河内5天',
+      destination: '越南',
+      duration: 5,
+      price: 3199,
+      tags: ['海湾', '联游'],
+      highlights: ['下龙湾', '河内'],
+      theme: '境外度假',
+    }),
+    candidate({
+      id: 'gx-single',
+      title: '广西桂林阳朔3天',
+      destination: '广西',
+      duration: 3,
+      price: 1499,
+      tags: ['山水'],
+      highlights: ['桂林', '阳朔'],
+      theme: '自然风光',
+    }),
+    candidate({
+      id: 'vn-single',
+      title: '越南芽庄5天',
+      destination: '越南',
+      duration: 5,
+      price: 2899,
+      tags: ['海岛'],
+      highlights: ['芽庄'],
+      theme: '海岛度假',
+    }),
+  ];
+
+  const destinationCoverageRanked = prioritizeRecommendationItems(
+    [
+      { tourId: 'gx-single', score: 99, reason: '广西单目的地团。', matchedSignals: ['广西'] },
+      { tourId: 'vn-single', score: 97, reason: '越南单目的地团。', matchedSignals: ['越南'] },
+      { tourId: 'gx-detailed', score: 88, reason: '广西边境线更完整，也更像联游里的前半段。', matchedSignals: ['广西', '边境'] },
+      { tourId: 'vn-detailed', score: 86, reason: '越南这条能补足另一半目的地。', matchedSignals: ['越南', '联游'] },
+    ],
+    {
+      candidateTours: destinationCoverageTours,
+      intent: { destinationHints: ['广西', '越南'], weatherSensitivity: [], departureWeekdays: [] },
+      userText: '给我找广西越南联游',
+    },
+  );
+  assert.deepEqual(
+    destinationCoverageRanked.slice(0, 2).map((item) => item.tourId).sort(),
+    ['gx-detailed', 'vn-detailed'],
+    'combined destination requests should surface both destinations ahead of single-destination matches',
+  );
+}
+
+{
+  const followUpQuery = buildLocalRecommendationQuery('继续细调，预算600以内，优先海边和温泉');
+  assert.ok(followUpQuery.budget.max !== null);
+  assert.ok(followUpQuery.themeHints.some((hint) => /海边|温泉/.test(hint)) || followUpQuery.coverageTerms.length > 0);
+}
+
 const ambiguousWetlandPrimitive = buildTourPrimitive(candidate({
   id: 'yn-wetland',
   title: '云南腾冲瑞丽芒市5天 北海湿地 和顺古镇',
@@ -2120,6 +2190,82 @@ const reordered = prioritizeRecommendationItems(
   assert.ok(
     firstGuilinIndex >= 0 && firstGuilinIndex < 10,
     `expected a Guilin/Guangxi tour in top 10 for Friday-evening/Sunday-return query, first found at ${firstGuilinIndex + 1}`,
+  );
+}
+
+// ─── 回归测试：最终排序应显式遵循 AI详细 > AI简要 > 本地补位 ───
+{
+  const aiTierTours = [
+    candidate({
+      id: 'ai-detailed-top',
+      title: '桂林周末动车3天',
+      destination: '桂林',
+      duration: 3,
+      price: 999,
+      departureDate: '2026-06-05',
+      departureDates: ['2026-06-05'],
+      tags: ['山水'],
+      theme: '自然风光',
+    }),
+    candidate({
+      id: 'ai-brief-second',
+      title: '广东周末温泉3天',
+      destination: '广东',
+      duration: 3,
+      price: 399,
+      departureDate: '2026-06-05',
+      departureDates: ['2026-06-05'],
+      tags: ['温泉'],
+      theme: '温泉度假',
+    }),
+    candidate({
+      id: 'local-third',
+      title: '广东补位休闲2天',
+      destination: '广东',
+      duration: 2,
+      price: 299,
+      departureDate: '2026-06-05',
+      departureDates: ['2026-06-05'],
+      tags: ['休闲'],
+      theme: '休闲度假',
+    }),
+  ];
+
+  const aiTierSorted = prioritizeRecommendationItems(
+    [
+      {
+        tourId: 'local-third',
+        score: 999,
+        reason: '本地补位高分',
+        matchedSignals: ['本地补位'],
+        recommendationTier: 'local-supplement',
+      },
+      {
+        tourId: 'ai-brief-second',
+        score: 120,
+        reason: '可考虑',
+        matchedSignals: ['周末'],
+        recommendationTier: 'ai-brief',
+      },
+      {
+        tourId: 'ai-detailed-top',
+        score: 60,
+        reason: '这条线周五晚出发，周日回程，桂林山水主线完整，AI 明确认为更符合你的周末短线需求。',
+        matchedSignals: ['周末', '山水'],
+        recommendationTier: 'ai-detailed',
+      },
+    ],
+    {
+      candidateTours: aiTierTours,
+      intent: buildHardIntentFromText('周五晚上出发，周日返回'),
+      userText: '周五晚上出发，周日返回',
+    },
+  );
+
+  assert.deepEqual(
+    aiTierSorted.map((item) => item.tourId),
+    ['ai-detailed-top', 'ai-brief-second', 'local-third'],
+    'tier ordering should dominate raw score when final recommendations are merged',
   );
 }
 

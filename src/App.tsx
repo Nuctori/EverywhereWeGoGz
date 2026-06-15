@@ -15,6 +15,7 @@ const QUICK_DESTINATIONS = [
 export interface AiSearchRequest {
   id: number;
   prompt: string;
+  searchQuery: string;
 }
 
 function App() {
@@ -47,7 +48,9 @@ function App() {
     setAiSearchRequest({
       id: Date.now(),
       prompt,
+      searchQuery: prompt,
     });
+    setSubmittedSearchQuery(prompt);
 
     const listEl = document.getElementById('tour-list');
     if (listEl) {
