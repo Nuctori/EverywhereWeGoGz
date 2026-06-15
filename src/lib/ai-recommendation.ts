@@ -1163,6 +1163,10 @@ function scoreTour(
   const signals: string[] = [];
   let score = 0;
 
+  if (isLikelyAiNonTour(primitive)) {
+    score -= 30;
+  }
+
   for (const hint of query.destinationHints) {
     if (destinationHintsMatchCorpus([hint], `${tour.destination} ${tour.title} ${corpus}`)) {
       score += 18;
@@ -2081,7 +2085,53 @@ function getItemCoverageMetrics(
   };
 }
 
-// ??????????????????????????????????????????
+function getBudgetFitTier(price: number, intent: AiTravelIntent | null) {
+  const hasMin = Number.isFinite(intent?.budgetMin ?? NaN);
+  const hasMax = Number.isFinite(intent?.budgetMax ?? NaN);
+  const budgetMin = hasMin ? Number(intent?.budgetMin) : null;
+  const budgetMax = hasMax ? Number(intent?.budgetMax) : null;
+  if (budgetMin === null && budgetMax === null) return 0;
+
+  if (budgetMin !== null && price < budgetMin) return -2;
+  if (budgetMax !== null) {
+    if (price <= budgetMax) return 2;
+    if (price <= budgetMax * 1.25) return 1;
+    return -2;
+  }
+
+  return 2;
+}
+
+function getNonBudgetConflictCount(reasons: string[]) {
+  return reasons.filter((reason) => !/^价格(?:高于|低于)预算/.test(reason)).length;
+}
+
+function getRecommendationRelevanceMetrics(
+  item: AiRecommendationItem,
+  primitive: RecommendationPrimitive | undefined,
+  context: {
+    intent: AiTravelIntent | null;
+    coverageTerms: string[];
+    conflictReasons: string[];
+  },
+) {
+  const coverage = primitive
+    ? getItemCoverageMetrics(primitive, context.coverageTerms)
+    : { matchedTerms: [], coverageCount: 0, coveragePercent: 0 };
+  const budgetFitTier = primitive ? getBudgetFitTier(primitive.price, context.intent) : 0;
+  const nonBudgetConflictCount = getNonBudgetConflictCount(context.conflictReasons);
+
+  return {
+    coverageCount: coverage.coverageCount,
+    coveragePercent: coverage.coveragePercent,
+    matchedTerms: coverage.matchedTerms,
+    budgetFitTier,
+    nonBudgetConflictCount,
+    totalConflictCount: context.conflictReasons.length,
+    aiScore: item.score,
+  };
+}
+
 function prioritizeRecommendationItems(
   items: AiRecommendationItem[],
   context?: {
@@ -2100,23 +2150,20 @@ function prioritizeRecommendationItems(
   const primitiveByTourId = new Map(
     context.candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]),
   );
-  const regularItems: AiRecommendationItem[] = [];
-  const alternativeItems: AiRecommendationItem[] = [];
+  const intent = context.intent ?? null;
+  const coverageTerms = getCoverageTermsForQuality(context.userText);
+  const rankedItems: AiRecommendationItem[] = [];
 
   for (const item of prioritized) {
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive) {
-      if (isAlternativeRecommendation(item)) {
-        alternativeItems.push(item);
-      } else {
-        regularItems.push(item);
-      }
+      rankedItems.push(item);
       continue;
     }
 
-    const conflictReasons = getPrimitiveConflictReasons(context.intent, primitive);
+    const conflictReasons = getPrimitiveConflictReasons(intent, primitive);
     if (conflictReasons.length > 0) {
-      alternativeItems.push(
+      rankedItems.push(
         isAlternativeRecommendation(item)
           ? item
           : markAsAlternativeRecommendation(item, conflictReasons),
@@ -2124,19 +2171,21 @@ function prioritizeRecommendationItems(
       continue;
     }
 
-    if (isAlternativeRecommendation(item)) {
-      alternativeItems.push(item);
-    } else {
-      regularItems.push(item);
-    }
+    rankedItems.push(item);
   }
 
-  const regularRanked = regularItems
+  return rankedItems
     .map((item, index) => {
       const primitive = primitiveByTourId.get(item.tourId);
       const localRank = context.candidateTours?.findIndex((tour) => tour.id === item.tourId) ?? -1;
       const reason = stripTerminalPunctuation(item.reason || '');
       const reasonLength = reason.replace(/\s+/g, '').length;
+      const conflictReasons = primitive ? getPrimitiveConflictReasons(intent, primitive) : [];
+      const relevance = getRecommendationRelevanceMetrics(item, primitive, {
+        intent,
+        coverageTerms,
+        conflictReasons,
+      });
       const detailScore = primitive
         ? Math.min(20, Math.floor(reasonLength / 10))
           + (reasonMentionsCandidateFact(reason, primitive) ? 4 : 0)
@@ -2150,10 +2199,27 @@ function prioritizeRecommendationItems(
         reasonLength,
         hasReason: Boolean(item.reason),
         localRank,
-        aiScore: item.score,
+        ...relevance,
       };
     })
     .sort((left, right) => {
+      if (coverageTerms.length > 0) {
+        const coverageGap = right.coverageCount - left.coverageCount;
+        if (coverageGap !== 0) return coverageGap;
+
+        const coveragePercentGap = right.coveragePercent - left.coveragePercent;
+        if (coveragePercentGap !== 0) return coveragePercentGap;
+      }
+
+      const budgetGap = right.budgetFitTier - left.budgetFitTier;
+      if (budgetGap !== 0) return budgetGap;
+
+      const hardConflictGap = left.nonBudgetConflictCount - right.nonBudgetConflictCount;
+      if (hardConflictGap !== 0) return hardConflictGap;
+
+      const conflictGap = left.totalConflictCount - right.totalConflictCount;
+      if (conflictGap !== 0) return conflictGap;
+
       const aiGap = right.aiScore - left.aiScore;
       if (Math.abs(aiGap) > 6) return aiGap;
 
@@ -2170,8 +2236,6 @@ function prioritizeRecommendationItems(
       return left.index - right.index;
     })
     .map(({ item }) => item);
-
-  return [...regularRanked, ...alternativeItems];
 }
 
 function getWeekday(date: string) {
@@ -3532,7 +3596,9 @@ function extractCandidateCoverageTerms(text: string | undefined) {
   return uniqueStrings([
     ...collectCoverageTermsFromAliases(normalized),
     ...lexicalTerms,
-  ]).slice(0, 12);
+  ])
+    .filter((term) => !/(?:^|[\s\d])(预算|价格|费用|花费|人均|以内|以下|以上|左右|元|块|rmb|人民币|\d)/i.test(term))
+    .slice(0, 12);
 }
 
 function getPrimitiveCoverageScore(primitive: RecommendationPrimitive, terms: string[]) {
