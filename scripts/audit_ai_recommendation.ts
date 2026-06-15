@@ -1507,6 +1507,87 @@ const defaultSliderBudgetIntent = buildHardIntentFromText(
 );
 assert.equal(defaultSliderBudgetIntent?.budgetMax ?? null, null);
 
+const hotSpringBeachBudgetQuery = '帮我找同时带温泉和沙滩的团. 预算600以内。';
+const hotSpringBeachBudgetIntent = buildHardIntentFromText(hotSpringBeachBudgetQuery);
+assert.equal(hotSpringBeachBudgetIntent?.budgetMax, 600);
+const hotSpringBeachBudgetLocal = localRecommendations(realTours, hotSpringBeachBudgetQuery);
+const hotSpringBeachBudgetTopTours = hotSpringBeachBudgetLocal
+  .slice(0, 6)
+  .map((item) => realTours.find((tour) => tour.id === item.tourId))
+  .filter((tour): tour is AiRecommendationCandidate => Boolean(tour));
+assert.ok(hotSpringBeachBudgetTopTours.length > 0);
+for (const tour of hotSpringBeachBudgetTopTours) {
+  const primitive = buildTourPrimitive(tour);
+  assert.ok(
+    primitive.experienceCategories.includes('温泉泡汤') &&
+      primitive.experienceCategories.includes('海边沙滩'),
+    `expected top budget hot-spring/beach result to cover both terms, got ${tour.title} (${primitive.experienceCategories.join('/')})`,
+  );
+  assert.ok(
+    tour.price <= 600,
+    `expected top budget hot-spring/beach result to stay within soft budget tier, got ${tour.title} ￥${tour.price}`,
+  );
+}
+
+const hotSpringOnlyBudgetTour = candidate({
+  id: 'hot-spring-only-budget',
+  title: '广东温泉2天',
+  destination: '广东',
+  duration: 2,
+  price: 199,
+  theme: '温泉',
+  tags: ['温泉'],
+  highlights: ['泡温泉'],
+});
+const beachOnlyBudgetTour = candidate({
+  id: 'beach-only-budget',
+  title: '广东海滩2天',
+  destination: '广东',
+  duration: 2,
+  price: 199,
+  theme: '海边',
+  tags: ['海边'],
+  highlights: ['沙滩散步'],
+});
+const bothBudgetTour = candidate({
+  id: 'both-budget',
+  title: '广东海边温泉沙滩2天',
+  destination: '广东',
+  duration: 2,
+  price: 599,
+  theme: '海边温泉',
+  tags: ['温泉', '沙滩'],
+  highlights: ['泡温泉', '沙滩散步'],
+});
+const bothOverBudgetTour = candidate({
+  id: 'both-over-budget',
+  title: '广东海边温泉沙滩2天高配',
+  destination: '广东',
+  duration: 2,
+  price: 699,
+  theme: '海边温泉',
+  tags: ['温泉', '沙滩'],
+  highlights: ['泡温泉', '沙滩散步'],
+});
+const relevanceSorted = prioritizeRecommendationItems(
+  [
+    { tourId: 'hot-spring-only-budget', score: 99, reason: '便宜温泉', matchedSignals: [] },
+    { tourId: 'beach-only-budget', score: 98, reason: '便宜海滩', matchedSignals: [] },
+    { tourId: 'both-over-budget', score: 97, reason: '温泉和沙滩但略贵', matchedSignals: [] },
+    { tourId: 'both-budget', score: 60, reason: '温泉和沙滩都覆盖', matchedSignals: [] },
+  ],
+  {
+    candidateTours: [hotSpringOnlyBudgetTour, beachOnlyBudgetTour, bothOverBudgetTour, bothBudgetTour],
+    intent: hotSpringBeachBudgetIntent,
+    userText: hotSpringBeachBudgetQuery,
+  },
+);
+assert.deepEqual(
+  relevanceSorted.slice(0, 4).map((item) => item.tourId),
+  ['both-budget', 'both-over-budget', 'hot-spring-only-budget', 'beach-only-budget'],
+  'coverage count should dominate budget-only or single-term matches, while budget fit breaks ties within full coverage',
+);
+
 const uiFilterOnlyIntent = buildHardIntentFromText(
   '找个轻松一点的团',
 );
