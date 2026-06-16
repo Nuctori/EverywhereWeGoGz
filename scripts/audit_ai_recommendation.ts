@@ -21,6 +21,7 @@ const {
   collectLiteralAvoidHints,
   compactCandidates,
   allowsPublicInterestForTurn,
+  enrichPromptCandidatesWithMemoryCoverage,
   finalizeRecommendationSummary,
   getAiResponseIntentQualityIssue,
   getConcreteAiReason,
@@ -29,8 +30,8 @@ const {
   matchesActiveDateFilters,
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
+  mergeAiRankingIntent,
   mergeIntentWithMemory,
-  preservePreviousDestinationForFollowUp,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
@@ -2348,7 +2349,7 @@ const reordered = prioritizeRecommendationItems(
   );
 }
 
-// ─── 回归测试：多轮纠偏不应把上一轮“广西越南联游”改成只看越南 ───
+// ─── 回归测试：多轮语义应由 AI intent 决定，而非本地词表抢先改写 ───
 {
   const previousMemory = {
     destinationHints: ['广西', '越南'],
@@ -2359,23 +2360,101 @@ const reordered = prioritizeRecommendationItems(
     departureWeekdays: [],
     updatedAt: '2026-06-16T00:00:00.000Z',
   };
-  const critiqueIntent = buildHardIntentFromText('你现在推荐的都是越南的旅行团了');
-  const preservedIntent = preservePreviousDestinationForFollowUp(
-    critiqueIntent,
-    '你现在推荐的都是越南的旅行团了',
-    previousMemory,
+  const hardIntent = buildHardIntentFromText('你现在推荐的都是越南的旅行团了');
+  const aiJudgedRefinement = mergeAiRankingIntent(
+    hardIntent,
+    {
+      destinationHints: ['广西', '越南'],
+      departureWeekdays: [],
+      refinementMode: 'refine_previous',
+    },
   );
-  const mergedIntent = mergeIntentWithMemory(preservedIntent, previousMemory);
+  const mergedRefinement = mergeIntentWithMemory(aiJudgedRefinement, previousMemory);
 
   assert.deepEqual(
-    mergedIntent?.destinationHints,
+    mergedRefinement?.destinationHints,
     ['广西', '越南'],
-    'follow-up critique should preserve prior composite destinations instead of replacing with the mentioned destination',
+    'AI judged refinement should preserve the composite destination instead of local extracted text taking over',
   );
   assert.equal(
-    preservedIntent?.refinementMode,
+    mergedRefinement?.refinementMode,
     'refine_previous',
-    'follow-up critique should be treated as refinement, not a new search',
+    'AI refinementMode should take precedence over local hard-intent defaults',
+  );
+
+  const aiJudgedReplacement = mergeAiRankingIntent(
+    hardIntent,
+    {
+      destinationHints: ['越南'],
+      departureWeekdays: [],
+      refinementMode: 'replace_destination',
+    },
+  );
+  const mergedReplacement = mergeIntentWithMemory(aiJudgedReplacement, previousMemory);
+  assert.deepEqual(
+    mergedReplacement?.destinationHints,
+    ['越南'],
+    'AI judged replacement should be able to replace previous destinations without a local phrase whitelist',
+  );
+  assert.equal(
+    mergedReplacement?.refinementMode,
+    'replace_destination',
+    'AI replacement mode should be preserved through memory merge',
+  );
+
+  const basePromptCandidates = compactCandidates(
+    [
+      candidate({
+        id: 'vn-only',
+        title: '越南下龙湾5天',
+        destination: '越南',
+        duration: 5,
+        price: 2399,
+        tags: ['海湾'],
+        highlights: ['下龙湾', '河内'],
+      }),
+      candidate({
+        id: 'gx-memory',
+        title: '广西德天边境3天',
+        destination: '广西',
+        duration: 3,
+        price: 999,
+        tags: ['德天瀑布'],
+        highlights: ['边境风光', '德天瀑布'],
+      }),
+    ],
+    [{ tourId: 'vn-only', score: 99, reason: '当前文本目的地', matchedSignals: ['越南'] }],
+    hardIntent,
+    { intent: hardIntent, userText: '你现在推荐的都是越南的旅行团了' },
+  ).filter((item) => item.id === 'vn-only');
+  const memoryCoveredCandidates = enrichPromptCandidatesWithMemoryCoverage(
+    basePromptCandidates,
+    [
+      candidate({
+        id: 'vn-only',
+        title: '越南下龙湾5天',
+        destination: '越南',
+        duration: 5,
+        price: 2399,
+        tags: ['海湾'],
+        highlights: ['下龙湾', '河内'],
+      }),
+      candidate({
+        id: 'gx-memory',
+        title: '广西德天边境3天',
+        destination: '广西',
+        duration: 3,
+        price: 999,
+        tags: ['德天瀑布'],
+        highlights: ['边境风光', '德天瀑布'],
+      }),
+    ],
+    previousMemory,
+    hardIntent,
+  );
+  assert.ok(
+    memoryCoveredCandidates.some((item) => item.id === 'gx-memory'),
+    'AI prompt pool should retain previous-memory destination candidates so the model can judge follow-up semantics',
   );
 }
 
