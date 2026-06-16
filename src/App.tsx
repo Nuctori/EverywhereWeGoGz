@@ -50,11 +50,11 @@ function App() {
       prompt,
       searchQuery: prompt,
     });
-    setSubmittedSearchQuery(prompt);
-
     const listEl = document.getElementById('tour-list');
     if (listEl) {
-      listEl.scrollIntoView({ behavior: 'smooth' });
+      window.requestAnimationFrame(() => {
+        listEl.scrollIntoView({ behavior: 'smooth' });
+      });
     }
   };
 

@@ -430,7 +430,6 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
-  const [clearedAiRequestId, setClearedAiRequestId] = useState<number | null>(null);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
   const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
@@ -549,14 +548,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     () => ({ normalized: normalizedSearchQuery, terms: searchTerms }),
     [normalizedSearchQuery, searchTerms],
   );
-  const isAiSearchMode = Boolean(
-    aiRecommendationResult ||
-    (
-      aiSearchRequest &&
-      aiSearchRequest.id !== clearedAiRequestId &&
-      aiSearchRequest.prompt.trim().length > 0
-    ),
-  );
+  const isAiSearchMode = Boolean(aiRecommendationResult);
 
   const aiRecommendedCount = useMemo(
     () => aiRecommendationResult?.items.filter((item) => Boolean(item.reason)).length ?? 0,
@@ -737,9 +729,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
-    setClearedAiRequestId(aiSearchRequest?.id ?? null);
     setAiClearVersion((current) => current + 1);
-  }, [aiSearchRequest?.id]);
+  }, []);
 
   const waterfallTours = useMemo(
     () => displayTours.slice(0, visibleCount),

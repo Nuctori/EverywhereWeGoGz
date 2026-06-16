@@ -59,6 +59,31 @@ interface AiRecommendPanelProps {
 }
 
 const MAX_PERSISTED_MESSAGES = 40;
+const scheduleIdleWork = (callback: () => void) => {
+  if (typeof window === 'undefined') return undefined;
+
+  const idleRequest = window.requestIdleCallback?.bind(window);
+  if (idleRequest) {
+    const id = idleRequest(callback, { timeout: 900 });
+    return () => window.cancelIdleCallback?.(id);
+  }
+
+  const id = window.setTimeout(callback, 80);
+  return () => window.clearTimeout(id);
+};
+
+const waitForNextPaint = () =>
+  new Promise<void>((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve();
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      window.setTimeout(resolve, 0);
+    });
+  });
+
 // 进度步骤定义，对应 AiRecommendationProgress.stage，面板进度条按此顺序推进
 const progressSteps: Array<{
   stage: AiRecommendationProgress['stage'];
@@ -173,6 +198,7 @@ export function AiRecommendPanel({
   const [progressState, setProgressState] = useState<AiRecommendationProgress | null>(null);
   const [expandedStage, setExpandedStage] = useState<AiRecommendationProgress['stage'] | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const storageSaveCleanupRef = useRef<ReturnType<typeof scheduleIdleWork>>(undefined);
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
   const didRestoreStoredResultRef = useRef(false);
   const requestVersionRef = useRef(0);
@@ -197,14 +223,20 @@ export function AiRecommendPanel({
       return;
     }
 
-    saveStoredAiChatState({
-      conversationId,
-      input: followUpInput,
-      messages,
-      result,
-      preferenceMemory,
-    }, MAX_PERSISTED_MESSAGES);
+    storageSaveCleanupRef.current?.();
+    storageSaveCleanupRef.current = scheduleIdleWork(() => {
+      saveStoredAiChatState({
+        conversationId,
+        input: followUpInput,
+        messages,
+        result,
+        preferenceMemory,
+      }, MAX_PERSISTED_MESSAGES);
+      storageSaveCleanupRef.current = undefined;
+    });
   }, [conversationId, followUpInput, messages, preferenceMemory, result]);
+
+  useEffect(() => () => storageSaveCleanupRef.current?.(), []);
 
   useEffect(() => {
     if (!detailsOpen) return;
@@ -249,11 +281,6 @@ export function AiRecommendPanel({
       : [createInitialMessage(), userMessage];
     setMessages(nextMessages);
     setLoading(true);
-    if (!preserveResult) {
-      onResultChange(null);
-    }
-    setDetailsOpen(true);
-    setFollowUpInput('');
     setProgressState({
       stage: 'queued',
       label: '已收到需求',
@@ -265,8 +292,16 @@ export function AiRecommendPanel({
         { id: 'prepare', label: '准备需求理解', status: 'pending' },
       ],
     });
+    if (!preserveResult) {
+      onResultChange(null);
+    }
+    setDetailsOpen(true);
+    setFollowUpInput('');
 
     try {
+      await waitForNextPaint();
+      if (requestVersionRef.current !== requestVersion) return;
+
       const nextResult = await requestAiRecommendations({
         conversationId,
         messages: nextMessages,
@@ -312,6 +347,7 @@ export function AiRecommendPanel({
 
   useEffect(() => {
     if (!request || handledRequestIdRef.current === request.id) return;
+    if (!toursReady) return;
     handledRequestIdRef.current = request.id;
     onResultChange(null);
     setProgressState(null);
@@ -319,7 +355,7 @@ export function AiRecommendPanel({
     setDetailsOpen(false);
     setFollowUpInput('');
     void submitPrompt(request.prompt, { preserveResult: false });
-  }, [onResultChange, request, submitPrompt]);
+  }, [onResultChange, request, submitPrompt, toursReady]);
 
   const clearConversation = () => {
     requestVersionRef.current += 1;
