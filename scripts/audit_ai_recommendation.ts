@@ -30,6 +30,7 @@ const {
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
   mergeIntentWithMemory,
+  preservePreviousDestinationForFollowUp,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
@@ -2266,6 +2267,115 @@ const reordered = prioritizeRecommendationItems(
     aiTierSorted.map((item) => item.tourId),
     ['ai-detailed-top', 'ai-brief-second', 'local-third'],
     'tier ordering should dominate raw score when final recommendations are merged',
+  );
+}
+
+// ─── 回归测试：短 reason 不应被当作 AI 详细推荐置顶 ───
+{
+  const tieredItems = mergeAiAndLocalRecommendations(
+    [
+      {
+        tourId: 'brief-guangxi',
+        score: 99,
+        reason: '广西崇左3天，标签含越南。',
+        matchedSignals: ['广西'],
+      },
+      {
+        tourId: 'detailed-guangxi-vietnam',
+        score: 70,
+        reason: '这条线同时覆盖广西边境和越南方向，德天跨国瀑布、通灵峡谷与越南段组合更贴近“广西越南联游”，不是只推荐广西单点。',
+        matchedSignals: ['广西', '越南', '联游'],
+      },
+    ],
+    [{
+      tourId: 'local-supplement',
+      score: 1000,
+      reason: '本地补位高分',
+      matchedSignals: ['本地补位'],
+    }],
+  );
+
+  const sorted = prioritizeRecommendationItems(tieredItems, {
+    candidateTours: [
+      candidate({
+        id: 'brief-guangxi',
+        title: '广西崇左德天3天',
+        destination: '广西',
+        duration: 3,
+        price: 899,
+        tags: ['德天瀑布'],
+        highlights: ['崇左', '德天瀑布'],
+        theme: '自然风光',
+      }),
+      candidate({
+        id: 'detailed-guangxi-vietnam',
+        title: '广西德天越南边境联游4天',
+        destination: '广西',
+        duration: 4,
+        price: 1599,
+        tags: ['广西', '越南', '联游'],
+        highlights: ['德天跨国瀑布', '越南边境', '通灵峡谷'],
+        theme: '边境联游',
+      }),
+      candidate({
+        id: 'local-supplement',
+        title: '广西普通补位2天',
+        destination: '广西',
+        duration: 2,
+        price: 399,
+        tags: ['休闲'],
+        highlights: ['补位'],
+      }),
+    ],
+    intent: buildHardIntentFromText('给我找广西越南联游'),
+    userText: '给我找广西越南联游',
+  });
+
+  assert.equal(
+    tieredItems.find((item) => item.tourId === 'brief-guangxi')?.recommendationTier,
+    'ai-brief',
+    'short screenshot-like reason should be classified as AI brief',
+  );
+  assert.equal(
+    tieredItems.find((item) => item.tourId === 'detailed-guangxi-vietnam')?.recommendationTier,
+    'ai-detailed',
+    'specific multi-destination reason should be classified as AI detailed',
+  );
+  assert.deepEqual(
+    sorted.map((item) => item.tourId),
+    ['detailed-guangxi-vietnam', 'brief-guangxi', 'local-supplement'],
+    'detailed AI recommendation should rank before brief AI and local supplement',
+  );
+}
+
+// ─── 回归测试：多轮纠偏不应把上一轮“广西越南联游”改成只看越南 ───
+{
+  const previousMemory = {
+    destinationHints: ['广西', '越南'],
+    travelStyle: [],
+    mustHave: ['联游'],
+    avoid: [],
+    weatherSensitivity: [],
+    departureWeekdays: [],
+    updatedAt: '2026-06-16T00:00:00.000Z',
+  };
+  const critiqueIntent = buildHardIntentFromText('你现在推荐的都是越南的旅行团了');
+  const preservedIntent = preservePreviousDestinationForFollowUp(
+    critiqueIntent,
+    '你现在推荐的都是越南的旅行团了',
+    previousMemory,
+  );
+  const mergedIntent = mergeIntentWithMemory(preservedIntent, previousMemory);
+
+  assert.deepEqual(
+    mergedIntent?.destinationHints,
+    ['广西', '越南'],
+    'follow-up critique should preserve prior composite destinations instead of replacing with the mentioned destination',
+  );
+  assert.equal(
+    preservedIntent?.refinementMode,
+    'refine_previous',
+    'follow-up critique should be treated as refinement, not a new search',
   );
 }
 

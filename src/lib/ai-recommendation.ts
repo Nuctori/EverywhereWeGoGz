@@ -1375,12 +1375,35 @@ function shouldInheritPreferenceMemoryForTurn(
   void intent;
   if (!memory) return false;
   const normalizedText = text.replace(/\s+/g, '');
-  const isRelativeTurn = /(上一轮|刚才|继续|沿用|保留|类似|这个|这些|上面|前面|再便宜|便宜一点|贵一点|轻松点|换一个|换成|不要|避开|剔除|更接近)/.test(
+  const isRelativeTurn = /(上一轮|刚才|继续|沿用|保留|类似|这个|这些|上面|前面|摘要|排序|排一下|为什么|怎么|口碑|价格|都是|不是|不对|你现在|再便宜|便宜一点|贵一点|轻松点|换一个|换成|不要|避开|剔除|更接近)/.test(
     normalizedText,
   );
   // 经验：只有相对续写才继承上一轮偏好，普通新搜索不要把旧预算/目的地/风格
   // 注入本轮硬意图，否则会把 AI 的判断空间偷偷收窄。
   return isRelativeTurn;
+}
+
+function shouldKeepPreviousDestinationForTurn(text: string, memory: AiPreferenceMemory | null | undefined) {
+  if (!memory?.destinationHints?.length) return false;
+  const normalizedText = text.replace(/\s+/g, '');
+  const isFollowUpQuestion = /(上一轮|刚才|继续|上面|前面|摘要|排序|排一下|口碑|价格|为什么|怎么|都是|不是|不对|你现在|这些|这个)/.test(normalizedText);
+  const mentionedDestinations = collectDestinationHints(normalizeText(text));
+  const explicitlyReplacesDestination = /(换成|改成|只要|只看)/.test(normalizedText) ||
+    (/不要|去掉|排除|剔除/.test(normalizedText) && mentionedDestinations.length > 0);
+  return isFollowUpQuestion && !explicitlyReplacesDestination;
+}
+
+function preservePreviousDestinationForFollowUp(
+  intent: AiTravelIntent | null,
+  text: string,
+  memory: AiPreferenceMemory | null | undefined,
+): AiTravelIntent | null {
+  if (!shouldKeepPreviousDestinationForTurn(text, memory)) return intent;
+  return {
+    ...(intent || { departureWeekdays: [] }),
+    destinationHints: memory?.destinationHints || [],
+    refinementMode: 'refine_previous',
+  };
 }
 
 function getCandidateReturnWeekdays(tour: AiRecommendationCandidate) {
@@ -1865,6 +1888,31 @@ function getRecommendationTierWeight(item: AiRecommendationItem) {
   }
 }
 
+function isDetailedAiRecommendation(item: AiRecommendationItem) {
+  const reason = stripTerminalPunctuation(item.reason || '').replace(/\s+/g, '');
+  if (!reason) return false;
+
+  const reasonLength = reason.length;
+  const matchedSignalCount = uniqueStrings(item.matchedSignals || []).length;
+  const destinationFactCount = collectDestinationHints(normalizeText(reason)).length > 0 ? 1 : 0;
+  const concreteFactCount = [
+    destinationFactCount,
+    /(?:周[一二三四五六日天]|周末|晚出发|晚班|返程|周日|周五)/,
+    /(?:\d+天|\d+晚|三天|两天|五天|行程|节奏)/,
+    /(?:预算|价格|人均|以内|口碑|评分|住宿|动车|高铁|大巴|飞机)/,
+    /(?:适合|因为|覆盖|同时|兼顾|更符合|优先|相比)/,
+  ].filter((fact) => typeof fact === 'number' ? fact > 0 : fact.test(reason)).length;
+  const isTemplateBrief = (
+    reasonLength < 18 ||
+    /^(?:[\p{Script=Han}A-Za-z]{0,12})?(?:\d+天)?(?:，|,)?(?:可考虑|性价比|热门|低价|价格|预算|经典|综合|AI综合推荐|更贴题|适合|符合需求)[。.]?$/u.test(reason) ||
+    /^(?:有|含|带)(?:温泉|沙滩|海边|山水|美食|周末)(?:和|、)?(?:温泉|沙滩|海边|山水|美食)?[。.]?$/.test(reason)
+  );
+
+  if (isTemplateBrief) return false;
+  if (reasonLength >= 42 && concreteFactCount >= 2) return true;
+  return reasonLength >= 28 && concreteFactCount >= 3 && matchedSignalCount >= 2;
+}
+
 function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecommendationItem[] {
   let commentaryCount = 0;
 
@@ -1896,7 +1944,7 @@ function mergeAiAndLocalRecommendations(
     })
     .map((item) => ({
       ...item,
-      recommendationTier: item.reason ? 'ai-detailed' : 'ai-brief',
+      recommendationTier: isDetailedAiRecommendation(item) ? 'ai-detailed' : 'ai-brief',
     } satisfies AiRecommendationItem));
   const supplementalLocalItems = localItems.filter((item) => {
     if (seenTourIds.has(item.tourId)) return false;
@@ -5553,6 +5601,7 @@ export const __aiRecommendationTestHooks = {
   mergeAiAndLocalRecommendations,
   mergeIntentWithMemory,
   normalizeIntent,
+  preservePreviousDestinationForFollowUp,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
@@ -6523,7 +6572,12 @@ export async function requestAiRecommendations({
 
   const text = getLatestUserText(messages);
   const basePreferenceMemory = preferenceMemory ?? null;
-  const baseHardIntent = buildHardIntentFromText(text);
+  const rawBaseHardIntent = buildHardIntentFromText(text);
+  const baseHardIntent = preservePreviousDestinationForFollowUp(
+    rawBaseHardIntent,
+    text,
+    basePreferenceMemory,
+  );
   const memoryForThisTurn = shouldInheritPreferenceMemoryForTurn(text, baseHardIntent, basePreferenceMemory)
     ? basePreferenceMemory
     : null;
