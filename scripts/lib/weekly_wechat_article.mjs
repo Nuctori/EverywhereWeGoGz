@@ -1416,55 +1416,37 @@ function articleMentionsTourTitle(article, title) {
   return matchedFragments.some((fragment) => fragment.length >= 5);
 }
 
-function listFeaturedSectionIndices(lines) {
-  const featuredIntroIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()) && /重点线路|细看/.test(line));
-  const startIndex = featuredIntroIndex >= 0 ? featuredIntroIndex + 1 : 0;
-  const indices = [];
-  for (let index = startIndex; index < lines.length; index += 1) {
-    if (/^##\s+/.test(lines[index].trim()) && index > startIndex) break;
-    if (/^###\s+/.test(lines[index].trim())) indices.push(index);
-  }
-  return indices;
+function isRecommendationHeadingLine(line) {
+  const trimmed = String(line || '').trim();
+  return /^#{2,3}\s+/.test(trimmed) || /^\*\*.+\*\*$/.test(trimmed);
 }
 
-function resolveTourSectionIndex(lines, tour, tourIndex, featuredSectionIndices, assignedSectionIndices) {
-  const directIndex = lines.findIndex(
-    (line, index) =>
-      /^#{2,3}\s+/.test(line.trim()) &&
-      !assignedSectionIndices.has(index) &&
-      articleMentionsTourTitle(line, tour.title),
-  );
-  if (directIndex >= 0) return directIndex;
-
-  const orderedFallback = featuredSectionIndices[tourIndex];
-  if (orderedFallback != null && !assignedSectionIndices.has(orderedFallback)) return orderedFallback;
-  return -1;
+function stripRecommendationHeadingDecorators(line) {
+  return String(line || '')
+    .replace(/^#{2,3}\s+/, '')
+    .replace(/^\*\*(.+)\*\*$/, '$1')
+    .trim();
 }
 
-function buildSectionEntries(lines, tours) {
-  const featuredSectionIndices = listFeaturedSectionIndices(lines);
-  const assignedSectionIndices = new Set();
-  const sectionEntries = tours
-    .map((tour, tourIndex) => {
-      const sectionIndex = resolveTourSectionIndex(
-        lines,
-        tour,
-        tourIndex,
-        featuredSectionIndices,
-        assignedSectionIndices,
-      );
-      if (sectionIndex < 0) return null;
-      assignedSectionIndices.add(sectionIndex);
-      return { tour, sectionIndex };
-    })
-    .filter(Boolean)
-    .sort((left, right) => left.sectionIndex - right.sectionIndex)
-    .map((entry, index, items) => ({
-      ...entry,
-      sectionEnd: index + 1 < items.length ? items[index + 1].sectionIndex : lines.length,
-    }));
-
-  return sectionEntries.sort((left, right) => right.sectionIndex - left.sectionIndex);
+function isGenericRecommendationMetaHeading(text, context) {
+  const normalized = String(text || '').trim();
+  if (!normalized) return true;
+  if (/^本周天气与出游节奏$/.test(normalized)) return true;
+  if (/^本周\d+条推荐$/.test(normalized)) return true;
+  if (/^出行提醒$/.test(normalized)) return true;
+  const groupLabels = new Set([
+    ...(context.recommendationGroups || []).map((group) => String(group.label || '').trim()),
+    '亲子短途',
+    '周末近场',
+    '轻巧出发',
+    '轻松度假',
+    '长线清凉',
+    '品质长线',
+    '预算友好',
+    '编辑补位',
+    '远线加看',
+  ]);
+  return groupLabels.has(normalized);
 }
 
 function buildQrImageUrl(bookingUrl) {
@@ -1509,6 +1491,13 @@ function stripInlineBookingLink(line) {
     .trim();
 }
 
+function sanitizeDisplayTitle(value) {
+  return String(value || '')
+    .replace(/^爆款/, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function normalizeRecommendationSection(sectionLines, tour, websiteUrl) {
   const headingLine = sectionLines[0] || '';
   const detailUrl = buildTourDetailUrl(tour, websiteUrl);
@@ -1539,7 +1528,7 @@ function normalizeRecommendationSection(sectionLines, tour, websiteUrl) {
 
   if (!chosenImageLine) {
     const imageUrl = resolveArticleAssetUrl(tour.images?.[0] || '', websiteUrl);
-    if (imageUrl) chosenImageLine = `![${tour.title}](${imageUrl})`;
+    if (imageUrl) chosenImageLine = `![${sanitizeDisplayTitle(tour.title)}](${imageUrl})`;
   }
 
   const output = [headingLine];
@@ -1555,7 +1544,7 @@ function normalizeRecommendationSection(sectionLines, tour, websiteUrl) {
       '',
       '扫码查看详情',
       '',
-      `![${tour.title} 报名二维码](${buildQrImageUrl(detailUrl)})`,
+      `![${sanitizeDisplayTitle(tour.title)} 报名二维码](${buildQrImageUrl(detailUrl)})`,
     );
   }
   output.push('');
@@ -1575,6 +1564,82 @@ function listArticleTours(context) {
   return [...deduped.values()];
 }
 
+function listAllKnownTours(context) {
+  const deduped = new Map();
+  const buckets = [
+    ...(context.recommendationGroups || []).flatMap((group) => group.tours || []),
+    ...(context.selectedTours || []),
+    ...(context.candidateTours || []),
+    ...(context.fallbackCandidateTours || []),
+  ];
+  for (const tour of buckets) {
+    if (tour?.id && !deduped.has(tour.id)) deduped.set(tour.id, tour);
+  }
+  return [...deduped.values()];
+}
+
+function extractTourIdFromSectionLines(sectionLines) {
+  for (const line of sectionLines) {
+    const match = String(line || '').match(/\[(?:查看行程|查看线路|立即查看)]\((https?:\/\/[^)\s]+)\)/);
+    if (!match) continue;
+    const url = match[1];
+    const tourMatch = url.match(/[?&]tour=([^&#)]+)/);
+    if (tourMatch?.[1]) return decodeURIComponent(tourMatch[1]);
+  }
+  return '';
+}
+
+function buildSectionEntries(lines, context) {
+  const articleTours = listArticleTours(context);
+  const allTours = listAllKnownTours(context);
+  const tourById = new Map(allTours.map((tour) => [tour.id, tour]));
+  const recommendationIntroIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()) && /本周.*推荐/.test(line));
+  const searchStart = recommendationIntroIndex >= 0 ? recommendationIntroIndex + 1 : 0;
+  const orderedStarts = [];
+
+  for (let index = searchStart; index < lines.length; index += 1) {
+    const trimmed = lines[index].trim();
+    if (!isRecommendationHeadingLine(trimmed)) continue;
+    const headingText = stripRecommendationHeadingDecorators(trimmed);
+    if (!headingText) continue;
+    if (isGenericRecommendationMetaHeading(headingText, context)) continue;
+    const isBoldHeading = /^\*\*.+\*\*$/.test(trimmed);
+    const isTourHeading = allTours.some((tour) => articleMentionsTourTitle(headingText, tour.title));
+    const looksNumberedRecommendation = /^\d+\.\s+/.test(headingText);
+    if (isBoldHeading || isTourHeading || looksNumberedRecommendation) orderedStarts.push(index);
+  }
+  const orderedStartSet = new Set(orderedStarts);
+
+  const entries = [];
+  for (let entryIndex = 0; entryIndex < orderedStarts.length; entryIndex += 1) {
+    const sectionIndex = orderedStarts[entryIndex];
+    const sectionEnd = (() => {
+      for (let cursor = sectionIndex + 1; cursor < lines.length; cursor += 1) {
+        if (orderedStartSet.has(cursor)) return cursor;
+        if (/^#{2,3}\s+/.test(lines[cursor].trim())) return cursor;
+      }
+      return lines.length;
+    })();
+    const sectionLines = lines.slice(sectionIndex, sectionEnd);
+    const tourId = extractTourIdFromSectionLines(sectionLines);
+    let tour = tourId ? tourById.get(tourId) : null;
+    if (!tour) {
+      const headingLine = stripRecommendationHeadingDecorators(sectionLines[0] || '');
+      tour = allTours.find((candidate) => articleMentionsTourTitle(headingLine, candidate.title));
+    }
+    if (!tour) {
+      const orderedFallback = articleTours[entries.length];
+      if (orderedFallback?.id && !entries.some((entry) => entry.tour?.id === orderedFallback.id)) {
+        tour = orderedFallback;
+      }
+    }
+    if (!tour) continue;
+    entries.push({ tour, sectionIndex, sectionEnd });
+  }
+
+  return entries.sort((left, right) => right.sectionIndex - left.sectionIndex);
+}
+
 export function enrichWeeklyArticleMedia(article, context, options = {}) {
   const websiteUrl = options.websiteUrl || DEFAULT_WEBSITE_URL;
   const lines = article.replace(/\r\n/g, '\n').split('\n');
@@ -1591,7 +1656,7 @@ export function enrichWeeklyArticleMedia(article, context, options = {}) {
     }
   }
 
-  const sectionEntries = buildSectionEntries(lines, articleTours);
+  const sectionEntries = buildSectionEntries(lines, context);
 
   sectionEntries.forEach(({ tour, sectionIndex, sectionEnd }) => {
     const rebuiltSection = normalizeRecommendationSection(lines.slice(sectionIndex, sectionEnd), tour, websiteUrl);
@@ -1718,7 +1783,7 @@ export function validateGeneratedArticle(article, context) {
   if (detailUrls.length > 0 && uniqueDetailUrls.size !== detailUrls.length) {
     issues.push('Article reuses the same route detail URL more than once.');
   }
-  const sectionEntries = buildSectionEntries(articleLines, articleTours);
+  const sectionEntries = buildSectionEntries(articleLines, context);
   for (const entry of sectionEntries) {
     const rawSection = articleLines.slice(entry.sectionIndex, entry.sectionEnd).join('\n');
     const visibleText = rawSection

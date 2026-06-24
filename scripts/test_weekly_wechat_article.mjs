@@ -303,6 +303,65 @@ assert.ok(
   ),
 );
 
+const articleWithBoldRecommendationTitles = `---
+title: "这周想找清凉感，广州出发可以这样玩"
+summary: "雷雨和闷热一起出现的这周，更适合把真山水、亲水活动和轻松住一晚的节奏排进周末。"
+author: "老广旅行"
+cover: "/data/image-cache/qingyuan.webp"
+---
+
+# 这周想找清凉感，广州出发可以这样玩
+
+## 本周天气与出游节奏
+
+未来7天广州大致在25-34°C之间，周末有阵雨，真山水、漂流和住下来慢慢放松的路线会更吃香。想避开闷热硬扛的感觉，这周更适合挑车程不算太折腾、到了就能进山进水的线路。
+
+## 本周25条推荐
+
+### 亲子短途
+
+**1. Qingyuan Gorge Rafting 2D**
+
+这条线的好处是清凉感来得很直接，到了峡谷和漂流段就能把广州城里的闷热切开。周末只请很少时间也能走，带娃家庭、想放空的上班族，或者想找点玩水动感的朋友都会比较容易有满足感。
+
+[查看行程](${buildTourDetailUrl(tours[0], getDefaultWebsiteUrl())})
+
+**2. Hezhou West Creek 3D (Yuequanju + 4 Meals)**
+
+这条更像是把山水和慢节奏一起打包，适合想认真离开城市两三天的人。西溪一带的溪谷、树荫和地方风味都比较有夏天出走的气质，天气闷的时候去这种有水有林的地方，体感会比纯城市逛吃舒服很多。
+
+[查看行程](${buildTourDetailUrl(tours[2], getDefaultWebsiteUrl())})
+`;
+
+const enrichedBoldTitles = enrichWeeklyArticleMedia(articleWithBoldRecommendationTitles, context, {
+  websiteUrl: getDefaultWebsiteUrl(),
+});
+assert.ok(
+  enrichedBoldTitles.includes(
+    '![Qingyuan Gorge Rafting 2D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)',
+  ),
+);
+assert.ok(
+  enrichedBoldTitles.includes(
+    '![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)',
+  ),
+);
+assert.ok(
+  enrichedBoldTitles.includes(
+    `地址：${buildTourDetailUrl(tours[0], getDefaultWebsiteUrl())}`,
+  ),
+);
+assert.ok(
+  enrichedBoldTitles.includes(
+    `地址：${buildTourDetailUrl(tours[2], getDefaultWebsiteUrl())}`,
+  ),
+);
+assert.ok(
+  enrichedBoldTitles.includes(
+    `![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(buildTourDetailUrl(tours[0], getDefaultWebsiteUrl()))})`,
+  ),
+);
+
 const articleWithMetaLeak = `---
 title: "测试标题"
 summary: "测试摘要"

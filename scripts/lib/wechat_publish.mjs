@@ -540,8 +540,20 @@ export function injectQrFallbackIntoMarkdown(markdown, options = {}) {
   const lines = cleanedBody.replace(/\r\n/g, '\n').split('\n');
   const output = [];
   let currentHeading = '';
+  const hasSupportNearby = (startIndex) => {
+    for (let offset = 1; offset <= 5 && startIndex + offset < lines.length; offset += 1) {
+      const nearby = lines[startIndex + offset].trim();
+      if (!nearby) continue;
+      if (/^地址：https?:\/\//.test(nearby)) return true;
+      if (/扫码查看详情/.test(nearby)) return true;
+      if (/报名二维码/.test(nearby)) return true;
+      if (/^\[/.test(nearby) || /^\*\*/.test(nearby) || /^#{2,6}\s+/.test(nearby)) return false;
+    }
+    return false;
+  };
 
-  for (const rawLine of lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const rawLine = lines[index];
     const line = rawLine.trimEnd();
     const trimmed = line.trim();
     const headingMatch = trimmed.match(/^#{2,6}\s+(.+)$/);
@@ -560,6 +572,7 @@ export function injectQrFallbackIntoMarkdown(markdown, options = {}) {
     const linkMatch = trimmed.match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/);
     if (linkMatch && /查看行程|查看线路|立即查看/.test(linkMatch[1])) {
       output.push(line);
+      if (hasSupportNearby(index)) continue;
       output.push('');
       output.push(`地址：${linkMatch[2]}`);
       output.push('');
@@ -574,6 +587,7 @@ export function injectQrFallbackIntoMarkdown(markdown, options = {}) {
     );
     if (inlineRouteLink) {
       output.push(line);
+      if (hasSupportNearby(index)) continue;
       output.push('');
       output.push(`地址：${inlineRouteLink[2]}`);
       output.push('');
