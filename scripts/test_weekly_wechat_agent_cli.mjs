@@ -119,14 +119,7 @@ cover: "/data/image-cache/qingyuan.webp"
     return;
   }
 
-  fs.writeFileSync(outputPath, `---
-title: "终审版：这周更值得发的旅行团清单"
-summary: "把清凉、亲子、近场和高铁轻出省放在同一篇里。"
-author: "老广旅行"
-cover: "/data/image-cache/qingyuan.webp"
----
-
-# 终审版：这周更值得发的旅行团清单
+  fs.writeFileSync(outputPath, `# 终审版：这周更值得发的旅行团清单
 
 ## 本周天气与出游节奏
 
@@ -181,6 +174,8 @@ assert.ok(fs.existsSync(path.join(outDir, 'candidate-1.md')));
 assert.ok(fs.existsSync(path.join(outDir, 'candidate-2.md')));
 assert.ok(fs.existsSync(path.join(outDir, 'article.raw.md')));
 assert.ok(result.article.includes('本周天气与出游节奏'));
+assert.ok(result.article.startsWith('---\n'));
+assert.ok(result.article.includes('title: "版本A：广州本周出游清单"') || result.article.includes('title: "版本B：这周出发会更舒服的25条线"'));
 
 assert.equal(normalizeAiderModel('deepseek-v4-flash'), 'deepseek/deepseek-chat');
 assert.equal(normalizeAiderModel('deepseek-reasoner'), 'deepseek/deepseek-reasoner');

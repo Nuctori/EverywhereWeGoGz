@@ -5,6 +5,7 @@ import {
   buildWeeklyArticleContext,
   ensureDir,
   fetchWeatherOutlook,
+  getDefaultAuthor,
   getDefaultWebsiteUrl,
   loadEnvFiles,
   readToursData,
@@ -56,6 +57,91 @@ function stripMarkdownFence(text) {
 
 function parseJsonResponse(text) {
   return JSON.parse(stripMarkdownFence(text));
+}
+
+function parseFrontmatterBlock(article) {
+  const match = String(article || '').match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return null;
+
+  const fields = {};
+  for (const line of match[1].split(/\r?\n/)) {
+    const separatorIndex = line.indexOf(':');
+    if (separatorIndex <= 0) continue;
+    const key = line.slice(0, separatorIndex).trim();
+    let value = line.slice(separatorIndex + 1).trim();
+    value = value.replace(/^['"]|['"]$/g, '');
+    fields[key] = value;
+  }
+  return fields;
+}
+
+function buildFrontmatterBlock(fields) {
+  return [
+    '---',
+    `title: "${String(fields.title || '').replace(/"/g, '\\"')}"`,
+    `summary: "${String(fields.summary || '').replace(/"/g, '\\"')}"`,
+    `author: "${String(fields.author || '').replace(/"/g, '\\"')}"`,
+    `cover: "${String(fields.cover || '').replace(/"/g, '\\"')}"`,
+    '---',
+  ].join('\n');
+}
+
+function deriveArticleTitle(article) {
+  const headingMatch = String(article || '').match(/^#\s+(.+)$/m);
+  return headingMatch ? headingMatch[1].trim() : '';
+}
+
+function deriveArticleSummary(article) {
+  const lines = String(article || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  for (const line of lines) {
+    if (line.startsWith('#')) continue;
+    if (line.startsWith('![')) continue;
+    if (line === '---') continue;
+    return line.slice(0, 120);
+  }
+  return '';
+}
+
+function ensureArticleFrontmatter(article, context, candidateArticles = []) {
+  const existing = parseFrontmatterBlock(article);
+  const candidateFrontmatters = candidateArticles
+    .map((item) => parseFrontmatterBlock(item))
+    .filter(Boolean);
+
+  const merged = {
+    title:
+      existing?.title ||
+      candidateFrontmatters.find((item) => item.title)?.title ||
+      deriveArticleTitle(article) ||
+      '广州出发本周旅行团推荐',
+    summary:
+      existing?.summary ||
+      candidateFrontmatters.find((item) => item.summary)?.summary ||
+      deriveArticleSummary(article) ||
+      '结合天气、时令和出发班期整理的本周旅行团推荐。',
+    author:
+      existing?.author ||
+      candidateFrontmatters.find((item) => item.author)?.author ||
+      getDefaultAuthor(),
+    cover:
+      existing?.cover ||
+      candidateFrontmatters.find((item) => item.cover)?.cover ||
+      context.selectedTours?.[0]?.articleImages?.[0] ||
+      context.selectedTours?.[0]?.images?.[0] ||
+      '',
+  };
+
+  const hasAllRequiredFields = merged.title && merged.summary && merged.author && merged.cover;
+  if (!hasAllRequiredFields) {
+    return article;
+  }
+
+  const body = existing ? String(article).replace(/^---\n[\s\S]*?\n---\n?/, '').trim() : String(article).trim();
+  return `${buildFrontmatterBlock(merged)}\n\n${body}\n`;
 }
 
 function normalizeAiderModel(model) {
@@ -402,7 +488,12 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
     model: aiderModel,
   });
 
-  const finalArticle = stripMarkdownFence(fs.readFileSync(finalPath, 'utf8'));
+  const finalArticle = ensureArticleFrontmatter(
+    stripMarkdownFence(fs.readFileSync(finalPath, 'utf8')),
+    context,
+    candidates,
+  );
+  fs.writeFileSync(finalPath, finalArticle, 'utf8');
   const validation = validateGeneratedArticle(finalArticle, context);
   writeJson(path.join(outDir, 'validation.json'), validation);
   writeJson(path.join(outDir, 'generation-meta.json'), {
