@@ -344,9 +344,62 @@ function repairPlaceholderRouteSections(article, context) {
   return `${rebuilt.join('\n').replace(/\n{4,}/g, '\n\n\n').trim()}\n`;
 }
 
+function forceReplacePlaceholderHeadingSections(article, context) {
+  const lines = String(article || '').split(/\r?\n/);
+  const pools = [
+    ...(context.recommendationGroups || []).flatMap((group) => group.tours || []),
+    ...(context.candidateTours || []),
+    ...(context.fallbackCandidateTours || []),
+  ];
+  const lookup = new Map(pools.filter((tour) => tour?.id).map((tour) => [tour.id, tour]));
+  const usedTourIds = new Set();
+  for (const tour of pools) {
+    if (!tour?.id) continue;
+    const detailUrl = buildTourDetailUrl(tour, getDefaultWebsiteUrl());
+    if (String(article || '').includes(detailUrl)) usedTourIds.add(tour.id);
+  }
+
+  clearArticleDedupeUsage(context);
+  for (const tourId of usedTourIds) {
+    const matchedTour = lookup.get(tourId);
+    if (matchedTour) bumpArticleDedupeUsage(context, matchedTour);
+  }
+
+  const rebuilt = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const trimmed = lines[index].trim();
+    if (trimmed && isRouteSectionHeading(trimmed) && /同第|已列|不再重复/.test(trimmed)) {
+      let end = index + 1;
+      while (end < lines.length) {
+        const nextTrimmed = lines[end].trim();
+        if (nextTrimmed && (isRouteSectionHeading(nextTrimmed) || /^##+\s+/.test(nextTrimmed))) break;
+        end += 1;
+      }
+
+      const replacement = findUnusedTourForArticle(context, usedTourIds);
+      if (replacement) {
+        usedTourIds.add(replacement.id);
+        bumpArticleDedupeUsage(context, replacement);
+        rebuilt.push(buildFallbackRecommendationBlock(replacement, { headingLine: lines[index] }));
+      }
+      index = end - 1;
+      continue;
+    }
+
+    if (/^（.*实际25条已.*）$/.test(trimmed) || /^（实际25条已.*）$/.test(trimmed)) {
+      continue;
+    }
+
+    rebuilt.push(lines[index]);
+  }
+
+  return `${rebuilt.join('\n').replace(/\n{4,}/g, '\n\n\n').trim()}\n`;
+}
+
 function postProcessArticle(article, context) {
   let output = ensureOpeningWeatherSection(article, context);
   output = repairPlaceholderRouteSections(output, context);
+  output = forceReplacePlaceholderHeadingSections(output, context);
   output = dedupeArticleRouteBlocks(output, context).article;
   output = ensureOpeningWeatherSection(output, context);
   return output;
