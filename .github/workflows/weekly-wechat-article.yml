@@ -30,21 +30,34 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install Aider
+        run: python3 -m pip install --user aider-chat
+
       - name: Choose run date
         run: echo "RUN_DATE=$(date -u +%F)" >> "$GITHUB_ENV"
 
       - name: Verify weekly article tests
         run: |
           npm run test:weekly-wechat-article
+          npm run test:weekly-wechat-agent-cli
           npm run test:wechat-publish
           npm run test:wechat-publish-bundle
 
-      - name: Generate weekly article
+      - name: Verify DeepSeek token
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          if [ -z "$DEEPSEEK_API_KEY" ]; then
+            echo "DEEPSEEK_API_KEY secret is missing"
+            exit 1
+          fi
+
+      - name: Generate weekly article with Aider + DeepSeek
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_BASE_URL: ${{ secrets.DEEPSEEK_BASE_URL }}
-          DEEPSEEK_MODEL: ${{ secrets.DEEPSEEK_MODEL }}
-        run: npm run generate:weekly-wechat-article -- --date "$RUN_DATE"
+          AIDER_MODEL: ${{ secrets.AIDER_MODEL }}
+        run: npm run generate:weekly-wechat-article -- --date "$RUN_DATE" --variant-count 2
 
       - name: Prepare publish bundle
         env:

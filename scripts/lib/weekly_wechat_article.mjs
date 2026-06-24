@@ -913,7 +913,7 @@ export function buildWeeklyArticleContext(tours, options = {}) {
     runDate,
     season,
     weekWindow,
-    generationMode: 'single-pass-deepseek',
+    generationMode: options.generationMode || 'single-pass-deepseek',
     weatherOutlook,
     seasonalOutlook,
     articleGoal: '每周旅行团公众号推荐文章',

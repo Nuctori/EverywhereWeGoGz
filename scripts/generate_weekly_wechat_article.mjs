@@ -1,21 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  buildWeeklyArticleContext,
-  buildWeeklyArticlePrompt,
-  defaultOutputDir,
-  ensureDir,
   enrichWeeklyArticleMedia,
-  fetchWeatherOutlook,
-  generateWeeklyArticle,
   getDefaultWebsiteUrl,
-  loadEnvFiles,
-  readToursData,
-  resolveDeepSeekConfig,
-  toDateKey,
-  validateGeneratedArticle,
-  writeJson,
 } from './lib/weekly_wechat_article.mjs';
+import { generateWeeklyArticleWithAgentCli } from './lib/weekly_wechat_agent_cli.mjs';
 
 function parseArgs(argv) {
   const options = {};
@@ -37,6 +26,12 @@ function parseArgs(argv) {
     } else if (arg === '--max-article-items' && next) {
       options.maxArticleItems = Number(next);
       index += 1;
+    } else if (arg === '--variant-count' && next) {
+      options.variantCount = Number(next);
+      index += 1;
+    } else if (arg === '--aider-model' && next) {
+      options.aiderModel = next;
+      index += 1;
     }
   }
   return options;
@@ -44,65 +39,12 @@ function parseArgs(argv) {
 
 async function main() {
   const rootDir = process.cwd();
-  loadEnvFiles(rootDir);
   const args = parseArgs(process.argv.slice(2));
-  const runDate = args.runDate || toDateKey();
-  const tours = readToursData(rootDir);
-  let weatherOutlook;
-  try {
-    weatherOutlook = await fetchWeatherOutlook({ location: '广州' });
-  } catch (error) {
-    console.warn(error instanceof Error ? error.message : String(error));
-  }
-  const context = buildWeeklyArticleContext(tours, {
-    runDate,
-    windowDays: args.windowDays,
-    maxCandidates: args.maxCandidates,
-    maxArticleItems: args.maxArticleItems,
-    weatherOutlook,
+  const result = await generateWeeklyArticleWithAgentCli(rootDir, args);
+  const articleWithMedia = enrichWeeklyArticleMedia(result.article, result.context, {
+    websiteUrl: getDefaultWebsiteUrl(),
   });
-  const outDir = args.outDir ? path.resolve(rootDir, args.outDir) : defaultOutputDir(rootDir, runDate);
-
-  ensureDir(outDir);
-  writeJson(path.join(outDir, 'weekly-context.json'), context);
-  writeJson(path.join(outDir, 'selected-tours.json'), context.selectedTours);
-  const config = resolveDeepSeekConfig();
-
-  try {
-    const generated = await generateWeeklyArticle(context, config);
-    const articleWithMedia = enrichWeeklyArticleMedia(generated.article, context, {
-      websiteUrl: getDefaultWebsiteUrl(),
-    });
-    const validation = validateGeneratedArticle(articleWithMedia, context);
-    writeJson(path.join(outDir, 'validation.json'), validation);
-    writeJson(path.join(outDir, 'generation-meta.json'), {
-      runDate,
-      generatedAt: new Date().toISOString(),
-      model: config.model,
-      baseUrl: config.baseUrl,
-      validationOk: validation.ok,
-    });
-    fs.writeFileSync(path.join(outDir, 'prompt.md'), `${generated.prompt.trim()}\n`, 'utf8');
-    fs.writeFileSync(path.join(outDir, 'article.md'), `${articleWithMedia.trim()}\n`, 'utf8');
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    writeJson(path.join(outDir, 'validation.json'), {
-      ok: false,
-      issues: [message],
-      mentionedSelectedTours: 0,
-      expectedSelectedTours: context.selectedTours.length,
-    });
-    writeJson(path.join(outDir, 'generation-meta.json'), {
-      runDate,
-      generatedAt: new Date().toISOString(),
-      model: config.model,
-      baseUrl: config.baseUrl,
-      validationOk: false,
-      error: message,
-    });
-    fs.writeFileSync(path.join(outDir, 'prompt.md'), `${buildWeeklyArticlePrompt(context).trim()}\n`, 'utf8');
-    throw error;
-  }
+  fs.writeFileSync(path.join(result.outDir, 'article.md'), `${articleWithMedia.trim()}\n`, 'utf8');
 }
 
 main().catch(async (error) => {
