@@ -44,14 +44,10 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_BASE_URL: ${{ secrets.DEEPSEEK_BASE_URL }}
           DEEPSEEK_MODEL: ${{ secrets.DEEPSEEK_MODEL }}
-          VITE_AI_FALLBACK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          VITE_AI_FALLBACK_BASE_URL: ${{ secrets.DEEPSEEK_BASE_URL }}
-          VITE_AI_FALLBACK_MODEL: ${{ secrets.DEEPSEEK_MODEL }}
         run: npm run generate:weekly-wechat-article -- --date "$RUN_DATE"
 
       - name: Prepare publish bundle
         env:
-          WECHAT_CONTENT_SOURCE_URL: ${{ secrets.WECHAT_CONTENT_SOURCE_URL }}
           WECHAT_NEED_OPEN_COMMENT: "1"
           WECHAT_ONLY_FANS_CAN_COMMENT: "0"
         run: npm run prepare:wechat-publish-bundle -- --date "$RUN_DATE"

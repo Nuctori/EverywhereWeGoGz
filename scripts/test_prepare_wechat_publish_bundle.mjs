@@ -23,5 +23,6 @@ assert.ok(result.bundlePath.endsWith('publish-bundle.json'));
 assert.ok(fs.existsSync(result.bundle.htmlPath));
 assert.ok(fs.existsSync(result.bundle.uploadCoverPath));
 assert.equal(result.bundle.title, '测试文章');
+assert.equal(result.bundle.sourceUrl, 'https://nuctori.github.io/EverywhereWeGoGz/');
 
 console.log('wechat publish bundle tests passed');

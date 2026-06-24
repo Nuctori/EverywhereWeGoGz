@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {
   buildWeeklyArticleContext,
   buildWeeklyArticlePrompt,
+  enrichWeeklyArticleMedia,
+  getDefaultWebsiteUrl,
   validateGeneratedArticle,
 } from './lib/weekly_wechat_article.mjs';
 
@@ -87,6 +89,8 @@ const prompt = buildWeeklyArticlePrompt(context);
 assert.ok(prompt.includes('frontmatter'));
 assert.ok(prompt.includes('清远峡谷漂流2天'));
 assert.ok(prompt.includes('贵州山水避暑4天'));
+assert.ok(prompt.includes('阅读原文链接固定指向'));
+assert.ok(prompt.includes('正文配图'));
 
 const article = `---
 title: "本周适合出发的两条线路"
@@ -108,5 +112,11 @@ cover: "/data/image-cache/qingyuan.webp"
 
 const validation = validateGeneratedArticle(article, context);
 assert.equal(validation.ok, true);
+
+const enriched = enrichWeeklyArticleMedia(article, context, {
+  websiteUrl: getDefaultWebsiteUrl(),
+});
+assert.ok(enriched.includes('![清远峡谷漂流2天](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)'));
+assert.ok(enriched.includes('![贵州山水避暑4天](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/guizhou.webp)'));
 
 console.log('weekly wechat article tests passed');
