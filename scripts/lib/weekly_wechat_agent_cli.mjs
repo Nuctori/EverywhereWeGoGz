@@ -120,6 +120,25 @@ function deriveArticleSummary(article) {
   return '';
 }
 
+function stripDuplicateFrontmatterAndScaffold(article) {
+  let body = String(article || '').trim();
+  body = body.replace(/^#\s*修订后完整 Markdown 成稿\s*/m, '').trim();
+  body = body.replace(/^#\s*完整 Markdown 成稿\s*/m, '').trim();
+  body = body.replace(/^#\s*最终 Markdown 成稿\s*/m, '').trim();
+
+  const frontmatterMatches = [...body.matchAll(/^---\n[\s\S]*?\n---\n?/gm)];
+  if (frontmatterMatches.length <= 1) return `${body}\n`;
+
+  const first = frontmatterMatches[0];
+  const last = frontmatterMatches[frontmatterMatches.length - 1];
+  const beforeLast = body.slice(0, last.index).trim();
+  const afterLast = body.slice(last.index + last[0].length).trim();
+
+  const primaryFrontmatter = beforeLast.startsWith('---') ? first[0].trim() : '';
+  const normalizedBody = [primaryFrontmatter, afterLast].filter(Boolean).join('\n\n').trim();
+  return `${normalizedBody}\n`;
+}
+
 function findUnusedTourForArticle(context, usedTourIds = new Set()) {
   const pools = [
     ...(context.recommendationGroups || []).flatMap((group) => group.tours || []),
@@ -397,11 +416,13 @@ function forceReplacePlaceholderHeadingSections(article, context) {
 }
 
 function postProcessArticle(article, context) {
-  let output = ensureOpeningWeatherSection(article, context);
+  let output = stripDuplicateFrontmatterAndScaffold(article);
+  output = ensureOpeningWeatherSection(output, context);
   output = repairPlaceholderRouteSections(output, context);
   output = forceReplacePlaceholderHeadingSections(output, context);
   output = dedupeArticleRouteBlocks(output, context).article;
   output = ensureOpeningWeatherSection(output, context);
+  output = stripDuplicateFrontmatterAndScaffold(output);
   return output;
 }
 

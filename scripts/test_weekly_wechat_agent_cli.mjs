@@ -567,6 +567,8 @@ assert.ok(/##\s*(?:1\.\s*)?本周天气与出游节奏/.test(generatedResult.art
 assert.ok(!generatedResult.article.includes('同第1条'));
 assert.ok(!generatedResult.article.includes('同第2条'));
 assert.ok(!generatedResult.article.includes('同第3条'));
+assert.equal((generatedResult.article.match(/^---$/gm) || []).length, 2);
+assert.ok(!generatedResult.article.includes('# 修订后完整 Markdown 成稿'));
 assert.ok(generatedResult.validation.ok);
 
 assert.equal(
