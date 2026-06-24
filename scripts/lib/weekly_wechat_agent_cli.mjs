@@ -284,6 +284,7 @@ function buildResearchPrompt(context) {
     '- recommendation_groups 合计必须正好 25 条，不要写成 30 条、40 条。',
     '- 不要把雅泡/带池/温泉写成词义解释题，只判断值不值得推荐。',
     '- 要主动压制同质化',
+    '- 德天/涠洲/桂林/平潭/双月湾这类同家族、同核心景区、同城市酒店变体，不要重复铺开；每个家族只保留当周最强的一条。',
     '- 不要完全照抄分数或现成入选结果，要结合天气、时令和文案可写性重新挑重点线路',
     '- featured_route_ids 只保留 6 条重点线路，且同一线路家族不要重复霸榜。',
     '- research 里的文字是给编辑团队内部看的，不是给读者看的。seasonal_observations、reason、editorial_angle 都要写成内部判断标签，不要写成可直接复述到成稿里的整句文案。',
@@ -559,14 +560,31 @@ function normalizeResearch(research, context) {
 
 function applyResearchSelectionToContext(context, research) {
   const lookup = buildTourLookup(context);
+  const recommendationGroups = (Array.isArray(research?.recommendation_groups) ? research.recommendation_groups : [])
+    .map((group, index) => {
+      const tours = (Array.isArray(group?.recommendations) ? group.recommendations : [])
+        .map((item) => lookup.get(item?.tour_id))
+        .filter(Boolean);
+      if (tours.length === 0) return null;
+      return {
+        id: group?.group_id || group?.id || `research-group-${index + 1}`,
+        label: group?.group_label || group?.label || `推荐组${index + 1}`,
+        description: group?.angle || group?.editorial_angle || '',
+        tours,
+      };
+    })
+    .filter(Boolean);
+  const curatedCandidateTours = recommendationGroups.flatMap((group) => group.tours || []);
   const selectedTours = (research?.featured_route_ids || [])
     .map((tourId) => lookup.get(tourId))
     .filter(Boolean)
     .slice(0, 6);
-  if (selectedTours.length === 0) return context;
   return {
     ...context,
-    selectedTours,
+    selectedTours: selectedTours.length > 0 ? selectedTours : context.selectedTours,
+    recommendationGroups: recommendationGroups.length > 0 ? recommendationGroups : context.recommendationGroups,
+    aiSelectionBuckets: recommendationGroups.length > 0 ? recommendationGroups : context.aiSelectionBuckets,
+    candidateTours: curatedCandidateTours.length > 0 ? curatedCandidateTours : context.candidateTours,
   };
 }
 
@@ -589,10 +607,12 @@ function buildWriterPrompt(context, researchJson, variantIndex) {
     '- 25 条推荐严格使用 research JSON 里清洗后的推荐结果，合计正好 25 条，不要私自扩成 30 条以上。',
     '- 优先用 featured_route_ids 对应的 6 条作为写得更深的线路，但正文里 25 条都要有完整推荐文案。',
     '- 每条推荐至少 50 个中文字符，至少 3 句，必须写出为什么这周值得去、适合谁、现场体验或节奏感、班期/价格/交通提醒。',
+    '- 交代受众时不要每条都机械写“适合……”，全篇尽量少用这个词，改成“带娃去会更省心 / 情侣去会更松弛 / 周末想换空气的人会更喜欢 / 上班族请一天假也走得动”这种自然说法。',
     '- 山水清凉组优先写真山水、森林、漂流、亲水、泳池、近海，不要让纯温泉酒店线挤占清凉主位。',
     '- 每条推荐都要先写“为什么现在去会舒服/会值”，再写适合谁、现场最有记忆点的画面，最后自然带出班期、价格或交通提醒。',
     '- 文案要让人想出发，不要像给推荐结果写批注，也不要解释“为什么把温泉算作清凉”“为什么这条放在这个组”。',
     '- 25 条都一条一条写，不要再出现“其中6条深度推荐”这类旧结构。',
+    '- 只能写 context JSON 里的 recommendationGroups / selectedTours 已经列出的线路，不要从旧候选池里再额外挑新线。',
     `- 当前是候选版本 ${variantIndex}，请把标题、导语和侧重点与另一版拉开`,
     `- 阅读原文固定：${getDefaultWebsiteUrl()}`,
     '',
@@ -610,7 +630,9 @@ function buildReviewerPrompt(context, researchJson, candidates) {
     '只能输出最终 Markdown，不要解释。',
     '终审重点：文案口吻、天气开头、25条逐条推荐、是否种草、图片、站内详情链接、二维码位置、真实性。',
     '硬性要求：不要出现“速览”“当前数据里”“可以理解为”“别误会成”“模型判断”“候选线路”“综合排序”“作为补充”“适合预算有限”“樱花已过季”“其中6条深度推荐”“同第2条”“同第4条”“侧重亲子”“侧重度假”；每条推荐至少 50 个中文字符。',
+    '全篇不要反复把“适合”写成统一句式；交代受众时请改写成更自然的表达，不要 25 条都像模板填空。',
     '请重点删掉像内部批注、解释推荐逻辑、找补季节错位、机械重复天气句式的写法。成稿必须像给读者看的旅行推荐，而不是像在交作业。',
+    '只能保留 context / research 里已经圈定的 25 条线路，不要把旧候选池里的相似线路再捞回来凑数。',
     '',
     'research JSON：',
     JSON.stringify(researchJson, null, 2),
@@ -635,6 +657,7 @@ function buildRepairPrompt(context, researchJson, article, validation) {
     '返工要求：',
     '- 删除“适合预算有限”“季节虽过”“已过季”“同第2条”“侧重亲子”“侧重度假”这类做题腔或找补句。',
     '- 同一个 detailUrl 不能在正文里重复出现；如果两条路线太像，只保留更像当周主推的一条，换成别的候选。',
+    '- 不要把“适合……”写成每条都重复的模板句，换成更自然的受众表达。',
     '- 必须保持 25 条推荐，每条独立成段，至少 3 句。',
     '- 只能使用 context / research 中真实存在的线路和事实，不要编造。',
     '',

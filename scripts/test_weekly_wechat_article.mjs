@@ -330,6 +330,36 @@ assert.equal(duplicateValidation.ok, false);
 assert.ok(duplicateValidation.issues.some((issue) => issue.includes('same route detail URL')));
 assert.ok(duplicateValidation.issues.some((issue) => issue.includes('同第')));
 
+const articleWithOverusedAudienceTemplate = `---
+title: "测试标题"
+summary: "测试摘要"
+author: "老广旅行"
+cover: "/data/image-cache/qingyuan.webp"
+---
+
+# 测试标题
+
+## 本周天气与出游节奏
+
+未来7天广州闷热带阵雨，真山水和玩水线会更舒服。
+
+## Qingyuan Gorge Rafting 2D
+
+这条线适合家庭，适合情侣，适合朋友，适合周末想换空气的人。峡谷漂流降温直接，玩完一身清爽，周末只请很少时间也能成行。最舒服的时刻是进入漂流河道后，山风和水雾一起扑过来。
+
+## Hezhou West Creek 3D (Yuequanju + 4 Meals)
+
+这条线适合家庭，适合情侣，适合朋友，适合想认真离开城市两三天的人。西溪一带的溪谷、树荫和地方风味都比较有夏天出走的气质，天气闷的时候去这种有水有林的地方，体感会比纯城市逛吃舒服很多。想把周末过得更松一点的人，会更容易喜欢这种不急着赶景点的节奏。
+
+## Hunan High-Speed Rail 4D
+
+这条线适合家庭，适合情侣，适合朋友，适合上班族请一天假接周末的人。四天节奏能把山景、换个城市住两晚的松弛感和出行效率一起兼顾，对想省下赶路体力的人来说，这类线路的舒服感会来得更稳定。要是你想在这周顺手把半径拉远一点，这类高铁线会比长途自驾更省心。
+`;
+
+const audienceTemplateValidation = validateGeneratedArticle(articleWithOverusedAudienceTemplate, context);
+assert.equal(audienceTemplateValidation.ok, false);
+assert.ok(audienceTemplateValidation.issues.some((issue) => issue.includes('模板句')));
+
 const naturalCoolingFixture = {
   id: 'natural-cooling',
   title: '紫云谷溯溪漂流2天',

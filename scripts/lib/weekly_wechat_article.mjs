@@ -47,7 +47,10 @@ const FORBIDDEN_PHRASES = [
 
 const REPETITIVE_PHRASE_LIMITS = [
   { phrase: '雷雨间隙', max: 2 },
-  { phrase: '适合', max: 14 },
+];
+
+const REPETITIVE_REGEX_LIMITS = [
+  { pattern: /适合[^。！？!\n]{0,18}?(人|家庭|情侣|朋友|亲子|出游|旅行|玩家|上班族)/g, max: 8, label: '“适合……”模板句' },
 ];
 
 const NATURAL_COOLING_KEYWORDS = [
@@ -1625,6 +1628,12 @@ export function validateGeneratedArticle(article, context) {
     const count = article.split(phrase).length - 1;
     if (count > max) {
       issues.push(`Phrase "${phrase}" is overused (${count} times).`);
+    }
+  }
+  for (const { pattern, max, label } of REPETITIVE_REGEX_LIMITS) {
+    const count = (article.match(pattern) || []).length;
+    if (count > max) {
+      issues.push(`${label} is overused (${count} times).`);
     }
   }
 
