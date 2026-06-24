@@ -120,6 +120,71 @@ function deriveArticleSummary(article) {
   return '';
 }
 
+function findUnusedTourForArticle(context, usedTourIds = new Set()) {
+  const pools = [
+    ...(context.recommendationGroups || []).flatMap((group) => group.tours || []),
+    ...(context.candidateTours || []),
+  ];
+  for (const tour of pools) {
+    if (!tour?.id || usedTourIds.has(tour.id)) continue;
+    return tour;
+  }
+  return null;
+}
+
+function buildFallbackRecommendationBlock(tour) {
+  const detailUrl = buildTourDetailUrl(tour, getDefaultWebsiteUrl());
+  const imageUrl = tour.articleImages?.[0] || tour.images?.[0] || '';
+  const priceText = typeof tour.price === 'number' ? `${tour.price}${tour.priceUnit || '元/人'}` : '价格以页面为准';
+  const dateText = Array.isArray(tour.departureDates) && tour.departureDates.length > 0
+    ? `最近班期有 ${tour.departureDates.slice(0, 4).join('、')}`
+    : '班期以页面信息为准';
+  const audienceText = Array.isArray(tour.suitableFor) && tour.suitableFor.length > 0
+    ? `${tour.suitableFor.slice(0, 2).join('、')}去会更顺手`
+    : '周末想换空气的人会更喜欢';
+  const highlightA = (tour.highlights || []).find(Boolean) || tour.destination || '现场';
+  const highlightB = (tour.tags || []).find(Boolean) || tour.theme || '节奏';
+  return [
+    `**${tour.title}**`,
+    imageUrl ? `![${tour.title}](${imageUrl})` : '',
+    `${highlightA}在这周更容易写出清凉感或放松感，到了现场不会只是走马观花。${audienceText}，而且${highlightB}这层体验也能把行程撑起来。${dateText}，${priceText}，点开详情就能继续看行程安排。`,
+    `[查看行程](${detailUrl})`,
+  ].filter(Boolean).join('\n\n');
+}
+
+function dedupeArticleRouteBlocks(article, context) {
+  const body = String(article || '');
+  const routePattern = /(\*\*.+?\*\*[\s\S]*?\[查看行程\]\((https?:\/\/[^)]+)\))/g;
+  const seenUrls = new Set();
+  const usedTourIds = new Set();
+  const urlToTour = new Map();
+  for (const tour of [...(context.recommendationGroups || []).flatMap((group) => group.tours || []), ...(context.candidateTours || [])]) {
+    if (!tour?.id) continue;
+    urlToTour.set(buildTourDetailUrl(tour, getDefaultWebsiteUrl()), tour);
+  }
+
+  let duplicateCount = 0;
+  const replaced = body.replace(routePattern, (block, _whole, url) => {
+    const matchedTour = urlToTour.get(url);
+    if (matchedTour?.id) usedTourIds.add(matchedTour.id);
+    if (!seenUrls.has(url)) {
+      seenUrls.add(url);
+      return block;
+    }
+    duplicateCount += 1;
+    const replacement = findUnusedTourForArticle(context, usedTourIds);
+    if (!replacement) return block;
+    usedTourIds.add(replacement.id);
+    seenUrls.add(buildTourDetailUrl(replacement, getDefaultWebsiteUrl()));
+    return buildFallbackRecommendationBlock(replacement);
+  });
+
+  return {
+    article: replaced,
+    duplicateCount,
+  };
+}
+
 export function ensureArticleFrontmatter(article, context, candidateArticles = []) {
   const existing = parseFrontmatterBlock(article);
   const candidateFrontmatters = candidateArticles
@@ -874,7 +939,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
     writingContext,
     candidates,
   );
-  let resolvedArticle = finalArticle;
+  let resolvedArticle = dedupeArticleRouteBlocks(finalArticle, writingContext).article;
   let validation = validateGeneratedArticle(resolvedArticle, writingContext);
 
   const repairAttempts = Math.max(0, Number(options.repairAttempts ?? DEFAULT_REPAIR_ATTEMPTS));
@@ -891,6 +956,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
       writingContext,
       [resolvedArticle, ...candidates],
     );
+    resolvedArticle = dedupeArticleRouteBlocks(resolvedArticle, writingContext).article;
     fs.writeFileSync(finalPath, resolvedArticle, 'utf8');
     validation = validateGeneratedArticle(resolvedArticle, writingContext);
   }
@@ -918,6 +984,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
 }
 
 export {
+  dedupeArticleRouteBlocks,
   extractAiderReplyFromHistory,
   normalizeResearch,
   normalizeAiderModel,

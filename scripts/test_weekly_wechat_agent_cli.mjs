@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  dedupeArticleRouteBlocks,
   ensureArticleFrontmatter,
   extractAiderReplyFromHistory,
   generateWeeklyArticleWithAgentCli,
@@ -274,7 +275,7 @@ assert.equal(normalizeAiderModel('deepseek-v4-flash'), 'deepseek/deepseek-chat')
 assert.equal(normalizeAiderModel('deepseek-reasoner'), 'deepseek/deepseek-reasoner');
 assert.deepEqual(parseJsonResponse('json\n{"ok":true}\n'), { ok: true });
 
-const dedupeContext = {
+const researchDedupeContext = {
   candidateTours: [
     { id: 'gx-a', title: '广西崇左德天瀑布3天', destination: '广西崇左' },
     { id: 'gx-b', title: '广西崇左通灵峡谷3天', destination: '广西崇左' },
@@ -326,7 +327,7 @@ const normalizedResearch = normalizeResearch(
     ],
     featured_route_ids: ['gx-a', 'gx-b', 'gx-c', 'wz-a', 'wz-b', 'qy-a', 'sz-a'],
   },
-  dedupeContext,
+  researchDedupeContext,
 );
 
 assert.equal(
@@ -374,6 +375,79 @@ const filledIds = filledResearch.recommendation_groups.flatMap((group) => group.
 assert.equal(new Set(filledIds).size, filledIds.length);
 assert.ok(filledIds.length > 2);
 assert.ok(filledResearch.recommendation_groups.some((group) => group.group_id === 'balanced_more'));
+
+const dedupeContext = {
+  recommendationGroups: [
+    {
+      id: 'test',
+      label: '测试',
+      tours: [
+        {
+          id: 'tour-a',
+          title: '清远峡谷漂流2天',
+          destination: '广东清远',
+          price: 699,
+          priceUnit: '元/人',
+          departureDates: ['2026-06-26'],
+          suitableFor: ['亲子'],
+          articleImages: ['https://example.com/a.jpg'],
+          highlights: ['峡谷漂流'],
+          tags: ['玩水'],
+        },
+        {
+          id: 'tour-b',
+          title: '阳江海陵岛2天',
+          destination: '广东阳江',
+          price: 499,
+          priceUnit: '元/人',
+          departureDates: ['2026-06-27'],
+          suitableFor: ['情侣'],
+          articleImages: ['https://example.com/b.jpg'],
+          highlights: ['海陵岛'],
+          tags: ['海风'],
+        },
+      ],
+    },
+  ],
+  candidateTours: [
+    {
+      id: 'tour-a',
+      title: '清远峡谷漂流2天',
+      destination: '广东清远',
+      price: 699,
+      priceUnit: '元/人',
+      departureDates: ['2026-06-26'],
+      suitableFor: ['亲子'],
+      articleImages: ['https://example.com/a.jpg'],
+      highlights: ['峡谷漂流'],
+      tags: ['玩水'],
+    },
+    {
+      id: 'tour-b',
+      title: '阳江海陵岛2天',
+      destination: '广东阳江',
+      price: 499,
+      priceUnit: '元/人',
+      departureDates: ['2026-06-27'],
+      suitableFor: ['情侣'],
+      articleImages: ['https://example.com/b.jpg'],
+      highlights: ['海陵岛'],
+      tags: ['海风'],
+    },
+  ],
+};
+
+const articleWithDuplicateLinks = `**清远峡谷漂流2天**
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-a&source=wechat)
+
+**清远峡谷漂流2天 再写一次**
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-a&source=wechat)`;
+
+const dedupedArticle = dedupeArticleRouteBlocks(articleWithDuplicateLinks, dedupeContext).article;
+assert.equal((dedupedArticle.match(/tour=tour-a/g) || []).length, 1);
+assert.equal((dedupedArticle.match(/tour=tour-b/g) || []).length, 1);
 
 assert.equal(
   extractAiderReplyFromHistory(`Update git name\nLLM RESPONSE 2026-06-24T15:36:33\nASSISTANT\n{"ok":true}\n`),
