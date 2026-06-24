@@ -14,6 +14,8 @@ cover: "/data/image-cache/cover.webp"
 
 # 本周适合出发的线路
 
+![导语配图](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/cover.webp)
+
 ## 清远峡谷漂流2天
 
 这条线路适合想找清凉感的人。
@@ -31,6 +33,7 @@ assert.ok(parsed.body.includes('# 本周适合出发的线路'));
 
 const html = markdownToHtml(parsed.body);
 assert.ok(html.includes('<h1>本周适合出发的线路</h1>'));
+assert.ok(html.includes('<img src="https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/cover.webp" alt="导语配图">'));
 assert.ok(html.includes('<h2>清远峡谷漂流2天</h2>'));
 assert.ok(html.includes('<ul>'));
 assert.ok(html.includes('<a href="https://example.com/qingyuan">查看线路</a>'));
