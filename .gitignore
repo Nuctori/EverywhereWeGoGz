@@ -31,3 +31,5 @@ __pycache__/
 # Debug artifacts
 .playwright-mcp/
 output/
+weekly-wechat-posts/
+.baoyu-skills/
