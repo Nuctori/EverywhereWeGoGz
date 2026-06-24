@@ -10,7 +10,7 @@ import {
 const tours = [
   {
     id: 'tour-qingyuan',
-    title: 'Qingyuan Gorge Rafting 2D (Private Pool)',
+    title: 'Qingyuan Gorge Rafting 2D',
     source: 'fixture',
     destination: 'Guangdong',
     duration: 2,
@@ -30,23 +30,24 @@ const tours = [
     dataQuality: { availabilityConfidence: 'high' },
   },
   {
-    id: 'tour-europe',
-    title: 'Europe Deep Tour 12D',
+    id: 'tour-hotspring',
+    title: 'Jinshuitai Hot Spring 2D',
     source: 'fixture',
-    destination: 'Europe',
-    duration: 12,
-    price: 19999,
+    destination: 'Guangdong',
+    duration: 2,
+    price: 299,
     priceUnit: 'per person',
-    departureDate: '2026-06-30',
-    departureDates: ['2026-06-30'],
-    transportType: 'flight',
-    accommodationLevel: 'luxury',
-    highlights: ['museum'],
-    tags: ['culture'],
-    suitableFor: ['couple'],
-    images: ['/data/image-cache/europe.webp'],
-    bookingUrl: 'https://example.com/europe',
-    theme: 'culture',
+    departureDate: '2026-06-25',
+    departureDates: ['2026-06-25', '2026-06-27'],
+    transportType: 'bus',
+    accommodationLevel: 'comfort',
+    highlights: ['hot spring', 'hotel', 'food'],
+    tags: ['hot spring', 'resort'],
+    suitableFor: ['family'],
+    images: ['/data/image-cache/hotspring.webp'],
+    bookingUrl: 'https://example.com/hotspring',
+    theme: 'resort',
+    isHot: true,
     dataQuality: { availabilityConfidence: 'high' },
   },
   {
@@ -61,7 +62,7 @@ const tours = [
     departureDates: ['2026-06-29', '2026-07-01'],
     transportType: 'bus',
     accommodationLevel: 'comfort',
-    highlights: ['mountain spring', 'forest', 'local food'],
+    highlights: ['mountain water', 'forest', 'local food'],
     tags: ['cool escape', 'family'],
     suitableFor: ['family', 'friends'],
     images: ['/data/image-cache/hezhou.webp'],
@@ -70,44 +71,79 @@ const tours = [
     isHot: true,
     dataQuality: { availabilityConfidence: 'high' },
   },
+  {
+    id: 'tour-hunan-rail',
+    title: 'Hunan High-Speed Rail 4D',
+    source: 'fixture',
+    destination: 'Hunan',
+    duration: 4,
+    price: 1299,
+    priceUnit: 'per person',
+    departureDate: '2026-06-30',
+    departureDates: ['2026-06-30'],
+    transportType: 'high-speed rail',
+    accommodationLevel: 'comfort',
+    highlights: ['mountain scenery', 'rail', 'summer trip'],
+    tags: ['rail', 'nature'],
+    suitableFor: ['couple'],
+    images: ['/data/image-cache/hunan.webp'],
+    bookingUrl: 'https://example.com/hunan',
+    theme: 'nature',
+    dataQuality: { availabilityConfidence: 'high' },
+  },
 ];
 
 const context = buildWeeklyArticleContext(tours, {
   runDate: '2026-06-24',
   windowDays: 14,
-  maxCandidates: 6,
-  maxArticleItems: 2,
+  maxCandidates: 10,
+  maxArticleItems: 3,
 });
 
-assert.equal(context.selectedTours.length, 2);
-assert.equal(context.selectedTours[0].id, 'tour-qingyuan');
-assert.ok(context.selectedTours.some((tour) => tour.id === 'tour-hezhou'));
-assert.ok(!context.selectedTours.some((tour) => tour.id === 'tour-europe'));
+assert.equal(context.season, '夏季');
+assert.equal(context.selectedTours.length, 3);
+assert.ok(context.candidateGroups.length >= 3);
+assert.ok(context.candidateGroups.some((group) => group.id === 'family_short_break'));
+assert.ok(context.candidateGroups.some((group) => group.id === 'mountain_water_cooling'));
+assert.ok(context.candidateGroups.some((group) => group.id === 'relaxing_resort'));
+
+const hotSpringCandidate = context.candidateTours.find((tour) => tour.id === 'tour-hotspring');
+assert.ok(hotSpringCandidate);
+assert.ok(
+  hotSpringCandidate.editorialReasons.some((reason) =>
+    reason.includes('不要硬写成避暑主推'),
+  ),
+);
 
 const prompt = buildWeeklyArticlePrompt(context);
-assert.ok(prompt.includes('frontmatter'));
-assert.ok(prompt.includes('Qingyuan Gorge Rafting 2D (Private Pool)'));
-assert.ok(prompt.includes('Hezhou West Creek 3D (Yuequanju + 4 Meals)'));
+assert.ok(prompt.includes('候选线路已经按偏好分组'));
+assert.ok(prompt.includes('夏季不要把温泉自动写成避暑主推'));
+assert.ok(prompt.includes('### 亲子短途'));
+assert.ok(prompt.includes('### 轻松度假'));
+assert.ok(prompt.includes('Qingyuan Gorge Rafting 2D'));
+assert.ok(prompt.includes('Jinshuitai Hot Spring 2D'));
 assert.ok(prompt.includes(getDefaultWebsiteUrl()));
-assert.ok(prompt.includes('https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp'));
-assert.ok(prompt.includes('https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp'));
 
 const article = `---
-title: "This Week's Easy Summer Getaways"
-summary: "Two nearby tours with cooler mountain-and-water plans."
+title: "This Week's Guangzhou Summer Tours"
+summary: "Three grouped tour ideas for family, cooling nature, and a rail escape."
 author: "Lao Guang Travel"
 cover: "/data/image-cache/qingyuan.webp"
 ---
 
-# This Week's Easy Summer Getaways
+# This Week's Guangzhou Summer Tours
 
-## Qingyuan Gorge Rafting 2D (Private Pool)
+## Qingyuan Gorge Rafting 2D
 
-This one fits families who want a short cooling break.
+This route works for families who want a cooling short break.
 
 ## Hezhou West Creek 3D (Yuequanju + 4 Meals)
 
-This one works for readers who want mountain water and an easier hot-spring stay.
+This route fits readers who want mountain water and a slower pace.
+
+## Hunan High-Speed Rail 4D
+
+This route is better for readers who want to travel a bit farther by rail.
 `;
 
 const validation = validateGeneratedArticle(article, context);
@@ -116,25 +152,42 @@ assert.equal(validation.ok, true);
 const enriched = enrichWeeklyArticleMedia(article, context, {
   websiteUrl: getDefaultWebsiteUrl(),
 });
-assert.ok(enriched.includes('![Qingyuan Gorge Rafting 2D (Private Pool)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)'));
-assert.ok(enriched.includes('![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)'));
+assert.ok(
+  enriched.includes(
+    '![Qingyuan Gorge Rafting 2D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)',
+  ),
+);
+assert.ok(
+  enriched.includes(
+    '![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)',
+  ),
+);
+assert.ok(
+  enriched.includes(
+    '![Hunan High-Speed Rail 4D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hunan.webp)',
+  ),
+);
 
 const articleWithLooseTitles = `---
-title: "This Week's Easy Summer Getaways"
-summary: "Two nearby tours with cooler mountain-and-water plans."
+title: "This Week's Guangzhou Summer Tours"
+summary: "Three grouped tour ideas for family, cooling nature, and a rail escape."
 author: "Lao Guang Travel"
 cover: "/data/image-cache/qingyuan.webp"
 ---
 
-# This Week's Easy Summer Getaways
+# This Week's Guangzhou Summer Tours
 
-## 1. Qingyuan Gorge Rafting 2D - Private Pool Weekend
+## 1. Qingyuan Gorge Rafting 2D - Family Weekend
 
-This one fits families who want a short cooling break.
+This route works for families who want a cooling short break.
 
-## 2. Hezhou West Creek 3D - Yuequanju 4 Meals Mountain Spring Break
+## 2. Hezhou West Creek 3D - Yuequanju 4 Meals Cool Escape
 
-This one works for readers who want mountain water and an easier hot-spring stay.
+This route fits readers who want mountain water and a slower pace.
+
+## 3. Hunan High-Speed Rail 4D - Light Out-of-Province Trip
+
+This route is better for readers who want to travel a bit farther by rail.
 `;
 
 const looseValidation = validateGeneratedArticle(articleWithLooseTitles, context);
@@ -143,6 +196,10 @@ assert.equal(looseValidation.ok, true);
 const enrichedLooseTitles = enrichWeeklyArticleMedia(articleWithLooseTitles, context, {
   websiteUrl: getDefaultWebsiteUrl(),
 });
-assert.ok(enrichedLooseTitles.includes('![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)'));
+assert.ok(
+  enrichedLooseTitles.includes(
+    '![Hunan High-Speed Rail 4D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hunan.webp)',
+  ),
+);
 
 console.log('weekly wechat article tests passed');
