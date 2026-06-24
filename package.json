@@ -23,6 +23,12 @@
     "audit:display-semantics": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_display_semantics.ts",
     "audit:availability": "python scripts/validate_tour_availability.py",
     "audit:availability:refresh": "python scripts/validate_tour_availability.py --cache-ttl-hours 0 --sample-failures 0",
+    "generate:weekly-wechat-article": "node scripts/generate_weekly_wechat_article.mjs",
+    "prepare:wechat-publish-bundle": "node scripts/prepare_wechat_publish_bundle.mjs",
+    "publish:wechat-draft": "node scripts/publish_wechat_draft.mjs",
+    "test:weekly-wechat-article": "node scripts/test_weekly_wechat_article.mjs",
+    "test:wechat-publish-bundle": "node scripts/test_prepare_wechat_publish_bundle.mjs",
+    "test:wechat-publish": "node scripts/test_wechat_publish.mjs",
     "lint": "eslint .",
     "preview": "vite preview"
   },
