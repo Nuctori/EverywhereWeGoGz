@@ -35,6 +35,9 @@ const FORBIDDEN_PHRASES = [
   '别误会成',
   '可保留',
   '能打的',
+  '同第',
+  '侧重亲子',
+  '侧重度假',
   '作为补充',
   '适合预算有限',
   '樱花已过季',
@@ -106,6 +109,16 @@ const RESORT_KEYWORDS = ['度假', '酒店', '休闲', '美食', '放松', 'reso
 const RAIL_KEYWORDS = ['高铁', '动车', '火车', 'high-speed rail', 'rail', 'train'];
 const FLOWER_KEYWORDS = ['荷花', '绣球', '花海', '花期', '荷塘', '樱花', '向日葵', '花'];
 const RED_LEAF_KEYWORDS = ['红叶', '银杏', '枫叶', '秋色'];
+const ROUTE_FAMILY_DEFINITIONS = [
+  { id: 'detian', keywords: ['德天', '通灵', '明仕', '靖西', '崇左', '鹅泉', '古龙山', '大新'] },
+  { id: 'weizhou', keywords: ['涠洲', '北海', '银滩', '鳄鱼山', '石螺口', '盛塘'] },
+  { id: 'changsha_wuhan', keywords: ['长沙', '岳阳', '武汉', '岳阳楼', '黄鹤楼', '东湖'] },
+  { id: 'mangshan_dongjiang', keywords: ['莽山', '五指峰', '东江湖', '小东江', '郴州', '仰天湖'] },
+  { id: 'guilin_yangshuo', keywords: ['桂林', '阳朔', '漓江', '遇龙河', '伏波', '象鼻山'] },
+  { id: 'xiamen_gulangyu', keywords: ['厦门', '鼓浪屿', '曾厝垵', '山海步栈道'] },
+  { id: 'pingtan', keywords: ['平潭', '猴研岛', '蓝眼泪', '风车海'] },
+  { id: 'sanya', keywords: ['三亚', '海棠湾', '君悦'] },
+];
 
 const WEATHER_CODE_LABELS = {
   0: '晴',
@@ -330,6 +343,13 @@ function buildSignalBlob(parts) {
     .join(' ');
 }
 
+function detectRouteFamilies(text) {
+  const normalized = String(text || '');
+  return ROUTE_FAMILY_DEFINITIONS
+    .filter((family) => family.keywords.some((keyword) => normalized.includes(keyword)))
+    .map((family) => family.id);
+}
+
 function containsAny(text, keywords) {
   return keywords.some((keyword) => text.includes(keyword));
 }
@@ -366,6 +386,15 @@ function buildTourMeta(tour, destination) {
   const hasCoolingSignals = hasNaturalCoolingSignals || hasWaterPlaySignals;
   const hasHotSpringSignals = containsAny(blob, HOT_SPRING_KEYWORDS);
   const hasResortSignals = containsAny(blob, RESORT_KEYWORDS);
+  const titleFamilies = detectRouteFamilies(String(tour.title || ''));
+  const textFamilies = detectRouteFamilies(`${primaryBlob} ${supportingBlob}`);
+  const riskFlags = [];
+  if (titleFamilies.length === 1) {
+    const foreignFamilies = textFamilies.filter((family) => family !== titleFamilies[0]);
+    if (foreignFamilies.length > 0) {
+      riskFlags.push('destination_conflict');
+    }
+  }
   return {
     text: blob,
     destination,
@@ -385,6 +414,9 @@ function buildTourMeta(tour, destination) {
     isRailFriendly: containsAny(`${tour.transportType || ''} ${blob}`, RAIL_KEYWORDS),
     hasFlowerSignals: containsAny(blob, FLOWER_KEYWORDS),
     hasRedLeafSignals: containsAny(blob, RED_LEAF_KEYWORDS),
+    titleFamilies,
+    textFamilies,
+    riskFlags,
   };
 }
 
@@ -441,6 +473,7 @@ export function scoreWeeklyArticleTour(tour, runDate, windowDates) {
   if (meta.hasNaturalCoolingSignals) score += Math.min(10, meta.naturalCoolingHits * 2);
   if (meta.hasWaterPlaySignals) score += Math.min(6, meta.waterPlayHits * 2);
   if (meta.hasHotSpringOnlySignals) score -= 8;
+  if ((meta.riskFlags || []).includes('destination_conflict')) score -= 100;
   if (meta.isFamilyFriendly) score += 4;
   if (tour.isFlashSale) score += 4;
   if (tour.isHot) score += 3;
@@ -1066,6 +1099,7 @@ export function buildWeeklyArticleContext(tours, options = {}) {
       if (typeof tour.bookingUrl !== 'string' || !tour.bookingUrl.trim()) return null;
 
       const score = scoreWeeklyArticleTour(tour, runDate, selectedDepartureDates);
+      if ((score.meta?.riskFlags || []).includes('destination_conflict')) return null;
       return {
         ...tour,
         selectedDepartureDates,
@@ -1596,6 +1630,11 @@ export function validateGeneratedArticle(article, context) {
 
   const articleLines = article.replace(/\r\n/g, '\n').split('\n');
   const articleTours = listArticleTours(context);
+  const detailUrls = [...article.matchAll(/\[查看行程\]\((https?:\/\/[^)]+)\)/g)].map((match) => match[1]);
+  const uniqueDetailUrls = new Set(detailUrls);
+  if (detailUrls.length > 0 && uniqueDetailUrls.size !== detailUrls.length) {
+    issues.push('Article reuses the same route detail URL more than once.');
+  }
   const sectionEntries = buildSectionEntries(articleLines, articleTours);
   for (const entry of sectionEntries) {
     const rawSection = articleLines.slice(entry.sectionIndex, entry.sectionEnd).join('\n');

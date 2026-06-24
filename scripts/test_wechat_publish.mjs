@@ -90,6 +90,7 @@ const markdownWithQr = injectQrFallbackIntoMarkdown(markdown, {
 assert.ok(markdownWithQr.includes('地址：https://example.com/qingyuan'));
 assert.ok(markdownWithQr.includes('> 扫码查看详情'));
 assert.ok(markdownWithQr.includes('报名二维码'));
+assert.equal((markdownWithQr.match(/地址：https:\/\/example\.com\/qingyuan/g) || []).length, 1);
 assert.ok(buildQrFallbackUrl('https://example.com/qingyuan').includes('quickchart.io/qr'));
 
 const htmlWithQr = markdownToHtml(parseFrontmatter(markdownWithQr).body);

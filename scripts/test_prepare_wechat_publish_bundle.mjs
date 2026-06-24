@@ -32,6 +32,7 @@ assert.ok(bundledMarkdownWithQr.includes('地址：https://example.com/test-line
 assert.ok(bundledMarkdownWithQr.includes('报名二维码'));
 assert.ok(bundledHtml.includes('地址：https://example.com/test-line'));
 assert.ok(bundledHtml.includes('inline-images/'));
+assert.equal((bundledMarkdownWithQr.match(/报名二维码/g) || []).length, 1);
 
 const remoteCoverOutput = await prepareCoverForUpload(
   'https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/jrttp.jrt365.com_8066/238e10f60f6c77e6.webp',

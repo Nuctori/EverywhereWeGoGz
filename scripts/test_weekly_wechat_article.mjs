@@ -299,6 +299,37 @@ assert.ok(leakedValidation.issues.some((issue) => issue.includes('作为补充')
 assert.ok(leakedValidation.issues.some((issue) => issue.includes('适合预算有限')));
 assert.ok(leakedValidation.issues.some((issue) => issue.includes('雷雨间隙')));
 
+const articleWithDuplicateRoute = `---
+title: "测试标题"
+summary: "测试摘要"
+author: "老广旅行"
+cover: "/data/image-cache/qingyuan.webp"
+---
+
+# 测试标题
+
+## 本周天气与出游节奏
+
+未来7天广州闷热带阵雨，真山水和玩水线会更舒服。
+
+## Qingyuan Gorge Rafting 2D
+
+这条线很适合这周出发，峡谷漂流降温直接，玩完一身清爽。带娃和朋友结伴都很容易玩得开心，周末只请很少时间也能成行。最舒服的时刻是进入漂流河道后，山风和水雾一起扑过来。
+
+[查看行程](https://example.com/qingyuan)
+
+## Qingyuan Gorge Rafting 2D 再写一遍
+
+同第2条，但侧重亲子。这条线依旧很适合家庭，孩子会喜欢玩水。班期和价格也差不多。
+
+[查看行程](https://example.com/qingyuan)
+`;
+
+const duplicateValidation = validateGeneratedArticle(articleWithDuplicateRoute, context);
+assert.equal(duplicateValidation.ok, false);
+assert.ok(duplicateValidation.issues.some((issue) => issue.includes('same route detail URL')));
+assert.ok(duplicateValidation.issues.some((issue) => issue.includes('同第')));
+
 const naturalCoolingFixture = {
   id: 'natural-cooling',
   title: '紫云谷溯溪漂流2天',
