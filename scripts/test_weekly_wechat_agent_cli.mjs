@@ -188,5 +188,27 @@ assert.equal(
   extractAiderReplyFromHistory(`Update git name\nLLM RESPONSE 2026-06-24T15:36:33\nASSISTANT\n{"ok":true}\n`),
   '{"ok":true}',
 );
+assert.equal(
+  extractAiderReplyFromHistory(`LLM RESPONSE 2026-06-24T15:36:33
+ASSISTANT article.md
+ASSISTANT \`\`\`markdown
+ASSISTANT <<<<<<< SEARCH
+ASSISTANT =======
+ASSISTANT ---
+ASSISTANT title: "示例标题"
+ASSISTANT summary: "示例摘要"
+ASSISTANT cover: "https://example.com/cover.jpg"
+ASSISTANT ---
+ASSISTANT # 正文
+ASSISTANT >>>>>>> REPLACE
+ASSISTANT \`\`\`
+`),
+  `---
+title: "示例标题"
+summary: "示例摘要"
+cover: "https://example.com/cover.jpg"
+---
+# 正文`,
+);
 
 console.log('weekly wechat agent cli tests passed');

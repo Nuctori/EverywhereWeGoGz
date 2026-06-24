@@ -81,7 +81,7 @@ function extractAiderReplyFromHistory(text) {
   const marker = 'LLM RESPONSE ';
   const markerIndex = content.lastIndexOf(marker);
   if (markerIndex === -1) {
-    return stripMarkdownFence(content);
+    return sanitizeAiderReply(content);
   }
 
   const section = content.slice(markerIndex);
@@ -91,7 +91,32 @@ function extractAiderReplyFromHistory(text) {
   }
 
   let body = section.slice(firstLineBreak + 1).trim();
-  body = body.replace(/^ASSISTANT\s*/i, '').trim();
+  return sanitizeAiderReply(body);
+}
+
+function sanitizeAiderReply(text) {
+  let body = String(text || '')
+    .replace(/^\s*ASSISTANT\s*/i, '')
+    .split(/\r?\n/)
+    .map((line) => line.replace(/^ASSISTANT\s*/, ''))
+    .join('\n')
+    .trim();
+
+  const patchMatch = body.match(/<<<<<<< SEARCH\s*[\r\n]+=======\s*([\s\S]*?)\s*>>>>>>> REPLACE/);
+  if (patchMatch) {
+    body = patchMatch[1].trim();
+  }
+
+  const markdownBlockMatch = body.match(/```(?:markdown)?\s*([\s\S]*?)\s*```/i);
+  if (markdownBlockMatch) {
+    body = markdownBlockMatch[1].trim();
+  }
+
+  const articleNameMatch = body.match(/^article(?:-[\w.]+)?\.md\s*/i);
+  if (articleNameMatch) {
+    body = body.slice(articleNameMatch[0].length).trim();
+  }
+
   return stripMarkdownFence(body);
 }
 
