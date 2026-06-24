@@ -5,6 +5,17 @@ import sharp from 'sharp';
 
 const DEFAULT_WECHAT_CONTENT_SOURCE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
 const DEFAULT_QR_SERVICE_URL = 'https://quickchart.io/qr';
+const PARAGRAPH_STYLE = 'margin:0 0 16px;line-height:1.85;font-size:16px;color:#1f2328;';
+const LEAD_PARAGRAPH_STYLE = 'margin:0 0 18px;line-height:1.9;font-size:17px;color:#1f2328;';
+const H1_STYLE = 'margin:0 0 20px;font-size:28px;line-height:1.35;font-weight:700;color:#111827;';
+const H2_STYLE = 'margin:30px 0 14px;font-size:22px;line-height:1.45;font-weight:700;color:#111827;';
+const H3_STYLE = 'margin:24px 0 10px;font-size:18px;line-height:1.5;font-weight:700;color:#111827;';
+const IMAGE_WRAP_STYLE = 'margin:18px 0 20px;text-align:center;';
+const IMAGE_STYLE = 'display:block;width:100%;height:auto;border-radius:8px;';
+const HR_STYLE = 'border:none;border-top:1px solid #e5e7eb;margin:24px 0;';
+const QR_CALLOUT_STYLE = 'margin:18px 0 24px;padding:14px 16px;background:#f7f8fa;border-radius:8px;';
+const QR_LABEL_STYLE = 'margin:0 0 10px;line-height:1.75;font-size:14px;color:#4b5563;';
+const LINK_STYLE = 'color:#0f766e;text-decoration:none;';
 
 function stripWrappingQuotes(value) {
   if (
@@ -41,7 +52,7 @@ function escapeHtml(value) {
 function renderInlineMarkdown(text) {
   let html = escapeHtml(text);
   html = html.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g, '<img src="$2" alt="$1">');
-  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, `<a href="$2" style="${LINK_STYLE}">$1</a>`);
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
   return html;
@@ -56,17 +67,55 @@ export function markdownToHtml(markdown) {
   const blocks = [];
   let paragraph = [];
   let listItems = [];
+  let listType = null;
+  let quoteLines = [];
 
   const flushParagraph = () => {
     if (paragraph.length === 0) return;
-    blocks.push(`<p>${paragraph.map(renderInlineMarkdown).join('<br>')}</p>`);
+    if (
+      paragraph.length === 1 &&
+      /^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/.test(paragraph[0].trim())
+    ) {
+      const [, alt, src] = paragraph[0].trim().match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/) || [];
+      blocks.push(
+        `<div style="${IMAGE_WRAP_STYLE}"><img src="${src}" alt="${escapeHtml(alt || '')}" style="${IMAGE_STYLE}"></div>`,
+      );
+    } else {
+      const style = blocks.length === 0 ? LEAD_PARAGRAPH_STYLE : PARAGRAPH_STYLE;
+      blocks.push(`<p style="${style}">${paragraph.map(renderInlineMarkdown).join('<br>')}</p>`);
+    }
     paragraph = [];
   };
 
   const flushList = () => {
     if (listItems.length === 0) return;
-    blocks.push(`<ul>${listItems.map((item) => `<li>${renderInlineMarkdown(item)}</li>`).join('')}</ul>`);
+    const rendered = listItems
+      .map((item, index) => {
+        const prefix = listType === 'ol' ? `${index + 1}. ` : '• ';
+        return `<p style="${PARAGRAPH_STYLE}">${renderInlineMarkdown(prefix + item)}</p>`;
+      })
+      .join('\n');
+    blocks.push(rendered);
     listItems = [];
+    listType = null;
+  };
+
+  const flushQuote = () => {
+    if (quoteLines.length === 0) return;
+    const imageLines = quoteLines.filter((line) => /^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/.test(line));
+    const textLines = quoteLines.filter((line) => !/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/.test(line));
+    const inner = [];
+    if (textLines.length > 0) {
+      inner.push(`<p style="${QR_LABEL_STYLE}">${textLines.map(renderInlineMarkdown).join('<br>')}</p>`);
+    }
+    for (const line of imageLines) {
+      const [, alt, src] = line.match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/) || [];
+      inner.push(
+        `<div style="margin:8px 0 0;text-align:center;"><img src="${src}" alt="${escapeHtml(alt || '')}" style="display:inline-block;max-width:220px;width:52%;height:auto;"></div>`,
+      );
+    }
+    blocks.push(`<div style="${QR_CALLOUT_STYLE}">${inner.join('')}</div>`);
+    quoteLines = [];
   };
 
   for (const line of lines) {
@@ -74,13 +123,15 @@ export function markdownToHtml(markdown) {
     if (!trimmed) {
       flushParagraph();
       flushList();
+      flushQuote();
       continue;
     }
 
     if (trimmed === '---') {
       flushParagraph();
       flushList();
-      blocks.push('<hr>');
+      flushQuote();
+      blocks.push(`<hr style="${HR_STYLE}">`);
       continue;
     }
 
@@ -88,15 +139,39 @@ export function markdownToHtml(markdown) {
     if (headingMatch) {
       flushParagraph();
       flushList();
+      flushQuote();
       const level = headingMatch[1].length;
-      blocks.push(`<h${level}>${renderInlineMarkdown(headingMatch[2])}</h${level}>`);
+      const style =
+        level === 1 ? H1_STYLE
+          : level === 2 ? H2_STYLE
+            : H3_STYLE;
+      blocks.push(`<h${Math.min(level, 3)} style="${style}">${renderInlineMarkdown(headingMatch[2])}</h${Math.min(level, 3)}>`);
       continue;
     }
 
-    const listMatch = trimmed.match(/^[-*]\s+(.+)$/);
-    if (listMatch) {
+    const unorderedListMatch = trimmed.match(/^[-*]\s+(.+)$/);
+    if (unorderedListMatch) {
       flushParagraph();
-      listItems.push(listMatch[1]);
+      flushQuote();
+      listType = listType || 'ul';
+      listItems.push(unorderedListMatch[1]);
+      continue;
+    }
+
+    const orderedListMatch = trimmed.match(/^\d+\.\s+(.+)$/);
+    if (orderedListMatch) {
+      flushParagraph();
+      flushQuote();
+      listType = listType || 'ol';
+      listItems.push(orderedListMatch[1]);
+      continue;
+    }
+
+    const quoteMatch = trimmed.match(/^>\s?(.*)$/);
+    if (quoteMatch) {
+      flushParagraph();
+      flushList();
+      quoteLines.push(quoteMatch[1]);
       continue;
     }
 
@@ -105,6 +180,7 @@ export function markdownToHtml(markdown) {
 
   flushParagraph();
   flushList();
+  flushQuote();
   return blocks.join('\n');
 }
 
@@ -270,46 +346,120 @@ export function buildQrFallbackUrl(targetUrl) {
   return url.toString();
 }
 
-export function injectQrFallbackIntoMarkdown(markdown, options = {}) {
-  const lines = markdown.replace(/\r\n/g, '\n').split('\n');
-  const sourceUrl = (options.sourceUrl || '').trim();
-  const fallbackLabel = options.fallbackLabel || '微信内打开外链不稳定，可扫码查看线路';
-  const qrImageUrl = sourceUrl ? buildQrFallbackUrl(sourceUrl) : '';
+function normalizeHeadingText(text) {
+  return String(text || '')
+    .replace(/^[#\s]+/, '')
+    .replace(/^[0-9]+\.\s*/, '')
+    .replace(/^[①②③④⑤⑥⑦⑧⑨⑩]\s*/, '')
+    .trim();
+}
 
-  const output = [];
-  let inFrontmatter = false;
-  let frontmatterSeen = false;
+function buildMarkdownWithFrontmatter(frontmatterBlock, body) {
+  if (!frontmatterBlock) {
+    return `${body.trim()}\n`;
+  }
+  return `${frontmatterBlock.trim()}\n\n${body.trim()}\n`;
+}
+
+function stripLeadingTitleHeading(body) {
+  const lines = body.replace(/\r\n/g, '\n').split('\n');
+  let firstContentIndex = 0;
+  while (firstContentIndex < lines.length && !lines[firstContentIndex].trim()) {
+    firstContentIndex += 1;
+  }
+  if (firstContentIndex < lines.length && /^#\s+/.test(lines[firstContentIndex].trim())) {
+    lines.splice(firstContentIndex, 1);
+    while (firstContentIndex < lines.length && !lines[firstContentIndex].trim()) {
+      lines.splice(firstContentIndex, 1);
+    }
+  }
+  return lines.join('\n').trim();
+}
+
+function collectExternalLinkEntries(body, options = {}) {
+  const sourceUrl = (options.sourceUrl || '').trim();
+  const lines = body.replace(/\r\n/g, '\n').split('\n');
+  const seen = new Set();
+  const entries = [];
+  let currentHeading = '';
 
   for (const line of lines) {
     const trimmed = line.trim();
-    if (trimmed === '---' && !frontmatterSeen) {
-      inFrontmatter = !inFrontmatter;
-      if (!inFrontmatter) frontmatterSeen = true;
-      output.push(line);
-      continue;
-    }
-    if (trimmed === '---' && inFrontmatter) {
-      inFrontmatter = false;
-      frontmatterSeen = true;
-      output.push(line);
+    const headingMatch = trimmed.match(/^#{2,6}\s+(.+)$/);
+    if (headingMatch) {
+      currentHeading = normalizeHeadingText(headingMatch[1]);
       continue;
     }
 
-    output.push(line);
-    if (inFrontmatter) continue;
+    if (/^!\[[^\]]*]\((https?:\/\/[^)\s]+)\)$/.test(trimmed)) {
+      continue;
+    }
 
-    const linkMatch = line.match(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/);
-    if (!linkMatch) continue;
-    const targetUrl = linkMatch[2];
-    if (!/^https?:\/\//i.test(targetUrl)) continue;
-    const qrTargetUrl = qrImageUrl || buildQrFallbackUrl(targetUrl);
-    output.push('');
-    output.push(`> ${fallbackLabel}`);
-    output.push(`> ![线路二维码](${qrTargetUrl})`);
-    output.push('');
+    const linkRegex = /(^|[^!])\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g;
+    for (const match of trimmed.matchAll(linkRegex)) {
+      const label = match[2]?.trim() || '查看链接';
+      const url = match[3]?.trim() || '';
+      if (!url || seen.has(url)) continue;
+      seen.add(url);
+
+      let entryLabel = label;
+      if (/查看行程|查看线路|立即查看/.test(label) && currentHeading) {
+        entryLabel = currentHeading;
+      } else if (/阅读原文/.test(label)) {
+        entryLabel = '阅读原文';
+      }
+
+      entries.push({
+        label: entryLabel,
+        actionLabel: label,
+        url,
+      });
+    }
   }
 
-  return output.join('\n').replace(/\n{4,}/g, '\n\n\n');
+  if (sourceUrl && !seen.has(sourceUrl)) {
+    entries.push({
+      label: '阅读原文',
+      actionLabel: '阅读原文',
+      url: sourceUrl,
+    });
+  }
+
+  return entries;
+}
+
+export function injectQrFallbackIntoMarkdown(markdown, options = {}) {
+  const frontmatterMatch = markdown.match(/^---\n[\s\S]*?\n---\n?/);
+  const frontmatterBlock = frontmatterMatch ? frontmatterMatch[0] : '';
+  const { body } = parseFrontmatter(markdown);
+  const fallbackLabel = options.fallbackLabel || '微信内如果外链无法直接打开，可在文末扫码继续查看：';
+  const cleanedBody = stripLeadingTitleHeading(body);
+  const entries = collectExternalLinkEntries(cleanedBody, options);
+
+  if (entries.length === 0) {
+    return buildMarkdownWithFrontmatter(frontmatterBlock, cleanedBody);
+  }
+
+  const appendixLines = [
+    cleanedBody,
+    '',
+    '---',
+    '',
+    '## 行程链接与二维码',
+    '',
+    fallbackLabel,
+    '',
+  ];
+
+  for (const entry of entries) {
+    appendixLines.push(`### ${entry.label}`);
+    appendixLines.push(`[${entry.actionLabel}](${entry.url})`);
+    appendixLines.push('');
+    appendixLines.push(`![${entry.label} 二维码](${buildQrFallbackUrl(entry.url)})`);
+    appendixLines.push('');
+  }
+
+  return buildMarkdownWithFrontmatter(frontmatterBlock, appendixLines.join('\n').replace(/\n{4,}/g, '\n\n\n'));
 }
 
 export async function uploadInlineImagesForHtml(accessToken, html) {
