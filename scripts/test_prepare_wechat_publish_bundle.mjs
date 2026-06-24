@@ -28,12 +28,10 @@ assert.equal(result.bundle.title, '测试文章');
 assert.equal(result.bundle.sourceUrl, 'https://nuctori.github.io/EverywhereWeGoGz/');
 const bundledMarkdownWithQr = fs.readFileSync(result.bundle.markdownPathWithQr, 'utf8');
 const bundledHtml = fs.readFileSync(result.bundle.htmlPath, 'utf8');
-assert.ok(!bundledMarkdownWithQr.includes('## 行程链接与二维码'));
-assert.ok(!bundledMarkdownWithQr.includes('> 微信内打开外链不稳定'));
-assert.ok(!bundledMarkdownWithQr.includes('阅读原文 二维码'));
-assert.ok(!bundledHtml.includes('行程链接与二维码'));
-assert.ok(!bundledHtml.includes('&gt; 微信内'));
-assert.ok(!bundledHtml.includes('阅读原文 二维码'));
+assert.ok(bundledMarkdownWithQr.includes('地址：https://example.com/test-line'));
+assert.ok(bundledMarkdownWithQr.includes('报名二维码'));
+assert.ok(bundledHtml.includes('地址：https://example.com/test-line'));
+assert.ok(bundledHtml.includes('inline-images/'));
 
 const remoteCoverOutput = await prepareCoverForUpload(
   'https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/jrttp.jrt365.com_8066/238e10f60f6c77e6.webp',

@@ -11,6 +11,8 @@ const DEFAULT_AI_BUCKET_SIZE = 6;
 const DEFAULT_AUTHOR = '老广旅行';
 const DEFAULT_WEBSITE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
 const GUANGZHOU_COORDS = { latitude: 23.1291, longitude: 113.2644 };
+const MAX_ROUTE_FAMILY_PER_ARTICLE = 1;
+const MAX_DESTINATION_CLUSTER_PER_ARTICLE = 2;
 
 const FORBIDDEN_PHRASES = [
   '最低价',
@@ -33,6 +35,16 @@ const FORBIDDEN_PHRASES = [
   '别误会成',
   '可保留',
   '能打的',
+  '作为补充',
+  '适合预算有限',
+  '樱花已过季',
+  '其中6条深度推荐',
+  '季节红利弱',
+];
+
+const REPETITIVE_PHRASE_LIMITS = [
+  { phrase: '雷雨间隙', max: 2 },
+  { phrase: '适合', max: 14 },
 ];
 
 const NATURAL_COOLING_KEYWORDS = [
@@ -456,10 +468,13 @@ function deriveThemeHints(candidateGroups, season) {
   const hints = [];
 
   if (season === '夏季') {
-    hints.push('先判断本周更适合清凉山水、亲子短途还是轻松度假');
-    hints.push('优先写清楚近场周末、高铁轻出省和酒店放松的差别');
+    hints.push('山水清凉');
+    hints.push('亲水近海');
+    hints.push('周末近场');
+    hints.push('轻松住一晚');
   } else {
-    hints.push('先判断本周更适合短途休闲还是中短线出游');
+    hints.push('短途休闲');
+    hints.push('中短线出游');
   }
 
   if (candidateGroups.some((group) => group.id === 'family_short_break')) {
@@ -658,6 +673,8 @@ function buildRecommendationGroups(candidateGroups, maxTotal = DEFAULT_GROUP_REC
   }));
   const offsets = new Map(groups.map((group) => [group.id, 0]));
   const selectedIds = new Set();
+  const selectedRouteFamilies = new Map();
+  const selectedDestinations = new Map();
   let total = 0;
 
   while (total < maxTotal) {
@@ -672,8 +689,20 @@ function buildRecommendationGroups(candidateGroups, maxTotal = DEFAULT_GROUP_REC
       offsets.set(group.id, offset);
       const tour = sourceGroup.tours[offset];
       if (!tour) continue;
+      const routeKey = deriveRouteClusterKey(tour);
+      const destinationKey = normalizeDestination(tour.destination);
+      if ((selectedRouteFamilies.get(routeKey) || 0) >= MAX_ROUTE_FAMILY_PER_ARTICLE) {
+        offsets.set(group.id, offset + 1);
+        continue;
+      }
+      if ((selectedDestinations.get(destinationKey) || 0) >= MAX_DESTINATION_CLUSTER_PER_ARTICLE) {
+        offsets.set(group.id, offset + 1);
+        continue;
+      }
       group.tours.push(tour);
       selectedIds.add(tour.id);
+      selectedRouteFamilies.set(routeKey, (selectedRouteFamilies.get(routeKey) || 0) + 1);
+      selectedDestinations.set(destinationKey, (selectedDestinations.get(destinationKey) || 0) + 1);
       offsets.set(group.id, offset + 1);
       total += 1;
       pickedThisRound = true;
@@ -782,6 +811,8 @@ function fillRecommendationGroups(groups, maxTotal) {
   const sourceMap = new Map(groups.map((group) => [group.id, group]));
   const offsets = new Map(groups.map((group) => [group.id, 0]));
   const selectedIds = new Set();
+  const selectedRouteFamilies = new Map();
+  const selectedDestinations = new Map();
   let total = 0;
 
   while (total < maxTotal) {
@@ -797,8 +828,20 @@ function fillRecommendationGroups(groups, maxTotal) {
       offsets.set(group.id, offset);
       const tour = sourceGroup.tours[offset];
       if (!tour) continue;
+      const routeKey = deriveRouteClusterKey(tour);
+      const destinationKey = normalizeDestination(tour.destination);
+      if ((selectedRouteFamilies.get(routeKey) || 0) >= MAX_ROUTE_FAMILY_PER_ARTICLE) {
+        offsets.set(group.id, offset + 1);
+        continue;
+      }
+      if ((selectedDestinations.get(destinationKey) || 0) >= MAX_DESTINATION_CLUSTER_PER_ARTICLE) {
+        offsets.set(group.id, offset + 1);
+        continue;
+      }
       group.tours.push(tour);
       selectedIds.add(tour.id);
+      selectedRouteFamilies.set(routeKey, (selectedRouteFamilies.get(routeKey) || 0) + 1);
+      selectedDestinations.set(destinationKey, (selectedDestinations.get(destinationKey) || 0) + 1);
       offsets.set(group.id, offset + 1);
       total += 1;
       pickedThisRound = true;
@@ -830,7 +873,7 @@ function pickSelectedTours(candidateGroups, candidateTours, maxArticleItems) {
       if (!tour) continue;
       const routeKey = deriveRouteClusterKey(tour);
       const destinationKey = normalizeDestination(tour.destination);
-      if ((routeCounts.get(routeKey) || 0) >= 1) {
+      if ((routeCounts.get(routeKey) || 0) >= MAX_ROUTE_FAMILY_PER_ARTICLE) {
         groupOffsets.set(group.id, offset + 1);
         continue;
       }
@@ -854,8 +897,8 @@ function pickSelectedTours(candidateGroups, candidateTours, maxArticleItems) {
     if (selectedIds.has(tour.id)) continue;
     const routeKey = deriveRouteClusterKey(tour);
     const destinationKey = normalizeDestination(tour.destination);
-    if ((routeCounts.get(routeKey) || 0) >= 1) continue;
-    if ((destinationCounts.get(destinationKey) || 0) >= 2) continue;
+    if ((routeCounts.get(routeKey) || 0) >= MAX_ROUTE_FAMILY_PER_ARTICLE) continue;
+    if ((destinationCounts.get(destinationKey) || 0) >= MAX_DESTINATION_CLUSTER_PER_ARTICLE) continue;
     selected.push(tour);
     selectedIds.add(tour.id);
     routeCounts.set(routeKey, (routeCounts.get(routeKey) || 0) + 1);
@@ -915,26 +958,26 @@ function buildSeasonalOutlook(candidateTours, runDate, season) {
   const metas = candidateTours.map((tour) => tour.editorialMeta || {});
 
   if (season === '夏季') {
-    signals.push('广州这段时间出游，更容易被真山水、森林树荫、亲水活动和近场放松线打动。');
+    signals.push('这周闷热和阵雨会反复出现，真山水、树荫、溪水、海风这类场景更容易把体感降下来。');
   } else if (season === '秋季') {
-    signals.push('秋天更适合把高铁中短线、城市漫游和轻山线放前面。');
+    signals.push('秋天更适合安排高铁中短线、城市漫游和轻山线，节奏不用赶。');
   } else if (season === '冬季') {
-    signals.push('冬季更适合把温泉、酒店放松和节庆档期结合着写。');
+    signals.push('冬季更适合把温泉、住一晚放松和节庆节点结合起来看。');
   } else {
-    signals.push('春季更适合把花期、近郊轻徒步和周末短途放在前排。');
+    signals.push('春季更适合把花景、近郊轻徒步和周末短途放在前面。');
   }
 
   if (metas.some((meta) => meta.hasCoolingSignals)) {
-    signals.push('本周想写出清凉感，更适合从山水、森林、漂流、亲水和近海度假的现场体验切入。');
+    signals.push('像瀑布、峡谷、森林步道、漂流、海岛和近海这样的线路，这周会比纯城市逛吃更有出发欲。');
   }
   if (metas.some((meta) => meta.hasHotSpringSignals || meta.hasResortSignals)) {
-    signals.push('带池、酒店放松类线路也值得保留，写周末休整、亲子陪伴和住下来慢慢放松会更自然。');
+    signals.push('如果想把行程放轻一点，带泳池、水世界或住下来慢慢玩的酒店线，也能接住周末放松和亲子需求。');
   }
   if (metas.some((meta) => meta.hasFlowerSignals)) {
-    signals.push('如果线路带花期关键词，可以作为近期可关注的时令亮点轻轻带到，不要写死花况。');
+    signals.push('荷花、绣球这类夏季花景可以顺手提一句，但别把花况写得太满。');
   }
   if (metas.some((meta) => meta.hasRedLeafSignals)) {
-    signals.push('带红叶或银杏关键词的线路适合当作时令看点，但仍以线路页更新为准。');
+    signals.push('带红叶或银杏关键词的线路先当季节伏笔看，具体还是以线路页同步信息为准。');
   }
 
   return [...signals, ...buildCalendarSignals(runDate)].slice(0, 6);
@@ -1220,10 +1263,14 @@ export function buildWeeklyArticlePrompt(context) {
     '- 标题适合公众号，但不要夸张标题党。',
     '- 推荐应该体现分组差异，比如亲子短途、周末近场、真山水清凉、带泳池/温泉的休整线、高铁轻出省、预算友好、轻松度假。',
     '- 山水清凉组优先写真山水、漂流、森林、峡谷、亲水、泳池等清凉体验，不要让纯温泉/酒店线挤占主位。',
+    '- 文案要像编辑在邀人出门，不要像在解释你的筛选过程，更不要复述研究备注。',
     '- 每条线路都要写得像能直接发的编辑推荐，不要只剩标题清单。',
     '- 每条线路至少写 3 句有效文案：这周为什么值得去、适合谁、现场体验/节奏感、班期/价格/交通里的关键信息。',
     '- 每条线路都要写清楚：为什么这周值得去、适合谁、线路信息、提醒、查看行程链接。',
     '- 面向读者直接说人话，不要出现“当前数据里”“候选线路”“综合排序”“模型判断”“可以理解为”“别误会成”这类幕后分析句子。',
+    '- 不要写“当前数据里能打的清凉感主要是……”“带池、酒店放松类线路可保留”“作为补充”“适合预算有限”“樱花已过季”这种像批注、打分或找补的话。',
+    '- 不要把每条都写成“雷雨间隙去……”，天气只在确实影响体验时轻轻带一下，句式要拉开。',
+    '- 如果一条线路只有低价、补位、过季或解释概念这类理由，就不要硬主推，换成同组里更鲜活、更有当下理由的备选。',
     '- 每条线路的链接统一写成 Markdown 链接 [查看行程](站内详情链接)，不要把供应商原始链接写进正文。',
     '- 每条线路的“查看行程”后面单独留出二维码位置，二维码会放在具体推荐正文下面。',
     '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达。',
@@ -1540,6 +1587,12 @@ export function validateGeneratedArticle(article, context) {
   for (const phrase of FORBIDDEN_PHRASES) {
     if (article.includes(phrase)) issues.push(`Contains forbidden phrase: ${phrase}`);
   }
+  for (const { phrase, max } of REPETITIVE_PHRASE_LIMITS) {
+    const count = article.split(phrase).length - 1;
+    if (count > max) {
+      issues.push(`Phrase "${phrase}" is overused (${count} times).`);
+    }
+  }
 
   const articleLines = article.replace(/\r\n/g, '\n').split('\n');
   const articleTours = listArticleTours(context);
@@ -1554,6 +1607,10 @@ export function validateGeneratedArticle(article, context) {
       .replace(/\s+/g, '');
     if (visibleText.length < 50) {
       issues.push(`Section for "${entry.tour.title}" is too short; expected at least 50 visible characters.`);
+    }
+    const sentenceCount = (rawSection.match(/[。！？!?]+/g) || []).length;
+    if (sentenceCount < 3) {
+      issues.push(`Section for "${entry.tour.title}" needs at least 3 sentences.`);
     }
   }
 

@@ -18,6 +18,8 @@ import {
 const DEFAULT_AIDER_MODEL = 'deepseek/deepseek-chat';
 const DEFAULT_AIDER_BASE_URL = 'https://api.deepseek.com/v1';
 const DEFAULT_CANDIDATE_VARIANTS = 2;
+const MAX_FAMILY_REPEAT_PER_RESEARCH = 1;
+const MAX_DESTINATION_REPEAT_PER_RESEARCH = 2;
 
 function parseArgs(argv) {
   const options = {};
@@ -269,10 +271,14 @@ function buildResearchPrompt(context) {
     '要求：',
     '- recommendation_groups 总条数要凑满 25 条',
     '- recommendation_groups 合计必须正好 25 条，不要写成 30 条、40 条。',
-    '- 不要把雅泡/带池/温泉写成词义解释题，只判断值不值得推荐',
+    '- 不要把雅泡/带池/温泉写成词义解释题，只判断值不值得推荐。',
     '- 要主动压制同质化',
     '- 不要完全照抄分数或现成入选结果，要结合天气、时令和文案可写性重新挑重点线路',
     '- featured_route_ids 只保留 6 条重点线路，且同一线路家族不要重复霸榜。',
+    '- research 里的文字是给编辑团队内部看的，不是给读者看的。seasonal_observations、reason、editorial_angle 都要写成内部判断标签，不要写成可直接复述到成稿里的整句文案。',
+    '- 对存在季节错位、信息冲突、理由过弱的线路，要直接降级或换线，不要输出“已过季但……”“作为补充”“预算有限也可”这种找补理由。',
+    '- 夏季优先把山水、森林、峡谷、漂流、溪水、海岛、近海、泳池水世界这些真正带清凉体感的线放前面；纯温泉酒店线只能作为周末放松补位。',
+    '- recommendation_groups 每条都请给出简短内部 reason，格式像“丰水期瀑布体感强，3天动车适合亲子”，不要写成面向读者的整段文案，也不要写“当前数据里……”“能打的……”这类口头禅。',
     '',
     `运行日期：${context.runDate}`,
     `季节：${context.season}`,
@@ -393,9 +399,9 @@ function normalizeResearch(research, context) {
         const tour = lookup.get(tourId);
         const familyKey = deriveTourFamilyKey(tour);
         const destinationKey = deriveTourDestinationKey(tour);
-        if ((routeUsage.get(tourId) || 0) >= 2) continue;
-        if ((familyUsage.get(familyKey) || 0) >= 2) continue;
-        if ((destinationUsage.get(destinationKey) || 0) >= 3) continue;
+        if ((routeUsage.get(tourId) || 0) >= 1) continue;
+        if ((familyUsage.get(familyKey) || 0) >= MAX_FAMILY_REPEAT_PER_RESEARCH) continue;
+        if ((destinationUsage.get(destinationKey) || 0) >= MAX_DESTINATION_REPEAT_PER_RESEARCH) continue;
         picked.push({
           tour_id: tourId,
           title: tour.title,
@@ -443,9 +449,9 @@ function normalizeResearch(research, context) {
       if (!tour) continue;
       const familyKey = deriveTourFamilyKey(tour);
       const destinationKey = deriveTourDestinationKey(tour);
-      if ((routeUsage.get(item.tour_id) || 0) >= 2) continue;
-      if ((familyUsage.get(familyKey) || 0) >= 2) continue;
-      if ((destinationUsage.get(destinationKey) || 0) >= 3) continue;
+      if ((routeUsage.get(item.tour_id) || 0) >= 1) continue;
+      if ((familyUsage.get(familyKey) || 0) >= MAX_FAMILY_REPEAT_PER_RESEARCH) continue;
+      if ((destinationUsage.get(destinationKey) || 0) >= MAX_DESTINATION_REPEAT_PER_RESEARCH) continue;
       existing.recommendations.push({ ...item });
       routeUsage.set(item.tour_id, (routeUsage.get(item.tour_id) || 0) + 1);
       familyUsage.set(familyKey, (familyUsage.get(familyKey) || 0) + 1);
@@ -523,12 +529,16 @@ function buildWriterPrompt(context, researchJson, variantIndex) {
     '要求：',
     '- author 固定写 "老广旅行"',
     '- 不要出现“速览”“当前数据里”“可以理解为”“别误会成”“模型判断”“候选线路”“综合排序”',
+    '- 不要出现“当前数据里能打的清凉感主要是”“带池、酒店放松类线路可保留”“作为补充”“适合预算有限”“樱花已过季”“季节红利弱”这种研究备注或找补句。',
     '- 导语至少 1 张图，每条推荐至少 1 张图',
     '- 每条推荐都要有 [查看行程](链接)；链接统一使用 detailUrl，不要直接输出 bookingUrl',
     '- 25 条推荐严格使用 research JSON 里清洗后的推荐结果，合计正好 25 条，不要私自扩成 30 条以上。',
     '- 优先用 featured_route_ids 对应的 6 条作为写得更深的线路，但正文里 25 条都要有完整推荐文案。',
     '- 每条推荐至少 50 个中文字符，至少 3 句，必须写出为什么这周值得去、适合谁、现场体验或节奏感、班期/价格/交通提醒。',
     '- 山水清凉组优先写真山水、森林、漂流、亲水、泳池、近海，不要让纯温泉酒店线挤占清凉主位。',
+    '- 每条推荐都要先写“为什么现在去会舒服/会值”，再写适合谁、现场最有记忆点的画面，最后自然带出班期、价格或交通提醒。',
+    '- 文案要让人想出发，不要像给推荐结果写批注，也不要解释“为什么把温泉算作清凉”“为什么这条放在这个组”。',
+    '- 25 条都一条一条写，不要再出现“其中6条深度推荐”这类旧结构。',
     `- 当前是候选版本 ${variantIndex}，请把标题、导语和侧重点与另一版拉开`,
     `- 阅读原文固定：${getDefaultWebsiteUrl()}`,
     '',
@@ -545,7 +555,8 @@ function buildReviewerPrompt(context, researchJson, candidates) {
     '你是终审编辑，请从两篇候选稿里选出更适合发公众号的一篇，并直接输出修订后的最终 Markdown。',
     '只能输出最终 Markdown，不要解释。',
     '终审重点：文案口吻、天气开头、25条逐条推荐、是否种草、图片、站内详情链接、二维码位置、真实性。',
-    '硬性要求：不要出现“速览”“当前数据里”“可以理解为”“别误会成”“模型判断”“候选线路”“综合排序”；每条推荐至少 50 个中文字符。',
+    '硬性要求：不要出现“速览”“当前数据里”“可以理解为”“别误会成”“模型判断”“候选线路”“综合排序”“作为补充”“适合预算有限”“樱花已过季”“其中6条深度推荐”；每条推荐至少 50 个中文字符。',
+    '请重点删掉像内部批注、解释推荐逻辑、找补季节错位、机械重复天气句式的写法。成稿必须像给读者看的旅行推荐，而不是像在交作业。',
     '',
     'research JSON：',
     JSON.stringify(researchJson, null, 2),

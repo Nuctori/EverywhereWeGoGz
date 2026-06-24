@@ -19,8 +19,10 @@ const outDir = path.join(rootDir, 'weekly-wechat-posts', '2099-02-02-agent-test'
 fs.rmSync(outDir, { recursive: true, force: true });
 
 let writerCalls = 0;
+const seenPrompts = [];
 
 const fakeExecRunner = async ({ prompt, outputPath }) => {
+  seenPrompts.push(prompt);
   if (prompt.includes('你是每周旅游选题研究员')) {
     fs.writeFileSync(outputPath, `${JSON.stringify({
       opening_weather_summary: '未来7天广州闷热带阵雨，近场和带池休闲线更舒服。',
@@ -198,6 +200,9 @@ assert.ok(fs.existsSync(path.join(outDir, 'article.raw.md')));
 assert.ok(result.article.includes('本周天气与出游节奏'));
 assert.ok(result.article.startsWith('---\n'));
 assert.ok(result.article.includes('title: "版本A：广州本周出游清单"') || result.article.includes('title: "版本B：这周出发会更舒服的25条线"'));
+assert.ok(!result.article.includes('当前数据里'));
+assert.ok(!result.article.includes('作为补充'));
+assert.ok(!result.article.includes('其中6条深度推荐'));
 assert.ok(fs.existsSync(path.join(outDir, 'weekly-context.json')));
 const storedContext = JSON.parse(fs.readFileSync(path.join(outDir, 'weekly-context.json'), 'utf8'));
 assert.ok(Array.isArray(storedContext.aiSelectionBuckets || []));
@@ -274,9 +279,15 @@ assert.equal(
   normalizedResearch.recommendation_groups
     .flatMap((group) => group.recommendations.map((item) => item.tour_id))
     .filter((tourId) => tourId.startsWith('gx-')).length,
-  3,
+  2,
 );
 assert.deepEqual(normalizedResearch.featured_route_ids, ['gx-a', 'wz-a', 'qy-a', 'sz-a', 'xm-a', 'cs-a']);
+const normalizedIds = normalizedResearch.recommendation_groups
+  .flatMap((group) => group.recommendations.map((item) => item.tour_id));
+assert.equal(normalizedIds.filter((tourId) => tourId.startsWith('gx-')).length <= 2, true);
+const researchPrompt = seenPrompts.find((prompt) => prompt.includes('你是每周旅游选题研究员')) || '';
+assert.ok(researchPrompt.includes('内部判断标签'));
+assert.ok(researchPrompt.includes('不是给读者看的'));
 
 assert.equal(
   extractAiderReplyFromHistory(`Update git name\nLLM RESPONSE 2026-06-24T15:36:33\nASSISTANT\n{"ok":true}\n`),

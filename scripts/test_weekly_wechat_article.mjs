@@ -137,7 +137,7 @@ assert.ok(Array.isArray(context.aiSelectionBuckets));
 assert.ok(context.aiSelectionBuckets.length >= context.candidateGroups.length);
 assert.ok(context.aiSelectionBuckets.some((group) => group.id === 'mountain_water_cooling'));
 assert.ok(context.weatherOutlook.headline.includes('未来7天广州大致在'));
-assert.ok(context.seasonalOutlook.some((item) => item.includes('带池')));
+assert.ok(context.seasonalOutlook.some((item) => item.includes('泳池') || item.includes('水世界')));
 const coolingGroup = context.candidateGroups.find((group) => group.id === 'mountain_water_cooling');
 assert.ok(coolingGroup);
 assert.ok(coolingGroup.tours.some((tour) => tour.id === 'tour-qingyuan'));
@@ -177,15 +177,15 @@ cover: "/data/image-cache/qingyuan.webp"
 
 ## Qingyuan Gorge Rafting 2D
 
-这条线的好处是清凉感来得很直接，到了峡谷和漂流段就能把广州城里的闷热切开。周末只请很少时间也能走，带娃家庭、想放空的上班族，或者想找点玩水动感的朋友都会比较容易有满足感。
+这条线的好处是清凉感来得很直接，到了峡谷和漂流段就能把广州城里的闷热切开。周末只请很少时间也能走，带娃家庭、想放空的上班族，或者想找点玩水动感的朋友都会比较容易有满足感。要是你这周只想用最短时间换回一点清爽，它会很容易成为先出发的那条。
 
 ## Hezhou West Creek 3D (Yuequanju + 4 Meals)
 
-这条更像是把山水和慢节奏一起打包，适合想认真离开城市两三天的人。西溪一带的溪谷、树荫和地方风味都比较有夏天出走的气质，天气闷的时候去这种有水有林的地方，体感会比纯城市逛吃舒服很多。
+这条更像是把山水和慢节奏一起打包，适合想认真离开城市两三天的人。西溪一带的溪谷、树荫和地方风味都比较有夏天出走的气质，天气闷的时候去这种有水有林的地方，体感会比纯城市逛吃舒服很多。要是你更想把节奏放慢一点，这种住下来慢慢走的线路会比赶景点更讨喜。
 
 ## Hunan High-Speed Rail 4D
 
-如果这周想把半径拉远一点，高铁线的轻松感会比自驾硬撑来得友好。四天节奏能把山景、换个城市住两晚的松弛感和出行效率一起兼顾，比较适合情侣、朋友结伴，或者想趁这周顺手换个空气的人。
+如果这周想把半径拉远一点，高铁线的轻松感会比自驾硬撑来得友好。四天节奏能把山景、换个城市住两晚的松弛感和出行效率一起兼顾，比较适合情侣、朋友结伴，或者想趁这周顺手换个空气的人。对不想把时间都耗在赶路上的人来说，它的节奏会更省心。
 `;
 
 const validation = validateGeneratedArticle(article, context);
@@ -241,15 +241,15 @@ cover: "/data/image-cache/qingyuan.webp"
 
 ## 1. Qingyuan Gorge Rafting 2D - Family Weekend
 
-这条线的好处是清凉感来得很直接，到了峡谷和漂流段就能把广州城里的闷热切开。周末只请很少时间也能走，带娃家庭、想放空的上班族，或者想找点玩水动感的朋友都会比较容易有满足感。
+这条线的好处是清凉感来得很直接，到了峡谷和漂流段就能把广州城里的闷热切开。周末只请很少时间也能走，带娃家庭、想放空的上班族，或者想找点玩水动感的朋友都会比较容易有满足感。要是你这周只想用最短时间换回一点清爽，它会很容易成为先出发的那条。
 
 ## 2. Hezhou West Creek 3D - Yuequanju 4 Meals Cool Escape
 
-这条更像是把山水和慢节奏一起打包，适合想认真离开城市两三天的人。西溪一带的溪谷、树荫和地方风味都比较有夏天出走的气质，天气闷的时候去这种有水有林的地方，体感会比纯城市逛吃舒服很多。
+这条更像是把山水和慢节奏一起打包，适合想认真离开城市两三天的人。西溪一带的溪谷、树荫和地方风味都比较有夏天出走的气质，天气闷的时候去这种有水有林的地方，体感会比纯城市逛吃舒服很多。想把周末过得更松一点的人，会更容易喜欢这种不急着赶景点的节奏。
 
 ## 3. Hunan High-Speed Rail 4D - Light Out-of-Province Trip
 
-如果这周想把半径拉远一点，高铁线的轻松感会比自驾硬撑来得友好。四天节奏能把山景、换个城市住两晚的松弛感和出行效率一起兼顾，比较适合情侣、朋友结伴，或者想趁这周顺手换个空气的人。
+如果这周想把半径拉远一点，高铁线的轻松感会比自驾硬撑来得友好。四天节奏能把山景、换个城市住两晚的松弛感和出行效率一起兼顾，比较适合情侣、朋友结伴，或者想趁这周顺手换个空气的人。对想省下赶路体力的人来说，这类线路的舒服感会来得更稳定。
 `;
 
 const looseValidation = validateGeneratedArticle(articleWithLooseTitles, context);
@@ -273,6 +273,31 @@ assert.ok(
     `![Hezhou West Creek 3D (Yuequanju + 4 Meals) 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(buildTourDetailUrl(tours[2], getDefaultWebsiteUrl()))})`,
   ),
 );
+
+const articleWithMetaLeak = `---
+title: "测试标题"
+summary: "测试摘要"
+author: "老广旅行"
+cover: "/data/image-cache/qingyuan.webp"
+---
+
+# 测试标题
+
+## 本周天气与出游节奏
+
+未来7天广州闷热带阵雨，真山水和玩水线会更舒服。
+
+## Qingyuan Gorge Rafting 2D
+
+当前数据里能打的清凉感主要是山水和漂流。这条线作为补充也可以看看，适合预算有限。雷雨间隙去峡谷玩水，雷雨间隙再去漂流，雷雨间隙回酒店休息。
+`;
+
+const leakedValidation = validateGeneratedArticle(articleWithMetaLeak, context);
+assert.equal(leakedValidation.ok, false);
+assert.ok(leakedValidation.issues.some((issue) => issue.includes('当前数据里')));
+assert.ok(leakedValidation.issues.some((issue) => issue.includes('作为补充')));
+assert.ok(leakedValidation.issues.some((issue) => issue.includes('适合预算有限')));
+assert.ok(leakedValidation.issues.some((issue) => issue.includes('雷雨间隙')));
 
 const naturalCoolingFixture = {
   id: 'natural-cooling',

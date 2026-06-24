@@ -530,7 +530,56 @@ export function injectQrFallbackIntoMarkdown(markdown, options = {}) {
   const frontmatterBlock = frontmatterMatch ? frontmatterMatch[0] : '';
   const { body } = parseFrontmatter(markdown);
   const cleanedBody = stripLeadingTitleHeading(body);
-  return buildMarkdownWithFrontmatter(frontmatterBlock, cleanedBody);
+  const lines = cleanedBody.replace(/\r\n/g, '\n').split('\n');
+  const output = [];
+  let currentHeading = '';
+  let lastLinkUrl = '';
+  let lastLinkLabel = '';
+
+  const flushQrBlock = () => {
+    if (!lastLinkUrl) return;
+    output.push('');
+    output.push(`地址：${lastLinkUrl}`);
+    output.push('');
+    output.push(`> 扫码查看详情`);
+    output.push(`> ![${currentHeading || lastLinkLabel || '线路'} 报名二维码](${buildQrFallbackUrl(lastLinkUrl)})`);
+    output.push('');
+    lastLinkUrl = '';
+    lastLinkLabel = '';
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+    const trimmed = line.trim();
+    const headingMatch = trimmed.match(/^#{2,6}\s+(.+)$/);
+    if (headingMatch) {
+      flushQrBlock();
+      currentHeading = normalizeHeadingText(headingMatch[1]);
+      output.push(line);
+      continue;
+    }
+
+    const standaloneImage = parseStandaloneImage(trimmed);
+    if (standaloneImage && /二维码/.test(standaloneImage.alt || '')) {
+      lastLinkUrl = '';
+      lastLinkLabel = '';
+      output.push(line);
+      continue;
+    }
+
+    const linkMatch = trimmed.match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/);
+    if (linkMatch && /查看行程|查看线路|立即查看/.test(linkMatch[1])) {
+      output.push(line);
+      lastLinkLabel = linkMatch[1];
+      lastLinkUrl = linkMatch[2];
+      continue;
+    }
+
+    output.push(line);
+  }
+
+  flushQrBlock();
+  return buildMarkdownWithFrontmatter(frontmatterBlock, output.join('\n'));
 }
 
 export async function uploadInlineImagesForHtml(accessToken, html) {
