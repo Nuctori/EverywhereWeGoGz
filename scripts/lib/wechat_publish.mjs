@@ -569,9 +569,65 @@ export function injectQrFallbackIntoMarkdown(markdown, options = {}) {
       continue;
     }
 
+    const inlineRouteLink = [...trimmed.matchAll(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g)].find((match) =>
+      /查看行程|查看线路|立即查看/.test(match[1] || ''),
+    );
+    if (inlineRouteLink) {
+      output.push(line);
+      output.push('');
+      output.push(`地址：${inlineRouteLink[2]}`);
+      output.push('');
+      output.push('> 扫码查看详情');
+      output.push(
+        `> ![${currentHeading || inlineRouteLink[1] || '线路'} 报名二维码](${buildQrFallbackUrl(inlineRouteLink[2])})`,
+      );
+      output.push('');
+      continue;
+    }
+
     output.push(line);
   }
   return buildMarkdownWithFrontmatter(frontmatterBlock, output.join('\n'));
+}
+
+function buildAddressHtml(url) {
+  return `<p style="${PARAGRAPH_STYLE}">地址：${escapeHtml(url)}</p>`;
+}
+
+function buildQrCalloutHtml(url, label) {
+  return `<div style="${QR_CALLOUT_STYLE}"><p style="${QR_LABEL_STYLE}">扫码查看详情</p><div style="margin:8px 0 0;text-align:center;"><img src="${buildQrFallbackUrl(url)}" alt="${escapeHtml(label)} 报名二维码" style="${QR_IMAGE_STYLE}"></div></div>`;
+}
+
+export function injectSupportBlocksIntoHtml(html) {
+  const paragraphs = html.split('\n');
+  const output = [];
+
+  const isAddressBlock = (block) => block.includes('地址：');
+  const isQrBlock = (block) => block.includes('扫码查看详情') || block.includes('报名二维码');
+  const isSupportBlock = (block) => isAddressBlock(block) || isQrBlock(block);
+
+  for (let index = 0; index < paragraphs.length; index += 1) {
+    const block = paragraphs[index];
+    output.push(block);
+
+    const routeLinkMatch = block.match(/<a href="(https?:\/\/[^"]+)"[^>]*>(查看行程|查看线路|立即查看)<\/a>/);
+    if (!routeLinkMatch) continue;
+
+    const url = decodeHtmlEntities(routeLinkMatch[1]);
+    const labelMatch = block.match(/<strong>([^<]+)<\/strong>/);
+    const label = stripHtmlTags(labelMatch?.[1] || routeLinkMatch[2] || '线路');
+
+    let supportCursor = index + 1;
+    while (supportCursor < paragraphs.length && isSupportBlock(paragraphs[supportCursor])) {
+      supportCursor += 1;
+    }
+
+    output.push(buildAddressHtml(url));
+    output.push(buildQrCalloutHtml(url, label));
+    index = supportCursor - 1;
+  }
+
+  return output.join('\n');
 }
 
 export async function uploadInlineImagesForHtml(accessToken, html) {
@@ -666,7 +722,7 @@ export async function publishMarkdownArticle(rootDir, options = {}) {
   const sourceUrl = options.sourceUrl || config.sourceUrl;
   const markdownWithQrFallback = injectQrFallbackIntoMarkdown(markdown, { sourceUrl });
   const parsedMarkdown = parseFrontmatter(markdownWithQrFallback);
-  const html = markdownToHtml(parsedMarkdown.body);
+  const html = injectSupportBlocksIntoHtml(markdownToHtml(parsedMarkdown.body));
   const htmlPath = path.join(outputDir, 'article.html');
   const markdownPathWithQr = path.join(outputDir, 'article.with-qr.md');
   fs.writeFileSync(markdownPathWithQr, `${markdownWithQrFallback}\n`, 'utf8');
@@ -722,7 +778,7 @@ export async function preparePublishBundle(rootDir, options = {}) {
   const sourceUrl = options.sourceUrl || process.env.WECHAT_CONTENT_SOURCE_URL || DEFAULT_WECHAT_CONTENT_SOURCE_URL;
   const markdownWithQrFallback = injectQrFallbackIntoMarkdown(markdown, { sourceUrl });
   const parsedMarkdown = parseFrontmatter(markdownWithQrFallback);
-  const html = markdownToHtml(parsedMarkdown.body);
+  const html = injectSupportBlocksIntoHtml(markdownToHtml(parsedMarkdown.body));
   const inlineAssets = await prepareInlineImageAssetsForHtml(html, outputDir);
   const htmlPath = path.join(outputDir, 'article.html');
   fs.writeFileSync(htmlPath, `${inlineAssets.html}\n`, 'utf8');

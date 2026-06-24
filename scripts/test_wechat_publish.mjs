@@ -4,6 +4,7 @@ import path from 'node:path';
 import {
   buildDraftPayload,
   buildQrFallbackUrl,
+  injectSupportBlocksIntoHtml,
   injectQrFallbackIntoMarkdown,
   markdownToHtml,
   parseFrontmatter,
@@ -97,6 +98,13 @@ const htmlWithQr = markdownToHtml(parseFrontmatter(markdownWithQr).body);
 assert.ok(htmlWithQr.includes('地址：https://example.com/qingyuan'));
 assert.ok(htmlWithQr.includes('<img src="https://quickchart.io/qr'));
 assert.ok(htmlWithQr.includes('扫码查看详情'));
+
+const htmlWithInlineRouteLink = injectSupportBlocksIntoHtml(
+  '<p style="x"><strong>1. 清远峡谷漂流2天</strong><br>适合周末找清凉感。<br><a href="https://example.com/inline-route" style="x">查看行程</a></p>',
+);
+assert.ok(htmlWithInlineRouteLink.includes('地址：https://example.com/inline-route'));
+assert.ok(htmlWithInlineRouteLink.includes('扫码查看详情'));
+assert.ok(htmlWithInlineRouteLink.includes('https://quickchart.io/qr'));
 
 const htmlForFeatureBlock = markdownToHtml(`## 重点线路\n\n### 清远峡谷漂流2天\n![线路图](https://example.com/feature.jpg)\n适合周末找清凉感。\n[查看线路](https://example.com/feature)`);
 assert.ok(htmlForFeatureBlock.includes('<h3'));
