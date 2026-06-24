@@ -435,6 +435,56 @@ const dedupeContext = {
       tags: ['海风'],
     },
   ],
+  fallbackCandidateTours: [
+    {
+      id: 'tour-a',
+      title: '清远峡谷漂流2天',
+      destination: '广东清远',
+      price: 699,
+      priceUnit: '元/人',
+      departureDates: ['2026-06-26'],
+      suitableFor: ['亲子'],
+      articleImages: ['https://example.com/a.jpg'],
+      highlights: ['峡谷漂流'],
+      tags: ['玩水'],
+    },
+    {
+      id: 'tour-b',
+      title: '阳江海陵岛2天',
+      destination: '广东阳江',
+      price: 499,
+      priceUnit: '元/人',
+      departureDates: ['2026-06-27'],
+      suitableFor: ['情侣'],
+      articleImages: ['https://example.com/b.jpg'],
+      highlights: ['海陵岛'],
+      tags: ['海风'],
+    },
+    {
+      id: 'tour-c',
+      title: '贺州西溪森林3天',
+      destination: '广西贺州',
+      price: 899,
+      priceUnit: '元/人',
+      departureDates: ['2026-06-28'],
+      suitableFor: ['朋友'],
+      articleImages: ['https://example.com/c.jpg'],
+      highlights: ['森林溪谷'],
+      tags: ['避暑'],
+    },
+    {
+      id: 'tour-d',
+      title: '清远紫云谷2天',
+      destination: '广东清远',
+      price: 599,
+      priceUnit: '元/人',
+      departureDates: ['2026-06-29'],
+      suitableFor: ['朋友'],
+      articleImages: ['https://example.com/d.jpg'],
+      highlights: ['溪谷亲水'],
+      tags: ['山水'],
+    },
+  ],
 };
 
 const articleWithDuplicateLinks = `**清远峡谷漂流2天**
@@ -470,6 +520,42 @@ const dedupedDeepSections = dedupeArticleRouteBlocks(articleWithRepeatedDeepSect
 assert.equal((dedupedDeepSections.match(/tour=tour-a/g) || []).length, 1);
 assert.equal((dedupedDeepSections.match(/tour=tour-b/g) || []).length, 1);
 assert.ok(dedupedDeepSections.includes('**23. 阳江海陵岛2天**'));
+
+const articleWithRepeatedTailBlocks = `### 周末近场
+
+**1. 清远峡谷漂流2天**
+
+第一条。
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-a&source=wechat)
+
+**2. 阳江海陵岛2天**
+
+第二条。
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-b&source=wechat)
+
+### 补充推荐（确保25条）
+
+**20. 清远峡谷漂流2天（周末补位）**
+
+重复第一条。
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-a&source=wechat)
+
+**21. 阳江海陵岛2天（补充）**
+
+重复第二条。
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-b&source=wechat)`;
+
+const dedupedTailBlocks = dedupeArticleRouteBlocks(articleWithRepeatedTailBlocks, dedupeContext).article;
+assert.equal((dedupedTailBlocks.match(/tour=tour-a/g) || []).length, 1);
+assert.equal((dedupedTailBlocks.match(/tour=tour-b/g) || []).length, 1);
+assert.equal((dedupedTailBlocks.match(/tour=tour-c/g) || []).length, 1);
+assert.equal((dedupedTailBlocks.match(/tour=tour-d/g) || []).length, 1);
+assert.ok(dedupedTailBlocks.includes('**20. 贺州西溪森林3天**'));
+assert.ok(dedupedTailBlocks.includes('**21. 清远紫云谷2天**'));
 
 assert.equal(
   extractAiderReplyFromHistory(`Update git name\nLLM RESPONSE 2026-06-24T15:36:33\nASSISTANT\n{"ok":true}\n`),

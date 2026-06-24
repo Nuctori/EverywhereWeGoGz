@@ -124,6 +124,7 @@ function findUnusedTourForArticle(context, usedTourIds = new Set()) {
   const pools = [
     ...(context.recommendationGroups || []).flatMap((group) => group.tours || []),
     ...(context.candidateTours || []),
+    ...(context.fallbackCandidateTours || []),
   ];
   for (const tour of pools) {
     if (!tour?.id || usedTourIds.has(tour.id)) continue;
@@ -765,6 +766,7 @@ function applyResearchSelectionToContext(context, research) {
     recommendationGroups: recommendationGroups.length > 0 ? recommendationGroups : context.recommendationGroups,
     aiSelectionBuckets: recommendationGroups.length > 0 ? recommendationGroups : context.aiSelectionBuckets,
     candidateTours: curatedCandidateTours.length > 0 ? curatedCandidateTours : context.candidateTours,
+    fallbackCandidateTours: context.candidateTours,
   };
 }
 
