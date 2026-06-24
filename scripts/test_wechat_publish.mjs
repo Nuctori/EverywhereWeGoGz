@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import {
   buildDraftPayload,
+  buildQrFallbackUrl,
+  injectQrFallbackIntoMarkdown,
   markdownToHtml,
   parseFrontmatter,
 } from './lib/wechat_publish.mjs';
@@ -37,6 +39,16 @@ assert.ok(html.includes('<img src="https://nuctori.github.io/EverywhereWeGoGz/da
 assert.ok(html.includes('<h2>清远峡谷漂流2天</h2>'));
 assert.ok(html.includes('<ul>'));
 assert.ok(html.includes('<a href="https://example.com/qingyuan">查看线路</a>'));
+
+const markdownWithQr = injectQrFallbackIntoMarkdown(markdown, {
+  sourceUrl: 'https://nuctori.github.io/EverywhereWeGoGz/',
+});
+assert.ok(markdownWithQr.includes('微信内打开外链不稳定，可扫码查看线路'));
+assert.ok(markdownWithQr.includes('![线路二维码]('));
+assert.ok(buildQrFallbackUrl('https://example.com/qingyuan').includes('quickchart.io/qr'));
+
+const htmlWithQr = markdownToHtml(parseFrontmatter(markdownWithQr).body);
+assert.ok(htmlWithQr.includes('<img src="https://quickchart.io/qr'));
 
 const payload = buildDraftPayload({
   frontmatter: parsed.data,

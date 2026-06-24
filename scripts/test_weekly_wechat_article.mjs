@@ -3,6 +3,7 @@ import {
   buildWeeklyArticleContext,
   buildWeeklyArticlePrompt,
   enrichWeeklyArticleMedia,
+  fetchWeatherOutlook,
   getDefaultWebsiteUrl,
   validateGeneratedArticle,
 } from './lib/weekly_wechat_article.mjs';
@@ -93,33 +94,60 @@ const tours = [
   },
 ];
 
+const weatherOutlook = await fetchWeatherOutlook({
+  location: '广州',
+  fetchImpl: async () => ({
+    ok: true,
+    async json() {
+      return {
+        daily: {
+          time: ['2026-06-24', '2026-06-25', '2026-06-26', '2026-06-27', '2026-06-28', '2026-06-29', '2026-06-30'],
+          weather_code: [2, 80, 3, 1, 95, 2, 0],
+          temperature_2m_max: [32, 31, 30, 33, 29, 31, 34],
+          temperature_2m_min: [26, 25, 25, 26, 24, 25, 26],
+          precipitation_probability_max: [35, 70, 60, 20, 85, 40, 15],
+        },
+      };
+    },
+  }),
+});
+
 const context = buildWeeklyArticleContext(tours, {
   runDate: '2026-06-24',
   windowDays: 14,
   maxCandidates: 10,
   maxArticleItems: 3,
+  weatherOutlook,
 });
 
 assert.equal(context.season, '夏季');
+assert.equal(context.generationMode, 'single-pass-deepseek');
 assert.equal(context.selectedTours.length, 3);
 assert.ok(context.candidateGroups.length >= 3);
+assert.ok(context.recommendationGroups.length >= 3);
+assert.ok(
+  context.recommendationGroups.reduce((sum, group) => sum + group.tours.length, 0) >= 4,
+);
 assert.ok(context.candidateGroups.some((group) => group.id === 'family_short_break'));
 assert.ok(context.candidateGroups.some((group) => group.id === 'mountain_water_cooling'));
 assert.ok(context.candidateGroups.some((group) => group.id === 'relaxing_resort'));
+assert.ok(context.weatherOutlook.headline.includes('未来7天广州大致在'));
+assert.ok(context.seasonalOutlook.some((item) => item.includes('带池')));
 
 const hotSpringCandidate = context.candidateTours.find((tour) => tour.id === 'tour-hotspring');
 assert.ok(hotSpringCandidate);
 assert.ok(
   hotSpringCandidate.editorialReasons.some((reason) =>
-    reason.includes('不要硬写成避暑主推'),
+    reason.includes('周末放松'),
   ),
 );
 
 const prompt = buildWeeklyArticlePrompt(context);
-assert.ok(prompt.includes('候选线路已经按偏好分组'));
-assert.ok(prompt.includes('夏季不要把温泉自动写成避暑主推'));
+assert.ok(prompt.includes('本周天气与出游节奏'));
+assert.ok(prompt.includes('本周 4 条分组推荐速览'));
+assert.ok(prompt.includes('不要解释线路命名'));
 assert.ok(prompt.includes('### 亲子短途'));
-assert.ok(prompt.includes('### 轻松度假'));
+assert.ok(prompt.includes('### 高铁轻出省'));
 assert.ok(prompt.includes('Qingyuan Gorge Rafting 2D'));
 assert.ok(prompt.includes('Jinshuitai Hot Spring 2D'));
 assert.ok(prompt.includes(getDefaultWebsiteUrl()));
@@ -132,6 +160,10 @@ cover: "/data/image-cache/qingyuan.webp"
 ---
 
 # This Week's Guangzhou Summer Tours
+
+## 本周天气与出游节奏
+
+未来7天广州大致在25-34°C之间，周末有阵雨，短途和酒店型线路更从容。
 
 ## Qingyuan Gorge Rafting 2D
 
@@ -176,6 +208,10 @@ cover: "/data/image-cache/qingyuan.webp"
 ---
 
 # This Week's Guangzhou Summer Tours
+
+## 本周天气与出游节奏
+
+未来7天广州大致在25-34°C之间，周末有阵雨，短途和酒店型线路更从容。
 
 ## 1. Qingyuan Gorge Rafting 2D - Family Weekend
 

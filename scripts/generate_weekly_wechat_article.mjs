@@ -6,6 +6,7 @@ import {
   defaultOutputDir,
   ensureDir,
   enrichWeeklyArticleMedia,
+  fetchWeatherOutlook,
   generateWeeklyArticle,
   getDefaultWebsiteUrl,
   loadEnvFiles,
@@ -47,11 +48,18 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const runDate = args.runDate || toDateKey();
   const tours = readToursData(rootDir);
+  let weatherOutlook;
+  try {
+    weatherOutlook = await fetchWeatherOutlook({ location: '广州' });
+  } catch (error) {
+    console.warn(error instanceof Error ? error.message : String(error));
+  }
   const context = buildWeeklyArticleContext(tours, {
     runDate,
     windowDays: args.windowDays,
     maxCandidates: args.maxCandidates,
     maxArticleItems: args.maxArticleItems,
+    weatherOutlook,
   });
   const outDir = args.outDir ? path.resolve(rootDir, args.outDir) : defaultOutputDir(rootDir, runDate);
 
