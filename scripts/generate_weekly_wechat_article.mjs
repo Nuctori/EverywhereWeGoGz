@@ -5,7 +5,9 @@ import {
   buildWeeklyArticlePrompt,
   defaultOutputDir,
   ensureDir,
+  enrichWeeklyArticleMedia,
   generateWeeklyArticle,
+  getDefaultWebsiteUrl,
   loadEnvFiles,
   readToursData,
   resolveDeepSeekConfig,
@@ -60,7 +62,10 @@ async function main() {
 
   try {
     const generated = await generateWeeklyArticle(context, config);
-    const validation = validateGeneratedArticle(generated.article, context);
+    const articleWithMedia = enrichWeeklyArticleMedia(generated.article, context, {
+      websiteUrl: getDefaultWebsiteUrl(),
+    });
+    const validation = validateGeneratedArticle(articleWithMedia, context);
     writeJson(path.join(outDir, 'validation.json'), validation);
     writeJson(path.join(outDir, 'generation-meta.json'), {
       runDate,
@@ -70,7 +75,7 @@ async function main() {
       validationOk: validation.ok,
     });
     fs.writeFileSync(path.join(outDir, 'prompt.md'), `${generated.prompt.trim()}\n`, 'utf8');
-    fs.writeFileSync(path.join(outDir, 'article.md'), `${generated.article.trim()}\n`, 'utf8');
+    fs.writeFileSync(path.join(outDir, 'article.md'), `${articleWithMedia.trim()}\n`, 'utf8');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     writeJson(path.join(outDir, 'validation.json'), {

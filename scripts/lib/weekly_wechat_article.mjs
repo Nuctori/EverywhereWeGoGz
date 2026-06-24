@@ -6,6 +6,7 @@ const DEFAULT_WINDOW_DAYS = 21;
 const DEFAULT_MAX_CANDIDATES = 18;
 const DEFAULT_MAX_ARTICLE_ITEMS = 5;
 const DEFAULT_AUTHOR = '老广旅行';
+const DEFAULT_WEBSITE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
 
 const FORBIDDEN_PHRASES = [
   '最低价',
@@ -268,6 +269,16 @@ function deriveThemeHints(selectedTours, season) {
   return [...new Set(hints)].slice(0, 4);
 }
 
+export function resolveArticleAssetUrl(assetPath, websiteUrl = DEFAULT_WEBSITE_URL) {
+  if (!assetPath || typeof assetPath !== 'string') return '';
+  if (/^https?:\/\//i.test(assetPath)) return assetPath;
+  const normalizedWebsiteUrl = websiteUrl.replace(/\/$/, '');
+  if (assetPath.startsWith('/')) {
+    return `${normalizedWebsiteUrl}${assetPath}`;
+  }
+  return `${normalizedWebsiteUrl}/${assetPath.replace(/^\.\//, '')}`;
+}
+
 function formatTourForPrompt(tour) {
   return {
     id: tour.id,
@@ -286,6 +297,7 @@ function formatTourForPrompt(tour) {
     accommodationLevel: tour.accommodationLevel,
     bookingUrl: tour.bookingUrl,
     images: tour.images || [],
+    articleImages: (tour.images || []).slice(0, 3).map((assetPath) => resolveArticleAssetUrl(assetPath)),
     dataQuality: {
       availabilityConfidence: tour.availabilityConfidence,
       riskFlags: tour.dataQuality?.riskFlags || tour.meta?.dataQuality?.riskFlags || [],
@@ -388,6 +400,7 @@ export function buildWeeklyArticlePrompt(context) {
         `适合人群：${(tour.suitableFor || []).join('、') || '未标注'}`,
         `亮点：${(tour.highlights || []).slice(0, 4).join('、') || '未标注'}`,
         `标签：${(tour.tags || []).slice(0, 4).join('、') || '未标注'}`,
+        `正文配图：${(tour.articleImages || []).join('、') || '未标注'}`,
         `预订链接：${tour.bookingUrl}`,
       ];
       return lines.join('\n');
@@ -407,9 +420,11 @@ export function buildWeeklyArticlePrompt(context) {
     '- 输出 Markdown，且必须带 frontmatter：title, summary, author, cover',
     `- author 固定写 "${DEFAULT_AUTHOR}"`,
     `- cover 使用第一条线路的首图：${context.selectedTours[0]?.images?.[0] || ''}`,
+    `- 阅读原文链接固定指向：${DEFAULT_WEBSITE_URL}`,
     '- 标题适合公众号，但不要夸张标题党',
     '- 开头先给本周出游判断，再分段推荐线路',
     '- 每条线路写清楚：为什么这周值得看、适合谁、线路信息、提醒',
+    '- 正文使用 Markdown 图片语法配图，导语至少 1 张图，每条线路至少 1 张图，优先使用提供的“正文配图”URL',
     '- 天气和季节只能做保守表达，例如“更适合避暑”“更适合亲子出游”，不要写成确定性预报',
     '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达',
     '- 不要编造出发城市、库存、优惠、成团率、景区政策',
@@ -429,8 +444,53 @@ export function buildWeeklyArticlePrompt(context) {
     '',
     '# 标题',
     '',
+    '![导语配图](https://example.com/hero.jpg)',
+    '',
     '正文……',
   ].join('\n');
+}
+
+function hasMarkdownImage(lines, startIndex, endIndex) {
+  for (let index = startIndex; index < endIndex; index += 1) {
+    if (/!\[[^\]]*]\(([^)]+)\)/.test(lines[index])) return true;
+  }
+  return false;
+}
+
+export function enrichWeeklyArticleMedia(article, context, options = {}) {
+  const websiteUrl = options.websiteUrl || DEFAULT_WEBSITE_URL;
+  const lines = article.replace(/\r\n/g, '\n').split('\n');
+  const h1Index = lines.findIndex((line) => /^#\s+/.test(line.trim()));
+  const firstSectionIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()));
+  const heroTour = context.selectedTours[0];
+  const heroImageUrl = resolveArticleAssetUrl(heroTour?.images?.[0] || '', websiteUrl);
+  let heroInserted = false;
+
+  if (heroImageUrl && h1Index >= 0) {
+    const heroRegionEnd = firstSectionIndex >= 0 ? firstSectionIndex : lines.length;
+    if (!hasMarkdownImage(lines, h1Index + 1, heroRegionEnd)) {
+      lines.splice(h1Index + 1, 0, '', `![${heroTour?.title || '线路配图'}](${heroImageUrl})`, '');
+      heroInserted = true;
+    }
+  }
+
+  context.selectedTours.forEach((tour, tourIndex) => {
+    const sectionIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()) && line.includes(tour.title));
+    if (sectionIndex < 0) return;
+
+    const nextSectionIndex = lines.findIndex(
+      (line, index) => index > sectionIndex && /^##\s+/.test(line.trim()),
+    );
+    const sectionEnd = nextSectionIndex >= 0 ? nextSectionIndex : lines.length;
+    if (hasMarkdownImage(lines, sectionIndex + 1, sectionEnd)) return;
+    if (heroInserted && tourIndex === 0) return;
+
+    const imageUrl = resolveArticleAssetUrl(tour.images?.[0] || '', websiteUrl);
+    if (!imageUrl) return;
+    lines.splice(sectionIndex + 1, 0, '', `![${tour.title}](${imageUrl})`, '');
+  });
+
+  return lines.join('\n').replace(/\n{4,}/g, '\n\n\n');
 }
 
 function normalizeBaseUrl(baseUrl) {
@@ -557,4 +617,8 @@ export function defaultOutputDir(rootDir, runDate) {
 
 export function getDefaultAuthor() {
   return DEFAULT_AUTHOR;
+}
+
+export function getDefaultWebsiteUrl() {
+  return DEFAULT_WEBSITE_URL;
 }

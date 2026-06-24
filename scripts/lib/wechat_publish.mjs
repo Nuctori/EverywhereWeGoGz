@@ -3,6 +3,8 @@ import path from 'node:path';
 import http from 'node:http';
 import sharp from 'sharp';
 
+const DEFAULT_WECHAT_CONTENT_SOURCE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
+
 function stripWrappingQuotes(value) {
   if (
     (value.startsWith('"') && value.endsWith('"')) ||
@@ -37,6 +39,7 @@ function escapeHtml(value) {
 
 function renderInlineMarkdown(text) {
   let html = escapeHtml(text);
+  html = html.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g, '<img src="$2" alt="$1">');
   html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
@@ -241,7 +244,7 @@ export function readWeChatConfig(env = process.env) {
   return {
     appId,
     appSecret,
-    sourceUrl: (env.WECHAT_CONTENT_SOURCE_URL || '').trim(),
+    sourceUrl: (env.WECHAT_CONTENT_SOURCE_URL || DEFAULT_WECHAT_CONTENT_SOURCE_URL).trim(),
     commentsOpen: (env.WECHAT_NEED_OPEN_COMMENT || '1').trim() !== '0',
     fansOnly: (env.WECHAT_ONLY_FANS_CAN_COMMENT || '0').trim() === '1',
     proxyUrl: (env.WECHAT_PROXY_URL || env.HTTPS_PROXY || env.HTTP_PROXY || '').trim(),
@@ -321,7 +324,7 @@ export async function preparePublishBundle(rootDir, options = {}) {
     title: frontmatter.title,
     summary: frontmatter.summary,
     author: frontmatter.author || '老广去边度',
-    sourceUrl: options.sourceUrl || process.env.WECHAT_CONTENT_SOURCE_URL || '',
+    sourceUrl: options.sourceUrl || process.env.WECHAT_CONTENT_SOURCE_URL || DEFAULT_WECHAT_CONTENT_SOURCE_URL,
     commentsOpen: (process.env.WECHAT_NEED_OPEN_COMMENT || '1').trim() !== '0',
     fansOnly: (process.env.WECHAT_ONLY_FANS_CAN_COMMENT || '0').trim() === '1',
     articlePath,
