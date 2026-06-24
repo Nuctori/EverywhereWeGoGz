@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { generateWeeklyArticleWithAgentCli } from './lib/weekly_wechat_agent_cli.mjs';
+import {
+  extractAiderReplyFromHistory,
+  generateWeeklyArticleWithAgentCli,
+  normalizeAiderModel,
+} from './lib/weekly_wechat_agent_cli.mjs';
 
 const rootDir = process.cwd();
 const outDir = path.join(rootDir, 'weekly-wechat-posts', '2099-02-02-agent-test');
@@ -177,5 +181,12 @@ assert.ok(fs.existsSync(path.join(outDir, 'candidate-1.md')));
 assert.ok(fs.existsSync(path.join(outDir, 'candidate-2.md')));
 assert.ok(fs.existsSync(path.join(outDir, 'article.raw.md')));
 assert.ok(result.article.includes('本周天气与出游节奏'));
+
+assert.equal(normalizeAiderModel('deepseek-v4-flash'), 'deepseek/deepseek-chat');
+assert.equal(normalizeAiderModel('deepseek-reasoner'), 'deepseek/deepseek-reasoner');
+assert.equal(
+  extractAiderReplyFromHistory(`Update git name\nLLM RESPONSE 2026-06-24T15:36:33\nASSISTANT\n{"ok":true}\n`),
+  '{"ok":true}',
+);
 
 console.log('weekly wechat agent cli tests passed');

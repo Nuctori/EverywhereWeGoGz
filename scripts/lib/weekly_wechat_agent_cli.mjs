@@ -58,6 +58,43 @@ function parseJsonResponse(text) {
   return JSON.parse(stripMarkdownFence(text));
 }
 
+function normalizeAiderModel(model) {
+  const trimmed = String(model || '').trim();
+  if (!trimmed) {
+    return DEFAULT_AIDER_MODEL;
+  }
+  if (trimmed.includes('/')) {
+    return trimmed;
+  }
+  const normalized = trimmed.toLowerCase();
+  if (normalized.includes('reasoner') || normalized.includes('r1')) {
+    return 'deepseek/deepseek-reasoner';
+  }
+  if (normalized.startsWith('deepseek')) {
+    return DEFAULT_AIDER_MODEL;
+  }
+  return trimmed;
+}
+
+function extractAiderReplyFromHistory(text) {
+  const content = String(text || '');
+  const marker = 'LLM RESPONSE ';
+  const markerIndex = content.lastIndexOf(marker);
+  if (markerIndex === -1) {
+    return stripMarkdownFence(content);
+  }
+
+  const section = content.slice(markerIndex);
+  const firstLineBreak = section.indexOf('\n');
+  if (firstLineBreak === -1) {
+    return '';
+  }
+
+  let body = section.slice(firstLineBreak + 1).trim();
+  body = body.replace(/^ASSISTANT\s*/i, '').trim();
+  return stripMarkdownFence(body);
+}
+
 function getAiderBinary() {
   const userScripts = path.join(process.env.APPDATA || '', 'Python', 'Python310', 'Scripts', 'aider.exe');
   return fs.existsSync(userScripts) ? userScripts : 'aider';
@@ -194,9 +231,16 @@ function runAiderMessage({ cwd, prompt, outputPath, model }) {
       return;
     }
 
+    const sessionDir = path.join(cwd, '.tmp-aider-session');
+    ensureDir(sessionDir);
+    const historyPath = path.join(sessionDir, `${path.basename(outputPath)}.llm-history.log`);
+    const historyInputPath = path.join(sessionDir, '.aider.input.history');
+    const historyChatPath = path.join(sessionDir, '.aider.chat.history.md');
+    const resolvedModel = normalizeAiderModel(model || env.AIDER_MODEL || DEFAULT_AIDER_MODEL);
+
     const args = [
       '--model',
-      model || env.AIDER_MODEL || DEFAULT_AIDER_MODEL,
+      resolvedModel,
       '--openai-api-key',
       env.AIDER_OPENAI_API_KEY,
       '--openai-api-base',
@@ -204,9 +248,21 @@ function runAiderMessage({ cwd, prompt, outputPath, model }) {
       '--message',
       prompt,
       '--yes-always',
+      '--no-git',
       '--no-gitignore',
       '--no-auto-commits',
       '--no-dirty-commits',
+      '--no-detect-urls',
+      '--map-tokens',
+      '0',
+      '--map-refresh',
+      'manual',
+      '--input-history-file',
+      historyInputPath,
+      '--chat-history-file',
+      historyChatPath,
+      '--llm-history-file',
+      historyPath,
       '--no-pretty',
       '--no-stream',
       '--no-check-update',
@@ -219,7 +275,7 @@ function runAiderMessage({ cwd, prompt, outputPath, model }) {
     ];
 
     const child = spawn(getAiderBinary(), args, {
-      cwd,
+      cwd: sessionDir,
       stdio: ['ignore', 'pipe', 'pipe'],
       env,
     });
@@ -239,8 +295,16 @@ function runAiderMessage({ cwd, prompt, outputPath, model }) {
         reject(new Error(`aider failed (${code})\n${combined}`.trim()));
         return;
       }
-      fs.writeFileSync(outputPath, `${combined.trim()}\n`, 'utf8');
-      resolve({ stdout, stderr });
+
+      const historyText = fs.existsSync(historyPath) ? fs.readFileSync(historyPath, 'utf8') : '';
+      const reply = extractAiderReplyFromHistory(historyText || combined);
+      if (!reply) {
+        reject(new Error(`aider returned no assistant reply\n${combined}`.trim()));
+        return;
+      }
+
+      fs.writeFileSync(outputPath, `${reply.trim()}\n`, 'utf8');
+      resolve({ stdout, stderr, reply, model: resolvedModel });
     });
   });
 }
@@ -320,7 +384,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
     runDate,
     generatedAt: new Date().toISOString(),
     generationMode: context.generationMode,
-    aiderModel,
+    aiderModel: normalizeAiderModel(aiderModel),
     validationOk: validation.ok,
     candidatePaths: candidatePaths.map((filePath) => path.relative(rootDir, filePath)),
   });
@@ -335,6 +399,11 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
     finalPath,
   };
 }
+
+export {
+  extractAiderReplyFromHistory,
+  normalizeAiderModel,
+};
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const rootDir = process.cwd();
