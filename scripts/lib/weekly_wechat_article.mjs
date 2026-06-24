@@ -23,6 +23,16 @@ const FORBIDDEN_PHRASES = [
   '最适合',
   '第一',
   '唯一',
+  '速览',
+  '当前数据里',
+  '从数据看',
+  '候选线路',
+  '综合排序',
+  '模型判断',
+  '可以理解为',
+  '别误会成',
+  '可保留',
+  '能打的',
 ];
 
 const NATURAL_COOLING_KEYWORDS = [
@@ -508,6 +518,7 @@ function formatTourForPrompt(tour) {
     transportType: tour.transportType,
     accommodationLevel: tour.accommodationLevel,
     bookingUrl: tour.bookingUrl,
+    detailUrl: buildTourDetailUrl(tour),
     images: tour.images || [],
     articleImages: (tour.images || []).slice(0, 3).map((assetPath) => resolveArticleAssetUrl(assetPath)),
     dataQuality: {
@@ -518,6 +529,14 @@ function formatTourForPrompt(tour) {
     editorialReasons: tour.editorialReasons,
     editorialMeta: tour.editorialMeta,
   };
+}
+
+export function buildTourDetailUrl(tour, websiteUrl = DEFAULT_WEBSITE_URL) {
+  if (!tour?.id) return websiteUrl;
+  const resolved = new URL(websiteUrl);
+  resolved.searchParams.set('tour', String(tour.id));
+  resolved.searchParams.set('source', 'wechat');
+  return resolved.toString();
 }
 
 function deriveRouteClusterKey(tour) {
@@ -896,7 +915,7 @@ function buildSeasonalOutlook(candidateTours, runDate, season) {
   const metas = candidateTours.map((tour) => tour.editorialMeta || {});
 
   if (season === '夏季') {
-    signals.push('广州这段时间更适合看清凉山水、亲子短途、近场酒店放松三类线。');
+    signals.push('广州这段时间出游，更容易被真山水、森林树荫、亲水活动和近场放松线打动。');
   } else if (season === '秋季') {
     signals.push('秋天更适合把高铁中短线、城市漫游和轻山线放前面。');
   } else if (season === '冬季') {
@@ -906,13 +925,13 @@ function buildSeasonalOutlook(candidateTours, runDate, season) {
   }
 
   if (metas.some((meta) => meta.hasCoolingSignals)) {
-    signals.push('当前数据里能打的清凉感，主要还是山水、森林、漂流、亲水和近海方向。');
+    signals.push('本周想写出清凉感，更适合从山水、森林、漂流、亲水和近海度假的现场体验切入。');
   }
   if (metas.some((meta) => meta.hasHotSpringSignals || meta.hasResortSignals)) {
-    signals.push('带池、酒店放松类线路可以保留，但更适合写成周末休整感，而不是生硬解释名字。');
+    signals.push('带池、酒店放松类线路也值得保留，写周末休整、亲子陪伴和住下来慢慢放松会更自然。');
   }
   if (metas.some((meta) => meta.hasFlowerSignals)) {
-    signals.push('数据里带花期关键词的线路可以放进开头时令提示，但要写成“可关注”，不要写死花况。');
+    signals.push('如果线路带花期关键词，可以作为近期可关注的时令亮点轻轻带到，不要写死花况。');
   }
   if (metas.some((meta) => meta.hasRedLeafSignals)) {
     signals.push('带红叶或银杏关键词的线路适合当作时令看点，但仍以线路页更新为准。');
@@ -1113,7 +1132,8 @@ export function buildWeeklyArticlePrompt(context) {
             `  标签：${(tour.tags || []).slice(0, 4).join('、') || '未标注'}`,
             `  季节判断提示：${(tour.editorialReasons || []).slice(-1)[0] || '请自行判断'}`,
             `  正文配图：${(tour.articleImages || []).join('、') || '未标注'}`,
-            `  预订链接：${tour.bookingUrl}`,
+            `  站内详情链接：${tour.detailUrl}`,
+            `  供应商链接（仅供核对，不要写入正文）：${tour.bookingUrl}`,
           ].join('\n'),
         );
       }
@@ -1139,7 +1159,8 @@ export function buildWeeklyArticlePrompt(context) {
             `  标签：${(tour.tags || []).slice(0, 5).join('、') || '未标注'}`,
             `  编辑提示：${(tour.editorialReasons || []).join('；') || '未标注'}`,
             `  配图：${(tour.articleImages || []).join('、') || '未标注'}`,
-            `  链接：${tour.bookingUrl}`,
+            `  站内详情链接：${tour.detailUrl}`,
+            `  供应商链接（仅供核对，不要写入正文）：${tour.bookingUrl}`,
           ].join('\n'),
         );
       }
@@ -1156,7 +1177,8 @@ export function buildWeeklyArticlePrompt(context) {
         `  班期：${(tour.departureDates || []).join('、') || '未标注'}`,
         `  价格：${tour.price}${tour.priceUnit || '元/人'}`,
         `  亮点：${(tour.highlights || []).slice(0, 4).join('、') || '未标注'}`,
-        `  预订链接：${tour.bookingUrl}`,
+        `  站内详情链接：${tour.detailUrl}`,
+        `  供应商链接（仅供核对，不要写入正文）：${tour.bookingUrl}`,
       ].join('\n'),
     )
     .join('\n\n');
@@ -1187,8 +1209,8 @@ export function buildWeeklyArticlePrompt(context) {
     `- cover 使用第一条已入选线路的首图：${context.selectedTours[0]?.images?.[0] || ''}`,
     `- 阅读原文链接固定指向：${DEFAULT_WEBSITE_URL}`,
     '- 先写“本周天气与出游节奏”，必须用给定的未来7天天气和时令提示来开头。',
-    `- 紧接着写“本周 ${groupedTotal} 条分组推荐速览”，按给定分组输出，每条只写 1 行短推荐，不要展开成长解释。`,
-    '- 速览之后，再写“这周更值得细看”的重点线路正文。',
+    `- 天气开头之后，直接进入“本周 ${groupedTotal} 条推荐”。可以按给定分组分段，但不要出现“速览”二字，也不要写成一句话清单。`,
+    `- 这 ${groupedTotal} 条线路都要逐条展开，一条线路一个小标题，每条至少 50 个中文字符。`,
     '- 候选线路已经按偏好分组，你需要自己判断这周真正值得写哪些，不要机械照抄分组。',
     '- 不要完全依赖既有分数顺序，请在更丰富的 AI 候选池里重新判断这周最值得主推的线路。',
     '- 如果高分线路明显同质化，可以主动跳过，换成更有差异、更好写、更符合天气节奏的备选。',
@@ -1198,16 +1220,16 @@ export function buildWeeklyArticlePrompt(context) {
     '- 标题适合公众号，但不要夸张标题党。',
     '- 推荐应该体现分组差异，比如亲子短途、周末近场、真山水清凉、带泳池/温泉的休整线、高铁轻出省、预算友好、轻松度假。',
     '- 山水清凉组优先写真山水、漂流、森林、峡谷、亲水、泳池等清凉体验，不要让纯温泉/酒店线挤占主位。',
-    '- 重点线路每条都要写得像能直接发的编辑推荐，不要只剩标题清单。',
-    '- 重点线路每条至少写 3 句有效文案：这周为什么值得去、适合谁、现场体验/节奏感、班期/价格/交通里的关键信息。',
-    '- 重点线路每条写清楚：为什么这周值得看、适合谁、线路信息、提醒、查看行程链接。',
-    '- 重点线路的链接优先写成 Markdown 链接，例如 [查看行程](https://example.com)。每条重点线路在“查看行程”后面单独留出一张“报名二维码”图片。',
-    '- 不要解释线路命名，不要写“X可以理解为...”“别误会成...”这类做题式、自我辩解式句子。',
-    '- 不要在正文里讨论你自己的判断过程，也不要写“之所以推荐是因为模型认为”。',
+    '- 每条线路都要写得像能直接发的编辑推荐，不要只剩标题清单。',
+    '- 每条线路至少写 3 句有效文案：这周为什么值得去、适合谁、现场体验/节奏感、班期/价格/交通里的关键信息。',
+    '- 每条线路都要写清楚：为什么这周值得去、适合谁、线路信息、提醒、查看行程链接。',
+    '- 面向读者直接说人话，不要出现“当前数据里”“候选线路”“综合排序”“模型判断”“可以理解为”“别误会成”这类幕后分析句子。',
+    '- 每条线路的链接统一写成 Markdown 链接 [查看行程](站内详情链接)，不要把供应商原始链接写进正文。',
+    '- 每条线路的“查看行程”后面单独留出二维码位置，二维码会放在具体推荐正文下面。',
     '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达。',
     '- 不要编造出发城市、库存、优惠、成团率、景区政策。',
-    '- 价格、班期、链接必须与素材一致。',
-    '- 结尾要提醒以供应商页面为准，并引导读者查看行程。',
+    '- 价格、班期必须与素材一致；正文链接统一使用站内详情链接。',
+    '- 结尾要提醒具体行程、班期和价格以站内详情页同步信息为准，并引导读者查看行程。',
     '',
     '天气素材：',
     weatherBlock,
@@ -1221,7 +1243,7 @@ export function buildWeeklyArticlePrompt(context) {
     'AI 候选池（供你二次挑选，不必完全按已有入选顺序）：',
     aiSelectionBlock,
     '',
-    '默认重点展开线路（仅供参考，可被 AI 候选池里的更优线路替换）：',
+    '默认优先展开线路（仅供参考，可被 AI 候选池里的更优线路替换）：',
     selectedTourDetailBlock,
     '',
     '输出格式示例：',
@@ -1236,7 +1258,23 @@ export function buildWeeklyArticlePrompt(context) {
     '',
     '![导语配图](https://example.com/hero.jpg)',
     '',
-    '正文……',
+    '## 本周 25 条推荐',
+    '',
+    '### 分组名',
+    '',
+    '#### 线路A',
+    '',
+    '这里写 3 句以上、至少 50 个中文字符的推荐文案，说明为什么这周值得去、适合谁、现场的清凉感或放松感从哪里来，再自然带出班期、价格或交通提醒。',
+    '',
+    '[查看行程](站内详情链接)',
+    '',
+    '#### 线路B',
+    '',
+    '这里继续写完整推荐，不要偷懒写成一句话清单，也不要解释命名或暴露筛选过程。',
+    '',
+    '[查看行程](站内详情链接)',
+    '',
+    '## 出行提醒',
   ].join('\n');
 }
 
@@ -1345,12 +1383,26 @@ function buildQrImageUrl(bookingUrl) {
   return `https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(bookingUrl)}`;
 }
 
+function listArticleTours(context) {
+  const deduped = new Map();
+  for (const group of context.recommendationGroups || []) {
+    for (const tour of group.tours || []) {
+      if (tour?.id && !deduped.has(tour.id)) deduped.set(tour.id, tour);
+    }
+  }
+  for (const tour of context.selectedTours || []) {
+    if (tour?.id && !deduped.has(tour.id)) deduped.set(tour.id, tour);
+  }
+  return [...deduped.values()];
+}
+
 export function enrichWeeklyArticleMedia(article, context, options = {}) {
   const websiteUrl = options.websiteUrl || DEFAULT_WEBSITE_URL;
   const lines = article.replace(/\r\n/g, '\n').split('\n');
   const h1Index = lines.findIndex((line) => /^#\s+/.test(line.trim()));
   const firstSectionIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()));
-  const heroTour = context.selectedTours[0];
+  const articleTours = listArticleTours(context);
+  const heroTour = context.selectedTours[0] || articleTours[0];
   const heroImageUrl = resolveArticleAssetUrl(heroTour?.images?.[0] || '', websiteUrl);
 
   if (heroImageUrl && h1Index >= 0) {
@@ -1360,27 +1412,27 @@ export function enrichWeeklyArticleMedia(article, context, options = {}) {
     }
   }
 
-  const sectionEntries = buildSectionEntries(lines, context.selectedTours || []);
+  const sectionEntries = buildSectionEntries(lines, articleTours);
 
   sectionEntries.forEach(({ tour, sectionIndex, sectionEnd }) => {
     const imageUrl = resolveArticleAssetUrl(tour.images?.[0] || '', websiteUrl);
-    const bookingUrl = String(tour.bookingUrl || '').trim();
+    const detailUrl = buildTourDetailUrl(tour, websiteUrl);
     const sectionLines = lines.slice(sectionIndex, sectionEnd);
     const insertAfterHeading = [];
     if (imageUrl && !hasMarkdownImage(lines, sectionIndex + 1, sectionEnd)) {
       insertAfterHeading.push('', `![${tour.title}](${imageUrl})`, '');
     }
 
-    const hasBookingLink = bookingUrl
-      ? sectionLines.some((line) => line.includes(bookingUrl) || line.includes('查看行程'))
+    const hasBookingLink = detailUrl
+      ? sectionLines.some((line) => line.includes(detailUrl) || line.includes('查看行程'))
       : true;
     const hasQrImage = sectionLines.some((line) => line.includes('quickchart.io/qr') || line.includes('报名二维码'));
     const insertBeforeNextSection = [];
-    if (bookingUrl && !hasBookingLink) {
-      insertBeforeNextSection.push('', `[查看行程](${bookingUrl})`);
+    if (detailUrl && !hasBookingLink) {
+      insertBeforeNextSection.push('', `[查看行程](${detailUrl})`);
     }
-    if (bookingUrl && !hasQrImage) {
-      insertBeforeNextSection.push('', `![${tour.title} 报名二维码](${buildQrImageUrl(bookingUrl)})`);
+    if (detailUrl && !hasQrImage) {
+      insertBeforeNextSection.push('', `![${tour.title} 报名二维码](${buildQrImageUrl(detailUrl)})`);
     }
     if (insertBeforeNextSection.length > 0) insertBeforeNextSection.push('');
 
@@ -1487,6 +1539,22 @@ export function validateGeneratedArticle(article, context) {
 
   for (const phrase of FORBIDDEN_PHRASES) {
     if (article.includes(phrase)) issues.push(`Contains forbidden phrase: ${phrase}`);
+  }
+
+  const articleLines = article.replace(/\r\n/g, '\n').split('\n');
+  const articleTours = listArticleTours(context);
+  const sectionEntries = buildSectionEntries(articleLines, articleTours);
+  for (const entry of sectionEntries) {
+    const rawSection = articleLines.slice(entry.sectionIndex, entry.sectionEnd).join('\n');
+    const visibleText = rawSection
+      .replace(/^#+\s+/gm, '')
+      .replace(/!\[[^\]]*]\([^)]+\)/g, '')
+      .replace(/\[[^\]]+]\([^)]+\)/g, '')
+      .replace(/[`>*_-]/g, '')
+      .replace(/\s+/g, '');
+    if (visibleText.length < 50) {
+      issues.push(`Section for "${entry.tour.title}" is too short; expected at least 50 visible characters.`);
+    }
   }
 
   const mentionedSelectedTours = context.selectedTours.filter((tour) =>

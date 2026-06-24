@@ -8,7 +8,11 @@ import {
   normalizeResearch,
   normalizeAiderModel,
 } from './lib/weekly_wechat_agent_cli.mjs';
-import { enrichWeeklyArticleMedia, getDefaultWebsiteUrl } from './lib/weekly_wechat_article.mjs';
+import {
+  buildTourDetailUrl,
+  enrichWeeklyArticleMedia,
+  getDefaultWebsiteUrl,
+} from './lib/weekly_wechat_article.mjs';
 
 const rootDir = process.cwd();
 const outDir = path.join(rootDir, 'weekly-wechat-posts', '2099-02-02-agent-test');
@@ -55,28 +59,33 @@ cover: "/data/image-cache/qingyuan.webp"
 
 未来7天广州闷热带阵雨，近场和带池休闲线更舒服。
 
-## 本周25条分组推荐速览
+## 本周25条推荐
 
-### 亲子短途
-- 亲子线1
+### 山水清凉
 
-## Qingyuan Gorge Rafting 2D
+#### Qingyuan Gorge Rafting 2D
 
 ![Qingyuan Gorge Rafting 2D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)
 
-[查看行程](https://example.com/qingyuan)
+这条线一上来就能把人从闷热里拽出来，峡谷水声、漂流和短途节奏都很适合周末出发。带娃家庭、想找一点玩水感的朋友，或者只想请很少时间换个空气的人，这周看它都会比较顺手。
 
-## Hezhou West Creek 3D (Yuequanju + 4 Meals)
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-qingyuan&source=wechat)
+
+#### Hezhou West Creek 3D (Yuequanju + 4 Meals)
 
 ![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)
 
-[查看行程](https://example.com/hezhou)
+这条更适合想认真躲开城市热气的人，山水、树荫和住下来慢慢走的节奏会比赶景点舒服很多。要是你更想要两三天都沉在溪谷和清爽空气里，它会比纯酒店放松线更有当下出发的理由。
 
-## Hunan High-Speed Rail 4D
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-hezhou&source=wechat)
+
+#### Hunan High-Speed Rail 4D
 
 ![Hunan High-Speed Rail 4D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hunan.webp)
 
-[查看行程](https://example.com/hunan)
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-hunan-rail&source=wechat)
+
+如果这周想把范围放大一点，高铁线会比长途大巴更轻松，四天节奏也方便把山景和换城住两晚的松弛感一起收下。对情侣、朋友结伴和想趁周中请假接周末的人来说，这类线路的舒适度会更高。
 `, 'utf8');
     return;
   }
@@ -96,28 +105,33 @@ cover: "/data/image-cache/qingyuan.webp"
 
 未来7天广州闷热带阵雨，近场和带池休闲线更舒服。
 
-## 本周25条分组推荐速览
+## 本周25条推荐
 
-### 亲子短途
-- 亲子线1
+### 山水清凉
 
-## Qingyuan Gorge Rafting 2D
+#### Qingyuan Gorge Rafting 2D
 
 ![Qingyuan Gorge Rafting 2D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)
 
-[查看行程](https://example.com/qingyuan)
+这条线最讨喜的地方是清凉感来得很直接，漂流、峡谷和两天一晚的周末节奏都没有负担。想找一条到站就能玩水、又不必把体力压得太满的路线，这周先看它很合理。
 
-## Hezhou West Creek 3D (Yuequanju + 4 Meals)
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-qingyuan&source=wechat)
+
+#### Hezhou West Creek 3D (Yuequanju + 4 Meals)
 
 ![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)
 
-[查看行程](https://example.com/hezhou)
+这条线路的优势在于不只是看山水，而是真的能把人放进溪谷和树影里慢慢走。天气一闷，这种有水有林、还有地方风味托住节奏的线路，往往比城市逛吃或纯酒店住一晚更让人想马上出发。
 
-## Hunan High-Speed Rail 4D
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-hezhou&source=wechat)
+
+#### Hunan High-Speed Rail 4D
 
 ![Hunan High-Speed Rail 4D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hunan.webp)
 
-[查看行程](https://example.com/hunan)
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-hunan-rail&source=wechat)
+
+如果你想趁这周顺手换个空气，高铁轻出省的舒适感会很明显，出发和落地都更省心。四天的长度也刚好能让人把看山、住两晚和回程缓冲一起安排进去，不会有赶路比玩还累的感觉。
 `, 'utf8');
     return;
   }
@@ -128,28 +142,33 @@ cover: "/data/image-cache/qingyuan.webp"
 
 未来7天广州闷热带阵雨，近场和带池休闲线更舒服。
 
-## 本周25条分组推荐速览
+## 本周25条推荐
 
-### 亲子短途
-- 亲子线1
+### 山水清凉
 
-## Qingyuan Gorge Rafting 2D
+#### Qingyuan Gorge Rafting 2D
 
 ![Qingyuan Gorge Rafting 2D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)
 
-[查看行程](https://example.com/qingyuan)
+这条线一上来就有很直接的清凉反馈，峡谷玩水和周末短途的组合很容易让人愿意现在就出发。无论是带娃、朋友结伴，还是想从城市热气里暂时抽离一下，它都很有说服力。
 
-## Hezhou West Creek 3D (Yuequanju + 4 Meals)
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-qingyuan&source=wechat)
+
+#### Hezhou West Creek 3D (Yuequanju + 4 Meals)
 
 ![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)
 
-[查看行程](https://example.com/hezhou)
+这条更像是把山水和慢节奏一起打包，适合想在这周认真离开城市两三天的人。西溪一带的溪谷、树荫和地方风味都有夏天出走的味道，闷热周里去这种地方，体感会明显比纯城市停留舒服。
 
-## Hunan High-Speed Rail 4D
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-hezhou&source=wechat)
+
+#### Hunan High-Speed Rail 4D
 
 ![Hunan High-Speed Rail 4D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hunan.webp)
 
-[查看行程](https://example.com/hunan)
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-hunan-rail&source=wechat)
+
+如果这周想把半径拉远一点，高铁线的轻松感会比自驾或长途大巴更友好。四天节奏能把山景、换城市住两晚的松弛感和出行效率一起兼顾，比较适合想认真透口气的人。
 `, 'utf8');
 };
 
@@ -191,6 +210,7 @@ const enrichedArticle = enrichWeeklyArticleMedia(
   { websiteUrl: getDefaultWebsiteUrl() },
 );
 assert.ok(enrichedArticle.includes('Qingyuan Gorge Rafting 2D'));
+assert.ok(enrichedArticle.includes(buildTourDetailUrl({ id: 'tour-qingyuan' }, getDefaultWebsiteUrl())));
 
 assert.equal(normalizeAiderModel('deepseek-v4-flash'), 'deepseek/deepseek-chat');
 assert.equal(normalizeAiderModel('deepseek-reasoner'), 'deepseek/deepseek-reasoner');

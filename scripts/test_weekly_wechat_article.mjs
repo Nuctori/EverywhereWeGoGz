@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {
+  buildTourDetailUrl,
   buildWeeklyArticleContext,
   buildWeeklyArticlePrompt,
   enrichWeeklyArticleMedia,
@@ -152,8 +153,9 @@ assert.ok(
 
 const prompt = buildWeeklyArticlePrompt(context);
 assert.ok(prompt.includes('本周天气与出游节奏'));
-assert.ok(prompt.includes('本周 4 条分组推荐速览'));
-assert.ok(prompt.includes('不要解释线路命名'));
+assert.ok(prompt.includes('本周 4 条推荐'));
+assert.ok(prompt.includes('每条至少 50 个中文字符'));
+assert.ok(!prompt.includes('分组推荐速览'));
 assert.ok(prompt.includes('### 亲子短途'));
 assert.ok(prompt.includes('### 高铁轻出省'));
 assert.ok(prompt.includes('Qingyuan Gorge Rafting 2D'));
@@ -161,29 +163,29 @@ assert.ok(prompt.includes('Jinshuitai Hot Spring 2D'));
 assert.ok(prompt.includes(getDefaultWebsiteUrl()));
 
 const article = `---
-title: "This Week's Guangzhou Summer Tours"
-summary: "Three grouped tour ideas for family, cooling nature, and a rail escape."
-author: "Lao Guang Travel"
+title: "这周想找清凉感，广州出发可以这样玩"
+summary: "雷雨和闷热一起出现的这周，更适合把真山水、亲水活动和轻松住一晚的节奏排进周末。"
+author: "老广旅行"
 cover: "/data/image-cache/qingyuan.webp"
 ---
 
-# This Week's Guangzhou Summer Tours
+# 这周想找清凉感，广州出发可以这样玩
 
 ## 本周天气与出游节奏
 
-未来7天广州大致在25-34°C之间，周末有阵雨，短途和酒店型线路更从容。
+未来7天广州大致在25-34°C之间，周末有阵雨，真山水、漂流和住下来慢慢放松的路线会更吃香。想避开闷热硬扛的感觉，这周更适合挑车程不算太折腾、到了就能进山进水的线路。
 
 ## Qingyuan Gorge Rafting 2D
 
-This route works for families who want a cooling short break.
+这条线的好处是清凉感来得很直接，到了峡谷和漂流段就能把广州城里的闷热切开。周末只请很少时间也能走，带娃家庭、想放空的上班族，或者想找点玩水动感的朋友都会比较容易有满足感。
 
 ## Hezhou West Creek 3D (Yuequanju + 4 Meals)
 
-This route fits readers who want mountain water and a slower pace.
+这条更像是把山水和慢节奏一起打包，适合想认真离开城市两三天的人。西溪一带的溪谷、树荫和地方风味都比较有夏天出走的气质，天气闷的时候去这种有水有林的地方，体感会比纯城市逛吃舒服很多。
 
 ## Hunan High-Speed Rail 4D
 
-This route is better for readers who want to travel a bit farther by rail.
+如果这周想把半径拉远一点，高铁线的轻松感会比自驾硬撑来得友好。四天节奏能把山景、换个城市住两晚的松弛感和出行效率一起兼顾，比较适合情侣、朋友结伴，或者想趁这周顺手换个空气的人。
 `;
 
 const validation = validateGeneratedArticle(article, context);
@@ -199,10 +201,10 @@ assert.ok(
 );
 assert.ok(
   enriched.includes(
-    '![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fqingyuan)',
+    `![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(buildTourDetailUrl(tours[0], getDefaultWebsiteUrl()))})`,
   ),
 );
-assert.ok(enriched.includes('[查看行程](https://example.com/qingyuan)'));
+assert.ok(enriched.includes(`[查看行程](${buildTourDetailUrl(tours[0], getDefaultWebsiteUrl())})`));
 assert.ok(
   enriched.includes(
     '![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)',
@@ -210,7 +212,7 @@ assert.ok(
 );
 assert.ok(
   enriched.includes(
-    '![Hezhou West Creek 3D (Yuequanju + 4 Meals) 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fhezhou)',
+    `![Hezhou West Creek 3D (Yuequanju + 4 Meals) 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(buildTourDetailUrl(tours[2], getDefaultWebsiteUrl()))})`,
   ),
 );
 assert.ok(
@@ -220,34 +222,34 @@ assert.ok(
 );
 assert.ok(
   enriched.includes(
-    '![Hunan High-Speed Rail 4D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fhunan)',
+    `![Hunan High-Speed Rail 4D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(buildTourDetailUrl(tours[3], getDefaultWebsiteUrl()))})`,
   ),
 );
 
 const articleWithLooseTitles = `---
-title: "This Week's Guangzhou Summer Tours"
-summary: "Three grouped tour ideas for family, cooling nature, and a rail escape."
-author: "Lao Guang Travel"
+title: "这周想找清凉感，广州出发可以这样玩"
+summary: "雷雨和闷热一起出现的这周，更适合把真山水、亲水活动和轻松住一晚的节奏排进周末。"
+author: "老广旅行"
 cover: "/data/image-cache/qingyuan.webp"
 ---
 
-# This Week's Guangzhou Summer Tours
+# 这周想找清凉感，广州出发可以这样玩
 
 ## 本周天气与出游节奏
 
-未来7天广州大致在25-34°C之间，周末有阵雨，短途和酒店型线路更从容。
+未来7天广州大致在25-34°C之间，周末有阵雨，真山水、漂流和住下来慢慢放松的路线会更吃香。想避开闷热硬扛的感觉，这周更适合挑车程不算太折腾、到了就能进山进水的线路。
 
 ## 1. Qingyuan Gorge Rafting 2D - Family Weekend
 
-This route works for families who want a cooling short break.
+这条线的好处是清凉感来得很直接，到了峡谷和漂流段就能把广州城里的闷热切开。周末只请很少时间也能走，带娃家庭、想放空的上班族，或者想找点玩水动感的朋友都会比较容易有满足感。
 
 ## 2. Hezhou West Creek 3D - Yuequanju 4 Meals Cool Escape
 
-This route fits readers who want mountain water and a slower pace.
+这条更像是把山水和慢节奏一起打包，适合想认真离开城市两三天的人。西溪一带的溪谷、树荫和地方风味都比较有夏天出走的气质，天气闷的时候去这种有水有林的地方，体感会比纯城市逛吃舒服很多。
 
 ## 3. Hunan High-Speed Rail 4D - Light Out-of-Province Trip
 
-This route is better for readers who want to travel a bit farther by rail.
+如果这周想把半径拉远一点，高铁线的轻松感会比自驾硬撑来得友好。四天节奏能把山景、换个城市住两晚的松弛感和出行效率一起兼顾，比较适合情侣、朋友结伴，或者想趁这周顺手换个空气的人。
 `;
 
 const looseValidation = validateGeneratedArticle(articleWithLooseTitles, context);
@@ -263,12 +265,12 @@ assert.ok(
 );
 assert.ok(
   enrichedLooseTitles.includes(
-    '![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fqingyuan)',
+    `![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(buildTourDetailUrl(tours[0], getDefaultWebsiteUrl()))})`,
   ),
 );
 assert.ok(
   enrichedLooseTitles.includes(
-    '![Hezhou West Creek 3D (Yuequanju + 4 Meals) 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fhezhou)',
+    `![Hezhou West Creek 3D (Yuequanju + 4 Meals) 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(buildTourDetailUrl(tours[2], getDefaultWebsiteUrl()))})`,
   ),
 );
 

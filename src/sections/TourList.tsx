@@ -434,6 +434,21 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     useState<AiRecommendationResult | null>(null);
   const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
 
+  const syncTourQueryParam = useCallback((tourId: string | null) => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    if (tourId) {
+      url.searchParams.set('tour', tourId);
+      url.searchParams.set('source', 'wechat');
+    } else {
+      url.searchParams.delete('tour');
+      if (url.searchParams.get('source') === 'wechat') {
+        url.searchParams.delete('source');
+      }
+    }
+    window.history.replaceState({}, '', url.toString());
+  }, []);
+
   const { maxPriceAll, priceStats } = useMemo(
     () => computePriceStats(catalogSourceTours),
     [catalogSourceTours],
@@ -877,8 +892,27 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const tourId = new URLSearchParams(window.location.search).get('tour');
+    if (!tourId) return;
+    if (selectedSummaryTour?.id === tourId) return;
+    const matchedTour = catalogSourceTours.find((tour) => tour.id === tourId);
+    if (matchedTour) {
+      selectTour(matchedTour);
+    }
+  }, [catalogSourceTours, selectTour, selectedSummaryTour?.id]);
+
 // 点击卡片后调用 selectTour 异步加载详情，触发 TourDetailModal
-  const handleCardClick = (tour: TourSummary) => selectTour(tour);
+  const handleCardClick = (tour: TourSummary) => {
+    syncTourQueryParam(tour.id);
+    selectTour(tour);
+  };
+
+  const handleCloseTour = useCallback(() => {
+    syncTourQueryParam(null);
+    clearSelectedTour();
+  }, [clearSelectedTour, syncTourQueryParam]);
 
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
@@ -1629,7 +1663,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         status={detailStatus}
         error={detailError}
         loading={detailLoading}
-        onClose={clearSelectedTour}
+        onClose={handleCloseTour}
       />
     </section>
   );
