@@ -124,4 +124,17 @@ assert.equal(payload.articles[0].content_source_url, 'https://laoguang.example/a
 assert.equal(payload.articles[0].need_open_comment, 1);
 assert.equal(payload.articles[0].only_fans_can_comment, 0);
 
+const longSummaryPayload = buildDraftPayload({
+  frontmatter: {
+    ...parsed.data,
+    summary: '这是一段会被微信摘要长度限制卡住的超长摘要'.repeat(12),
+  },
+  html,
+  thumbMediaId: 'thumb123',
+  sourceUrl: 'https://laoguang.example/article',
+  commentsOpen: true,
+  fansOnly: false,
+});
+assert.ok(longSummaryPayload.articles[0].digest.length <= 120);
+
 console.log('wechat publish tests passed');

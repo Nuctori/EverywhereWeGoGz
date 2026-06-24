@@ -17,6 +17,7 @@ const HR_STYLE = 'border:none;border-top:1px solid #e5e7eb;margin:24px 0;';
 const QR_CALLOUT_STYLE = 'margin:18px 0 24px;padding:14px 16px;background:#f7f8fa;border-radius:8px;';
 const QR_LABEL_STYLE = 'margin:0 0 10px;line-height:1.75;font-size:14px;color:#4b5563;';
 const LINK_STYLE = 'color:#0f766e;text-decoration:none;';
+const WECHAT_DIGEST_MAX_CHARS = 120;
 
 function stripWrappingQuotes(value) {
   if (
@@ -231,6 +232,12 @@ function decodeHtmlEntities(value) {
 
 function stripHtmlTags(value) {
   return decodeHtmlEntities(String(value || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+}
+
+function truncateWechatDigest(value, maxChars = WECHAT_DIGEST_MAX_CHARS) {
+  const text = String(value || '').replace(/\s+/g, ' ').trim();
+  if (text.length <= maxChars) return text;
+  return `${text.slice(0, Math.max(0, maxChars - 1)).trim()}…`;
 }
 
 export function resolveArticlePath(rootDir, options = {}) {
@@ -613,7 +620,7 @@ export function buildDraftPayload({ frontmatter, html, thumbMediaId, sourceUrl, 
       {
         title: frontmatter.title,
         author: frontmatter.author || '老广去边度',
-        digest: frontmatter.summary || frontmatter.description || '',
+        digest: truncateWechatDigest(frontmatter.summary || frontmatter.description || ''),
         content: html,
         content_source_url: sourceUrl || frontmatter.sourceUrl || frontmatter.contentSourceUrl || '',
         thumb_media_id: thumbMediaId,
