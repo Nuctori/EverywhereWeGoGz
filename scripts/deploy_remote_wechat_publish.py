@@ -59,8 +59,9 @@ def multipart_bytes(field_name, file_name, file_bytes, mime_type):
     return boundary, b''.join(body)
 
 
-def upload_inline_image(access_token, image_url):
-    image_bytes, mime_type = request_bytes(image_url)
+def upload_inline_image(access_token, image_path):
+    image_bytes = pathlib.Path(image_path).read_bytes()
+    mime_type = mimetypes.guess_type(image_path)[0] or 'image/jpeg'
     normalized_mime = 'image/png' if (mime_type or '').lower() == 'image/png' else 'image/jpeg'
     extension = '.png' if normalized_mime == 'image/png' else '.jpg'
     upload_url = 'https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=%s' % urllib.parse.quote(access_token)
@@ -78,10 +79,10 @@ def upload_inline_image(access_token, image_url):
 
 
 def replace_inline_images(access_token, html):
-    image_urls = re.findall(r'<img\s+[^>]*src="(https?://[^"]+)"[^>]*>', html, flags=re.IGNORECASE)
+    image_urls = re.findall(r'<img\s+[^>]*src="([^"]+)"[^>]*>', html, flags=re.IGNORECASE)
     replacements = {}
     for original_url in image_urls:
-      if original_url in replacements:
+      if original_url in replacements or original_url.startswith('http'):
           continue
       replacements[original_url] = upload_inline_image(access_token, original_url)
     for original_url, uploaded_url in replacements.items():
@@ -212,6 +213,9 @@ def main():
     run(['ssh', args.host, f'mkdir -p {remote_dir}'])
     run(['scp', args.html_path, f'{args.host}:{remote_dir}/article.html'])
     run(['scp', args.cover_path, f'{args.host}:{remote_dir}/cover-upload.jpg'])
+    inline_dir = pathlib.Path(args.html_path).parent / 'inline-images'
+    if inline_dir.exists():
+        run(['scp', '-r', str(inline_dir), f'{args.host}:{remote_dir}/'])
 
     bundle = json.loads(pathlib.Path(args.bundle_path).read_text(encoding='utf-8'))
     normalized_bundle = normalize_bundle_for_remote(bundle, remote_dir)

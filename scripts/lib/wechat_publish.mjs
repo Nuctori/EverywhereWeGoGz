@@ -375,6 +375,73 @@ export async function uploadInlineImage(accessToken, imageUrl) {
   return data.url;
 }
 
+function deriveInlineImageExtension(contentType) {
+  const normalized = String(contentType || '').toLowerCase();
+  if (normalized.includes('png')) return '.png';
+  return '.jpg';
+}
+
+function getInlineImageFileName(originalUrl, index, extension) {
+  const parsed = (() => {
+    try {
+      return new URL(originalUrl);
+    } catch {
+      return null;
+    }
+  })();
+  const baseName = parsed ? path.basename(parsed.pathname) : path.basename(originalUrl);
+  const stem = baseName.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]+/g, '-').replace(/^-+|-+$/g, '');
+  const safeStem = stem || `inline-${index + 1}`;
+  return `${String(index + 1).padStart(2, '0')}-${safeStem}${extension}`;
+}
+
+export async function prepareInlineImageAssetsForHtml(html, outputDir) {
+  const imageDir = path.join(outputDir, 'inline-images');
+  fs.mkdirSync(imageDir, { recursive: true });
+
+  const imageMap = new Map();
+  const matches = [...html.matchAll(/<img\s+[^>]*src="(https?:\/\/[^"]+)"[^>]*>/gi)];
+
+  for (const match of matches) {
+    const originalUrl = match[1];
+    if (imageMap.has(originalUrl)) continue;
+
+    const response = await fetch(originalUrl, { method: 'GET' });
+    if (!response.ok) {
+      throw new Error(`Inline image fetch failed: ${response.status} ${originalUrl}`);
+    }
+
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    const imageBuffer = Buffer.from(await response.arrayBuffer());
+    const extension = deriveInlineImageExtension(contentType);
+    const fileName = getInlineImageFileName(originalUrl, imageMap.size, extension);
+    const relativePath = `inline-images/${fileName}`;
+    const targetPath = path.join(imageDir, fileName);
+
+    if (extension === '.png') {
+      fs.writeFileSync(targetPath, imageBuffer);
+    } else {
+      await sharp(imageBuffer).jpeg({ quality: 88 }).toFile(targetPath);
+    }
+
+    imageMap.set(originalUrl, relativePath);
+  }
+
+  let convertedHtml = html;
+  for (const [originalUrl, relativePath] of imageMap.entries()) {
+    convertedHtml = convertedHtml.split(originalUrl).join(relativePath);
+  }
+
+  return {
+    html: convertedHtml,
+    inlineImages: Array.from(imageMap.entries()).map(([originalUrl, relativePath]) => ({
+      originalUrl,
+      relativePath,
+    })),
+    inlineImagesDir: imageDir,
+  };
+}
+
 export function buildQrFallbackUrl(targetUrl) {
   const url = new URL(DEFAULT_QR_SERVICE_URL);
   url.searchParams.set('text', targetUrl);
@@ -615,8 +682,9 @@ export async function preparePublishBundle(rootDir, options = {}) {
   const markdownWithQrFallback = injectQrFallbackIntoMarkdown(markdown, { sourceUrl });
   const parsedMarkdown = parseFrontmatter(markdownWithQrFallback);
   const html = markdownToHtml(parsedMarkdown.body);
+  const inlineAssets = await prepareInlineImageAssetsForHtml(html, outputDir);
   const htmlPath = path.join(outputDir, 'article.html');
-  fs.writeFileSync(htmlPath, `${html}\n`, 'utf8');
+  fs.writeFileSync(htmlPath, `${inlineAssets.html}\n`, 'utf8');
   const markdownPathWithQr = path.join(outputDir, 'article.with-qr.md');
   fs.writeFileSync(markdownPathWithQr, `${markdownWithQrFallback}\n`, 'utf8');
 
@@ -631,6 +699,7 @@ export async function preparePublishBundle(rootDir, options = {}) {
     articlePath,
     markdownPathWithQr,
     htmlPath,
+    inlineImagesDir: inlineAssets.inlineImagesDir,
     coverPath,
     uploadCoverPath,
   };

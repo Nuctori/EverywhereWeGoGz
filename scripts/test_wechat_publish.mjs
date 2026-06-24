@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   buildDraftPayload,
   buildQrFallbackUrl,
   injectQrFallbackIntoMarkdown,
   markdownToHtml,
   parseFrontmatter,
+  prepareInlineImageAssetsForHtml,
 } from './lib/wechat_publish.mjs';
 
+const rootDir = process.cwd();
 const markdown = `---
 title: "本周线路推荐"
 summary: "适合近期出发的三条线。"
@@ -42,6 +46,43 @@ assert.ok(html.includes('• 近期班期：2026-06-24'));
 assert.ok(html.includes('href="https://example.com/qingyuan"'));
 assert.ok(html.includes('>查看线路</a>'));
 assert.ok(html.includes('<div style="margin:18px 0 20px;text-align:center;"><img src="https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/cover.webp"'));
+
+const inlineAssetDir = path.join(rootDir, 'weekly-wechat-posts', '2099-01-01-test-inline');
+fs.rmSync(inlineAssetDir, { recursive: true, force: true });
+fs.mkdirSync(inlineAssetDir, { recursive: true });
+const originalFetch = globalThis.fetch;
+const samplePng = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO2Y8S0AAAAASUVORK5CYII=',
+  'base64',
+);
+globalThis.fetch = async (url) => ({
+  ok: true,
+  headers: {
+    get(name) {
+      return String(name).toLowerCase() === 'content-type'
+        ? String(url).includes('b.png')
+          ? 'image/png'
+          : 'image/webp'
+        : null;
+    },
+  },
+  async arrayBuffer() {
+    return samplePng;
+  },
+});
+try {
+  const preparedInline = await prepareInlineImageAssetsForHtml(
+    '<p><img src="https://example.com/a.webp"></p><p><img src="https://example.com/b.png"></p>',
+    inlineAssetDir,
+  );
+  assert.ok(preparedInline.html.includes('inline-images/01-a.jpg'));
+  assert.ok(preparedInline.html.includes('inline-images/02-b.png'));
+  assert.ok(fs.existsSync(path.join(inlineAssetDir, 'inline-images')));
+  assert.ok(fs.existsSync(path.join(inlineAssetDir, 'inline-images', '01-a.jpg')));
+  assert.ok(fs.existsSync(path.join(inlineAssetDir, 'inline-images', '02-b.png')));
+} finally {
+  globalThis.fetch = originalFetch;
+}
 
 const markdownWithQr = injectQrFallbackIntoMarkdown(markdown, {
   sourceUrl: 'https://nuctori.github.io/EverywhereWeGoGz/',
