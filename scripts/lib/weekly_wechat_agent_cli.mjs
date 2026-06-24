@@ -267,9 +267,11 @@ function buildResearchPrompt(context) {
     'opening_weather_summary, seasonal_observations, recommendation_groups, featured_route_ids, editorial_risks, duplicate_watchouts',
     '要求：',
     '- recommendation_groups 总条数要凑满 25 条',
+    '- recommendation_groups 合计必须正好 25 条，不要写成 30 条、40 条。',
     '- 不要把雅泡/带池/温泉写成词义解释题，只判断值不值得推荐',
     '- 要主动压制同质化',
     '- 不要完全照抄分数或现成入选结果，要结合天气、时令和文案可写性重新挑重点线路',
+    '- featured_route_ids 只保留 6 条重点线路，且同一线路家族不要重复霸榜。',
     '',
     `运行日期：${context.runDate}`,
     `季节：${context.season}`,
@@ -321,6 +323,192 @@ function buildAgentContextPayload(context) {
   };
 }
 
+const TITLE_TOKEN_STOPWORDS = new Set([
+  '广州', '往返', '纯玩', '品质', '直通车', '高铁', '动车', '双飞', '双动', '一家一团',
+  '等待确认', '酒店', '豪华', '超豪华', '亲子', '情侣', '暑期', '周末', '自由行',
+  '天', '日', '游', '线', '团', '版', '大巴',
+]);
+
+function normalizeRouteToken(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .replace(/（[^）]*）|\([^)]*\)|【[^】]*】|<[^>]*>/g, ' ')
+    .replace(/\d+\s*[天日晚]\b/gu, ' ')
+    .replace(/[＊*|/、，。,.\-—_:：；（）()\[\]【】<>《》]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function deriveTitleTokens(title) {
+  return normalizeRouteToken(title)
+    .split(/\s+/)
+    .filter((token) => token && token.length >= 2 && !TITLE_TOKEN_STOPWORDS.has(token));
+}
+
+function deriveTourFamilyKey(tour) {
+  const tokens = deriveTitleTokens(tour?.title || '');
+  if (tokens.length > 0) return tokens.slice(0, 3).join('|');
+  return normalizeRouteToken(tour?.destination || '') || String(tour?.id || 'misc');
+}
+
+function deriveTourDestinationKey(tour) {
+  const destination = normalizeRouteToken(tour?.destination || '');
+  if (destination) return destination;
+
+  const titleTokens = deriveTitleTokens(tour?.title || '');
+  if (titleTokens.length > 0) return titleTokens[0];
+  return String(tour?.id || 'misc');
+}
+
+function buildTourLookup(context) {
+  const map = new Map();
+  for (const tour of context.candidateTours || []) map.set(tour.id, tour);
+  for (const tour of context.selectedTours || []) map.set(tour.id, tour);
+  for (const bucket of context.aiSelectionBuckets || []) {
+    for (const tour of bucket.tours || []) {
+      map.set(tour.id, tour);
+    }
+  }
+  return map;
+}
+
+function normalizeResearch(research, context) {
+  const lookup = buildTourLookup(context);
+  const groups = Array.isArray(research?.recommendation_groups) ? research.recommendation_groups : [];
+  const routeUsage = new Map();
+  const familyUsage = new Map();
+  const destinationUsage = new Map();
+  let total = 0;
+
+  const normalizedGroups = groups
+    .map((group) => {
+      const recommendations = Array.isArray(group?.recommendations) ? group.recommendations : [];
+      const picked = [];
+      for (const item of recommendations) {
+        const tourId = item?.tour_id;
+        if (!tourId || !lookup.has(tourId)) continue;
+        const tour = lookup.get(tourId);
+        const familyKey = deriveTourFamilyKey(tour);
+        const destinationKey = deriveTourDestinationKey(tour);
+        if ((routeUsage.get(tourId) || 0) >= 2) continue;
+        if ((familyUsage.get(familyKey) || 0) >= 2) continue;
+        if ((destinationUsage.get(destinationKey) || 0) >= 3) continue;
+        picked.push({
+          tour_id: tourId,
+          title: tour.title,
+          reason: item?.reason || '',
+          editorial_angle: item?.editorial_angle || '',
+        });
+        routeUsage.set(tourId, (routeUsage.get(tourId) || 0) + 1);
+        familyUsage.set(familyKey, (familyUsage.get(familyKey) || 0) + 1);
+        destinationUsage.set(destinationKey, (destinationUsage.get(destinationKey) || 0) + 1);
+        total += 1;
+        if (total >= 25) break;
+      }
+      if (picked.length === 0) return null;
+      return {
+        ...group,
+        recommendations: picked,
+      };
+    })
+    .filter(Boolean);
+
+  const fallbackGroups = (context.recommendationGroups || []).map((group) => ({
+    group_id: group.id,
+    group_label: group.label,
+    recommendations: (group.tours || []).map((tour) => ({
+      tour_id: tour.id,
+      title: tour.title,
+      reason: (tour.editorialReasons || [])[0] || '',
+      editorial_angle: (tour.editorialReasons || [])[3] || '',
+    })),
+  }));
+
+  for (const group of fallbackGroups) {
+    if (total >= 25) break;
+    const existing =
+      normalizedGroups.find((item) => item.group_id === group.group_id || item.group_label === group.group_label) ||
+      (() => {
+        const created = { ...group, recommendations: [] };
+        normalizedGroups.push(created);
+        return created;
+      })();
+    for (const item of group.recommendations) {
+      if (total >= 25) break;
+      if ((existing.recommendations || []).some((entry) => entry.tour_id === item.tour_id)) continue;
+      const tour = lookup.get(item.tour_id);
+      if (!tour) continue;
+      const familyKey = deriveTourFamilyKey(tour);
+      const destinationKey = deriveTourDestinationKey(tour);
+      if ((routeUsage.get(item.tour_id) || 0) >= 2) continue;
+      if ((familyUsage.get(familyKey) || 0) >= 2) continue;
+      if ((destinationUsage.get(destinationKey) || 0) >= 3) continue;
+      existing.recommendations.push({ ...item });
+      routeUsage.set(item.tour_id, (routeUsage.get(item.tour_id) || 0) + 1);
+      familyUsage.set(familyKey, (familyUsage.get(familyKey) || 0) + 1);
+      destinationUsage.set(destinationKey, (destinationUsage.get(destinationKey) || 0) + 1);
+      total += 1;
+    }
+  }
+
+  const normalizedFeatured = [];
+  const featuredIds = Array.isArray(research?.featured_route_ids) ? research.featured_route_ids : [];
+  const featuredFamilyUsage = new Map();
+  const featuredDestinationUsage = new Map();
+
+  const tryPickFeatured = (tourId) => {
+    if (!tourId || normalizedFeatured.includes(tourId)) return false;
+    const tour = lookup.get(tourId);
+    if (!tour) return false;
+    const familyKey = deriveTourFamilyKey(tour);
+    const destinationKey = deriveTourDestinationKey(tour);
+    if ((featuredFamilyUsage.get(familyKey) || 0) >= 1) return false;
+    if ((featuredDestinationUsage.get(destinationKey) || 0) >= 1) return false;
+    normalizedFeatured.push(tourId);
+    featuredFamilyUsage.set(familyKey, (featuredFamilyUsage.get(familyKey) || 0) + 1);
+    featuredDestinationUsage.set(destinationKey, (featuredDestinationUsage.get(destinationKey) || 0) + 1);
+    return true;
+  };
+
+  for (const tourId of featuredIds) {
+    if (normalizedFeatured.length >= 6) break;
+    tryPickFeatured(tourId);
+  }
+
+  for (const group of normalizedGroups) {
+    for (const item of group.recommendations || []) {
+      if (normalizedFeatured.length >= 6) break;
+      tryPickFeatured(item.tour_id);
+    }
+    if (normalizedFeatured.length >= 6) break;
+  }
+
+  for (const tour of context.selectedTours || []) {
+    if (normalizedFeatured.length >= 6) break;
+    tryPickFeatured(tour.id);
+  }
+
+  return {
+    ...research,
+    recommendation_groups: normalizedGroups,
+    featured_route_ids: normalizedFeatured,
+  };
+}
+
+function applyResearchSelectionToContext(context, research) {
+  const lookup = buildTourLookup(context);
+  const selectedTours = (research?.featured_route_ids || [])
+    .map((tourId) => lookup.get(tourId))
+    .filter(Boolean)
+    .slice(0, 6);
+  if (selectedTours.length === 0) return context;
+  return {
+    ...context,
+    selectedTours,
+  };
+}
+
 function buildWriterPrompt(context, researchJson, variantIndex) {
   return [
     '你是资深旅行编辑，要写公众号文章，而不是解释题面。',
@@ -332,9 +520,12 @@ function buildWriterPrompt(context, researchJson, variantIndex) {
     '3. 这周更值得细看的 6 条重点线路',
     '4. 结尾提醒',
     '要求：',
+    '- author 固定写 "老广旅行"',
     '- 不要出现“可以理解为”“别误会成”“模型判断”',
     '- 导语至少 1 张图，每条重点线路至少 1 张图',
     '- 每条重点线路都要有 [查看行程](链接)',
+    '- “本周25条分组推荐速览”严格使用 research JSON 里清洗后的推荐结果，合计正好 25 条，不要私自扩成 30 条以上。',
+    '- 重点线路优先使用 featured_route_ids 对应的 6 条，不要再换回一堆同区域同玩法的近亲线路。',
     `- 当前是候选版本 ${variantIndex}，请把标题、导语和侧重点与另一版拉开`,
     `- 阅读原文固定：${getDefaultWebsiteUrl()}`,
     '',
@@ -495,7 +686,11 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
     model: aiderModel,
   });
 
-  const research = parseJsonResponse(fs.readFileSync(researchPath, 'utf8'));
+  const researchRaw = parseJsonResponse(fs.readFileSync(researchPath, 'utf8'));
+  const research = normalizeResearch(researchRaw, context);
+  fs.writeFileSync(researchPath, `${JSON.stringify(research, null, 2)}\n`, 'utf8');
+  const writingContext = applyResearchSelectionToContext(context, research);
+  writeJson(path.join(outDir, 'selected-tours.json'), writingContext.selectedTours);
   const candidatePaths = [];
   const candidates = [];
 
@@ -506,7 +701,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
       candidatePaths.push(outputPath);
       await execRunner({
         cwd: rootDir,
-        prompt: buildWriterPrompt(context, research, variantNo),
+        prompt: buildWriterPrompt(writingContext, research, variantNo),
         outputPath,
         model: aiderModel,
       });
@@ -517,18 +712,18 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
   const finalPath = path.join(outDir, 'article.raw.md');
   await execRunner({
     cwd: rootDir,
-    prompt: buildReviewerPrompt(context, research, candidates),
+    prompt: buildReviewerPrompt(writingContext, research, candidates),
     outputPath: finalPath,
     model: aiderModel,
   });
 
   const finalArticle = ensureArticleFrontmatter(
     stripMarkdownFence(fs.readFileSync(finalPath, 'utf8')),
-    context,
+    writingContext,
     candidates,
   );
   fs.writeFileSync(finalPath, finalArticle, 'utf8');
-  const validation = validateGeneratedArticle(finalArticle, context);
+  const validation = validateGeneratedArticle(finalArticle, writingContext);
   writeJson(path.join(outDir, 'validation.json'), validation);
   writeJson(path.join(outDir, 'generation-meta.json'), {
     runDate,
@@ -540,7 +735,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
   });
 
   return {
-    context,
+    context: writingContext,
     outDir,
     article: finalArticle,
     validation,
@@ -552,6 +747,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
 
 export {
   extractAiderReplyFromHistory,
+  normalizeResearch,
   normalizeAiderModel,
 };
 

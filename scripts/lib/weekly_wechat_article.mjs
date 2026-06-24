@@ -1256,11 +1256,93 @@ function normalizeTourTitleForMatch(value) {
     .toLowerCase();
 }
 
+const TOUR_TITLE_NOISE_PATTERNS = [
+  /【[^】]*】/g,
+  /＜[^＞]*＞|<[^>]*>/g,
+  /（[^）]*）|\([^)]*\)/g,
+  /\b\d+\s*[天日晚]\b/gu,
+  /一家一团|等待确认|纯玩0购物|纯玩|品质|深度|休闲|直通车|高铁|动车|大巴|豪华酒店|超豪华酒店|网红民宿|成团/g,
+  /跨国/g,
+];
+
+function extractTourTitleFragments(value) {
+  let working = String(value || '').normalize('NFKC');
+  for (const pattern of TOUR_TITLE_NOISE_PATTERNS) {
+    working = working.replace(pattern, ' ');
+  }
+
+  const fragments = new Set();
+  for (const part of working.split(/[＊*|/、，。,.\-—_:：；（）()\[\]【】<>《》\s+]+/u)) {
+    const normalized = normalizeTourTitleForMatch(part);
+    if (normalized.length >= 3) fragments.add(normalized);
+  }
+  return [...fragments];
+}
+
 function articleMentionsTourTitle(article, title) {
   const normalizedArticle = normalizeTourTitleForMatch(article);
   const normalizedTitle = normalizeTourTitleForMatch(title);
   if (!normalizedArticle || !normalizedTitle) return false;
-  return normalizedArticle.includes(normalizedTitle);
+  if (normalizedArticle.includes(normalizedTitle)) return true;
+
+  const matchedFragments = extractTourTitleFragments(title).filter((fragment) => normalizedArticle.includes(fragment));
+  if (matchedFragments.length >= 2) return true;
+  return matchedFragments.some((fragment) => fragment.length >= 5);
+}
+
+function listFeaturedSectionIndices(lines) {
+  const featuredIntroIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()) && /重点线路|细看/.test(line));
+  const startIndex = featuredIntroIndex >= 0 ? featuredIntroIndex + 1 : 0;
+  const indices = [];
+  for (let index = startIndex; index < lines.length; index += 1) {
+    if (/^##\s+/.test(lines[index].trim()) && index > startIndex) break;
+    if (/^###\s+/.test(lines[index].trim())) indices.push(index);
+  }
+  return indices;
+}
+
+function resolveTourSectionIndex(lines, tour, tourIndex, featuredSectionIndices, assignedSectionIndices) {
+  const directIndex = lines.findIndex(
+    (line, index) =>
+      /^#{2,3}\s+/.test(line.trim()) &&
+      !assignedSectionIndices.has(index) &&
+      articleMentionsTourTitle(line, tour.title),
+  );
+  if (directIndex >= 0) return directIndex;
+
+  const orderedFallback = featuredSectionIndices[tourIndex];
+  if (orderedFallback != null && !assignedSectionIndices.has(orderedFallback)) return orderedFallback;
+  return -1;
+}
+
+function buildSectionEntries(lines, tours) {
+  const featuredSectionIndices = listFeaturedSectionIndices(lines);
+  const assignedSectionIndices = new Set();
+  const sectionEntries = tours
+    .map((tour, tourIndex) => {
+      const sectionIndex = resolveTourSectionIndex(
+        lines,
+        tour,
+        tourIndex,
+        featuredSectionIndices,
+        assignedSectionIndices,
+      );
+      if (sectionIndex < 0) return null;
+      assignedSectionIndices.add(sectionIndex);
+      return { tour, sectionIndex };
+    })
+    .filter(Boolean)
+    .sort((left, right) => left.sectionIndex - right.sectionIndex)
+    .map((entry, index, items) => ({
+      ...entry,
+      sectionEnd: index + 1 < items.length ? items[index + 1].sectionIndex : lines.length,
+    }));
+
+  return sectionEntries.sort((left, right) => right.sectionIndex - left.sectionIndex);
+}
+
+function buildQrImageUrl(bookingUrl) {
+  return `https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(bookingUrl)}`;
 }
 
 export function enrichWeeklyArticleMedia(article, context, options = {}) {
@@ -1270,71 +1352,40 @@ export function enrichWeeklyArticleMedia(article, context, options = {}) {
   const firstSectionIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()));
   const heroTour = context.selectedTours[0];
   const heroImageUrl = resolveArticleAssetUrl(heroTour?.images?.[0] || '', websiteUrl);
-  let heroInserted = false;
 
   if (heroImageUrl && h1Index >= 0) {
     const heroRegionEnd = firstSectionIndex >= 0 ? firstSectionIndex : lines.length;
     if (!hasMarkdownImage(lines, h1Index + 1, heroRegionEnd)) {
       lines.splice(h1Index + 1, 0, '', `![${heroTour?.title || '线路配图'}](${heroImageUrl})`, '');
-      heroInserted = true;
     }
   }
 
-  context.selectedTours.forEach((tour, tourIndex) => {
-    const sectionIndex = lines.findIndex(
-      (line) => /^##\s+/.test(line.trim()) && articleMentionsTourTitle(line, tour.title),
-    );
-    if (sectionIndex < 0) return;
+  const sectionEntries = buildSectionEntries(lines, context.selectedTours || []);
 
-    const nextSectionIndex = lines.findIndex(
-      (line, index) => index > sectionIndex && /^##\s+/.test(line.trim()),
-    );
-    const sectionEnd = nextSectionIndex >= 0 ? nextSectionIndex : lines.length;
-    if (hasMarkdownImage(lines, sectionIndex + 1, sectionEnd)) return;
-
+  sectionEntries.forEach(({ tour, sectionIndex, sectionEnd }) => {
     const imageUrl = resolveArticleAssetUrl(tour.images?.[0] || '', websiteUrl);
     const bookingUrl = String(tour.bookingUrl || '').trim();
-    const qrImageUrl = bookingUrl
-      ? `https://quickchart.io/qr?text=${encodeURIComponent(bookingUrl)}&size=320&margin=2`
-      : '';
-
-    const insertLines = [];
-    if (imageUrl) {
-      insertLines.push('', `![${tour.title}](${imageUrl})`, '');
-    }
-    if (qrImageUrl) {
-      insertLines.push(`[查看行程](${bookingUrl})`, '', `![${tour.title} 报名二维码](${qrImageUrl})`, '');
-    }
-    if (insertLines.length === 0) return;
-    lines.splice(sectionIndex + 1, 0, ...insertLines);
-  });
-
-  context.selectedTours.forEach((tour) => {
-    const bookingUrl = String(tour.bookingUrl || '').trim();
-    if (!bookingUrl) return;
-    const sectionIndex = lines.findIndex(
-      (line) => /^##\s+/.test(line.trim()) && articleMentionsTourTitle(line, tour.title),
-    );
-    if (sectionIndex < 0) return;
-    const nextSectionIndex = lines.findIndex(
-      (line, index) => index > sectionIndex && /^##\s+/.test(line.trim()),
-    );
-    const sectionEnd = nextSectionIndex >= 0 ? nextSectionIndex : lines.length;
-
     const sectionLines = lines.slice(sectionIndex, sectionEnd);
-    const hasBookingLink = sectionLines.some((line) => line.includes(bookingUrl) || /\[查看行程\]\(/.test(line));
-    const hasQrImage = sectionLines.some((line) => line.includes('报名二维码') || line.includes('二维码]('));
-    if (hasBookingLink && hasQrImage) return;
+    const insertAfterHeading = [];
+    if (imageUrl && !hasMarkdownImage(lines, sectionIndex + 1, sectionEnd)) {
+      insertAfterHeading.push('', `![${tour.title}](${imageUrl})`, '');
+    }
 
-    const trailingInsertLines = [];
-    if (!hasBookingLink) {
-      trailingInsertLines.push('', `[查看行程](${bookingUrl})`);
+    const hasBookingLink = bookingUrl
+      ? sectionLines.some((line) => line.includes(bookingUrl) || line.includes('查看行程'))
+      : true;
+    const hasQrImage = sectionLines.some((line) => line.includes('quickchart.io/qr') || line.includes('报名二维码'));
+    const insertBeforeNextSection = [];
+    if (bookingUrl && !hasBookingLink) {
+      insertBeforeNextSection.push('', `[查看行程](${bookingUrl})`);
     }
-    if (!hasQrImage) {
-      trailingInsertLines.push('', `![${tour.title} 报名二维码](https://quickchart.io/qr?text=${encodeURIComponent(bookingUrl)}&size=320&margin=2)`);
+    if (bookingUrl && !hasQrImage) {
+      insertBeforeNextSection.push('', `![${tour.title} 报名二维码](${buildQrImageUrl(bookingUrl)})`);
     }
-    trailingInsertLines.push('');
-    lines.splice(sectionEnd, 0, ...trailingInsertLines);
+    if (insertBeforeNextSection.length > 0) insertBeforeNextSection.push('');
+
+    if (insertBeforeNextSection.length > 0) lines.splice(sectionEnd, 0, ...insertBeforeNextSection);
+    if (insertAfterHeading.length > 0) lines.splice(sectionIndex + 1, 0, ...insertAfterHeading);
   });
 
   return lines.join('\n').replace(/\n{4,}/g, '\n\n\n');

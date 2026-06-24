@@ -5,6 +5,7 @@ import {
   ensureArticleFrontmatter,
   extractAiderReplyFromHistory,
   generateWeeklyArticleWithAgentCli,
+  normalizeResearch,
   normalizeAiderModel,
 } from './lib/weekly_wechat_agent_cli.mjs';
 import { enrichWeeklyArticleMedia, getDefaultWebsiteUrl } from './lib/weekly_wechat_article.mjs';
@@ -193,6 +194,70 @@ assert.ok(enrichedArticle.includes('Qingyuan Gorge Rafting 2D'));
 
 assert.equal(normalizeAiderModel('deepseek-v4-flash'), 'deepseek/deepseek-chat');
 assert.equal(normalizeAiderModel('deepseek-reasoner'), 'deepseek/deepseek-reasoner');
+
+const dedupeContext = {
+  candidateTours: [
+    { id: 'gx-a', title: '广西崇左德天瀑布3天', destination: '广西崇左' },
+    { id: 'gx-b', title: '广西崇左通灵峡谷3天', destination: '广西崇左' },
+    { id: 'gx-c', title: '广西崇左明仕田园4天', destination: '广西崇左' },
+    { id: 'gx-d', title: '广西崇左古龙山4天', destination: '广西崇左' },
+    { id: 'wz-a', title: '北海涠洲岛4天', destination: '广西北海' },
+    { id: 'wz-b', title: '北海涠洲岛3天', destination: '广西北海' },
+    { id: 'qy-a', title: '清远紫云谷2天', destination: '广东清远' },
+    { id: 'sz-a', title: '深圳大鹏海边2天', destination: '广东深圳' },
+    { id: 'xm-a', title: '厦门鼓浪屿3天', destination: '福建厦门' },
+    { id: 'cs-a', title: '长沙岳阳武汉4天', destination: '湖南长沙' },
+  ],
+  selectedTours: [],
+  aiSelectionBuckets: [],
+  recommendationGroups: [],
+};
+
+const normalizedResearch = normalizeResearch(
+  {
+    recommendation_groups: [
+      {
+        group_id: 'cooling',
+        group_label: '山水清凉',
+        recommendations: [
+          { tour_id: 'gx-a' },
+          { tour_id: 'gx-b' },
+          { tour_id: 'gx-c' },
+          { tour_id: 'gx-d' },
+          { tour_id: 'wz-a' },
+          { tour_id: 'wz-b' },
+          { tour_id: 'qy-a' },
+          { tour_id: 'sz-a' },
+          { tour_id: 'xm-a' },
+          { tour_id: 'cs-a' },
+        ],
+      },
+      {
+        group_id: 'escape',
+        group_label: '高铁轻出省',
+        recommendations: [
+          { tour_id: 'gx-a' },
+          { tour_id: 'gx-b' },
+          { tour_id: 'gx-c' },
+          { tour_id: 'wz-a' },
+          { tour_id: 'wz-b' },
+          { tour_id: 'qy-a' },
+        ],
+      },
+    ],
+    featured_route_ids: ['gx-a', 'gx-b', 'gx-c', 'wz-a', 'wz-b', 'qy-a', 'sz-a'],
+  },
+  dedupeContext,
+);
+
+assert.equal(
+  normalizedResearch.recommendation_groups
+    .flatMap((group) => group.recommendations.map((item) => item.tour_id))
+    .filter((tourId) => tourId.startsWith('gx-')).length,
+  3,
+);
+assert.deepEqual(normalizedResearch.featured_route_ids, ['gx-a', 'wz-a', 'qy-a', 'sz-a', 'xm-a', 'cs-a']);
+
 assert.equal(
   extractAiderReplyFromHistory(`Update git name\nLLM RESPONSE 2026-06-24T15:36:33\nASSISTANT\n{"ok":true}\n`),
   '{"ok":true}',

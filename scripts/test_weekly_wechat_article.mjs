@@ -199,7 +199,7 @@ assert.ok(
 );
 assert.ok(
   enriched.includes(
-    '![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?text=https%3A%2F%2Fexample.com%2Fqingyuan&size=320&margin=2)',
+    '![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fqingyuan)',
   ),
 );
 assert.ok(enriched.includes('[查看行程](https://example.com/qingyuan)'));
@@ -210,7 +210,7 @@ assert.ok(
 );
 assert.ok(
   enriched.includes(
-    '![Hezhou West Creek 3D (Yuequanju + 4 Meals) 报名二维码](https://quickchart.io/qr?text=https%3A%2F%2Fexample.com%2Fhezhou&size=320&margin=2)',
+    '![Hezhou West Creek 3D (Yuequanju + 4 Meals) 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fhezhou)',
   ),
 );
 assert.ok(
@@ -220,7 +220,7 @@ assert.ok(
 );
 assert.ok(
   enriched.includes(
-    '![Hunan High-Speed Rail 4D 报名二维码](https://quickchart.io/qr?text=https%3A%2F%2Fexample.com%2Fhunan&size=320&margin=2)',
+    '![Hunan High-Speed Rail 4D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fhunan)',
   ),
 );
 
@@ -263,7 +263,12 @@ assert.ok(
 );
 assert.ok(
   enrichedLooseTitles.includes(
-    '![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?text=https%3A%2F%2Fexample.com%2Fqingyuan&size=320&margin=2)',
+    '![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fqingyuan)',
+  ),
+);
+assert.ok(
+  enrichedLooseTitles.includes(
+    '![Hezhou West Creek 3D (Yuequanju + 4 Meals) 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=https%3A%2F%2Fexample.com%2Fhezhou)',
   ),
 );
 

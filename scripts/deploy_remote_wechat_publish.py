@@ -61,9 +61,10 @@ def multipart_bytes(field_name, file_name, file_bytes, mime_type):
 
 def upload_inline_image(access_token, image_url):
     image_bytes, mime_type = request_bytes(image_url)
-    extension = mimetypes.guess_extension(mime_type or 'image/jpeg') or '.jpg'
+    normalized_mime = 'image/png' if (mime_type or '').lower() == 'image/png' else 'image/jpeg'
+    extension = '.png' if normalized_mime == 'image/png' else '.jpg'
     upload_url = 'https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=%s' % urllib.parse.quote(access_token)
-    boundary, body = multipart_bytes('media', 'inline%s' % extension, image_bytes, mime_type or 'image/jpeg')
+    boundary, body = multipart_bytes('media', 'inline%s' % extension, image_bytes, normalized_mime)
     data = request_json(
         upload_url,
         method='POST',
