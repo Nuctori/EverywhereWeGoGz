@@ -116,8 +116,35 @@ def run(cmd):
 
 
 def capture(cmd):
-    completed = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    try:
+        completed = subprocess.run(
+            cmd,
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding='utf-8',
+            errors='replace',
+        )
+    except subprocess.CalledProcessError as error:
+        if error.stdout:
+            print(error.stdout, file=sys.stderr, end='' if error.stdout.endswith('\n') else '\n')
+        if error.stderr:
+            print(error.stderr, file=sys.stderr, end='' if error.stderr.endswith('\n') else '\n')
+        raise
     return completed.stdout.strip()
+
+
+def remote_bundle_path(remote_dir, original_path, default_name):
+    source_name = pathlib.Path(original_path).name if original_path else default_name
+    return f'{remote_dir}/{source_name or default_name}'
+
+
+def normalize_bundle_for_remote(bundle, remote_dir):
+    normalized = dict(bundle)
+    normalized['htmlPath'] = remote_bundle_path(remote_dir, bundle.get('htmlPath'), 'article.html')
+    normalized['uploadCoverPath'] = remote_bundle_path(remote_dir, bundle.get('uploadCoverPath'), 'cover-upload.jpg')
+    return normalized
 
 
 def main():
@@ -133,18 +160,27 @@ def main():
 
     remote_dir = args.remote_dir.rstrip('/')
     run(['ssh', args.host, f'mkdir -p {remote_dir}'])
-    run(['scp', args.bundle_path, f'{args.host}:{remote_dir}/publish-bundle.json'])
     run(['scp', args.html_path, f'{args.host}:{remote_dir}/article.html'])
     run(['scp', args.cover_path, f'{args.host}:{remote_dir}/cover-upload.jpg'])
 
-    with tempfile.NamedTemporaryFile('w', suffix='.py', delete=False, encoding='utf-8') as handle:
-      handle.write(textwrap.dedent(REMOTE_SCRIPT))
-      local_script = handle.name
+    bundle = json.loads(pathlib.Path(args.bundle_path).read_text(encoding='utf-8'))
+    normalized_bundle = normalize_bundle_for_remote(bundle, remote_dir)
 
     try:
-      run(['scp', local_script, f'{args.host}:{remote_dir}/remote_publish.py'])
+        with tempfile.NamedTemporaryFile('w', suffix='.json', delete=False, encoding='utf-8') as bundle_handle:
+            bundle_handle.write(json.dumps(normalized_bundle, ensure_ascii=False, indent=2) + '\n')
+            local_bundle = bundle_handle.name
+        with tempfile.NamedTemporaryFile('w', suffix='.py', delete=False, encoding='utf-8') as handle:
+            handle.write(textwrap.dedent(REMOTE_SCRIPT))
+            local_script = handle.name
+
+        run(['scp', local_bundle, f'{args.host}:{remote_dir}/publish-bundle.json'])
+        run(['scp', local_script, f'{args.host}:{remote_dir}/remote_publish.py'])
     finally:
-      pathlib.Path(local_script).unlink(missing_ok=True)
+        if 'local_bundle' in locals():
+            pathlib.Path(local_bundle).unlink(missing_ok=True)
+        if 'local_script' in locals():
+            pathlib.Path(local_script).unlink(missing_ok=True)
 
     remote_command = (
         f"cd {remote_dir} && "
