@@ -126,29 +126,42 @@ function findUnusedTourForArticle(context, usedTourIds = new Set()) {
     ...(context.candidateTours || []),
     ...(context.fallbackCandidateTours || []),
   ];
-  for (const tour of pools) {
-    if (!tour?.id || usedTourIds.has(tour.id)) continue;
-    return tour;
-  }
-  return null;
+  const familyUsage = context.__dedupeFamilyUsage || new Map();
+  const destinationUsage = context.__dedupeDestinationUsage || new Map();
+  const pick = (predicate) => {
+    for (const tour of pools) {
+      if (!tour?.id || usedTourIds.has(tour.id)) continue;
+      const familyKey = deriveTourFamilyKey(tour);
+      const destinationKey = deriveTourDestinationKey(tour);
+      if (!predicate({ familyKey, destinationKey, tour })) continue;
+      return tour;
+    }
+    return null;
+  };
+
+  return (
+    pick(({ familyKey, destinationKey }) =>
+      (familyUsage.get(familyKey) || 0) < MAX_FAMILY_REPEAT_PER_RESEARCH &&
+      (destinationUsage.get(destinationKey) || 0) < MAX_DESTINATION_REPEAT_PER_RESEARCH,
+    ) ||
+    pick(({ familyKey }) => (familyUsage.get(familyKey) || 0) < MAX_FAMILY_REPEAT_PER_RESEARCH) ||
+    pick(() => true)
+  );
 }
 
-function formatReplacementHeading(templateLine, title) {
-  const trimmed = String(templateLine || '').trim();
-  if (/^\*\*.+\*\*$/.test(trimmed)) {
-    const inner = trimmed.slice(2, -2).trim();
-    const prefixMatch = inner.match(/^(\d+[.、]\s*)/);
-    return `**${prefixMatch ? prefixMatch[1] : ''}${title}**`;
-  }
-  if (/^####\s+/.test(trimmed)) {
-    return `#### ${title}`;
-  }
-  return `**${title}**`;
+function bumpArticleDedupeUsage(context, tour) {
+  if (!tour?.id) return;
+  const familyUsage = context.__dedupeFamilyUsage || new Map();
+  const destinationUsage = context.__dedupeDestinationUsage || new Map();
+  const familyKey = deriveTourFamilyKey(tour);
+  const destinationKey = deriveTourDestinationKey(tour);
+  familyUsage.set(familyKey, (familyUsage.get(familyKey) || 0) + 1);
+  destinationUsage.set(destinationKey, (destinationUsage.get(destinationKey) || 0) + 1);
+  context.__dedupeFamilyUsage = familyUsage;
+  context.__dedupeDestinationUsage = destinationUsage;
 }
 
-function buildFallbackRecommendationBlock(tour, options = {}) {
-  const detailUrl = buildTourDetailUrl(tour, getDefaultWebsiteUrl());
-  const imageUrl = tour.articleImages?.[0] || tour.images?.[0] || '';
+function buildFallbackRecommendationCopy(tour) {
   const priceText = typeof tour.price === 'number' ? `${tour.price}${tour.priceUnit || '元/人'}` : '价格以页面为准';
   const dateText = Array.isArray(tour.departureDates) && tour.departureDates.length > 0
     ? `最近班期有 ${tour.departureDates.slice(0, 4).join('、')}`
@@ -156,14 +169,36 @@ function buildFallbackRecommendationBlock(tour, options = {}) {
   const audienceText = Array.isArray(tour.suitableFor) && tour.suitableFor.length > 0
     ? `${tour.suitableFor.slice(0, 2).join('、')}去会更顺手`
     : '周末想换空气的人会更喜欢';
-  const highlightA = (tour.highlights || []).find(Boolean) || tour.destination || '现场';
-  const highlightB = (tour.tags || []).find(Boolean) || tour.theme || '节奏';
+  const destinationText = tour.destination || '这一路';
+  const highlightA = (tour.highlights || []).find(Boolean) || destinationText;
+  const highlightB = (tour.tags || []).find(Boolean) || tour.theme || '行程节奏';
+  const variants = [
+    `真要躲开这周反复的闷热，${highlightA}这种场景会比待在城里舒服得多。${audienceText}，${destinationText}这一线不只是看风景，${highlightB}和住下来慢慢玩的节奏也撑得住两三天的小假期。${dateText}，${priceText}。`,
+    `${destinationText}在这个时间段最讨喜的地方，就是到了现场很快能进入状态，${highlightA}不是摆拍景点，待上一会儿就能感到凉意和松弛。${audienceText}，想换空气又不想把行程排太满的人，往往会更吃这一类${highlightB}线路。${dateText}，${priceText}。`,
+    `如果这周只想认真换个环境，${highlightA}和${highlightB}会比常规城市逛吃更有记忆点。${audienceText}，从出发到落地都不算折腾，到了地方就能把步子慢下来。${dateText}，${priceText}。`,
+  ];
+  const variantIndex = Math.abs(
+    String(tour.id || tour.title || destinationText)
+      .split('')
+      .reduce((sum, char) => sum + char.charCodeAt(0), 0),
+  ) % variants.length;
+  return variants[variantIndex];
+}
+
+function buildFallbackRecommendationBlock(tour, options = {}) {
+  const detailUrl = buildTourDetailUrl(tour, getDefaultWebsiteUrl());
+  const imageUrl = tour.articleImages?.[0] || tour.images?.[0] || '';
   return [
     formatReplacementHeading(options.headingLine, tour.title),
     imageUrl ? `![${tour.title}](${imageUrl})` : '',
-    `${highlightA}在这周更容易写出清凉感或放松感，到了现场不会只是走马观花。${audienceText}，而且${highlightB}这层体验也能把行程撑起来。${dateText}，${priceText}，点开详情就能继续看行程安排。`,
+    buildFallbackRecommendationCopy(tour),
     `[查看行程](${detailUrl})`,
   ].filter(Boolean).join('\n\n');
+}
+
+function clearArticleDedupeUsage(context) {
+  delete context.__dedupeFamilyUsage;
+  delete context.__dedupeDestinationUsage;
 }
 
 function isRouteSectionHeading(line) {
@@ -200,12 +235,30 @@ function parseRouteSections(article) {
   };
 }
 
+function formatReplacementHeading(templateLine, title) {
+  const trimmed = String(templateLine || '').trim();
+  if (/^\*\*.+\*\*$/.test(trimmed)) {
+    const inner = trimmed.slice(2, -2).trim();
+    const prefixMatch = inner.match(/^(\d+[.、]\s*)/);
+    return `**${prefixMatch ? prefixMatch[1] : ''}${title}**`;
+  }
+  if (/^####\s+/.test(trimmed)) {
+    return `#### ${title}`;
+  }
+  return `**${title}**`;
+}
+
 function dedupeArticleRouteBlocks(article, context) {
+  clearArticleDedupeUsage(context);
   const body = String(article || '');
   const seenUrls = new Set();
   const usedTourIds = new Set();
   const urlToTour = new Map();
-  for (const tour of [...(context.recommendationGroups || []).flatMap((group) => group.tours || []), ...(context.candidateTours || [])]) {
+  for (const tour of [
+    ...(context.recommendationGroups || []).flatMap((group) => group.tours || []),
+    ...(context.candidateTours || []),
+    ...(context.fallbackCandidateTours || []),
+  ]) {
     if (!tour?.id) continue;
     urlToTour.set(buildTourDetailUrl(tour, getDefaultWebsiteUrl()), tour);
   }
@@ -224,7 +277,10 @@ function dedupeArticleRouteBlocks(article, context) {
     const matchedTour = urlToTour.get(section.url);
     if (!seenUrls.has(section.url)) {
       seenUrls.add(section.url);
-      if (matchedTour?.id) usedTourIds.add(matchedTour.id);
+      if (matchedTour?.id) {
+        usedTourIds.add(matchedTour.id);
+        bumpArticleDedupeUsage(context, matchedTour);
+      }
       continue;
     }
 
@@ -233,6 +289,7 @@ function dedupeArticleRouteBlocks(article, context) {
     if (!replacement) continue;
     usedTourIds.add(replacement.id);
     seenUrls.add(buildTourDetailUrl(replacement, getDefaultWebsiteUrl()));
+    bumpArticleDedupeUsage(context, replacement);
     replacements.set(
       section.start,
       buildFallbackRecommendationBlock(replacement, { headingLine: section.headingLine }),
