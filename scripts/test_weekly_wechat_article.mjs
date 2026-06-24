@@ -5,6 +5,7 @@ import {
   enrichWeeklyArticleMedia,
   fetchWeatherOutlook,
   getDefaultWebsiteUrl,
+  scoreWeeklyArticleTour,
   validateGeneratedArticle,
 } from './lib/weekly_wechat_article.mjs';
 
@@ -131,8 +132,15 @@ assert.ok(
 assert.ok(context.candidateGroups.some((group) => group.id === 'family_short_break'));
 assert.ok(context.candidateGroups.some((group) => group.id === 'mountain_water_cooling'));
 assert.ok(context.candidateGroups.some((group) => group.id === 'relaxing_resort'));
+assert.ok(Array.isArray(context.aiSelectionBuckets));
+assert.ok(context.aiSelectionBuckets.length >= context.candidateGroups.length);
+assert.ok(context.aiSelectionBuckets.some((group) => group.id === 'mountain_water_cooling'));
 assert.ok(context.weatherOutlook.headline.includes('未来7天广州大致在'));
 assert.ok(context.seasonalOutlook.some((item) => item.includes('带池')));
+const coolingGroup = context.candidateGroups.find((group) => group.id === 'mountain_water_cooling');
+assert.ok(coolingGroup);
+assert.ok(coolingGroup.tours.some((tour) => tour.id === 'tour-qingyuan'));
+assert.ok(!coolingGroup.tours.some((tour) => tour.id === 'tour-hotspring'));
 
 const hotSpringCandidate = context.candidateTours.find((tour) => tour.id === 'tour-hotspring');
 assert.ok(hotSpringCandidate);
@@ -258,5 +266,63 @@ assert.ok(
     '![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?text=https%3A%2F%2Fexample.com%2Fqingyuan&size=320&margin=2)',
   ),
 );
+
+const naturalCoolingFixture = {
+  id: 'natural-cooling',
+  title: '紫云谷溯溪漂流2天',
+  destination: '广东',
+  duration: 2,
+  price: 599,
+  departureDates: ['2026-06-26'],
+  bookingUrl: 'https://example.com/ziyun',
+  images: ['/data/image-cache/ziyun.webp'],
+  highlights: ['紫云谷', '峡谷溯溪', '漂流'],
+  tags: ['自然风光', '亲水'],
+  theme: '自然风光',
+  dataQuality: { availabilityConfidence: 'high' },
+};
+
+const hybridPoolFixture = {
+  id: 'hybrid-pool',
+  title: '从化泳池温泉2天',
+  destination: '广东',
+  duration: 2,
+  price: 499,
+  departureDates: ['2026-06-26'],
+  bookingUrl: 'https://example.com/pool',
+  images: ['/data/image-cache/pool.webp'],
+  highlights: ['无边泳池', '泡池放松'],
+  tags: ['度假', '亲水'],
+  theme: '度假',
+  dataQuality: { availabilityConfidence: 'high' },
+};
+
+const hotSpringOnlyFixture = {
+  id: 'hot-only',
+  title: '新兴温泉酒店2天',
+  destination: '广东',
+  duration: 2,
+  price: 399,
+  departureDates: ['2026-06-26'],
+  bookingUrl: 'https://example.com/hot',
+  images: ['/data/image-cache/hot.webp'],
+  highlights: ['温泉', '酒店'],
+  tags: ['度假'],
+  theme: '度假',
+  dataQuality: { availabilityConfidence: 'high' },
+};
+
+const naturalScore = scoreWeeklyArticleTour(naturalCoolingFixture, '2026-06-25', ['2026-06-26']);
+const hybridScore = scoreWeeklyArticleTour(hybridPoolFixture, '2026-06-25', ['2026-06-26']);
+const hotOnlyScore = scoreWeeklyArticleTour(hotSpringOnlyFixture, '2026-06-25', ['2026-06-26']);
+
+assert.equal(naturalScore.meta.hasNaturalCoolingSignals, true);
+assert.ok(naturalScore.meta.naturalCoolingHits >= 3);
+assert.equal(hybridScore.meta.hasWaterPlaySignals, true);
+assert.equal(hybridScore.meta.hasHotSpringSignals, true);
+assert.equal(hotOnlyScore.meta.hasHotSpringOnlySignals, true);
+assert.equal(hotOnlyScore.meta.hasWaterPlaySignals, false);
+assert.ok(naturalScore.score > hybridScore.score);
+assert.ok(hybridScore.score > hotOnlyScore.score);
 
 console.log('weekly wechat article tests passed');

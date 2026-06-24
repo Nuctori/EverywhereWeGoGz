@@ -178,6 +178,12 @@ assert.ok(fs.existsSync(path.join(outDir, 'article.raw.md')));
 assert.ok(result.article.includes('本周天气与出游节奏'));
 assert.ok(result.article.startsWith('---\n'));
 assert.ok(result.article.includes('title: "版本A：广州本周出游清单"') || result.article.includes('title: "版本B：这周出发会更舒服的25条线"'));
+assert.ok(fs.existsSync(path.join(outDir, 'weekly-context.json')));
+const storedContext = JSON.parse(fs.readFileSync(path.join(outDir, 'weekly-context.json'), 'utf8'));
+assert.ok(Array.isArray(storedContext.aiSelectionBuckets || []));
+if ((storedContext.candidateTours || []).length > 0) {
+  assert.ok((storedContext.aiSelectionBuckets || []).length > 0);
+}
 const enrichedArticle = enrichWeeklyArticleMedia(
   ensureArticleFrontmatter(result.article, result.context, []),
   result.context,

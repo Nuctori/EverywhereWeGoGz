@@ -238,20 +238,25 @@ function buildAiderEnv() {
 }
 
 function buildResearchPrompt(context) {
-  const sampleTours = context.candidateTours.slice(0, 18).map((tour, index) => ({
-    rank: index + 1,
-    id: tour.id,
-    title: tour.title,
-    destination: tour.destination,
-    duration: tour.duration,
-    price: tour.price,
-    priceUnit: tour.priceUnit,
-    departureDates: tour.departureDates,
-    transportType: tour.transportType,
-    bookingUrl: tour.bookingUrl,
-    highlights: tour.highlights,
-    tags: tour.tags,
-    editorialReasons: tour.editorialReasons,
+  const sampleBuckets = (context.aiSelectionBuckets || []).map((bucket) => ({
+    id: bucket.id,
+    label: bucket.label,
+    description: bucket.description,
+    tours: bucket.tours.map((tour, index) => ({
+      rank: index + 1,
+      id: tour.id,
+      title: tour.title,
+      destination: tour.destination,
+      duration: tour.duration,
+      price: tour.price,
+      priceUnit: tour.priceUnit,
+      departureDates: tour.departureDates,
+      transportType: tour.transportType,
+      bookingUrl: tour.bookingUrl,
+      highlights: tour.highlights,
+      tags: tour.tags,
+      editorialReasons: tour.editorialReasons,
+    })),
   }));
 
   return [
@@ -264,14 +269,15 @@ function buildResearchPrompt(context) {
     '- recommendation_groups 总条数要凑满 25 条',
     '- 不要把雅泡/带池/温泉写成词义解释题，只判断值不值得推荐',
     '- 要主动压制同质化',
+    '- 不要完全照抄分数或现成入选结果，要结合天气、时令和文案可写性重新挑重点线路',
     '',
     `运行日期：${context.runDate}`,
     `季节：${context.season}`,
     `天气：${context.weatherOutlook?.headline || '暂无'}`,
     `时令提示：${(context.seasonalOutlook || []).join(' | ')}`,
     '',
-    '候选线路 JSON：',
-    JSON.stringify(sampleTours, null, 2),
+    '分桶候选线路 JSON：',
+    JSON.stringify(sampleBuckets, null, 2),
   ].join('\n');
 }
 
@@ -301,6 +307,7 @@ function buildWriterPrompt(context, researchJson, variantIndex) {
       season: context.season,
       weatherOutlook: context.weatherOutlook,
       seasonalOutlook: context.seasonalOutlook,
+      aiSelectionBuckets: context.aiSelectionBuckets,
       recommendationGroups: context.recommendationGroups,
       selectedTours: context.selectedTours,
     }, null, 2),
@@ -320,6 +327,7 @@ function buildReviewerPrompt(context, researchJson, candidates) {
     JSON.stringify({
       runDate: context.runDate,
       season: context.season,
+      aiSelectionBuckets: context.aiSelectionBuckets,
       recommendationGroups: context.recommendationGroups,
       selectedTours: context.selectedTours,
       weatherOutlook: context.weatherOutlook,
