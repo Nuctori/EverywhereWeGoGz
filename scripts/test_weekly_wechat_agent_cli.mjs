@@ -339,9 +339,41 @@ assert.deepEqual(normalizedResearch.featured_route_ids, ['gx-a', 'wz-a', 'qy-a',
 const normalizedIds = normalizedResearch.recommendation_groups
   .flatMap((group) => group.recommendations.map((item) => item.tour_id));
 assert.equal(normalizedIds.filter((tourId) => tourId.startsWith('gx-')).length <= 1, true);
+assert.ok(normalizedIds.length >= 6);
 const researchPrompt = seenPrompts.find((prompt) => prompt.includes('你是每周旅游选题研究员')) || '';
 assert.ok(researchPrompt.includes('内部判断标签'));
 assert.ok(researchPrompt.includes('不是给读者看的'));
+
+const fillContext = {
+  candidateTours: [
+    { id: 'a', title: '广东清远峡谷2天', destination: '广东清远', editorialReasons: ['可出发', '', '', '山水清凉'] },
+    { id: 'b', title: '广东阳江海边2天', destination: '广东阳江', editorialReasons: ['可出发', '', '', '近海降温'] },
+    { id: 'c', title: '福建厦门3天', destination: '福建厦门', editorialReasons: ['可出发', '', '', '海风舒服'] },
+    { id: 'd', title: '云南香格里拉4天', destination: '云南', editorialReasons: ['可出发', '', '', '高原清凉'] },
+    { id: 'e', title: '新疆北疆8天', destination: '新疆', editorialReasons: ['可出发', '', '', '长线避暑'] },
+  ],
+  selectedTours: [],
+  aiSelectionBuckets: [],
+  recommendationGroups: [],
+};
+
+const filledResearch = normalizeResearch(
+  {
+    recommendation_groups: [
+      {
+        group_id: 'seed',
+        group_label: '初始推荐',
+        recommendations: [{ tour_id: 'a' }, { tour_id: 'b' }],
+      },
+    ],
+    featured_route_ids: ['a'],
+  },
+  fillContext,
+);
+const filledIds = filledResearch.recommendation_groups.flatMap((group) => group.recommendations.map((item) => item.tour_id));
+assert.equal(new Set(filledIds).size, filledIds.length);
+assert.ok(filledIds.length > 2);
+assert.ok(filledResearch.recommendation_groups.some((group) => group.group_id === 'balanced_more'));
 
 assert.equal(
   extractAiderReplyFromHistory(`Update git name\nLLM RESPONSE 2026-06-24T15:36:33\nASSISTANT\n{"ok":true}\n`),

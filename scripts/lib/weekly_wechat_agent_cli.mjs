@@ -474,16 +474,21 @@ function normalizeResearch(research, context) {
     })
     .filter(Boolean);
 
-  const fallbackGroups = (context.recommendationGroups || []).map((group) => ({
-    group_id: group.id,
-    group_label: group.label,
-    recommendations: (group.tours || []).map((tour) => ({
-      tour_id: tour.id,
-      title: tour.title,
-      reason: (tour.editorialReasons || [])[0] || '',
-      editorial_angle: (tour.editorialReasons || [])[3] || '',
-    })),
-  }));
+  const fallbackGroupMap = new Map();
+  for (const group of [...(context.aiSelectionBuckets || []), ...(context.recommendationGroups || [])]) {
+    if (!group?.id || fallbackGroupMap.has(group.id)) continue;
+    fallbackGroupMap.set(group.id, {
+      group_id: group.id,
+      group_label: group.label,
+      recommendations: (group.tours || []).map((tour) => ({
+        tour_id: tour.id,
+        title: tour.title,
+        reason: (tour.editorialReasons || [])[0] || '',
+        editorial_angle: (tour.editorialReasons || [])[3] || '',
+      })),
+    });
+  }
+  const fallbackGroups = [...fallbackGroupMap.values()];
 
   for (const group of fallbackGroups) {
     if (total >= 25) break;
@@ -510,6 +515,38 @@ function normalizeResearch(research, context) {
       familyUsage.set(familyKey, (familyUsage.get(familyKey) || 0) + 1);
       destinationUsage.set(destinationKey, (destinationUsage.get(destinationKey) || 0) + 1);
       total += 1;
+    }
+  }
+
+  if (total < 25) {
+    const overflowGroup = {
+      group_id: 'balanced_more',
+      group_label: '补位加看',
+      recommendations: [],
+    };
+
+    for (const tour of context.candidateTours || []) {
+      if (total >= 25) break;
+      if (!tour?.id || excludedIds.has(tour.id)) continue;
+      const familyKey = deriveTourFamilyKey(tour);
+      const destinationKey = deriveTourDestinationKey(tour);
+      if ((routeUsage.get(tour.id) || 0) >= 1) continue;
+      if ((familyUsage.get(familyKey) || 0) >= MAX_FAMILY_REPEAT_PER_RESEARCH) continue;
+      if ((destinationUsage.get(destinationKey) || 0) >= MAX_DESTINATION_REPEAT_PER_RESEARCH) continue;
+      overflowGroup.recommendations.push({
+        tour_id: tour.id,
+        title: tour.title,
+        reason: (tour.editorialReasons || [])[0] || '',
+        editorial_angle: (tour.editorialReasons || [])[3] || '',
+      });
+      routeUsage.set(tour.id, (routeUsage.get(tour.id) || 0) + 1);
+      familyUsage.set(familyKey, (familyUsage.get(familyKey) || 0) + 1);
+      destinationUsage.set(destinationKey, (destinationUsage.get(destinationKey) || 0) + 1);
+      total += 1;
+    }
+
+    if (overflowGroup.recommendations.length > 0) {
+      normalizedGroups.push(overflowGroup);
     }
   }
 
