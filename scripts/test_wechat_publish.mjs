@@ -9,6 +9,7 @@ import {
   markdownToHtml,
   parseFrontmatter,
   prepareInlineImageAssetsForHtml,
+  validateRecommendationSupportBlocks,
 } from './lib/wechat_publish.mjs';
 
 const rootDir = process.cwd();
@@ -98,6 +99,11 @@ const htmlWithQr = markdownToHtml(parseFrontmatter(markdownWithQr).body);
 assert.ok(htmlWithQr.includes('地址：https://example.com/qingyuan'));
 assert.ok(htmlWithQr.includes('<img src="https://quickchart.io/qr'));
 assert.ok(htmlWithQr.includes('扫码查看详情'));
+const supportValidation = validateRecommendationSupportBlocks(markdownWithQr, htmlWithQr);
+assert.equal(supportValidation.ok, true);
+assert.equal(supportValidation.counts.routeLinkCount, 1);
+assert.equal(supportValidation.counts.htmlQrCount, 1);
+assert.equal(supportValidation.counts.addressCount, 1);
 
 const htmlWithInlineRouteLink = injectSupportBlocksIntoHtml(
   '<p style="x"><strong>1. 清远峡谷漂流2天</strong><br>适合周末找清凉感。<br><a href="https://example.com/inline-route" style="x">查看行程</a></p>',
@@ -105,6 +111,13 @@ const htmlWithInlineRouteLink = injectSupportBlocksIntoHtml(
 assert.ok(htmlWithInlineRouteLink.includes('地址：https://example.com/inline-route'));
 assert.ok(htmlWithInlineRouteLink.includes('扫码查看详情'));
 assert.ok(htmlWithInlineRouteLink.includes('https://quickchart.io/qr'));
+
+const invalidSupportValidation = validateRecommendationSupportBlocks(
+  '[查看行程](https://example.com/inline-route)',
+  '<p>没有地址也没有二维码</p>',
+);
+assert.equal(invalidSupportValidation.ok, false);
+assert.ok(invalidSupportValidation.issues.some((issue) => issue.includes('HTML route/address count mismatch')));
 
 const htmlForFeatureBlock = markdownToHtml(`## 重点线路\n\n### 清远峡谷漂流2天\n![线路图](https://example.com/feature.jpg)\n适合周末找清凉感。\n[查看线路](https://example.com/feature)`);
 assert.ok(htmlForFeatureBlock.includes('<h3'));

@@ -225,6 +225,35 @@ assert.ok(
     `![Hunan High-Speed Rail 4D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(buildTourDetailUrl(tours[3], getDefaultWebsiteUrl()))})`,
   ),
 );
+assert.ok(
+  enriched.includes(
+    `地址：${buildTourDetailUrl(tours[0], getDefaultWebsiteUrl())}`,
+  ),
+);
+assert.ok(
+  enriched.includes(
+    `地址：${buildTourDetailUrl(tours[2], getDefaultWebsiteUrl())}`,
+  ),
+);
+assert.ok(
+  enriched.includes(
+    `地址：${buildTourDetailUrl(tours[3], getDefaultWebsiteUrl())}`,
+  ),
+);
+assert.ok(
+  enriched.indexOf('![Qingyuan Gorge Rafting 2D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)') <
+    enriched.indexOf(`[查看行程](${buildTourDetailUrl(tours[0], getDefaultWebsiteUrl())})`),
+);
+assert.ok(
+  enriched.indexOf(`[查看行程](${buildTourDetailUrl(tours[0], getDefaultWebsiteUrl())})`) <
+    enriched.indexOf(`地址：${buildTourDetailUrl(tours[0], getDefaultWebsiteUrl())}`),
+);
+assert.ok(
+  enriched.indexOf(`地址：${buildTourDetailUrl(tours[0], getDefaultWebsiteUrl())}`) <
+    enriched.indexOf(
+      `![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(buildTourDetailUrl(tours[0], getDefaultWebsiteUrl()))})`,
+    ),
+);
 
 const articleWithLooseTitles = `---
 title: "这周想找清凉感，广州出发可以这样玩"

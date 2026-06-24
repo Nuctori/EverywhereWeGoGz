@@ -24,10 +24,21 @@ const DEFAULT_REPAIR_ATTEMPTS = 1;
 const RESEARCH_EXCLUSION_HINTS = ['降级', '季节已过', '无清凉', '无季节红利', '非本周主推', '夏季闷热'];
 const FORBIDDEN_PHRASE_REPLACEMENTS = [
   { pattern: /适合预算有限又想出省的人/g, replacement: '对想少请假、又想轻松走远一点的人很友好' },
+  { pattern: /适合预算有限但想走远一点的人/g, replacement: '对想少请假、又想轻松走远一点的人很友好' },
+  { pattern: /适合预算有限但想走远一点的年轻人/g, replacement: '对想轻松走远一点的年轻人更友好' },
   { pattern: /适合预算有限的人/g, replacement: '对想把预算花在刀刃上的人更友好' },
   { pattern: /适合预算有限/g, replacement: '对想把预算花得更顺手' },
   { pattern: /作为补充/g, replacement: '顺手也值得看看' },
+  { pattern: /产品特色这种场景/g, replacement: '现场这种氛围' },
+  { pattern: /产品特色/g, replacement: '现场体验' },
+  { pattern: /其他这一线/g, replacement: '东莞这一线' },
+  { pattern: /\*\*6\. 爆款湖南高铁4天\*\*/g, replacement: '**6. 湖南高铁4天**' },
 ];
+const GROUP_LABEL_REPLACEMENTS = new Map([
+  ['编辑补位', '轻松度假'],
+  ['预算友好', '轻巧出发'],
+  ['远线加看', '长线清凉'],
+]);
 const TOUR_FAMILY_PATTERNS = [
   { id: 'detian', keywords: ['德天', '通灵', '明仕', '靖西', '鹅泉', '崇左', '古龙山'] },
   { id: 'weizhou', keywords: ['涠洲', '北海', '鳄鱼山', '石螺口', '银滩'] },
@@ -153,6 +164,15 @@ function sanitizeForbiddenEditorialPhrases(article) {
   return body;
 }
 
+function sanitizeGroupLabels(article) {
+  let body = String(article || '');
+  for (const [from, to] of GROUP_LABEL_REPLACEMENTS.entries()) {
+    body = body.replace(new RegExp(`^###\\s+${from}$`, 'gm'), `### ${to}`);
+    body = body.replace(new RegExp(`> !\\[${from} 报名二维码\\]`, 'g'), `> ![${to} 报名二维码]`);
+  }
+  return body;
+}
+
 function findUnusedTourForArticle(context, usedTourIds = new Set()) {
   const pools = [
     ...(context.recommendationGroups || []).flatMap((group) => group.tours || []),
@@ -206,8 +226,8 @@ function buildFallbackRecommendationCopy(tour) {
   const highlightA = (tour.highlights || []).find(Boolean) || destinationText;
   const highlightB = (tour.tags || []).find(Boolean) || tour.theme || '行程节奏';
   const variants = [
-    `真要躲开这周反复的闷热，${highlightA}这种场景会比待在城里舒服得多。${audienceText}，${destinationText}这一线不只是看风景，${highlightB}和住下来慢慢玩的节奏也撑得住两三天的小假期。${dateText}，${priceText}。`,
-    `${destinationText}在这个时间段最讨喜的地方，就是到了现场很快能进入状态，${highlightA}不是摆拍景点，待上一会儿就能感到凉意和松弛。${audienceText}，想换空气又不想把行程排太满的人，往往会更吃这一类${highlightB}线路。${dateText}，${priceText}。`,
+    `${highlightA}在这种闷热反复的天气里会特别讨喜，到了现场很快就能把体感降下来。${audienceText}，${destinationText}这一线不只是看风景，${highlightB}和住下来慢慢玩的节奏也撑得住两三天的小假期。${dateText}，${priceText}。`,
+    `${destinationText}在这个时间段最有吸引力的地方，就是到了现场很快能进入状态，${highlightA}不是摆拍景点，待上一会儿就能感到凉意和松弛。${audienceText}，想换空气又不想把行程排太满的人，往往会更喜欢这一类${highlightB}线路。${dateText}，${priceText}。`,
     `如果这周只想认真换个环境，${highlightA}和${highlightB}会比常规城市逛吃更有记忆点。${audienceText}，从出发到落地都不算折腾，到了地方就能把步子慢下来。${dateText}，${priceText}。`,
   ];
   const variantIndex = Math.abs(
@@ -437,6 +457,7 @@ function postProcessArticle(article, context) {
   output = dedupeArticleRouteBlocks(output, context).article;
   output = ensureOpeningWeatherSection(output, context);
   output = stripDuplicateFrontmatterAndScaffold(output);
+  output = sanitizeGroupLabels(output);
   output = sanitizeForbiddenEditorialPhrases(output);
   return output;
 }

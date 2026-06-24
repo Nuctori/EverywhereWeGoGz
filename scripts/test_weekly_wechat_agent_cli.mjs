@@ -570,6 +570,11 @@ assert.ok(!generatedResult.article.includes('同第3条'));
 assert.equal((generatedResult.article.match(/^---$/gm) || []).length, 2);
 assert.ok(!generatedResult.article.includes('# 修订后完整 Markdown 成稿'));
 assert.ok(!generatedResult.article.includes('适合预算有限'));
+assert.ok(!generatedResult.article.includes('编辑补位'));
+assert.ok(!generatedResult.article.includes('预算友好'));
+assert.ok(!generatedResult.article.includes('远线加看'));
+assert.ok(!generatedResult.article.includes('产品特色这种场景'));
+assert.ok(!generatedResult.article.includes('爆款湖南高铁4天'));
 assert.ok(generatedResult.validation.ok);
 
 assert.equal(

@@ -595,7 +595,7 @@ function buildAddressHtml(url) {
 }
 
 function buildQrCalloutHtml(url, label) {
-  return `<div style="${QR_CALLOUT_STYLE}"><p style="${QR_LABEL_STYLE}">扫码查看详情</p><div style="margin:8px 0 0;text-align:center;"><img src="${buildQrFallbackUrl(url)}" alt="${escapeHtml(label)} 报名二维码" style="${QR_IMAGE_STYLE}"></div></div>`;
+  return `<p style="${QR_LABEL_STYLE}">扫码查看详情</p><div style="${IMAGE_WRAP_STYLE}"><img src="${buildQrFallbackUrl(url)}" alt="${escapeHtml(label)} 报名二维码" style="${QR_IMAGE_STYLE}"></div>`;
 }
 
 export function injectSupportBlocksIntoHtml(html) {
@@ -628,6 +628,47 @@ export function injectSupportBlocksIntoHtml(html) {
   }
 
   return output.join('\n');
+}
+
+export function validateRecommendationSupportBlocks(markdownWithQr, html) {
+  const markdownText = String(markdownWithQr || '');
+  const htmlText = String(html || '');
+  const routeLinkCount = (
+    markdownText.match(/\[(查看行程|查看线路|立即查看)]\((https?:\/\/[^)\s]+)\)/g) || []
+  ).length;
+  const addressCount = (markdownText.match(/^地址：https?:\/\/.+$/gm) || []).length;
+  const markdownQrCount = (markdownText.match(/!\[[^\]]*报名二维码[^\]]*]\((https?:\/\/[^)\s]+)\)/g) || []).length;
+  const htmlAddressCount = (htmlText.match(/地址：https?:\/\/[^<\s]+/g) || []).length;
+  const htmlQrCount = (htmlText.match(/报名二维码/g) || []).length;
+  const issues = [];
+
+  if (routeLinkCount === 0) {
+    issues.push('No route links found in article markdown.');
+  }
+  if (routeLinkCount !== addressCount) {
+    issues.push(`Markdown route/address count mismatch: links=${routeLinkCount}, addresses=${addressCount}`);
+  }
+  if (routeLinkCount !== markdownQrCount) {
+    issues.push(`Markdown route/QR count mismatch: links=${routeLinkCount}, qr=${markdownQrCount}`);
+  }
+  if (routeLinkCount !== htmlAddressCount) {
+    issues.push(`HTML route/address count mismatch: links=${routeLinkCount}, addresses=${htmlAddressCount}`);
+  }
+  if (routeLinkCount !== htmlQrCount) {
+    issues.push(`HTML route/QR count mismatch: links=${routeLinkCount}, qr=${htmlQrCount}`);
+  }
+
+  return {
+    ok: issues.length === 0,
+    issues,
+    counts: {
+      routeLinkCount,
+      addressCount,
+      markdownQrCount,
+      htmlAddressCount,
+      htmlQrCount,
+    },
+  };
 }
 
 export async function uploadInlineImagesForHtml(accessToken, html) {
@@ -723,6 +764,10 @@ export async function publishMarkdownArticle(rootDir, options = {}) {
   const markdownWithQrFallback = injectQrFallbackIntoMarkdown(markdown, { sourceUrl });
   const parsedMarkdown = parseFrontmatter(markdownWithQrFallback);
   const html = injectSupportBlocksIntoHtml(markdownToHtml(parsedMarkdown.body));
+  const supportValidation = validateRecommendationSupportBlocks(markdownWithQrFallback, html);
+  if (!supportValidation.ok) {
+    throw new Error(`WeChat support block validation failed: ${supportValidation.issues.join('; ')}`);
+  }
   const htmlPath = path.join(outputDir, 'article.html');
   const markdownPathWithQr = path.join(outputDir, 'article.with-qr.md');
   fs.writeFileSync(markdownPathWithQr, `${markdownWithQrFallback}\n`, 'utf8');
@@ -779,6 +824,10 @@ export async function preparePublishBundle(rootDir, options = {}) {
   const markdownWithQrFallback = injectQrFallbackIntoMarkdown(markdown, { sourceUrl });
   const parsedMarkdown = parseFrontmatter(markdownWithQrFallback);
   const html = injectSupportBlocksIntoHtml(markdownToHtml(parsedMarkdown.body));
+  const supportValidation = validateRecommendationSupportBlocks(markdownWithQrFallback, html);
+  if (!supportValidation.ok) {
+    throw new Error(`WeChat support block validation failed: ${supportValidation.issues.join('; ')}`);
+  }
   const inlineAssets = await prepareInlineImageAssetsForHtml(html, outputDir);
   const htmlPath = path.join(outputDir, 'article.html');
   fs.writeFileSync(htmlPath, `${inlineAssets.html}\n`, 'utf8');

@@ -43,6 +43,10 @@ const FORBIDDEN_PHRASES = [
   '樱花已过季',
   '其中6条深度推荐',
   '季节红利弱',
+  '编辑补位',
+  '远线加看',
+  '预算友好',
+  '产品特色这种场景',
 ];
 
 const REPETITIVE_PHRASE_LIMITS = [
@@ -1467,6 +1471,97 @@ function buildQrImageUrl(bookingUrl) {
   return `https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(bookingUrl)}`;
 }
 
+function collapseBlankLines(lines) {
+  const output = [];
+  let previousBlank = true;
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+    const isBlank = !line.trim();
+    if (isBlank) {
+      if (!previousBlank) output.push('');
+      previousBlank = true;
+      continue;
+    }
+    output.push(line);
+    previousBlank = false;
+  }
+  while (output.length > 0 && !output[output.length - 1].trim()) output.pop();
+  return output;
+}
+
+function stripStandaloneSupportLine(line) {
+  const trimmed = line.trim();
+  if (!trimmed) return { keep: true, line: '' };
+  if (/^地址：https?:\/\//.test(trimmed)) return { keep: false };
+  if (trimmed === '扫码查看详情' || trimmed === '> 扫码查看详情') return { keep: false };
+  if (/^>\s*!\[[^\]]*报名二维码[^\]]*]\((https?:\/\/[^)\s]+)\)$/.test(trimmed)) return { keep: false };
+  if (/^!\[[^\]]*报名二维码[^\]]*]\((https?:\/\/[^)\s]+)\)$/.test(trimmed)) return { keep: false };
+  if (/^>\s*$/.test(trimmed)) return { keep: false };
+  return { keep: true, line };
+}
+
+function stripInlineBookingLink(line) {
+  return line
+    .replace(/\s*\[查看行程]\((https?:\/\/[^)\s]+)\)\s*/g, ' ')
+    .replace(/\s*\[查看线路]\((https?:\/\/[^)\s]+)\)\s*/g, ' ')
+    .replace(/\s*\[立即查看]\((https?:\/\/[^)\s]+)\)\s*/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+function normalizeRecommendationSection(sectionLines, tour, websiteUrl) {
+  const headingLine = sectionLines[0] || '';
+  const detailUrl = buildTourDetailUrl(tour, websiteUrl);
+  const normalizedBodyLines = [];
+  let chosenImageLine = '';
+
+  for (const rawLine of sectionLines.slice(1)) {
+    const trimmed = rawLine.trim();
+    if (!trimmed) {
+      normalizedBodyLines.push('');
+      continue;
+    }
+
+    const standaloneImageMatch = trimmed.match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/);
+    if (standaloneImageMatch) {
+      if (/报名二维码/.test(standaloneImageMatch[1] || '')) continue;
+      if (!chosenImageLine) chosenImageLine = trimmed;
+      continue;
+    }
+
+    const supportLine = stripStandaloneSupportLine(rawLine);
+    if (!supportLine.keep) continue;
+
+    const withoutInlineLink = stripInlineBookingLink(supportLine.line);
+    if (!withoutInlineLink) continue;
+    normalizedBodyLines.push(withoutInlineLink);
+  }
+
+  if (!chosenImageLine) {
+    const imageUrl = resolveArticleAssetUrl(tour.images?.[0] || '', websiteUrl);
+    if (imageUrl) chosenImageLine = `![${tour.title}](${imageUrl})`;
+  }
+
+  const output = [headingLine];
+  if (chosenImageLine) output.push('', chosenImageLine);
+  const collapsedBody = collapseBlankLines(normalizedBodyLines);
+  if (collapsedBody.length > 0) output.push('', ...collapsedBody);
+  if (detailUrl) {
+    output.push(
+      '',
+      `[查看行程](${detailUrl})`,
+      '',
+      `地址：${detailUrl}`,
+      '',
+      '扫码查看详情',
+      '',
+      `![${tour.title} 报名二维码](${buildQrImageUrl(detailUrl)})`,
+    );
+  }
+  output.push('');
+  return collapseBlankLines(output);
+}
+
 function listArticleTours(context) {
   const deduped = new Map();
   for (const group of context.recommendationGroups || []) {
@@ -1499,29 +1594,8 @@ export function enrichWeeklyArticleMedia(article, context, options = {}) {
   const sectionEntries = buildSectionEntries(lines, articleTours);
 
   sectionEntries.forEach(({ tour, sectionIndex, sectionEnd }) => {
-    const imageUrl = resolveArticleAssetUrl(tour.images?.[0] || '', websiteUrl);
-    const detailUrl = buildTourDetailUrl(tour, websiteUrl);
-    const sectionLines = lines.slice(sectionIndex, sectionEnd);
-    const insertAfterHeading = [];
-    if (imageUrl && !hasMarkdownImage(lines, sectionIndex + 1, sectionEnd)) {
-      insertAfterHeading.push('', `![${tour.title}](${imageUrl})`, '');
-    }
-
-    const hasBookingLink = detailUrl
-      ? sectionLines.some((line) => line.includes(detailUrl) || line.includes('查看行程'))
-      : true;
-    const hasQrImage = sectionLines.some((line) => line.includes('quickchart.io/qr') || line.includes('报名二维码'));
-    const insertBeforeNextSection = [];
-    if (detailUrl && !hasBookingLink) {
-      insertBeforeNextSection.push('', `[查看行程](${detailUrl})`);
-    }
-    if (detailUrl && !hasQrImage) {
-      insertBeforeNextSection.push('', `![${tour.title} 报名二维码](${buildQrImageUrl(detailUrl)})`);
-    }
-    if (insertBeforeNextSection.length > 0) insertBeforeNextSection.push('');
-
-    if (insertBeforeNextSection.length > 0) lines.splice(sectionEnd, 0, ...insertBeforeNextSection);
-    if (insertAfterHeading.length > 0) lines.splice(sectionIndex + 1, 0, ...insertAfterHeading);
+    const rebuiltSection = normalizeRecommendationSection(lines.slice(sectionIndex, sectionEnd), tour, websiteUrl);
+    lines.splice(sectionIndex, sectionEnd - sectionIndex, ...rebuiltSection);
   });
 
   return lines.join('\n').replace(/\n{4,}/g, '\n\n\n');
