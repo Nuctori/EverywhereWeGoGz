@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { preparePublishBundle } from './lib/wechat_publish.mjs';
+import { prepareCoverForUpload, preparePublishBundle } from './lib/wechat_publish.mjs';
 
 const rootDir = process.cwd();
 const outDir = path.join(rootDir, 'weekly-wechat-posts', '2099-01-01-test');
@@ -24,5 +24,11 @@ assert.ok(fs.existsSync(result.bundle.htmlPath));
 assert.ok(fs.existsSync(result.bundle.uploadCoverPath));
 assert.equal(result.bundle.title, '测试文章');
 assert.equal(result.bundle.sourceUrl, 'https://nuctori.github.io/EverywhereWeGoGz/');
+
+const remoteCoverOutput = await prepareCoverForUpload(
+  'https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/jrttp.jrt365.com_8066/238e10f60f6c77e6.webp',
+  outDir,
+);
+assert.ok(fs.existsSync(remoteCoverOutput));
 
 console.log('wechat publish bundle tests passed');

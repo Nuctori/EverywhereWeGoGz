@@ -134,6 +134,9 @@ export function resolveOutputDir(articlePath) {
 export function resolveCoverFile(rootDir, articlePath, frontmatter) {
   const cover = frontmatter.cover || frontmatter.coverImage || frontmatter.image || '';
   if (!cover) throw new Error('Article frontmatter is missing cover.');
+  if (/^https?:\/\//i.test(cover)) {
+    return cover;
+  }
   if (cover.startsWith('/')) {
     return path.join(rootDir, 'public', cover.slice(1).replaceAll('/', path.sep));
   }
@@ -141,11 +144,21 @@ export function resolveCoverFile(rootDir, articlePath, frontmatter) {
 }
 
 export async function prepareCoverForUpload(coverPath, outputDir) {
-  if (!fs.existsSync(coverPath)) {
+  const isRemoteCover = /^https?:\/\//i.test(coverPath);
+  const targetPath = path.join(outputDir, 'cover-upload.jpg');
+  let coverInput = coverPath;
+
+  if (isRemoteCover) {
+    const response = await fetch(coverPath, { method: 'GET' });
+    if (!response.ok) {
+      throw new Error(`Remote cover fetch failed: ${response.status} ${coverPath}`);
+    }
+    coverInput = Buffer.from(await response.arrayBuffer());
+  } else if (!fs.existsSync(coverPath)) {
     throw new Error(`Cover image not found: ${coverPath}`);
   }
-  const targetPath = path.join(outputDir, 'cover-upload.jpg');
-  await sharp(coverPath).jpeg({ quality: 88 }).toFile(targetPath);
+
+  await sharp(coverInput).jpeg({ quality: 88 }).toFile(targetPath);
   return targetPath;
 }
 
