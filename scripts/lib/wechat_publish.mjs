@@ -12,6 +12,7 @@ const H2_STYLE = 'margin:30px 0 14px;font-size:22px;line-height:1.45;font-weight
 const H3_STYLE = 'margin:24px 0 10px;font-size:18px;line-height:1.5;font-weight:700;color:#111827;';
 const IMAGE_WRAP_STYLE = 'margin:18px 0 20px;text-align:center;';
 const IMAGE_STYLE = 'display:block;width:100%;height:auto;border-radius:8px;';
+const QR_IMAGE_STYLE = 'display:inline-block;max-width:220px;width:52%;height:auto;';
 const HR_STYLE = 'border:none;border-top:1px solid #e5e7eb;margin:24px 0;';
 const QR_CALLOUT_STYLE = 'margin:18px 0 24px;padding:14px 16px;background:#f7f8fa;border-radius:8px;';
 const QR_LABEL_STYLE = 'margin:0 0 10px;line-height:1.75;font-size:14px;color:#4b5563;';
@@ -58,6 +59,19 @@ function renderInlineMarkdown(text) {
   return html;
 }
 
+function parseStandaloneImage(line) {
+  const match = line.trim().match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/);
+  if (!match) return null;
+  return { alt: match[1] || '', src: match[2] };
+}
+
+function renderStandaloneImage(line) {
+  const image = parseStandaloneImage(line);
+  if (!image) return null;
+  const imageStyle = /二维码/.test(image.alt) ? QR_IMAGE_STYLE : IMAGE_STYLE;
+  return `<div style="${IMAGE_WRAP_STYLE}"><img src="${image.src}" alt="${escapeHtml(image.alt)}" style="${imageStyle}"></div>`;
+}
+
 export function markdownToHtml(markdown) {
   const lines = markdown
     .replace(/\r\n/g, '\n')
@@ -72,18 +86,41 @@ export function markdownToHtml(markdown) {
 
   const flushParagraph = () => {
     if (paragraph.length === 0) return;
-    if (
-      paragraph.length === 1 &&
-      /^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/.test(paragraph[0].trim())
-    ) {
-      const [, alt, src] = paragraph[0].trim().match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/) || [];
-      blocks.push(
-        `<div style="${IMAGE_WRAP_STYLE}"><img src="${src}" alt="${escapeHtml(alt || '')}" style="${IMAGE_STYLE}"></div>`,
-      );
-    } else {
+    if (paragraph.length === 1) {
+      const standaloneImage = renderStandaloneImage(paragraph[0]);
+      if (standaloneImage) {
+        blocks.push(standaloneImage);
+        paragraph = [];
+        return;
+      }
+    }
+
+    const hasStandaloneImages = paragraph.some((line) => parseStandaloneImage(line));
+    if (!hasStandaloneImages) {
       const style = blocks.length === 0 ? LEAD_PARAGRAPH_STYLE : PARAGRAPH_STYLE;
       blocks.push(`<p style="${style}">${paragraph.map(renderInlineMarkdown).join('<br>')}</p>`);
+      paragraph = [];
+      return;
     }
+
+    let textBuffer = [];
+    const flushTextBuffer = () => {
+      if (textBuffer.length === 0) return;
+      const style = blocks.length === 0 ? LEAD_PARAGRAPH_STYLE : PARAGRAPH_STYLE;
+      blocks.push(`<p style="${style}">${textBuffer.map(renderInlineMarkdown).join('<br>')}</p>`);
+      textBuffer = [];
+    };
+
+    for (const line of paragraph) {
+      const standaloneImage = renderStandaloneImage(line);
+      if (standaloneImage) {
+        flushTextBuffer();
+        blocks.push(standaloneImage);
+        continue;
+      }
+      textBuffer.push(line);
+    }
+    flushTextBuffer();
     paragraph = [];
   };
 
@@ -111,7 +148,7 @@ export function markdownToHtml(markdown) {
     for (const line of imageLines) {
       const [, alt, src] = line.match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/) || [];
       inner.push(
-        `<div style="margin:8px 0 0;text-align:center;"><img src="${src}" alt="${escapeHtml(alt || '')}" style="display:inline-block;max-width:220px;width:52%;height:auto;"></div>`,
+        `<div style="margin:8px 0 0;text-align:center;"><img src="${src}" alt="${escapeHtml(alt || '')}" style="${QR_IMAGE_STYLE}"></div>`,
       );
     }
     blocks.push(`<div style="${QR_CALLOUT_STYLE}">${inner.join('')}</div>`);
@@ -400,6 +437,7 @@ function collectExternalLinkEntries(body, options = {}) {
       const label = match[2]?.trim() || '查看链接';
       const url = match[3]?.trim() || '';
       if (!url || seen.has(url)) continue;
+      if (sourceUrl && url === sourceUrl) continue;
       seen.add(url);
 
       let entryLabel = label;
@@ -415,14 +453,6 @@ function collectExternalLinkEntries(body, options = {}) {
         url,
       });
     }
-  }
-
-  if (sourceUrl && !seen.has(sourceUrl)) {
-    entries.push({
-      label: '阅读原文',
-      actionLabel: '阅读原文',
-      url: sourceUrl,
-    });
   }
 
   return entries;

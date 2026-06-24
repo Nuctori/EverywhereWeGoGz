@@ -41,6 +41,7 @@ assert.ok(html.includes('清远峡谷漂流2天</h2>'));
 assert.ok(html.includes('• 近期班期：2026-06-24'));
 assert.ok(html.includes('href="https://example.com/qingyuan"'));
 assert.ok(html.includes('>查看线路</a>'));
+assert.ok(html.includes('<div style="margin:18px 0 20px;text-align:center;"><img src="https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/cover.webp"'));
 
 const markdownWithQr = injectQrFallbackIntoMarkdown(markdown, {
   sourceUrl: 'https://nuctori.github.io/EverywhereWeGoGz/',
@@ -51,11 +52,19 @@ assert.ok(markdownWithQr.includes('![清远峡谷漂流2天 二维码](') || mar
 assert.ok(buildQrFallbackUrl('https://example.com/qingyuan').includes('quickchart.io/qr'));
 assert.ok(!markdownWithQr.includes('> 微信内打开外链不稳定'));
 assert.ok(!markdownWithQr.includes('![线路二维码]('));
+assert.ok(!markdownWithQr.includes('https://nuctori.github.io/EverywhereWeGoGz/ 二维码'));
 
 const htmlWithQr = markdownToHtml(parseFrontmatter(markdownWithQr).body);
 assert.ok(htmlWithQr.includes('行程链接与二维码'));
 assert.ok(htmlWithQr.includes('<img src="https://quickchart.io/qr'));
 assert.ok(!htmlWithQr.includes('&gt; 微信内'));
+assert.ok(!htmlWithQr.includes('https://nuctori.github.io/EverywhereWeGoGz/ 二维码'));
+
+const htmlForFeatureBlock = markdownToHtml(`## 重点线路\n\n### 清远峡谷漂流2天\n![线路图](https://example.com/feature.jpg)\n适合周末找清凉感。\n[查看线路](https://example.com/feature)`);
+assert.ok(htmlForFeatureBlock.includes('<h3'));
+assert.ok(htmlForFeatureBlock.includes('<div style="margin:18px 0 20px;text-align:center;"><img src="https://example.com/feature.jpg" alt="线路图" style="display:block;width:100%;height:auto;border-radius:8px;"></div>'));
+assert.ok(htmlForFeatureBlock.includes('适合周末找清凉感。'));
+assert.ok(htmlForFeatureBlock.includes('href="https://example.com/feature"'));
 
 const htmlForOrderedList = markdownToHtml(`## 一周推荐\n\n1. 第一条\n2. 第二条\n\n> 提示\n> ![二维码](https://example.com/qr.png)`);
 assert.ok(htmlForOrderedList.includes('1. 第一条'));

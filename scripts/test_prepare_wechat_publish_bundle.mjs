@@ -16,6 +16,8 @@ cover: "/data/image-cache/jrttp.jrt365.com_8066/238e10f60f6c77e6.webp"
 # 标题
 
 正文
+
+[查看线路](https://example.com/test-line)
 `, 'utf8');
 
 const result = await preparePublishBundle(rootDir, { outDir });
@@ -28,8 +30,10 @@ const bundledMarkdownWithQr = fs.readFileSync(result.bundle.markdownPathWithQr, 
 const bundledHtml = fs.readFileSync(result.bundle.htmlPath, 'utf8');
 assert.ok(bundledMarkdownWithQr.includes('## 行程链接与二维码'));
 assert.ok(!bundledMarkdownWithQr.includes('> 微信内打开外链不稳定'));
+assert.ok(!bundledMarkdownWithQr.includes('阅读原文 二维码'));
 assert.ok(bundledHtml.includes('行程链接与二维码'));
 assert.ok(!bundledHtml.includes('&gt; 微信内'));
+assert.ok(!bundledHtml.includes('阅读原文 二维码'));
 
 const remoteCoverOutput = await prepareCoverForUpload(
   'https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/jrttp.jrt365.com_8066/238e10f60f6c77e6.webp',
