@@ -132,7 +132,20 @@ function findUnusedTourForArticle(context, usedTourIds = new Set()) {
   return null;
 }
 
-function buildFallbackRecommendationBlock(tour) {
+function formatReplacementHeading(templateLine, title) {
+  const trimmed = String(templateLine || '').trim();
+  if (/^\*\*.+\*\*$/.test(trimmed)) {
+    const inner = trimmed.slice(2, -2).trim();
+    const prefixMatch = inner.match(/^(\d+[.、]\s*)/);
+    return `**${prefixMatch ? prefixMatch[1] : ''}${title}**`;
+  }
+  if (/^####\s+/.test(trimmed)) {
+    return `#### ${title}`;
+  }
+  return `**${title}**`;
+}
+
+function buildFallbackRecommendationBlock(tour, options = {}) {
   const detailUrl = buildTourDetailUrl(tour, getDefaultWebsiteUrl());
   const imageUrl = tour.articleImages?.[0] || tour.images?.[0] || '';
   const priceText = typeof tour.price === 'number' ? `${tour.price}${tour.priceUnit || '元/人'}` : '价格以页面为准';
@@ -145,16 +158,49 @@ function buildFallbackRecommendationBlock(tour) {
   const highlightA = (tour.highlights || []).find(Boolean) || tour.destination || '现场';
   const highlightB = (tour.tags || []).find(Boolean) || tour.theme || '节奏';
   return [
-    `**${tour.title}**`,
+    formatReplacementHeading(options.headingLine, tour.title),
     imageUrl ? `![${tour.title}](${imageUrl})` : '',
     `${highlightA}在这周更容易写出清凉感或放松感，到了现场不会只是走马观花。${audienceText}，而且${highlightB}这层体验也能把行程撑起来。${dateText}，${priceText}，点开详情就能继续看行程安排。`,
     `[查看行程](${detailUrl})`,
   ].filter(Boolean).join('\n\n');
 }
 
+function isRouteSectionHeading(line) {
+  const trimmed = String(line || '').trim();
+  return /^\*\*.+\*\*$/.test(trimmed) || /^####\s+.+/.test(trimmed);
+}
+
+function parseRouteSections(article) {
+  const lines = String(article || '').split(/\r?\n/);
+  const sectionStarts = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (isRouteSectionHeading(lines[index])) sectionStarts.push(index);
+  }
+
+  const sections = [];
+  for (let index = 0; index < sectionStarts.length; index += 1) {
+    const start = sectionStarts[index];
+    const end = index + 1 < sectionStarts.length ? sectionStarts[index + 1] : lines.length;
+    const text = lines.slice(start, end).join('\n');
+    const linkMatch = text.match(/\[(查看行程|查看路线|立即查看)\]\((https?:\/\/[^)]+)\)/);
+    if (!linkMatch) continue;
+    sections.push({
+      start,
+      end,
+      headingLine: lines[start],
+      url: linkMatch[2],
+      text,
+    });
+  }
+
+  return {
+    lines,
+    sections,
+  };
+}
+
 function dedupeArticleRouteBlocks(article, context) {
   const body = String(article || '');
-  const routePattern = /(\*\*.+?\*\*[\s\S]*?\[查看行程\]\((https?:\/\/[^)]+)\))/g;
   const seenUrls = new Set();
   const usedTourIds = new Set();
   const urlToTour = new Map();
@@ -163,24 +209,56 @@ function dedupeArticleRouteBlocks(article, context) {
     urlToTour.set(buildTourDetailUrl(tour, getDefaultWebsiteUrl()), tour);
   }
 
+  const { lines, sections } = parseRouteSections(body);
+  if (sections.length === 0) {
+    return {
+      article: body,
+      duplicateCount: 0,
+    };
+  }
+
   let duplicateCount = 0;
-  const replaced = body.replace(routePattern, (block, _whole, url) => {
-    const matchedTour = urlToTour.get(url);
-    if (matchedTour?.id) usedTourIds.add(matchedTour.id);
-    if (!seenUrls.has(url)) {
-      seenUrls.add(url);
-      return block;
+  const replacements = new Map();
+  for (const section of sections) {
+    const matchedTour = urlToTour.get(section.url);
+    if (!seenUrls.has(section.url)) {
+      seenUrls.add(section.url);
+      if (matchedTour?.id) usedTourIds.add(matchedTour.id);
+      continue;
     }
+
     duplicateCount += 1;
     const replacement = findUnusedTourForArticle(context, usedTourIds);
-    if (!replacement) return block;
+    if (!replacement) continue;
     usedTourIds.add(replacement.id);
     seenUrls.add(buildTourDetailUrl(replacement, getDefaultWebsiteUrl()));
-    return buildFallbackRecommendationBlock(replacement);
-  });
+    replacements.set(
+      section.start,
+      buildFallbackRecommendationBlock(replacement, { headingLine: section.headingLine }),
+    );
+  }
+
+  if (replacements.size === 0) {
+    return {
+      article: body,
+      duplicateCount,
+    };
+  }
+
+  const rebuilt = [];
+  let cursor = 0;
+  for (const section of sections) {
+    if (section.start < cursor) continue;
+    rebuilt.push(lines.slice(cursor, section.start).join('\n'));
+    rebuilt.push(replacements.get(section.start) || section.text);
+    cursor = section.end;
+  }
+  rebuilt.push(lines.slice(cursor).join('\n'));
+
+  const replaced = rebuilt.join('\n').replace(/\n{4,}/g, '\n\n\n').trim();
 
   return {
-    article: replaced,
+    article: `${replaced}\n`,
     duplicateCount,
   };
 }

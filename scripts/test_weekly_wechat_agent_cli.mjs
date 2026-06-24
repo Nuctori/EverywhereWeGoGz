@@ -448,6 +448,28 @@ const articleWithDuplicateLinks = `**清远峡谷漂流2天**
 const dedupedArticle = dedupeArticleRouteBlocks(articleWithDuplicateLinks, dedupeContext).article;
 assert.equal((dedupedArticle.match(/tour=tour-a/g) || []).length, 1);
 assert.equal((dedupedArticle.match(/tour=tour-b/g) || []).length, 1);
+assert.ok(dedupedArticle.includes('**阳江海陵岛2天**'));
+
+const articleWithRepeatedDeepSections = `### 山水清凉
+
+**1. 清远峡谷漂流2天**
+
+这条线路先写一遍。
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-a&source=wechat)
+
+### 补充推荐（确保25条）
+
+**23. 清远峡谷漂流2天（深度版）**
+
+这条线路又写了一遍。
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-a&source=wechat)`;
+
+const dedupedDeepSections = dedupeArticleRouteBlocks(articleWithRepeatedDeepSections, dedupeContext).article;
+assert.equal((dedupedDeepSections.match(/tour=tour-a/g) || []).length, 1);
+assert.equal((dedupedDeepSections.match(/tour=tour-b/g) || []).length, 1);
+assert.ok(dedupedDeepSections.includes('**23. 阳江海陵岛2天**'));
 
 assert.equal(
   extractAiderReplyFromHistory(`Update git name\nLLM RESPONSE 2026-06-24T15:36:33\nASSISTANT\n{"ok":true}\n`),
