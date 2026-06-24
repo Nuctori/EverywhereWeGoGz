@@ -41,6 +41,9 @@ async function main() {
   const rootDir = process.cwd();
   const args = parseArgs(process.argv.slice(2));
   const result = await generateWeeklyArticleWithAgentCli(rootDir, args);
+  if (!result.validation?.ok) {
+    throw new Error(`Weekly article validation failed: ${(result.validation?.issues || []).join('; ')}`);
+  }
   const articleWithMedia = enrichWeeklyArticleMedia(result.article, result.context, {
     websiteUrl: getDefaultWebsiteUrl(),
   });

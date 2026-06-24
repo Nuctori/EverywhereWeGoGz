@@ -20,6 +20,7 @@ const outDir = path.join(rootDir, 'weekly-wechat-posts', '2099-02-02-agent-test'
 fs.rmSync(outDir, { recursive: true, force: true });
 
 let writerCalls = 0;
+let repairCalls = 0;
 const seenPrompts = [];
 
 const fakeExecRunner = async ({ prompt, outputPath }) => {
@@ -139,6 +140,52 @@ cover: "/data/image-cache/qingyuan.webp"
     return;
   }
 
+  if (prompt.includes('你是返工编辑')) {
+    repairCalls += 1;
+    fs.writeFileSync(outputPath, `---
+title: "返工版：这周出发会更舒服的25条线"
+summary: "返工后去掉了做题腔。"
+author: "老广旅行"
+cover: "/data/image-cache/qingyuan.webp"
+---
+
+# 返工版：这周出发会更舒服的25条线
+
+## 本周天气与出游节奏
+
+未来7天广州闷热带阵雨，近场和带池休闲线更舒服。
+
+## 本周25条推荐
+
+### 山水清凉
+
+#### Qingyuan Gorge Rafting 2D
+
+![Qingyuan Gorge Rafting 2D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)
+
+这条线清凉感来得很直接，峡谷水声和漂流一开场就能把城市闷热感切掉。周末只请一点时间也能成行，带娃家庭和想找玩水节奏的朋友都容易喜欢。到了现场最舒服的瞬间，是山风卷着水雾一起扑过来。
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-qingyuan&source=wechat)
+
+#### Hezhou West Creek 3D (Yuequanju + 4 Meals)
+
+![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)
+
+这条更适合想认真躲开城市热气的人，山水、树荫和住下来慢慢走的节奏会比赶景点舒服很多。要是你更想要两三天都沉在溪谷和清爽空气里，它会比纯酒店放松线更有当下出发的理由。溪谷边坐下来听水声的那一刻，会特别想把手机先放下。
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-hezhou&source=wechat)
+
+#### Hunan High-Speed Rail 4D
+
+![Hunan High-Speed Rail 4D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hunan.webp)
+
+如果这周想把范围放大一点，高铁线会比长途大巴更轻松，四天节奏也方便把山景和换城住两晚的松弛感一起收下。对情侣、朋友结伴和想趁周中请假接周末的人来说，这类线路的舒适度会更高。高铁落地后的节奏也更利落，不会把体力先耗在路上。
+
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-hunan-rail&source=wechat)
+`, 'utf8');
+    return;
+  }
+
   fs.writeFileSync(outputPath, `# 终审版：这周更值得发的旅行团清单
 
 ## 本周天气与出游节奏
@@ -171,7 +218,7 @@ cover: "/data/image-cache/qingyuan.webp"
 
 [查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour-hunan-rail&source=wechat)
 
-如果这周想把半径拉远一点，高铁线的轻松感会比自驾或长途大巴更友好。四天节奏能把山景、换城市住两晚的松弛感和出行效率一起兼顾，比较适合想认真透口气的人。
+如果这周想把半径拉远一点，高铁线的轻松感会比自驾或长途大巴更友好。四天节奏能把山景、换城市住两晚的松弛感和出行效率一起兼顾，比较适合预算有限的人。作为补充，它也能接住想认真透口气的人。
 `, 'utf8');
 };
 
@@ -193,6 +240,7 @@ const result = await generateWeeklyArticleWithAgentCli(rootDir, {
 
 assert.equal(result.context.generationMode, 'aider-deepseek-multi-pass');
 assert.equal(writerCalls, 2);
+assert.equal(repairCalls, 1);
 assert.ok(result.validation.ok);
 assert.ok(fs.existsSync(path.join(outDir, 'agent-research.json')));
 assert.ok(fs.existsSync(path.join(outDir, 'candidate-1.md')));
@@ -200,7 +248,11 @@ assert.ok(fs.existsSync(path.join(outDir, 'candidate-2.md')));
 assert.ok(fs.existsSync(path.join(outDir, 'article.raw.md')));
 assert.ok(result.article.includes('本周天气与出游节奏'));
 assert.ok(result.article.startsWith('---\n'));
-assert.ok(result.article.includes('title: "版本A：广州本周出游清单"') || result.article.includes('title: "版本B：这周出发会更舒服的25条线"'));
+assert.ok(
+  result.article.includes('title: "版本A：广州本周出游清单"') ||
+  result.article.includes('title: "版本B：这周出发会更舒服的25条线"') ||
+  result.article.includes('title: "返工版：这周出发会更舒服的25条线"'),
+);
 assert.ok(!result.article.includes('当前数据里'));
 assert.ok(!result.article.includes('作为补充'));
 assert.ok(!result.article.includes('其中6条深度推荐'));
@@ -281,12 +333,12 @@ assert.equal(
   normalizedResearch.recommendation_groups
     .flatMap((group) => group.recommendations.map((item) => item.tour_id))
     .filter((tourId) => tourId.startsWith('gx-')).length,
-  2,
+  1,
 );
 assert.deepEqual(normalizedResearch.featured_route_ids, ['gx-a', 'wz-a', 'qy-a', 'sz-a', 'xm-a', 'cs-a']);
 const normalizedIds = normalizedResearch.recommendation_groups
   .flatMap((group) => group.recommendations.map((item) => item.tour_id));
-assert.equal(normalizedIds.filter((tourId) => tourId.startsWith('gx-')).length <= 2, true);
+assert.equal(normalizedIds.filter((tourId) => tourId.startsWith('gx-')).length <= 1, true);
 const researchPrompt = seenPrompts.find((prompt) => prompt.includes('你是每周旅游选题研究员')) || '';
 assert.ok(researchPrompt.includes('内部判断标签'));
 assert.ok(researchPrompt.includes('不是给读者看的'));

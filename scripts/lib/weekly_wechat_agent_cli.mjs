@@ -20,6 +20,16 @@ const DEFAULT_AIDER_BASE_URL = 'https://api.deepseek.com/v1';
 const DEFAULT_CANDIDATE_VARIANTS = 2;
 const MAX_FAMILY_REPEAT_PER_RESEARCH = 1;
 const MAX_DESTINATION_REPEAT_PER_RESEARCH = 2;
+const DEFAULT_REPAIR_ATTEMPTS = 1;
+const RESEARCH_EXCLUSION_HINTS = ['降级', '季节已过', '无清凉', '无季节红利', '非本周主推', '夏季闷热'];
+const TOUR_FAMILY_PATTERNS = [
+  { id: 'detian', keywords: ['德天', '通灵', '明仕', '靖西', '鹅泉', '崇左', '古龙山'] },
+  { id: 'weizhou', keywords: ['涠洲', '北海', '鳄鱼山', '石螺口', '银滩'] },
+  { id: 'guilin_yangshuo', keywords: ['桂林', '阳朔', '漓江', '遇龙河'] },
+  { id: 'pingtan', keywords: ['平潭', '猴研岛', '蓝眼泪', '风车海'] },
+  { id: 'doublemoon', keywords: ['双月湾', '檀悦', '华美达'] },
+  { id: 'changsha', keywords: ['长沙', '岳阳', '武汉', '黄鹤楼', '岳阳楼', '东湖'] },
+];
 
 function parseArgs(argv) {
   const options = {};
@@ -355,7 +365,17 @@ function deriveTitleTokens(title) {
     .filter((token) => token && token.length >= 2 && !TITLE_TOKEN_STOPWORDS.has(token));
 }
 
+function detectTourFamilyId(tour) {
+  const text = `${tour?.title || ''} ${tour?.destination || ''}`;
+  const matched = TOUR_FAMILY_PATTERNS.find((pattern) =>
+    pattern.keywords.some((keyword) => text.includes(keyword)),
+  );
+  return matched?.id || '';
+}
+
 function deriveTourFamilyKey(tour) {
+  const detected = detectTourFamilyId(tour);
+  if (detected) return detected;
   const tokens = deriveTitleTokens(tour?.title || '');
   if (tokens.length > 0) return tokens.slice(0, 3).join('|');
   return normalizeRouteToken(tour?.destination || '') || String(tour?.id || 'misc');
@@ -382,8 +402,37 @@ function buildTourLookup(context) {
   return map;
 }
 
+function collectResearchExcludedIds(research) {
+  const excluded = new Set();
+  const lines = [
+    ...(Array.isArray(research?.editorial_risks) ? research.editorial_risks : []),
+    ...(Array.isArray(research?.duplicate_watchouts) ? research.duplicate_watchouts : []),
+  ];
+
+  for (const rawLine of lines) {
+    const line = String(rawLine || '');
+    const ids = [...line.matchAll(/tour_[\w-]+/g)].map((match) => match[0]);
+    if (ids.length === 0) continue;
+
+    if (RESEARCH_EXCLUSION_HINTS.some((hint) => line.includes(hint))) {
+      ids.forEach((tourId) => excluded.add(tourId));
+    }
+
+    const keepMatch = line.match(/只保留\s+(tour_[\w-]+)/);
+    if (keepMatch) {
+      const kept = keepMatch[1];
+      for (const tourId of ids) {
+        if (tourId !== kept) excluded.add(tourId);
+      }
+    }
+  }
+
+  return excluded;
+}
+
 function normalizeResearch(research, context) {
   const lookup = buildTourLookup(context);
+  const excludedIds = collectResearchExcludedIds(research);
   const groups = Array.isArray(research?.recommendation_groups) ? research.recommendation_groups : [];
   const routeUsage = new Map();
   const familyUsage = new Map();
@@ -397,6 +446,7 @@ function normalizeResearch(research, context) {
       for (const item of recommendations) {
         const tourId = item?.tour_id;
         if (!tourId || !lookup.has(tourId)) continue;
+        if (excludedIds.has(tourId)) continue;
         const tour = lookup.get(tourId);
         const familyKey = deriveTourFamilyKey(tour);
         const destinationKey = deriveTourDestinationKey(tour);
@@ -446,6 +496,7 @@ function normalizeResearch(research, context) {
     for (const item of group.recommendations) {
       if (total >= 25) break;
       if ((existing.recommendations || []).some((entry) => entry.tour_id === item.tour_id)) continue;
+      if (excludedIds.has(item.tour_id)) continue;
       const tour = lookup.get(item.tour_id);
       if (!tour) continue;
       const familyKey = deriveTourFamilyKey(tour);
@@ -468,6 +519,7 @@ function normalizeResearch(research, context) {
 
   const tryPickFeatured = (tourId) => {
     if (!tourId || normalizedFeatured.includes(tourId)) return false;
+    if (excludedIds.has(tourId)) return false;
     const tour = lookup.get(tourId);
     if (!tour) return false;
     const familyKey = deriveTourFamilyKey(tour);
@@ -571,6 +623,29 @@ function buildReviewerPrompt(context, researchJson, candidates) {
     '',
     '候选稿 B：',
     candidates[1] || '',
+  ].join('\n');
+}
+
+function buildRepairPrompt(context, researchJson, article, validation) {
+  return [
+    '你是返工编辑，上一版文章没有通过终审。',
+    '请只输出修订后的完整 Markdown 成稿，不要解释。',
+    '请在保留结构和大部分有效内容的前提下，逐项修掉这些硬伤：',
+    ...(validation?.issues || []).map((issue) => `- ${issue}`),
+    '返工要求：',
+    '- 删除“适合预算有限”“季节虽过”“已过季”“同第2条”“侧重亲子”“侧重度假”这类做题腔或找补句。',
+    '- 同一个 detailUrl 不能在正文里重复出现；如果两条路线太像，只保留更像当周主推的一条，换成别的候选。',
+    '- 必须保持 25 条推荐，每条独立成段，至少 3 句。',
+    '- 只能使用 context / research 中真实存在的线路和事实，不要编造。',
+    '',
+    'research JSON：',
+    JSON.stringify(researchJson, null, 2),
+    '',
+    'context JSON：',
+    JSON.stringify(buildAgentContextPayload(context), null, 2),
+    '',
+    '待修订成稿：',
+    article,
   ].join('\n');
 }
 
@@ -739,8 +814,28 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
     writingContext,
     candidates,
   );
-  fs.writeFileSync(finalPath, finalArticle, 'utf8');
-  const validation = validateGeneratedArticle(finalArticle, writingContext);
+  let resolvedArticle = finalArticle;
+  let validation = validateGeneratedArticle(resolvedArticle, writingContext);
+
+  const repairAttempts = Math.max(0, Number(options.repairAttempts ?? DEFAULT_REPAIR_ATTEMPTS));
+  for (let attempt = 0; attempt < repairAttempts && !validation.ok; attempt += 1) {
+    const repairedPath = path.join(outDir, `article.repair-${attempt + 1}.md`);
+    await execRunner({
+      cwd: rootDir,
+      prompt: buildRepairPrompt(writingContext, research, resolvedArticle, validation),
+      outputPath: repairedPath,
+      model: aiderModel,
+    });
+    resolvedArticle = ensureArticleFrontmatter(
+      stripMarkdownFence(fs.readFileSync(repairedPath, 'utf8')),
+      writingContext,
+      [resolvedArticle, ...candidates],
+    );
+    fs.writeFileSync(finalPath, resolvedArticle, 'utf8');
+    validation = validateGeneratedArticle(resolvedArticle, writingContext);
+  }
+
+  fs.writeFileSync(finalPath, resolvedArticle, 'utf8');
   writeJson(path.join(outDir, 'validation.json'), validation);
   writeJson(path.join(outDir, 'generation-meta.json'), {
     runDate,
@@ -754,7 +849,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
   return {
     context: writingContext,
     outDir,
-    article: finalArticle,
+    article: resolvedArticle,
     validation,
     research,
     candidatePaths,
