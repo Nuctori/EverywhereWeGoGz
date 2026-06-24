@@ -281,6 +281,46 @@ function buildResearchPrompt(context) {
   ].join('\n');
 }
 
+function compactTourForAgent(tour) {
+  return {
+    id: tour.id,
+    title: tour.title,
+    destination: tour.destination,
+    duration: tour.duration,
+    price: tour.price,
+    priceUnit: tour.priceUnit,
+    departureDates: (tour.departureDates || []).slice(0, 4),
+    transportType: tour.transportType,
+    bookingUrl: tour.bookingUrl,
+    highlights: (tour.highlights || []).slice(0, 5),
+    tags: (tour.tags || []).slice(0, 5),
+    articleImages: (tour.articleImages || []).slice(0, 2),
+    editorialReasons: (tour.editorialReasons || []).slice(0, 4),
+  };
+}
+
+function compactGroupForAgent(group) {
+  return {
+    id: group.id,
+    label: group.label,
+    description: group.description,
+    tours: (group.tours || []).map(compactTourForAgent),
+  };
+}
+
+function buildAgentContextPayload(context) {
+  return {
+    runDate: context.runDate,
+    season: context.season,
+    weekWindow: context.weekWindow,
+    weatherOutlook: context.weatherOutlook,
+    seasonalOutlook: context.seasonalOutlook,
+    aiSelectionBuckets: (context.aiSelectionBuckets || []).map(compactGroupForAgent),
+    recommendationGroups: (context.recommendationGroups || []).map(compactGroupForAgent),
+    selectedTours: (context.selectedTours || []).map(compactTourForAgent),
+  };
+}
+
 function buildWriterPrompt(context, researchJson, variantIndex) {
   return [
     '你是资深旅行编辑，要写公众号文章，而不是解释题面。',
@@ -302,15 +342,7 @@ function buildWriterPrompt(context, researchJson, variantIndex) {
     JSON.stringify(researchJson, null, 2),
     '',
     'context JSON：',
-    JSON.stringify({
-      runDate: context.runDate,
-      season: context.season,
-      weatherOutlook: context.weatherOutlook,
-      seasonalOutlook: context.seasonalOutlook,
-      aiSelectionBuckets: context.aiSelectionBuckets,
-      recommendationGroups: context.recommendationGroups,
-      selectedTours: context.selectedTours,
-    }, null, 2),
+    JSON.stringify(buildAgentContextPayload(context), null, 2),
   ].join('\n');
 }
 
@@ -324,15 +356,7 @@ function buildReviewerPrompt(context, researchJson, candidates) {
     JSON.stringify(researchJson, null, 2),
     '',
     'context JSON：',
-    JSON.stringify({
-      runDate: context.runDate,
-      season: context.season,
-      aiSelectionBuckets: context.aiSelectionBuckets,
-      recommendationGroups: context.recommendationGroups,
-      selectedTours: context.selectedTours,
-      weatherOutlook: context.weatherOutlook,
-      seasonalOutlook: context.seasonalOutlook,
-    }, null, 2),
+    JSON.stringify(buildAgentContextPayload(context), null, 2),
     '',
     '候选稿 A：',
     candidates[0],
@@ -355,7 +379,9 @@ function runAiderMessage({ cwd, prompt, outputPath, model }) {
     const historyPath = path.join(sessionDir, `${path.basename(outputPath)}.llm-history.log`);
     const historyInputPath = path.join(sessionDir, '.aider.input.history');
     const historyChatPath = path.join(sessionDir, '.aider.chat.history.md');
+    const messagePath = path.join(sessionDir, `${path.basename(outputPath)}.prompt.md`);
     const resolvedModel = normalizeAiderModel(model || env.AIDER_MODEL || DEFAULT_AIDER_MODEL);
+    fs.writeFileSync(messagePath, prompt, 'utf8');
 
     const args = [
       '--model',
@@ -364,8 +390,8 @@ function runAiderMessage({ cwd, prompt, outputPath, model }) {
       env.AIDER_OPENAI_API_KEY,
       '--openai-api-base',
       env.AIDER_OPENAI_API_BASE,
-      '--message',
-      prompt,
+      '--message-file',
+      messagePath,
       '--yes-always',
       '--no-git',
       '--no-gitignore',
