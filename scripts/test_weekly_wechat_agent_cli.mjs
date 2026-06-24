@@ -557,6 +557,18 @@ assert.equal((dedupedTailBlocks.match(/tour=tour-d/g) || []).length, 1);
 assert.ok(dedupedTailBlocks.includes('**20. 贺州西溪森林3天**'));
 assert.ok(dedupedTailBlocks.includes('**21. 清远紫云谷2天**'));
 
+const generatedResult = await generateWeeklyArticleWithAgentCli(rootDir, {
+  runDate: '2099-02-02',
+  outDir: path.relative(rootDir, outDir),
+  execRunner: fakeExecRunner,
+  repairAttempts: 1,
+});
+assert.ok(/##\s*(?:1\.\s*)?本周天气与出游节奏/.test(generatedResult.article));
+assert.ok(!generatedResult.article.includes('同第1条'));
+assert.ok(!generatedResult.article.includes('同第2条'));
+assert.ok(!generatedResult.article.includes('同第3条'));
+assert.ok(generatedResult.validation.ok);
+
 assert.equal(
   extractAiderReplyFromHistory(`Update git name\nLLM RESPONSE 2026-06-24T15:36:33\nASSISTANT\n{"ok":true}\n`),
   '{"ok":true}',

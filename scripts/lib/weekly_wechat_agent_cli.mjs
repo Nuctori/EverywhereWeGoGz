@@ -248,6 +248,110 @@ function formatReplacementHeading(templateLine, title) {
   return `**${title}**`;
 }
 
+function isPlaceholderRouteSection(text) {
+  const normalized = String(text || '');
+  return /同第\d+条|同第|已列|不再重复|占位|实际不重复/.test(normalized);
+}
+
+function composeWeatherLeadParagraph(context) {
+  const headline = context.weatherOutlook?.headline || '未来7天广州仍是闷热夹阵雨的典型夏天';
+  const temperature =
+    typeof context.weatherOutlook?.minTempC === 'number' && typeof context.weatherOutlook?.maxTempC === 'number'
+      ? `体感大致落在 ${context.weatherOutlook.minTempC.toFixed(1)}-${context.weatherOutlook.maxTempC.toFixed(1)}°C`
+      : '体感还是偏闷';
+  const seasonalBits = (context.seasonalOutlook || []).filter(Boolean).slice(0, 3);
+  const seasonalText =
+    seasonalBits.length > 0
+      ? `${seasonalBits.join('、')}，所以真山水、树荫、溪水、海风这种能直接降体感的线路会更值当。`
+      : '所以真山水、树荫、溪水、海风这种能直接降体感的线路会更值当。';
+  return `${headline}，${temperature}。这周出门别只看路程远近，更该看现场是不是有水、有树荫、有没有住下来慢慢放松的空间。${seasonalText}`;
+}
+
+function ensureOpeningWeatherSection(article, context) {
+  const body = String(article || '').trim();
+  if (/^##\s*(?:1\.\s*)?本周天气与出游节奏/m.test(body)) {
+    return `${body}\n`;
+  }
+
+  const lines = body.split(/\r?\n/);
+  const firstH1Index = lines.findIndex((line) => /^#\s+/.test(line.trim()));
+  const recommendationIndex = lines.findIndex((line) => /^##\s*(?:2\.\s*)?本周25条推荐/.test(line.trim()));
+  const insertIndex = recommendationIndex >= 0 ? recommendationIndex : (firstH1Index >= 0 ? firstH1Index + 1 : 0);
+  const weatherBlock = [
+    '## 1. 本周天气与出游节奏',
+    '',
+    composeWeatherLeadParagraph(context),
+    '',
+  ];
+
+  lines.splice(insertIndex, 0, ...(insertIndex > 0 && lines[insertIndex - 1].trim() ? [''] : []), ...weatherBlock);
+  return `${lines.join('\n').replace(/\n{4,}/g, '\n\n\n').trim()}\n`;
+}
+
+function repairPlaceholderRouteSections(article, context) {
+  const lines = String(article || '').split(/\r?\n/);
+  const sectionStarts = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    if (isRouteSectionHeading(lines[index])) sectionStarts.push(index);
+  }
+  if (sectionStarts.length === 0) return `${String(article || '').trim()}\n`;
+
+  const usedTourIds = new Set();
+  for (const tour of [
+    ...(context.recommendationGroups || []).flatMap((group) => group.tours || []),
+    ...(context.candidateTours || []),
+    ...(context.fallbackCandidateTours || []),
+  ]) {
+    if (!tour?.id) continue;
+    const detailUrl = buildTourDetailUrl(tour, getDefaultWebsiteUrl());
+    if (String(article || '').includes(detailUrl)) {
+      usedTourIds.add(tour.id);
+    }
+  }
+
+  clearArticleDedupeUsage(context);
+  for (const tourId of usedTourIds) {
+    const matchedTour = [
+      ...(context.recommendationGroups || []).flatMap((group) => group.tours || []),
+      ...(context.candidateTours || []),
+      ...(context.fallbackCandidateTours || []),
+    ].find((tour) => tour?.id === tourId);
+    if (matchedTour) bumpArticleDedupeUsage(context, matchedTour);
+  }
+
+  const rebuilt = [];
+  let cursor = 0;
+  for (let index = 0; index < sectionStarts.length; index += 1) {
+    const start = sectionStarts[index];
+    const end = index + 1 < sectionStarts.length ? sectionStarts[index + 1] : lines.length;
+    const text = lines.slice(start, end).join('\n');
+    rebuilt.push(lines.slice(cursor, start).join('\n'));
+    if (isPlaceholderRouteSection(text)) {
+      const replacement = findUnusedTourForArticle(context, usedTourIds);
+      if (replacement) {
+        usedTourIds.add(replacement.id);
+        bumpArticleDedupeUsage(context, replacement);
+        rebuilt.push(buildFallbackRecommendationBlock(replacement, { headingLine: lines[start] }));
+      } else {
+        rebuilt.push(text.replace(/同第\d+条[^。\n]*。?/g, '').replace(/（已列）/g, '').trim());
+      }
+    } else {
+      rebuilt.push(text);
+    }
+    cursor = end;
+  }
+  rebuilt.push(lines.slice(cursor).join('\n'));
+  return `${rebuilt.join('\n').replace(/\n{4,}/g, '\n\n\n').trim()}\n`;
+}
+
+function postProcessArticle(article, context) {
+  let output = ensureOpeningWeatherSection(article, context);
+  output = repairPlaceholderRouteSections(output, context);
+  output = dedupeArticleRouteBlocks(output, context).article;
+  output = ensureOpeningWeatherSection(output, context);
+  return output;
+}
+
 function dedupeArticleRouteBlocks(article, context) {
   clearArticleDedupeUsage(context);
   const body = String(article || '');
@@ -1076,7 +1180,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
     writingContext,
     candidates,
   );
-  let resolvedArticle = dedupeArticleRouteBlocks(finalArticle, writingContext).article;
+  let resolvedArticle = postProcessArticle(finalArticle, writingContext);
   let validation = validateGeneratedArticle(resolvedArticle, writingContext);
 
   const repairAttempts = Math.max(0, Number(options.repairAttempts ?? DEFAULT_REPAIR_ATTEMPTS));
@@ -1093,7 +1197,7 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
       writingContext,
       [resolvedArticle, ...candidates],
     );
-    resolvedArticle = dedupeArticleRouteBlocks(resolvedArticle, writingContext).article;
+    resolvedArticle = postProcessArticle(resolvedArticle, writingContext);
     fs.writeFileSync(finalPath, resolvedArticle, 'utf8');
     validation = validateGeneratedArticle(resolvedArticle, writingContext);
   }
