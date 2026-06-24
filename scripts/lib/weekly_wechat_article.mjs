@@ -130,7 +130,7 @@ const PREFERENCE_GROUPS = [
     id: 'mountain_water_cooling',
     label: '山水清凉',
     description: '更符合夏季常识的清凉线，比如山水、漂流、森林、亲水。',
-    matches: (_tour, meta) => meta.hasCoolingSignals,
+    matches: (_tour, meta) => meta.hasCoolingSignals && !meta.hasHotSpringOnlySignals,
   },
   {
     id: 'weekend_nearby',
@@ -313,14 +313,19 @@ function getTravelWindowDates(tour, runDate, endDate) {
 
 function buildTourMeta(tour, destination) {
   const blob = textBlob(tour);
+  const hasCoolingSignals =
+    containsAny(blob, SUMMER_COOLING_KEYWORDS) || containsAny(blob, WATER_AND_MOUNTAIN_KEYWORDS);
+  const hasHotSpringSignals = containsAny(blob, HOT_SPRING_KEYWORDS);
+  const hasResortSignals = containsAny(blob, RESORT_KEYWORDS);
   return {
     text: blob,
     destination,
     isNearby: DOMESTIC_NEARBY_DESTINATIONS.has(destination),
     isFamilyFriendly: containsAny(blob, FAMILY_KEYWORDS),
-    hasCoolingSignals: containsAny(blob, SUMMER_COOLING_KEYWORDS) || containsAny(blob, WATER_AND_MOUNTAIN_KEYWORDS),
-    hasHotSpringSignals: containsAny(blob, HOT_SPRING_KEYWORDS),
-    hasResortSignals: containsAny(blob, RESORT_KEYWORDS),
+    hasCoolingSignals,
+    hasHotSpringSignals,
+    hasResortSignals,
+    hasHotSpringOnlySignals: hasHotSpringSignals && !hasCoolingSignals,
     isRailFriendly: containsAny(`${tour.transportType || ''} ${blob}`, RAIL_KEYWORDS),
     hasFlowerSignals: containsAny(blob, FLOWER_KEYWORDS),
     hasRedLeafSignals: containsAny(blob, RED_LEAF_KEYWORDS),
@@ -1030,9 +1035,12 @@ export function buildWeeklyArticlePrompt(context) {
     `- 正文必须覆盖这些已入选线路标题：${selectedTourTitles}`,
     '- 正文使用 Markdown 图片语法配图，导语至少 1 张图，每条线路至少 1 张图，优先使用提供的“正文配图”URL。',
     '- 标题适合公众号，但不要夸张标题党。',
-    '- 推荐应该体现分组差异，比如亲子短途、周末近场、山水清凉、高铁轻出省、预算友好、轻松度假。',
+    '- 推荐应该体现分组差异，比如亲子短途、周末近场、真山水清凉、带泳池/温泉的休整线、高铁轻出省、预算友好、轻松度假。',
+    '- 山水清凉组优先写真山水、漂流、森林、峡谷、亲水、泳池等清凉体验，不要让纯温泉/酒店线挤占主位。',
+    '- 重点线路每条都要写得像能直接发的编辑推荐，不要只剩标题清单。',
+    '- 重点线路每条至少写 3 句有效文案：这周为什么值得去、适合谁、现场体验/节奏感、班期/价格/交通里的关键信息。',
     '- 重点线路每条写清楚：为什么这周值得看、适合谁、线路信息、提醒、查看行程链接。',
-    '- 重点线路的链接优先写成 Markdown 链接，例如 [查看行程](https://example.com)。',
+    '- 重点线路的链接优先写成 Markdown 链接，例如 [查看行程](https://example.com)。每条重点线路在“查看行程”后面单独留出一张“报名二维码”图片。',
     '- 不要解释线路命名，不要写“X可以理解为...”“别误会成...”这类做题式、自我辩解式句子。',
     '- 不要在正文里讨论你自己的判断过程，也不要写“之所以推荐是因为模型认为”。',
     '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达。',
@@ -1119,11 +1127,50 @@ export function enrichWeeklyArticleMedia(article, context, options = {}) {
     );
     const sectionEnd = nextSectionIndex >= 0 ? nextSectionIndex : lines.length;
     if (hasMarkdownImage(lines, sectionIndex + 1, sectionEnd)) return;
-    if (heroInserted && tourIndex === 0) return;
 
     const imageUrl = resolveArticleAssetUrl(tour.images?.[0] || '', websiteUrl);
-    if (!imageUrl) return;
-    lines.splice(sectionIndex + 1, 0, '', `![${tour.title}](${imageUrl})`, '');
+    const bookingUrl = String(tour.bookingUrl || '').trim();
+    const qrImageUrl = bookingUrl
+      ? `https://quickchart.io/qr?text=${encodeURIComponent(bookingUrl)}&size=320&margin=2`
+      : '';
+
+    const insertLines = [];
+    if (imageUrl) {
+      insertLines.push('', `![${tour.title}](${imageUrl})`, '');
+    }
+    if (qrImageUrl) {
+      insertLines.push(`[查看行程](${bookingUrl})`, '', `![${tour.title} 报名二维码](${qrImageUrl})`, '');
+    }
+    if (insertLines.length === 0) return;
+    lines.splice(sectionIndex + 1, 0, ...insertLines);
+  });
+
+  context.selectedTours.forEach((tour) => {
+    const bookingUrl = String(tour.bookingUrl || '').trim();
+    if (!bookingUrl) return;
+    const sectionIndex = lines.findIndex(
+      (line) => /^##\s+/.test(line.trim()) && articleMentionsTourTitle(line, tour.title),
+    );
+    if (sectionIndex < 0) return;
+    const nextSectionIndex = lines.findIndex(
+      (line, index) => index > sectionIndex && /^##\s+/.test(line.trim()),
+    );
+    const sectionEnd = nextSectionIndex >= 0 ? nextSectionIndex : lines.length;
+
+    const sectionLines = lines.slice(sectionIndex, sectionEnd);
+    const hasBookingLink = sectionLines.some((line) => line.includes(bookingUrl) || /\[查看行程\]\(/.test(line));
+    const hasQrImage = sectionLines.some((line) => line.includes('报名二维码') || line.includes('二维码]('));
+    if (hasBookingLink && hasQrImage) return;
+
+    const trailingInsertLines = [];
+    if (!hasBookingLink) {
+      trailingInsertLines.push('', `[查看行程](${bookingUrl})`);
+    }
+    if (!hasQrImage) {
+      trailingInsertLines.push('', `![${tour.title} 报名二维码](https://quickchart.io/qr?text=${encodeURIComponent(bookingUrl)}&size=320&margin=2)`);
+    }
+    trailingInsertLines.push('');
+    lines.splice(sectionEnd, 0, ...trailingInsertLines);
   });
 
   return lines.join('\n').replace(/\n{4,}/g, '\n\n\n');

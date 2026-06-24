@@ -17,6 +17,7 @@ import sys
 import urllib.parse
 import urllib.request
 import uuid
+import re
 
 
 def request_json(url, method='GET', data=None, headers=None):
@@ -24,6 +25,11 @@ def request_json(url, method='GET', data=None, headers=None):
     with urllib.request.urlopen(request, timeout=30) as response:
         payload = response.read().decode('utf-8')
     return json.loads(payload)
+
+
+def request_bytes(url):
+    with urllib.request.urlopen(url, timeout=30) as response:
+        return response.read(), response.headers.get_content_type()
 
 
 def multipart_body(field_name, file_path):
@@ -39,6 +45,47 @@ def multipart_body(field_name, file_path):
     body.append(b'\r\n')
     body.append(('--%s--\r\n' % boundary).encode('utf-8'))
     return boundary, b''.join(body)
+
+
+def multipart_bytes(field_name, file_name, file_bytes, mime_type):
+    boundary = '----CodexBoundary%s' % uuid.uuid4().hex
+    body = []
+    body.append(('--%s\r\n' % boundary).encode('utf-8'))
+    body.append(('Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (field_name, file_name)).encode('utf-8'))
+    body.append(('Content-Type: %s\r\n\r\n' % mime_type).encode('utf-8'))
+    body.append(file_bytes)
+    body.append(b'\r\n')
+    body.append(('--%s--\r\n' % boundary).encode('utf-8'))
+    return boundary, b''.join(body)
+
+
+def upload_inline_image(access_token, image_url):
+    image_bytes, mime_type = request_bytes(image_url)
+    extension = mimetypes.guess_extension(mime_type or 'image/jpeg') or '.jpg'
+    upload_url = 'https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=%s' % urllib.parse.quote(access_token)
+    boundary, body = multipart_bytes('media', 'inline%s' % extension, image_bytes, mime_type or 'image/jpeg')
+    data = request_json(
+        upload_url,
+        method='POST',
+        data=body,
+        headers={'Content-Type': 'multipart/form-data; boundary=%s' % boundary},
+    )
+    uploaded_url = data.get('url')
+    if not uploaded_url:
+        raise RuntimeError('inline image url missing: %s' % json.dumps(data, ensure_ascii=False))
+    return uploaded_url
+
+
+def replace_inline_images(access_token, html):
+    image_urls = re.findall(r'<img\s+[^>]*src="(https?://[^"]+)"[^>]*>', html, flags=re.IGNORECASE)
+    replacements = {}
+    for original_url in image_urls:
+      if original_url in replacements:
+          continue
+      replacements[original_url] = upload_inline_image(access_token, original_url)
+    for original_url, uploaded_url in replacements.items():
+        html = html.replace(original_url, uploaded_url)
+    return html, replacements
 
 
 def main():
@@ -69,6 +116,7 @@ def main():
         raise RuntimeError('media_id missing: %s' % json.dumps(media_data, ensure_ascii=False))
 
     html = pathlib.Path(bundle['htmlPath']).read_text(encoding='utf-8')
+    html, uploaded_images = replace_inline_images(access_token, html)
     payload = {
         'articles': [
             {
@@ -100,6 +148,7 @@ def main():
         'mediaId': media_id_result,
         'thumbMediaId': media_id,
         'title': bundle['title'],
+        'inlineImageCount': len(uploaded_images),
     }
     result_path = bundle_path.parent / 'publish-result.json'
     result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')

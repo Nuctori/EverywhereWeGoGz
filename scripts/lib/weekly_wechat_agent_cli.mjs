@@ -106,7 +106,7 @@ function deriveArticleSummary(article) {
   return '';
 }
 
-function ensureArticleFrontmatter(article, context, candidateArticles = []) {
+export function ensureArticleFrontmatter(article, context, candidateArticles = []) {
   const existing = parseFrontmatterBlock(article);
   const candidateFrontmatters = candidateArticles
     .map((item) => parseFrontmatterBlock(item))

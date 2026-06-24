@@ -462,34 +462,8 @@ export function injectQrFallbackIntoMarkdown(markdown, options = {}) {
   const frontmatterMatch = markdown.match(/^---\n[\s\S]*?\n---\n?/);
   const frontmatterBlock = frontmatterMatch ? frontmatterMatch[0] : '';
   const { body } = parseFrontmatter(markdown);
-  const fallbackLabel = options.fallbackLabel || '微信内如果外链无法直接打开，可在文末扫码继续查看：';
   const cleanedBody = stripLeadingTitleHeading(body);
-  const entries = collectExternalLinkEntries(cleanedBody, options);
-
-  if (entries.length === 0) {
-    return buildMarkdownWithFrontmatter(frontmatterBlock, cleanedBody);
-  }
-
-  const appendixLines = [
-    cleanedBody,
-    '',
-    '---',
-    '',
-    '## 行程链接与二维码',
-    '',
-    fallbackLabel,
-    '',
-  ];
-
-  for (const entry of entries) {
-    appendixLines.push(`### ${entry.label}`);
-    appendixLines.push(`[${entry.actionLabel}](${entry.url})`);
-    appendixLines.push('');
-    appendixLines.push(`![${entry.label} 二维码](${buildQrFallbackUrl(entry.url)})`);
-    appendixLines.push('');
-  }
-
-  return buildMarkdownWithFrontmatter(frontmatterBlock, appendixLines.join('\n').replace(/\n{4,}/g, '\n\n\n'));
+  return buildMarkdownWithFrontmatter(frontmatterBlock, cleanedBody);
 }
 
 export async function uploadInlineImagesForHtml(accessToken, html) {

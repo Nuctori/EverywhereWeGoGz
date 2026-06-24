@@ -46,17 +46,17 @@ assert.ok(html.includes('<div style="margin:18px 0 20px;text-align:center;"><img
 const markdownWithQr = injectQrFallbackIntoMarkdown(markdown, {
   sourceUrl: 'https://nuctori.github.io/EverywhereWeGoGz/',
 });
-assert.ok(markdownWithQr.includes('## 行程链接与二维码'));
-assert.ok(markdownWithQr.includes('微信内如果外链无法直接打开，可在文末扫码继续查看：'));
-assert.ok(markdownWithQr.includes('![清远峡谷漂流2天 二维码](') || markdownWithQr.includes('![阅读原文 二维码]('));
+assert.ok(!markdownWithQr.includes('## 行程链接与二维码'));
+assert.ok(!markdownWithQr.includes('微信内如果外链无法直接打开，可在文末扫码继续查看：'));
+assert.ok(!markdownWithQr.includes('二维码]('));
 assert.ok(buildQrFallbackUrl('https://example.com/qingyuan').includes('quickchart.io/qr'));
 assert.ok(!markdownWithQr.includes('> 微信内打开外链不稳定'));
 assert.ok(!markdownWithQr.includes('![线路二维码]('));
 assert.ok(!markdownWithQr.includes('https://nuctori.github.io/EverywhereWeGoGz/ 二维码'));
 
 const htmlWithQr = markdownToHtml(parseFrontmatter(markdownWithQr).body);
-assert.ok(htmlWithQr.includes('行程链接与二维码'));
-assert.ok(htmlWithQr.includes('<img src="https://quickchart.io/qr'));
+assert.ok(!htmlWithQr.includes('行程链接与二维码'));
+assert.ok(!htmlWithQr.includes('<img src="https://quickchart.io/qr'));
 assert.ok(!htmlWithQr.includes('&gt; 微信内'));
 assert.ok(!htmlWithQr.includes('https://nuctori.github.io/EverywhereWeGoGz/ 二维码'));
 

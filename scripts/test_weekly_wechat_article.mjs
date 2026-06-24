@@ -191,12 +191,28 @@ assert.ok(
 );
 assert.ok(
   enriched.includes(
+    '![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?text=https%3A%2F%2Fexample.com%2Fqingyuan&size=320&margin=2)',
+  ),
+);
+assert.ok(enriched.includes('[查看行程](https://example.com/qingyuan)'));
+assert.ok(
+  enriched.includes(
     '![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)',
   ),
 );
 assert.ok(
   enriched.includes(
+    '![Hezhou West Creek 3D (Yuequanju + 4 Meals) 报名二维码](https://quickchart.io/qr?text=https%3A%2F%2Fexample.com%2Fhezhou&size=320&margin=2)',
+  ),
+);
+assert.ok(
+  enriched.includes(
     '![Hunan High-Speed Rail 4D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hunan.webp)',
+  ),
+);
+assert.ok(
+  enriched.includes(
+    '![Hunan High-Speed Rail 4D 报名二维码](https://quickchart.io/qr?text=https%3A%2F%2Fexample.com%2Fhunan&size=320&margin=2)',
   ),
 );
 
@@ -235,6 +251,11 @@ const enrichedLooseTitles = enrichWeeklyArticleMedia(articleWithLooseTitles, con
 assert.ok(
   enrichedLooseTitles.includes(
     '![Hunan High-Speed Rail 4D](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hunan.webp)',
+  ),
+);
+assert.ok(
+  enrichedLooseTitles.includes(
+    '![Qingyuan Gorge Rafting 2D 报名二维码](https://quickchart.io/qr?text=https%3A%2F%2Fexample.com%2Fqingyuan&size=320&margin=2)',
   ),
 );
 

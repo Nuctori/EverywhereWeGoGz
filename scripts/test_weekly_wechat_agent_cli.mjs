@@ -2,10 +2,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  ensureArticleFrontmatter,
   extractAiderReplyFromHistory,
   generateWeeklyArticleWithAgentCli,
   normalizeAiderModel,
 } from './lib/weekly_wechat_agent_cli.mjs';
+import { enrichWeeklyArticleMedia, getDefaultWebsiteUrl } from './lib/weekly_wechat_article.mjs';
 
 const rootDir = process.cwd();
 const outDir = path.join(rootDir, 'weekly-wechat-posts', '2099-02-02-agent-test');
@@ -176,6 +178,12 @@ assert.ok(fs.existsSync(path.join(outDir, 'article.raw.md')));
 assert.ok(result.article.includes('本周天气与出游节奏'));
 assert.ok(result.article.startsWith('---\n'));
 assert.ok(result.article.includes('title: "版本A：广州本周出游清单"') || result.article.includes('title: "版本B：这周出发会更舒服的25条线"'));
+const enrichedArticle = enrichWeeklyArticleMedia(
+  ensureArticleFrontmatter(result.article, result.context, []),
+  result.context,
+  { websiteUrl: getDefaultWebsiteUrl() },
+);
+assert.ok(enrichedArticle.includes('Qingyuan Gorge Rafting 2D'));
 
 assert.equal(normalizeAiderModel('deepseek-v4-flash'), 'deepseek/deepseek-chat');
 assert.equal(normalizeAiderModel('deepseek-reasoner'), 'deepseek/deepseek-reasoner');
