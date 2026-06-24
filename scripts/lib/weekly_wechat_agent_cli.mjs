@@ -59,7 +59,8 @@ function stripMarkdownFence(text) {
 }
 
 function parseJsonResponse(text) {
-  return JSON.parse(stripMarkdownFence(text));
+  const stripped = stripMarkdownFence(text).replace(/^\s*json\s*\n/i, '').trim();
+  return JSON.parse(stripped);
 }
 
 function parseFrontmatterBlock(article) {
@@ -764,6 +765,7 @@ export {
   extractAiderReplyFromHistory,
   normalizeResearch,
   normalizeAiderModel,
+  parseJsonResponse,
 };
 
 if (import.meta.url === `file://${process.argv[1]}`) {

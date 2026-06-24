@@ -7,6 +7,7 @@ import {
   generateWeeklyArticleWithAgentCli,
   normalizeResearch,
   normalizeAiderModel,
+  parseJsonResponse,
 } from './lib/weekly_wechat_agent_cli.mjs';
 import {
   buildTourDetailUrl,
@@ -219,6 +220,7 @@ assert.ok(enrichedArticle.includes(buildTourDetailUrl({ id: 'tour-qingyuan' }, g
 
 assert.equal(normalizeAiderModel('deepseek-v4-flash'), 'deepseek/deepseek-chat');
 assert.equal(normalizeAiderModel('deepseek-reasoner'), 'deepseek/deepseek-reasoner');
+assert.deepEqual(parseJsonResponse('json\n{"ok":true}\n'), { ok: true });
 
 const dedupeContext = {
   candidateTours: [
