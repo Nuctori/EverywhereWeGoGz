@@ -241,7 +241,7 @@ const result = await generateWeeklyArticleWithAgentCli(rootDir, {
 
 assert.equal(result.context.generationMode, 'aider-deepseek-multi-pass');
 assert.equal(writerCalls, 2);
-assert.equal(repairCalls, 1);
+assert.equal(repairCalls, 0);
 assert.ok(result.validation.ok);
 assert.ok(fs.existsSync(path.join(outDir, 'agent-research.json')));
 assert.ok(fs.existsSync(path.join(outDir, 'candidate-1.md')));
@@ -569,6 +569,7 @@ assert.ok(!generatedResult.article.includes('同第2条'));
 assert.ok(!generatedResult.article.includes('同第3条'));
 assert.equal((generatedResult.article.match(/^---$/gm) || []).length, 2);
 assert.ok(!generatedResult.article.includes('# 修订后完整 Markdown 成稿'));
+assert.ok(!generatedResult.article.includes('适合预算有限'));
 assert.ok(generatedResult.validation.ok);
 
 assert.equal(

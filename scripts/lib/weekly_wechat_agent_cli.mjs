@@ -22,6 +22,12 @@ const MAX_FAMILY_REPEAT_PER_RESEARCH = 1;
 const MAX_DESTINATION_REPEAT_PER_RESEARCH = 2;
 const DEFAULT_REPAIR_ATTEMPTS = 1;
 const RESEARCH_EXCLUSION_HINTS = ['降级', '季节已过', '无清凉', '无季节红利', '非本周主推', '夏季闷热'];
+const FORBIDDEN_PHRASE_REPLACEMENTS = [
+  { pattern: /适合预算有限又想出省的人/g, replacement: '对想少请假、又想轻松走远一点的人很友好' },
+  { pattern: /适合预算有限的人/g, replacement: '对想把预算花在刀刃上的人更友好' },
+  { pattern: /适合预算有限/g, replacement: '对想把预算花得更顺手' },
+  { pattern: /作为补充/g, replacement: '顺手也值得看看' },
+];
 const TOUR_FAMILY_PATTERNS = [
   { id: 'detian', keywords: ['德天', '通灵', '明仕', '靖西', '鹅泉', '崇左', '古龙山'] },
   { id: 'weizhou', keywords: ['涠洲', '北海', '鳄鱼山', '石螺口', '银滩'] },
@@ -137,6 +143,14 @@ function stripDuplicateFrontmatterAndScaffold(article) {
   const primaryFrontmatter = beforeLast.startsWith('---') ? first[0].trim() : '';
   const normalizedBody = [primaryFrontmatter, afterLast].filter(Boolean).join('\n\n').trim();
   return `${normalizedBody}\n`;
+}
+
+function sanitizeForbiddenEditorialPhrases(article) {
+  let body = String(article || '');
+  for (const { pattern, replacement } of FORBIDDEN_PHRASE_REPLACEMENTS) {
+    body = body.replace(pattern, replacement);
+  }
+  return body;
 }
 
 function findUnusedTourForArticle(context, usedTourIds = new Set()) {
@@ -423,6 +437,7 @@ function postProcessArticle(article, context) {
   output = dedupeArticleRouteBlocks(output, context).article;
   output = ensureOpeningWeatherSection(output, context);
   output = stripDuplicateFrontmatterAndScaffold(output);
+  output = sanitizeForbiddenEditorialPhrases(output);
   return output;
 }
 
