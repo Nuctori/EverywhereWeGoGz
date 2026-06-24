@@ -9,64 +9,64 @@ import {
 
 const tours = [
   {
-    id: 'tour-summer-nearby',
-    title: '清远峡谷漂流2天',
-    source: '测试源',
-    destination: '广东',
+    id: 'tour-qingyuan',
+    title: 'Qingyuan Gorge Rafting 2D (Private Pool)',
+    source: 'fixture',
+    destination: 'Guangdong',
     duration: 2,
     price: 699,
-    priceUnit: '元/人',
+    priceUnit: 'per person',
     departureDate: '2026-06-26',
     departureDates: ['2026-06-26', '2026-06-28'],
-    transportType: '大巴',
-    accommodationLevel: '舒适型',
-    highlights: ['漂流', '峡谷', '清凉'],
-    tags: ['漂流', '避暑'],
-    suitableFor: ['亲子'],
+    transportType: 'bus',
+    accommodationLevel: 'comfort',
+    highlights: ['rafting', 'gorge', 'cool escape'],
+    tags: ['summer', 'family'],
+    suitableFor: ['family'],
     images: ['/data/image-cache/qingyuan.webp'],
     bookingUrl: 'https://example.com/qingyuan',
-    theme: '自然风光',
+    theme: 'nature',
     isHot: true,
     dataQuality: { availabilityConfidence: 'high' },
   },
   {
-    id: 'tour-long-haul',
-    title: '欧洲深度12天',
-    source: '测试源',
-    destination: '其他',
+    id: 'tour-europe',
+    title: 'Europe Deep Tour 12D',
+    source: 'fixture',
+    destination: 'Europe',
     duration: 12,
     price: 19999,
-    priceUnit: '元/人',
+    priceUnit: 'per person',
     departureDate: '2026-06-30',
     departureDates: ['2026-06-30'],
-    transportType: '飞机',
-    accommodationLevel: '豪华型',
-    highlights: ['博物馆'],
-    tags: ['文化'],
-    suitableFor: ['情侣'],
+    transportType: 'flight',
+    accommodationLevel: 'luxury',
+    highlights: ['museum'],
+    tags: ['culture'],
+    suitableFor: ['couple'],
     images: ['/data/image-cache/europe.webp'],
     bookingUrl: 'https://example.com/europe',
-    theme: '人文',
+    theme: 'culture',
     dataQuality: { availabilityConfidence: 'high' },
   },
   {
-    id: 'tour-guizhou',
-    title: '贵州山水避暑4天',
-    source: '测试源',
-    destination: '贵州',
-    duration: 4,
-    price: 2399,
-    priceUnit: '元/人',
+    id: 'tour-hezhou',
+    title: 'Hezhou West Creek 3D (Yuequanju + 4 Meals)',
+    source: 'fixture',
+    destination: 'Guangxi',
+    duration: 3,
+    price: 799,
+    priceUnit: 'per person',
     departureDate: '2026-06-29',
     departureDates: ['2026-06-29', '2026-07-01'],
-    transportType: '高铁',
-    accommodationLevel: '舒适型',
-    highlights: ['山水', '避暑'],
-    tags: ['避暑', '亲子'],
-    suitableFor: ['亲子', '朋友'],
-    images: ['/data/image-cache/guizhou.webp'],
-    bookingUrl: 'https://example.com/guizhou',
-    theme: '自然风光',
+    transportType: 'bus',
+    accommodationLevel: 'comfort',
+    highlights: ['mountain spring', 'forest', 'local food'],
+    tags: ['cool escape', 'family'],
+    suitableFor: ['family', 'friends'],
+    images: ['/data/image-cache/hezhou.webp'],
+    bookingUrl: 'https://example.com/hezhou',
+    theme: 'nature',
     isHot: true,
     dataQuality: { availabilityConfidence: 'high' },
   },
@@ -80,34 +80,34 @@ const context = buildWeeklyArticleContext(tours, {
 });
 
 assert.equal(context.selectedTours.length, 2);
-assert.equal(context.selectedTours[0].id, 'tour-summer-nearby');
-assert.ok(context.selectedTours.some((tour) => tour.id === 'tour-guizhou'));
-assert.ok(!context.selectedTours.some((tour) => tour.id === 'tour-long-haul'));
-assert.equal(context.season, '夏季');
+assert.equal(context.selectedTours[0].id, 'tour-qingyuan');
+assert.ok(context.selectedTours.some((tour) => tour.id === 'tour-hezhou'));
+assert.ok(!context.selectedTours.some((tour) => tour.id === 'tour-europe'));
 
 const prompt = buildWeeklyArticlePrompt(context);
 assert.ok(prompt.includes('frontmatter'));
-assert.ok(prompt.includes('清远峡谷漂流2天'));
-assert.ok(prompt.includes('贵州山水避暑4天'));
-assert.ok(prompt.includes('阅读原文链接固定指向'));
-assert.ok(prompt.includes('正文配图'));
+assert.ok(prompt.includes('Qingyuan Gorge Rafting 2D (Private Pool)'));
+assert.ok(prompt.includes('Hezhou West Creek 3D (Yuequanju + 4 Meals)'));
+assert.ok(prompt.includes(getDefaultWebsiteUrl()));
+assert.ok(prompt.includes('https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp'));
+assert.ok(prompt.includes('https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp'));
 
 const article = `---
-title: "本周适合出发的两条线路"
-summary: "按近期班期整理的短线与避暑线。"
-author: "老广旅行"
+title: "This Week's Easy Summer Getaways"
+summary: "Two nearby tours with cooler mountain-and-water plans."
+author: "Lao Guang Travel"
 cover: "/data/image-cache/qingyuan.webp"
 ---
 
-# 本周适合出发的两条线路
+# This Week's Easy Summer Getaways
 
-## 清远峡谷漂流2天
+## Qingyuan Gorge Rafting 2D (Private Pool)
 
-这条线路更适合夏天想找清凉感的人。
+This one fits families who want a short cooling break.
 
-## 贵州山水避暑4天
+## Hezhou West Creek 3D (Yuequanju + 4 Meals)
 
-这条线路更适合想找山水避暑的人。
+This one works for readers who want mountain water and an easier hot-spring stay.
 `;
 
 const validation = validateGeneratedArticle(article, context);
@@ -116,7 +116,33 @@ assert.equal(validation.ok, true);
 const enriched = enrichWeeklyArticleMedia(article, context, {
   websiteUrl: getDefaultWebsiteUrl(),
 });
-assert.ok(enriched.includes('![清远峡谷漂流2天](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)'));
-assert.ok(enriched.includes('![贵州山水避暑4天](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/guizhou.webp)'));
+assert.ok(enriched.includes('![Qingyuan Gorge Rafting 2D (Private Pool)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)'));
+assert.ok(enriched.includes('![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)'));
+
+const articleWithLooseTitles = `---
+title: "This Week's Easy Summer Getaways"
+summary: "Two nearby tours with cooler mountain-and-water plans."
+author: "Lao Guang Travel"
+cover: "/data/image-cache/qingyuan.webp"
+---
+
+# This Week's Easy Summer Getaways
+
+## 1. Qingyuan Gorge Rafting 2D - Private Pool Weekend
+
+This one fits families who want a short cooling break.
+
+## 2. Hezhou West Creek 3D - Yuequanju 4 Meals Mountain Spring Break
+
+This one works for readers who want mountain water and an easier hot-spring stay.
+`;
+
+const looseValidation = validateGeneratedArticle(articleWithLooseTitles, context);
+assert.equal(looseValidation.ok, true);
+
+const enrichedLooseTitles = enrichWeeklyArticleMedia(articleWithLooseTitles, context, {
+  websiteUrl: getDefaultWebsiteUrl(),
+});
+assert.ok(enrichedLooseTitles.includes('![Hezhou West Creek 3D (Yuequanju + 4 Meals)](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/hezhou.webp)'));
 
 console.log('weekly wechat article tests passed');

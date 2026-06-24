@@ -457,6 +457,22 @@ function hasMarkdownImage(lines, startIndex, endIndex) {
   return false;
 }
 
+function normalizeTourTitleForMatch(value) {
+  return String(value || '')
+    .normalize('NFKC')
+    .replace(/[`~!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?~！@#￥%……&*（）—+=【】；：‘’“”《》，。？、\s]/g, '')
+    .replace(/[0-9]+\uFE0F?\u20E3/g, '')
+    .replace(/[^\p{L}\p{N}]/gu, '')
+    .toLowerCase();
+}
+
+function articleMentionsTourTitle(article, title) {
+  const normalizedArticle = normalizeTourTitleForMatch(article);
+  const normalizedTitle = normalizeTourTitleForMatch(title);
+  if (!normalizedArticle || !normalizedTitle) return false;
+  return normalizedArticle.includes(normalizedTitle);
+}
+
 export function enrichWeeklyArticleMedia(article, context, options = {}) {
   const websiteUrl = options.websiteUrl || DEFAULT_WEBSITE_URL;
   const lines = article.replace(/\r\n/g, '\n').split('\n');
@@ -475,7 +491,9 @@ export function enrichWeeklyArticleMedia(article, context, options = {}) {
   }
 
   context.selectedTours.forEach((tour, tourIndex) => {
-    const sectionIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()) && line.includes(tour.title));
+    const sectionIndex = lines.findIndex(
+      (line) => /^##\s+/.test(line.trim()) && articleMentionsTourTitle(line, tour.title),
+    );
     if (sectionIndex < 0) return;
 
     const nextSectionIndex = lines.findIndex(
@@ -590,7 +608,7 @@ export function validateGeneratedArticle(article, context) {
     if (article.includes(phrase)) issues.push(`Contains forbidden phrase: ${phrase}`);
   }
 
-  const mentionedSelectedTours = context.selectedTours.filter((tour) => article.includes(tour.title)).length;
+  const mentionedSelectedTours = context.selectedTours.filter((tour) => articleMentionsTourTitle(article, tour.title)).length;
   if (mentionedSelectedTours < Math.min(3, context.selectedTours.length)) {
     issues.push('Article did not mention enough selected tours by title.');
   }
