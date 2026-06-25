@@ -175,31 +175,31 @@ const ARTICLE_BUCKET_ORDER = [
 const ARTICLE_BUCKET_META = {
   山水亲水: {
     title: '山水亲水',
-    intro: '这组优先看真山真水、树荫、溪谷、漂流和能直接把体感降下来的线路，更对这周想认真躲闷热的人胃口。',
+    intro: '这组最吃香的是能把体感直接拉下来的真山真水，树荫、溪谷、瀑布和亲水玩法都在，适合这周想把闷热感实打实卸掉的人。',
   },
   海边海岛: {
     title: '海边海岛',
-    intro: '如果你更想靠海风换气、把节奏放松一点，这一组更像真正的放假，适合想把周末过出空旷感的人。',
+    intro: '这组把海风、开阔和松弛感放在第一位，适合想借两天把节奏放慢、顺手把心情吹开的人。',
   },
   酒店泡池: {
     title: '住下来慢慢玩',
-    intro: '不想赶景点，就把重点放在住得舒服、泳池水世界够能打、白天晚上都能慢下来这一类线路上。',
+    intro: '如果你这周更想舒服地歇一歇，这组就看住得好不好、池子够不够松弛、白天晚上能不能把人留在度假感里。',
   },
   亲子玩乐: {
     title: '亲子玩乐',
-    intro: '这一组更偏向大人小孩都能消磨时间的玩法，重点是互动空间够多，路上不至于太折腾。',
+    intro: '这组更适合带着家人慢慢玩，重点不是赶多少景点，而是大人小孩都能玩得住、节奏也不会太折腾。',
   },
   美食人文: {
     title: '美食人文',
-    intro: '如果你这周更想轻松走走、顺手吃点当地拿手菜，这组会比纯暴晒式打卡更舒服，也更容易约人同行。',
+    intro: '想把这周过得更有滋味，就看这组。吃得到地方味道，也能顺手把城市气质和慢节奏一起带回来。',
   },
   周末轻出发: {
     title: '周末轻出发',
-    intro: '时间卡得紧也没关系，这一组更适合说走就走，出发成本低，安排起来不费劲。',
+    intro: '时间卡得紧的时候，这组最方便。距离不远、准备不重，适合临时起意也能顺手出发。',
   },
   长线风景: {
     title: '请假也值得的长线',
-    intro: '愿意多请一两天假，就把风景密度和季节感拉满，这一组更适合去一个现在去才真正有味道的地方。',
+    intro: '愿意多请一两天假，就把风景密度拉满。真正出彩的往往不是远，而是现在去刚好对味。',
   },
 };
 
@@ -908,6 +908,7 @@ export function buildWeeklyArticlePrompt(context) {
     '- 标题适合公众号，但不要夸张标题党，不要像营销口号',
     '- weatherLead 要把未来7天体感、季节节奏、节假日/时令玩法判断写在前头，但只能做保守表达，不要写成确定性天气预报',
     '- intro 是开场导语，要像老广熟门熟路地给朋友出主意，不要像答题或思维链展示',
+    '- groupIntros 要按“公众号分大类”给每个分组都写一段 40 到 80 字的导语，语气要像种草，不要像解释栏目，也不要重复“这组/这一组/如果你更想”这种开场',
     '- 每条线路只写三个字段：recommendationTitle、reason、reminder',
     '- 程序会按“公众号分大类”自动分组排版，所以你不要再额外发明新的栏目名，只把每条线路写得具体、有种草感',
     '- reason 必须 55 字以上，要讲清为什么当下去会更舒服或更值得，不要空泛，不要写“推荐方向”“取舍”“可以理解为”这种解释腔',
@@ -928,6 +929,12 @@ export function buildWeeklyArticlePrompt(context) {
     '  "summary": "..." ,',
     '  "intro": "..." ,',
     '  "weatherLead": "..." ,',
+    '  "groupIntros": [',
+    '    {',
+    '      "bucket": "山水亲水",',
+    '      "intro": "..."',
+    '    }',
+    '  ]',
     '  "items": [',
     '    {',
     '      "id": "tour_xxx",',
@@ -1007,6 +1014,20 @@ function normalizeAiItemMap(payload, context) {
   });
 }
 
+function normalizeAiGroupIntroMap(payload) {
+  const groupIntros = new Map();
+  const rawItems = Array.isArray(payload?.groupIntros) ? payload.groupIntros : [];
+  for (const item of rawItems) {
+    if (!item || typeof item !== 'object') continue;
+    const bucket = String(item.bucket || '').trim();
+    if (!bucket) continue;
+    const intro = normalizeAiText(item.intro || '');
+    if (!intro) continue;
+    groupIntros.set(bucket, intro);
+  }
+  return groupIntros;
+}
+
 function buildFallbackIntro(context) {
   const advice = context.editorialContext.themeHints.join('、') || '近场清凉、山水与亲水玩法';
   return `这周广州和周边更适合挑有树荫、有水体、能把节奏放慢的线路来走。比起纯城市暴走，${advice}这一类行程更容易把闷热感卸下来；如果时间不多，住下来放松的酒店线也更适合周末接一口气。`;
@@ -1076,10 +1097,9 @@ function renderTourSection(tour, aiItem, index) {
     '',
     reason,
     '',
-    `- 适合谁：${suitabilityLabel(tour)}`,
-    `- 为什么当下去：${highlightLabel(tour)}`,
-    `- 行程信息：${durationLabel(tour)}｜${priceLabel(tour)}｜近期班期 ${departureHint || '以页面为准'}`,
-    `- 出发提醒：${reminder}`,
+    `适合：${suitabilityLabel(tour)}｜当下看点：${highlightLabel(tour)}`,
+    `行程：${durationLabel(tour)}｜${priceLabel(tour)}｜近期班期 ${departureHint || '以页面为准'}`,
+    `提醒：${reminder}`,
     '',
     '[查看行程](' + siteUrl + ')',
     '',
@@ -1105,6 +1125,7 @@ export function renderWeeklyArticle(context, aiPayload) {
 
   const intro = normalizeAiText(aiPayload.intro || buildFallbackIntro(context));
   const weatherLead = normalizeAiText(aiPayload.weatherLead || buildFallbackWeatherLead(context));
+  const aiGroupIntros = normalizeAiGroupIntroMap(aiPayload);
   const items = normalizeAiItemMap(aiPayload, context);
   const itemsById = new Map(items.map((item) => [item.id, item]));
   const groupedSections = [];
@@ -1117,7 +1138,7 @@ export function renderWeeklyArticle(context, aiPayload) {
     }
     groupedSections.push(`### ${group.title}`);
     groupedSections.push('');
-    groupedSections.push(group.intro);
+    groupedSections.push(normalizeAiText(aiGroupIntros.get(group.bucket) || group.intro));
     groupedSections.push('');
     for (const tour of group.tours) {
       groupedSections.push(renderTourSection(tour, itemsById.get(tour.id) || {}, recommendationIndex));
@@ -1235,6 +1256,9 @@ export function validateGeneratedArticle(article, context) {
   }
   if ((article.match(/^###\s+/gm) || []).length === 0) {
     issues.push('Article is missing grouped recommendation headings.');
+  }
+  if ((article.match(/^    /gm) || []).length > 0) {
+    issues.push('Article should not contain indentation artifacts.');
   }
 
   const mentionedSelectedTours = context.selectedTours.filter((tour) => article.includes(tour.title)).length;

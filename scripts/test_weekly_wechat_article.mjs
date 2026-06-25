@@ -284,6 +284,12 @@ const article = renderWeeklyArticle(context, {
   summary: '按近期班期整理的短线与避暑线。',
   intro: '这一周更适合挑有清凉体感、路上不折腾的短线来走。',
   weatherLead: '华南夏季常见闷热和阵雨，瀑布、山水、森林一类线路会比纯城市逛吃更舒服。',
+  groupIntros: [
+    {
+      bucket: '山水亲水',
+      intro: '这一组看的是能把人一下子从闷热里拎出来的水声和树荫，适合想把周末真的过清爽一点的人。',
+    },
+  ],
   items: [
     {
       id: 'tour-summer-nearby',
@@ -306,6 +312,7 @@ assert.ok(article.includes(`author: "${getDefaultAuthor()}"`));
 assert.ok(article.includes('## 本周推荐'));
 assert.ok(article.includes('### 山水亲水'));
 assert.ok(article.includes('#### 1. 清远峡谷漂流2天'));
+assert.ok(article.includes('这一组看的是能把人一下子从闷热里拎出来的水声和树荫'));
 assert.ok(article.includes('扫码查看详情'));
 assert.ok(article.includes('qr/tour-summer-nearby.png'));
 assert.ok((article.match(/^---$/gm) || []).length >= context.selectedTours.length + 2);
@@ -315,6 +322,10 @@ const groupedArticle = renderWeeklyArticle(balancedContext, {
   summary: '按玩法分组整理的样例文章。',
   intro: '这周更适合先按玩法挑方向，再看哪条线的班期和节奏最顺手。',
   weatherLead: '闷热和阵雨反复出现时，山水、海风、亲子玩水和住下来慢慢玩的线路更容易把体感拉回来。',
+  groupIntros: [
+    { bucket: '山水亲水', intro: '这组把山里和水边的清凉感都拉满了，适合现在就想往自然里躲一躲的人。' },
+    { bucket: '海边海岛', intro: '海风和开阔感是这组的主角，适合想把周末过得更松一点的人。' },
+  ],
   items: balancedContext.selectedTours.map((tour) => ({
     id: tour.id,
     recommendationTitle: tour.title,
