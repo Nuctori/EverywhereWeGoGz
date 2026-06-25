@@ -1102,10 +1102,6 @@ function renderTourSection(tour, aiItem, index) {
     `行程：${durationLabel(tour)}｜${priceLabel(tour)}｜近期班期 ${departureHint || '以页面为准'}`,
     `提醒：${reminder}`,
     '',
-    `查看行程：[老广去边度站内详情](${siteUrl})`,
-    `地址：[站内详情](${siteUrl})`,
-    '扫码查看详情',
-    '',
     `![${escapeMarkdown(tour.title)} 报名二维码](${qrPath})`,
   ]
     .filter(Boolean)
@@ -1163,7 +1159,7 @@ export function renderWeeklyArticle(context, aiPayload) {
     '',
     ...groupedSections,
     '',
-    '以上班期、价格和行程信息请以供应商页面实时展示为准，想看完整行程、图文详情和报名入口，直接点每条线路下方的“查看行程”或扫码进入老广去边度站内详情。',
+    '以上班期、价格和行程信息请以供应商页面实时展示为准，想看完整行程、图文详情和报名入口，直接扫码进入老广去边度站内详情。',
     '',
     '想持续看这类线路整理，点开公众号主页关注“老广去边度”。',
   ].join('\n');
@@ -1270,9 +1266,6 @@ export function validateGeneratedArticle(article, context) {
   for (const tour of context.selectedTours) {
     const siteUrl = getTourSiteUrl(tour.id);
     const qrPath = tour.qrPath || getTourQrRelativePath(tour.id);
-    if (!article.includes(siteUrl)) {
-      issues.push(`Missing site URL for ${tour.id}.`);
-    }
     if (!article.includes(qrPath)) {
       issues.push(`Missing QR path for ${tour.id}.`);
     }
@@ -1281,7 +1274,7 @@ export function validateGeneratedArticle(article, context) {
     }
   }
 
-  const qrCount = (article.match(/扫码查看详情/g) || []).length;
+  const qrCount = (article.match(/报名二维码/g) || []).length;
   if (qrCount < context.selectedTours.length) {
     issues.push('Not every selected tour rendered a QR block.');
   }

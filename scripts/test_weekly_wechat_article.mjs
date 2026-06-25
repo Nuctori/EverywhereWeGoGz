@@ -313,9 +313,6 @@ assert.ok(article.includes('## 本周推荐'));
 assert.ok(article.includes('### 山水亲水'));
 assert.ok(article.includes('#### 1. 清远峡谷漂流2天'));
 assert.ok(article.includes('这一组看的是能把人一下子从闷热里拎出来的水声和树荫'));
-assert.ok(article.includes('查看行程：[老广去边度站内详情]('));
-assert.ok(article.includes('地址：[站内详情]('));
-assert.ok(article.includes('扫码查看详情'));
 assert.ok(article.includes('![清远峡谷漂流2天 报名二维码](qr/tour-summer-nearby.png)'));
 assert.ok(article.includes('想持续看这类线路整理，点开公众号主页关注“老广去边度”。'));
 assert.ok((article.match(/^---$/gm) || []).length >= context.selectedTours.length + 2);
@@ -389,7 +386,7 @@ assert.ok(capturedRequest);
 const requestBody = JSON.parse(capturedRequest.init.body);
 assert.equal(requestBody.response_format.type, 'json_object');
 assert.equal(requestBody.max_tokens, 4096);
-assert.ok(generated.article.includes('扫码查看详情'));
+assert.ok(generated.article.includes('报名二维码'));
 
 console.log('weekly wechat article tests passed');
 
