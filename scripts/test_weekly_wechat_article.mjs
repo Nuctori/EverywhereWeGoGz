@@ -88,12 +88,191 @@ assert.equal(context.selectedTours[0].id, 'tour-summer-nearby');
 assert.equal(context.season, '夏季');
 assert.ok(new Set(context.selectedTours.map((tour) => tour.bucket)).size >= 1);
 assert.ok(context.selectedTours.every((tour) => tour.siteUrl.includes('source=wechat')));
+assert.ok(context.selectionDiagnostics.eligibleTours >= context.selectedTours.length);
+
+const balancedTours = [
+  {
+    id: 'hotel-a',
+    title: '金水台温泉2天（带池）',
+    source: '测试源',
+    destination: '广东',
+    duration: 2,
+    price: 299,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-26', '2026-06-27', '2026-06-28'],
+    transportType: '大巴',
+    accommodationLevel: '舒适型',
+    highlights: ['精品住宿', '泳池'],
+    tags: ['温泉', '带池'],
+    suitableFor: ['亲子', '情侣'],
+    images: ['/data/image-cache/hotel-a.webp'],
+    bookingUrl: 'https://example.com/hotel-a',
+    theme: '酒店度假',
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+  {
+    id: 'hotel-b',
+    title: '金水台温泉3天(食4餐）',
+    source: '测试源',
+    destination: '广东',
+    duration: 3,
+    price: 499,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-26', '2026-06-27'],
+    transportType: '大巴',
+    accommodationLevel: '舒适型',
+    highlights: ['精品住宿', '温泉'],
+    tags: ['温泉', '含餐'],
+    suitableFor: ['亲子', '情侣'],
+    images: ['/data/image-cache/hotel-b.webp'],
+    bookingUrl: 'https://example.com/hotel-b',
+    theme: '酒店度假',
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+  {
+    id: 'hotel-c',
+    title: '金水台温泉3天带池（食3餐）',
+    source: '测试源',
+    destination: '广东',
+    duration: 3,
+    price: 479,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-27'],
+    transportType: '大巴',
+    accommodationLevel: '舒适型',
+    highlights: ['精品住宿', '温泉'],
+    tags: ['温泉', '带池'],
+    suitableFor: ['亲子', '情侣'],
+    images: ['/data/image-cache/hotel-c.webp'],
+    bookingUrl: 'https://example.com/hotel-c',
+    theme: '酒店度假',
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+  {
+    id: 'mountain-a',
+    title: '紫云谷山水溯溪2天',
+    source: '测试源',
+    destination: '广东',
+    duration: 2,
+    price: 399,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-27', '2026-06-28'],
+    transportType: '大巴',
+    accommodationLevel: '舒适型',
+    highlights: ['山水', '溯溪'],
+    tags: ['避暑', '森林'],
+    suitableFor: ['朋友', '情侣'],
+    images: ['/data/image-cache/mountain-a.webp'],
+    bookingUrl: 'https://example.com/mountain-a',
+    theme: '自然风光',
+    isHot: true,
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+  {
+    id: 'sea-a',
+    title: '东山岛海边玩水4天',
+    source: '测试源',
+    destination: '福建',
+    duration: 4,
+    price: 1099,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-26', '2026-06-27'],
+    transportType: '动车',
+    accommodationLevel: '舒适型',
+    highlights: ['海边', '沙滩'],
+    tags: ['海风', '玩水'],
+    suitableFor: ['情侣', '朋友'],
+    images: ['/data/image-cache/sea-a.webp'],
+    bookingUrl: 'https://example.com/sea-a',
+    theme: '海岛度假',
+    isHot: true,
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+  {
+    id: 'food-a',
+    title: '中山江门美食2天(含餐)',
+    source: '测试源',
+    destination: '广东',
+    duration: 2,
+    price: 399,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-25', '2026-06-30'],
+    transportType: '大巴',
+    accommodationLevel: '舒适型',
+    highlights: ['美食', '早茶'],
+    tags: ['乳鸽', '陈皮'],
+    suitableFor: ['朋友', '长辈'],
+    images: ['/data/image-cache/food-a.webp'],
+    bookingUrl: 'https://example.com/food-a',
+    theme: '美食',
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+  {
+    id: 'family-a',
+    title: '长隆水上乐园2天',
+    source: '测试源',
+    destination: '广东',
+    duration: 2,
+    price: 699,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-26', '2026-06-27'],
+    transportType: '大巴',
+    accommodationLevel: '舒适型',
+    highlights: ['乐园', '玩水'],
+    tags: ['亲子', '暑假'],
+    suitableFor: ['亲子'],
+    images: ['/data/image-cache/family-a.webp'],
+    bookingUrl: 'https://example.com/family-a',
+    theme: '亲子',
+    isHot: true,
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+  {
+    id: 'long-a',
+    title: '云南香格里拉高铁6天',
+    source: '测试源',
+    destination: '云南',
+    duration: 6,
+    price: 2099,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-29'],
+    transportType: '高铁',
+    accommodationLevel: '舒适型',
+    highlights: ['高原', '风景'],
+    tags: ['秘境', '长线'],
+    suitableFor: ['朋友', '情侣'],
+    images: ['/data/image-cache/long-a.webp'],
+    bookingUrl: 'https://example.com/long-a',
+    theme: '自然风光',
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+];
+
+const balancedContext = buildWeeklyArticleContext(balancedTours, {
+  runDate: '2026-06-24',
+  windowDays: 14,
+  maxCandidates: 10,
+  maxArticleItems: 5,
+});
+
+assert.ok(new Set(balancedContext.candidateTours.map((tour) => tour.editorialScore)).size > 1);
+assert.ok(new Set(balancedContext.selectedTours.map((tour) => tour.bucket)).size >= 4);
+assert.ok(balancedContext.selectedTours.some((tour) => tour.bucket === '酒店泡池'));
+assert.ok(balancedContext.selectedTours.some((tour) => tour.bucket === '山水亲水'));
+assert.ok(balancedContext.selectedTours.some((tour) => tour.bucket === '海边海岛'));
+const routeFamilyCounts = balancedContext.selectedTours.reduce((result, tour) => {
+  result[tour.routeFamily] = (result[tour.routeFamily] || 0) + 1;
+  return result;
+}, {});
+assert.ok(Math.max(...Object.values(routeFamilyCounts)) <= 1);
 
 const prompt = buildWeeklyArticlePrompt(context);
 assert.ok(prompt.includes('"weatherLead"'));
 assert.ok(prompt.includes('清远峡谷漂流2天'));
 assert.ok(prompt.includes('tour-summer-nearby'));
 assert.ok(prompt.includes('二维码文件'));
+assert.ok(prompt.includes('线路家族'));
+assert.ok(prompt.includes('体验关键词'));
 
 const qrOutDir = path.join(process.cwd(), 'tmp', 'weekly-wechat-article-qr-test');
 fs.mkdirSync(qrOutDir, { recursive: true });

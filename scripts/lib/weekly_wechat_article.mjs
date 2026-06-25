@@ -41,6 +41,109 @@ const SUMMER_KEYWORDS = [
   '暑假',
 ];
 
+const SCENIC_KEYWORDS = [
+  '山水',
+  '峡谷',
+  '瀑布',
+  '丹霞',
+  '峰林',
+  '森林',
+  '溶洞',
+  '茶山',
+  '山居',
+  '畔山',
+  '云顶',
+  '溪谷',
+  '溪',
+  '湖',
+  '草原',
+  '氧吧',
+];
+
+const WATER_KEYWORDS = [
+  '漂流',
+  '亲水',
+  '玩水',
+  '戏水',
+  '山泉',
+  '玩漂',
+  '溯溪',
+  '冲浪',
+];
+
+const COASTAL_KEYWORDS = [
+  '海边',
+  '海岛',
+  '沙滩',
+  '蓝眼泪',
+  '赶海',
+  '海风',
+  '海景',
+  '东山岛',
+  '海陵岛',
+];
+
+const HOT_SPRING_KEYWORDS = [
+  '温泉',
+  '泡汤',
+  '汤泉',
+  '私汤',
+  '带池',
+  '泡池',
+  '雅泡',
+  '御泉',
+  '汤池',
+];
+
+const HOTEL_RELAX_KEYWORDS = [
+  '酒店',
+  '度假村',
+  '民宿',
+  '别墅',
+  '山房',
+  '庄园',
+  '美宿',
+  '泳池',
+  '恒温池',
+];
+
+const FOOD_CULTURE_KEYWORDS = [
+  '美食',
+  '早茶',
+  '海鲜',
+  '乳鸽',
+  '陈皮',
+  '宴',
+  '古镇',
+  '古城',
+  '博物馆',
+  '寺',
+  '夜游',
+  '人文',
+];
+
+const FAMILY_PLAY_KEYWORDS = [
+  '夏令营',
+  '乐园',
+  '动物园',
+  '马戏',
+  '萌宠',
+  '亲子营',
+  '水上乐园',
+];
+
+const LONG_HAUL_KEYWORDS = [
+  '高铁',
+  '动车',
+  '飞机',
+  '跨国',
+  '边境',
+  '秘境',
+  '香格里拉',
+  '川西',
+  '新疆',
+];
+
 const DOMESTIC_NEARBY_DESTINATIONS = new Set([
   '广东',
   '广西',
@@ -280,6 +383,9 @@ function suitabilityLabel(tour) {
 }
 
 function highlightLabel(tour) {
+  if (Array.isArray(tour.experienceSignals) && tour.experienceSignals.length > 0) {
+    return [...new Set(tour.experienceSignals)].slice(0, 4).join('、');
+  }
   const parts = [
     ...(Array.isArray(tour.highlights) ? tour.highlights : []),
     ...(Array.isArray(tour.tags) ? tour.tags : []),
@@ -300,6 +406,10 @@ function textBlob(tour) {
     .join(' ');
 }
 
+function experienceBlob(tour) {
+  return [tour.title].filter(Boolean).join(' ');
+}
+
 function getTravelWindowDates(tour, runDate, endDate) {
   const departureDates = Array.isArray(tour.departureDates) ? tour.departureDates : [];
   const candidates = departureDates.length > 0 ? departureDates : [tour.departureDate].filter(Boolean);
@@ -317,11 +427,110 @@ function isGenericDestination(destination) {
   return destination === '其他' || destination === '未标注目的地';
 }
 
+function countKeywordHits(blob, keywords) {
+  return keywords.reduce((count, keyword) => (blob.includes(keyword) ? count + 1 : count), 0);
+}
+
+function inferRouteFamily(title) {
+  const normalized = slugifyText(title)
+    .replace(/[（(][^）)]*[）)]/g, ' ')
+    .replace(/\d+\s*天/g, ' ')
+    .replace(/(含早|含餐|食\d+餐|带池|泡池|雅泡|私汤|升级房|升级版|豪华版|标准版|平价之选|品质之选|超低价|慢生活|食宿升级|1号楼|2号楼|3号楼|威士忌雅泡|威士忌畔山|高铁|动车|双动|双高|纯玩)/g, ' ')
+    .replace(/[·丨|｜/]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\s+/g, '');
+  return normalized || slugifyText(title) || '未分组线路';
+}
+
+function inferExperienceSignals(tour) {
+  const blob = experienceBlob(tour);
+  const signals = [];
+  if (countKeywordHits(blob, SCENIC_KEYWORDS) > 0) signals.push('山水避暑');
+  if (countKeywordHits(blob, WATER_KEYWORDS) > 0) signals.push('亲水玩水');
+  if (countKeywordHits(blob, COASTAL_KEYWORDS) > 0) signals.push('海边海风');
+  if (countKeywordHits(blob, HOT_SPRING_KEYWORDS) > 0) signals.push('温泉泡池');
+  if (countKeywordHits(blob, HOTEL_RELAX_KEYWORDS) > 0) signals.push('酒店放松');
+  if (countKeywordHits(blob, FOOD_CULTURE_KEYWORDS) > 0) signals.push('美食人文');
+  if (countKeywordHits(blob, FAMILY_PLAY_KEYWORDS) > 0) signals.push('亲子玩乐');
+  if (countKeywordHits(blob, LONG_HAUL_KEYWORDS) > 0) signals.push('长线风景');
+  if (tour.suitableFor?.includes('亲子') && !signals.includes('亲子玩乐')) {
+    signals.push('亲子友好');
+  }
+  return [...new Set(signals)];
+}
+
+function getExperienceHitCounts(tour) {
+  const blob = experienceBlob(tour);
+  return {
+    scenic: countKeywordHits(blob, SCENIC_KEYWORDS),
+    water: countKeywordHits(blob, WATER_KEYWORDS),
+    coastal: countKeywordHits(blob, COASTAL_KEYWORDS),
+    hotSpring: countKeywordHits(blob, HOT_SPRING_KEYWORDS),
+    hotel: countKeywordHits(blob, HOTEL_RELAX_KEYWORDS),
+    food: countKeywordHits(blob, FOOD_CULTURE_KEYWORDS),
+    family: countKeywordHits(blob, FAMILY_PLAY_KEYWORDS),
+    longHaul: countKeywordHits(blob, LONG_HAUL_KEYWORDS),
+  };
+}
+
+function hasWeekendDeparture(windowDates) {
+  return windowDates.some((dateKey) => {
+    const dayOfWeek = new Date(`${dateKey}T00:00:00`).getDay();
+    return dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0;
+  });
+}
+
+function classifyTourBucket(tour, experienceSignals = inferExperienceSignals(tour)) {
+  const destination = normalizeDestination(tour.destination);
+  const hits = getExperienceHitCounts(tour);
+  if (hits.family > 0 && hits.water > 0) {
+    return '亲子玩乐';
+  }
+  if (hits.coastal > 0) {
+    return '海边海岛';
+  }
+  if (hits.scenic > 0 || hits.water > 0) {
+    return '山水亲水';
+  }
+  if (hits.food >= 2 || (hits.food > 0 && hits.scenic === 0 && hits.coastal === 0)) {
+    return '美食人文';
+  }
+  if (hits.family > 0 || experienceSignals.includes('亲子玩乐')) {
+    return '亲子玩乐';
+  }
+  if (
+    hits.hotSpring > 0 ||
+    hits.hotel > 1 ||
+    ((hits.hotel > 0 || experienceSignals.includes('酒店放松')) && hits.scenic === 0 && hits.water === 0)
+  ) {
+    return '酒店泡池';
+  }
+  if (
+    hits.longHaul > 0 ||
+    experienceSignals.includes('长线风景') ||
+    tour.duration >= 5 ||
+    !DOMESTIC_NEARBY_DESTINATIONS.has(destination)
+  ) {
+    return '长线风景';
+  }
+  return '周末轻出发';
+}
+
 function scoreTour(tour, runDate, windowDates) {
   const destination = normalizeDestination(tour.destination);
   const firstDate = windowDates[0];
   const daysUntilDeparture = firstDate ? diffDays(runDate, firstDate) : 999;
   const availabilityConfidence = tour.dataQuality?.availabilityConfidence || tour.meta?.dataQuality?.availabilityConfidence || 'unknown';
+  const routeFamily = inferRouteFamily(tour.title);
+  const experienceSignals = inferExperienceSignals(tour);
+  const bucket = classifyTourBucket(tour, experienceSignals);
+  const departureSpread = new Set(windowDates).size;
+  const weekendFriendly = hasWeekendDeparture(windowDates);
+  const highlightCount = new Set([
+    ...(Array.isArray(tour.highlights) ? tour.highlights : []),
+    ...(Array.isArray(tour.tags) ? tour.tags : []),
+  ].filter(Boolean)).size;
   let score = 0;
 
   score += Math.max(0, 18 - Math.min(daysUntilDeparture, 18));
@@ -345,9 +554,19 @@ function scoreTour(tour, runDate, windowDates) {
   if (isGenericDestination(destination)) score -= 14;
   if (hasSummerSignals(tour)) score += 10;
   if (tour.title?.includes('暑假')) score += 6;
-  if (tour.suitableFor?.includes('亲子')) score += 4;
+  if (tour.suitableFor?.includes('亲子')) score += 2;
   if (tour.isFlashSale) score += 4;
   if (tour.isHot) score += 3;
+  score += Math.min(8, Math.max(0, departureSpread - 1) * 2);
+  if (weekendFriendly) score += 4;
+  score += Math.min(10, experienceSignals.length * 2);
+  score += Math.min(6, highlightCount);
+  if (bucket === '山水亲水') score += 6;
+  if (bucket === '海边海岛') score += 5;
+  if (bucket === '酒店泡池') score += 4;
+  if (bucket === '美食人文') score += 3;
+  if (experienceSignals.includes('山水避暑') && experienceSignals.includes('温泉泡池')) score += 3;
+  if (experienceSignals.includes('山水避暑') && experienceSignals.includes('亲水玩水')) score += 4;
 
   return {
     score,
@@ -355,6 +574,12 @@ function scoreTour(tour, runDate, windowDates) {
     availabilityConfidence,
     destination,
     firstDate,
+    routeFamily,
+    bucket,
+    experienceSignals,
+    departureSpread,
+    weekendFriendly,
+    highlightCount,
   };
 }
 
@@ -381,57 +606,105 @@ function deriveThemeHints(selectedTours, season) {
   return [...new Set(hints)].slice(0, 4);
 }
 
-function classifyTourBucket(tour) {
-  const blob = textBlob(tour);
-  const destination = normalizeDestination(tour.destination);
-  if (blob.includes('夏令营') || blob.includes('亲子') || (tour.suitableFor || []).includes('亲子')) {
-    return '亲子清凉';
-  }
-  if (blob.includes('漂流') || blob.includes('瀑布') || blob.includes('峡谷') || blob.includes('山') || blob.includes('湖') || blob.includes('森林') || blob.includes('溪')) {
-    return '山水避暑';
-  }
-  if (blob.includes('海') || blob.includes('沙滩') || blob.includes('海岛') || blob.includes('蓝眼泪')) {
-    return '海风玩水';
-  }
-  if (blob.includes('泳池') || blob.includes('水世界') || blob.includes('温泉') || blob.includes('酒店')) {
-    return '住下来放松';
-  }
-  if (tour.duration >= 5 || !DOMESTIC_NEARBY_DESTINATIONS.has(destination)) {
-    return '远一点也值得';
-  }
-  return '周末就能走';
+function compareEditorialPriority(left, right) {
+  return (
+    right.editorialScore - left.editorialScore ||
+    right.departureSpread - left.departureSpread ||
+    Number(right.weekendFriendly) - Number(left.weekendFriendly) ||
+    right.experienceSignals.length - left.experienceSignals.length ||
+    right.highlightCount - left.highlightCount ||
+    left.price - right.price
+  );
 }
 
-function rebalanceSelectedTours(candidateTours, maxArticleItems) {
+function applyCrowdingPenalties(scoredTours) {
+  const familyCounts = new Map();
+  const destinationCounts = new Map();
+  const bucketCounts = new Map();
+
+  return scoredTours
+    .map((tour) => {
+      const familyRank = (familyCounts.get(tour.routeFamily) || 0) + 1;
+      const destinationRank = (destinationCounts.get(tour.destination) || 0) + 1;
+      const bucketRank = (bucketCounts.get(tour.bucket) || 0) + 1;
+      familyCounts.set(tour.routeFamily, familyRank);
+      destinationCounts.set(tour.destination, destinationRank);
+      bucketCounts.set(tour.bucket, bucketRank);
+
+      const familyPenalty = familyRank > 1 ? Math.min(24, (familyRank - 1) * 8) : 0;
+      const destinationPenalty = destinationRank > 4 ? Math.min(12, (destinationRank - 4) * 3) : 0;
+      const bucketPenalty = bucketRank > 10 ? Math.min(10, (bucketRank - 10) * 2) : 0;
+      const editorialScore = tour.editorialScore - familyPenalty - destinationPenalty - bucketPenalty;
+
+      return {
+        ...tour,
+        editorialScore,
+        routeFamilyRank: familyRank,
+        editorialReasons: [
+          ...tour.editorialReasons,
+          familyRank === 1 ? '同系列优先保留首推' : `同系列第${familyRank}条，适度降权`,
+        ],
+      };
+    })
+    .sort(compareEditorialPriority);
+}
+
+function pickToursByStages(candidateTours, limit, stages) {
   const picked = [];
   const usedIds = new Set();
   const bucketCounts = new Map();
   const destinationCounts = new Map();
+  const familyCounts = new Map();
 
-  for (const tour of candidateTours) {
-    const bucket = classifyTourBucket(tour);
-    const destination = normalizeDestination(tour.destination);
-    const bucketCount = bucketCounts.get(bucket) || 0;
-    const destinationCount = destinationCounts.get(destination) || 0;
-    const allowAnotherBucket = picked.length >= Math.min(8, maxArticleItems);
-    const allowAnotherDestination = picked.length >= Math.min(12, maxArticleItems);
-    if (!allowAnotherBucket && bucketCount >= 1) continue;
-    if (!allowAnotherDestination && destinationCount >= 1) continue;
-    picked.push(tour);
-    usedIds.add(tour.id);
-    bucketCounts.set(bucket, bucketCount + 1);
-    destinationCounts.set(destination, destinationCount + 1);
-    if (picked.length >= maxArticleItems) return picked;
+  for (const stage of stages) {
+    const stageLimit = Math.min(limit, stage.until);
+    let progressed = true;
+    while (picked.length < stageLimit && progressed) {
+      progressed = false;
+      for (const tour of candidateTours) {
+        if (usedIds.has(tour.id)) continue;
+        const bucketCount = bucketCounts.get(tour.bucket) || 0;
+        const destinationCount = destinationCounts.get(tour.destination) || 0;
+        const familyCount = familyCounts.get(tour.routeFamily) || 0;
+        if (bucketCount >= stage.maxPerBucket) continue;
+        if (destinationCount >= stage.maxPerDestination) continue;
+        if (familyCount >= stage.maxPerFamily) continue;
+        picked.push(tour);
+        usedIds.add(tour.id);
+        bucketCounts.set(tour.bucket, bucketCount + 1);
+        destinationCounts.set(tour.destination, destinationCount + 1);
+        familyCounts.set(tour.routeFamily, familyCount + 1);
+        progressed = true;
+        if (picked.length >= stageLimit) break;
+      }
+    }
+    if (picked.length >= limit) return picked;
   }
 
   for (const tour of candidateTours) {
     if (usedIds.has(tour.id)) continue;
     picked.push(tour);
     usedIds.add(tour.id);
-    if (picked.length >= maxArticleItems) break;
+    if (picked.length >= limit) break;
   }
 
   return picked;
+}
+
+function buildCandidatePool(scoredTours, limit) {
+  return pickToursByStages(scoredTours, limit, [
+    { until: Math.min(limit, 18), maxPerBucket: 4, maxPerDestination: 3, maxPerFamily: 1 },
+    { until: Math.min(limit, 32), maxPerBucket: 7, maxPerDestination: 5, maxPerFamily: 1 },
+    { until: limit, maxPerBucket: 12, maxPerDestination: 8, maxPerFamily: 2 },
+  ]);
+}
+
+function rebalanceSelectedTours(candidateTours, maxArticleItems) {
+  return pickToursByStages(candidateTours, maxArticleItems, [
+    { until: Math.min(maxArticleItems, 10), maxPerBucket: 3, maxPerDestination: 2, maxPerFamily: 1 },
+    { until: Math.min(maxArticleItems, 18), maxPerBucket: 5, maxPerDestination: 3, maxPerFamily: 1 },
+    { until: maxArticleItems, maxPerBucket: 7, maxPerDestination: 4, maxPerFamily: 2 },
+  ]);
 }
 
 function formatTourForPrompt(tour) {
@@ -456,7 +729,9 @@ function formatTourForPrompt(tour) {
     siteUrl: getTourSiteUrl(tour.id),
     qrPath: getTourQrRelativePath(tour.id),
     primaryImage,
-    bucket: classifyTourBucket(tour),
+    bucket: tour.bucket || classifyTourBucket(tour),
+    routeFamily: tour.routeFamily || inferRouteFamily(tour.title),
+    experienceSignals: Array.isArray(tour.experienceSignals) ? tour.experienceSignals : inferExperienceSignals(tour),
     dataQuality: {
       availabilityConfidence: tour.availabilityConfidence,
       riskFlags: tour.dataQuality?.riskFlags || tour.meta?.dataQuality?.riskFlags || [],
@@ -489,18 +764,28 @@ export function buildWeeklyArticleContext(tours, options = {}) {
         selectedDepartureDates,
         editorialScore: score.score,
         availabilityConfidence: score.availabilityConfidence,
+        bucket: score.bucket,
+        routeFamily: score.routeFamily,
+        experienceSignals: score.experienceSignals,
+        departureSpread: score.departureSpread,
+        weekendFriendly: score.weekendFriendly,
+        highlightCount: score.highlightCount,
         editorialReasons: [
           `${score.daysUntilDeparture}天内可出发`,
           score.availabilityConfidence === 'high' ? '班期可信度高' : '班期需二次确认',
-          DOMESTIC_NEARBY_DESTINATIONS.has(score.destination) ? '更适合周度推荐' : '适合作为中长线备选',
+          `${score.bucket}优先入池`,
+          score.weekendFriendly ? '周末出发更顺手' : '工作日班期也可消化',
           hasSummerSignals(tour) ? `${season}语境下更好写` : '以常规卖点切入',
         ],
       };
     })
     .filter(Boolean)
-    .sort((left, right) => right.editorialScore - left.editorialScore);
+    .sort(compareEditorialPriority);
 
-  const candidateTours = filtered.slice(0, Math.max(maxCandidates, maxArticleItems * 2));
+  const diversified = applyCrowdingPenalties(filtered);
+  const candidateLimit = Math.max(maxCandidates, maxArticleItems * 2);
+  const scanLimit = Math.min(diversified.length, Math.max(candidateLimit * 4, maxArticleItems * 8, 160));
+  const candidateTours = buildCandidatePool(diversified.slice(0, scanLimit), candidateLimit);
   const selectedTours = rebalanceSelectedTours(candidateTours, maxArticleItems);
   const themeHints = deriveThemeHints(selectedTours, season);
 
@@ -515,6 +800,17 @@ export function buildWeeklyArticleContext(tours, options = {}) {
       themeHints,
       departureWindowDays: windowDays,
       priceRangeHint: summarizePriceRange(selectedTours),
+    },
+    selectionDiagnostics: {
+      totalTours: tours.length,
+      eligibleTours: filtered.length,
+      scannedTours: scanLimit,
+      candidatePoolSize: candidateTours.length,
+      selectedSize: selectedTours.length,
+      bucketCounts: candidateTours.reduce((result, tour) => {
+        result[tour.bucket] = (result[tour.bucket] || 0) + 1;
+        return result;
+      }, {}),
     },
     selectionRules: {
       onlyUseToursWithUpcomingDepartureDates: true,
@@ -548,6 +844,8 @@ export function buildWeeklyArticlePrompt(context) {
         `适合人群：${(tour.suitableFor || []).join('、') || '未标注'}`,
         `亮点：${(tour.highlights || []).slice(0, 4).join('、') || '未标注'}`,
         `标签：${(tour.tags || []).slice(0, 4).join('、') || '未标注'}`,
+        `线路家族：${tour.routeFamily || '未归类'}`,
+        `体验关键词：${(tour.experienceSignals || []).join('、') || '常规短线'}`,
         `站内详情：${tour.siteUrl}`,
         `二维码文件：${tour.qrPath}`,
         `分组：${tour.bucket}`,
