@@ -38,7 +38,8 @@ def request_json(url, method='GET', data=None, headers=None):
 def multipart_body(field_name, file_path=None, file_bytes=None, file_name=None, mime_type=None):
     boundary = '----CodexBoundary%s' % uuid.uuid4().hex
     if file_path is not None:
-        mime_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
+        file_path_str = str(file_path)
+        mime_type = mimetypes.guess_type(file_path_str)[0] or 'application/octet-stream'
         file_name = pathlib.Path(file_path).name
         file_bytes = pathlib.Path(file_path).read_bytes()
     body = []
@@ -70,7 +71,7 @@ def load_image_source(article_dir, source):
     if not file_path.exists():
         raise RuntimeError('inline image missing: %s' % decoded)
 
-    mime_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
+    mime_type = mimetypes.guess_type(str(file_path))[0] or 'application/octet-stream'
     return file_path.read_bytes(), mime_type, file_path.name
 
 
