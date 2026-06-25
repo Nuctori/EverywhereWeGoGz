@@ -6,6 +6,7 @@ const DEFAULT_TOURS_FILE = 'public/data/tours.json';
 const DEFAULT_WINDOW_DAYS = 21;
 const DEFAULT_MAX_CANDIDATES = 18;
 const DEFAULT_MAX_ARTICLE_ITEMS = 25;
+const DEFAULT_JSON_MAX_TOKENS = 8192;
 const DEFAULT_AUTHOR = '老广去边度';
 
 const FORBIDDEN_PHRASES = [
@@ -757,6 +758,7 @@ export function renderWeeklyArticle(context, aiPayload) {
 
 export async function generateWeeklyArticle(context, config, options = {}) {
   const prompt = buildWeeklyArticlePrompt(context);
+  const maxTokens = options.maxTokens || DEFAULT_JSON_MAX_TOKENS;
   const response = await fetch(getChatCompletionsUrl(config.baseUrl), {
     method: 'POST',
     headers: {
@@ -766,11 +768,14 @@ export async function generateWeeklyArticle(context, config, options = {}) {
     body: JSON.stringify({
       model: config.model,
       temperature: 0.7,
-      max_tokens: options.maxTokens || 2200,
+      max_tokens: maxTokens,
+      response_format: {
+        type: 'json_object',
+      },
       messages: [
         {
           role: 'system',
-          content: '你写作稳健、像旅行编辑而不是销售，不夸张，不编造产品事实。',
+          content: '你写作稳健、像旅行编辑而不是销售，不夸张，不编造产品事实。必须返回严格 json。',
         },
         {
           role: 'user',
