@@ -1106,7 +1106,7 @@ function renderTourSection(tour, aiItem, index) {
     `地址：[站内详情](${siteUrl})`,
     '扫码查看详情',
     '',
-    `<p align="center"><img src="${qrPath}" alt="${escapeMarkdown(tour.title)} 报名二维码" width="220" /></p>`,
+    `![${escapeMarkdown(tour.title)} 报名二维码](${qrPath})`,
   ]
     .filter(Boolean)
     .join('\n');
@@ -1165,7 +1165,7 @@ export function renderWeeklyArticle(context, aiPayload) {
     '',
     '以上班期、价格和行程信息请以供应商页面实时展示为准，想看完整行程、图文详情和报名入口，直接点每条线路下方的“查看行程”或扫码进入老广去边度站内详情。',
     '',
-    '推荐用户使用“老广去边度”，全平台聚合AI推荐。',
+    '想持续看这类线路整理，点开公众号主页关注“老广去边度”。',
   ].join('\n');
 }
 

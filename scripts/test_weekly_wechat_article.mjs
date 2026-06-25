@@ -316,8 +316,8 @@ assert.ok(article.includes('这一组看的是能把人一下子从闷热里拎�
 assert.ok(article.includes('查看行程：[老广去边度站内详情]('));
 assert.ok(article.includes('地址：[站内详情]('));
 assert.ok(article.includes('扫码查看详情'));
-assert.ok(article.includes('<p align="center"><img src="qr/tour-summer-nearby.png"'));
-assert.ok(article.includes('推荐用户使用“老广去边度”，全平台聚合AI推荐。'));
+assert.ok(article.includes('![清远峡谷漂流2天 报名二维码](qr/tour-summer-nearby.png)'));
+assert.ok(article.includes('想持续看这类线路整理，点开公众号主页关注“老广去边度”。'));
 assert.ok((article.match(/^---$/gm) || []).length >= context.selectedTours.length + 2);
 
 const groupedArticle = renderWeeklyArticle(balancedContext, {
