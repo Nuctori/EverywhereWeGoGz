@@ -4,8 +4,8 @@ import path from 'node:path';
 const DEFAULT_TOURS_FILE = 'public/data/tours.json';
 const DEFAULT_WINDOW_DAYS = 21;
 const DEFAULT_MAX_CANDIDATES = 18;
-const DEFAULT_MAX_ARTICLE_ITEMS = 5;
-const DEFAULT_AUTHOR = '老广旅行';
+const DEFAULT_MAX_ARTICLE_ITEMS = 25;
+const DEFAULT_AUTHOR = '老广去边度';
 
 const FORBIDDEN_PHRASES = [
   '最低价',
@@ -55,6 +55,9 @@ const DOMESTIC_NEARBY_DESTINATIONS = new Set([
   '四川',
   '华东',
 ]);
+
+const SITE_BASE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
+const WEATHER_OVERVIEW_IMAGE = 'https://file.gzl.cn/group1/M00/31/55/wKkBH1-XfHqAXFtHAAE1-x29ZjY556.jpg';
 
 function stripWrappingQuotes(value) {
   if (
@@ -174,6 +177,74 @@ function normalizeDestination(value) {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : '未标注目的地';
 }
 
+function slugifyText(value) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function escapeMarkdown(value) {
+  return String(value || '').replace(/\|/g, '\\|');
+}
+
+function getTourSiteUrl(tourId) {
+  return `${SITE_BASE_URL}?tour=${encodeURIComponent(tourId)}&source=wechat`;
+}
+
+function getTourQrUrl(tourId) {
+  return `https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(getTourSiteUrl(tourId))}`;
+}
+
+function chooseTourImage(tour) {
+  if (Array.isArray(tour.images) && tour.images.length > 0) {
+    return tour.images[0];
+  }
+  return '';
+}
+
+function normalizeArticleImageUrl(value) {
+  const src = String(value || '').trim();
+  if (!src) return '';
+  if (/^https?:\/\//i.test(src)) return src;
+  if (src.startsWith('/')) {
+    return `${SITE_BASE_URL.replace(/\/$/, '')}${src}`;
+  }
+  return src;
+}
+
+function summarizeDepartureDates(dates, limit = 4) {
+  const list = Array.isArray(dates) ? dates.filter(Boolean) : [];
+  if (list.length <= limit) return list.join('、');
+  return `${list.slice(0, limit).join('、')} 等${list.length}个班期`;
+}
+
+function priceLabel(tour) {
+  if (typeof tour.price !== 'number') return '价格以供应商页面为准';
+  const unit = tour.priceUnit || '元/人';
+  if (unit.includes('元')) return `${tour.price}${unit}起`;
+  return `${tour.price}元/${unit}起`;
+}
+
+function durationLabel(tour) {
+  if (typeof tour.duration === 'number' && Number.isFinite(tour.duration)) {
+    return `${tour.duration}天`;
+  }
+  return '行程天数以供应商页面为准';
+}
+
+function suitabilityLabel(tour) {
+  const list = Array.isArray(tour.suitableFor) ? tour.suitableFor.filter(Boolean) : [];
+  return list.length > 0 ? list.join('、') : '亲子、情侣、朋友结伴';
+}
+
+function highlightLabel(tour) {
+  const parts = [
+    ...(Array.isArray(tour.highlights) ? tour.highlights : []),
+    ...(Array.isArray(tour.tags) ? tour.tags : []),
+  ].filter(Boolean);
+  return [...new Set(parts)].slice(0, 4).join('、') || '按当季热门玩法筛出';
+}
+
 function textBlob(tour) {
   return [
     tour.title,
@@ -268,7 +339,61 @@ function deriveThemeHints(selectedTours, season) {
   return [...new Set(hints)].slice(0, 4);
 }
 
+function classifyTourBucket(tour) {
+  const blob = textBlob(tour);
+  const destination = normalizeDestination(tour.destination);
+  if (blob.includes('夏令营') || blob.includes('亲子') || (tour.suitableFor || []).includes('亲子')) {
+    return '亲子清凉';
+  }
+  if (blob.includes('漂流') || blob.includes('瀑布') || blob.includes('峡谷') || blob.includes('山') || blob.includes('湖') || blob.includes('森林') || blob.includes('溪')) {
+    return '山水避暑';
+  }
+  if (blob.includes('海') || blob.includes('沙滩') || blob.includes('海岛') || blob.includes('蓝眼泪')) {
+    return '海风玩水';
+  }
+  if (blob.includes('泳池') || blob.includes('水世界') || blob.includes('温泉') || blob.includes('酒店')) {
+    return '住下来放松';
+  }
+  if (tour.duration >= 5 || !DOMESTIC_NEARBY_DESTINATIONS.has(destination)) {
+    return '远一点也值得';
+  }
+  return '周末就能走';
+}
+
+function rebalanceSelectedTours(candidateTours, maxArticleItems) {
+  const picked = [];
+  const usedIds = new Set();
+  const bucketCounts = new Map();
+  const destinationCounts = new Map();
+
+  for (const tour of candidateTours) {
+    const bucket = classifyTourBucket(tour);
+    const destination = normalizeDestination(tour.destination);
+    const bucketCount = bucketCounts.get(bucket) || 0;
+    const destinationCount = destinationCounts.get(destination) || 0;
+    const allowAnotherBucket = picked.length >= Math.min(8, maxArticleItems);
+    const allowAnotherDestination = picked.length >= Math.min(12, maxArticleItems);
+    if (!allowAnotherBucket && bucketCount >= 1) continue;
+    if (!allowAnotherDestination && destinationCount >= 1) continue;
+    picked.push(tour);
+    usedIds.add(tour.id);
+    bucketCounts.set(bucket, bucketCount + 1);
+    destinationCounts.set(destination, destinationCount + 1);
+    if (picked.length >= maxArticleItems) return picked;
+  }
+
+  for (const tour of candidateTours) {
+    if (usedIds.has(tour.id)) continue;
+    picked.push(tour);
+    usedIds.add(tour.id);
+    if (picked.length >= maxArticleItems) break;
+  }
+
+  return picked;
+}
+
 function formatTourForPrompt(tour) {
+  const primaryImage = normalizeArticleImageUrl(chooseTourImage(tour));
   return {
     id: tour.id,
     title: tour.title,
@@ -285,7 +410,11 @@ function formatTourForPrompt(tour) {
     transportType: tour.transportType,
     accommodationLevel: tour.accommodationLevel,
     bookingUrl: tour.bookingUrl,
-    images: tour.images || [],
+    images: (tour.images || []).map(normalizeArticleImageUrl),
+    siteUrl: getTourSiteUrl(tour.id),
+    qrUrl: getTourQrUrl(tour.id),
+    primaryImage,
+    bucket: classifyTourBucket(tour),
     dataQuality: {
       availabilityConfidence: tour.availabilityConfidence,
       riskFlags: tour.dataQuality?.riskFlags || tour.meta?.dataQuality?.riskFlags || [],
@@ -329,19 +458,8 @@ export function buildWeeklyArticleContext(tours, options = {}) {
     .filter(Boolean)
     .sort((left, right) => right.editorialScore - left.editorialScore);
 
-  const candidateTours = filtered.slice(0, maxCandidates);
-  const articleTours = [];
-  const destinationCounts = new Map();
-  for (const tour of candidateTours) {
-    const destination = normalizeDestination(tour.destination);
-    const count = destinationCounts.get(destination) || 0;
-    if (count >= 1 && articleTours.length < Math.max(3, maxArticleItems - 1)) continue;
-    articleTours.push(tour);
-    destinationCounts.set(destination, count + 1);
-    if (articleTours.length >= maxArticleItems) break;
-  }
-
-  const selectedTours = articleTours.length > 0 ? articleTours : candidateTours.slice(0, maxArticleItems);
+  const candidateTours = filtered.slice(0, Math.max(maxCandidates, maxArticleItems * 2));
+  const selectedTours = rebalanceSelectedTours(candidateTours, maxArticleItems);
   const themeHints = deriveThemeHints(selectedTours, season);
 
   return {
@@ -388,7 +506,9 @@ export function buildWeeklyArticlePrompt(context) {
         `适合人群：${(tour.suitableFor || []).join('、') || '未标注'}`,
         `亮点：${(tour.highlights || []).slice(0, 4).join('、') || '未标注'}`,
         `标签：${(tour.tags || []).slice(0, 4).join('、') || '未标注'}`,
-        `预订链接：${tour.bookingUrl}`,
+        `站内详情：${tour.siteUrl}`,
+        `二维码：${tour.qrUrl}`,
+        `分组：${tour.bucket}`,
       ];
       return lines.join('\n');
     })
@@ -397,6 +517,7 @@ export function buildWeeklyArticlePrompt(context) {
   return [
     '你是一名擅长写微信公众号的旅行编辑。',
     '请只根据提供的 JSON 素材与线路事实写作，不要编造任何产品信息。',
+    '你这次不要输出整篇 Markdown，只输出一个 JSON 对象，方便程序拼接成固定版式的公众号文章。',
     '',
     '写作要求：',
     `- 文章日期语境：${context.runDate}，当前季节是${context.season}`,
@@ -404,32 +525,37 @@ export function buildWeeklyArticlePrompt(context) {
     `- 读者：${context.editorialContext.audience}`,
     `- 基调：${context.editorialContext.tone}`,
     `- 选题方向：${context.editorialContext.themeHints.join('、') || '周度出游推荐'}`,
-    '- 输出 Markdown，且必须带 frontmatter：title, summary, author, cover',
-    `- author 固定写 "${DEFAULT_AUTHOR}"`,
-    `- cover 使用第一条线路的首图：${context.selectedTours[0]?.images?.[0] || ''}`,
-    '- 标题适合公众号，但不要夸张标题党',
-    '- 开头先给本周出游判断，再分段推荐线路',
-    '- 每条线路写清楚：为什么这周值得看、适合谁、线路信息、提醒',
-    '- 天气和季节只能做保守表达，例如“更适合避暑”“更适合亲子出游”，不要写成确定性预报',
+    '- 标题适合公众号，但不要夸张标题党，不要像营销口号',
+    '- weatherLead 要把未来7天体感、季节节奏、节假日/时令玩法判断写在前头，但只能做保守表达，不要写成确定性天气预报',
+    '- intro 是开场导语，要像老广熟门熟路地给朋友出主意，不要像答题或思维链展示',
+    '- 每条线路只写三个字段：recommendationTitle、reason、reminder',
+    '- reason 必须 55 字以上，要讲清为什么当下去会更舒服或更值得，不要空泛，不要写“推荐方向”“取舍”“可以理解为”这种解释腔',
+    '- recommendationTitle 可以比原产品名更像公众号小标题，但不能改错事实',
+    '- reminder 用一句自然提醒补班期、节奏、适合人群或出发前注意点',
+    '- 不要重复同一个 destination 的同一套说法，不要把多条线路写成一个模子',
+    '- 能写真山水、亲水、森林、海风、泳池、水世界，就不要硬把所有“带池”都写成温泉放松',
     '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达',
     '- 不要编造出发城市、库存、优惠、成团率、景区政策',
-    '- 价格、班期、链接必须与素材一致',
-    '- 结尾要提醒以供应商页面为准，并引导读者查看行程',
+    '- 不要输出 Markdown 代码块，不要输出解释，只输出 JSON',
     '',
     '本次优先采用的线路：',
     selectedTourBlock,
     '',
-    '输出格式示例：',
-    '---',
-    'title: "..."',
-    'summary: "..."',
-    `author: "${DEFAULT_AUTHOR}"`,
-    `cover: "${context.selectedTours[0]?.images?.[0] || ''}"`,
-    '---',
-    '',
-    '# 标题',
-    '',
-    '正文……',
+    '输出 JSON 格式：',
+    '{',
+    '  "title": "..." ,',
+    '  "summary": "..." ,',
+    '  "intro": "..." ,',
+    '  "weatherLead": "..." ,',
+    '  "items": [',
+    '    {',
+    '      "id": "tour_xxx",',
+    '      "recommendationTitle": "..." ,',
+    '      "reason": "..." ,',
+    '      "reminder": "..."',
+    '    }',
+    '  ]',
+    '}',
   ].join('\n');
 }
 
@@ -463,6 +589,131 @@ function stripMarkdownFence(text) {
   return match ? match[1].trim() : trimmed;
 }
 
+function parseJsonPayload(text) {
+  const cleaned = stripMarkdownFence(text).trim();
+  return JSON.parse(cleaned);
+}
+
+function normalizeAiText(value) {
+  return String(value || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function normalizeAiItemMap(payload, context) {
+  const itemsById = new Map();
+  const rawItems = Array.isArray(payload?.items) ? payload.items : [];
+  for (const item of rawItems) {
+    if (!item || typeof item !== 'object') continue;
+    const id = String(item.id || '').trim();
+    if (!id) continue;
+    itemsById.set(id, {
+      recommendationTitle: normalizeAiText(item.recommendationTitle || ''),
+      reason: normalizeAiText(item.reason || ''),
+      reminder: normalizeAiText(item.reminder || ''),
+    });
+  }
+
+  return context.selectedTours.map((tour) => {
+    const item = itemsById.get(tour.id) || {};
+    return {
+      id: tour.id,
+      recommendationTitle: item.recommendationTitle || '',
+      reason: item.reason || '',
+      reminder: item.reminder || '',
+    };
+  });
+}
+
+function buildFallbackIntro(context) {
+  const advice = context.editorialContext.themeHints.join('、') || '近场清凉、山水与亲水玩法';
+  return `这周广州和周边更适合挑有树荫、有水体、能把节奏放慢的线路来走。比起纯城市暴走，${advice}这一类行程更容易把闷热感卸下来；如果时间不多，住下来放松的酒店线也更适合周末接一口气。`;
+}
+
+function buildFallbackWeatherLead(context) {
+  return `进入${context.season}后，华南通常会反复出现闷热和阵雨，出游更适合优先看体感而不是只看公里数。瀑布、峡谷、森林步道、漂流、海边、泳池和住下来慢慢玩的线路，这周都会比纯暴晒型路线更顺手。`;
+}
+
+function defaultReasonForTour(tour) {
+  const destination = normalizeDestination(tour.destination);
+  const departureHint = summarizeDepartureDates(tour.departureDates, 4);
+  const highlights = highlightLabel(tour);
+  const suitableFor = suitabilityLabel(tour);
+  return `这条线现在值得出发，重点不只是目的地顺眼，而是它的玩法和眼下体感很对路。${destination}这一线能打的通常是${highlights}，比起只在城里兜圈，更容易把这周的闷热感卸下来。对${suitableFor}来说，它既有看点，也不至于把行程排得太赶；近期班期有${departureHint}，${priceLabel(tour)}，是那种现在翻出来会立刻想认真看看详情的路线。`;
+}
+
+function defaultReminderForTour(tour) {
+  return `线路为${durationLabel(tour)}，近期班期以供应商页面实时展示为准；如果是亲水、海边或山地玩法，出发前记得顺手看一眼当周天气和集合通知。`;
+}
+
+function renderTourSection(tour, aiItem, index) {
+  const title = aiItem.recommendationTitle || slugifyText(tour.title);
+  const reason = aiItem.reason || defaultReasonForTour(tour);
+  const reminder = aiItem.reminder || defaultReminderForTour(tour);
+  const image = tour.primaryImage || normalizeArticleImageUrl(chooseTourImage(tour));
+  const siteUrl = tour.siteUrl || getTourSiteUrl(tour.id);
+  const qrUrl = tour.qrUrl || getTourQrUrl(tour.id);
+  const departureHint = summarizeDepartureDates(tour.departureDates, 4);
+
+  return [
+    `## ${index + 1}. ${title}`,
+    '',
+    image ? `![${escapeMarkdown(tour.title)}](${image})` : '',
+    '',
+    reason,
+    '',
+    `- 适合谁：${suitabilityLabel(tour)}`,
+    `- 为什么当下去：${highlightLabel(tour)}`,
+    `- 行程信息：${durationLabel(tour)}｜${priceLabel(tour)}｜近期班期 ${departureHint || '以页面为准'}`,
+    `- 出发提醒：${reminder}`,
+    '',
+    '[查看行程](' + siteUrl + ')',
+    '',
+    `地址：${siteUrl}`,
+    '',
+    '扫码查看详情',
+    '',
+    `![${escapeMarkdown(tour.title)} 报名二维码](${qrUrl})`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+export function renderWeeklyArticle(context, aiPayload) {
+  const frontmatter = [
+    '---',
+    `title: "${(aiPayload.title || '本周值得认真看的25条线路').replaceAll('"', '\\"')}"`,
+    `summary: "${(aiPayload.summary || buildFallbackIntro(context)).replaceAll('"', '\\"')}"`,
+    `author: "${DEFAULT_AUTHOR}"`,
+    `cover: "${context.selectedTours[0]?.primaryImage || context.selectedTours[0]?.images?.[0] || ''}"`,
+    '---',
+  ].join('\n');
+
+  const intro = normalizeAiText(aiPayload.intro || buildFallbackIntro(context));
+  const weatherLead = normalizeAiText(aiPayload.weatherLead || buildFallbackWeatherLead(context));
+  const items = normalizeAiItemMap(aiPayload, context);
+  const sections = context.selectedTours.map((tour, index) => renderTourSection(tour, items[index] || {}, index));
+
+  return [
+    frontmatter,
+    '',
+    `# ${aiPayload.title || '本周值得认真看的25条线路'}`,
+    '',
+    intro,
+    '',
+    '## 未来7天出游提醒',
+    '',
+    weatherLead,
+    '',
+    `![本周天气与季节提醒](${WEATHER_OVERVIEW_IMAGE})`,
+    '',
+    ...sections,
+    '',
+    '以上班期、价格和行程信息请以供应商页面实时展示为准，想看完整行程、图文详情和报名入口，直接点每条线路下方的“查看行程”或扫码进入老广去边度站内详情。',
+  ].join('\n');
+}
+
 export async function generateWeeklyArticle(context, config, options = {}) {
   const prompt = buildWeeklyArticlePrompt(context);
   const response = await fetch(getChatCompletionsUrl(config.baseUrl), {
@@ -494,9 +745,13 @@ export async function generateWeeklyArticle(context, config, options = {}) {
   }
 
   const payload = await response.json();
+  const rawContent = getAiContent(payload);
+  const structured = parseJsonPayload(rawContent);
+  const article = renderWeeklyArticle(context, structured);
   return {
     prompt,
-    article: stripMarkdownFence(getAiContent(payload)),
+    article,
+    structured,
     rawResponse: payload,
   };
 }
@@ -524,6 +779,9 @@ export function validateGeneratedArticle(article, context) {
     for (const field of ['title', 'summary', 'author', 'cover']) {
       if (!frontmatter[field]) issues.push(`Missing frontmatter field: ${field}.`);
     }
+    if (frontmatter.author !== DEFAULT_AUTHOR) {
+      issues.push(`Author must be ${DEFAULT_AUTHOR}.`);
+    }
   }
 
   for (const phrase of FORBIDDEN_PHRASES) {
@@ -533,6 +791,22 @@ export function validateGeneratedArticle(article, context) {
   const mentionedSelectedTours = context.selectedTours.filter((tour) => article.includes(tour.title)).length;
   if (mentionedSelectedTours < Math.min(3, context.selectedTours.length)) {
     issues.push('Article did not mention enough selected tours by title.');
+  }
+
+  for (const tour of context.selectedTours) {
+    const siteUrl = getTourSiteUrl(tour.id);
+    const qrUrl = getTourQrUrl(tour.id);
+    if (!article.includes(siteUrl)) {
+      issues.push(`Missing site URL for ${tour.id}.`);
+    }
+    if (!article.includes(qrUrl)) {
+      issues.push(`Missing QR URL for ${tour.id}.`);
+    }
+  }
+
+  const qrCount = (article.match(/扫码查看详情/g) || []).length;
+  if (qrCount < context.selectedTours.length) {
+    issues.push('Not every selected tour rendered a QR block.');
   }
 
   return {
@@ -557,4 +831,8 @@ export function defaultOutputDir(rootDir, runDate) {
 
 export function getDefaultAuthor() {
   return DEFAULT_AUTHOR;
+}
+
+export function rebuildWeeklyArticleFromStructured(context, structured) {
+  return renderWeeklyArticle(context, structured);
 }

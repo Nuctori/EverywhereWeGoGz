@@ -47,6 +47,7 @@ const supportBlockHtml = markdownToHtml(`
 assert.ok(supportBlockHtml.includes('详情地址'));
 assert.ok(supportBlockHtml.includes('扫码查看详情'));
 assert.ok(supportBlockHtml.includes('width:200px'));
+assert.ok(supportBlockHtml.includes('老广去边度站内详情页'));
 assert.ok(!supportBlockHtml.includes('<p>地址：https://nuctori.github.io/EverywhereWeGoGz/?tour=tour_2705&amp;source=wechat</p>'));
 
 const payload = buildDraftPayload({

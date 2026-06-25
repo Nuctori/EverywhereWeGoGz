@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import {
   buildWeeklyArticleContext,
   buildWeeklyArticlePrompt,
+  getDefaultAuthor,
+  renderWeeklyArticle,
   validateGeneratedArticle,
 } from './lib/weekly_wechat_article.mjs';
 
@@ -79,34 +81,41 @@ const context = buildWeeklyArticleContext(tours, {
 
 assert.equal(context.selectedTours.length, 2);
 assert.equal(context.selectedTours[0].id, 'tour-summer-nearby');
-assert.ok(context.selectedTours.some((tour) => tour.id === 'tour-guizhou'));
-assert.ok(!context.selectedTours.some((tour) => tour.id === 'tour-long-haul'));
 assert.equal(context.season, '夏季');
+assert.ok(new Set(context.selectedTours.map((tour) => tour.bucket)).size >= 1);
+assert.ok(context.selectedTours.every((tour) => tour.siteUrl.includes('source=wechat')));
 
 const prompt = buildWeeklyArticlePrompt(context);
-assert.ok(prompt.includes('frontmatter'));
+assert.ok(prompt.includes('"weatherLead"'));
 assert.ok(prompt.includes('清远峡谷漂流2天'));
-assert.ok(prompt.includes('贵州山水避暑4天'));
+assert.ok(prompt.includes('tour-summer-nearby'));
+assert.ok(prompt.includes('二维码'));
 
-const article = `---
-title: "本周适合出发的两条线路"
-summary: "按近期班期整理的短线与避暑线。"
-author: "老广旅行"
-cover: "/data/image-cache/qingyuan.webp"
----
-
-# 本周适合出发的两条线路
-
-## 清远峡谷漂流2天
-
-这条线路更适合夏天想找清凉感的人。
-
-## 贵州山水避暑4天
-
-这条线路更适合想找山水避暑的人。
-`;
+const article = renderWeeklyArticle(context, {
+  title: '本周适合出发的两条线路',
+  summary: '按近期班期整理的短线与避暑线。',
+  intro: '这一周更适合挑有清凉体感、路上不折腾的短线来走。',
+  weatherLead: '华南夏季常见闷热和阵雨，瀑布、山水、森林一类线路会比纯城市逛吃更舒服。',
+  items: [
+    {
+      id: 'tour-summer-nearby',
+      recommendationTitle: '清远峡谷漂流2天',
+      reason: '这条线路更适合夏天想找清凉感的人，峡谷、漂流和近场车程放在一起，周末出发不累，现场的水声和树荫也能把体感明显压下来。',
+      reminder: '班期近，适合周末轻装出发，遇雨天也记得带一件轻便替换衣物。',
+    },
+    {
+      id: 'tour-guizhou',
+      recommendationTitle: '贵州山水避暑4天',
+      reason: '如果这周想认真避暑，贵州这条山水线比单纯住酒店更有出门的意义，风景密度高，节奏也不会被压得太满，适合想把小长假用得更值的人。',
+      reminder: '4天行程更适合留一点机动时间，班期和集合信息以供应商页面为准。',
+    },
+  ],
+});
 
 const validation = validateGeneratedArticle(article, context);
 assert.equal(validation.ok, true);
+assert.ok(article.includes(`author: "${getDefaultAuthor()}"`));
+assert.ok(article.includes('扫码查看详情'));
+assert.ok(article.includes('source=wechat'));
 
 console.log('weekly wechat article tests passed');

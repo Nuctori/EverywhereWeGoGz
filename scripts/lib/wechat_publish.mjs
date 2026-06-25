@@ -56,7 +56,8 @@ function renderSupportBlock({ ctaLabel, href, address, qrAlt, qrSrc }) {
     '<div style="margin:14px 0 28px;padding:16px 18px;border:1px solid #e5e7eb;border-radius:14px;background:#f8fafc;">',
     `<a href="${escapeHtml(href)}" style="display:inline-block;padding:8px 16px;border-radius:999px;background:#0f766e;color:#ffffff;text-decoration:none;font-size:15px;line-height:1.2;font-weight:600;">${escapeHtml(ctaLabel)}</a>`,
     '<div style="margin:14px 0 6px;font-size:13px;line-height:1.5;color:#6b7280;">详情地址</div>',
-    `<a href="${escapeHtml(address)}" style="display:block;font-size:14px;line-height:1.7;color:#0f172a;text-decoration:none;word-break:break-all;">${escapeHtml(address)}</a>`,
+    `<a href="${escapeHtml(address)}" style="display:block;font-size:14px;line-height:1.7;color:#0f172a;text-decoration:none;font-weight:600;">老广去边度站内详情页</a>`,
+    `<div style="margin-top:6px;font-size:12px;line-height:1.6;color:#64748b;word-break:break-all;">${escapeHtml(address)}</div>`,
     '<div style="margin:14px 0 8px;font-size:13px;line-height:1.5;color:#6b7280;">扫码查看详情</div>',
     `<div style="text-align:center;"><img src="${escapeHtml(qrSrc)}" alt="${escapeHtml(qrAlt || '报名二维码')}" style="display:block;margin:0 auto;width:200px;max-width:100%;height:auto;border-radius:0;"></div>`,
     '</div>',
@@ -190,6 +191,9 @@ export function resolveOutputDir(articlePath) {
 export function resolveCoverFile(rootDir, articlePath, frontmatter) {
   const cover = frontmatter.cover || frontmatter.coverImage || frontmatter.image || '';
   if (!cover) throw new Error('Article frontmatter is missing cover.');
+  if (/^https?:\/\//i.test(cover)) {
+    return cover;
+  }
   if (cover.startsWith('/')) {
     return path.join(rootDir, 'public', cover.slice(1).replaceAll('/', path.sep));
   }
@@ -197,10 +201,19 @@ export function resolveCoverFile(rootDir, articlePath, frontmatter) {
 }
 
 export async function prepareCoverForUpload(coverPath, outputDir) {
+  const targetPath = path.join(outputDir, 'cover-upload.jpg');
+  if (/^https?:\/\//i.test(String(coverPath))) {
+    const response = await fetch(String(coverPath));
+    if (!response.ok) {
+      throw new Error(`Cover image download failed: ${response.status} ${String(coverPath)}`);
+    }
+    const bytes = Buffer.from(await response.arrayBuffer());
+    await sharp(bytes).jpeg({ quality: 88 }).toFile(targetPath);
+    return targetPath;
+  }
   if (!fs.existsSync(coverPath)) {
     throw new Error(`Cover image not found: ${coverPath}`);
   }
-  const targetPath = path.join(outputDir, 'cover-upload.jpg');
   await sharp(coverPath).jpeg({ quality: 88 }).toFile(targetPath);
   return targetPath;
 }
