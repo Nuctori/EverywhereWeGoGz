@@ -11,8 +11,10 @@ import textwrap
 REMOTE_SCRIPT = r"""
 import json
 import mimetypes
+import html
 import os
 import pathlib
+import re
 import sys
 import urllib.parse
 import urllib.request
@@ -26,11 +28,12 @@ def request_json(url, method='GET', data=None, headers=None):
     return json.loads(payload)
 
 
-def multipart_body(field_name, file_path):
+def multipart_body(field_name, file_path=None, file_bytes=None, file_name=None, mime_type=None):
     boundary = '----CodexBoundary%s' % uuid.uuid4().hex
-    mime_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
-    file_name = pathlib.Path(file_path).name
-    file_bytes = pathlib.Path(file_path).read_bytes()
+    if file_path is not None:
+        mime_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
+        file_name = pathlib.Path(file_path).name
+        file_bytes = pathlib.Path(file_path).read_bytes()
     body = []
     body.append(('--%s\r\n' % boundary).encode('utf-8'))
     body.append(('Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (field_name, file_name)).encode('utf-8'))
@@ -39,6 +42,57 @@ def multipart_body(field_name, file_path):
     body.append(b'\r\n')
     body.append(('--%s--\r\n' % boundary).encode('utf-8'))
     return boundary, b''.join(body)
+
+
+def load_image_source(article_dir, source):
+    decoded = html.unescape(source).strip()
+    if decoded.startswith('http://') or decoded.startswith('https://'):
+        try:
+            with urllib.request.urlopen(decoded, timeout=60) as response:
+                return (
+                    response.read(),
+                    response.headers.get_content_type() or 'application/octet-stream',
+                    pathlib.Path(urllib.parse.urlparse(decoded).path).name or 'inline-image.jpg',
+                )
+        except Exception as exc:
+            raise RuntimeError('fetch image failed: %s -> %s' % (decoded, exc))
+
+    file_path = pathlib.Path(decoded)
+    if not file_path.is_absolute():
+        file_path = article_dir / file_path
+    if not file_path.exists():
+        raise RuntimeError('inline image missing: %s' % decoded)
+
+    mime_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
+    return file_path.read_bytes(), mime_type, file_path.name
+
+
+def upload_inline_image(access_token, article_dir, source):
+    file_bytes, mime_type, file_name = load_image_source(article_dir, source)
+    boundary, body = multipart_body('media', file_path=None, file_bytes=file_bytes, file_name=file_name, mime_type=mime_type)
+    data = request_json(
+        'https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=%s' % urllib.parse.quote(access_token),
+        method='POST',
+        data=body,
+        headers={'Content-Type': 'multipart/form-data; boundary=%s' % boundary},
+    )
+    if not data.get('url'):
+        raise RuntimeError('inline image upload failed: %s' % json.dumps(data, ensure_ascii=False))
+    return data['url']
+
+
+def rewrite_html_images(access_token, html_text, article_dir):
+    replacements = {}
+    for match in re.finditer(r'<img\b[^>]*\bsrc="([^"]+)"[^>]*>', html_text):
+        source = match.group(1).strip()
+        if not source or source.startswith('data:') or 'mmbiz.qpic.cn' in source:
+            continue
+        if source in replacements:
+            continue
+        replacements[source] = upload_inline_image(access_token, article_dir, source)
+    for source, target in replacements.items():
+        html_text = html_text.replace('src="%s"' % source, 'src="%s"' % target)
+    return html_text
 
 
 def main():
@@ -57,7 +111,8 @@ def main():
         raise RuntimeError('access_token missing: %s' % json.dumps(token_data, ensure_ascii=False))
 
     media_url = 'https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=%s&type=image' % urllib.parse.quote(access_token)
-    boundary, media_body = multipart_body('media', bundle['uploadCoverPath'])
+    cover_name = pathlib.Path(bundle.get('uploadCoverPath') or 'cover-upload.jpg').name
+    boundary, media_body = multipart_body('media', bundle_path.parent / cover_name)
     media_data = request_json(
         media_url,
         method='POST',
@@ -68,7 +123,12 @@ def main():
     if not media_id:
         raise RuntimeError('media_id missing: %s' % json.dumps(media_data, ensure_ascii=False))
 
-    html = pathlib.Path(bundle['htmlPath']).read_text(encoding='utf-8')
+    html_name = pathlib.Path(bundle.get('htmlPath') or 'article.html').name
+    html_path = bundle_path.parent / html_name
+    article_dir = html_path.parent
+    html = html_path.read_text(encoding='utf-8')
+    html = rewrite_html_images(access_token, html, article_dir)
+    html_path.write_text(html, encoding='utf-8')
     payload = {
         'articles': [
             {
@@ -111,12 +171,12 @@ if __name__ == '__main__':
 """
 
 
-def run(cmd):
-    subprocess.run(cmd, check=True)
+def run(cmd, cwd=None):
+    subprocess.run(cmd, check=True, cwd=cwd)
 
 
-def capture(cmd):
-    completed = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+def capture(cmd, cwd=None):
+    completed = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=cwd)
     return completed.stdout.strip()
 
 
@@ -133,9 +193,8 @@ def main():
 
     remote_dir = args.remote_dir.rstrip('/')
     run(['ssh', args.host, f'mkdir -p {remote_dir}'])
-    run(['scp', args.bundle_path, f'{args.host}:{remote_dir}/publish-bundle.json'])
-    run(['scp', args.html_path, f'{args.host}:{remote_dir}/article.html'])
-    run(['scp', args.cover_path, f'{args.host}:{remote_dir}/cover-upload.jpg'])
+    source_dir = pathlib.Path(args.bundle_path).resolve().parent
+    run(['scp', '-r', '.', f'{args.host}:{remote_dir}'], cwd=source_dir)
 
     with tempfile.NamedTemporaryFile('w', suffix='.py', delete=False, encoding='utf-8') as handle:
       handle.write(textwrap.dedent(REMOTE_SCRIPT))

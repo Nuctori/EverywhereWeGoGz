@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import QRCode from 'qrcode';
 
 const DEFAULT_TOURS_FILE = 'public/data/tours.json';
 const DEFAULT_WINDOW_DAYS = 21;
@@ -191,8 +192,8 @@ function getTourSiteUrl(tourId) {
   return `${SITE_BASE_URL}?tour=${encodeURIComponent(tourId)}&source=wechat`;
 }
 
-function getTourQrUrl(tourId) {
-  return `https://quickchart.io/qr?format=png&ecLevel=M&margin=2&size=320&text=${encodeURIComponent(getTourSiteUrl(tourId))}`;
+function getTourQrRelativePath(tourId) {
+  return path.posix.join('qr', `${safeSlug(tourId)}.png`);
 }
 
 function chooseTourImage(tour) {
@@ -210,6 +211,46 @@ function normalizeArticleImageUrl(value) {
     return `${SITE_BASE_URL.replace(/\/$/, '')}${src}`;
   }
   return src;
+}
+
+function safeSlug(value) {
+  return String(value || '')
+    .replace(/[^\w\u4e00-\u9fa5-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48) || 'tour';
+}
+
+export async function ensureTourQrAsset(outputDir, tourId) {
+  const qrDir = path.join(outputDir, 'qr');
+  fs.mkdirSync(qrDir, { recursive: true });
+  const filePath = path.join(qrDir, `${safeSlug(tourId)}.png`);
+  if (!fs.existsSync(filePath)) {
+    await QRCode.toFile(filePath, getTourSiteUrl(tourId), {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 320,
+      color: {
+        dark: '#111111',
+        light: '#ffffff',
+      },
+    });
+  }
+  return filePath;
+}
+
+export async function ensureWeeklyArticleQrAssets(outputDir, tours) {
+  await Promise.all((tours || []).map((tour) => ensureTourQrAsset(outputDir, tour.id)));
+}
+
+export async function ensureReferencedQrAssets(outputDir, markdown) {
+  const refs = new Set();
+  const regex = /\((qr\/[^)\s]+\.png)\)/gi;
+  for (const match of String(markdown || '').matchAll(regex)) {
+    const fileName = path.basename(match[1] || '');
+    const tourId = fileName.replace(/\.png$/i, '').trim();
+    if (tourId) refs.add(tourId);
+  }
+  await Promise.all([...refs].map((tourId) => ensureTourQrAsset(outputDir, tourId)));
 }
 
 function summarizeDepartureDates(dates, limit = 4) {
@@ -412,7 +453,7 @@ function formatTourForPrompt(tour) {
     bookingUrl: tour.bookingUrl,
     images: (tour.images || []).map(normalizeArticleImageUrl),
     siteUrl: getTourSiteUrl(tour.id),
-    qrUrl: getTourQrUrl(tour.id),
+    qrPath: getTourQrRelativePath(tour.id),
     primaryImage,
     bucket: classifyTourBucket(tour),
     dataQuality: {
@@ -507,7 +548,7 @@ export function buildWeeklyArticlePrompt(context) {
         `亮点：${(tour.highlights || []).slice(0, 4).join('、') || '未标注'}`,
         `标签：${(tour.tags || []).slice(0, 4).join('、') || '未标注'}`,
         `站内详情：${tour.siteUrl}`,
-        `二维码：${tour.qrUrl}`,
+        `二维码文件：${tour.qrPath}`,
         `分组：${tour.bucket}`,
       ];
       return lines.join('\n');
@@ -653,7 +694,7 @@ function renderTourSection(tour, aiItem, index) {
   const reminder = aiItem.reminder || defaultReminderForTour(tour);
   const image = tour.primaryImage || normalizeArticleImageUrl(chooseTourImage(tour));
   const siteUrl = tour.siteUrl || getTourSiteUrl(tour.id);
-  const qrUrl = tour.qrUrl || getTourQrUrl(tour.id);
+  const qrPath = tour.qrPath || getTourQrRelativePath(tour.id);
   const departureHint = summarizeDepartureDates(tour.departureDates, 4);
 
   return [
@@ -674,7 +715,7 @@ function renderTourSection(tour, aiItem, index) {
     '',
     '扫码查看详情',
     '',
-    `![${escapeMarkdown(tour.title)} 报名二维码](${qrUrl})`,
+    `![${escapeMarkdown(tour.title)} 报名二维码](${qrPath})`,
   ]
     .filter(Boolean)
     .join('\n');
@@ -747,6 +788,9 @@ export async function generateWeeklyArticle(context, config, options = {}) {
   const payload = await response.json();
   const rawContent = getAiContent(payload);
   const structured = parseJsonPayload(rawContent);
+  if (options.outputDir) {
+    await ensureWeeklyArticleQrAssets(options.outputDir, context.selectedTours);
+  }
   const article = renderWeeklyArticle(context, structured);
   return {
     prompt,
@@ -787,6 +831,9 @@ export function validateGeneratedArticle(article, context) {
   for (const phrase of FORBIDDEN_PHRASES) {
     if (article.includes(phrase)) issues.push(`Contains forbidden phrase: ${phrase}`);
   }
+  if (article.includes('quickchart.io')) {
+    issues.push('Article should not use external QR service URLs.');
+  }
 
   const mentionedSelectedTours = context.selectedTours.filter((tour) => article.includes(tour.title)).length;
   if (mentionedSelectedTours < Math.min(3, context.selectedTours.length)) {
@@ -795,12 +842,15 @@ export function validateGeneratedArticle(article, context) {
 
   for (const tour of context.selectedTours) {
     const siteUrl = getTourSiteUrl(tour.id);
-    const qrUrl = getTourQrUrl(tour.id);
+    const qrPath = tour.qrPath || getTourQrRelativePath(tour.id);
     if (!article.includes(siteUrl)) {
       issues.push(`Missing site URL for ${tour.id}.`);
     }
-    if (!article.includes(qrUrl)) {
-      issues.push(`Missing QR URL for ${tour.id}.`);
+    if (!article.includes(qrPath)) {
+      issues.push(`Missing QR path for ${tour.id}.`);
+    }
+    if (!article.includes(`报名二维码`)) {
+      issues.push(`Missing QR block for ${tour.id}.`);
     }
   }
 

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   buildWeeklyArticleContext,
+  ensureReferencedQrAssets,
   loadEnvFiles,
   readToursData,
   rebuildWeeklyArticleFromStructured,
@@ -114,6 +115,7 @@ async function main() {
 
   fs.mkdirSync(outDir, { recursive: true });
   fs.writeFileSync(path.join(outDir, 'article.md'), `${article.trim()}\n`, 'utf8');
+  await ensureReferencedQrAssets(outDir, article);
   writeJson(path.join(outDir, 'weekly-context.json'), context);
   writeJson(path.join(outDir, 'structured-source.json'), structured);
 }

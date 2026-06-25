@@ -59,7 +59,7 @@ async function main() {
   const config = resolveDeepSeekConfig();
 
   try {
-    const generated = await generateWeeklyArticle(context, config);
+    const generated = await generateWeeklyArticle(context, config, { outputDir: outDir });
     const validation = validateGeneratedArticle(generated.article, context);
     writeJson(path.join(outDir, 'validation.json'), validation);
     writeJson(path.join(outDir, 'generation-meta.json'), {

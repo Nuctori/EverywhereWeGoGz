@@ -1,8 +1,11 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
 import {
   buildWeeklyArticleContext,
   buildWeeklyArticlePrompt,
   getDefaultAuthor,
+  ensureWeeklyArticleQrAssets,
   renderWeeklyArticle,
   validateGeneratedArticle,
 } from './lib/weekly_wechat_article.mjs';
@@ -89,7 +92,12 @@ const prompt = buildWeeklyArticlePrompt(context);
 assert.ok(prompt.includes('"weatherLead"'));
 assert.ok(prompt.includes('清远峡谷漂流2天'));
 assert.ok(prompt.includes('tour-summer-nearby'));
-assert.ok(prompt.includes('二维码'));
+assert.ok(prompt.includes('二维码文件'));
+
+const qrOutDir = path.join(process.cwd(), 'tmp', 'weekly-wechat-article-qr-test');
+fs.mkdirSync(qrOutDir, { recursive: true });
+await ensureWeeklyArticleQrAssets(qrOutDir, context.selectedTours);
+assert.ok(fs.existsSync(path.join(qrOutDir, 'qr', 'tour-summer-nearby.png')));
 
 const article = renderWeeklyArticle(context, {
   title: '本周适合出发的两条线路',
@@ -116,6 +124,6 @@ const validation = validateGeneratedArticle(article, context);
 assert.equal(validation.ok, true);
 assert.ok(article.includes(`author: "${getDefaultAuthor()}"`));
 assert.ok(article.includes('扫码查看详情'));
-assert.ok(article.includes('source=wechat'));
+assert.ok(article.includes('qr/tour-summer-nearby.png'));
 
 console.log('weekly wechat article tests passed');

@@ -16,12 +16,16 @@ cover: "/data/image-cache/jrttp.jrt365.com_8066/238e10f60f6c77e6.webp"
 # 标题
 
 正文
+
+![报名二维码](qr/tour_test.png)
 `, 'utf8');
 
 const result = await preparePublishBundle(rootDir, { outDir });
 assert.ok(result.bundlePath.endsWith('publish-bundle.json'));
 assert.ok(fs.existsSync(result.bundle.htmlPath));
 assert.ok(fs.existsSync(result.bundle.uploadCoverPath));
+assert.ok(fs.existsSync(path.join(outDir, 'qr')));
+assert.ok(fs.existsSync(path.join(outDir, 'qr', 'tour_test.png')));
 assert.equal(result.bundle.title, '测试文章');
 
 console.log('wechat publish bundle tests passed');

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
 import sharp from 'sharp';
+import { ensureReferencedQrAssets } from './weekly_wechat_article.mjs';
 
 function stripWrappingQuotes(value) {
   if (
@@ -41,6 +42,23 @@ function renderInlineMarkdown(text) {
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
   return html;
+}
+
+function mimeTypeFromFileName(fileName) {
+  const lower = String(fileName || '').toLowerCase();
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  if (lower.endsWith('.gif')) return 'image/gif';
+  return 'image/jpeg';
+}
+
+function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replaceAll('&amp;', '&')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>');
 }
 
 function renderMarkdownImage(alt, src, options = {}) {
@@ -83,7 +101,7 @@ function tryRenderSupportBlock(lines, startIndex) {
   if (!qrHint || !qrHint.startsWith('扫码')) return null;
 
   cursor = consumeBlankLines(lines, cursor + 1);
-  const qrMatch = lines[cursor]?.trim().match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/);
+  const qrMatch = lines[cursor]?.trim().match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
   if (!qrMatch) return null;
 
   return {
@@ -154,7 +172,7 @@ export function markdownToHtml(markdown) {
       continue;
     }
 
-    const imageMatch = trimmed.match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/);
+    const imageMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
     if (imageMatch) {
       flushParagraph();
       flushList();
@@ -216,6 +234,92 @@ export async function prepareCoverForUpload(coverPath, outputDir) {
   }
   await sharp(coverPath).jpeg({ quality: 88 }).toFile(targetPath);
   return targetPath;
+}
+
+function collectHtmlImageSources(html) {
+  const sources = [];
+  const seen = new Set();
+  const regex = /<img\b[^>]*\bsrc="([^"]+)"[^>]*>/gi;
+  for (const match of html.matchAll(regex)) {
+    const src = String(match[1] || '').trim();
+    if (!src || seen.has(src)) continue;
+    seen.add(src);
+    sources.push(src);
+  }
+  return sources;
+}
+
+function replaceHtmlImageSources(html, replacements) {
+  let output = html;
+  for (const [source, target] of replacements.entries()) {
+    output = output.replaceAll(`src="${source}"`, `src="${target}"`);
+  }
+  return output;
+}
+
+async function loadImageAsset(rootDir, articlePath, source) {
+  const decodedSource = decodeHtmlEntities(source);
+  if (/^https?:\/\//i.test(decodedSource)) {
+    const response = await fetch(decodedSource);
+    if (!response.ok) {
+      throw new Error(`Inline image download failed: ${response.status} ${decodedSource}`);
+    }
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const url = new URL(decodedSource);
+    const fileName = path.basename(url.pathname || 'image.jpg') || 'image.jpg';
+    const contentType = response.headers.get('content-type') || mimeTypeFromFileName(fileName);
+    return { bytes, fileName, contentType };
+  }
+
+  let filePath = decodedSource;
+  if (decodedSource.startsWith('/')) {
+    filePath = path.join(rootDir, 'public', decodedSource.slice(1).replaceAll('/', path.sep));
+  } else {
+    filePath = path.resolve(path.dirname(articlePath), decodedSource);
+  }
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Inline image not found: ${decodedSource}`);
+  }
+
+  return {
+    bytes: fs.readFileSync(filePath),
+    fileName: path.basename(filePath),
+    contentType: mimeTypeFromFileName(filePath),
+  };
+}
+
+export async function uploadArticleImage(accessToken, imageAsset) {
+  const url = new URL('https://api.weixin.qq.com/cgi-bin/media/uploadimg');
+  url.searchParams.set('access_token', accessToken);
+
+  const form = new FormData();
+  form.set(
+    'media',
+    new Blob([imageAsset.bytes], { type: imageAsset.contentType }),
+    imageAsset.fileName,
+  );
+
+  const data = await fetchJson(url, {
+    method: 'POST',
+    body: form,
+  });
+
+  if (!data?.url) {
+    throw new Error(`WeChat inline image url missing: ${JSON.stringify(data).slice(0, 300)}`);
+  }
+  return data.url;
+}
+
+export async function rewriteHtmlImagesForWechat(rootDir, articlePath, html, accessToken) {
+  const replacements = new Map();
+  for (const source of collectHtmlImageSources(html)) {
+    if (/^https?:\/\/mmbiz\.qpic\.cn\//i.test(source)) continue;
+    const asset = await loadImageAsset(rootDir, articlePath, source);
+    const uploadedUrl = await uploadArticleImage(accessToken, asset);
+    replacements.set(source, uploadedUrl);
+  }
+  return replaceHtmlImageSources(html, replacements);
 }
 
 function applyProxyEnv() {
@@ -350,12 +454,14 @@ export async function publishMarkdownArticle(rootDir, options = {}) {
   const outputDir = resolveOutputDir(articlePath);
   const coverPath = resolveCoverFile(rootDir, articlePath, frontmatter);
   const uploadCoverPath = await prepareCoverForUpload(coverPath, outputDir);
-  const html = markdownToHtml(body);
+  const rawHtml = markdownToHtml(body);
   const htmlPath = path.join(outputDir, 'article.html');
-  fs.writeFileSync(htmlPath, `${html}\n`, 'utf8');
 
   const accessToken = await getAccessToken(config);
   const thumbMediaId = await uploadCoverMedia(accessToken, uploadCoverPath);
+  await ensureReferencedQrAssets(outputDir, body);
+  const html = await rewriteHtmlImagesForWechat(rootDir, articlePath, rawHtml, accessToken);
+  fs.writeFileSync(htmlPath, `${html}\n`, 'utf8');
   const payload = buildDraftPayload({
     frontmatter,
     html,
@@ -400,6 +506,7 @@ export async function preparePublishBundle(rootDir, options = {}) {
   const html = markdownToHtml(body);
   const htmlPath = path.join(outputDir, 'article.html');
   fs.writeFileSync(htmlPath, `${html}\n`, 'utf8');
+  await ensureReferencedQrAssets(outputDir, body);
 
   const bundle = {
     generatedAt: new Date().toISOString(),
