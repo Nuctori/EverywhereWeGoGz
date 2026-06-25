@@ -272,7 +272,9 @@ async function loadImageAsset(rootDir, articlePath, source) {
   }
 
   let filePath = decodedSource;
-  if (decodedSource.startsWith('/')) {
+  if (path.isAbsolute(decodedSource) && fs.existsSync(decodedSource)) {
+    filePath = decodedSource;
+  } else if (decodedSource.startsWith('/')) {
     filePath = path.join(rootDir, 'public', decodedSource.slice(1).replaceAll('/', path.sep));
   } else {
     filePath = path.resolve(path.dirname(articlePath), decodedSource);

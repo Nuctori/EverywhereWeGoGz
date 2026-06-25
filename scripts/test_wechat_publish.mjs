@@ -100,6 +100,20 @@ const rewritten = await rewriteHtmlImagesForWechat(
 );
 assert.ok(rewritten.includes('https://mmbiz.qpic.cn/'));
 
+const publicImagePath = path.join(tmpRoot, 'public', 'data', 'image-cache', 'wechat-inline-test.png');
+fs.mkdirSync(path.dirname(publicImagePath), { recursive: true });
+fs.writeFileSync(
+  publicImagePath,
+  Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+XgnsAAAAASUVORK5CYII=', 'base64'),
+);
+const publicImageRewritten = await rewriteHtmlImagesForWechat(
+  tmpRoot,
+  path.join(inlineDir, 'article.md'),
+  `<p><img src="/data/image-cache/wechat-inline-test.png" alt="public"></p>`,
+  'token123',
+);
+assert.ok(publicImageRewritten.includes('https://mmbiz.qpic.cn/'));
+
 const qrRewritten = await rewriteHtmlImagesForWechat(
   tmpRoot,
   path.join(inlineDir, 'article.md'),
