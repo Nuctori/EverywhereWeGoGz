@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Flame, ChevronRight } from 'lucide-react';
 import type { Tour } from '@/types/tour';
 import { formatDate } from '@/lib/tour-display';
+import { formatDepartureDateToggleLabel } from '@/lib/departure-date-display';
 
 interface DepartureDateSelectorProps {
   tour: Tour;
@@ -121,7 +122,7 @@ export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
           onClick={() => setShowAll(!showAll)}
           className="w-full mt-3 py-2 text-xs text-slate-500 hover:text-blue-500 flex items-center justify-center gap-1 transition-colors"
         >
-          {showAll ? '收起' : `查看全部 ${allDates} 个团期`}
+          {formatDepartureDateToggleLabel(allDates.length, showAll)}
           <ChevronRight className={`w-3 h-3 transition-transform ${showAll ? 'rotate-90' : ''}`} />
         </button>
       )}
