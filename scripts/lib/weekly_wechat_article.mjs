@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import QRCode from 'qrcode';
 
 const DEFAULT_TOURS_FILE = 'public/data/tours.json';
 const DEFAULT_WINDOW_DAYS = 21;
 const DEFAULT_MAX_CANDIDATES = 18;
-const DEFAULT_MAX_ARTICLE_ITEMS = 5;
-const DEFAULT_AUTHOR = '老广旅行';
-const DEFAULT_WEBSITE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
+const DEFAULT_MAX_ARTICLE_ITEMS = 25;
+const DEFAULT_JSON_MAX_TOKENS = 8192;
+const DEFAULT_AUTHOR = '老广去边度';
 
 const FORBIDDEN_PHRASES = [
   '最低价',
@@ -21,7 +22,7 @@ const FORBIDDEN_PHRASES = [
   '唯一',
 ];
 
-const SUMMER_COOLING_KEYWORDS = [
+const SUMMER_KEYWORDS = [
   '避暑',
   '清凉',
   '漂流',
@@ -33,45 +34,115 @@ const SUMMER_COOLING_KEYWORDS = [
   '峡谷',
   '亲水',
   '玩水',
+  '温泉',
   '山',
   '湖',
+  '亲子',
   '暑假',
-  'cool',
-  'summer',
-  'rafting',
-  'beach',
-  'coast',
-  'island',
-  'forest',
-  'gorge',
-  'water',
-  'lake',
-  'mountain',
 ];
 
-const HOT_SPRING_KEYWORDS = ['温泉', '私汤', '泡池', '汤泉', 'hot spring', 'spring resort'];
-const FAMILY_KEYWORDS = ['亲子', '家庭', '带娃', '母婴', 'family', 'kid', 'kids', 'parent-child'];
-const RESORT_KEYWORDS = ['度假', '酒店', '休闲', '美食', '放松', 'resort', 'hotel', 'relax', 'staycation'];
-const WATER_AND_MOUNTAIN_KEYWORDS = [
-  '山',
-  '湖',
+const SCENIC_KEYWORDS = [
+  '山水',
   '峡谷',
+  '瀑布',
+  '丹霞',
+  '峰林',
   '森林',
+  '溶洞',
+  '茶山',
+  '山居',
+  '畔山',
+  '云顶',
+  '溪谷',
+  '溪',
+  '湖',
+  '草原',
+  '氧吧',
+];
+
+const WATER_KEYWORDS = [
   '漂流',
   '亲水',
   '玩水',
-  '海岛',
-  '海边',
-  'mountain',
-  'lake',
-  'gorge',
-  'forest',
-  'rafting',
-  'water',
-  'island',
-  'coast',
+  '戏水',
+  '山泉',
+  '玩漂',
+  '溯溪',
+  '冲浪',
 ];
-const RAIL_KEYWORDS = ['高铁', '动车', '火车', 'high-speed rail', 'rail', 'train'];
+
+const COASTAL_KEYWORDS = [
+  '海边',
+  '海岛',
+  '沙滩',
+  '蓝眼泪',
+  '赶海',
+  '海风',
+  '海景',
+  '东山岛',
+  '海陵岛',
+];
+
+const HOT_SPRING_KEYWORDS = [
+  '温泉',
+  '泡汤',
+  '汤泉',
+  '私汤',
+  '带池',
+  '泡池',
+  '雅泡',
+  '御泉',
+  '汤池',
+];
+
+const HOTEL_RELAX_KEYWORDS = [
+  '酒店',
+  '度假村',
+  '民宿',
+  '别墅',
+  '山房',
+  '庄园',
+  '美宿',
+  '泳池',
+  '恒温池',
+];
+
+const FOOD_CULTURE_KEYWORDS = [
+  '美食',
+  '早茶',
+  '海鲜',
+  '乳鸽',
+  '陈皮',
+  '宴',
+  '古镇',
+  '古城',
+  '博物馆',
+  '寺',
+  '夜游',
+  '人文',
+];
+
+const FAMILY_PLAY_KEYWORDS = [
+  '夏令营',
+  '乐园',
+  '动物园',
+  '马戏',
+  '萌宠',
+  '亲子营',
+  '水上乐园',
+];
+
+const LONG_HAUL_KEYWORDS = [
+  '高铁',
+  '动车',
+  '飞机',
+  '跨国',
+  '边境',
+  '秘境',
+  '香格里拉',
+  '川西',
+  '新疆',
+];
 
 const DOMESTIC_NEARBY_DESTINATIONS = new Set([
   '广东',
@@ -90,44 +161,47 @@ const DOMESTIC_NEARBY_DESTINATIONS = new Set([
   '华东',
 ]);
 
-const PREFERENCE_GROUPS = [
-  {
-    id: 'family_short_break',
-    label: '亲子短途',
-    description: '适合带娃出行，2 到 4 天优先，尽量轻松不折腾。',
-    matches: (tour, meta) => meta.isFamilyFriendly && tour.duration >= 2 && tour.duration <= 4,
-  },
-  {
-    id: 'mountain_water_cooling',
-    label: '山水清凉',
-    description: '更符合夏季常识的清凉线，比如山水、漂流、森林、亲水。',
-    matches: (_tour, meta) => meta.hasCoolingSignals,
-  },
-  {
-    id: 'weekend_nearby',
-    label: '周末近场',
-    description: '更适合广州及周边用户周末或小假期说走就走。',
-    matches: (tour, meta) => meta.isNearby && tour.duration >= 2 && tour.duration <= 3,
-  },
-  {
-    id: 'rail_escape',
-    label: '高铁轻出省',
-    description: '想走远一点，但更偏向高铁、动车这类省心交通方式。',
-    matches: (tour, meta) => meta.isRailFriendly || /高铁|动车|火车/.test(tour.transportType || ''),
-  },
-  {
-    id: 'budget_friendly',
-    label: '预算友好',
-    description: '价格更容易下手，适合临时起意的周度出游。',
-    matches: (tour) => typeof tour.price === 'number' && tour.price <= 999,
-  },
-  {
-    id: 'relaxing_resort',
-    label: '轻松度假',
-    description: '更偏酒店休闲、温泉或放松路线，但是否适合本周需要 AI 用常识再判断。',
-    matches: (_tour, meta) => meta.hasHotSpringSignals || meta.hasResortSignals,
-  },
+const SITE_BASE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
+const WEATHER_OVERVIEW_IMAGE = 'https://file.gzl.cn/group1/M00/31/55/wKkBH1-XfHqAXFtHAAE1-x29ZjY556.jpg';
+const ARTICLE_BUCKET_ORDER = [
+  '山水亲水',
+  '海边海岛',
+  '酒店泡池',
+  '亲子玩乐',
+  '美食人文',
+  '周末轻出发',
+  '长线风景',
 ];
+const ARTICLE_BUCKET_META = {
+  山水亲水: {
+    title: '山水亲水',
+    intro: '这组优先看真山真水、树荫、溪谷、漂流和能直接把体感降下来的线路，更对这周想认真躲闷热的人胃口。',
+  },
+  海边海岛: {
+    title: '海边海岛',
+    intro: '如果你更想靠海风换气、把节奏放松一点，这一组更像真正的放假，适合想把周末过出空旷感的人。',
+  },
+  酒店泡池: {
+    title: '住下来慢慢玩',
+    intro: '不想赶景点，就把重点放在住得舒服、泳池水世界够能打、白天晚上都能慢下来这一类线路上。',
+  },
+  亲子玩乐: {
+    title: '亲子玩乐',
+    intro: '这一组更偏向大人小孩都能消磨时间的玩法，重点是互动空间够多，路上不至于太折腾。',
+  },
+  美食人文: {
+    title: '美食人文',
+    intro: '如果你这周更想轻松走走、顺手吃点当地拿手菜，这组会比纯暴晒式打卡更舒服，也更容易约人同行。',
+  },
+  周末轻出发: {
+    title: '周末轻出发',
+    intro: '时间卡得紧也没关系，这一组更适合说走就走，出发成本低，安排起来不费劲。',
+  },
+  长线风景: {
+    title: '请假也值得的长线',
+    intro: '愿意多请一两天假，就把风景密度和季节感拉满，这一组更适合去一个现在去才真正有味道的地方。',
+  },
+};
 
 function stripWrappingQuotes(value) {
   if (
@@ -247,6 +321,117 @@ function normalizeDestination(value) {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : '未标注目的地';
 }
 
+function slugifyText(value) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function escapeMarkdown(value) {
+  return String(value || '').replace(/\|/g, '\\|');
+}
+
+function getTourSiteUrl(tourId) {
+  return `${SITE_BASE_URL}?tour=${encodeURIComponent(tourId)}&source=wechat`;
+}
+
+function getTourQrRelativePath(tourId) {
+  return path.posix.join('qr', `${safeSlug(tourId)}.png`);
+}
+
+function chooseTourImage(tour) {
+  if (Array.isArray(tour.images) && tour.images.length > 0) {
+    return tour.images[0];
+  }
+  return '';
+}
+
+function normalizeArticleImageUrl(value) {
+  const src = String(value || '').trim();
+  if (!src) return '';
+  if (/^https?:\/\//i.test(src)) return src;
+  if (src.startsWith('/')) {
+    return `${SITE_BASE_URL.replace(/\/$/, '')}${src}`;
+  }
+  return src;
+}
+
+function safeSlug(value) {
+  return String(value || '')
+    .replace(/[^\w\u4e00-\u9fa5-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 48) || 'tour';
+}
+
+export async function ensureTourQrAsset(outputDir, tourId) {
+  const qrDir = path.join(outputDir, 'qr');
+  fs.mkdirSync(qrDir, { recursive: true });
+  const filePath = path.join(qrDir, `${safeSlug(tourId)}.png`);
+  if (!fs.existsSync(filePath)) {
+    await QRCode.toFile(filePath, getTourSiteUrl(tourId), {
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      width: 320,
+      color: {
+        dark: '#111111',
+        light: '#ffffff',
+      },
+    });
+  }
+  return filePath;
+}
+
+export async function ensureWeeklyArticleQrAssets(outputDir, tours) {
+  await Promise.all((tours || []).map((tour) => ensureTourQrAsset(outputDir, tour.id)));
+}
+
+export async function ensureReferencedQrAssets(outputDir, markdown) {
+  const refs = new Set();
+  const regex = /\((qr\/[^)\s]+\.png)\)/gi;
+  for (const match of String(markdown || '').matchAll(regex)) {
+    const fileName = path.basename(match[1] || '');
+    const tourId = fileName.replace(/\.png$/i, '').trim();
+    if (tourId) refs.add(tourId);
+  }
+  await Promise.all([...refs].map((tourId) => ensureTourQrAsset(outputDir, tourId)));
+}
+
+function summarizeDepartureDates(dates, limit = 4) {
+  const list = Array.isArray(dates) ? dates.filter(Boolean) : [];
+  if (list.length <= limit) return list.join('、');
+  return `${list.slice(0, limit).join('、')} 等${list.length}个班期`;
+}
+
+function priceLabel(tour) {
+  if (typeof tour.price !== 'number') return '价格以供应商页面为准';
+  const unit = tour.priceUnit || '元/人';
+  if (unit.includes('元')) return `${tour.price}${unit}起`;
+  return `${tour.price}元/${unit}起`;
+}
+
+function durationLabel(tour) {
+  if (typeof tour.duration === 'number' && Number.isFinite(tour.duration)) {
+    return `${tour.duration}天`;
+  }
+  return '行程天数以供应商页面为准';
+}
+
+function suitabilityLabel(tour) {
+  const list = Array.isArray(tour.suitableFor) ? tour.suitableFor.filter(Boolean) : [];
+  return list.length > 0 ? list.join('、') : '亲子、情侣、朋友结伴';
+}
+
+function highlightLabel(tour) {
+  if (Array.isArray(tour.experienceSignals) && tour.experienceSignals.length > 0) {
+    return [...new Set(tour.experienceSignals)].slice(0, 4).join('、');
+  }
+  const parts = [
+    ...(Array.isArray(tour.highlights) ? tour.highlights : []),
+    ...(Array.isArray(tour.tags) ? tour.tags : []),
+  ].filter(Boolean);
+  return [...new Set(parts)].slice(0, 4).join('、') || '按当季热门玩法筛出';
+}
+
 function textBlob(tour) {
   return [
     tour.title,
@@ -260,8 +445,8 @@ function textBlob(tour) {
     .join(' ');
 }
 
-function containsAny(text, keywords) {
-  return keywords.some((keyword) => text.includes(keyword));
+function experienceBlob(tour) {
+  return [tour.title].filter(Boolean).join(' ');
 }
 
 function getTravelWindowDates(tour, runDate, endDate) {
@@ -272,46 +457,119 @@ function getTravelWindowDates(tour, runDate, endDate) {
     .sort();
 }
 
-function buildTourMeta(tour, destination) {
+function hasSummerSignals(tour) {
   const blob = textBlob(tour);
-  return {
-    text: blob,
-    destination,
-    isNearby: DOMESTIC_NEARBY_DESTINATIONS.has(destination),
-    isFamilyFriendly: containsAny(blob, FAMILY_KEYWORDS),
-    hasCoolingSignals: containsAny(blob, SUMMER_COOLING_KEYWORDS) || containsAny(blob, WATER_AND_MOUNTAIN_KEYWORDS),
-    hasHotSpringSignals: containsAny(blob, HOT_SPRING_KEYWORDS),
-    hasResortSignals: containsAny(blob, RESORT_KEYWORDS),
-    isRailFriendly: containsAny(`${tour.transportType || ''} ${blob}`, RAIL_KEYWORDS),
-  };
-}
-
-function getSeasonalPriorityAdjustment(meta, season) {
-  if (season === '夏季') {
-    if (meta.hasCoolingSignals) return 6;
-    if (meta.hasHotSpringSignals && !meta.hasCoolingSignals) return -8;
-  }
-
-  if (season === '冬季' && meta.hasHotSpringSignals) {
-    return 6;
-  }
-
-  return 0;
+  return SUMMER_KEYWORDS.some((keyword) => blob.includes(keyword));
 }
 
 function isGenericDestination(destination) {
   return destination === '其他' || destination === '未标注目的地';
 }
 
+function countKeywordHits(blob, keywords) {
+  return keywords.reduce((count, keyword) => (blob.includes(keyword) ? count + 1 : count), 0);
+}
+
+function inferRouteFamily(title) {
+  const normalized = slugifyText(title)
+    .replace(/[（(][^）)]*[）)]/g, ' ')
+    .replace(/\d+\s*天/g, ' ')
+    .replace(/(含早|含餐|食\d+餐|带池|泡池|雅泡|私汤|升级房|升级版|豪华版|标准版|平价之选|品质之选|超低价|慢生活|食宿升级|1号楼|2号楼|3号楼|威士忌雅泡|威士忌畔山|高铁|动车|双动|双高|纯玩)/g, ' ')
+    .replace(/[·丨|｜/]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\s+/g, '');
+  return normalized || slugifyText(title) || '未分组线路';
+}
+
+function inferExperienceSignals(tour) {
+  const blob = experienceBlob(tour);
+  const signals = [];
+  if (countKeywordHits(blob, SCENIC_KEYWORDS) > 0) signals.push('山水避暑');
+  if (countKeywordHits(blob, WATER_KEYWORDS) > 0) signals.push('亲水玩水');
+  if (countKeywordHits(blob, COASTAL_KEYWORDS) > 0) signals.push('海边海风');
+  if (countKeywordHits(blob, HOT_SPRING_KEYWORDS) > 0) signals.push('温泉泡池');
+  if (countKeywordHits(blob, HOTEL_RELAX_KEYWORDS) > 0) signals.push('酒店放松');
+  if (countKeywordHits(blob, FOOD_CULTURE_KEYWORDS) > 0) signals.push('美食人文');
+  if (countKeywordHits(blob, FAMILY_PLAY_KEYWORDS) > 0) signals.push('亲子玩乐');
+  if (countKeywordHits(blob, LONG_HAUL_KEYWORDS) > 0) signals.push('长线风景');
+  if (tour.suitableFor?.includes('亲子') && !signals.includes('亲子玩乐')) {
+    signals.push('亲子友好');
+  }
+  return [...new Set(signals)];
+}
+
+function getExperienceHitCounts(tour) {
+  const blob = experienceBlob(tour);
+  return {
+    scenic: countKeywordHits(blob, SCENIC_KEYWORDS),
+    water: countKeywordHits(blob, WATER_KEYWORDS),
+    coastal: countKeywordHits(blob, COASTAL_KEYWORDS),
+    hotSpring: countKeywordHits(blob, HOT_SPRING_KEYWORDS),
+    hotel: countKeywordHits(blob, HOTEL_RELAX_KEYWORDS),
+    food: countKeywordHits(blob, FOOD_CULTURE_KEYWORDS),
+    family: countKeywordHits(blob, FAMILY_PLAY_KEYWORDS),
+    longHaul: countKeywordHits(blob, LONG_HAUL_KEYWORDS),
+  };
+}
+
+function hasWeekendDeparture(windowDates) {
+  return windowDates.some((dateKey) => {
+    const dayOfWeek = new Date(`${dateKey}T00:00:00`).getDay();
+    return dayOfWeek === 5 || dayOfWeek === 6 || dayOfWeek === 0;
+  });
+}
+
+function classifyTourBucket(tour, experienceSignals = inferExperienceSignals(tour)) {
+  const destination = normalizeDestination(tour.destination);
+  const hits = getExperienceHitCounts(tour);
+  if (hits.family > 0 && hits.water > 0) {
+    return '亲子玩乐';
+  }
+  if (hits.coastal > 0) {
+    return '海边海岛';
+  }
+  if (hits.scenic > 0 || hits.water > 0) {
+    return '山水亲水';
+  }
+  if (hits.food >= 2 || (hits.food > 0 && hits.scenic === 0 && hits.coastal === 0)) {
+    return '美食人文';
+  }
+  if (hits.family > 0 || experienceSignals.includes('亲子玩乐')) {
+    return '亲子玩乐';
+  }
+  if (
+    hits.hotSpring > 0 ||
+    hits.hotel > 1 ||
+    ((hits.hotel > 0 || experienceSignals.includes('酒店放松')) && hits.scenic === 0 && hits.water === 0)
+  ) {
+    return '酒店泡池';
+  }
+  if (
+    hits.longHaul > 0 ||
+    experienceSignals.includes('长线风景') ||
+    tour.duration >= 5 ||
+    !DOMESTIC_NEARBY_DESTINATIONS.has(destination)
+  ) {
+    return '长线风景';
+  }
+  return '周末轻出发';
+}
+
 function scoreTour(tour, runDate, windowDates) {
   const destination = normalizeDestination(tour.destination);
-  const meta = buildTourMeta(tour, destination);
   const firstDate = windowDates[0];
   const daysUntilDeparture = firstDate ? diffDays(runDate, firstDate) : 999;
-  const availabilityConfidence =
-    tour.dataQuality?.availabilityConfidence ||
-    tour.meta?.dataQuality?.availabilityConfidence ||
-    'unknown';
+  const availabilityConfidence = tour.dataQuality?.availabilityConfidence || tour.meta?.dataQuality?.availabilityConfidence || 'unknown';
+  const routeFamily = inferRouteFamily(tour.title);
+  const experienceSignals = inferExperienceSignals(tour);
+  const bucket = classifyTourBucket(tour, experienceSignals);
+  const departureSpread = new Set(windowDates).size;
+  const weekendFriendly = hasWeekendDeparture(windowDates);
+  const highlightCount = new Set([
+    ...(Array.isArray(tour.highlights) ? tour.highlights : []),
+    ...(Array.isArray(tour.tags) ? tour.tags : []),
+  ].filter(Boolean)).size;
   let score = 0;
 
   score += Math.max(0, 18 - Math.min(daysUntilDeparture, 18));
@@ -331,12 +589,23 @@ function scoreTour(tour, runDate, windowDates) {
     else if (tour.price >= 15000) score -= 12;
   }
 
-  if (meta.isNearby) score += 16;
+  if (DOMESTIC_NEARBY_DESTINATIONS.has(destination)) score += 16;
   if (isGenericDestination(destination)) score -= 14;
-  score += getSeasonalPriorityAdjustment(meta, monthToSeason(Number(runDate.split('-')[1])));
-  if (meta.isFamilyFriendly) score += 4;
+  if (hasSummerSignals(tour)) score += 10;
+  if (tour.title?.includes('暑假')) score += 6;
+  if (tour.suitableFor?.includes('亲子')) score += 2;
   if (tour.isFlashSale) score += 4;
   if (tour.isHot) score += 3;
+  score += Math.min(8, Math.max(0, departureSpread - 1) * 2);
+  if (weekendFriendly) score += 4;
+  score += Math.min(10, experienceSignals.length * 2);
+  score += Math.min(6, highlightCount);
+  if (bucket === '山水亲水') score += 6;
+  if (bucket === '海边海岛') score += 5;
+  if (bucket === '酒店泡池') score += 4;
+  if (bucket === '美食人文') score += 3;
+  if (experienceSignals.includes('山水避暑') && experienceSignals.includes('温泉泡池')) score += 3;
+  if (experienceSignals.includes('山水避暑') && experienceSignals.includes('亲水玩水')) score += 4;
 
   return {
     score,
@@ -344,67 +613,141 @@ function scoreTour(tour, runDate, windowDates) {
     availabilityConfidence,
     destination,
     firstDate,
-    meta,
+    routeFamily,
+    bucket,
+    experienceSignals,
+    departureSpread,
+    weekendFriendly,
+    highlightCount,
   };
 }
 
 function summarizePriceRange(tours) {
-  const prices = tours
-    .map((tour) => tour.price)
-    .filter((value) => typeof value === 'number')
-    .sort((a, b) => a - b);
+  const prices = tours.map((tour) => tour.price).filter((value) => typeof value === 'number').sort((a, b) => a - b);
   if (prices.length === 0) return '价格以供应商页面为准';
-  return `${prices[0]}-${prices[prices.length - 1]}${tours[0]?.priceUnit || '元/人'}`;
+  return `${prices[0]}-${prices[prices.length - 1]}元/${tours[0]?.priceUnit || '人'}`;
 }
 
-function deriveThemeHints(candidateGroups, season) {
+function deriveThemeHints(selectedTours, season) {
   const hints = [];
-
   if (season === '夏季') {
-    hints.push('先判断本周更适合避暑、亲子短途还是轻松度假');
-    hints.push('优先写清凉山水、近场周末和高铁轻出省的区别');
-  } else {
-    hints.push('先判断本周更适合短途休闲还是中短线出游');
-  }
-
-  if (candidateGroups.some((group) => group.id === 'family_short_break')) {
-    hints.push('亲子友好');
-  }
-  if (candidateGroups.some((group) => group.id === 'mountain_water_cooling')) {
+    hints.push('周边避暑');
+    hints.push('亲子短途');
     hints.push('山水清凉');
   }
-  if (candidateGroups.some((group) => group.id === 'relaxing_resort')) {
-    hints.push('度假放松');
-  }
 
-  return [...new Set(hints)].slice(0, 5);
+  if (selectedTours.some((tour) => (tour.theme || '').includes('亲子') || tour.suitableFor?.includes('亲子'))) {
+    hints.push('暑期亲子');
+  }
+  if (selectedTours.some((tour) => textBlob(tour).includes('海'))) {
+    hints.push('玩水度假');
+  }
+  return [...new Set(hints)].slice(0, 4);
 }
 
-export function resolveArticleAssetUrl(assetPath, websiteUrl = DEFAULT_WEBSITE_URL) {
-  if (!assetPath || typeof assetPath !== 'string') return '';
-  if (/^https?:\/\//i.test(assetPath)) return assetPath;
-  const normalizedWebsiteUrl = websiteUrl.replace(/\/$/, '');
-  if (assetPath.startsWith('/')) {
-    return `${normalizedWebsiteUrl}${assetPath}`;
-  }
-  return `${normalizedWebsiteUrl}/${assetPath.replace(/^\.\//, '')}`;
+function compareEditorialPriority(left, right) {
+  return (
+    right.editorialScore - left.editorialScore ||
+    right.departureSpread - left.departureSpread ||
+    Number(right.weekendFriendly) - Number(left.weekendFriendly) ||
+    right.experienceSignals.length - left.experienceSignals.length ||
+    right.highlightCount - left.highlightCount ||
+    left.price - right.price
+  );
 }
 
-function summarizeSeasonFit(meta, season) {
-  if (season === '夏季') {
-    if (meta.hasCoolingSignals) return '更符合夏季常识，可从清凉、山水、亲水等方向来写';
-    if (meta.hasHotSpringSignals) return '属于度假放松型，除非同时有山水、亲水或高海拔卖点，否则不要硬写成避暑主推';
-    return '没有明显季节红利，适合当作补充选择而不是主推';
+function applyCrowdingPenalties(scoredTours) {
+  const familyCounts = new Map();
+  const destinationCounts = new Map();
+  const bucketCounts = new Map();
+
+  return scoredTours
+    .map((tour) => {
+      const familyRank = (familyCounts.get(tour.routeFamily) || 0) + 1;
+      const destinationRank = (destinationCounts.get(tour.destination) || 0) + 1;
+      const bucketRank = (bucketCounts.get(tour.bucket) || 0) + 1;
+      familyCounts.set(tour.routeFamily, familyRank);
+      destinationCounts.set(tour.destination, destinationRank);
+      bucketCounts.set(tour.bucket, bucketRank);
+
+      const familyPenalty = familyRank > 1 ? Math.min(24, (familyRank - 1) * 8) : 0;
+      const destinationPenalty = destinationRank > 4 ? Math.min(12, (destinationRank - 4) * 3) : 0;
+      const bucketPenalty = bucketRank > 10 ? Math.min(10, (bucketRank - 10) * 2) : 0;
+      const editorialScore = tour.editorialScore - familyPenalty - destinationPenalty - bucketPenalty;
+
+      return {
+        ...tour,
+        editorialScore,
+        routeFamilyRank: familyRank,
+        editorialReasons: [
+          ...tour.editorialReasons,
+          familyRank === 1 ? '同系列优先保留首推' : `同系列第${familyRank}条，适度降权`,
+        ],
+      };
+    })
+    .sort(compareEditorialPriority);
+}
+
+function pickToursByStages(candidateTours, limit, stages) {
+  const picked = [];
+  const usedIds = new Set();
+  const bucketCounts = new Map();
+  const destinationCounts = new Map();
+  const familyCounts = new Map();
+
+  for (const stage of stages) {
+    const stageLimit = Math.min(limit, stage.until);
+    let progressed = true;
+    while (picked.length < stageLimit && progressed) {
+      progressed = false;
+      for (const tour of candidateTours) {
+        if (usedIds.has(tour.id)) continue;
+        const bucketCount = bucketCounts.get(tour.bucket) || 0;
+        const destinationCount = destinationCounts.get(tour.destination) || 0;
+        const familyCount = familyCounts.get(tour.routeFamily) || 0;
+        if (bucketCount >= stage.maxPerBucket) continue;
+        if (destinationCount >= stage.maxPerDestination) continue;
+        if (familyCount >= stage.maxPerFamily) continue;
+        picked.push(tour);
+        usedIds.add(tour.id);
+        bucketCounts.set(tour.bucket, bucketCount + 1);
+        destinationCounts.set(tour.destination, destinationCount + 1);
+        familyCounts.set(tour.routeFamily, familyCount + 1);
+        progressed = true;
+        if (picked.length >= stageLimit) break;
+      }
+    }
+    if (picked.length >= limit) return picked;
   }
 
-  if (season === '冬季' && meta.hasHotSpringSignals) {
-    return '更符合冬季放松语境，可以把温泉和休闲感写得更自然';
+  for (const tour of candidateTours) {
+    if (usedIds.has(tour.id)) continue;
+    picked.push(tour);
+    usedIds.add(tour.id);
+    if (picked.length >= limit) break;
   }
 
-  return '需要结合班期、受众和本周出游节奏来判断是否值得写';
+  return picked;
+}
+
+function buildCandidatePool(scoredTours, limit) {
+  return pickToursByStages(scoredTours, limit, [
+    { until: Math.min(limit, 18), maxPerBucket: 4, maxPerDestination: 3, maxPerFamily: 1 },
+    { until: Math.min(limit, 32), maxPerBucket: 7, maxPerDestination: 5, maxPerFamily: 1 },
+    { until: limit, maxPerBucket: 12, maxPerDestination: 8, maxPerFamily: 2 },
+  ]);
+}
+
+function rebalanceSelectedTours(candidateTours, maxArticleItems) {
+  return pickToursByStages(candidateTours, maxArticleItems, [
+    { until: Math.min(maxArticleItems, 10), maxPerBucket: 3, maxPerDestination: 2, maxPerFamily: 1 },
+    { until: Math.min(maxArticleItems, 18), maxPerBucket: 5, maxPerDestination: 3, maxPerFamily: 1 },
+    { until: maxArticleItems, maxPerBucket: 7, maxPerDestination: 4, maxPerFamily: 2 },
+  ]);
 }
 
 function formatTourForPrompt(tour) {
+  const primaryImage = normalizeArticleImageUrl(chooseTourImage(tour));
   return {
     id: tour.id,
     title: tour.title,
@@ -421,65 +764,20 @@ function formatTourForPrompt(tour) {
     transportType: tour.transportType,
     accommodationLevel: tour.accommodationLevel,
     bookingUrl: tour.bookingUrl,
-    images: tour.images || [],
-    articleImages: (tour.images || []).slice(0, 3).map((assetPath) => resolveArticleAssetUrl(assetPath)),
+    images: (tour.images || []).map(normalizeArticleImageUrl),
+    siteUrl: getTourSiteUrl(tour.id),
+    qrPath: getTourQrRelativePath(tour.id),
+    primaryImage,
+    bucket: tour.bucket || classifyTourBucket(tour),
+    routeFamily: tour.routeFamily || inferRouteFamily(tour.title),
+    experienceSignals: Array.isArray(tour.experienceSignals) ? tour.experienceSignals : inferExperienceSignals(tour),
     dataQuality: {
       availabilityConfidence: tour.availabilityConfidence,
       riskFlags: tour.dataQuality?.riskFlags || tour.meta?.dataQuality?.riskFlags || [],
     },
     editorialScore: tour.editorialScore,
     editorialReasons: tour.editorialReasons,
-    editorialMeta: tour.editorialMeta,
   };
-}
-
-function buildCandidateGroups(candidateTours, maxPerGroup = 3) {
-  return PREFERENCE_GROUPS
-    .map((group) => {
-      const tours = candidateTours.filter((tour) => group.matches(tour, tour.editorialMeta)).slice(0, maxPerGroup);
-      if (tours.length === 0) return null;
-      return {
-        id: group.id,
-        label: group.label,
-        description: group.description,
-        tours,
-      };
-    })
-    .filter(Boolean);
-}
-
-function pickSelectedTours(candidateGroups, candidateTours, maxArticleItems) {
-  const selected = [];
-  const selectedIds = new Set();
-  const groupOffsets = new Map(candidateGroups.map((group) => [group.id, 0]));
-
-  while (selected.length < maxArticleItems) {
-    let pickedThisRound = false;
-    for (const group of candidateGroups) {
-      let offset = groupOffsets.get(group.id) || 0;
-      while (offset < group.tours.length && selectedIds.has(group.tours[offset].id)) {
-        offset += 1;
-      }
-      groupOffsets.set(group.id, offset);
-      const tour = group.tours[offset];
-      if (!tour) continue;
-      selected.push(tour);
-      selectedIds.add(tour.id);
-      groupOffsets.set(group.id, offset + 1);
-      pickedThisRound = true;
-      if (selected.length >= maxArticleItems) break;
-    }
-    if (!pickedThisRound) break;
-  }
-
-  for (const tour of candidateTours) {
-    if (selected.length >= maxArticleItems) break;
-    if (selectedIds.has(tour.id)) continue;
-    selected.push(tour);
-    selectedIds.add(tour.id);
-  }
-
-  return selected;
 }
 
 export function buildWeeklyArticleContext(tours, options = {}) {
@@ -488,7 +786,7 @@ export function buildWeeklyArticleContext(tours, options = {}) {
   const maxCandidates = options.maxCandidates || DEFAULT_MAX_CANDIDATES;
   const maxArticleItems = options.maxArticleItems || DEFAULT_MAX_ARTICLE_ITEMS;
   const endDate = addDays(runDate, windowDays);
-  const [, month] = runDate.split('-').map(Number);
+  const [year, month] = runDate.split('-').map(Number);
   const season = monthToSeason(month);
   const weekWindow = getWeekWindow(runDate);
 
@@ -505,22 +803,30 @@ export function buildWeeklyArticleContext(tours, options = {}) {
         selectedDepartureDates,
         editorialScore: score.score,
         availabilityConfidence: score.availabilityConfidence,
-        editorialMeta: score.meta,
+        bucket: score.bucket,
+        routeFamily: score.routeFamily,
+        experienceSignals: score.experienceSignals,
+        departureSpread: score.departureSpread,
+        weekendFriendly: score.weekendFriendly,
+        highlightCount: score.highlightCount,
         editorialReasons: [
           `${score.daysUntilDeparture}天内可出发`,
-          score.availabilityConfidence === 'high' ? '班期可信度高' : '班期需要二次确认',
-          score.meta.isNearby ? '更适合周度推荐' : '更适合作为中短线备选',
-          summarizeSeasonFit(score.meta, season),
+          score.availabilityConfidence === 'high' ? '班期可信度高' : '班期需二次确认',
+          `${score.bucket}优先入池`,
+          score.weekendFriendly ? '周末出发更顺手' : '工作日班期也可消化',
+          hasSummerSignals(tour) ? `${season}语境下更好写` : '以常规卖点切入',
         ],
       };
     })
     .filter(Boolean)
-    .sort((left, right) => right.editorialScore - left.editorialScore);
+    .sort(compareEditorialPriority);
 
-  const candidateTours = filtered.slice(0, maxCandidates);
-  const candidateGroups = buildCandidateGroups(candidateTours);
-  const selectedTours = pickSelectedTours(candidateGroups, candidateTours, maxArticleItems);
-  const themeHints = deriveThemeHints(candidateGroups, season);
+  const diversified = applyCrowdingPenalties(filtered);
+  const candidateLimit = Math.max(maxCandidates, maxArticleItems * 2);
+  const scanLimit = Math.min(diversified.length, Math.max(candidateLimit * 4, maxArticleItems * 8, 160));
+  const candidateTours = buildCandidatePool(diversified.slice(0, scanLimit), candidateLimit);
+  const selectedTours = rebalanceSelectedTours(candidateTours, maxArticleItems);
+  const themeHints = deriveThemeHints(selectedTours, season);
 
   return {
     runDate,
@@ -533,7 +839,17 @@ export function buildWeeklyArticleContext(tours, options = {}) {
       themeHints,
       departureWindowDays: windowDays,
       priceRangeHint: summarizePriceRange(selectedTours),
-      groupingGoal: '先按偏好分组，再用常识判断这周真正值得写哪几条',
+    },
+    selectionDiagnostics: {
+      totalTours: tours.length,
+      eligibleTours: filtered.length,
+      scannedTours: scanLimit,
+      candidatePoolSize: candidateTours.length,
+      selectedSize: selectedTours.length,
+      bucketCounts: candidateTours.reduce((result, tour) => {
+        result[tour.bucket] = (result[tour.bucket] || 0) + 1;
+        return result;
+      }, {}),
     },
     selectionRules: {
       onlyUseToursWithUpcomingDepartureDates: true,
@@ -546,53 +862,42 @@ export function buildWeeklyArticleContext(tours, options = {}) {
         '不要承诺最低价',
         '不要虚构库存',
         '不要虚构具体天气预报',
-        '不要写绝对化广告语',
+        '不要写绝对化广告词',
       ],
     },
     candidateTours: candidateTours.map(formatTourForPrompt),
-    candidateGroups: candidateGroups.map((group) => ({
-      id: group.id,
-      label: group.label,
-      description: group.description,
-      tours: group.tours.map(formatTourForPrompt),
-    })),
     selectedTours: selectedTours.map(formatTourForPrompt),
   };
 }
 
 export function buildWeeklyArticlePrompt(context) {
-  const groupedCandidateBlock = context.candidateGroups
-    .map((group) => {
+  const selectedTourBlock = context.selectedTours
+    .map((tour, index) => {
       const lines = [
-        `### ${group.label}`,
-        `分组意图：${group.description}`,
+        `${index + 1}. ${tour.title}`,
+        `目的地：${tour.destination}`,
+        `时长：${tour.duration}天`,
+        `价格：${tour.price}${tour.priceUnit || '元/人'}`,
+        `近期班期：${(tour.departureDates || []).join('、')}`,
+        `主题：${tour.theme || '未标注'}`,
+        `适合人群：${(tour.suitableFor || []).join('、') || '未标注'}`,
+        `亮点：${(tour.highlights || []).slice(0, 4).join('、') || '未标注'}`,
+        `标签：${(tour.tags || []).slice(0, 4).join('、') || '未标注'}`,
+        `线路家族：${tour.routeFamily || '未归类'}`,
+        `体验关键词：${(tour.experienceSignals || []).join('、') || '常规短线'}`,
+        `站内详情：${tour.siteUrl}`,
+        `二维码文件：${tour.qrPath}`,
+        `分组：${tour.bucket}`,
+        `公众号分大类：${getArticleBucketMeta(tour.bucket).title}`,
       ];
-      for (const tour of group.tours) {
-        lines.push(
-          [
-            `- ${tour.title}`,
-            `  目的地：${tour.destination}`,
-            `  时长：${tour.duration}天`,
-            `  价格：${tour.price}${tour.priceUnit || '元/人'}`,
-            `  近期班期：${(tour.departureDates || []).join('、') || '未标注'}`,
-            `  适合人群：${(tour.suitableFor || []).join('、') || '未标注'}`,
-            `  亮点：${(tour.highlights || []).slice(0, 4).join('、') || '未标注'}`,
-            `  标签：${(tour.tags || []).slice(0, 4).join('、') || '未标注'}`,
-            `  季节判断提示：${(tour.editorialReasons || []).slice(-1)[0] || '请自行判断'}`,
-            `  正文配图：${(tour.articleImages || []).join('、') || '未标注'}`,
-            `  预订链接：${tour.bookingUrl}`,
-          ].join('\n'),
-        );
-      }
       return lines.join('\n');
     })
     .join('\n\n');
 
-  const selectedTourTitles = context.selectedTours.map((tour) => tour.title).join('、');
-
   return [
     '你是一名擅长写微信公众号的旅行编辑。',
     '请只根据提供的 JSON 素材与线路事实写作，不要编造任何产品信息。',
+    '你这次不要输出整篇 Markdown，只输出一个 JSON 对象，方便程序拼接成固定版式的公众号文章。',
     '',
     '写作要求：',
     `- 文章日期语境：${context.runDate}，当前季节是${context.season}`,
@@ -600,103 +905,39 @@ export function buildWeeklyArticlePrompt(context) {
     `- 读者：${context.editorialContext.audience}`,
     `- 基调：${context.editorialContext.tone}`,
     `- 选题方向：${context.editorialContext.themeHints.join('、') || '周度出游推荐'}`,
-    `- 分组目标：${context.editorialContext.groupingGoal}`,
-    '- 输出 Markdown，且必须带 frontmatter：title, summary, author, cover',
-    `- author 固定写 "${DEFAULT_AUTHOR}"`,
-    `- cover 使用第一条已入选线路的首图：${context.selectedTours[0]?.images?.[0] || ''}`,
-    `- 阅读原文链接固定指向：${DEFAULT_WEBSITE_URL}`,
-    '- 先写“本周出游判断”，再进入推荐正文。',
-    '- 候选线路已经按偏好分组，你需要自己判断这周真正值得写哪些，不要机械照抄分组。',
-    '- 夏季不要把温泉自动写成避暑主推；只有当它同时具备山水、清凉、亲水或明显度假放松语境时，才可以谨慎推荐。',
-    `- 正文必须覆盖这些已入选线路标题：${selectedTourTitles}`,
-    '- 正文使用 Markdown 图片语法配图，导语至少 1 张图，每条线路至少 1 张图，优先使用提供的“正文配图”URL。',
-    '- 标题适合公众号，但不要夸张标题党。',
-    '- 推荐应该体现分组差异，比如亲子短途、周末近场、山水清凉、高铁轻出省、预算友好、轻松度假。',
-    '- 每条线路写清楚：为什么这周值得看、适合谁、线路信息、提醒。',
-    '- 天气和季节只能做保守表达，例如“更适合避暑”“更适合亲子出游”，不要写成确定性预报。',
-    '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达。',
-    '- 不要编造出发城市、库存、优惠、成团率、景区政策。',
-    '- 价格、班期、链接必须与素材一致。',
-    '- 结尾要提醒以供应商页面为准，并引导读者查看行程。',
+    '- 标题适合公众号，但不要夸张标题党，不要像营销口号',
+    '- weatherLead 要把未来7天体感、季节节奏、节假日/时令玩法判断写在前头，但只能做保守表达，不要写成确定性天气预报',
+    '- intro 是开场导语，要像老广熟门熟路地给朋友出主意，不要像答题或思维链展示',
+    '- 每条线路只写三个字段：recommendationTitle、reason、reminder',
+    '- 程序会按“公众号分大类”自动分组排版，所以你不要再额外发明新的栏目名，只把每条线路写得具体、有种草感',
+    '- reason 必须 55 字以上，要讲清为什么当下去会更舒服或更值得，不要空泛，不要写“推荐方向”“取舍”“可以理解为”这种解释腔',
+    '- recommendationTitle 可以比原产品名更像公众号小标题，但不能改错事实',
+    '- reminder 用一句自然提醒补班期、节奏、适合人群或出发前注意点',
+    '- 不要重复同一个 destination 的同一套说法，不要把多条线路写成一个模子',
+    '- 能写真山水、亲水、森林、海风、泳池、水世界，就不要硬把所有“带池”都写成温泉放松',
+    '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达',
+    '- 不要编造出发城市、库存、优惠、成团率、景区政策',
+    '- 不要输出 Markdown 代码块，不要输出解释，只输出 JSON',
     '',
-    '分组候选线路：',
-    groupedCandidateBlock,
+    '本次优先采用的线路：',
+    selectedTourBlock,
     '',
-    '输出格式示例：',
-    '---',
-    'title: "..."',
-    'summary: "..."',
-    `author: "${DEFAULT_AUTHOR}"`,
-    `cover: "${context.selectedTours[0]?.images?.[0] || ''}"`,
-    '---',
-    '',
-    '# 标题',
-    '',
-    '![导语配图](https://example.com/hero.jpg)',
-    '',
-    '正文……',
+    '输出 JSON 格式：',
+    '{',
+    '  "title": "..." ,',
+    '  "summary": "..." ,',
+    '  "intro": "..." ,',
+    '  "weatherLead": "..." ,',
+    '  "items": [',
+    '    {',
+    '      "id": "tour_xxx",',
+    '      "recommendationTitle": "..." ,',
+    '      "reason": "..." ,',
+    '      "reminder": "..."',
+    '    }',
+    '  ]',
+    '}',
   ].join('\n');
-}
-
-function hasMarkdownImage(lines, startIndex, endIndex) {
-  for (let index = startIndex; index < endIndex; index += 1) {
-    if (/!\[[^\]]*]\(([^)]+)\)/.test(lines[index])) return true;
-  }
-  return false;
-}
-
-function normalizeTourTitleForMatch(value) {
-  return String(value || '')
-    .normalize('NFKC')
-    .replace(/[`~!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?~！@#￥%……&*（）—+=【】；：‘’“”《》，。？、\s]/g, '')
-    .replace(/[0-9]+\uFE0F?\u20E3/g, '')
-    .replace(/[^\p{L}\p{N}]/gu, '')
-    .toLowerCase();
-}
-
-function articleMentionsTourTitle(article, title) {
-  const normalizedArticle = normalizeTourTitleForMatch(article);
-  const normalizedTitle = normalizeTourTitleForMatch(title);
-  if (!normalizedArticle || !normalizedTitle) return false;
-  return normalizedArticle.includes(normalizedTitle);
-}
-
-export function enrichWeeklyArticleMedia(article, context, options = {}) {
-  const websiteUrl = options.websiteUrl || DEFAULT_WEBSITE_URL;
-  const lines = article.replace(/\r\n/g, '\n').split('\n');
-  const h1Index = lines.findIndex((line) => /^#\s+/.test(line.trim()));
-  const firstSectionIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()));
-  const heroTour = context.selectedTours[0];
-  const heroImageUrl = resolveArticleAssetUrl(heroTour?.images?.[0] || '', websiteUrl);
-  let heroInserted = false;
-
-  if (heroImageUrl && h1Index >= 0) {
-    const heroRegionEnd = firstSectionIndex >= 0 ? firstSectionIndex : lines.length;
-    if (!hasMarkdownImage(lines, h1Index + 1, heroRegionEnd)) {
-      lines.splice(h1Index + 1, 0, '', `![${heroTour?.title || '线路配图'}](${heroImageUrl})`, '');
-      heroInserted = true;
-    }
-  }
-
-  context.selectedTours.forEach((tour, tourIndex) => {
-    const sectionIndex = lines.findIndex(
-      (line) => /^##\s+/.test(line.trim()) && articleMentionsTourTitle(line, tour.title),
-    );
-    if (sectionIndex < 0) return;
-
-    const nextSectionIndex = lines.findIndex(
-      (line, index) => index > sectionIndex && /^##\s+/.test(line.trim()),
-    );
-    const sectionEnd = nextSectionIndex >= 0 ? nextSectionIndex : lines.length;
-    if (hasMarkdownImage(lines, sectionIndex + 1, sectionEnd)) return;
-    if (heroInserted && tourIndex === 0) return;
-
-    const imageUrl = resolveArticleAssetUrl(tour.images?.[0] || '', websiteUrl);
-    if (!imageUrl) return;
-    lines.splice(sectionIndex + 1, 0, '', `![${tour.title}](${imageUrl})`, '');
-  });
-
-  return lines.join('\n').replace(/\n{4,}/g, '\n\n\n');
 }
 
 function normalizeBaseUrl(baseUrl) {
@@ -729,8 +970,186 @@ function stripMarkdownFence(text) {
   return match ? match[1].trim() : trimmed;
 }
 
+function parseJsonPayload(text) {
+  const cleaned = stripMarkdownFence(text).trim();
+  return JSON.parse(cleaned);
+}
+
+function normalizeAiText(value) {
+  return String(value || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function normalizeAiItemMap(payload, context) {
+  const itemsById = new Map();
+  const rawItems = Array.isArray(payload?.items) ? payload.items : [];
+  for (const item of rawItems) {
+    if (!item || typeof item !== 'object') continue;
+    const id = String(item.id || '').trim();
+    if (!id) continue;
+    itemsById.set(id, {
+      recommendationTitle: normalizeAiText(item.recommendationTitle || ''),
+      reason: normalizeAiText(item.reason || ''),
+      reminder: normalizeAiText(item.reminder || ''),
+    });
+  }
+
+  return context.selectedTours.map((tour) => {
+    const item = itemsById.get(tour.id) || {};
+    return {
+      id: tour.id,
+      recommendationTitle: item.recommendationTitle || '',
+      reason: item.reason || '',
+      reminder: item.reminder || '',
+    };
+  });
+}
+
+function buildFallbackIntro(context) {
+  const advice = context.editorialContext.themeHints.join('、') || '近场清凉、山水与亲水玩法';
+  return `这周广州和周边更适合挑有树荫、有水体、能把节奏放慢的线路来走。比起纯城市暴走，${advice}这一类行程更容易把闷热感卸下来；如果时间不多，住下来放松的酒店线也更适合周末接一口气。`;
+}
+
+function buildFallbackWeatherLead(context) {
+  return `进入${context.season}后，华南通常会反复出现闷热和阵雨，出游更适合优先看体感而不是只看公里数。瀑布、峡谷、森林步道、漂流、海边、泳池和住下来慢慢玩的线路，这周都会比纯暴晒型路线更顺手。`;
+}
+
+function defaultReasonForTour(tour) {
+  const destination = normalizeDestination(tour.destination);
+  const departureHint = summarizeDepartureDates(tour.departureDates, 4);
+  const highlights = highlightLabel(tour);
+  const suitableFor = suitabilityLabel(tour);
+  return `这条线现在值得出发，重点不只是目的地顺眼，而是它的玩法和眼下体感很对路。${destination}这一线能打的通常是${highlights}，比起只在城里兜圈，更容易把这周的闷热感卸下来。对${suitableFor}来说，它既有看点，也不至于把行程排得太赶；近期班期有${departureHint}，${priceLabel(tour)}，是那种现在翻出来会立刻想认真看看详情的路线。`;
+}
+
+function defaultReminderForTour(tour) {
+  return `线路为${durationLabel(tour)}，近期班期以供应商页面实时展示为准；如果是亲水、海边或山地玩法，出发前记得顺手看一眼当周天气和集合通知。`;
+}
+
+function getArticleBucketMeta(bucket) {
+  return ARTICLE_BUCKET_META[bucket] || {
+    title: bucket || '本周推荐',
+    intro: '这一组是适合本周顺手出发的线路，玩法和节奏各不相同，可以按自己想要的体感来挑。',
+  };
+}
+
+function groupSelectedToursForArticle(selectedTours) {
+  const groups = new Map();
+  for (const tour of selectedTours || []) {
+    const bucket = tour.bucket || '周末轻出发';
+    if (!groups.has(bucket)) {
+      groups.set(bucket, {
+        bucket,
+        ...getArticleBucketMeta(bucket),
+        tours: [],
+      });
+    }
+    groups.get(bucket).tours.push(tour);
+  }
+
+  return [...groups.values()].sort((left, right) => {
+    const leftIndex = ARTICLE_BUCKET_ORDER.indexOf(left.bucket);
+    const rightIndex = ARTICLE_BUCKET_ORDER.indexOf(right.bucket);
+    const safeLeftIndex = leftIndex === -1 ? ARTICLE_BUCKET_ORDER.length : leftIndex;
+    const safeRightIndex = rightIndex === -1 ? ARTICLE_BUCKET_ORDER.length : rightIndex;
+    return safeLeftIndex - safeRightIndex;
+  });
+}
+
+function renderTourSection(tour, aiItem, index) {
+  const title = aiItem.recommendationTitle || slugifyText(tour.title);
+  const reason = aiItem.reason || defaultReasonForTour(tour);
+  const reminder = aiItem.reminder || defaultReminderForTour(tour);
+  const image = tour.primaryImage || normalizeArticleImageUrl(chooseTourImage(tour));
+  const siteUrl = tour.siteUrl || getTourSiteUrl(tour.id);
+  const qrPath = tour.qrPath || getTourQrRelativePath(tour.id);
+  const departureHint = summarizeDepartureDates(tour.departureDates, 4);
+
+  return [
+    '---',
+    '',
+    `#### ${index}. ${title}`,
+    '',
+    image ? `![${escapeMarkdown(tour.title)}](${image})` : '',
+    '',
+    reason,
+    '',
+    `- 适合谁：${suitabilityLabel(tour)}`,
+    `- 为什么当下去：${highlightLabel(tour)}`,
+    `- 行程信息：${durationLabel(tour)}｜${priceLabel(tour)}｜近期班期 ${departureHint || '以页面为准'}`,
+    `- 出发提醒：${reminder}`,
+    '',
+    '[查看行程](' + siteUrl + ')',
+    '',
+    `地址：${siteUrl}`,
+    '',
+    '扫码查看详情',
+    '',
+    `![${escapeMarkdown(tour.title)} 报名二维码](${qrPath})`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+export function renderWeeklyArticle(context, aiPayload) {
+  const frontmatter = [
+    '---',
+    `title: "${(aiPayload.title || '本周值得认真看的25条线路').replaceAll('"', '\\"')}"`,
+    `summary: "${(aiPayload.summary || buildFallbackIntro(context)).replaceAll('"', '\\"')}"`,
+    `author: "${DEFAULT_AUTHOR}"`,
+    `cover: "${context.selectedTours[0]?.primaryImage || context.selectedTours[0]?.images?.[0] || ''}"`,
+    '---',
+  ].join('\n');
+
+  const intro = normalizeAiText(aiPayload.intro || buildFallbackIntro(context));
+  const weatherLead = normalizeAiText(aiPayload.weatherLead || buildFallbackWeatherLead(context));
+  const items = normalizeAiItemMap(aiPayload, context);
+  const itemsById = new Map(items.map((item) => [item.id, item]));
+  const groupedSections = [];
+  let recommendationIndex = 1;
+
+  for (const group of groupSelectedToursForArticle(context.selectedTours)) {
+    if (groupedSections.length > 0) {
+      groupedSections.push('---');
+      groupedSections.push('');
+    }
+    groupedSections.push(`### ${group.title}`);
+    groupedSections.push('');
+    groupedSections.push(group.intro);
+    groupedSections.push('');
+    for (const tour of group.tours) {
+      groupedSections.push(renderTourSection(tour, itemsById.get(tour.id) || {}, recommendationIndex));
+      groupedSections.push('');
+      recommendationIndex += 1;
+    }
+  }
+
+  return [
+    frontmatter,
+    '',
+    `# ${aiPayload.title || '本周值得认真看的25条线路'}`,
+    '',
+    intro,
+    '',
+    '## 未来7天出游提醒',
+    '',
+    weatherLead,
+    '',
+    `![本周天气与季节提醒](${WEATHER_OVERVIEW_IMAGE})`,
+    '',
+    '## 本周推荐',
+    '',
+    ...groupedSections,
+    '',
+    '以上班期、价格和行程信息请以供应商页面实时展示为准，想看完整行程、图文详情和报名入口，直接点每条线路下方的“查看行程”或扫码进入老广去边度站内详情。',
+  ].join('\n');
+}
+
 export async function generateWeeklyArticle(context, config, options = {}) {
   const prompt = buildWeeklyArticlePrompt(context);
+  const maxTokens = options.maxTokens || DEFAULT_JSON_MAX_TOKENS;
   const response = await fetch(getChatCompletionsUrl(config.baseUrl), {
     method: 'POST',
     headers: {
@@ -740,12 +1159,14 @@ export async function generateWeeklyArticle(context, config, options = {}) {
     body: JSON.stringify({
       model: config.model,
       temperature: 0.7,
-      max_tokens: options.maxTokens || 2600,
+      max_tokens: maxTokens,
+      response_format: {
+        type: 'json_object',
+      },
       messages: [
         {
           role: 'system',
-          content:
-            '你写作要像旅行编辑而不是销售，重视季节常识、读者体验和信息可信度，不夸张，不编造产品事实。',
+          content: '你写作稳健、像旅行编辑而不是销售，不夸张，不编造产品事实。必须返回严格 json。',
         },
         {
           role: 'user',
@@ -761,9 +1182,16 @@ export async function generateWeeklyArticle(context, config, options = {}) {
   }
 
   const payload = await response.json();
+  const rawContent = getAiContent(payload);
+  const structured = parseJsonPayload(rawContent);
+  if (options.outputDir) {
+    await ensureWeeklyArticleQrAssets(options.outputDir, context.selectedTours);
+  }
+  const article = renderWeeklyArticle(context, structured);
   return {
     prompt,
-    article: stripMarkdownFence(getAiContent(payload)),
+    article,
+    structured,
     rawResponse: payload,
   };
 }
@@ -791,17 +1219,46 @@ export function validateGeneratedArticle(article, context) {
     for (const field of ['title', 'summary', 'author', 'cover']) {
       if (!frontmatter[field]) issues.push(`Missing frontmatter field: ${field}.`);
     }
+    if (frontmatter.author !== DEFAULT_AUTHOR) {
+      issues.push(`Author must be ${DEFAULT_AUTHOR}.`);
+    }
   }
 
   for (const phrase of FORBIDDEN_PHRASES) {
     if (article.includes(phrase)) issues.push(`Contains forbidden phrase: ${phrase}`);
   }
+  if (article.includes('quickchart.io')) {
+    issues.push('Article should not use external QR service URLs.');
+  }
+  if (!article.includes('## 本周推荐')) {
+    issues.push('Article is missing the main recommendation section heading.');
+  }
+  if ((article.match(/^###\s+/gm) || []).length === 0) {
+    issues.push('Article is missing grouped recommendation headings.');
+  }
 
-  const mentionedSelectedTours = context.selectedTours.filter((tour) =>
-    articleMentionsTourTitle(article, tour.title),
-  ).length;
+  const mentionedSelectedTours = context.selectedTours.filter((tour) => article.includes(tour.title)).length;
   if (mentionedSelectedTours < Math.min(3, context.selectedTours.length)) {
     issues.push('Article did not mention enough selected tours by title.');
+  }
+
+  for (const tour of context.selectedTours) {
+    const siteUrl = getTourSiteUrl(tour.id);
+    const qrPath = tour.qrPath || getTourQrRelativePath(tour.id);
+    if (!article.includes(siteUrl)) {
+      issues.push(`Missing site URL for ${tour.id}.`);
+    }
+    if (!article.includes(qrPath)) {
+      issues.push(`Missing QR path for ${tour.id}.`);
+    }
+    if (!article.includes(`报名二维码`)) {
+      issues.push(`Missing QR block for ${tour.id}.`);
+    }
+  }
+
+  const qrCount = (article.match(/扫码查看详情/g) || []).length;
+  if (qrCount < context.selectedTours.length) {
+    issues.push('Not every selected tour rendered a QR block.');
   }
 
   return {
@@ -828,6 +1285,6 @@ export function getDefaultAuthor() {
   return DEFAULT_AUTHOR;
 }
 
-export function getDefaultWebsiteUrl() {
-  return DEFAULT_WEBSITE_URL;
+export function rebuildWeeklyArticleFromStructured(context, structured) {
+  return renderWeeklyArticle(context, structured);
 }

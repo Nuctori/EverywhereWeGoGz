@@ -1,9 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
+import crypto from 'node:crypto';
 import sharp from 'sharp';
-
-const DEFAULT_WECHAT_CONTENT_SOURCE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
+import { ensureReferencedQrAssets } from './weekly_wechat_article.mjs';
 
 function stripWrappingQuotes(value) {
   if (
@@ -39,11 +39,107 @@ function escapeHtml(value) {
 
 function renderInlineMarkdown(text) {
   let html = escapeHtml(text);
-  html = html.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/g, '<img src="$2" alt="$1">');
   html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2">$1</a>');
   html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
   return html;
+}
+
+function mimeTypeFromFileName(fileName) {
+  const lower = String(fileName || '').toLowerCase();
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  if (lower.endsWith('.gif')) return 'image/gif';
+  return 'image/jpeg';
+}
+
+function decodeHtmlEntities(value) {
+  return String(value || '')
+    .replaceAll('&amp;', '&')
+    .replaceAll('&quot;', '"')
+    .replaceAll('&#39;', "'")
+    .replaceAll('&lt;', '<')
+    .replaceAll('&gt;', '>');
+}
+
+function renderMarkdownImage(alt, src, options = {}) {
+  const width = options.width || '100%';
+  const maxWidth = options.maxWidth || '100%';
+  const display = options.display || 'block';
+  const borderRadius = options.borderRadius || '8px';
+  return `<div style="margin:16px 0 18px;text-align:center;"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt || '')}" style="display:${display};width:${width};max-width:${maxWidth};height:auto;border-radius:${borderRadius};"></div>`;
+}
+
+function renderSupportBlock({ ctaLabel, href, address, qrAlt, qrSrc }) {
+  return [
+    '<div style="margin:16px 0 0;padding:16px 18px;border:1px solid #e5e7eb;border-radius:14px;background:#f8fafc;">',
+    `<a href="${escapeHtml(href)}" style="display:inline-block;padding:8px 16px;border-radius:999px;background:#0f766e;color:#ffffff;text-decoration:none;font-size:15px;line-height:1.2;font-weight:600;">${escapeHtml(ctaLabel)}</a>`,
+    '<div style="margin:14px 0 6px;font-size:13px;line-height:1.5;color:#6b7280;">详情地址</div>',
+    `<a href="${escapeHtml(address)}" style="display:block;font-size:14px;line-height:1.7;color:#0f172a;text-decoration:none;font-weight:600;">老广去边度站内详情页</a>`,
+    `<div style="margin-top:6px;font-size:12px;line-height:1.6;color:#64748b;word-break:break-all;">${escapeHtml(address)}</div>`,
+    '<div style="margin:14px 0 8px;font-size:13px;line-height:1.5;color:#6b7280;">扫码查看详情</div>',
+    `<div style="text-align:center;"><img src="${escapeHtml(qrSrc)}" alt="${escapeHtml(qrAlt || '报名二维码')}" style="display:block;margin:0 auto;width:200px;max-width:100%;height:auto;border-radius:0;"></div>`,
+    '</div>',
+  ].join('');
+}
+
+function consumeBlankLines(lines, startIndex) {
+  let index = startIndex;
+  while (index < lines.length && !lines[index].trim()) index += 1;
+  return index;
+}
+
+function tryRenderSupportBlock(lines, startIndex) {
+  const ctaMatch = lines[startIndex]?.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/);
+  if (!ctaMatch) return null;
+
+  let cursor = consumeBlankLines(lines, startIndex + 1);
+  const addressMatch = lines[cursor]?.trim().match(/^地址[:：]\s*(https?:\/\/\S+)$/);
+  if (!addressMatch) return null;
+
+  cursor = consumeBlankLines(lines, cursor + 1);
+  const qrHint = lines[cursor]?.trim();
+  if (!qrHint || !qrHint.startsWith('扫码')) return null;
+
+  cursor = consumeBlankLines(lines, cursor + 1);
+  const qrMatch = lines[cursor]?.trim().match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
+  if (!qrMatch) return null;
+
+  return {
+    nextIndex: cursor,
+    html: renderSupportBlock({
+      ctaLabel: ctaMatch[1],
+      href: ctaMatch[2],
+      address: addressMatch[1],
+      qrAlt: qrMatch[1],
+      qrSrc: qrMatch[2],
+    }),
+  };
+}
+
+function renderHeading(level, text) {
+  const styles = {
+    1: 'margin:0 0 18px;font-size:28px;line-height:1.35;font-weight:700;color:#0f172a;',
+    2: 'margin:30px 0 14px;padding-left:10px;border-left:4px solid #0f766e;font-size:22px;line-height:1.4;font-weight:700;color:#0f172a;',
+    3: 'margin:26px 0 12px;font-size:19px;line-height:1.5;font-weight:700;color:#0f172a;',
+    4: 'margin:0 0 14px;font-size:18px;line-height:1.6;font-weight:700;color:#111827;',
+    5: 'margin:0 0 12px;font-size:17px;line-height:1.6;font-weight:700;color:#111827;',
+    6: 'margin:0 0 10px;font-size:16px;line-height:1.6;font-weight:700;color:#111827;',
+  };
+  const safeLevel = Math.min(6, Math.max(1, Number(level) || 1));
+  return `<h${safeLevel} style="${styles[safeLevel]}">${renderInlineMarkdown(text)}</h${safeLevel}>`;
+}
+
+function renderParagraph(lines) {
+  return `<p style="margin:0 0 14px;font-size:16px;line-height:1.82;color:#1f2937;">${lines.map(renderInlineMarkdown).join('<br>')}</p>`;
+}
+
+function renderList(items) {
+  return `<ul style="margin:0 0 14px;padding-left:1.35em;color:#1f2937;">${items.map((item) => `<li style="margin:0 0 8px;font-size:15px;line-height:1.75;">${renderInlineMarkdown(item)}</li>`).join('')}</ul>`;
+}
+
+function renderHorizontalRule() {
+  return '<hr style="margin:30px 0 24px;border:0;border-top:1px solid #dbe4ea;">';
 }
 
 export function markdownToHtml(markdown) {
@@ -58,17 +154,18 @@ export function markdownToHtml(markdown) {
 
   const flushParagraph = () => {
     if (paragraph.length === 0) return;
-    blocks.push(`<p>${paragraph.map(renderInlineMarkdown).join('<br>')}</p>`);
+    blocks.push(renderParagraph(paragraph));
     paragraph = [];
   };
 
   const flushList = () => {
     if (listItems.length === 0) return;
-    blocks.push(`<ul>${listItems.map((item) => `<li>${renderInlineMarkdown(item)}</li>`).join('')}</ul>`);
+    blocks.push(renderList(listItems));
     listItems = [];
   };
 
-  for (const line of lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
     const trimmed = line.trim();
     if (!trimmed) {
       flushParagraph();
@@ -79,7 +176,16 @@ export function markdownToHtml(markdown) {
     if (trimmed === '---') {
       flushParagraph();
       flushList();
-      blocks.push('<hr>');
+      blocks.push(renderHorizontalRule());
+      continue;
+    }
+
+    const supportBlock = tryRenderSupportBlock(lines, index);
+    if (supportBlock) {
+      flushParagraph();
+      flushList();
+      blocks.push(supportBlock.html);
+      index = supportBlock.nextIndex;
       continue;
     }
 
@@ -88,7 +194,15 @@ export function markdownToHtml(markdown) {
       flushParagraph();
       flushList();
       const level = headingMatch[1].length;
-      blocks.push(`<h${level}>${renderInlineMarkdown(headingMatch[2])}</h${level}>`);
+      blocks.push(renderHeading(level, headingMatch[2]));
+      continue;
+    }
+
+    const imageMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
+    if (imageMatch) {
+      flushParagraph();
+      flushList();
+      blocks.push(renderMarkdownImage(imageMatch[1], imageMatch[2]));
       continue;
     }
 
@@ -121,6 +235,9 @@ export function resolveOutputDir(articlePath) {
 export function resolveCoverFile(rootDir, articlePath, frontmatter) {
   const cover = frontmatter.cover || frontmatter.coverImage || frontmatter.image || '';
   if (!cover) throw new Error('Article frontmatter is missing cover.');
+  if (/^https?:\/\//i.test(cover)) {
+    return cover;
+  }
   if (cover.startsWith('/')) {
     return path.join(rootDir, 'public', cover.slice(1).replaceAll('/', path.sep));
   }
@@ -128,12 +245,178 @@ export function resolveCoverFile(rootDir, articlePath, frontmatter) {
 }
 
 export async function prepareCoverForUpload(coverPath, outputDir) {
+  const targetPath = path.join(outputDir, 'cover-upload.jpg');
+  if (/^https?:\/\//i.test(String(coverPath))) {
+    const response = await fetch(String(coverPath));
+    if (!response.ok) {
+      throw new Error(`Cover image download failed: ${response.status} ${String(coverPath)}`);
+    }
+    const bytes = Buffer.from(await response.arrayBuffer());
+    await sharp(bytes).jpeg({ quality: 88 }).toFile(targetPath);
+    return targetPath;
+  }
   if (!fs.existsSync(coverPath)) {
     throw new Error(`Cover image not found: ${coverPath}`);
   }
-  const targetPath = path.join(outputDir, 'cover-upload.jpg');
   await sharp(coverPath).jpeg({ quality: 88 }).toFile(targetPath);
   return targetPath;
+}
+
+function collectHtmlImageSources(html) {
+  const sources = [];
+  const seen = new Set();
+  const regex = /<img\b[^>]*\bsrc="([^"]+)"[^>]*>/gi;
+  for (const match of html.matchAll(regex)) {
+    const src = String(match[1] || '').trim();
+    if (!src || seen.has(src)) continue;
+    seen.add(src);
+    sources.push(src);
+  }
+  return sources;
+}
+
+function replaceHtmlImageSources(html, replacements) {
+  let output = html;
+  for (const [source, target] of replacements.entries()) {
+    output = output.replaceAll(`src="${source}"`, `src="${target}"`);
+  }
+  return output;
+}
+
+function hashInlineImageSource(source) {
+  return crypto.createHash('sha1').update(String(source)).digest('hex').slice(0, 12);
+}
+
+function normalizeInlineImageExtension(fileName, contentType) {
+  const lowerName = String(fileName || '').toLowerCase();
+  const lowerType = String(contentType || '').toLowerCase();
+  if (lowerType.includes('image/png') || lowerName.endsWith('.png')) return '.png';
+  if (lowerType.includes('image/gif') || lowerName.endsWith('.gif')) return '.gif';
+  if (
+    lowerType.includes('image/jpeg') ||
+    lowerType.includes('image/jpg') ||
+    lowerName.endsWith('.jpg') ||
+    lowerName.endsWith('.jpeg')
+  ) {
+    return '.jpg';
+  }
+  return '.jpg';
+}
+
+async function normalizeInlineImageAsset(imageAsset) {
+  const fileName = path.basename(imageAsset.fileName || 'image.jpg');
+  const contentType = String(imageAsset.contentType || '').toLowerCase();
+  const needsConversion =
+    contentType.includes('image/webp') ||
+    contentType.includes('image/avif') ||
+    fileName.toLowerCase().endsWith('.webp') ||
+    fileName.toLowerCase().endsWith('.avif');
+
+  if (needsConversion) {
+    const converted = await sharp(imageAsset.bytes).jpeg({ quality: 88 }).toBuffer();
+    return {
+      bytes: converted,
+      fileName: `${path.parse(fileName).name}.jpg`,
+      contentType: 'image/jpeg',
+    };
+  }
+
+  return {
+    bytes: imageAsset.bytes,
+    fileName,
+    contentType: imageAsset.contentType || mimeTypeFromFileName(fileName),
+  };
+}
+
+async function materializeInlineImageAsset(rootDir, articlePath, outputDir, source) {
+  const imageAsset = await loadImageAsset(rootDir, articlePath, source);
+  const normalizedAsset = await normalizeInlineImageAsset(imageAsset);
+  const assetDir = path.join(outputDir, 'wechat-assets');
+  fs.mkdirSync(assetDir, { recursive: true });
+  const assetFileName = `${hashInlineImageSource(source)}${normalizeInlineImageExtension(
+    normalizedAsset.fileName,
+    normalizedAsset.contentType,
+  )}`;
+  const assetPath = path.join(assetDir, assetFileName);
+  fs.writeFileSync(assetPath, normalizedAsset.bytes);
+  return path.posix.join('wechat-assets', assetFileName);
+}
+
+async function rewriteHtmlImagesForBundle(rootDir, articlePath, html, outputDir) {
+  const replacements = new Map();
+  for (const source of collectHtmlImageSources(html)) {
+    if (!/^https?:\/\//i.test(source)) continue;
+    const localPath = await materializeInlineImageAsset(rootDir, articlePath, outputDir, source);
+    replacements.set(source, localPath);
+  }
+  return replaceHtmlImageSources(html, replacements);
+}
+
+async function loadImageAsset(rootDir, articlePath, source) {
+  const decodedSource = decodeHtmlEntities(source);
+  if (/^https?:\/\//i.test(decodedSource)) {
+    const response = await fetch(decodedSource);
+    if (!response.ok) {
+      throw new Error(`Inline image download failed: ${response.status} ${decodedSource}`);
+    }
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const url = new URL(decodedSource);
+    const fileName = path.basename(url.pathname || 'image.jpg') || 'image.jpg';
+    const contentType = response.headers.get('content-type') || mimeTypeFromFileName(fileName);
+    return normalizeInlineImageAsset({ bytes, fileName, contentType });
+  }
+
+  let filePath = decodedSource;
+  if (path.isAbsolute(decodedSource) && fs.existsSync(decodedSource)) {
+    filePath = decodedSource;
+  } else if (decodedSource.startsWith('/')) {
+    filePath = path.join(rootDir, 'public', decodedSource.slice(1).replaceAll('/', path.sep));
+  } else {
+    filePath = path.resolve(path.dirname(articlePath), decodedSource);
+  }
+
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Inline image not found: ${decodedSource}`);
+  }
+
+  return normalizeInlineImageAsset({
+    bytes: fs.readFileSync(filePath),
+    fileName: path.basename(filePath),
+    contentType: mimeTypeFromFileName(filePath),
+  });
+}
+
+export async function uploadArticleImage(accessToken, imageAsset) {
+  const url = new URL('https://api.weixin.qq.com/cgi-bin/media/uploadimg');
+  url.searchParams.set('access_token', accessToken);
+
+  const form = new FormData();
+  form.set(
+    'media',
+    new Blob([imageAsset.bytes], { type: imageAsset.contentType }),
+    imageAsset.fileName,
+  );
+
+  const data = await fetchJson(url, {
+    method: 'POST',
+    body: form,
+  });
+
+  if (!data?.url) {
+    throw new Error(`WeChat inline image url missing: ${JSON.stringify(data).slice(0, 300)}`);
+  }
+  return data.url;
+}
+
+export async function rewriteHtmlImagesForWechat(rootDir, articlePath, html, accessToken) {
+  const replacements = new Map();
+  for (const source of collectHtmlImageSources(html)) {
+    if (/^https?:\/\/mmbiz\.qpic\.cn\//i.test(source)) continue;
+    const asset = await loadImageAsset(rootDir, articlePath, source);
+    const uploadedUrl = await uploadArticleImage(accessToken, asset);
+    replacements.set(source, uploadedUrl);
+  }
+  return replaceHtmlImageSources(html, replacements);
 }
 
 function applyProxyEnv() {
@@ -244,7 +527,7 @@ export function readWeChatConfig(env = process.env) {
   return {
     appId,
     appSecret,
-    sourceUrl: (env.WECHAT_CONTENT_SOURCE_URL || DEFAULT_WECHAT_CONTENT_SOURCE_URL).trim(),
+    sourceUrl: (env.WECHAT_CONTENT_SOURCE_URL || '').trim(),
     commentsOpen: (env.WECHAT_NEED_OPEN_COMMENT || '1').trim() !== '0',
     fansOnly: (env.WECHAT_ONLY_FANS_CAN_COMMENT || '0').trim() === '1',
     proxyUrl: (env.WECHAT_PROXY_URL || env.HTTPS_PROXY || env.HTTP_PROXY || '').trim(),
@@ -268,12 +551,14 @@ export async function publishMarkdownArticle(rootDir, options = {}) {
   const outputDir = resolveOutputDir(articlePath);
   const coverPath = resolveCoverFile(rootDir, articlePath, frontmatter);
   const uploadCoverPath = await prepareCoverForUpload(coverPath, outputDir);
-  const html = markdownToHtml(body);
+  const rawHtml = markdownToHtml(body);
   const htmlPath = path.join(outputDir, 'article.html');
-  fs.writeFileSync(htmlPath, `${html}\n`, 'utf8');
 
   const accessToken = await getAccessToken(config);
   const thumbMediaId = await uploadCoverMedia(accessToken, uploadCoverPath);
+  await ensureReferencedQrAssets(outputDir, body);
+  const html = await rewriteHtmlImagesForWechat(rootDir, articlePath, rawHtml, accessToken);
+  fs.writeFileSync(htmlPath, `${html}\n`, 'utf8');
   const payload = buildDraftPayload({
     frontmatter,
     html,
@@ -317,14 +602,16 @@ export async function preparePublishBundle(rootDir, options = {}) {
   const uploadCoverPath = await prepareCoverForUpload(coverPath, outputDir);
   const html = markdownToHtml(body);
   const htmlPath = path.join(outputDir, 'article.html');
-  fs.writeFileSync(htmlPath, `${html}\n`, 'utf8');
+  await ensureReferencedQrAssets(outputDir, body);
+  const htmlWithLocalAssets = await rewriteHtmlImagesForBundle(rootDir, articlePath, html, outputDir);
+  fs.writeFileSync(htmlPath, `${htmlWithLocalAssets}\n`, 'utf8');
 
   const bundle = {
     generatedAt: new Date().toISOString(),
     title: frontmatter.title,
     summary: frontmatter.summary,
     author: frontmatter.author || '老广去边度',
-    sourceUrl: options.sourceUrl || process.env.WECHAT_CONTENT_SOURCE_URL || DEFAULT_WECHAT_CONTENT_SOURCE_URL,
+    sourceUrl: options.sourceUrl || process.env.WECHAT_CONTENT_SOURCE_URL || '',
     commentsOpen: (process.env.WECHAT_NEED_OPEN_COMMENT || '1').trim() !== '0',
     fansOnly: (process.env.WECHAT_ONLY_FANS_CAN_COMMENT || '0').trim() === '1',
     articlePath,
