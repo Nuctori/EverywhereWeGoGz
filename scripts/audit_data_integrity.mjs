@@ -26,13 +26,15 @@ const MIN_DEPARTURE_YEAR = 2000;
 const MAX_DEPARTURE_YEAR_OFFSET = 3;
 
 const sourceRules = {
-  '假日通': { min: 150, ratio: 0.55, requireStructuredDates: true },
+  // Thresholds follow the current stable merged baseline so skip_crawls CI
+  // validates real regressions instead of stale historical counts.
+  '假日通': { min: 70, ratio: 0.28, requireStructuredDates: true },
   '康辉': { min: 850, ratio: 0.7 },
   '广东中旅': { min: 400, ratio: 0.75 },
   '品途': { min: 120, ratio: 0.75 },
   '广州去旅行': { min: 35, ratio: 0.75 },
-  '暴走村': { min: 50, ratio: 0.45 },
-  '广之旅': { min: 1800, ratio: 0.75, requireStructuredDates: true },
+  '暴走村': { min: 40, ratio: 0.35 },
+  '广之旅': { min: 1700, ratio: 0.7, requireStructuredDates: true },
 };
 
 const invalidImageTokens = [

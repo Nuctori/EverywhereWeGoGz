@@ -157,6 +157,46 @@ assert.equal(validOrderPreserved[0].tourId, 'copy-long');
 assert.equal(validOrderPreserved[1].tourId, 'copy-short');
 assert.ok((validOrderPreserved[0].reason || '').length > (validOrderPreserved[1].reason || '').length);
 
+const aiTierPriority = prioritizeRecommendationItems(
+  [
+    {
+      tourId: 'copy-short',
+      score: 99,
+      reason: '有温泉和沙滩。',
+      matchedSignals: ['温泉'],
+      recommendationTier: 'ai-brief',
+    },
+    {
+      tourId: 'copy-long',
+      score: 70,
+      reason: '这条线同时带温泉和沙滩，节奏更松一点，适合想玩得完整些的人。',
+      matchedSignals: ['温泉', '沙滩', '轻松'],
+      recommendationTier: 'ai-detailed',
+    },
+    {
+      tourId: 'local-supplement',
+      score: 1000,
+      reason: '本地补位高分',
+      matchedSignals: ['本地补位'],
+      recommendationTier: 'local-supplement',
+    },
+  ],
+  {
+    candidateTours: [
+      candidate({ id: 'copy-short', title: '惠州海边温泉2天', destination: '广东', price: 499, tags: ['温泉', '沙滩'], highlights: ['海边', '温泉'] }),
+      candidate({ id: 'copy-long', title: '惠州双湾温泉3天', destination: '广东', price: 699, tags: ['温泉', '沙滩'], highlights: ['海边', '温泉', '慢节奏'] }),
+      candidate({ id: 'local-supplement', title: '广东普通补位2天', destination: '广东', price: 299, tags: ['休闲'], highlights: ['补位'] }),
+    ],
+    intent: { weatherSensitivity: [], departureWeekdays: [] },
+    userText: '帮我找同时带温泉和沙滩的团，最好轻松一点',
+  },
+);
+assert.deepEqual(
+  aiTierPriority.map((item) => item.tourId),
+  ['copy-long', 'copy-short', 'local-supplement'],
+  'final ordering should keep AI detailed items ahead of AI brief items, and both ahead of local supplements',
+);
+
 const alternativesLast = prioritizeRecommendationItems([
   strictConflictAudited[2],
   strictConflictAudited[0],
