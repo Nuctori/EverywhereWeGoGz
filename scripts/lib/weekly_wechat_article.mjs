@@ -1102,11 +1102,11 @@ function renderTourSection(tour, aiItem, index) {
     `行程：${durationLabel(tour)}｜${priceLabel(tour)}｜近期班期 ${departureHint || '以页面为准'}`,
     `提醒：${reminder}`,
     '',
-    `- [查看行程](${siteUrl})`,
-    `- 地址：${siteUrl}`,
-    `- 扫码查看详情：${qrPath}`,
+    `查看行程：[老广去边度站内详情](${siteUrl})`,
+    `地址：[站内详情](${siteUrl})`,
+    '扫码查看详情',
     '',
-    `![${escapeMarkdown(tour.title)} 报名二维码](${qrPath})`,
+    `<p align="center"><img src="${qrPath}" alt="${escapeMarkdown(tour.title)} 报名二维码" width="220" /></p>`,
   ]
     .filter(Boolean)
     .join('\n');
