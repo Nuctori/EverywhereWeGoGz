@@ -42,10 +42,30 @@ assert.equal(parsed.data.cover, '/data/image-cache/cover.webp');
 assert.ok(parsed.body.includes('# 本周适合出发的线路'));
 
 const html = markdownToHtml(parsed.body);
-assert.ok(html.includes('<h1>本周适合出发的线路</h1>'));
-assert.ok(html.includes('<h2>清远峡谷漂流2天</h2>'));
-assert.ok(html.includes('<ul>'));
+assert.ok(html.includes('<h1 style='));
+assert.ok(html.includes('本周适合出发的线路'));
+assert.ok(html.includes('<h2 style='));
+assert.ok(html.includes('清远峡谷漂流2天'));
+assert.ok(html.includes('<ul style='));
 assert.ok(html.includes('<a href="https://example.com/qingyuan">查看线路</a>'));
+
+const groupedHtml = markdownToHtml(`
+## 本周推荐
+
+### 山水亲水
+
+更适合这周先挑真山真水和有树荫的方向。
+
+---
+
+#### 1. 清远峡谷漂流2天
+
+这条线路现在看，重点是漂流和峡谷都能直接把体感往下拉。
+`);
+assert.ok(groupedHtml.includes('border-left:4px solid #0f766e'));
+assert.ok(groupedHtml.includes('font-size:19px'));
+assert.ok(groupedHtml.includes('font-size:18px'));
+assert.ok(groupedHtml.includes('border-top:1px solid #dbe4ea'));
 
 const supportBlockHtml = markdownToHtml(`
 [查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour_2705&source=wechat)

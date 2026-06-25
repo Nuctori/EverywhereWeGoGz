@@ -303,8 +303,28 @@ const article = renderWeeklyArticle(context, {
 const validation = validateGeneratedArticle(article, context);
 assert.equal(validation.ok, true);
 assert.ok(article.includes(`author: "${getDefaultAuthor()}"`));
+assert.ok(article.includes('## 本周推荐'));
+assert.ok(article.includes('### 山水亲水'));
+assert.ok(article.includes('#### 1. 清远峡谷漂流2天'));
 assert.ok(article.includes('扫码查看详情'));
 assert.ok(article.includes('qr/tour-summer-nearby.png'));
+assert.ok((article.match(/^---$/gm) || []).length >= context.selectedTours.length + 2);
+
+const groupedArticle = renderWeeklyArticle(balancedContext, {
+  title: '本周适合出发的五条线路',
+  summary: '按玩法分组整理的样例文章。',
+  intro: '这周更适合先按玩法挑方向，再看哪条线的班期和节奏最顺手。',
+  weatherLead: '闷热和阵雨反复出现时，山水、海风、亲子玩水和住下来慢慢玩的线路更容易把体感拉回来。',
+  items: balancedContext.selectedTours.map((tour) => ({
+    id: tour.id,
+    recommendationTitle: tour.title,
+    reason: defaultReasonText(tour),
+    reminder: '班期与集合信息以供应商页面实时展示为准。',
+  })),
+});
+assert.ok(groupedArticle.includes('### 山水亲水'));
+assert.ok(groupedArticle.includes('### 海边海岛'));
+assert.ok(groupedArticle.includes('### 住下来慢慢玩') || groupedArticle.includes('### 亲子玩乐'));
 
 let capturedRequest = null;
 globalThis.fetch = async (url, init) => {
@@ -358,3 +378,7 @@ assert.equal(requestBody.max_tokens, 4096);
 assert.ok(generated.article.includes('扫码查看详情'));
 
 console.log('weekly wechat article tests passed');
+
+function defaultReasonText(tour) {
+  return `${tour.title}这条线放在这周看，胜在玩法本身就能把闷热感往下压。它不只是去一个地方打卡，而是把${(tour.experienceSignals || []).join('、') || '当季舒适体感'}放进了行程节奏里，对想认真放松、又不想空跑一趟的人来说，会比纯赶景点更值得现在出发。`;
+}

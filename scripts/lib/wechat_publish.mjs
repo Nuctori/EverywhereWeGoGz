@@ -67,12 +67,12 @@ function renderMarkdownImage(alt, src, options = {}) {
   const maxWidth = options.maxWidth || '100%';
   const display = options.display || 'block';
   const borderRadius = options.borderRadius || '8px';
-  return `<div style="margin:18px 0 20px;text-align:center;"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt || '')}" style="display:${display};width:${width};max-width:${maxWidth};height:auto;border-radius:${borderRadius};"></div>`;
+  return `<div style="margin:16px 0 18px;text-align:center;"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt || '')}" style="display:${display};width:${width};max-width:${maxWidth};height:auto;border-radius:${borderRadius};"></div>`;
 }
 
 function renderSupportBlock({ ctaLabel, href, address, qrAlt, qrSrc }) {
   return [
-    '<div style="margin:14px 0 28px;padding:16px 18px;border:1px solid #e5e7eb;border-radius:14px;background:#f8fafc;">',
+    '<div style="margin:16px 0 0;padding:16px 18px;border:1px solid #e5e7eb;border-radius:14px;background:#f8fafc;">',
     `<a href="${escapeHtml(href)}" style="display:inline-block;padding:8px 16px;border-radius:999px;background:#0f766e;color:#ffffff;text-decoration:none;font-size:15px;line-height:1.2;font-weight:600;">${escapeHtml(ctaLabel)}</a>`,
     '<div style="margin:14px 0 6px;font-size:13px;line-height:1.5;color:#6b7280;">详情地址</div>',
     `<a href="${escapeHtml(address)}" style="display:block;font-size:14px;line-height:1.7;color:#0f172a;text-decoration:none;font-weight:600;">老广去边度站内详情页</a>`,
@@ -117,6 +117,31 @@ function tryRenderSupportBlock(lines, startIndex) {
   };
 }
 
+function renderHeading(level, text) {
+  const styles = {
+    1: 'margin:0 0 18px;font-size:28px;line-height:1.35;font-weight:700;color:#0f172a;',
+    2: 'margin:30px 0 14px;padding-left:10px;border-left:4px solid #0f766e;font-size:22px;line-height:1.4;font-weight:700;color:#0f172a;',
+    3: 'margin:26px 0 12px;font-size:19px;line-height:1.5;font-weight:700;color:#0f172a;',
+    4: 'margin:0 0 14px;font-size:18px;line-height:1.6;font-weight:700;color:#111827;',
+    5: 'margin:0 0 12px;font-size:17px;line-height:1.6;font-weight:700;color:#111827;',
+    6: 'margin:0 0 10px;font-size:16px;line-height:1.6;font-weight:700;color:#111827;',
+  };
+  const safeLevel = Math.min(6, Math.max(1, Number(level) || 1));
+  return `<h${safeLevel} style="${styles[safeLevel]}">${renderInlineMarkdown(text)}</h${safeLevel}>`;
+}
+
+function renderParagraph(lines) {
+  return `<p style="margin:0 0 14px;font-size:16px;line-height:1.82;color:#1f2937;">${lines.map(renderInlineMarkdown).join('<br>')}</p>`;
+}
+
+function renderList(items) {
+  return `<ul style="margin:0 0 14px;padding-left:1.35em;color:#1f2937;">${items.map((item) => `<li style="margin:0 0 8px;font-size:15px;line-height:1.75;">${renderInlineMarkdown(item)}</li>`).join('')}</ul>`;
+}
+
+function renderHorizontalRule() {
+  return '<hr style="margin:30px 0 24px;border:0;border-top:1px solid #dbe4ea;">';
+}
+
 export function markdownToHtml(markdown) {
   const lines = markdown
     .replace(/\r\n/g, '\n')
@@ -129,13 +154,13 @@ export function markdownToHtml(markdown) {
 
   const flushParagraph = () => {
     if (paragraph.length === 0) return;
-    blocks.push(`<p>${paragraph.map(renderInlineMarkdown).join('<br>')}</p>`);
+    blocks.push(renderParagraph(paragraph));
     paragraph = [];
   };
 
   const flushList = () => {
     if (listItems.length === 0) return;
-    blocks.push(`<ul>${listItems.map((item) => `<li>${renderInlineMarkdown(item)}</li>`).join('')}</ul>`);
+    blocks.push(renderList(listItems));
     listItems = [];
   };
 
@@ -151,7 +176,7 @@ export function markdownToHtml(markdown) {
     if (trimmed === '---') {
       flushParagraph();
       flushList();
-      blocks.push('<hr>');
+      blocks.push(renderHorizontalRule());
       continue;
     }
 
@@ -169,7 +194,7 @@ export function markdownToHtml(markdown) {
       flushParagraph();
       flushList();
       const level = headingMatch[1].length;
-      blocks.push(`<h${level}>${renderInlineMarkdown(headingMatch[2])}</h${level}>`);
+      blocks.push(renderHeading(level, headingMatch[2]));
       continue;
     }
 
