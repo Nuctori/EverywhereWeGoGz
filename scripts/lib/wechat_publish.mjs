@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import http from 'node:http';
+import crypto from 'node:crypto';
 import sharp from 'sharp';
 import { ensureReferencedQrAssets } from './weekly_wechat_article.mjs';
 
@@ -257,6 +258,75 @@ function replaceHtmlImageSources(html, replacements) {
   return output;
 }
 
+function hashInlineImageSource(source) {
+  return crypto.createHash('sha1').update(String(source)).digest('hex').slice(0, 12);
+}
+
+function normalizeInlineImageExtension(fileName, contentType) {
+  const lowerName = String(fileName || '').toLowerCase();
+  const lowerType = String(contentType || '').toLowerCase();
+  if (lowerType.includes('image/png') || lowerName.endsWith('.png')) return '.png';
+  if (lowerType.includes('image/gif') || lowerName.endsWith('.gif')) return '.gif';
+  if (
+    lowerType.includes('image/jpeg') ||
+    lowerType.includes('image/jpg') ||
+    lowerName.endsWith('.jpg') ||
+    lowerName.endsWith('.jpeg')
+  ) {
+    return '.jpg';
+  }
+  return '.jpg';
+}
+
+async function normalizeInlineImageAsset(imageAsset) {
+  const fileName = path.basename(imageAsset.fileName || 'image.jpg');
+  const contentType = String(imageAsset.contentType || '').toLowerCase();
+  const needsConversion =
+    contentType.includes('image/webp') ||
+    contentType.includes('image/avif') ||
+    fileName.toLowerCase().endsWith('.webp') ||
+    fileName.toLowerCase().endsWith('.avif');
+
+  if (needsConversion) {
+    const converted = await sharp(imageAsset.bytes).jpeg({ quality: 88 }).toBuffer();
+    return {
+      bytes: converted,
+      fileName: `${path.parse(fileName).name}.jpg`,
+      contentType: 'image/jpeg',
+    };
+  }
+
+  return {
+    bytes: imageAsset.bytes,
+    fileName,
+    contentType: imageAsset.contentType || mimeTypeFromFileName(fileName),
+  };
+}
+
+async function materializeInlineImageAsset(rootDir, articlePath, outputDir, source) {
+  const imageAsset = await loadImageAsset(rootDir, articlePath, source);
+  const normalizedAsset = await normalizeInlineImageAsset(imageAsset);
+  const assetDir = path.join(outputDir, 'wechat-assets');
+  fs.mkdirSync(assetDir, { recursive: true });
+  const assetFileName = `${hashInlineImageSource(source)}${normalizeInlineImageExtension(
+    normalizedAsset.fileName,
+    normalizedAsset.contentType,
+  )}`;
+  const assetPath = path.join(assetDir, assetFileName);
+  fs.writeFileSync(assetPath, normalizedAsset.bytes);
+  return path.posix.join('wechat-assets', assetFileName);
+}
+
+async function rewriteHtmlImagesForBundle(rootDir, articlePath, html, outputDir) {
+  const replacements = new Map();
+  for (const source of collectHtmlImageSources(html)) {
+    if (!/^https?:\/\//i.test(source)) continue;
+    const localPath = await materializeInlineImageAsset(rootDir, articlePath, outputDir, source);
+    replacements.set(source, localPath);
+  }
+  return replaceHtmlImageSources(html, replacements);
+}
+
 async function loadImageAsset(rootDir, articlePath, source) {
   const decodedSource = decodeHtmlEntities(source);
   if (/^https?:\/\//i.test(decodedSource)) {
@@ -268,7 +338,7 @@ async function loadImageAsset(rootDir, articlePath, source) {
     const url = new URL(decodedSource);
     const fileName = path.basename(url.pathname || 'image.jpg') || 'image.jpg';
     const contentType = response.headers.get('content-type') || mimeTypeFromFileName(fileName);
-    return { bytes, fileName, contentType };
+    return normalizeInlineImageAsset({ bytes, fileName, contentType });
   }
 
   let filePath = decodedSource;
@@ -284,11 +354,11 @@ async function loadImageAsset(rootDir, articlePath, source) {
     throw new Error(`Inline image not found: ${decodedSource}`);
   }
 
-  return {
+  return normalizeInlineImageAsset({
     bytes: fs.readFileSync(filePath),
     fileName: path.basename(filePath),
     contentType: mimeTypeFromFileName(filePath),
-  };
+  });
 }
 
 export async function uploadArticleImage(accessToken, imageAsset) {
@@ -507,8 +577,9 @@ export async function preparePublishBundle(rootDir, options = {}) {
   const uploadCoverPath = await prepareCoverForUpload(coverPath, outputDir);
   const html = markdownToHtml(body);
   const htmlPath = path.join(outputDir, 'article.html');
-  fs.writeFileSync(htmlPath, `${html}\n`, 'utf8');
   await ensureReferencedQrAssets(outputDir, body);
+  const htmlWithLocalAssets = await rewriteHtmlImagesForBundle(rootDir, articlePath, html, outputDir);
+  fs.writeFileSync(htmlPath, `${htmlWithLocalAssets}\n`, 'utf8');
 
   const bundle = {
     generatedAt: new Date().toISOString(),
