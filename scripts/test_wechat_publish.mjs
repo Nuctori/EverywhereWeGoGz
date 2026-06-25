@@ -35,6 +35,20 @@ assert.ok(html.includes('<h2>清远峡谷漂流2天</h2>'));
 assert.ok(html.includes('<ul>'));
 assert.ok(html.includes('<a href="https://example.com/qingyuan">查看线路</a>'));
 
+const supportBlockHtml = markdownToHtml(`
+[查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour_2705&source=wechat)
+
+地址：https://nuctori.github.io/EverywhereWeGoGz/?tour=tour_2705&source=wechat
+
+扫码查看详情
+
+![查看行程 报名二维码](https://quickchart.io/qr?text=tour_2705)
+`);
+assert.ok(supportBlockHtml.includes('详情地址'));
+assert.ok(supportBlockHtml.includes('扫码查看详情'));
+assert.ok(supportBlockHtml.includes('width:200px'));
+assert.ok(!supportBlockHtml.includes('<p>地址：https://nuctori.github.io/EverywhereWeGoGz/?tour=tour_2705&amp;source=wechat</p>'));
+
 const payload = buildDraftPayload({
   frontmatter: parsed.data,
   html,

@@ -8,9 +8,6 @@ import hashlib
 import json
 import os
 import re
-import subprocess
-import sys
-import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -982,64 +979,52 @@ def filter_unavailable_tours(tours):
 
 
 def main():
-    started_at = time.perf_counter()
-
-    def log_stage(label: str, started: float, extra: str = "") -> None:
-        elapsed = time.perf_counter() - started
-        suffix = f" ({extra})" if extra else ""
-        print(f"[stage] {label}{suffix}: {elapsed:.1f}s")
-
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(line_buffering=True)
-
     print("=" * 60)
-    print("merge data script")
+    print("数据合并脚本")
     print("=" * 60)
 
     all_raw = []
     existing_tours = {}
-    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "data"))
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
+    data_dir = os.path.abspath(data_dir)
     existing_json_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "public", "data", "tours.json")
     )
 
-    stage_started = time.perf_counter()
     if os.path.exists(existing_json_path):
         try:
             with open(existing_json_path, "r", encoding="utf-8-sig") as f:
                 existing_data = json.load(f)
             existing_tours = {make_tour_key(item): item for item in existing_data}
-            print(f"[existing tours.json] {len(existing_tours)} records")
-        except Exception as exc:
-            print(f"[existing tours.json] read failed: {exc}")
-    else:
-        print("[existing tours.json] missing")
-    log_stage("load existing tours.json", stage_started, f"{len(existing_tours)} records")
+            print(f"[existing tours.json] {len(existing_tours)}条")
+        except Exception as e:
+            print(f"[existing tours.json] 读取失败: {e}")
 
-    backup_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tours_json_backup.json"))
-    stage_started = time.perf_counter()
+    # 1. 尝试读取旧备份数据 (962条)
+    backup_path = os.path.join(os.path.dirname(__file__), "..", "tours_json_backup.json")
+    backup_path = os.path.abspath(backup_path)
     if os.path.exists(backup_path):
         try:
-            with open(backup_path, "r", encoding="utf-16") as f:
+            with open(backup_path, 'r', encoding='utf-16') as f:
                 old_data = json.load(f)
-            print(f"[legacy backup] {len(old_data)} records")
+            print(f"[旧数据] {len(old_data)}条")
+            # 将旧数据转换为raw格式
             for item in old_data:
-                all_raw.append(
-                    {
-                        "source": item.get("source", ""),
-                        "title": item.get("title", ""),
-                        "price": item.get("price", 0),
-                        "url": item.get("bookingUrl", "#"),
-                        "days": item.get("duration", 0),
-                        "img": item.get("images", [""])[0] if item.get("images") else "",
-                    }
-                )
-        except Exception as exc:
-            print(f"[legacy backup] read failed: {exc}")
-    else:
-        print("[legacy backup] missing")
-    log_stage("load legacy backup", stage_started, f"{len(all_raw)} raw rows")
+                raw = {
+                    "source": item.get("source", ""),
+                    "title": item.get("title", ""),
+                    "price": item.get("price", 0),
+                    "url": item.get("bookingUrl", "#"),
+                    "days": item.get("duration", 0),
+                    "img": item.get("images", [""])[0] if item.get("images") else "",
+                }
+                all_raw.append(raw)
+        except Exception as e:
+            print(f"[旧数据] 读取失败: {e}")
 
+    # 2. 读取新的raw数据
+    # 假日通仅保留 unified crawl 刷新的 raw_jrt365_full.json。
+    # raw_jrt365.json 已不在统一抓取链路中刷新，继续混入会把陈旧线路重新带回产物。
     raw_files = [
         "raw_jrt365_full.json",
         "raw_kanghui.json",
@@ -1052,92 +1037,82 @@ def main():
     ]
     for fname in raw_files:
         fpath = os.path.join(data_dir, fname)
-        stage_started = time.perf_counter()
-        enriched = []
         if os.path.exists(fpath):
             try:
-                with open(fpath, "r", encoding="utf-8") as f:
+                with open(fpath, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 if fname == "raw_http_full.json":
-                    data = [item for item in data if item.get("source") not in {"品途", "广之旅"}]
+                    data = [
+                        item for item in data
+                        if item.get("source") not in {"品途", "广之旅"}
+                    ]
                 priority = RAW_FILE_PRIORITIES.get(fname, 0)
+                enriched = []
                 for item in data:
                     if not isinstance(item, dict):
                         continue
                     candidate = dict(item)
                     candidate["_merge_priority"] = priority
                     enriched.append(candidate)
+                print(f"[{fname}] {len(enriched)}条")
                 all_raw.extend(enriched)
-                print(f"[{fname}] {len(enriched)} records")
-            except Exception as exc:
-                print(f"[{fname}] read failed: {exc}")
-        else:
-            print(f"[{fname}] missing")
-        log_stage(f"load {fname}", stage_started, f"{len(enriched)} records")
+            except Exception as e:
+                print(f"[{fname}] 读取失败: {e}")
 
-    print(f"[summary] raw input: {len(all_raw)} records")
+    print(f"\n[汇总] 原始数据: {len(all_raw)}条")
 
-    stage_started = time.perf_counter()
+    # 去重
     seen = {}
-    for item in all_raw:
-        key = make_tour_key(item)
+    for it in all_raw:
+        key = make_tour_key(it)
         previous = seen.get(key)
-        if previous is None or prefer_raw_candidate(previous, item):
-            seen[key] = item
+        if previous is None or prefer_raw_candidate(previous, it):
+            seen[key] = it
     deduped = list(seen.values())
-    log_stage("deduplicate raw data", stage_started, f"{len(deduped)} unique / {len(all_raw)} input")
+    print(f"[去重] 后: {len(deduped)}条")
 
-    stage_started = time.perf_counter()
-    deduped = [row for row in deduped if row.get("price", 0) > 0 and len(row.get("title", "")) > 5]
-    log_stage("filter invalid raw data", stage_started, f"{len(deduped)} valid")
+    # 过滤
+    deduped = [r for r in deduped if r.get('price', 0) > 0 and len(r.get('title', '')) > 5]
+    print(f"[过滤] 有效数据: {len(deduped)}条")
 
-    stage_started = time.perf_counter()
     detail_results = load_detail_results(deduped, existing_tours)
-    log_stage("load detail results", stage_started)
 
-    stage_started = time.perf_counter()
+    # 转换为前端格式
     tours = []
-    skipped_tours = 0
-    total = len(deduped)
-    for index, raw in enumerate(deduped, 1):
-        tour = raw_to_tour(raw, index, detail_results.get(make_tour_key(raw), empty_detail()))
-        if tour is None:
-            skipped_tours += 1
-        else:
+    for i, raw in enumerate(deduped, 1):
+        tour = raw_to_tour(raw, i, detail_results.get(make_tour_key(raw), empty_detail()))
+        if tour is not None:
             existing = existing_tours.get(make_tour_key(tour))
             if existing and existing.get("createdAt"):
                 tour["createdAt"] = existing["createdAt"]
             tours.append(tour)
-        if index % 250 == 0 or index == total:
-            print(f"[transform] {index}/{total} kept={len(tours)} skipped={skipped_tours}")
-    log_stage("transform raw to tours", stage_started, f"kept={len(tours)} skipped={skipped_tours}")
 
+    print(f"[转换] 生成 {len(tours)} 条 Tour 数据")
     for source in sorted(set(t["source"] for t in tours)):
         subset = [tour for tour in tours if tour["source"] == source]
         print(
-            f"[detail coverage] {source}: "
+            f"[详情覆盖] {source}: "
             f"itinerary={sum(1 for tour in subset if tour.get('itinerary'))}/{len(subset)} "
             f"inclusions={sum(1 for tour in subset if tour.get('inclusions'))}/{len(subset)} "
             f"exclusions={sum(1 for tour in subset if tour.get('exclusions'))}/{len(subset)} "
             f"notes={sum(1 for tour in subset if tour.get('importantNotes'))}/{len(subset)}"
         )
 
-    stage_started = time.perf_counter()
     tours = filter_unavailable_tours(tours)
-    log_stage("availability filter", stage_started, f"{len(tours)} kept")
+    print(f"[输出] 自动过滤后 {len(tours)} 条 Tour 数据")
 
-    stage_started = time.perf_counter()
+    # 生成元数据
     tours_clean = clean_nulls(tours)
     sources = sorted(set(t["source"] for t in tours_clean))
     destinations = sorted(set(t["destination"] for t in tours_clean if t.get("destination")))
     themes = sorted(set(t["theme"] for t in tours_clean if t.get("theme")))
-    log_stage("build metadata", stage_started, f"sources={len(sources)} destinations={len(destinations)} themes={len(themes)}")
 
     sources_def = [
-        {"name": s, "logo": f"/icons/{s}.png", "color": SOURCE_COLORS.get(s, "#666")}
+        {"name": s, "logo": f"/icons/{s}.png", "color": SOURCE_COLORS.get(s, '#666')}
         for s in sources
     ]
 
+    # 写入 tours.ts (元数据)
     ts_content = f'''import type {{ Tour }} from '@/types/tour';
 
 export const sources = {json.dumps(sources_def, ensure_ascii=False, indent=2)};
@@ -1150,26 +1125,25 @@ export const tours: Tour[] = [];
 '''
 
     ts_path = os.path.join(data_dir, "tours.ts")
-    stage_started = time.perf_counter()
     with open(ts_path, "w", encoding="utf-8") as f:
         f.write(ts_content)
-    log_stage("write tours.ts", stage_started, ts_path)
+    print(f"[保存] tours.ts -> {ts_path}")
 
-    json_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "tours.json"))
+    # 写入 tours.json (数据，无BOM)
+    json_path = os.path.join(os.path.dirname(__file__), "..", "public", "data", "tours.json")
+    json_path = os.path.abspath(json_path)
     os.makedirs(os.path.dirname(json_path), exist_ok=True)
-    stage_started = time.perf_counter()
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(tours_clean, f, ensure_ascii=False, separators=(",", ":"))
-    log_stage("write tours.json", stage_started, f"{json_path} ({os.path.getsize(json_path) / 1024:.1f} KB)")
 
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(tours_clean, f, ensure_ascii=False, separators=(',', ':'))
     split_script = os.path.abspath(os.path.join(os.path.dirname(__file__), "split_tour_data.mjs"))
     if os.path.exists(split_script):
-        split_started = time.perf_counter()
-        result = subprocess.run(["node", split_script], check=False)
-        log_stage("split tour data", split_started, f"exit={result.returncode}")
+        os.system(f'node "{split_script}"')
+    print(f"[保存] tours.json -> {json_path}")
+    print(f"[文件大小] {os.path.getsize(json_path) / 1024:.1f} KB")
 
     print("=" * 60)
-    log_stage("merge pipeline complete", started_at, f"{len(tours_clean)} tours")
+    print("完成！")
 
 
 if __name__ == "__main__":

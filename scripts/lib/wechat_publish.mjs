@@ -43,6 +43,60 @@ function renderInlineMarkdown(text) {
   return html;
 }
 
+function renderMarkdownImage(alt, src, options = {}) {
+  const width = options.width || '100%';
+  const maxWidth = options.maxWidth || '100%';
+  const display = options.display || 'block';
+  const borderRadius = options.borderRadius || '8px';
+  return `<div style="margin:18px 0 20px;text-align:center;"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt || '')}" style="display:${display};width:${width};max-width:${maxWidth};height:auto;border-radius:${borderRadius};"></div>`;
+}
+
+function renderSupportBlock({ ctaLabel, href, address, qrAlt, qrSrc }) {
+  return [
+    '<div style="margin:14px 0 28px;padding:16px 18px;border:1px solid #e5e7eb;border-radius:14px;background:#f8fafc;">',
+    `<a href="${escapeHtml(href)}" style="display:inline-block;padding:8px 16px;border-radius:999px;background:#0f766e;color:#ffffff;text-decoration:none;font-size:15px;line-height:1.2;font-weight:600;">${escapeHtml(ctaLabel)}</a>`,
+    '<div style="margin:14px 0 6px;font-size:13px;line-height:1.5;color:#6b7280;">详情地址</div>',
+    `<a href="${escapeHtml(address)}" style="display:block;font-size:14px;line-height:1.7;color:#0f172a;text-decoration:none;word-break:break-all;">${escapeHtml(address)}</a>`,
+    '<div style="margin:14px 0 8px;font-size:13px;line-height:1.5;color:#6b7280;">扫码查看详情</div>',
+    `<div style="text-align:center;"><img src="${escapeHtml(qrSrc)}" alt="${escapeHtml(qrAlt || '报名二维码')}" style="display:block;margin:0 auto;width:200px;max-width:100%;height:auto;border-radius:0;"></div>`,
+    '</div>',
+  ].join('');
+}
+
+function consumeBlankLines(lines, startIndex) {
+  let index = startIndex;
+  while (index < lines.length && !lines[index].trim()) index += 1;
+  return index;
+}
+
+function tryRenderSupportBlock(lines, startIndex) {
+  const ctaMatch = lines[startIndex]?.trim().match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/);
+  if (!ctaMatch) return null;
+
+  let cursor = consumeBlankLines(lines, startIndex + 1);
+  const addressMatch = lines[cursor]?.trim().match(/^地址[:：]\s*(https?:\/\/\S+)$/);
+  if (!addressMatch) return null;
+
+  cursor = consumeBlankLines(lines, cursor + 1);
+  const qrHint = lines[cursor]?.trim();
+  if (!qrHint || !qrHint.startsWith('扫码')) return null;
+
+  cursor = consumeBlankLines(lines, cursor + 1);
+  const qrMatch = lines[cursor]?.trim().match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/);
+  if (!qrMatch) return null;
+
+  return {
+    nextIndex: cursor,
+    html: renderSupportBlock({
+      ctaLabel: ctaMatch[1],
+      href: ctaMatch[2],
+      address: addressMatch[1],
+      qrAlt: qrMatch[1],
+      qrSrc: qrMatch[2],
+    }),
+  };
+}
+
 export function markdownToHtml(markdown) {
   const lines = markdown
     .replace(/\r\n/g, '\n')
@@ -65,7 +119,8 @@ export function markdownToHtml(markdown) {
     listItems = [];
   };
 
-  for (const line of lines) {
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
     const trimmed = line.trim();
     if (!trimmed) {
       flushParagraph();
@@ -80,12 +135,29 @@ export function markdownToHtml(markdown) {
       continue;
     }
 
+    const supportBlock = tryRenderSupportBlock(lines, index);
+    if (supportBlock) {
+      flushParagraph();
+      flushList();
+      blocks.push(supportBlock.html);
+      index = supportBlock.nextIndex;
+      continue;
+    }
+
     const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
     if (headingMatch) {
       flushParagraph();
       flushList();
       const level = headingMatch[1].length;
       blocks.push(`<h${level}>${renderInlineMarkdown(headingMatch[2])}</h${level}>`);
+      continue;
+    }
+
+    const imageMatch = trimmed.match(/^!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)$/);
+    if (imageMatch) {
+      flushParagraph();
+      flushList();
+      blocks.push(renderMarkdownImage(imageMatch[1], imageMatch[2]));
       continue;
     }
 

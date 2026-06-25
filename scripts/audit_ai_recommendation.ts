@@ -21,7 +21,6 @@ const {
   collectLiteralAvoidHints,
   compactCandidates,
   allowsPublicInterestForTurn,
-  enrichPromptCandidatesWithMemoryCoverage,
   finalizeRecommendationSummary,
   getAiResponseIntentQualityIssue,
   getConcreteAiReason,
@@ -30,7 +29,6 @@ const {
   matchesActiveDateFilters,
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
-  mergeAiRankingIntent,
   mergeIntentWithMemory,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
@@ -2268,193 +2266,6 @@ const reordered = prioritizeRecommendationItems(
     aiTierSorted.map((item) => item.tourId),
     ['ai-detailed-top', 'ai-brief-second', 'local-third'],
     'tier ordering should dominate raw score when final recommendations are merged',
-  );
-}
-
-// ─── 回归测试：短 reason 不应被当作 AI 详细推荐置顶 ───
-{
-  const tieredItems = mergeAiAndLocalRecommendations(
-    [
-      {
-        tourId: 'brief-guangxi',
-        score: 99,
-        reason: '广西崇左3天，标签含越南。',
-        matchedSignals: ['广西'],
-      },
-      {
-        tourId: 'detailed-guangxi-vietnam',
-        score: 70,
-        reason: '这条线同时覆盖广西边境和越南方向，德天跨国瀑布、通灵峡谷与越南段组合更贴近“广西越南联游”，不是只推荐广西单点。',
-        matchedSignals: ['广西', '越南', '联游'],
-      },
-    ],
-    [{
-      tourId: 'local-supplement',
-      score: 1000,
-      reason: '本地补位高分',
-      matchedSignals: ['本地补位'],
-    }],
-  );
-
-  const sorted = prioritizeRecommendationItems(tieredItems, {
-    candidateTours: [
-      candidate({
-        id: 'brief-guangxi',
-        title: '广西崇左德天3天',
-        destination: '广西',
-        duration: 3,
-        price: 899,
-        tags: ['德天瀑布'],
-        highlights: ['崇左', '德天瀑布'],
-        theme: '自然风光',
-      }),
-      candidate({
-        id: 'detailed-guangxi-vietnam',
-        title: '广西德天越南边境联游4天',
-        destination: '广西',
-        duration: 4,
-        price: 1599,
-        tags: ['广西', '越南', '联游'],
-        highlights: ['德天跨国瀑布', '越南边境', '通灵峡谷'],
-        theme: '边境联游',
-      }),
-      candidate({
-        id: 'local-supplement',
-        title: '广西普通补位2天',
-        destination: '广西',
-        duration: 2,
-        price: 399,
-        tags: ['休闲'],
-        highlights: ['补位'],
-      }),
-    ],
-    intent: buildHardIntentFromText('给我找广西越南联游'),
-    userText: '给我找广西越南联游',
-  });
-
-  assert.equal(
-    tieredItems.find((item) => item.tourId === 'brief-guangxi')?.recommendationTier,
-    'ai-brief',
-    'short screenshot-like reason should be classified as AI brief',
-  );
-  assert.equal(
-    tieredItems.find((item) => item.tourId === 'detailed-guangxi-vietnam')?.recommendationTier,
-    'ai-detailed',
-    'specific multi-destination reason should be classified as AI detailed',
-  );
-  assert.deepEqual(
-    sorted.map((item) => item.tourId),
-    ['detailed-guangxi-vietnam', 'brief-guangxi', 'local-supplement'],
-    'detailed AI recommendation should rank before brief AI and local supplement',
-  );
-}
-
-// ─── 回归测试：多轮语义应由 AI intent 决定，而非本地词表抢先改写 ───
-{
-  const previousMemory = {
-    destinationHints: ['广西', '越南'],
-    travelStyle: [],
-    mustHave: ['联游'],
-    avoid: [],
-    weatherSensitivity: [],
-    departureWeekdays: [],
-    updatedAt: '2026-06-16T00:00:00.000Z',
-  };
-  const hardIntent = buildHardIntentFromText('你现在推荐的都是越南的旅行团了');
-  const aiJudgedRefinement = mergeAiRankingIntent(
-    hardIntent,
-    {
-      destinationHints: ['广西', '越南'],
-      departureWeekdays: [],
-      refinementMode: 'refine_previous',
-    },
-  );
-  const mergedRefinement = mergeIntentWithMemory(aiJudgedRefinement, previousMemory);
-
-  assert.deepEqual(
-    mergedRefinement?.destinationHints,
-    ['广西', '越南'],
-    'AI judged refinement should preserve the composite destination instead of local extracted text taking over',
-  );
-  assert.equal(
-    mergedRefinement?.refinementMode,
-    'refine_previous',
-    'AI refinementMode should take precedence over local hard-intent defaults',
-  );
-
-  const aiJudgedReplacement = mergeAiRankingIntent(
-    hardIntent,
-    {
-      destinationHints: ['越南'],
-      departureWeekdays: [],
-      refinementMode: 'replace_destination',
-    },
-  );
-  const mergedReplacement = mergeIntentWithMemory(aiJudgedReplacement, previousMemory);
-  assert.deepEqual(
-    mergedReplacement?.destinationHints,
-    ['越南'],
-    'AI judged replacement should be able to replace previous destinations without a local phrase whitelist',
-  );
-  assert.equal(
-    mergedReplacement?.refinementMode,
-    'replace_destination',
-    'AI replacement mode should be preserved through memory merge',
-  );
-
-  const basePromptCandidates = compactCandidates(
-    [
-      candidate({
-        id: 'vn-only',
-        title: '越南下龙湾5天',
-        destination: '越南',
-        duration: 5,
-        price: 2399,
-        tags: ['海湾'],
-        highlights: ['下龙湾', '河内'],
-      }),
-      candidate({
-        id: 'gx-memory',
-        title: '广西德天边境3天',
-        destination: '广西',
-        duration: 3,
-        price: 999,
-        tags: ['德天瀑布'],
-        highlights: ['边境风光', '德天瀑布'],
-      }),
-    ],
-    [{ tourId: 'vn-only', score: 99, reason: '当前文本目的地', matchedSignals: ['越南'] }],
-    hardIntent,
-    { intent: hardIntent, userText: '你现在推荐的都是越南的旅行团了' },
-  ).filter((item) => item.id === 'vn-only');
-  const memoryCoveredCandidates = enrichPromptCandidatesWithMemoryCoverage(
-    basePromptCandidates,
-    [
-      candidate({
-        id: 'vn-only',
-        title: '越南下龙湾5天',
-        destination: '越南',
-        duration: 5,
-        price: 2399,
-        tags: ['海湾'],
-        highlights: ['下龙湾', '河内'],
-      }),
-      candidate({
-        id: 'gx-memory',
-        title: '广西德天边境3天',
-        destination: '广西',
-        duration: 3,
-        price: 999,
-        tags: ['德天瀑布'],
-        highlights: ['边境风光', '德天瀑布'],
-      }),
-    ],
-    previousMemory,
-    hardIntent,
-  );
-  assert.ok(
-    memoryCoveredCandidates.some((item) => item.id === 'gx-memory'),
-    'AI prompt pool should retain previous-memory destination candidates so the model can judge follow-up semantics',
   );
 }
 

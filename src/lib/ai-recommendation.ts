@@ -1375,10 +1375,11 @@ function shouldInheritPreferenceMemoryForTurn(
   void intent;
   if (!memory) return false;
   const normalizedText = text.replace(/\s+/g, '');
-  const isRelativeTurn = /(上一轮|刚才|继续|沿用|保留|类似|这个|这些|上面|前面)/.test(
+  const isRelativeTurn = /(上一轮|刚才|继续|沿用|保留|类似|这个|这些|上面|前面|再便宜|便宜一点|贵一点|轻松点|换一个|换成|不要|避开|剔除|更接近)/.test(
     normalizedText,
   );
-  // 本地 fallback 只处理明确指代上一轮的情况；是否“纠偏/替换/扩展”交给 AI 的 refinementMode 判断。
+  // 经验：只有相对续写才继承上一轮偏好，普通新搜索不要把旧预算/目的地/风格
+  // 注入本轮硬意图，否则会把 AI 的判断空间偷偷收窄。
   return isRelativeTurn;
 }
 
@@ -1521,15 +1522,10 @@ function mergeAiRankingIntent(
   if (!hardIntent && !aiIntent) return null;
   if (!hardIntent) return aiIntent;
   if (!aiIntent) return hardIntent;
-  const aiDestinationJudgement =
-    aiIntent.destinationHints?.length &&
-    ['refine_previous', 'broaden', 'replace_destination'].includes(String(aiIntent.refinementMode));
 
   return {
     ...aiIntent,
-    destinationHints: aiDestinationJudgement
-      ? aiIntent.destinationHints || []
-      : hardIntent.destinationHints?.length
+    destinationHints: hardIntent.destinationHints?.length
       ? hardIntent.destinationHints
       : aiIntent.destinationHints || [],
     semanticFocus: uniqueStrings([
@@ -1562,7 +1558,7 @@ function mergeAiRankingIntent(
       ? hardIntent.returnWeekdays
       : aiIntent.returnWeekdays || [],
     departureTimeOfDay: hardIntent.departureTimeOfDay ?? aiIntent.departureTimeOfDay ?? null,
-    refinementMode: aiIntent.refinementMode ?? hardIntent.refinementMode ?? null,
+    refinementMode: hardIntent.refinementMode ?? aiIntent.refinementMode ?? null,
   };
 }
 
@@ -1869,31 +1865,6 @@ function getRecommendationTierWeight(item: AiRecommendationItem) {
   }
 }
 
-function isDetailedAiRecommendation(item: AiRecommendationItem) {
-  const reason = stripTerminalPunctuation(item.reason || '').replace(/\s+/g, '');
-  if (!reason) return false;
-
-  const reasonLength = reason.length;
-  const matchedSignalCount = uniqueStrings(item.matchedSignals || []).length;
-  const destinationFactCount = collectDestinationHints(normalizeText(reason)).length > 0 ? 1 : 0;
-  const concreteFactCount = [
-    destinationFactCount,
-    /(?:周[一二三四五六日天]|周末|晚出发|晚班|返程|周日|周五)/,
-    /(?:\d+天|\d+晚|三天|两天|五天|行程|节奏)/,
-    /(?:预算|价格|人均|以内|口碑|评分|住宿|动车|高铁|大巴|飞机)/,
-    /(?:适合|因为|覆盖|同时|兼顾|更符合|优先|相比)/,
-  ].filter((fact) => typeof fact === 'number' ? fact > 0 : fact.test(reason)).length;
-  const isTemplateBrief = (
-    reasonLength < 18 ||
-    /^(?:[\p{Script=Han}A-Za-z]{0,12})?(?:\d+天)?(?:，|,)?(?:可考虑|性价比|热门|低价|价格|预算|经典|综合|AI综合推荐|更贴题|适合|符合需求)[。.]?$/u.test(reason) ||
-    /^(?:有|含|带)(?:温泉|沙滩|海边|山水|美食|周末)(?:和|、)?(?:温泉|沙滩|海边|山水|美食)?[。.]?$/.test(reason)
-  );
-
-  if (isTemplateBrief) return false;
-  if (reasonLength >= 42 && concreteFactCount >= 2) return true;
-  return reasonLength >= 28 && concreteFactCount >= 3 && matchedSignalCount >= 2;
-}
-
 function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecommendationItem[] {
   let commentaryCount = 0;
 
@@ -1925,7 +1896,7 @@ function mergeAiAndLocalRecommendations(
     })
     .map((item) => ({
       ...item,
-      recommendationTier: isDetailedAiRecommendation(item) ? 'ai-detailed' : 'ai-brief',
+      recommendationTier: item.reason ? 'ai-detailed' : 'ai-brief',
     } satisfies AiRecommendationItem));
   const supplementalLocalItems = localItems.filter((item) => {
     if (seenTourIds.has(item.tourId)) return false;
@@ -4128,43 +4099,6 @@ function enrichPromptCandidatesWithSemanticEvidence(
   return merged.slice(0, MAX_AI_CANDIDATES);
 }
 
-function enrichPromptCandidatesWithMemoryCoverage(
-  baseCandidates: ReturnType<typeof compactCandidates>,
-  tours: AiRecommendationCandidate[],
-  memory: AiPreferenceMemory | null | undefined,
-  intent: AiTravelIntent | null,
-) {
-  if (!memory?.destinationHints?.length) return baseCandidates;
-
-  const primitives = tours.map(buildTourPrimitive);
-  const sortedPrices = primitives
-    .map((primitive) => primitive.price)
-    .filter((price) => Number.isFinite(price) && price > 0)
-    .sort((a, b) => a - b);
-  const memoryIntent = { destinationHints: memory.destinationHints };
-  const memoryCandidates = selectDiversePrimitives(
-    primitives.filter((primitive) => candidateMatchesDestinationIntent(memoryIntent, primitive)),
-    Math.min(12, MAX_AI_CANDIDATES),
-    [],
-  ).map((primitive) =>
-    annotateCandidatePrimitive(
-      primitive,
-      intent,
-      sortedPrices,
-      intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
-      memory.destinationHints,
-    ),
-  );
-
-  if (memoryCandidates.length === 0) return baseCandidates;
-  const seenIds = new Set<string>();
-  return [...memoryCandidates, ...baseCandidates].filter((candidate) => {
-    if (seenIds.has(candidate.id)) return false;
-    seenIds.add(candidate.id);
-    return true;
-  }).slice(0, MAX_AI_CANDIDATES);
-}
-
 function extractRecentUserTexts(messages: AiRecommendationMessage[], limit = 6) {
   return messages
     .filter((message) => message.role === 'user')
@@ -5237,7 +5171,6 @@ function buildAiMessages(params: {
         caveat: '一句中文，说明近似替代或证据边界',
       },
       intent: {
-        destinationHints: 'string[]，本轮语义判断后的目的地；若用户在纠偏上一轮偏差，应保留/修正上一轮目的地组合；若明确重开搜索才替换',
         semanticFocus: promptPolicy.semanticFocusDescription,
         travelStyle: 'string[]',
         mustHave: 'string[]',
@@ -5259,7 +5192,6 @@ function buildAiMessages(params: {
     },
     rq: [
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。',
-      '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
       'candidates 里 pc/pricePct 是价格上下文，atoms/cats/seasonAtoms/conflicts 是候选事实摘要。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
@@ -5316,10 +5248,6 @@ function buildLiteAiMessages(params: {
     ],
     candidates: compactCandidatesForLitePrompt(params.candidates),
     schema: {
-      intent: {
-        destinationHints: 'string[]，本轮语义判断后的目的地',
-        refinementMode: 'new_search|refine_previous|broaden|replace_destination|null',
-      },
       intentNotes: {
         w: '短句，如何用世界知识理解 q 的软语义',
         sc: 'string[]，最多4个软语义标准',
@@ -5337,11 +5265,10 @@ function buildLiteAiMessages(params: {
     },
     rq: [
       '只输出 JSON，不要 Markdown。',
-      '返回 intent、intentNotes 和 items；不要 summary、reason、matchedSignals。',
+      '返回 intentNotes 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
       '用紧凑 JSON；中文短句不超过32字。',
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
-      '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
       '结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 理解软语义。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，优先按 sg 去理解这类软语义；它是理解镜头，不是硬过滤规则。']
@@ -5616,7 +5543,6 @@ export const __aiRecommendationTestHooks = {
   allowsPublicInterestForTurn,
   buildLocalRecommendationQuery,
   buildIntentLocalRecommendations,
-  enrichPromptCandidatesWithMemoryCoverage,
   finalizeRecommendationSummary,
   getConcreteAiReason,
   getAiResponseIntentQualityIssue,
@@ -5625,7 +5551,6 @@ export const __aiRecommendationTestHooks = {
   matchesActiveDateFilters,
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
-  mergeAiRankingIntent,
   mergeIntentWithMemory,
   normalizeIntent,
   prioritizeRecommendationItems,
@@ -6602,7 +6527,6 @@ export async function requestAiRecommendations({
   const memoryForThisTurn = shouldInheritPreferenceMemoryForTurn(text, baseHardIntent, basePreferenceMemory)
     ? basePreferenceMemory
     : null;
-  const aiContextMemoryForThisTurn = basePreferenceMemory;
   const baseEffectiveUserText = buildEffectiveUserText(text, memoryForThisTurn);
   const normalizedCandidateTours = candidateTours.map(normalizeCandidateTour);
   const baseCandidatePool = filterPastOnlyCandidatesWhenFutureExists(normalizedCandidateTours);
@@ -6756,22 +6680,17 @@ export async function requestAiRecommendations({
     const routeAtlasPromise = Promise.resolve(buildRouteAtlas(availableCandidates));
 
     const aiCandidatePool = enrichPromptCandidatesWithSemanticEvidence(
-      enrichPromptCandidatesWithMemoryCoverage(
-        compactCandidates(
-          availableCandidates,
-          localItemsForMerge,
-          effectiveIntent,
-          {
-            budgetPriority: effectiveIntent?.budgetPriority,
-            intent: effectiveIntent,
-            userText: effectiveUserText,
-            weatherSensitivity: effectiveIntent?.weatherSensitivity,
-            weatherContext: weatherContextForRanking,
-          },
-        ),
+      compactCandidates(
         availableCandidates,
-        aiContextMemoryForThisTurn,
+        localItemsForMerge,
         effectiveIntent,
+        {
+          budgetPriority: effectiveIntent?.budgetPriority,
+          intent: effectiveIntent,
+          userText: effectiveUserText,
+          weatherSensitivity: effectiveIntent?.weatherSensitivity,
+          weatherContext: weatherContextForRanking,
+        },
       ),
       availableCandidates,
       localItemsForMerge,
@@ -6820,7 +6739,7 @@ export async function requestAiRecommendations({
         destinationWeatherInsights: [],
         searchQuery,
         intent: effectiveIntent,
-        preferenceMemory: aiContextMemoryForThisTurn,
+        preferenceMemory: nextPreferenceMemory,
         allowPublicInterest: allowPublicInterestForTurn,
       }),
       liteMessages: buildLiteAiMessages({
@@ -6830,7 +6749,7 @@ export async function requestAiRecommendations({
         weatherContext: weatherContextForRanking,
         searchQuery,
         intent: effectiveIntent,
-        preferenceMemory: aiContextMemoryForThisTurn,
+        preferenceMemory: nextPreferenceMemory,
         allowPublicInterest: allowPublicInterestForTurn,
       }),
       maxTokens: 1600,

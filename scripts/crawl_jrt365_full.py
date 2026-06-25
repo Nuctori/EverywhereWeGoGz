@@ -24,17 +24,6 @@ HEADERS = {
 }
 BASE_URL = "http://www.jrt365.com"
 
-
-def env_int(name, default, minimum=0, maximum=None):
-    try:
-        value = int(os.environ.get(name, str(default)) or default)
-    except (TypeError, ValueError):
-        value = default
-    value = max(minimum, value)
-    if maximum is not None:
-        value = min(maximum, value)
-    return value
-
 def create_webdriver():
     from selenium import webdriver
 
@@ -103,17 +92,6 @@ def parse_flashcalendar_dates(markup, year, month):
     return dates
 
 
-def build_month_windows():
-    current_year = time.localtime().tm_year
-    current_month = time.localtime().tm_mon
-    month_limit = env_int("JRT365_CALENDAR_MONTHS", 6, minimum=1, maximum=12)
-    windows = []
-    for offset in range(month_limit):
-        month_index = current_month - 1 + offset
-        year = current_year + (month_index // 12)
-        month = (month_index % 12) + 1
-        windows.append((year, month))
-    return windows
 def fetch_detail_snapshot(item):
     url = str(item.get('url') or '').strip()
     if not url:
@@ -191,86 +169,6 @@ def fetch_detail_snapshot(item):
     }
 
 
-
-def parse_listing_html(html, seen):
-    href_m = re.search(r'href=["\']([^"\']*groupno=[^"\']*)["\']', html)
-    title_m = re.search(r'>([^<]+)</a></p>', html)
-    price_m = re.search(r'<div class="t4_price[^"]*">.*?(\d+(?:\.\d+)?)<', html, re.S)
-    img_m = re.search(r'src=["\']([^"\']*HOLIDAY/[^"\']*)["\']', html)
-    if not (href_m and title_m):
-        return None
-
-    href = href_m.group(1)
-    if not href.startswith('http'):
-        href = BASE_URL + '/tourgroup/' + href
-
-    title = title_m.group(1).strip()
-    price = float(price_m.group(1)) if price_m else 0
-    img_url = img_m.group(1) if img_m else ''
-    groupno = extract_groupno(href)
-
-    key = title + '|' + str(price)
-    if key in seen:
-        return None
-    seen.add(key)
-
-    item = {
-        'source': '假日通',
-        'title': title,
-        'price': price,
-        'url': href,
-        'days': extract_days(title),
-        'groupno': groupno,
-        'sourceId': groupno,
-    }
-    if img_url:
-        item['img'] = img_url if img_url.startswith('http') else BASE_URL + img_url
-    return item
-
-
-def enrich_items_with_details(items):
-    total = len(items)
-    if total == 0:
-        return items
-
-    workers = env_int('JRT365_DETAIL_WORKERS', 12, minimum=1, maximum=24)
-    print(f"[假日通] 详情补全开始: {total} 条, workers={workers}, months={len(build_month_windows())}")
-    enriched = [None] * total
-    started = time.perf_counter()
-
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        future_map = {
-            executor.submit(fetch_detail_snapshot, dict(item)): index
-            for index, item in enumerate(items)
-        }
-        for completed, future in enumerate(as_completed(future_map), start=1):
-            index = future_map[future]
-            merged = dict(items[index])
-            try:
-                merged.update(future.result() or {})
-            except Exception:
-                pass
-            enriched[index] = merged
-            if completed % 20 == 0 or completed == total:
-                elapsed = time.perf_counter() - started
-                print(f"[假日通] 详情补全 {completed}/{total} ({elapsed:.1f}s)")
-
-    return enriched
-
-
-def extract_items_from_current_page(driver, By, seen, all_items):
-    lis = driver.find_elements(By.CSS_SELECTOR, '#ctl00_ContentPlaceHolder_htmlform_id_list > ul > li')
-    added = 0
-    for li in lis:
-        try:
-            item = parse_listing_html(li.get_attribute('outerHTML'), seen)
-            if item is None:
-                continue
-            all_items.append(item)
-            added += 1
-        except Exception:
-            pass
-    return added
 def fetch():
     print("[假日通] 全量抓取中...")
     try:
@@ -306,11 +204,10 @@ def fetch():
                     except:
                         pass
 
-                    max_pages = env_int("JRT365_MAX_PAGES", 0, minimum=0, maximum=total_pages)
+                    # 默认抓取全部页；如需限页可通过环境变量控制
+                    max_pages = int(os.environ.get("JRT365_MAX_PAGES", "0") or "0")
                     if max_pages > 0:
                         total_pages = min(total_pages, max_pages)
-
-                    print(f"[假日通] {cat_name}/{mudidi} pages={total_pages}")
 
                     for page in range(1, total_pages + 1):
                         if page > 1:
@@ -319,9 +216,48 @@ def fetch():
                                 time.sleep(2)
                             except:
                                 break
-                        added = extract_items_from_current_page(driver, By, seen, all_items)
-                        if page % 10 == 0 or page == total_pages:
-                            print(f"[假日通] {cat_name}/{mudidi} page {page}/{total_pages}, added={added}, total={len(all_items)}")
+
+                        lis = driver.find_elements(By.CSS_SELECTOR, '#ctl00_ContentPlaceHolder_htmlform_id_list > ul > li')
+                        for li in lis:
+                            try:
+                                html = li.get_attribute('outerHTML')
+                                href_m = re.search(r'href=["\']([^"\']*groupno=[^"\']*)["\']', html)
+                                title_m = re.search(r'>([^<]+)</a></p>', html)
+                                price_m = re.search(r'<div class="t4_price[^"]*">.*?(\d+(?:\.\d+)?)<', html, re.S)
+                                img_m = re.search(r'src=["\']([^"\']*HOLIDAY/[^"\']*)["\']', html)
+
+                                if href_m and title_m:
+                                    href = href_m.group(1)
+                                    if not href.startswith('http'):
+                                        href = BASE_URL + '/tourgroup/' + href
+                                    title = title_m.group(1).strip()
+                                    price = float(price_m.group(1)) if price_m else 0
+                                    img_url = img_m.group(1) if img_m else ''
+                                    groupno = extract_groupno(href)
+
+                                    key = title + "|" + str(price)
+                                    if key in seen:
+                                        continue
+                                    seen.add(key)
+
+                                    item = {
+                                        "source": "假日通",
+                                        "title": title,
+                                        "price": price,
+                                        "url": href,
+                                        "days": extract_days(title),
+                                        "groupno": groupno,
+                                        "sourceId": groupno,
+                                    }
+                                    if img_url:
+                                        if img_url.startswith('http'):
+                                            item["img"] = img_url
+                                        else:
+                                            item["img"] = BASE_URL + img_url
+                                    item.update(fetch_detail_snapshot(item))
+                                    all_items.append(item)
+                            except:
+                                pass
                 except Exception as e:
                     print(f"  {cat_name}/{mudidi} error: {e}")
 
@@ -342,11 +278,9 @@ def fetch():
                 except:
                     pass
 
-                max_pages = env_int("JRT365_MAX_PAGES", 0, minimum=0, maximum=total_pages)
+                max_pages = int(os.environ.get("JRT365_MAX_PAGES", "0") or "0")
                 if max_pages > 0:
                     total_pages = min(total_pages, max_pages)
-
-                print(f"[假日通] {name} pages={total_pages}")
 
                 for page in range(1, total_pages + 1):
                     if page > 1:
@@ -356,15 +290,51 @@ def fetch():
                         except:
                             break
 
-                    added = extract_items_from_current_page(driver, By, seen, all_items)
-                    if page % 10 == 0 or page == total_pages:
-                        print(f"[假日通] {name} page {page}/{total_pages}, added={added}, total={len(all_items)}")
+                    lis = driver.find_elements(By.CSS_SELECTOR, '#ctl00_ContentPlaceHolder_htmlform_id_list > ul > li')
+                    for li in lis:
+                        try:
+                            html = li.get_attribute('outerHTML')
+                            href_m = re.search(r'href=["\']([^"\']*groupno=[^"\']*)["\']', html)
+                            title_m = re.search(r'>([^<]+)</a></p>', html)
+                            price_m = re.search(r'<div class="t4_price[^"]*">.*?(\d+(?:\.\d+)?)<', html, re.S)
+                            img_m = re.search(r'src=["\']([^"\']*HOLIDAY/[^"\']*)["\']', html)
+
+                            if href_m and title_m:
+                                href = href_m.group(1)
+                                if not href.startswith('http'):
+                                    href = BASE_URL + '/tourgroup/' + href
+                                title = title_m.group(1).strip()
+                                price = float(price_m.group(1)) if price_m else 0
+                                img_url = img_m.group(1) if img_m else ''
+                                groupno = extract_groupno(href)
+
+                                key = title + "|" + str(price)
+                                if key in seen:
+                                    continue
+                                seen.add(key)
+
+                                item = {
+                                    "source": "假日通",
+                                    "title": title,
+                                    "price": price,
+                                    "url": href,
+                                    "days": extract_days(title),
+                                    "groupno": groupno,
+                                    "sourceId": groupno,
+                                }
+                                if img_url:
+                                    if img_url.startswith('http'):
+                                        item["img"] = img_url
+                                    else:
+                                        item["img"] = BASE_URL + img_url
+                                item.update(fetch_detail_snapshot(item))
+                                all_items.append(item)
+                        except:
+                            pass
             except Exception as e:
                 print(f"  {name} error: {e}")
 
         driver.quit()
-        print(f"[假日通] 列表采集完成: {len(all_items)} 条")
-        all_items = enrich_items_with_details(all_items)
         print(f"[假日通] 抓取完成: {len(all_items)} 条")
         return all_items
     except Exception as e:
@@ -418,8 +388,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-

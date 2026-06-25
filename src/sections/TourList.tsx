@@ -20,6 +20,7 @@ import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { compareRecommended, getEffectiveDepartureDates } from '@/lib/tour-recommendation';
+import { findTourByDeepLink, getRequestedTourId } from '@/lib/tour-deeplink';
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { computePriceStats, sliderToPrice, priceToSlider } from '@/lib/price-slider';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -426,10 +427,12 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const loadMoreTimerRef = useRef<number | null>(null);
   const viewVersionRef = useRef(0);
+  const openedDeepLinkTourIdRef = useRef<string>('');
 // filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
+  const [clearedAiRequestId, setClearedAiRequestId] = useState<number | null>(null);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
   const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
@@ -454,6 +457,21 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     () => getSourceOptions(catalogSourceTours),
     [catalogSourceTours],
   );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const requestedTourId = getRequestedTourId(window.location.search);
+    if (!requestedTourId) return;
+    if (selectedSummaryTour?.id === requestedTourId) return;
+    if (openedDeepLinkTourIdRef.current === requestedTourId) return;
+    if (catalogSourceTours.length === 0) return;
+
+    const requestedTour = findTourByDeepLink(window.location.search, catalogSourceTours);
+    if (!requestedTour) return;
+
+    openedDeepLinkTourIdRef.current = requestedTourId;
+    selectTour(requestedTour);
+  }, [catalogSourceTours, selectTour, selectedSummaryTour]);
 
   const priceRange = useMemo(
     () => [
@@ -548,7 +566,14 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     () => ({ normalized: normalizedSearchQuery, terms: searchTerms }),
     [normalizedSearchQuery, searchTerms],
   );
-  const isAiSearchMode = Boolean(aiRecommendationResult);
+  const isAiSearchMode = Boolean(
+    aiRecommendationResult ||
+    (
+      aiSearchRequest &&
+      aiSearchRequest.id !== clearedAiRequestId &&
+      aiSearchRequest.prompt.trim().length > 0
+    ),
+  );
 
   const aiRecommendedCount = useMemo(
     () => aiRecommendationResult?.items.filter((item) => Boolean(item.reason)).length ?? 0,
@@ -729,8 +754,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
+    setClearedAiRequestId(aiSearchRequest?.id ?? null);
     setAiClearVersion((current) => current + 1);
-  }, []);
+  }, [aiSearchRequest?.id]);
 
   const waterfallTours = useMemo(
     () => displayTours.slice(0, visibleCount),
