@@ -266,6 +266,90 @@ const routeFamilyCounts = balancedContext.selectedTours.reduce((result, tour) =>
 }, {});
 assert.ok(Math.max(...Object.values(routeFamilyCounts)) <= 1);
 
+const groupSizePreferenceTours = [
+  {
+    id: 'group-min-start',
+    title: '4人起订山水线',
+    source: '测试源',
+    destination: '广东',
+    duration: 3,
+    price: 499,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-26', '2026-06-28'],
+    transportType: '大巴',
+    accommodationLevel: '舒适型',
+    highlights: ['山水', '玩水'],
+    tags: ['避暑'],
+    suitableFor: ['亲子', '朋友'],
+    images: ['/data/image-cache/group-min-start.webp'],
+    bookingUrl: 'https://example.com/group-min-start',
+    theme: '自然风光',
+    groupSize: '4人起订',
+    singleSupplement: 300,
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+  {
+    id: 'group-min-group',
+    title: '4人成团山水线',
+    source: '测试源',
+    destination: '广东',
+    duration: 3,
+    price: 499,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-26', '2026-06-28'],
+    transportType: '大巴',
+    accommodationLevel: '舒适型',
+    highlights: ['山水', '玩水'],
+    tags: ['避暑'],
+    suitableFor: ['亲子', '朋友'],
+    images: ['/data/image-cache/group-min-group.webp'],
+    bookingUrl: 'https://example.com/group-min-group',
+    theme: '自然风光',
+    groupSize: '4人成团',
+    singleSupplement: 300,
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+  {
+    id: 'group-flex',
+    title: '2人成行山水线',
+    source: '测试源',
+    destination: '广东',
+    duration: 3,
+    price: 599,
+    priceUnit: '元/人',
+    departureDates: ['2026-06-26', '2026-06-28'],
+    transportType: '大巴',
+    accommodationLevel: '舒适型',
+    highlights: ['山水', '玩水'],
+    tags: ['避暑'],
+    suitableFor: ['亲子', '朋友'],
+    images: ['/data/image-cache/group-flex.webp'],
+    bookingUrl: 'https://example.com/group-flex',
+    theme: '自然风光',
+    groupSize: '2人成行',
+    singleSupplement: 0,
+    singleSupplementNote: '无房差',
+    dataQuality: { availabilityConfidence: 'high' },
+  },
+];
+
+const groupSizeContext = buildWeeklyArticleContext(groupSizePreferenceTours, {
+  runDate: '2026-06-24',
+  windowDays: 14,
+  maxCandidates: 6,
+  maxArticleItems: 3,
+});
+
+const minStartTour = groupSizeContext.candidateTours.find((tour) => tour.id === 'group-min-start');
+const minGroupTour = groupSizeContext.candidateTours.find((tour) => tour.id === 'group-min-group');
+const flexTour = groupSizeContext.candidateTours.find((tour) => tour.id === 'group-flex');
+assert.ok(minStartTour);
+assert.ok(minGroupTour);
+assert.ok(flexTour);
+assert.ok(minStartTour.editorialScore < minGroupTour.editorialScore);
+assert.equal(minGroupTour.groupSize, '4人成团');
+assert.equal(flexTour.singleSupplement, 0);
+
 const prompt = buildWeeklyArticlePrompt(context);
 assert.ok(prompt.includes('"weatherLead"'));
 assert.ok(prompt.includes('清远峡谷漂流2天'));

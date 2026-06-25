@@ -179,7 +179,7 @@ const ARTICLE_BUCKET_META = {
   },
   海边海岛: {
     title: '海边海岛',
-    intro: '这组把海风、开阔和松弛感放在第一位，适合想借两天把节奏放慢、顺手把心情吹开的人。',
+    intro: '这组把海风、开阔和松弛感放在前面，适合想借两天把节奏放慢、顺手把心情吹开的人。',
   },
   酒店泡池: {
     title: '住下来慢慢玩',
@@ -566,6 +566,10 @@ function scoreTour(tour, runDate, windowDates) {
   const bucket = classifyTourBucket(tour, experienceSignals);
   const departureSpread = new Set(windowDates).size;
   const weekendFriendly = hasWeekendDeparture(windowDates);
+  const groupSizeText = `${tour.groupSize || ''}`.replace(/\s+/g, '');
+  const minGroupSize = extractMinimumGroupSize(groupSizeText);
+  const groupSizeType = classifyGroupSizeType(groupSizeText);
+  const hasNoRoomDifference = isNoRoomSupplement(tour);
   const highlightCount = new Set([
     ...(Array.isArray(tour.highlights) ? tour.highlights : []),
     ...(Array.isArray(tour.tags) ? tour.tags : []),
@@ -596,6 +600,10 @@ function scoreTour(tour, runDate, windowDates) {
   if (tour.suitableFor?.includes('亲子')) score += 2;
   if (tour.isFlashSale) score += 4;
   if (tour.isHot) score += 3;
+  if (groupSizeType === 'minStart') score -= Math.min(3, Math.max(1, minGroupSize - 3));
+  if (groupSizeType === 'smallShared') score += 2;
+  if (hasNoRoomDifference) score += 3;
+  else if (tour.singleSupplement > 0) score -= Math.min(4, Math.ceil(tour.singleSupplement / 300) + 1);
   score += Math.min(8, Math.max(0, departureSpread - 1) * 2);
   if (weekendFriendly) score += 4;
   score += Math.min(10, experienceSignals.length * 2);
@@ -620,6 +628,28 @@ function scoreTour(tour, runDate, windowDates) {
     weekendFriendly,
     highlightCount,
   };
+}
+
+function extractMinimumGroupSize(groupSizeText) {
+  if (!groupSizeText) return 0;
+  const match = groupSizeText.match(/(\d+)\s*人\s*(?:起订|起发)/);
+  if (match) return Number(match[1]);
+  const plainMatch = groupSizeText.match(/(\d+)/);
+  return plainMatch ? Number(plainMatch[1]) : 0;
+}
+
+function classifyGroupSizeType(groupSizeText) {
+  if (!groupSizeText) return 'unknown';
+  if (/\d+\s*人\s*(?:起订|起发)/.test(groupSizeText)) return 'minStart';
+  if (/\d+\s*人\s*成团/.test(groupSizeText) || /\d+\s*人\s*成行/.test(groupSizeText)) return 'minGroup';
+  if (/无房差/.test(groupSizeText)) return 'smallShared';
+  return 'unknown';
+}
+
+function isNoRoomSupplement(tour) {
+  if (tour.singleSupplement === 0) return true;
+  const note = `${tour.singleSupplementNote || ''} ${tour.groupSize || ''}`.toLowerCase();
+  return /无房差|免房差|不补房差|不收单房差|single\s*supplement\s*free/.test(note);
 }
 
 function summarizePriceRange(tours) {
@@ -757,6 +787,8 @@ function formatTourForPrompt(tour) {
     price: tour.price,
     priceUnit: tour.priceUnit,
     theme: tour.theme,
+    groupSize: tour.groupSize,
+    singleSupplement: tour.singleSupplement,
     suitableFor: tour.suitableFor || [],
     tags: tour.tags || [],
     highlights: tour.highlights || [],
@@ -916,7 +948,7 @@ export function buildWeeklyArticlePrompt(context) {
     '- reminder 用一句自然提醒补班期、节奏、适合人群或出发前注意点',
     '- 不要重复同一个 destination 的同一套说法，不要把多条线路写成一个模子',
     '- 能写真山水、亲水、森林、海风、泳池、水世界，就不要硬把所有“带池”都写成温泉放松',
-    '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达',
+    '- 全文不要出现“最适合”“第一”“第一位”“最佳”“最低价”“必去”“百分百成团”“错过再等一年”等绝对化表达',
     '- 不要编造出发城市、库存、优惠、成团率、景区政策',
     '- 不要输出 Markdown 代码块，不要输出解释，只输出 JSON',
     '',
@@ -1111,7 +1143,7 @@ function renderTourSection(tour, aiItem, index) {
 export function renderWeeklyArticle(context, aiPayload) {
   const frontmatter = [
     '---',
-    `title: "${(aiPayload.title || '本周值得认真看的25条线路').replaceAll('"', '\\"')}"`,
+    `title: "${(aiPayload.title || '本周清凉出发25条线路').replaceAll('"', '\\"')}"`,
     `summary: "${(aiPayload.summary || buildFallbackIntro(context)).replaceAll('"', '\\"')}"`,
     `author: "${DEFAULT_AUTHOR}"`,
     `cover: "${context.selectedTours[0]?.primaryImage || context.selectedTours[0]?.images?.[0] || ''}"`,
@@ -1145,7 +1177,7 @@ export function renderWeeklyArticle(context, aiPayload) {
   return [
     frontmatter,
     '',
-    `# ${aiPayload.title || '本周值得认真看的25条线路'}`,
+    `# ${aiPayload.title || '本周清凉出发25条线路'}`,
     '',
     intro,
     '',
