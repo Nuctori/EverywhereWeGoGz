@@ -17,14 +17,21 @@ import pathlib
 import re
 import sys
 import urllib.parse
+import urllib.error
 import urllib.request
 import uuid
 
 
 def request_json(url, method='GET', data=None, headers=None):
     request = urllib.request.Request(url, data=data, headers=headers or {}, method=method)
-    with urllib.request.urlopen(request, timeout=30) as response:
-        payload = response.read().decode('utf-8')
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            payload = response.read().decode('utf-8', errors='replace')
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode('utf-8', errors='replace')
+        raise RuntimeError('http %s %s: %s' % (exc.code, exc.reason, body)) from exc
+    except urllib.error.URLError as exc:
+        raise RuntimeError('request failed: %s' % exc) from exc
     return json.loads(payload)
 
 
@@ -176,7 +183,22 @@ def run(cmd, cwd=None):
 
 
 def capture(cmd, cwd=None):
-    completed = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=cwd)
+    completed = subprocess.run(cmd, check=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=cwd)
+    if completed.returncode != 0:
+        if completed.stdout:
+            sys.stderr.write(completed.stdout)
+            if not completed.stdout.endswith('\n'):
+                sys.stderr.write('\n')
+        if completed.stderr:
+            sys.stderr.write(completed.stderr)
+            if not completed.stderr.endswith('\n'):
+                sys.stderr.write('\n')
+        raise subprocess.CalledProcessError(
+            completed.returncode,
+            completed.args,
+            output=completed.stdout,
+            stderr=completed.stderr,
+        )
     return completed.stdout.strip()
 
 
