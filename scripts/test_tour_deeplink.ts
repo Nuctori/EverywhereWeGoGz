@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { findTourByDeepLink, getRequestedTourId } from '@/lib/tour-deeplink';
+import { findTourByDeepLink, getRequestedTourId, resolveTourByDeepLink } from '@/lib/tour-deeplink';
 import type { TourSummary } from '@/types/tour';
 
 const tours: TourSummary[] = [
@@ -37,5 +37,9 @@ assert.equal(getRequestedTourId('tour=tour_2705'), 'tour_2705');
 assert.equal(getRequestedTourId('?source=wechat'), '');
 assert.equal(findTourByDeepLink('?tour=tour_2705&source=wechat', tours)?.id, 'tour_2705');
 assert.equal(findTourByDeepLink('?tour=tour_missing', tours), null);
+assert.equal(
+  resolveTourByDeepLink('?tour=tour_2705&source=wechat', [], tours)?.id,
+  'tour_2705',
+);
 
 console.log('tour deeplink tests passed');

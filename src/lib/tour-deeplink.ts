@@ -12,3 +12,18 @@ export function findTourByDeepLink(search: string, tours: TourSummary[]) {
   if (!requestedTourId) return null;
   return tours.find((tour) => tour.id === requestedTourId) || null;
 }
+
+export function resolveTourByDeepLink(
+  search: string,
+  primaryTours: TourSummary[],
+  fallbackTours: TourSummary[] = [],
+) {
+  const requestedTourId = getRequestedTourId(search);
+  if (!requestedTourId) return null;
+
+  return (
+    primaryTours.find((tour) => tour.id === requestedTourId) ||
+    fallbackTours.find((tour) => tour.id === requestedTourId) ||
+    null
+  );
+}

@@ -20,7 +20,7 @@ import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { compareRecommended, getEffectiveDepartureDates } from '@/lib/tour-recommendation';
-import { findTourByDeepLink, getRequestedTourId } from '@/lib/tour-deeplink';
+import { findTourByDeepLink, getRequestedTourId, resolveTourByDeepLink } from '@/lib/tour-deeplink';
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { computePriceStats, sliderToPrice, priceToSlider } from '@/lib/price-slider';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -428,6 +428,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const loadMoreTimerRef = useRef<number | null>(null);
   const viewVersionRef = useRef(0);
   const openedDeepLinkTourIdRef = useRef<string>('');
+  const deepLinkFetchAttemptRef = useRef<string>('');
 // filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
@@ -464,14 +465,38 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     if (!requestedTourId) return;
     if (selectedSummaryTour?.id === requestedTourId) return;
     if (openedDeepLinkTourIdRef.current === requestedTourId) return;
-    if (catalogSourceTours.length === 0) return;
 
     const requestedTour = findTourByDeepLink(window.location.search, catalogSourceTours);
-    if (!requestedTour) return;
+    if (requestedTour) {
+      openedDeepLinkTourIdRef.current = requestedTourId;
+      selectTour(requestedTour);
+      return;
+    }
 
-    openedDeepLinkTourIdRef.current = requestedTourId;
-    selectTour(requestedTour);
-  }, [catalogSourceTours, selectTour, selectedSummaryTour]);
+    if (catalogLoading) return;
+    if (deepLinkFetchAttemptRef.current === requestedTourId) return;
+
+    let cancelled = false;
+    deepLinkFetchAttemptRef.current = requestedTourId;
+    void (async () => {
+      try {
+        const response = await fetch(getDataUrl('tours-list.json'));
+        if (!response.ok || cancelled) return;
+        const catalog = toursListSchema.parse(await response.json());
+        if (cancelled) return;
+        const fallbackTour = resolveTourByDeepLink(window.location.search, [], catalog);
+        if (!fallbackTour) return;
+        openedDeepLinkTourIdRef.current = requestedTourId;
+        selectTour(fallbackTour);
+      } catch {
+        // 深链兜底失败时不打扰主列表；用户仍可手动打开卡片查看详情。
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [catalogLoading, catalogSourceTours, selectTour, selectedSummaryTour]);
 
   const priceRange = useMemo(
     () => [
