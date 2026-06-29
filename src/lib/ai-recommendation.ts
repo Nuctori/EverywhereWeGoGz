@@ -327,6 +327,8 @@ function compactPreferenceMemoryForPrompt(memory: AiPreferenceMemory | null) {
 function compactIntentForPrompt(intent: AiTravelIntent | null) {
   if (!intent) return null;
 
+  // 把完整意图压成短键值对，减少 prompt 体积，同时保留排序需要的全部决策维度。
+  // 这里的字段名越短越好，语义靠下游 schema 和注释约定维持。
   return {
     td: intent.tripDays ?? null,
     t0: intent.tripDaysMin ?? null,
@@ -417,6 +419,8 @@ function buildPublicInterestReasoningContext(
 ) {
   if (!hasPublicInterestNeed(intent, userText)) return null;
 
+  // 这段不是白名单，也不是强过滤器。
+  // 它只是在“用户确实在表达公益/乡村/县域语义”时，给模型一组可解释的参考候选和近似替代候选。
   const stronger = candidates
     .filter((candidate) =>
       primitiveHasPublicInterestEvidence(candidate) &&
@@ -5128,6 +5132,7 @@ function buildAiMessages(params: {
     : '理解软语义时主动调动你的世界知识：例如“带老人”要知道哪些目的地和节奏更适合年长者，“怕热”要知道哪些线路体感更凉快，“想放松”要知道哪些线路节奏更松。';
   // 经验：想让 provider cache 命中，关键不是少输出，而是让大块稳定上下文稳定。
   // system message 只放身份、候选边界和输出格式，排序取舍尽量交给模型。
+  // 下面的 dynamicRequest 才是“每轮变化”的输入，二者分开能降低缓存失效和幻觉干扰。
   const systemPrompt = [
     '你是旅行团推荐顾问，充分发挥你的世界知识来理解用户需求，从给定候选池中真正推荐适合的线路。',
     '输出只能引用候选池中真实存在的 tourId；线路事实、价格、班期、酒店、景点和服务来自候选原语。',
