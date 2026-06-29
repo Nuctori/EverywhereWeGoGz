@@ -185,6 +185,7 @@ export function AiRecommendPanel({
   const toursReady = !toursLoading && tours.length > 0;
   const resultStatusMeta = getResultStatusMeta(result);
   useEffect(() => {
+    // 首次挂载时只恢复一次本地保存的推荐结果，避免后续请求覆盖前把旧状态反复回灌。
     if (didRestoreStoredResultRef.current || !storedChatState.result) return;
 
     didRestoreStoredResultRef.current = true;
@@ -192,6 +193,7 @@ export function AiRecommendPanel({
   }, [onResultChange, storedChatState.result]);
 
   useEffect(() => {
+    // 对话输入、消息和偏好记忆都要持久化，方便刷新后继续追问同一轮推荐。
     if (skipInitialSaveRef.current) {
       skipInitialSaveRef.current = false;
       return;
@@ -215,6 +217,7 @@ export function AiRecommendPanel({
   }, [detailsOpen, messages]);
 
   useEffect(() => {
+    // 清空外部请求版本后，主动抬高版本号，确保旧请求返回时不会覆盖新一轮状态。
     if (clearVersion === 0) return;
 
     requestVersionRef.current += 1;
@@ -228,6 +231,7 @@ export function AiRecommendPanel({
   }, [clearVersion]);
 
   useEffect(() => {
+    // 进度条进入某一步后，只展开当前阶段；没有子步骤时则自动收起。
     if (!progressState?.substeps?.length) {
       setExpandedStage(null);
       return;
@@ -243,6 +247,7 @@ export function AiRecommendPanel({
     requestVersionRef.current = requestVersion;
     const preserveResult = options?.preserveResult ?? false;
 
+    // preserveResult 为 true 时延续上一轮结果和消息历史，否则把它当成一次全新的提问。
     const userMessage = createMessage('user', prompt);
     const nextMessages = preserveResult
       ? [...messages, userMessage]
