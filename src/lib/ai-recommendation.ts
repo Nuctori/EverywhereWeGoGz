@@ -5996,6 +5996,7 @@ function attachTurnSemanticContext(
 ): AiTravelIntent | null {
   if (!intent && !userText) return null;
   const nextIntent: AiTravelIntent = intent ? { ...intent } : { departureWeekdays: [] };
+  // 这一步只补“本轮文本里新出现的语义锚点”，不重新推翻前面的硬意图合并结果。
   if (options.allowPublicInterest && hasPublicInterestLanguage(userText)) {
     nextIntent.semanticFocus = uniqueStrings([
       ...(nextIntent.semanticFocus || []),
@@ -6016,6 +6017,7 @@ function mergeIntentWithMemory(
   memory: AiPreferenceMemory | null | undefined,
 ): AiTravelIntent | null {
   if (!intent && !memory) return null;
+  // 当前轮输入优先，记忆只负责补齐缺失项；这样既能续写，又不会把历史条件强行覆盖到新问题上。
   const positivePreferences = uniqueStrings([
     ...(intent?.travelStyle || []),
     ...(intent?.mustHave || []),
@@ -6775,6 +6777,7 @@ export async function requestAiRecommendations({
       normalizeIntent(aiResponse.intent),
       text,
     );
+    // 先清预算和数组字段，再按本轮语义策略清洗公益词，最后再和记忆合并成可回写意图。
     const rankingIntent = sanitizeAiPreferenceArraysForTurn(
       normalizeBudgetPriorityByUserText(
         sanitizeAiIntentForTurn(normalizedAiIntent, {
@@ -6795,6 +6798,7 @@ export async function requestAiRecommendations({
       text,
       { allowPublicInterest: allowPublicInterestForTurn },
     );
+    // 语义说明和偏好记忆都以“最终态”回写，保证后续续写和缓存恢复看到的是同一轮收敛后的结果。
     const semanticNotes = sanitizeAiSemanticNotesForTurn(rawSemanticNotes, {
       userText: text,
       hardIntent: intent,
