@@ -99,6 +99,7 @@ jobs:
 
   crawl-gzl-api:
     runs-on: ubuntu-latest
+    timeout-minutes: 180
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
