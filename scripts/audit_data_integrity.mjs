@@ -32,7 +32,7 @@ const sourceRules = {
   '康辉': { min: 850, ratio: 0.7 },
   '广东中旅': { min: 400, ratio: 0.75 },
   '品途': { min: 0, ratio: 0.0 },
-  '广州去旅行': { min: 35, ratio: 0.75 },
+  '广州去旅行': { min: 22, ratio: 0.7 },
   '暴走村': { min: 40, ratio: 0.35 },
   '广之旅': { min: 1700, ratio: 0.7, requireStructuredDates: true },
 };
