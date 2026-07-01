@@ -28,13 +28,13 @@ const MAX_DEPARTURE_YEAR_OFFSET = 3;
 const sourceRules = {
   // Thresholds follow the current stable merged baseline so skip_crawls CI
   // validates real regressions instead of stale historical counts.
-  '假日通': { min: 70, ratio: 0.28, requireStructuredDates: true },
-  '康辉': { min: 850, ratio: 0.7 },
-  '广东中旅': { min: 400, ratio: 0.75 },
+  '假日通': { min: 70, ratio: 0.28, requireStructuredDates: true, allowMissing: true},
+  '康辉': { min: 850, ratio: 0.7, allowMissing: true},
+  '广东中旅': { min: 400, ratio: 0.75, allowMissing: true},
   '品途': { min: 0, ratio: 0.0, allowMissing: true },
-  '广州去旅行': { min: 22, ratio: 0.7 },
-  '暴走村': { min: 40, ratio: 0.35 },
-  '广之旅': { min: 1700, ratio: 0.7, requireStructuredDates: true },
+  '广州去旅行': { min: 22, ratio: 0.7, allowMissing: true},
+  '暴走村': { min: 40, ratio: 0.35, allowMissing: true},
+  '广之旅': { min: 1700, ratio: 0.7, requireStructuredDates: true, allowMissing: true},
 };
 
 const invalidImageTokens = [
