@@ -114,7 +114,7 @@ jobs:
         run: pip install requests beautifulsoup4 lxml selenium
 
       - name: Crawl GZL API full
-        timeout-minutes: 60
+        timeout-minutes: 180
         run: python -u scripts/crawl_gzl_api.py
 
       - name: Upload GZL raw data
