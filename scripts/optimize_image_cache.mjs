@@ -26,6 +26,7 @@ const stats = {
   remoteRewriteCount: 0,
   remoteDownloadedCount: 0,
   remoteDownloadFailedCount: 0,
+  remoteFallbackCount: 0,
   localLegacyRewriteCount: 0,
   unsupportedRewriteCount: 0,
   originalBytes: 0,
@@ -92,6 +93,29 @@ function collectStrings(value, result = []) {
     for (const child of Object.values(value)) collectStrings(child, result);
   }
   return result;
+}
+
+function collectRemoteImageStrings(value, result = [], parentKey = '') {
+  if (typeof value === 'string') {
+    if (/^https?:\/\//i.test(value) && isImageLikeKey(parentKey)) {
+      result.push(value);
+    }
+    return result;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) collectRemoteImageStrings(item, result, parentKey);
+    return result;
+  }
+  if (value && typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) {
+      collectRemoteImageStrings(child, result, key);
+    }
+  }
+  return result;
+}
+
+function isImageLikeKey(key) {
+  return /image|logo|photo|cover|thumb|avatar/i.test(key);
 }
 
 function cachedPublicPathForRemoteImage(url) {
@@ -193,11 +217,7 @@ async function collectRemoteImageReplacements(jsonFiles) {
   for (const filePath of jsonFiles) {
     if (!fs.existsSync(filePath)) continue;
     const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    for (const value of collectStrings(parsed)) {
-      if (/^https?:\/\//i.test(value)) {
-        remoteUrls.add(value);
-      }
-    }
+    for (const value of collectRemoteImageStrings(parsed)) remoteUrls.add(value);
   }
 
   const remoteValues = [...remoteUrls];
@@ -207,7 +227,11 @@ async function collectRemoteImageReplacements(jsonFiles) {
     while (cursor < remoteValues.length) {
       const value = remoteValues[cursor];
       cursor += 1;
-      const cachedPath = cachedPublicPathForRemoteImage(value) || await cacheRemoteImage(value);
+      let cachedPath = cachedPublicPathForRemoteImage(value) || await cacheRemoteImage(value);
+      if (!cachedPath && process.env.IMAGE_CACHE_DOWNLOAD_REMOTE !== '1') {
+        cachedPath = ensureFallbackPlaceholder();
+        stats.remoteFallbackCount += 1;
+      }
       if (cachedPath && cachedPath !== value) {
         replacements.set(value, cachedPath);
       }
@@ -380,6 +404,7 @@ async function main() {
   console.log(`external image URLs rewritten to cache: ${stats.remoteRewriteCount}`);
   console.log(`external image URLs downloaded to cache: ${stats.remoteDownloadedCount}`);
   console.log(`external image URL download fallbacks: ${stats.remoteDownloadFailedCount}`);
+  console.log(`external image URL cache misses rewritten to fallback: ${stats.remoteFallbackCount}`);
   console.log(`legacy local image URLs rewritten to cache: ${stats.localLegacyRewriteCount}`);
   console.log(`unsupported cached images rewritten to fallback: ${stats.unsupportedRewriteCount}`);
   console.log(`remaining legacy cache images: ${remainingLegacyImages}`);

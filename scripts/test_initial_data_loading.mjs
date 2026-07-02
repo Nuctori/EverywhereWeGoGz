@@ -86,6 +86,14 @@ assert(
 );
 
 assert(
+  optimize.includes('collectRemoteImageStrings') &&
+    optimize.includes('isImageLikeKey') &&
+    optimize.includes('IMAGE_CACHE_DOWNLOAD_REMOTE') &&
+    optimize.includes('external image URL cache misses rewritten to fallback'),
+  'Clean Pages builds should rewrite uncached remote image fields to a local fallback without touching non-image links.',
+);
+
+assert(
   merge.includes('老广精选线路') && !merge.includes('>图片暂不可用<'),
   'Merge workflow placeholder SVG generation should not reintroduce unavailable-image copy.',
 );
