@@ -20,5 +20,6 @@ for (const marker of [
 
 assert.ok(mergeScript.includes('load detail results'), 'expected merge_data.py to keep the detail load stage log');
 assert.ok(mergeScript.includes('raw_to_tour'), 'expected merge_data.py to keep raw_to_tour coverage');
+assert.ok(mergeScript.includes('tour["updatedAt"] = existing["updatedAt"]'), 'expected merge_data.py to avoid timestamp-only data diffs');
 
 console.log('merge data observability audit passed');
