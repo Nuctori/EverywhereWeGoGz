@@ -62,10 +62,12 @@ function useToursData() {
   const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [hasPageChunks, setHasPageChunks] = useState(true);
   const loadedPagesRef = useRef<Set<number>>(new Set());
   const inFlightPagesRef = useRef<Set<number>>(new Set());
+  const failedPageRetryAfterRef = useRef<Map<number, number>>(new Map());
   const hasPageChunksRef = useRef(true);
   const catalogLoadedRef = useRef(false);
   const catalogRequestRef = useRef<Promise<void> | null>(null);
@@ -202,10 +204,13 @@ function useToursData() {
     return () => { cancelled = true; };
   }, [loadCatalog]);
 
-  const loadMorePages = useCallback(async (neededPage: number) => {
-    if (!hasPageChunksRef.current) return;
-    if (loadedPagesRef.current.has(neededPage)) return;
-    if (inFlightPagesRef.current.has(neededPage)) return;
+  const loadMorePages = useCallback(async (neededPage: number, forceRetry = false) => {
+    if (!hasPageChunksRef.current) return false;
+    if (loadedPagesRef.current.has(neededPage)) return true;
+    if (inFlightPagesRef.current.has(neededPage)) return false;
+
+    const retryAfter = failedPageRetryAfterRef.current.get(neededPage) ?? 0;
+    if (!forceRetry && retryAfter > Date.now()) return false;
 
     inFlightPagesRef.current.add(neededPage);
     syncLoadingMoreState();
@@ -221,9 +226,15 @@ function useToursData() {
         const nextItems = pageData.items.filter((tour: TourSummary) => !existingIds.has(tour.id));
         return prev.concat(nextItems);
       });
+      failedPageRetryAfterRef.current.delete(neededPage);
+      if (mountedRef.current) setLoadMoreError(null);
+      return true;
     } catch {
-      hasPageChunksRef.current = false;
-      setHasPageChunks(false);
+      failedPageRetryAfterRef.current.set(neededPage, Date.now() + 4000);
+      if (mountedRef.current) {
+        setLoadMoreError('网络刚刚抖了一下，稍后会自动重试');
+      }
+      return false;
     } finally {
       inFlightPagesRef.current.delete(neededPage);
       syncLoadingMoreState();
@@ -238,6 +249,7 @@ function useToursData() {
     loadingMore,
     total,
     loadMorePages,
+    loadMoreError,
     loadedPagesRef,
     hasPageChunks,
     hasPageChunksRef,
@@ -473,6 +485,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     loadingMore,
     total,
     loadMorePages,
+    loadMoreError,
     hasPageChunks,
     hasPageChunksRef,
   } = useToursData();
@@ -914,16 +927,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       : '可以换个关键词，或者先放宽时间、预算、天数这些条件。'
     : '可以先放宽时间或预算条件，再看看更多线路';
 
-  const handleObserver = useCallback(
-
-        // IntersectionObserver 监听底部占位元素，进入视口时触发 loadMorePages
-    (entries: IntersectionObserverEntry[]) => {
-      const [target] = entries;
-
-      if (!target.isIntersecting || isLoadingMore || loadingMore) {
-        return;
-      }
-
+  const loadNextBatch = useCallback((forceRetry = false) => {
+      if (isLoadingMore || loadingMore) return;
       if (visibleCount < displayTours.length) {
         const viewVersion = viewVersionRef.current;
         setIsLoadingMore(true);
@@ -946,13 +951,16 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         const viewVersion = viewVersionRef.current;
 
         setIsLoadingMore(true);
-        void loadMorePages(nextPage).finally(() => {
+        void loadMorePages(nextPage, forceRetry).then((loaded) => {
           if (viewVersionRef.current !== viewVersion) {
             setIsLoadingMore(false);
             return;
           }
 
-          setVisibleCount((current) => current + PAGE_SIZE);
+          if (loaded) {
+            setVisibleCount((current) => current + PAGE_SIZE);
+          }
+        }).finally(() => {
           setIsLoadingMore(false);
         });
       }
@@ -968,6 +976,21 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       localTours.length,
       visibleCount,
     ],
+  );
+
+  const handleObserver = useCallback(
+
+        // IntersectionObserver 监听底部占位元素，进入视口时触发 loadMorePages
+    (entries: IntersectionObserverEntry[]) => {
+      const [target] = entries;
+
+      if (!target.isIntersecting) {
+        return;
+      }
+
+      loadNextBatch(false);
+    },
+    [loadNextBatch],
   );
 
   useEffect(() => {
@@ -1771,6 +1794,19 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 <div className="flex items-center gap-2 text-stone-500">
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span className="text-sm">正在加载更多...</span>
+                </div>
+              ) : loadMoreError ? (
+                <div className="flex flex-col items-center gap-3 text-stone-500">
+                  <span className="text-sm">{loadMoreError}</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => loadNextBatch(true)}
+                  >
+                    重试加载
+                  </Button>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 text-stone-400">
