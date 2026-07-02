@@ -50,6 +50,27 @@ assert(
   'AI recommendations should wait for tours-index.json or the full catalog instead of using only the first page.',
 );
 
+const loadMoreSection = tourList.slice(
+  tourList.indexOf('const loadMorePages = useCallback'),
+  tourList.indexOf('return {', tourList.indexOf('const loadMorePages = useCallback')),
+);
+
+assert(
+  loadMoreSection.includes('return true;') &&
+    loadMoreSection.includes('return false;') &&
+    loadMoreSection.includes('failedPageRetryAfterRef') &&
+    loadMoreSection.includes('setLoadMoreError') &&
+    !loadMoreSection.includes('setHasPageChunks(false)'),
+  'Chunk page failures should be retryable and must not disable all lazy page loading.',
+);
+
+assert(
+  tourList.includes('if (loaded)') &&
+    tourList.includes('setVisibleCount((current) => current + PAGE_SIZE)') &&
+    tourList.includes('重试加载'),
+  'Infinite scroll should advance visible results only after a page loads and expose a retry action on transient failures.',
+);
+
 assert(
   /setTimeout\(\(\) => \{\s*void loadCatalog\(\);/s.test(tourList),
   'Full catalog should only be scheduled as delayed background enhancement.',
