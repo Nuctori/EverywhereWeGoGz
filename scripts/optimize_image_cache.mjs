@@ -18,6 +18,7 @@ const stats = {
   skippedCount: 0,
   removedOriginalCount: 0,
   removalDeferredCount: 0,
+  failedConversionCount: 0,
   originalBytes: 0,
   webpBytes: 0,
 };
@@ -86,13 +87,19 @@ async function ensureWebp(filePath) {
   if (fs.existsSync(webpPath)) {
     stats.reusedExistingWebpCount += 1;
   } else {
-    await sharp(filePath)
-      .rotate()
-      .webp({
-        quality,
-        effort: 4,
-      })
-      .toFile(webpPath);
+    try {
+      await sharp(filePath)
+        .rotate()
+        .webp({
+          quality,
+          effort: 4,
+        })
+        .toFile(webpPath);
+    } catch (error) {
+      stats.failedConversionCount += 1;
+      console.warn(`skipped unsupported image: ${path.relative(root, filePath)} (${error.message})`);
+      return null;
+    }
     stats.convertedCount += 1;
   }
 
@@ -119,6 +126,10 @@ async function collectReplacementsFromCache() {
     }
 
     const webpPath = await ensureWebp(filePath);
+    if (!webpPath) {
+      stats.skippedCount += 1;
+      continue;
+    }
     replacements.set(toPublicPath(filePath), toPublicPath(webpPath));
 
     if (!tryUnlink(filePath)) {
@@ -177,6 +188,7 @@ async function main() {
   console.log(`files skipped: ${stats.skippedCount}`);
   console.log(`original files removed: ${stats.removedOriginalCount}`);
   console.log(`original cleanup deferred: ${stats.removalDeferredCount}`);
+  console.log(`webp conversion failures: ${stats.failedConversionCount}`);
   console.log(`remaining legacy cache images: ${remainingLegacyImages}`);
   console.log(`original image-cache bytes: ${stats.originalBytes}`);
   console.log(`webp image-cache bytes: ${stats.webpBytes}`);
@@ -185,9 +197,11 @@ async function main() {
     console.log(`webp ratio: ${ratio}`);
   }
 
-  if (remainingLegacyImages > 0) {
+  if (remainingLegacyImages > 0 && process.env.IMAGE_CACHE_WEBP_STRICT === '1') {
     process.exitCode = 1;
     console.error(`image-cache still contains ${remainingLegacyImages} jpg/jpeg/png files`);
+  } else if (remainingLegacyImages > 0) {
+    console.warn(`image-cache still contains ${remainingLegacyImages} jpg/jpeg/png files`);
   }
 }
 

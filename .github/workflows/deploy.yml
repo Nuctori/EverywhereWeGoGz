@@ -41,7 +41,7 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npm run build:pages
         env:
           APP_BASE: EverywhereWeGoGz
           VITE_AI_DEFAULT_BASE_URL: https://api.z.ai/api/paas/v4

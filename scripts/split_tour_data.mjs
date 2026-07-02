@@ -226,12 +226,34 @@ writeTextFileWithRetry(listPath, compactJson(listTours));
 
 // ====== Generate tours-index.json + tours-page-*.json chunks ======
 const PAGE_SIZE = 24;
-const indexFields = ['id', 'price', 'destination', 'duration', 'source', 'theme', 'departureDate', 'isHot', 'isNew', 'isFlashSale', 'leisureLevel', 'rating', 'season'];
-const indexTours = listTours.map((tour) => {
+const indexFields = [
+  'id',
+  'title',
+  'price',
+  'destination',
+  'duration',
+  'source',
+  'bookingUrl',
+  'theme',
+  'departureDate',
+  'departureDates',
+  'hotDepartureDates',
+  'transportType',
+  'tags',
+  'isHot',
+  'isNew',
+  'isFlashSale',
+  'leisureLevel',
+  'rating',
+  'suitableFor',
+  'season',
+];
+const indexTours = listTours.map((tour, index) => {
   const idx = {};
   for (const key of indexFields) {
     if (key in tour) idx[key] = tour[key];
   }
+  idx.page = Math.floor(index / PAGE_SIZE);
   return idx;
 });
 writeTextFileWithRetry(path.join(dataDir, 'tours-index.json'), compactJson(indexTours));

@@ -60,6 +60,35 @@ export interface TourSummary {
   dataQuality?: DataQuality;
 }
 
+export interface TourIndexEntry {
+  id: string;
+  title: string;
+  source: string;
+  destination: string;
+  duration: number;
+  price: number;
+  bookingUrl: string;
+  departureDate: string;
+  departureDates?: string[];
+  hotDepartureDates?: string[];
+  transportType: string;
+  accommodationLevel: string;
+  meals: string;
+  highlights: string[];
+  tags: string[];
+  isHot: boolean;
+  isNew: boolean;
+  isFlashSale: boolean;
+  theme: string;
+  leisureLevel: 'easy' | 'medium' | 'hard';
+  rating: number;
+  groupSize: string;
+  suitableFor: string[];
+  season: string;
+  page: number;
+  searchText?: string;
+}
+
 export interface TourDetail {
   sourceLogo: string;
   returnDate: string;

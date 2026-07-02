@@ -1,10 +1,10 @@
-// 数据加载链：loadCatalog（全量列表）→ loadInitial（分页加载，失败回退 loadCatalog）→ loadMorePages（滚动懒加载）
+// 数据加载链：loadInitial（分页首屏）→ 按需 loadCatalog（全量列表）→ loadMorePages（滚动懒加载）
 // 筛选/排序/瀑布流、AI 推荐叠加、滚动监听加载更多
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import type {
   AiRecommendationCandidate,
   AiRecommendationResult,
-  Tour,
+  TourIndexEntry,
   TourSummary,
   FilterState,
 } from '@/types/tour';
@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { cn, getDataUrl } from '@/lib/utils';
 import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
-import { toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
+import { toursIndexSchema, toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { compareRecommended, getEffectiveDepartureDates } from '@/lib/tour-recommendation';
 import { findTourByDeepLink, getRequestedTourId, resolveTourByDeepLink } from '@/lib/tour-deeplink';
@@ -55,51 +55,82 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { zhCN } from 'date-fns/locale';
 
-// 数据加载核心 hook：分页优先（tours-page-0.json），失败后回退全量列表
+// 数据加载核心 hook：index 负责筛选，chunk 负责展示，全量列表只做后台增强。
 function useToursData() {
   const [tours, setTours] = useState<TourSummary[]>([]);
+  const [indexTours, setIndexTours] = useState<TourIndexEntry[]>([]);
   const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [catalogLoading, setCatalogLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
   const [hasPageChunks, setHasPageChunks] = useState(true);
   const loadedPagesRef = useRef<Set<number>>(new Set());
   const inFlightPagesRef = useRef<Set<number>>(new Set());
   const hasPageChunksRef = useRef(true);
-
+  const catalogLoadedRef = useRef(false);
+  const catalogRequestRef = useRef<Promise<void> | null>(null);
+  const backgroundCatalogTimerRef = useRef<number | null>(null);
+  const mountedRef = useRef(false);
   const syncLoadingMoreState = useCallback(() => {
     setLoadingMore(inFlightPagesRef.current.size > 0);
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (backgroundCatalogTimerRef.current !== null) {
+        window.clearTimeout(backgroundCatalogTimerRef.current);
+      }
+    };
+  }, []);
 
-    async function loadCatalog() {
+  const loadCatalog = useCallback(() => {
+    if (catalogLoadedRef.current) return Promise.resolve();
+    if (catalogRequestRef.current) return catalogRequestRef.current;
+
+    catalogRequestRef.current = (async () => {
       try {
         const listRes = await fetch(getDataUrl('tours-list.json'));
         if (!listRes.ok) {
           throw new Error(`Failed to load tours catalog: ${listRes.status}`);
         }
         const data = toursListSchema.parse(await listRes.json());
-        if (cancelled) return;
+        if (!mountedRef.current) return;
+        catalogLoadedRef.current = true;
         setCatalogTours(data);
         setTotal(data.length);
       } catch {
-        if (!cancelled) {
+        if (mountedRef.current) {
           setCatalogTours([]);
         }
       } finally {
-        if (!cancelled) {
-          setCatalogLoading(false);
-        }
+        catalogRequestRef.current = null;
       }
-    }
+    })();
+
+    return catalogRequestRef.current;
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
 
     async function loadInitial() {
       try {
+        const indexPromise = fetch(getDataUrl('tours-index.json'))
+          .then(async (indexRes) => {
+            if (!indexRes.ok) {
+              throw new Error(`Failed to load tours index: ${indexRes.status}`);
+            }
+            return toursIndexSchema.parse(await indexRes.json());
+          })
+          .catch(() => [] as TourIndexEntry[]);
+
         const pageRes = await fetch(getDataUrl('tours-page-0.json'));
         if (cancelled) return;
+        if (!pageRes.ok) {
+          throw new Error(`Failed to load first tours page: ${pageRes.status}`);
+        }
         const pageData = toursPageSchema.parse(await pageRes.json());
         if (cancelled) return;
         setTours(pageData.items);
@@ -108,25 +139,60 @@ function useToursData() {
         hasPageChunksRef.current = true;
         setHasPageChunks(true);
         setLoading(false);
-        void loadCatalog();
+
+        const indexData = await indexPromise;
+        if (!cancelled && indexData.length > 0) {
+          setIndexTours(indexData);
+          setTotal(indexData.length);
+        }
+
+        backgroundCatalogTimerRef.current = window.setTimeout(() => {
+          void loadCatalog();
+        }, 12000);
       } catch {
         try {
           const fallbackRes = await fetch(getDataUrl('tours-list.json'));
           if (cancelled) return;
           const data = toursListSchema.parse(await fallbackRes.json());
           if (cancelled) return;
+          catalogLoadedRef.current = true;
+          setIndexTours(data.map((tour, index) => ({
+            id: tour.id,
+            title: tour.title,
+            source: tour.source,
+            destination: tour.destination,
+            duration: tour.duration,
+            price: tour.price,
+            bookingUrl: tour.bookingUrl,
+            departureDate: tour.departureDate,
+            departureDates: tour.departureDates,
+            hotDepartureDates: tour.hotDepartureDates,
+            transportType: tour.transportType,
+            accommodationLevel: tour.accommodationLevel,
+            meals: tour.meals,
+            highlights: tour.highlights,
+            tags: tour.tags,
+            isHot: tour.isHot,
+            isNew: tour.isNew,
+            isFlashSale: tour.isFlashSale,
+            theme: tour.theme,
+            leisureLevel: tour.leisureLevel,
+            rating: tour.rating,
+            groupSize: tour.groupSize,
+            suitableFor: tour.suitableFor,
+            season: tour.season,
+            page: Math.floor(index / PAGE_SIZE),
+          })));
           setTours(data);
           setCatalogTours(data);
           setTotal(data.length);
           hasPageChunksRef.current = false;
           setHasPageChunks(false);
-          setCatalogLoading(false);
           setLoading(false);
         } catch {
           if (!cancelled) {
             setTours([]);
             setCatalogTours([]);
-            setCatalogLoading(false);
             setLoading(false);
           }
         }
@@ -134,7 +200,7 @@ function useToursData() {
     }
     loadInitial();
     return () => { cancelled = true; };
-  }, []);
+  }, [loadCatalog]);
 
   const loadMorePages = useCallback(async (neededPage: number) => {
     if (!hasPageChunksRef.current) return;
@@ -166,9 +232,9 @@ function useToursData() {
 
   return {
     tours,
+    indexTours,
     catalogTours,
     loading,
-    catalogLoading,
     loadingMore,
     total,
     loadMorePages,
@@ -248,7 +314,8 @@ const RECOMMENDED_TITLE_HINTS = [
 
 const SEARCH_SPLIT_PATTERN =
   /(?:\s+|推荐|帮我|帮忙|给我|想要|想找|想去|看看|安排|同时|具有|带有|带|含有|包含|包括|适合|可以|有没有|和|与|及|以及|或者|或|的|旅行团|旅游团|跟团|线路|产品|主题|玩法|一下|一个|一些)+/gu;
-const searchCorpusCache = new WeakMap<TourSummary, string>();
+type TourCatalogEntry = TourSummary | TourIndexEntry;
+const searchCorpusCache = new WeakMap<TourCatalogEntry, string>();
 
 function normalizeSearchText(value: string) {
   return value.trim().toLowerCase();
@@ -268,11 +335,12 @@ function extractSearchTerms(query: string) {
   return normalized && normalized.length <= 16 ? [normalized] : [];
 }
 
-function getTourSearchCorpus(tour: TourSummary) {
+function getTourSearchCorpus(tour: TourCatalogEntry) {
   const cached = searchCorpusCache.get(tour);
   if (cached) return cached;
 
   const corpus = [
+    'searchText' in tour ? tour.searchText : undefined,
     tour.title,
     tour.destination,
     tour.theme,
@@ -290,7 +358,7 @@ function getTourSearchCorpus(tour: TourSummary) {
 }
 
 function getTourSearchRelevance(
-  tour: TourSummary,
+  tour: TourCatalogEntry,
   search: { normalized: string; terms: string[] },
 ) {
   if (!search.normalized) return 0;
@@ -316,8 +384,8 @@ function getTourSearchRelevance(
 
 function compareToursBySortMode(
   sortBy: FilterState['sortBy'],
-  a: TourSummary,
-  b: TourSummary,
+  a: TourCatalogEntry,
+  b: TourCatalogEntry,
 ) {
   switch (sortBy) {
     case 'price_asc':
@@ -333,7 +401,7 @@ function compareToursBySortMode(
   }
 }
 
-function getDynamicHeroDestinations(tours: TourSummary[]) {
+function getDynamicHeroDestinations(tours: TourCatalogEntry[]) {
   const counts = new Map<string, number>();
 
   for (const tour of tours) {
@@ -348,7 +416,7 @@ function getDynamicHeroDestinations(tours: TourSummary[]) {
     .map(([destination]) => destination);
 }
 
-function getDestinationOptions(tours: TourSummary[]) {
+function getDestinationOptions(tours: TourCatalogEntry[]) {
   const counts = new Map<string, number>();
 
   for (const tour of tours) {
@@ -362,7 +430,7 @@ function getDestinationOptions(tours: TourSummary[]) {
     .map(([destination]) => destination);
 }
 
-function getThemeOptions(tours: TourSummary[]) {
+function getThemeOptions(tours: TourCatalogEntry[]) {
   const counts = new Map<string, number>();
 
   for (const tour of tours) {
@@ -376,7 +444,7 @@ function getThemeOptions(tours: TourSummary[]) {
     .map(([theme]) => theme);
 }
 
-function getSourceOptions(tours: TourSummary[]) {
+function getSourceOptions(tours: TourCatalogEntry[]) {
   const sourceMeta = new Map<string, { name: string; color?: string }>();
 
   for (const tour of tours) {
@@ -399,9 +467,9 @@ interface TourListProps {
 export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const {
     tours: localTours,
+    indexTours,
     catalogTours,
     loading,
-    catalogLoading,
     loadingMore,
     total,
     loadMorePages,
@@ -436,7 +504,11 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const [clearedAiRequestId, setClearedAiRequestId] = useState<number | null>(null);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
-  const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
+  const catalogSourceTours = catalogTours.length > 0 ? catalogTours : indexTours.length > 0 ? indexTours : localTours;
+  const loadedSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
+  const loadedTourById = useMemo(() => {
+    return new Map(loadedSourceTours.map((tour) => [tour.id, tour]));
+  }, [loadedSourceTours]);
 
   const { maxPriceAll, priceStats } = useMemo(
     () => computePriceStats(catalogSourceTours),
@@ -466,14 +538,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     if (selectedSummaryTour?.id === requestedTourId) return;
     if (openedDeepLinkTourIdRef.current === requestedTourId) return;
 
-    const requestedTour = findTourByDeepLink(window.location.search, catalogSourceTours);
+    const requestedTour = findTourByDeepLink(window.location.search, loadedSourceTours);
     if (requestedTour) {
       openedDeepLinkTourIdRef.current = requestedTourId;
       selectTour(requestedTour);
       return;
     }
 
-    if (catalogLoading) return;
     if (deepLinkFetchAttemptRef.current === requestedTourId) return;
 
     let cancelled = false;
@@ -496,7 +567,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     return () => {
       cancelled = true;
     };
-  }, [catalogLoading, catalogSourceTours, selectTour, selectedSummaryTour]);
+  }, [loadedSourceTours, selectTour, selectedSummaryTour]);
 
   const priceRange = useMemo(
     () => [
@@ -514,6 +585,14 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     }),
     [filters, priceRange],
   );
+  const activeFilterCount = [
+    effectiveFilters.destination,
+    effectiveFilters.source,
+    effectiveFilters.theme,
+    effectiveFilters.departureDate || effectiveFilters.departureDateStart || effectiveFilters.departureDateEnd,
+    effectiveFilters.duration,
+    hasPriceFilter,
+  ].filter(Boolean).length;
 
   const today = toDateInputValue(new Date());
 
@@ -599,6 +678,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       aiSearchRequest.prompt.trim().length > 0
     ),
   );
+  const recommendationsReady = indexTours.length > 0 || catalogTours.length > 0 || !hasPageChunks;
+  const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode;
+  const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;
 
   const aiRecommendedCount = useMemo(
     () => aiRecommendationResult?.items.filter((item) => Boolean(item.reason)).length ?? 0,
@@ -616,9 +698,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     [aiRecommendationResult],
   );
   const displayTours = useMemo(() => {
-    if (catalogSourceTours.length === 0) return [];
+    if (resultSourceTours.length === 0) return [];
 
-    const result = catalogSourceTours.filter((tour) => {
+    const result = resultSourceTours.filter((tour) => {
       if (!isDisplayableTour(tour)) {
         return false;
       }
@@ -726,8 +808,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     }
 
     if (aiRecommendationByTourId.size > 0) {
-      const pinned: Tour[] = [];
-      const rest: Tour[] = [];
+      const pinned: TourCatalogEntry[] = [];
+      const rest: TourCatalogEntry[] = [];
 
       for (const tour of result) {
         if (aiRecommendationByTourId.has(tour.id)) {
@@ -750,11 +832,11 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   }, [
     aiRecommendationByTourId,
     isAiSearchMode,
-    catalogSourceTours,
     dateFilter,
     effectiveFilters,
     filters.sortBy,
     hasNaturalLanguageQuery,
+    resultSourceTours,
     searchContext,
     normalizedSearchQuery,
     today,
@@ -768,28 +850,51 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       aiRecommendationResult?.items.filter((item) => !visibleTourIds.has(item.tourId)).length ?? 0,
     [aiRecommendationResult, visibleTourIds],
   );
-  const activeFilterCount = [
-    effectiveFilters.destination,
-    effectiveFilters.source,
-    effectiveFilters.theme,
-    effectiveFilters.departureDate || effectiveFilters.departureDateStart || effectiveFilters.departureDateEnd,
-    effectiveFilters.duration,
-    hasPriceFilter,
-  ].filter(Boolean).length;
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
     setClearedAiRequestId(aiSearchRequest?.id ?? null);
     setAiClearVersion((current) => current + 1);
   }, [aiSearchRequest?.id]);
-
-  const waterfallTours = useMemo(
+  const visibleDisplayCandidates = useMemo(
     () => displayTours.slice(0, visibleCount),
     [displayTours, visibleCount],
   );
+  const waterfallTours = useMemo(
+    () =>
+      visibleDisplayCandidates
+        .map((tour) => loadedTourById.get(tour.id))
+        .filter((tour): tour is TourSummary => Boolean(tour)),
+    [loadedTourById, visibleDisplayCandidates],
+  );
   const hasMoreLoadedResults = visibleCount < displayTours.length;
-  const hasMoreRemotePages = hasPageChunks && catalogTours.length === 0 && localTours.length < total;
+  const hasMoreRemotePages =
+    hasPageChunks &&
+    catalogTours.length === 0 &&
+    localTours.length < total;
   const shouldRenderLoadMore = hasMoreLoadedResults || hasMoreRemotePages;
+
+  useEffect(() => {
+    if (!hasPageChunks || catalogTours.length > 0) return;
+
+    const missingPages = new Set<number>();
+    for (const tour of visibleDisplayCandidates) {
+      if (loadedTourById.has(tour.id)) continue;
+      if ('page' in tour && typeof tour.page === 'number') {
+        missingPages.add(tour.page);
+      }
+    }
+
+    for (const page of missingPages) {
+      void loadMorePages(page);
+    }
+  }, [
+    catalogTours.length,
+    hasPageChunks,
+    loadMorePages,
+    loadedTourById,
+    visibleDisplayCandidates,
+  ]);
   const emptyStateTitle = normalizedSearchQuery && !isAiSearchMode
     ? hasNaturalLanguageQuery
       ? '这句需求没有直接卡死结果'
@@ -1415,7 +1520,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <AiRecommendPanel
         tours={aiCandidateTours}
-        toursLoading={loading || catalogLoading}
+        toursLoading={loading || !recommendationsReady}
         activeFilters={effectiveFilters}
         searchQuery={searchQuery}
         result={aiRecommendationResult}
