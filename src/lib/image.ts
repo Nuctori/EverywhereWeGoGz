@@ -1,4 +1,4 @@
-// 图片不可用时的 SVG 回退占位图，显示“图片暂不可用”及线路标题
+// 图片不可用时的 SVG 回退占位图，显示温和的线路占位文案及标题
 export function getFallbackImage(title: string): string {
   const safeTitle = title.replace(/[<>&"]/g, (char) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[char] || char));
   const svg = `
@@ -16,7 +16,7 @@ export function getFallbackImage(title: string): string {
         <path d="M310 340l55-55 45 45 35-35 45 45"/>
         <circle cx="340" cy="255" r="18"/>
       </g>
-      <text x="400" y="455" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#64748b">图片暂不可用</text>
+      <text x="400" y="455" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" fill="#64748b">老广精选线路</text>
       <text x="400" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#94a3b8">${safeTitle}</text>
     </svg>
   `.trim();

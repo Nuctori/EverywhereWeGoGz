@@ -95,6 +95,36 @@ export const tourDetailSchema = z.object({
 export const resolvedTourSchema = tourSummarySchema.and(tourDetailSchema);
 export const toursListSchema = z.array(tourSummarySchema);
 
+export const tourIndexEntrySchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  source: z.string().min(1),
+  destination: z.string().min(1),
+  duration: z.coerce.number().int().positive(),
+  price: nonNegativeNumber,
+  bookingUrl: z.string().optional().default(''),
+  departureDate: z.string().optional().default(''),
+  departureDates: z.array(z.string()).optional(),
+  hotDepartureDates: z.array(z.string()).optional(),
+  transportType: z.string().optional().default(''),
+  accommodationLevel: z.string().optional().default(''),
+  meals: z.string().optional().default(''),
+  highlights: stringArrayDefaultEmpty,
+  tags: stringArrayDefaultEmpty,
+  isHot: booleanDefaultFalse,
+  isNew: booleanDefaultFalse,
+  isFlashSale: booleanDefaultFalse,
+  theme: z.string().optional().default(''),
+  leisureLevel: z.enum(['easy', 'medium', 'hard']).optional().default('easy'),
+  rating: nonNegativeNumber.optional().default(0),
+  groupSize: z.string().optional().default(''),
+  suitableFor: stringArrayDefaultEmpty,
+  season: z.string().optional().default(''),
+  page: z.coerce.number().int().nonnegative(),
+  searchText: z.string().optional(),
+});
+export const toursIndexSchema = z.array(tourIndexEntrySchema);
+
 export const toursPageSchema = z.object({
   items: z.array(tourSummarySchema),
   meta: z

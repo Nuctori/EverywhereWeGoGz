@@ -1,6 +1,4 @@
 // 价格滑块使用非线性映射：0-80% 对应 0~3000 元，80-100% 对应 3000~P95。
-import type { Tour } from '@/types/tour';
-
 // 焦点价格阈值：0-3000 元占据滑条 80% 空间以便精细调节
 const FOCUS_PRICE = 3000;
 
@@ -16,7 +14,7 @@ export interface PriceStatsResult {
   };
 }
 
-export function computePriceStats(tours: Tour[]): PriceStatsResult {
+export function computePriceStats(tours: Array<{ price: number }>): PriceStatsResult {
   const prices = tours.map((t) => t.price).sort((a, b) => a - b);
   const max = prices.length > 0 ? prices[prices.length - 1] : 10000;
   const p95 = prices[Math.floor(prices.length * 0.95)] || max;

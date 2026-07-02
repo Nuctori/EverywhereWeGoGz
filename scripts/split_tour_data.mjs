@@ -13,6 +13,7 @@ const imageCacheDir = path.join(dataDir, 'image-cache', 'placeholders');
 // ?? token ?????????????????????????
 const invalidImageTokens = ['lazyimg', '{{', '}}'];
 const writeRetries = 5;
+const placeholderLabel = '老广精选线路';
 const destinationKeywordMap = [
   ['华东', ['华东', '江南', '上海', '苏州', '杭州', '南京', '无锡', '乌镇', '周庄', '南浔', '西湖', '外滩', '迪士尼', '拈花湾', '牛首山']],
   ['广东', ['广东', '广州', '深圳', '珠海', '从化', '增城', '龙门', '新丰', '英德', '佛冈', '江门', '惠州', '双月湾', '巽寮湾', '古兜', '恩平', '新兴', '清远', '沙扒湾', '温泉']],
@@ -99,17 +100,30 @@ function placeholderImage(source) {
   const safeSource = String(source || '旅行团');
   const filename = `${crypto.createHash('sha1').update(safeSource).digest('hex').slice(0, 12)}.svg`;
   const filePath = path.join(imageCacheDir, filename);
-
-  if (!fs.existsSync(filePath)) {
-    const escapedSource = safeSource
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e2e8f0"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs><rect width="800" height="600" fill="url(#g)"/><rect x="60" y="60" width="680" height="480" rx="32" fill="#f8fafc" opacity="0.88"/><text x="400" y="290" text-anchor="middle" font-size="42" fill="#475569" font-family="Arial, sans-serif">图片暂不可用</text><text x="400" y="350" text-anchor="middle" font-size="26" fill="#64748b" font-family="Arial, sans-serif">${escapedSource}</text></svg>`;
-    fs.writeFileSync(filePath, svg, 'utf8');
-  }
+  const escapedSource = safeSource
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e2e8f0"/><stop offset="100%" stop-color="#cbd5e1"/></linearGradient></defs><rect width="800" height="600" fill="url(#g)"/><rect x="60" y="60" width="680" height="480" rx="32" fill="#f8fafc" opacity="0.88"/><text x="400" y="290" text-anchor="middle" font-size="42" fill="#475569" font-family="Arial, sans-serif">${placeholderLabel}</text><text x="400" y="350" text-anchor="middle" font-size="26" fill="#64748b" font-family="Arial, sans-serif">${escapedSource}</text></svg>`;
+  fs.writeFileSync(filePath, svg, 'utf8');
 
   return `/data/image-cache/placeholders/${filename}`;
+}
+
+function refreshExistingPlaceholderLabels() {
+  if (!fs.existsSync(imageCacheDir)) return 0;
+  let rewritten = 0;
+  for (const file of fs.readdirSync(imageCacheDir)) {
+    if (!file.endsWith('.svg')) continue;
+    const filePath = path.join(imageCacheDir, file);
+    const current = fs.readFileSync(filePath, 'utf8');
+    const next = current.replace(/图片暂不可用/g, placeholderLabel);
+    if (next !== current) {
+      fs.writeFileSync(filePath, next, 'utf8');
+      rewritten += 1;
+    }
+  }
+  return rewritten;
 }
 
 // Windows ????????????????????????????
@@ -182,6 +196,7 @@ for (const tour of tours) {
 if (sanitizedImages > 0 || normalizedDestinations > 0 || normalizedSourceLogos > 0) {
   fs.writeFileSync(sourcePath, JSON.stringify(tours), 'utf8');
 }
+const refreshedPlaceholders = refreshExistingPlaceholderLabels();
 
 fs.mkdirSync(detailsDir, { recursive: true });
 
@@ -218,12 +233,34 @@ writeTextFileWithRetry(listPath, JSON.stringify(listTours));
 
 // ====== Generate tours-index.json + tours-page-*.json chunks ======
 const PAGE_SIZE = 24;
-const indexFields = ['id', 'price', 'destination', 'duration', 'source', 'theme', 'departureDate', 'isHot', 'isNew', 'isFlashSale', 'leisureLevel', 'rating', 'season'];
-const indexTours = listTours.map((tour) => {
+const indexFields = [
+  'id',
+  'title',
+  'price',
+  'destination',
+  'duration',
+  'source',
+  'bookingUrl',
+  'theme',
+  'departureDate',
+  'departureDates',
+  'hotDepartureDates',
+  'transportType',
+  'tags',
+  'isHot',
+  'isNew',
+  'isFlashSale',
+  'leisureLevel',
+  'rating',
+  'suitableFor',
+  'season',
+];
+const indexTours = listTours.map((tour, index) => {
   const idx = {};
   for (const key of indexFields) {
     if (key in tour) idx[key] = tour[key];
   }
+  idx.page = Math.floor(index / PAGE_SIZE);
   return idx;
 });
 writeTextFileWithRetry(path.join(dataDir, 'tours-index.json'), JSON.stringify(indexTours));
@@ -298,6 +335,7 @@ console.log(`Split ${tours.length} tours`);
 console.log(`sanitized images ${sanitizedImages}`);
 console.log(`normalized destinations ${normalizedDestinations}`);
 console.log(`normalized source logos ${normalizedSourceLogos}`);
+console.log(`refreshed placeholders ${refreshedPlaceholders}`);
 console.log(`tours.json ${sourceSize}`);
 console.log(`tours-list.json ${listSize}`);
 console.log(`tour-details ${detailFiles.length} files, ${detailSize}`);
