@@ -101,7 +101,7 @@ def normalize_image_path(url: str, source: str) -> str:
         (source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc) or
         (source == "假日通" and parsed.netloc == "jrttp.jrt365.com:8066")
     )
-    if image_cache_mode in {"remote", "skip", "off"} and not force_cache:
+    if image_cache_mode == "remote" and not force_cache:
         return normalized_url
     ext = os.path.splitext(parsed.path)[1].lower()
     if ext not in IMAGE_EXTENSIONS:
@@ -123,6 +123,8 @@ def normalize_image_path(url: str, source: str) -> str:
 
     if os.path.exists(local_path):
         return public_path
+    if image_cache_mode in {"skip", "off"}:
+        return normalized_url
 
     try:
         headers = {'User-Agent': 'Mozilla/5.0'}
@@ -1107,6 +1109,8 @@ def main():
             existing = existing_tours.get(make_tour_key(tour))
             if existing and existing.get("createdAt"):
                 tour["createdAt"] = existing["createdAt"]
+            if existing and existing.get("updatedAt"):
+                tour["updatedAt"] = existing["updatedAt"]
             tours.append(tour)
         if index % 250 == 0 or index == total:
             print(f"[transform] {index}/{total} kept={len(tours)} skipped={skipped_tours}")
@@ -1160,6 +1164,7 @@ export const tours: Tour[] = [];
     stage_started = time.perf_counter()
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(tours_clean, f, ensure_ascii=False, separators=(",", ":"))
+        f.write("\n")
     log_stage("write tours.json", stage_started, f"{json_path} ({os.path.getsize(json_path) / 1024:.1f} KB)")
 
     split_script = os.path.abspath(os.path.join(os.path.dirname(__file__), "split_tour_data.mjs"))

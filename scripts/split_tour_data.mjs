@@ -129,6 +129,14 @@ function writeTextFileWithRetry(filePath, content) {
   throw lastError;
 }
 
+function compactJson(value) {
+  return `${JSON.stringify(value)}\n`;
+}
+
+function prettyJson(value) {
+  return `${JSON.stringify(value, null, 2)}\n`;
+}
+
 // ??????????/??/?????????????????
 function inferDestinationFromTour(tour) {
   const title = String(tour.title || '').trim();
@@ -180,7 +188,7 @@ for (const tour of tours) {
 }
 
 if (sanitizedImages > 0 || normalizedDestinations > 0 || normalizedSourceLogos > 0) {
-  fs.writeFileSync(sourcePath, JSON.stringify(tours), 'utf8');
+  fs.writeFileSync(sourcePath, compactJson(tours), 'utf8');
 }
 
 fs.mkdirSync(detailsDir, { recursive: true });
@@ -202,7 +210,7 @@ const listTours = tours.map((tour) => {
   }
 
   const detailFile = `${tour.id}.json`;
-  writeTextFileWithRetry(path.join(detailsDir, detailFile), JSON.stringify(detailTour));
+  writeTextFileWithRetry(path.join(detailsDir, detailFile), compactJson(detailTour));
   existingDetailFiles.delete(detailFile);
   return listTour;
 });
@@ -214,7 +222,7 @@ for (const staleFile of existingDetailFiles) {
   }
 }
 
-writeTextFileWithRetry(listPath, JSON.stringify(listTours));
+writeTextFileWithRetry(listPath, compactJson(listTours));
 
 // ====== Generate tours-index.json + tours-page-*.json chunks ======
 const PAGE_SIZE = 24;
@@ -226,7 +234,7 @@ const indexTours = listTours.map((tour) => {
   }
   return idx;
 });
-writeTextFileWithRetry(path.join(dataDir, 'tours-index.json'), JSON.stringify(indexTours));
+writeTextFileWithRetry(path.join(dataDir, 'tours-index.json'), compactJson(indexTours));
 
 const totalPages = Math.ceil(listTours.length / PAGE_SIZE);
 const pageDir = path.join(dataDir);
@@ -237,7 +245,7 @@ for (let page = 0; page < totalPages; page++) {
     meta: { page, pageSize: PAGE_SIZE, total: listTours.length },
     items: listTours.slice(start, end),
   };
-  writeTextFileWithRetry(path.join(pageDir, `tours-page-${page}.json`), JSON.stringify(pageData));
+  writeTextFileWithRetry(path.join(pageDir, `tours-page-${page}.json`), compactJson(pageData));
 }
 console.log(`tours-index.json ${Buffer.byteLength(JSON.stringify(indexTours), 'utf8')} bytes`);
 console.log(`Generated ${totalPages} page chunks (tours-page-0.json ~ tours-page-${totalPages - 1}.json)`);
@@ -292,7 +300,7 @@ const meta = {
   },
 };
 
-writeTextFileWithRetry(metaPath, JSON.stringify(meta, null, 2));
+writeTextFileWithRetry(metaPath, prettyJson(meta));
 
 console.log(`Split ${tours.length} tours`);
 console.log(`sanitized images ${sanitizedImages}`);
