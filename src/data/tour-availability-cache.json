@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-02T07:13:58Z",
+  "generated_at": "2026-07-02T15:10:42Z",
   "schema_version": 3,
   "entries": {
     "http://gftblm.360jlb.cn/m/event?id=655768": {
@@ -2608,6 +2608,42 @@
       "matched_keyword": "",
       "checked_at": "2026-07-02T07:08:45Z"
     },
+    "http://gftblm.360jlb.cn/m/event?id=870652": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=870652",
+      "title": "即将成团！菜头领队！周六7.4-7.5【汽车·郴州2天】行摄碧水丹霞高椅岭、雾漫小东江、夜游裕后街 湖南·郴州 07/04-07/05",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=870652",
+      "elapsed_ms": 827,
+      "text_sample": "即将成团！菜头领队！周六7.4-7.5【汽车·郴州2天】行摄碧水丹霞高椅岭、雾漫小东江、夜游裕后街_暴走村广州站 活动介绍湖南“南大门”——郴州这个颜值超高、楚楚动人的迷人小县城是时候来认识一下它了~~~其距离广州400多公里的地方每年4 ~10月，都会吸引无数游客前往这里的风景每一帧都可能刷爆你的朋友圈、小红书、抖音高椅岭独特的丹霞地貌+小东江神奇的雾漫江景美不胜收~~~高椅岭（丹霞奇观，红石仙境）“2019年十大爆火旅行地”一个绝对",
+      "title_token_hits": [
+        "行摄碧水丹霞高椅岭、雾漫小东江、夜游裕后街",
+        "即将成团",
+        "菜头领队"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
+    },
+    "http://gftblm.360jlb.cn/m/event?id=870657": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=870657",
+      "title": "即将成团!塘主领队！178元起！周六7.4晚-7.5【虐线-龙斗峰15公里】龙斗峰广东第一险峰K2 广东·韶关 07/04-07/05",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=870657",
+      "elapsed_ms": 832,
+      "text_sample": "即将成团!塘主领队！178元起！周六7.4晚-7.5【虐线-龙斗峰15公里】龙斗峰广东第一险峰K2_暴走村广州站 部分线路已发放10元优惠券！数量有限，先领券，再下单！亮点1、暴走村广州站：大品牌值得信赖，广州+深圳每周发团5000人左右，上百个活动49元起，活动多白菜价还靠谱。亮点2、广东第一峰集攀登、探险、观光、于一体亮点3、危险与挑战并存的登山路线亮点4、陡峻的峭壁和壮美的云海、一幅绝美的画卷#龙斗峰#位于韶关市始兴县隘子镇与小坑",
+      "title_token_hits": [
+        "龙斗峰广东第一险峰k2",
+        "龙斗峰15公里",
+        "178元起"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
+    },
     "http://gftblm.360jlb.cn/m/event?id=870659": {
       "url": "http://gftblm.360jlb.cn/m/event?id=870659",
       "title": "即将成团！随风领队！周六7.4-7.5，轻装上阵！【齐云山露营15公里】赣南第一高峰，高山草甸徒步 + 山顶露营 江西·赣州 07/03-07/04",
@@ -2824,6 +2860,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-02T07:08:45Z"
     },
+    "http://gftblm.360jlb.cn/m/event?id=875589": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=875589",
+      "title": "即将成团！69元起！悠悠领队！周六7.4【溪悦谷溪降】清远溪乐谷溪降， 拥抱自然、挑战自我 广东·清远 07/04-07/04",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/error?code=404",
+      "elapsed_ms": 708,
+      "text_sample": "错误页_暴走村广州站 首页 暴走村新闻 其他站点 扫码进群 活动报名 领队招募 扫码进群 工作日 本周2天活动 下周2天活动 周六7.4 周日7.5 暑假多天线大巴 暑假长线合集 暑假亲子长线 飞机高铁&动车 徒步热门长线 云南长线 新疆西北内蒙 四川西藏长线 山西河南湖南/北 团建定制 装备官网 关于我们 招聘 新活动菜单 出错啦 您访问的页面被删除了 技术支持：赛会通",
+      "title_token_hits": [
+        "周六7"
+      ],
+      "category": "unavailable",
+      "reason": "redirected to non-detail page: /m/error",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
+    },
     "http://gftblm.360jlb.cn/m/event?id=875592": {
       "url": "http://gftblm.360jlb.cn/m/event?id=875592",
       "title": "已成团！109元起！阿运领队！周六7.4【千年瑶寨穿油岭古寨12公里】穿越喀斯特峰林，重走瑶民千年往来古道 广东·清远 07/03-07/03",
@@ -2927,6 +2979,24 @@
       "reason": "redirected to non-detail page: /m/error",
       "matched_keyword": "",
       "checked_at": "2026-07-02T07:08:46Z"
+    },
+    "http://gftblm.360jlb.cn/m/event?id=875613": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=875613",
+      "title": "已成团！99元起！小若领队！周六7.4【惠州风车山9公里】风车山徒步摄影，盐洲岛唯美日落 广东·惠州 07/04-07/04",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=875613",
+      "elapsed_ms": 789,
+      "text_sample": "已成团！99元起！周六7.4【惠州风车山9公里】风车山徒步摄影，盐洲岛唯美日落_暴走村广州站 活动亮点：亮点1：暴走村广州站：国民户外徒步登山连锁大品牌值得信赖，北上广深杭成6城平均每周发团上万人，一日线49元起，活动多白菜价还靠谱。亮点2：风车山，已成为盐洲岛的靓丽景观被誉为惠州最美风车山亮点3：盐洲岛位于惠东县东南部因盛产原盐而得名，绵延几公里的平缓沙滩，有着美丽的近海景观终年温暖湿润的气候孕育了四季葱郁的树林，独特的海滨风光，也是",
+      "title_token_hits": [
+        "惠州风车山9公里",
+        "风车山徒步摄影",
+        "盐洲岛唯美日落"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
     },
     "http://gftblm.360jlb.cn/m/event?id=875731": {
       "url": "http://gftblm.360jlb.cn/m/event?id=875731",
@@ -3064,6 +3134,24 @@
       "matched_keyword": "",
       "checked_at": "2026-07-02T07:08:45Z"
     },
+    "http://gftblm.360jlb.cn/m/event?id=875852": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=875852",
+      "title": "即将成团！周六7.11-7.12，轻装上阵！【齐云山露营15公里】赣南第一高峰，高山草甸徒步 + 山顶露营 江西·赣州 07/11-07/12",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=875852",
+      "elapsed_ms": 805,
+      "text_sample": "即将成团！周六7.11-7.12，轻装上阵！【齐云山露营15公里】赣南第一高峰，高山草甸徒步 + 山顶露营_暴走村广州站 活动介绍 行程亮点亮点1、暴走村广州站：大品牌值得信赖，广州+深圳每周发团5000人左右，上百个活动49元起，活动多白菜价还靠谱。亮点2、【赣南第一高峰】登顶海拔 2061.3 米的齐云山，解锁三重震撼自然景观 “云海 + 星空 + 草甸” 。亮点3、【山顶露营夜观星】远离城市光污染，夜幕降临时星空格外清晰亮点4、【",
+      "title_token_hits": [
+        "齐云山露营15公里",
+        "赣南第一高峰",
+        "高山草甸徒步"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
+    },
     "http://gftblm.360jlb.cn/m/event?id=875854": {
       "url": "http://gftblm.360jlb.cn/m/event?id=875854",
       "title": "即将成团！178元起！周六7.11晚-7.12【虐线-龙斗峰15公里】龙斗峰广东第一险峰K2 广东·韶关 07/10-07/12",
@@ -3154,6 +3242,24 @@
       "matched_keyword": "",
       "checked_at": "2026-07-02T07:08:47Z"
     },
+    "http://gftblm.360jlb.cn/m/event?id=875877": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=875877",
+      "title": "已成团！99元起！小毛领队！周六7.4【梅子坪穿江英古道21公里】一次性享受双历史著名古道穿越 广东·清远 07/04-07/04",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=875877",
+      "elapsed_ms": 779,
+      "text_sample": "已成团！99元起！小毛领队！周六7.4【梅子坪穿江英古道21公里】一次性享受双历史著名古道穿越_暴走村广州站 活动亮点：亮点1：暴走村广州站：国民户外徒步登山连锁大品牌值得信赖，北上广深杭成6城平均每周发团上万人，一日线49元起，活动多白菜价还靠谱。亮点2：历史文化深厚，均为古代重要的交通要塞。亮点3：喀斯特地貌，黑色的石头遍布，彷如广东版的墨石公园亮点4：欣赏近期火爆出圈的梅子坪古道外再赠送江英古道，双倍享受#梅子坪古道# ‌梅子坪古",
+      "title_token_hits": [
+        "一次性享受双历史著名古道穿越",
+        "梅子坪穿江英古道21公里",
+        "99元起"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
+    },
     "http://gftblm.360jlb.cn/m/event?id=876212": {
       "url": "http://gftblm.360jlb.cn/m/event?id=876212",
       "title": "即将成团！99元起！江海领队！周日7.5【黑排角4公里】海岸奇观黑排角，摄影天堂盐洲岛 广东·惠州 07/04-07/05",
@@ -3189,6 +3295,24 @@
       "reason": "title tokens matched in reachable page",
       "matched_keyword": "",
       "checked_at": "2026-07-02T07:08:47Z"
+    },
+    "http://gftblm.360jlb.cn/m/event?id=876215": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=876215",
+      "title": "已成团！79元起！林志玲领队！周日7.5【东西冲7公里】穿越深圳经典海岸，打卡天文台栈道 广东·深圳 07/05-07/05",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=876215",
+      "elapsed_ms": 269,
+      "text_sample": "已成团！79元起！林志玲领队！周日7.5【东西冲7公里】穿越深圳经典海岸，打卡天文台栈道_暴走村广州站 __________________________________________________________________________________________活动亮点：亮点1：暴走村广州站：国民户外徒步登山连锁大品牌值得信赖，北上广深杭成6城平均每周发团上万人，一日线49元起，活动多白菜价还靠谱。亮点2：东西冲：",
+      "title_token_hits": [
+        "穿越深圳经典海岸",
+        "打卡天文台栈道",
+        "东西冲7公里"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
     },
     "http://gftblm.360jlb.cn/m/event?id=876226": {
       "url": "http://gftblm.360jlb.cn/m/event?id=876226",
@@ -3384,6 +3508,60 @@
       "matched_keyword": "",
       "checked_at": "2026-07-02T07:08:45Z"
     },
+    "http://gftblm.360jlb.cn/m/event?id=877379": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=877379",
+      "title": "即将成团！9元起！托马斯领队！周二7.7【金麦线11公里】打卡广州网红圣地油麻山，拍天坑大片！ 广东·广州 07/07-07/07",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=877379",
+      "elapsed_ms": 809,
+      "text_sample": "即将成团！9元起！托马斯领队！周二7.7【金麦线11公里】打卡广州网红圣地油麻山，拍天坑大片！_暴走村广州站 活动亮点：亮点1：暴走村广州站：国民户外徒步登山连锁大品牌值得信赖，北上广深杭成6城平均每周发团上万人，一日线49元起，活动多白菜价还靠谱。亮点2：线路途经油麻山和石牙顶，有两个美丽的天池，也被称为 “广州的最后两滴眼泪”，湖水在阳光照耀下呈现出迷人的蓝色，宛如绿宝石，非常适合拍照；亮点3：沿途基本都是山林间，森林覆盖率达到 9",
+      "title_token_hits": [
+        "打卡广州网红圣地油麻山",
+        "金麦线11公里",
+        "托马斯领队"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
+    },
+    "http://gftblm.360jlb.cn/m/event?id=877380": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=877380",
+      "title": "即将成团！89元起！鸽子领队！周二7.7【东西冲7公里】穿越深圳经典海岸，打卡天文台栈道 广东·深圳 07/07-07/07",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=877380",
+      "elapsed_ms": 819,
+      "text_sample": "即将成团！89元起！鸽子领队！周二7.7【东西冲7公里】穿越深圳经典海岸，打卡天文台栈道_暴走村广州站 活动亮点：亮点1：亮点1：暴走村广州站：国民户外徒步登山连锁大品牌值得信赖，北上广深杭成6城平均每周发团上万人，一日线49元起，活动多白菜价还靠谱。亮点2：东西冲：深圳经典入门海岸线，全程沿海岸线徒步，被国家地理评为“中国最美海岸线”之一的海岸线#东西冲#经过一段时间的封闭后终于又开放啦！全程沿海岸线徒步，东西冲穿越被国家地理评为“中",
+      "title_token_hits": [
+        "穿越深圳经典海岸",
+        "打卡天文台栈道",
+        "东西冲7公里"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
+    },
+    "http://gftblm.360jlb.cn/m/event?id=877382": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=877382",
+      "title": "即将成团！119元起！耀杰领队！周二7.7【千年瑶寨穿油岭古寨12公里】穿越喀斯特峰林，重走瑶民千年往来古道 广东·清远 07/07-07/07",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=877382",
+      "elapsed_ms": 825,
+      "text_sample": "即将成团！119元起！耀杰领队！周二7.7【千年瑶寨穿油岭古寨12公里】穿越喀斯特峰林，重走瑶民千年往来古道_暴走村广州站 活动亮点：亮点1：暴走村广州站：国民户外徒步登山连锁大品牌值得信赖，北上广深杭成6城平均每周发团上万人，一日线49元起，活动多白菜价还靠谱。亮点2：穿越喀斯特峰林、原始森林、瑶寨梯田，视野开阔，人文与自然景观交融。亮点3：穿过油岭古寨，吊脚楼依山层叠，沉浸式感受原生态排瑶风情#清远千年瑶寨至油岭古寨#徒步线全程约 ",
+      "title_token_hits": [
+        "千年瑶寨穿油岭古寨12公里",
+        "重走瑶民千年往来古道",
+        "穿越喀斯特峰林"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
+    },
     "http://gftblm.360jlb.cn/m/event?id=877383": {
       "url": "http://gftblm.360jlb.cn/m/event?id=877383",
       "title": "即将成团！79元起！萧导领队！周二7.7【大尖山穿白水寨13公里】心形天池+白水仙瀑双打卡，踏古火山遗迹 广东·广州 07/06-07/07",
@@ -3437,6 +3615,24 @@
       "reason": "title tokens matched in reachable page",
       "matched_keyword": "",
       "checked_at": "2026-07-02T07:08:45Z"
+    },
+    "http://gftblm.360jlb.cn/m/event?id=877398": {
+      "url": "http://gftblm.360jlb.cn/m/event?id=877398",
+      "title": "即将成团！9元起！小若领队！周三7.8【白云山永梅线8公里】赏广州迷人夜景 广东·广州 07/08-07/08",
+      "domain_rule": "广州去旅行/暴走村",
+      "status_code": 200,
+      "final_url": "http://gftblm.360jlb.cn/m/event?id=877398",
+      "elapsed_ms": 801,
+      "text_sample": "即将成团！9元起！小若领队！周三7.8【白云山永梅线8公里】赏广州迷人夜景_暴走村广州站 活动亮点：亮点1：暴走村广州站：国民户外徒步登山连锁大品牌值得信赖，北上广深杭成6城平均每周发团上万人，一日线49元起，活动多白菜价还靠谱。亮点2：俯瞰广州 CBD的绝佳位置#夜爬永梅线#每一个忙碌的白天有随之而来静谧的夜。让我们在凉风习习的晚上，探索这种趣味的休闲健身方式... 首页 暴走村新闻 其他站点 扫码进群 活动报名 领队招募 扫码进群 ",
+      "title_token_hits": [
+        "白云山永梅线8公里",
+        "赏广州迷人夜景",
+        "即将成团"
+      ],
+      "category": "ok",
+      "reason": "title tokens matched in reachable page",
+      "matched_keyword": "",
+      "checked_at": "2026-07-02T15:03:18Z"
     },
     "http://gftblm.360jlb.cn/m/event?id=877405": {
       "url": "http://gftblm.360jlb.cn/m/event?id=877405",
@@ -52292,21 +52488,21 @@
     },
     "http://nn.gzl.cn/domestic/0F1ACAEBF95641DDE0532429030A5D63.html": {
       "url": "http://nn.gzl.cn/domestic/0F1ACAEBF95641DDE0532429030A5D63.html",
-      "title": "【颂·温泉】郴州、莽山、仰天湖草原、高铁4天＊4人成团＊12人封顶＊往返缆车直达五指峰＊雾漫小东江小花船＊吉普车穿越环湖公路＜赠送旅拍＋航拍，一晚莽山温泉酒店，无限次体验森林温泉＞",
+      "title": "【颂·悠享】郴州、莽山、仰天湖草原、高铁4天＊4人成团＊12人封顶＊往返缆车直达五指峰＊雾漫小东江小花船＊吉普车穿越环湖公路＜赠送旅拍＋航拍，一晚莽山温泉酒店，无限次体验森林温泉＞",
       "domain_rule": "广之旅",
       "status_code": 200,
       "final_url": "http://nn.gzl.cn/domestic/0F1ACAEBF95641DDE0532429030A5D63.html",
-      "elapsed_ms": 474,
+      "elapsed_ms": 524,
       "text_sample": "广州到郴州4日游路线_【颂·悠享】郴州、莽山、仰天湖草原、高铁4天＊4人成团＊12人封顶＊往返缆车直达五指峰＊雾漫小东江小花船＊吉普车穿越环湖公路＜赠送旅拍＋航拍，一晚莽山温泉酒店，无限次体验森林温泉＞- 广州 A股上市企业岭南控股（000524）旗下旅行社 旅行社业务经营许可证号：L-GD-CJ00004 我的订单 企业客户 旅游积分卡 门市网点 广之旅: GZL_ONLINE --> GZL_ONLINE 广之旅头条: GZLWXD",
       "title_token_hits": [
         "郴州、莽山、仰天湖草原、高铁4天＊4人成团＊12人封顶＊往返缆车直达五指峰＊雾漫小东江小花船＊吉普车穿越环湖公路＜赠送旅拍＋航拍",
         "无限次体验森林温泉＞",
         "一晚莽山温泉酒店"
       ],
-      "category": "unavailable",
-      "reason": "广之旅 sale flag is false",
-      "matched_keyword": "isB2cOnSale=false",
-      "checked_at": "2026-07-01T08:03:13Z"
+      "category": "ok",
+      "reason": "广之旅 detail markers found + title tokens matched",
+      "matched_keyword": "产品特色",
+      "checked_at": "2026-07-02T15:03:18Z"
     },
     "http://nn.gzl.cn/domestic/0F1ACAEBF97B41DDE0532429030A5D63.html": {
       "url": "http://nn.gzl.cn/domestic/0F1ACAEBF97B41DDE0532429030A5D63.html",
@@ -53958,21 +54154,21 @@
     },
     "http://nn.gzl.cn/domestic/402880225ec3abd7015f141a411806d7.html": {
       "url": "http://nn.gzl.cn/domestic/402880225ec3abd7015f141a411806d7.html",
-      "title": "【典·休闲】四川、成都双飞5/6天＊恋上四川＊黄龙＊都江堰＊九寨沟＊湛江往返",
+      "title": "【典·休闲】四川、成都双飞6/8天＊恋上四川＊黄龙＊都江堰＊九寨沟＊湛江往返＜双飞或双卧＞",
       "domain_rule": "广之旅",
       "status_code": 200,
       "final_url": "http://nn.gzl.cn/domestic/402880225ec3abd7015f141a411806d7.html",
-      "elapsed_ms": 801,
-      "text_sample": "湛江到成都6日游路线-【典·休闲】四川、成都双飞5／6天＊恋上四川＊黄龙＊都江堰＊九寨沟＊湛江往返- 广州 A股上市企业岭南控股（000524）旗下旅行社 旅行社业务经营许可证号：L-GD-CJ00004 我的订单 企业客户 旅游积分卡 门市网点 广之旅: GZL_ONLINE --> GZL_ONLINE 广之旅头条: GZLWXDYH --> GZLWXDYH --> 全部产品 全部产品 跟团游 一家一团 自由行 当地玩乐 酒店 门",
+      "elapsed_ms": 332,
+      "text_sample": "湛江到成都6日游路线-【典·休闲】四川、成都双飞6／8天＊恋上四川＊黄龙＊都江堰＊九寨沟＊湛江往返＜双飞或双卧＞- 广州 A股上市企业岭南控股（000524）旗下旅行社 旅行社业务经营许可证号：L-GD-CJ00004 我的订单 企业客户 旅游积分卡 门市网点 广之旅: GZL_ONLINE --> GZL_ONLINE 广之旅头条: GZLWXDYH --> GZLWXDYH --> 全部产品 全部产品 跟团游 一家一团 自由行 当地",
       "title_token_hits": [
-        "6天＊恋上四川＊黄龙＊都江堰＊九寨沟＊湛江往返",
-        "四川、成都双飞5",
+        "8天＊恋上四川＊黄龙＊都江堰＊九寨沟＊湛江往返＜双飞或双卧＞",
+        "四川、成都双飞6",
         "休闲"
       ],
-      "category": "unavailable",
-      "reason": "广之旅 sale flag is false",
-      "matched_keyword": "isB2cOnSale=false",
-      "checked_at": "2026-07-01T08:02:27Z"
+      "category": "ok",
+      "reason": "广之旅 detail markers found + title tokens matched",
+      "matched_keyword": "产品特色",
+      "checked_at": "2026-07-02T15:03:18Z"
     },
     "http://nn.gzl.cn/domestic/402880225f3a347c015f5219a582106f.html": {
       "url": "http://nn.gzl.cn/domestic/402880225f3a347c015f5219a582106f.html",
@@ -68281,17 +68477,17 @@
       "domain_rule": "广之旅",
       "status_code": 200,
       "final_url": "http://nn.gzl.cn/freetour/402880226b89daeb016b8da600343736.html",
-      "elapsed_ms": 402,
+      "elapsed_ms": 455,
       "text_sample": "广州到河源自由行2日游_【直通车】河源客天下国际旅游度假区2/3天＊国际大酒店山景双人房＊超大水上乐园＊客家小镇体验民俗文化＊等待确认＜含早＞- 广州 A股上市企业岭南控股（000524）旗下旅行社 旅行社业务经营许可证号：L-GD-CJ00004 我的订单 企业客户 旅游积分卡 门市网点 广之旅: GZL_ONLINE --> GZL_ONLINE 广之旅头条: GZLWXDYH --> GZLWXDYH --> 全部产品 全部产品 ",
       "title_token_hits": [
         "3天＊国际大酒店山景双人房＊超大水上乐园＊客家小镇体验民俗文化＊等待确认＜含早＞",
         "河源客天下国际旅游度假区2",
         "直通车"
       ],
-      "category": "unavailable",
-      "reason": "广之旅 sale flag is false",
-      "matched_keyword": "isB2cOnSale=false",
-      "checked_at": "2026-07-01T08:03:51Z"
+      "category": "ok",
+      "reason": "广之旅 detail markers found + title tokens matched",
+      "matched_keyword": "产品特色",
+      "checked_at": "2026-07-02T15:03:20Z"
     },
     "http://nn.gzl.cn/freetour/402880226cce7ba0016cfb46d43735b2.html": {
       "url": "http://nn.gzl.cn/freetour/402880226cce7ba0016cfb46d43735b2.html",
@@ -68531,17 +68727,17 @@
       "domain_rule": "广之旅",
       "status_code": 200,
       "final_url": "http://nn.gzl.cn/freetour/402880228dd13435018df43029747bf4.html",
-      "elapsed_ms": 406,
+      "elapsed_ms": 170,
       "text_sample": "广州到河源自由行1日游_【直通车】河源叶园温泉3天＊豪华双人房＊水上乐园＊泡功能各异的温泉池＊感受特色的客家和生态文化＊等待确认＜吃足6餐，可加订升级全新温泉泡池房＞- 广州 A股上市企业岭南控股（000524）旗下旅行社 旅行社业务经营许可证号：L-GD-CJ00004 我的订单 企业客户 旅游积分卡 门市网点 广之旅: GZL_ONLINE --> GZL_ONLINE 广之旅头条: GZLWXDYH --> GZLWXDYH --",
       "title_token_hits": [
         "河源叶园温泉3天＊豪华双人房＊水上乐园＊泡功能各异的温泉池＊感受特色的客家和生态文化＊等待确认＜吃足6餐",
         "可加订升级全新温泉泡池房＞",
         "直通车"
       ],
-      "category": "unavailable",
-      "reason": "广之旅 sale flag is false",
-      "matched_keyword": "isB2cOnSale=false",
-      "checked_at": "2026-07-01T08:04:02Z"
+      "category": "ok",
+      "reason": "广之旅 detail markers found + title tokens matched",
+      "matched_keyword": "产品特色",
+      "checked_at": "2026-07-02T15:03:19Z"
     },
     "http://nn.gzl.cn/freetour/402880228dd13435018e07da05a456c5.html": {
       "url": "http://nn.gzl.cn/freetour/402880228dd13435018e07da05a456c5.html",
@@ -79403,17 +79599,17 @@
       "domain_rule": "广之旅",
       "status_code": 200,
       "final_url": "http://nn.gzl.cn/freetour/4028804e8e0f48af018e11c4c6122f68.html",
-      "elapsed_ms": 402,
+      "elapsed_ms": 265,
       "text_sample": "广州到河源自由行3日游_【直通车】河源紫金福盈门温泉大酒店3天＊泡池房双人房＊浸泡紫金硫磺温泉＊等待确认＜含早，不限池水＞- 广州 A股上市企业岭南控股（000524）旗下旅行社 旅行社业务经营许可证号：L-GD-CJ00004 我的订单 企业客户 旅游积分卡 门市网点 广之旅: GZL_ONLINE --> GZL_ONLINE 广之旅头条: GZLWXDYH --> GZLWXDYH --> 全部产品 全部产品 跟团游 一家一团 自",
       "title_token_hits": [
         "河源紫金福盈门温泉大酒店3天＊泡池房双人房＊浸泡紫金硫磺温泉＊等待确认＜含早",
         "不限池水＞",
         "直通车"
       ],
-      "category": "unavailable",
-      "reason": "广之旅 sale flag is false",
-      "matched_keyword": "isB2cOnSale=false",
-      "checked_at": "2026-07-01T08:04:00Z"
+      "category": "ok",
+      "reason": "广之旅 detail markers found + title tokens matched",
+      "matched_keyword": "产品特色",
+      "checked_at": "2026-07-02T15:03:19Z"
     },
     "http://nn.gzl.cn/freetour/4028804e8e12269a018e1d40c1ec2104.html": {
       "url": "http://nn.gzl.cn/freetour/4028804e8e12269a018e1d40c1ec2104.html",
@@ -79582,16 +79778,16 @@
       "domain_rule": "广之旅",
       "status_code": 200,
       "final_url": "http://nn.gzl.cn/freetour/4028804e919eb09a0191c76e664872df.html",
-      "elapsed_ms": 396,
+      "elapsed_ms": 184,
       "text_sample": "广州到紫金自由行3日游_【直通车】河源紫金御临门温泉度假村3天＊标准双人房＊打卡东南亚风情度假区＊无限次美颜硫磺泉＊等待确认＜可选含早套餐＞- 广州 A股上市企业岭南控股（000524）旗下旅行社 旅行社业务经营许可证号：L-GD-CJ00004 我的订单 企业客户 旅游积分卡 门市网点 广之旅: GZL_ONLINE --> GZL_ONLINE 广之旅头条: GZLWXDYH --> GZLWXDYH --> 全部产品 全部产品 跟",
       "title_token_hits": [
         "河源紫金御临门温泉度假村3天＊标准双人房＊打卡东南亚风情度假区＊无限次美颜硫磺泉＊等待确认＜可选含早套餐＞",
         "直通车"
       ],
-      "category": "unavailable",
-      "reason": "广之旅 sale flag is false",
-      "matched_keyword": "isB2cOnSale=false",
-      "checked_at": "2026-07-01T08:04:03Z"
+      "category": "ok",
+      "reason": "广之旅 detail markers found + title tokens matched",
+      "matched_keyword": "产品特色",
+      "checked_at": "2026-07-02T15:03:19Z"
     },
     "http://nn.gzl.cn/freetour/4028804e9465331a019512ccd73a5020.html": {
       "url": "http://nn.gzl.cn/freetour/4028804e9465331a019512ccd73a5020.html",
@@ -79599,17 +79795,17 @@
       "domain_rule": "广之旅",
       "status_code": 200,
       "final_url": "http://nn.gzl.cn/freetour/4028804e9465331a019512ccd73a5020.html",
-      "elapsed_ms": 419,
+      "elapsed_ms": 151,
       "text_sample": "广州到河源自由行1日游_【直通车】河源康颜温泉度假村3天＊维也纳豪华房＊酒店官方专属直通车＊无限次硫磺温泉＊等待确认＜含早，可加订升级泡池房＞- 广州 A股上市企业岭南控股（000524）旗下旅行社 旅行社业务经营许可证号：L-GD-CJ00004 我的订单 企业客户 旅游积分卡 门市网点 广之旅: GZL_ONLINE --> GZL_ONLINE 广之旅头条: GZLWXDYH --> GZLWXDYH --> 全部产品 全部产品 ",
       "title_token_hits": [
         "河源康颜温泉度假村3天＊维也纳豪华房＊酒店官方专属直通车＊无限次硫磺温泉＊等待确认＜含早",
         "可加订升级泡池房＞",
         "直通车"
       ],
-      "category": "unavailable",
-      "reason": "广之旅 sale flag is false",
-      "matched_keyword": "isB2cOnSale=false",
-      "checked_at": "2026-07-01T08:04:06Z"
+      "category": "ok",
+      "reason": "广之旅 detail markers found + title tokens matched",
+      "matched_keyword": "产品特色",
+      "checked_at": "2026-07-02T15:03:19Z"
     },
     "http://nn.gzl.cn/freetour/4028804e9465331a01953c139a4c356f.html": {
       "url": "http://nn.gzl.cn/freetour/4028804e9465331a01953c139a4c356f.html",

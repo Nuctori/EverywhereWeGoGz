@@ -129,6 +129,14 @@ function writeTextFileWithRetry(filePath, content) {
   throw lastError;
 }
 
+function sameDetailContent(left, right) {
+  const ignoredFields = new Set(['updatedAt']);
+  const normalize = (detail) => Object.fromEntries(
+    Object.entries(detail || {}).filter(([key]) => !ignoredFields.has(key)),
+  );
+  return JSON.stringify(normalize(left)) === JSON.stringify(normalize(right));
+}
+
 // ??????????/??/?????????????????
 function inferDestinationFromTour(tour) {
   const title = String(tour.title || '').trim();
@@ -202,7 +210,18 @@ const listTours = tours.map((tour) => {
   }
 
   const detailFile = `${tour.id}.json`;
-  writeTextFileWithRetry(path.join(detailsDir, detailFile), JSON.stringify(detailTour));
+  const detailPath = path.join(detailsDir, detailFile);
+  if (fs.existsSync(detailPath)) {
+    try {
+      const existingDetail = JSON.parse(fs.readFileSync(detailPath, 'utf8'));
+      if (existingDetail.updatedAt && sameDetailContent(existingDetail, detailTour)) {
+        detailTour.updatedAt = existingDetail.updatedAt;
+      }
+    } catch {
+      // Rebuild malformed detail files from the current canonical tour record.
+    }
+  }
+  writeTextFileWithRetry(detailPath, `${JSON.stringify(detailTour)}\n`);
   existingDetailFiles.delete(detailFile);
   return listTour;
 });

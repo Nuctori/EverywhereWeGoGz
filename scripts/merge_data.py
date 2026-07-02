@@ -799,6 +799,13 @@ def merge_detail_with_existing(detail, existing_detail):
     return merged
 
 
+def tour_content_equal(left, right):
+    ignored_fields = {"createdAt", "updatedAt"}
+    left_content = {key: value for key, value in left.items() if key not in ignored_fields}
+    right_content = {key: value for key, value in right.items() if key not in ignored_fields}
+    return left_content == right_content
+
+
 def load_detail_results(deduped, existing_tours):
     detail_mode = os.environ.get("DETAIL_FETCH_MODE", "fetch").strip().lower()
     detail_results = {}
@@ -1107,6 +1114,8 @@ def main():
             existing = existing_tours.get(make_tour_key(tour))
             if existing and existing.get("createdAt"):
                 tour["createdAt"] = existing["createdAt"]
+                if existing.get("updatedAt") and tour_content_equal(tour, existing):
+                    tour["updatedAt"] = existing["updatedAt"]
             tours.append(tour)
         if index % 250 == 0 or index == total:
             print(f"[transform] {index}/{total} kept={len(tours)} skipped={skipped_tours}")
