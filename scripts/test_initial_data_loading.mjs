@@ -5,9 +5,19 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const tourListPath = path.join(root, 'src', 'sections', 'TourList.tsx');
 const tourCardPath = path.join(root, 'src', 'sections', 'TourCard.tsx');
+const utilsPath = path.join(root, 'src', 'lib', 'utils.ts');
+const imagePath = path.join(root, 'src', 'lib', 'image.ts');
+const splitPath = path.join(root, 'scripts', 'split_tour_data.mjs');
+const optimizePath = path.join(root, 'scripts', 'optimize_image_cache.mjs');
+const mergePath = path.join(root, 'scripts', 'merge_data.py');
 
 const tourList = fs.readFileSync(tourListPath, 'utf8');
 const tourCard = fs.readFileSync(tourCardPath, 'utf8');
+const utils = fs.readFileSync(utilsPath, 'utf8');
+const image = fs.readFileSync(imagePath, 'utf8');
+const split = fs.readFileSync(splitPath, 'utf8');
+const optimize = fs.readFileSync(optimizePath, 'utf8');
+const merge = fs.readFileSync(mergePath, 'utf8');
 
 function assert(condition, message) {
   if (!condition) {
@@ -26,28 +36,18 @@ assert(
 );
 
 assert(
-  /const hasMoreRemotePages =\s*hasPageChunks &&\s*catalogTours\.length === 0 &&\s*localTours\.length < total;/s.test(tourList),
-  'Default unfiltered scrolling must keep loading remote page chunks after tours-index.json arrives.',
-);
-
-assert(
-  tourList.includes('const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode;') &&
-    tourList.includes('const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;') &&
-    tourList.includes('const resultCount = isIndexDrivenView ? displayTours.length : total;') &&
-    tourList.includes('共 {resultCount.toLocaleString()} 条结果'),
-  'Default unfiltered cards should stay on loaded chunks while the result count uses page metadata total.',
-);
-
-assert(
-  tourList.includes('const recommendationsReady =') &&
-    tourList.includes('indexTours.length > 0 || catalogTours.length > 0 || !hasPageChunks') &&
-    tourList.includes('toursLoading={loading || !recommendationsReady}'),
-  'AI recommendations must keep showing loading until the index or full catalog is ready.',
-);
-
-assert(
   !tourList.includes('const needsFullCatalog ='),
   'Search, filters, and AI should use tours-index.json instead of forcing tours-list.json.',
+);
+
+assert(
+  tourList.includes('const displayResultCount =') && !tourList.includes('indexTours.length === 0 &&'),
+  'Default results should show the index-backed total count while sequential lazy page loading continues beyond the first page.',
+);
+
+assert(
+  tourList.includes('const aiCandidatesReady =') && tourList.includes('toursLoading={loading || !aiCandidatesReady}'),
+  'AI recommendations should wait for tours-index.json or the full catalog instead of using only the first page.',
 );
 
 assert(
@@ -63,6 +63,39 @@ assert(
 assert(
   tourCard.includes('fetchPriority="low"'),
   'Tour card images should not compete with JSON data as high-priority fetches.',
+);
+
+assert(
+  !utils.includes("`https://${path.slice('http://'.length)}`"),
+  'Image URL normalization must not force http supplier images to https.',
+);
+
+assert(
+  image.includes('老广精选线路') && !image.includes('图片暂不可用'),
+  'Runtime image fallback should not show scary unavailable-image copy.',
+);
+
+assert(
+  split.includes('refreshExistingPlaceholderLabels') && split.includes('老广精选线路') && !split.includes('>图片暂不可用<'),
+  'Static placeholder SVG generation should refresh old unavailable-image copy.',
+);
+
+assert(
+  optimize.includes('tours-page-') && optimize.includes('pageFilePattern') && optimize.includes('collectRemoteImageReplacements') && optimize.includes('cacheRemoteImage') && optimize.includes('collectLocalLegacyImageReplacements') && optimize.includes('unsupported cached images rewritten to fallback'),
+  'Image cache optimization should rewrite tours-page chunks, cached remote image URLs, legacy local image URLs, and unsupported cached images.',
+);
+
+assert(
+  optimize.includes('collectRemoteImageStrings') &&
+    optimize.includes('isImageLikeKey') &&
+    optimize.includes('IMAGE_CACHE_DOWNLOAD_REMOTE') &&
+    optimize.includes('external image URL cache misses rewritten to fallback'),
+  'Clean Pages builds should rewrite uncached remote image fields to a local fallback without touching non-image links.',
+);
+
+assert(
+  merge.includes('老广精选线路') && !merge.includes('>图片暂不可用<'),
+  'Merge workflow placeholder SVG generation should not reintroduce unavailable-image copy.',
 );
 
 console.log('Initial data loading audit passed.');
