@@ -5,12 +5,9 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// 将 http 强制升级为 https，防止混合内容安全警告
+// 保留原始图片协议；部分供应商的 http 图片服务器不支持 https。
 export function normalizeImageUrl(path: string) {
   if (!path) return path
-  if (path.startsWith('http://')) {
-    return `https://${path.slice('http://'.length)}`
-  }
   return path
 }
 

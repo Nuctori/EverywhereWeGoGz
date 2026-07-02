@@ -678,7 +678,6 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       aiSearchRequest.prompt.trim().length > 0
     ),
   );
-  const recommendationsReady = indexTours.length > 0 || catalogTours.length > 0 || !hasPageChunks;
   const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode;
   const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;
 
@@ -850,7 +849,6 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       aiRecommendationResult?.items.filter((item) => !visibleTourIds.has(item.tourId)).length ?? 0,
     [aiRecommendationResult, visibleTourIds],
   );
-  const resultCount = isIndexDrivenView ? displayTours.length : total;
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
@@ -869,10 +867,19 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     [loadedTourById, visibleDisplayCandidates],
   );
   const hasMoreLoadedResults = visibleCount < displayTours.length;
+  const unfilteredDisplayableCount = useMemo(
+    () => catalogSourceTours.filter((tour) => isDisplayableTour(tour)).length,
+    [catalogSourceTours],
+  );
+  const defaultResultCount =
+    unfilteredDisplayableCount > displayTours.length
+      ? unfilteredDisplayableCount
+      : Math.max(total, displayTours.length);
+  const displayResultCount = isIndexDrivenView ? displayTours.length : defaultResultCount;
   const hasMoreRemotePages =
     hasPageChunks &&
     catalogTours.length === 0 &&
-    localTours.length < total;
+    localTours.length < displayResultCount;
   const shouldRenderLoadMore = hasMoreLoadedResults || hasMoreRemotePages;
 
   useEffect(() => {
@@ -934,7 +941,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         return;
       }
 
-      if (hasPageChunksRef.current && catalogTours.length === 0 && localTours.length < total) {
+      if (hasPageChunksRef.current && catalogTours.length === 0 && localTours.length < displayResultCount) {
         const nextPage = Math.floor(localTours.length / PAGE_SIZE);
         const viewVersion = viewVersionRef.current;
 
@@ -952,13 +959,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     },
     [
       catalogTours.length,
+      displayResultCount,
       displayTours.length,
       hasPageChunksRef,
       isLoadingMore,
       loadMorePages,
       loadingMore,
       localTours.length,
-      total,
       visibleCount,
     ],
   );
@@ -1073,6 +1080,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       })),
     [catalogSourceTours],
   );
+  const aiCandidatesReady =
+    indexTours.length > 0 || catalogTours.length > 0 || localTours.length >= total || !hasPageChunks;
 
   const focusResults = useCallback(() => {
     document.getElementById('tour-list')?.scrollIntoView({ behavior: 'smooth' });
@@ -1521,7 +1530,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <AiRecommendPanel
         tours={aiCandidateTours}
-        toursLoading={loading || !recommendationsReady}
+        toursLoading={loading || !aiCandidatesReady}
         activeFilters={effectiveFilters}
         searchQuery={searchQuery}
         result={aiRecommendationResult}
@@ -1714,9 +1723,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         </div>
       </div>
 
-      {displayTours.length > 0 && (
+      {displayResultCount > 0 && (
         <div className="mb-5 flex items-center justify-between text-sm text-stone-500">
-          <span>共 {resultCount.toLocaleString()} 条结果</span>
+          <span>共 {displayResultCount.toLocaleString()} 条结果</span>
           {shouldRenderLoadMore && (
             <span className="text-xs text-stone-400">
               已显示 {waterfallTours.length.toLocaleString()} 条
@@ -1772,9 +1781,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
             </div>
           )}
 
-          {!shouldRenderLoadMore && displayTours.length > INITIAL_LOAD_COUNT && (
+          {!shouldRenderLoadMore && displayResultCount > INITIAL_LOAD_COUNT && (
             <div className="py-8 text-center text-sm text-stone-400">
-              已加载全部 {displayTours.length.toLocaleString()} 条结果
+              已加载全部 {displayResultCount.toLocaleString()} 条结果
             </div>
           )}
         </>
