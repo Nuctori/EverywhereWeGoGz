@@ -50,9 +50,12 @@ RAW_FILE_PRIORITIES = {
 JRT365_HOST_TOKEN = "jrt365.com"
 GZL_HOST_TOKENS = ("gzl.cn", "gzl.com.cn")
 JLB_HOST_TOKEN = "360jlb.cn"
+GDCTS_HOST_TOKEN = "gdcts.com"
+KANGHUI_HOST_TOKEN = "cctpage.com"
 PLACEHOLDER_IMAGE_TOKENS = ("lazyimg", "{{", "}}")
 OUTDOORS_HOST_TOKEN = "outdoors.com.cn"
 GROUPNO_RE = re.compile(r"groupno=([^&]+)", re.IGNORECASE)
+KANGHUI_PRODCODE_RE = re.compile(r"prodcode=([^&]+)", re.IGNORECASE)
 MIN_DEPARTURE_YEAR = 2000
 MAX_DEPARTURE_YEAR_OFFSET = 3
 
@@ -81,6 +84,13 @@ def extract_jrt365_groupno(value: str) -> str:
         return ""
     match = GROUPNO_RE.search(str(value))
     return match.group(1).strip() if match else ""
+
+
+def extract_kanghui_prodcode(value: str) -> str:
+    if not value:
+        return ""
+    match = KANGHUI_PRODCODE_RE.search(str(value))
+    return match.group(1).strip().upper() if match else ""
 
 
 # ?????????????????????????????????
@@ -644,6 +654,8 @@ def raw_to_tour(raw, id_counter, detail=None):
     source_id = str(raw.get("sourceId") or raw.get("pdId") or raw.get("prodcode") or raw.get("groupno") or "").strip()
     if not source_id and source == "假日通":
         source_id = extract_jrt365_groupno(raw.get("url", ""))
+    if not source_id and source == "康辉":
+        source_id = extract_kanghui_prodcode(raw.get("url", ""))
     ai_meta = build_ai_meta(raw, source, departure_date, departure_dates)
 
     return {
@@ -721,6 +733,8 @@ def make_tour_key(item):
     url = str(item.get("url") or item.get("bookingUrl") or "").strip()
     if not source_id and source == "假日通":
         source_id = extract_jrt365_groupno(url)
+    if not source_id and source == "康辉":
+        source_id = extract_kanghui_prodcode(url)
     if source_id:
         return f"{item.get('source', '')}|id:{source_id}"
     if source == "假日通" and url:
@@ -747,6 +761,61 @@ def score_raw_candidate(item):
 # ????????????????????????
 def prefer_raw_candidate(current, candidate):
     return score_raw_candidate(candidate) >= score_raw_candidate(current)
+
+
+def get_merge_today():
+    override = os.environ.get("MERGE_TODAY", "").strip()
+    if override:
+        try:
+            return datetime.strptime(override, "%Y-%m-%d").date()
+        except ValueError:
+            print(f"[日期] MERGE_TODAY 无效，使用系统日期: {override}")
+    return datetime.now().date()
+
+
+def parse_iso_date(value):
+    try:
+        return datetime.strptime(str(value), "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        return None
+
+
+def has_only_past_departures(tour, today=None):
+    today = today or get_merge_today()
+    dates = list(tour.get("departureDates") or [])
+    if not dates and tour.get("departureDate"):
+        dates = [tour.get("departureDate")]
+    parsed_dates = [parse_iso_date(value) for value in dates]
+    parsed_dates = [value for value in parsed_dates if value is not None]
+    return bool(parsed_dates) and max(parsed_dates) < today
+
+
+def filter_past_only_tours(tours):
+    today = get_merge_today()
+    filtered = []
+    removed = []
+    for tour in tours:
+        if has_only_past_departures(tour, today):
+            removed.append(tour)
+        else:
+            filtered.append(tour)
+
+    if not removed:
+        print("[日期] 没有仅包含过期团期的线路")
+        return tours
+
+    removed_by_source = {}
+    for tour in removed:
+        source = tour.get("source", "")
+        removed_by_source[source] = removed_by_source.get(source, 0) + 1
+
+    print(f"[日期] 移除 {len(removed)} 条仅包含过期团期的线路（today={today.isoformat()}）")
+    for source, count in sorted(removed_by_source.items()):
+        print(f"[日期] 移除 {source}: {count}")
+    for tour in removed[:10]:
+        print(f"  [过期团期] {tour.get('source', '')} | {tour.get('title', '')[:40]} | {tour.get('departureDates')}")
+
+    return filtered
 
 
 def extract_existing_detail(item):
@@ -941,6 +1010,16 @@ def is_360jlb_tour(tour):
     return JLB_HOST_TOKEN in url
 
 
+def is_gdcts_tour(tour):
+    url = str(tour.get("bookingUrl") or "").strip().lower()
+    return GDCTS_HOST_TOKEN in url
+
+
+def is_outdoors_tour(tour):
+    url = str(tour.get("bookingUrl") or "").strip().lower()
+    return OUTDOORS_HOST_TOKEN in url
+
+
 # ?????????????????????????????
 def filter_unavailable_tours(tours):
     enabled = os.environ.get("AVAILABILITY_FILTER", "0").strip().lower()
@@ -948,6 +1027,8 @@ def filter_unavailable_tours(tours):
         jrt365_filter = os.environ.get("JRT365_AVAILABILITY_FILTER", "1").strip().lower()
         gzl_filter = os.environ.get("GZL_AVAILABILITY_FILTER", "1").strip().lower()
         jlb_filter = os.environ.get("JLB_AVAILABILITY_FILTER", "1").strip().lower()
+        gdcts_filter = os.environ.get("GDCTS_AVAILABILITY_FILTER", "1").strip().lower()
+        outdoors_filter = os.environ.get("OUTDOORS_AVAILABILITY_FILTER", "1").strip().lower()
 
         enabled_predicates = []
         if jrt365_filter in {"1", "true", "yes", "on"}:
@@ -956,6 +1037,10 @@ def filter_unavailable_tours(tours):
             enabled_predicates.append(("GZL", is_gzl_tour))
         if jlb_filter in {"1", "true", "yes", "on"}:
             enabled_predicates.append(("360JLB", is_360jlb_tour))
+        if gdcts_filter in {"1", "true", "yes", "on"}:
+            enabled_predicates.append(("GDCTS", is_gdcts_tour))
+        if outdoors_filter in {"1", "true", "yes", "on"}:
+            enabled_predicates.append(("OUTDOORS", is_outdoors_tour))
 
         if not enabled_predicates:
             print("[可用性] 已跳过自动下架过滤")
@@ -1115,6 +1200,10 @@ def main():
         if index % 250 == 0 or index == total:
             print(f"[transform] {index}/{total} kept={len(tours)} skipped={skipped_tours}")
     log_stage("transform raw to tours", stage_started, f"kept={len(tours)} skipped={skipped_tours}")
+
+    stage_started = time.perf_counter()
+    tours = filter_past_only_tours(tours)
+    log_stage("filter past-only tours", stage_started, f"{len(tours)} kept")
 
     for source in sorted(set(t["source"] for t in tours)):
         subset = [tour for tour in tours if tour["source"] == source]

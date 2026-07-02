@@ -17,6 +17,8 @@ env:
   AVAILABILITY_FILTER: 0
   JRT365_AVAILABILITY_FILTER: 1
   JLB_AVAILABILITY_FILTER: 1
+  GDCTS_AVAILABILITY_FILTER: 1
+  OUTDOORS_AVAILABILITY_FILTER: 1
 
 jobs:
   crawl-jrt365:
@@ -95,6 +97,58 @@ jobs:
         with:
           name: raw-pintu
           path: src/data/raw_pintu_full.json
+          if-no-files-found: error
+
+  crawl-kanghui:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install requests beautifulsoup4 lxml selenium
+
+      - name: Crawl Kanghui full
+        timeout-minutes: 60
+        run: python -u scripts/crawl_kanghui_full.py
+
+      - name: Upload Kanghui raw data
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-kanghui
+          path: src/data/raw_kanghui.json
+          if-no-files-found: error
+
+  crawl-gdcts:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install requests beautifulsoup4 lxml selenium
+
+      - name: Crawl GDCTS full
+        timeout-minutes: 60
+        run: python -u scripts/crawl_gdcts_full.py
+
+      - name: Upload GDCTS raw data
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-gdcts
+          path: src/data/raw_gdcts_full.json
           if-no-files-found: error
 
   crawl-gzl-api:
@@ -184,10 +238,12 @@ jobs:
       - crawl-jrt365
       - crawl-saihuitong
       - crawl-pintu
+      - crawl-kanghui
+      - crawl-gdcts
       - crawl-gzl-api
       - crawl-outdoors
       - crawl-http-aggregate
-    if: always() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.crawl-jrt365.result == 'success' && needs.crawl-saihuitong.result == 'success' && needs.crawl-pintu.result == 'success' && needs.crawl-gzl-api.result == 'success' && needs.crawl-outdoors.result == 'success' && needs.crawl-http-aggregate.result == 'success'))
+    if: always() && !cancelled()
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -212,55 +268,94 @@ jobs:
       - name: Download JRT365 raw data
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: raw-jrt365
-          path: src/data
+          path: artifacts/raw-jrt365
 
       - name: Download Saihuitong raw data
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: raw-saihuitong
-          path: src/data
+          path: artifacts/raw-saihuitong
 
       - name: Download Pintu raw data
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: raw-pintu
-          path: src/data
+          path: artifacts/raw-pintu
+
+      - name: Download Kanghui raw data
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: raw-kanghui
+          path: artifacts/raw-kanghui
+
+      - name: Download GDCTS raw data
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: raw-gdcts
+          path: artifacts/raw-gdcts
 
       - name: Download GZL raw data
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: raw-gzl-api
-          path: src/data
+          path: artifacts/raw-gzl-api
 
       - name: Download Outdoors raw data
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: raw-outdoors
-          path: src/data
+          path: artifacts/raw-outdoors
 
       - name: Download HTTP aggregate raw data
         if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: raw-http
-          path: src/data
+          path: artifacts/raw-http
+
+      - name: Prepare raw source updates
+        id: raw_sources
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        run: node scripts/prepare_raw_artifacts.mjs --artifact-root artifacts --data-dir src/data --max-stale-days 7 --report audit/raw-source-update-report.json --state src/data/raw-source-state.json
+
+      - name: Upload raw source update report
+        if: always() && hashFiles('audit/raw-source-update-report.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-source-update-report
+          path: audit/raw-source-update-report.json
+          if-no-files-found: error
 
       - name: Merge crawled data
+        if: (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_crawls == 'true') || steps.raw_sources.outputs.rebuild_required == 'true'
         run: python -u scripts/merge_data.py
 
       - name: Split merged data
+        if: (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_crawls == 'true') || steps.raw_sources.outputs.rebuild_required == 'true'
         run: npm run data:split
 
       - name: Optimize cached images
+        if: (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_crawls == 'true') || steps.raw_sources.outputs.rebuild_required == 'true'
         run: npm run data:images:webp
 
       - name: Audit merged data
+        if: (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_crawls == 'true') || steps.raw_sources.outputs.rebuild_required == 'true'
         run: npm run audit:data-integrity
 
       - name: Summarize audit report
@@ -308,7 +403,7 @@ jobs:
       - name: Check if data changed
         id: check_changes
         run: |
-          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tours-page-*.json public/data/tour-details src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json src/data/tour-availability-cache.json public/data/image-cache
+          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tours-page-*.json public/data/tour-details src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_gdcts_full.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json src/data/tour-availability-cache.json src/data/raw-source-state.json public/data/image-cache
           if git diff --cached --quiet; then
             echo "Data unchanged, skipping build and deploy"
             echo "changed=false" >> $GITHUB_OUTPUT
