@@ -31,6 +31,14 @@ assert(
 );
 
 assert(
+  tourList.includes('const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode;') &&
+    tourList.includes('const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;') &&
+    tourList.includes('const resultCount = isIndexDrivenView ? displayTours.length : total;') &&
+    tourList.includes('共 {resultCount.toLocaleString()} 条结果'),
+  'Default unfiltered cards should stay on loaded chunks while the result count uses page metadata total.',
+);
+
+assert(
   tourList.includes('const recommendationsReady =') &&
     tourList.includes('indexTours.length > 0 || catalogTours.length > 0 || !hasPageChunks') &&
     tourList.includes('toursLoading={loading || !recommendationsReady}'),

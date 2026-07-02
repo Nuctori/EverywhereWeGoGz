@@ -850,6 +850,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       aiRecommendationResult?.items.filter((item) => !visibleTourIds.has(item.tourId)).length ?? 0,
     [aiRecommendationResult, visibleTourIds],
   );
+  const resultCount = isIndexDrivenView ? displayTours.length : total;
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
@@ -1715,7 +1716,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
       {displayTours.length > 0 && (
         <div className="mb-5 flex items-center justify-between text-sm text-stone-500">
-          <span>共 {displayTours.length.toLocaleString()} 条结果</span>
+          <span>共 {resultCount.toLocaleString()} 条结果</span>
           {shouldRenderLoadMore && (
             <span className="text-xs text-stone-400">
               已显示 {waterfallTours.length.toLocaleString()} 条
