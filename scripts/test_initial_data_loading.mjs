@@ -31,6 +31,11 @@ assert(
 );
 
 assert(
+  tourList.includes('void indexPromise.then') && !tourList.includes('const indexData = await indexPromise;'),
+  'TourList should publish index data as soon as it arrives instead of waiting for the first page chunk.',
+);
+
+assert(
   tourList.includes('visibleDisplayCandidates') && tourList.includes('missingPages'),
   'Visible filtered results should load only the missing chunk pages they need.',
 );

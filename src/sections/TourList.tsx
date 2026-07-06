@@ -1,6 +1,6 @@
 // 数据加载链：loadInitial（分页首屏）→ 按需 loadCatalog（全量列表）→ loadMorePages（滚动懒加载）
 // 筛选/排序/瀑布流、AI 推荐叠加、滚动监听加载更多
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import type {
   AiRecommendationCandidate,
   AiRecommendationResult,
@@ -20,7 +20,11 @@ import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { toursIndexSchema, toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { compareRecommended, getEffectiveDepartureDates } from '@/lib/tour-recommendation';
-import { findTourByDeepLink, getRequestedTourId, resolveTourByDeepLink } from '@/lib/tour-deeplink';
+import {
+  findTourDeepLinkResolution,
+  inflateTourSummaryFromIndexEntry,
+  readTourDeepLink,
+} from '@/lib/tour-deeplink';
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { computePriceStats, sliderToPrice, priceToSlider } from '@/lib/price-slider';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -128,6 +132,12 @@ function useToursData() {
           })
           .catch(() => [] as TourIndexEntry[]);
 
+        void indexPromise.then((indexData) => {
+          if (cancelled || indexData.length === 0) return;
+          setIndexTours(indexData);
+          setTotal(indexData.length);
+        });
+
         const pageRes = await fetch(getDataUrl('tours-page-0.json'));
         if (cancelled) return;
         if (!pageRes.ok) {
@@ -141,12 +151,6 @@ function useToursData() {
         hasPageChunksRef.current = true;
         setHasPageChunks(true);
         setLoading(false);
-
-        const indexData = await indexPromise;
-        if (!cancelled && indexData.length > 0) {
-          setIndexTours(indexData);
-          setTotal(indexData.length);
-        }
 
         backgroundCatalogTimerRef.current = window.setTimeout(() => {
           void loadCatalog();
@@ -508,20 +512,47 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const loadMoreTimerRef = useRef<number | null>(null);
   const viewVersionRef = useRef(0);
-  const openedDeepLinkTourIdRef = useRef<string>('');
-  const deepLinkFetchAttemptRef = useRef<string>('');
-// filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
+  // filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
   const [clearedAiRequestId, setClearedAiRequestId] = useState<number | null>(null);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
-  const catalogSourceTours = catalogTours.length > 0 ? catalogTours : indexTours.length > 0 ? indexTours : localTours;
-  const loadedSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
+  const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
   const loadedTourById = useMemo(() => {
-    return new Map(loadedSourceTours.map((tour) => [tour.id, tour]));
-  }, [loadedSourceTours]);
+    const entries = catalogTours.length > 0 ? catalogTours : localTours;
+    return new Map(entries.map((tour) => [tour.id, tour]));
+  }, [catalogTours, localTours]);
+  const deepLinkTarget = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    return readTourDeepLink(window.location.search);
+  }, []);
+  const deepLinkResolution = useMemo(
+    () =>
+      deepLinkTarget
+        ? findTourDeepLinkResolution(deepLinkTarget, [localTours, catalogTours], indexTours)
+        : null,
+    [catalogTours, deepLinkTarget, indexTours, localTours],
+  );
+  const deepLinkIndexTour = useMemo(() => {
+    if (!deepLinkResolution) return null;
+    return indexTours.find((tour) => tour.id === deepLinkResolution.tourId) ?? null;
+  }, [deepLinkResolution, indexTours]);
+  const deepLinkLoadedTour = useMemo(() => {
+    if (!deepLinkResolution) return null;
+
+    for (const collection of [localTours, catalogTours]) {
+      const match = collection.find((tour) => tour.id === deepLinkResolution.tourId);
+      if (match) return match;
+    }
+
+    return null;
+  }, [catalogTours, deepLinkResolution, localTours]);
+  const deepLinkTour = useMemo(() => {
+    return deepLinkLoadedTour ?? (deepLinkIndexTour ? inflateTourSummaryFromIndexEntry(deepLinkIndexTour) : null);
+  }, [deepLinkIndexTour, deepLinkLoadedTour]);
+  const deepLinkRequestedPageRef = useRef<number | null>(null);
 
   const { maxPriceAll, priceStats } = useMemo(
     () => computePriceStats(catalogSourceTours),
@@ -544,43 +575,22 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     [catalogSourceTours],
   );
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const requestedTourId = getRequestedTourId(window.location.search);
-    if (!requestedTourId) return;
-    if (selectedSummaryTour?.id === requestedTourId) return;
-    if (openedDeepLinkTourIdRef.current === requestedTourId) return;
+  useLayoutEffect(() => {
+    if (!deepLinkTarget) return;
 
-    const requestedTour = findTourByDeepLink(window.location.search, loadedSourceTours);
-    if (requestedTour) {
-      openedDeepLinkTourIdRef.current = requestedTourId;
-      selectTour(requestedTour);
-      return;
+    const targetPage = deepLinkResolution?.page ?? null;
+
+    if (deepLinkTour) {
+      if (selectedSummaryTour !== deepLinkTour) {
+        selectTour(deepLinkTour);
+      }
     }
 
-    if (deepLinkFetchAttemptRef.current === requestedTourId) return;
-
-    let cancelled = false;
-    deepLinkFetchAttemptRef.current = requestedTourId;
-    void (async () => {
-      try {
-        const response = await fetch(getDataUrl('tours-list.json'));
-        if (!response.ok || cancelled) return;
-        const catalog = toursListSchema.parse(await response.json());
-        if (cancelled) return;
-        const fallbackTour = resolveTourByDeepLink(window.location.search, [], catalog);
-        if (!fallbackTour) return;
-        openedDeepLinkTourIdRef.current = requestedTourId;
-        selectTour(fallbackTour);
-      } catch {
-        // 深链兜底失败时不打扰主列表；用户仍可手动打开卡片查看详情。
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [loadedSourceTours, selectTour, selectedSummaryTour]);
+    if (targetPage !== null && deepLinkRequestedPageRef.current !== targetPage) {
+      deepLinkRequestedPageRef.current = targetPage;
+      void loadMorePages(targetPage);
+    }
+  }, [deepLinkResolution, deepLinkTarget, deepLinkTour, loadMorePages, selectTour, selectedSummaryTour]);
 
   const priceRange = useMemo(
     () => [
@@ -916,6 +926,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     loadedTourById,
     visibleDisplayCandidates,
   ]);
+
   const emptyStateTitle = normalizedSearchQuery && !isAiSearchMode
     ? hasNaturalLanguageQuery
       ? '这句需求没有直接卡死结果'
