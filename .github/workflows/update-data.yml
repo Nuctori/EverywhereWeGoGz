@@ -31,8 +31,16 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
       - name: Install Python dependencies
         run: pip install requests beautifulsoup4 lxml selenium
+
+      - name: Verify JRT365 crawl guard
+        run: npm run audit:jrt365-crawl-guard
 
       - name: Crawl JRT365 full
         timeout-minutes: 60

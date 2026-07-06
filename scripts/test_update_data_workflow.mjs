@@ -4,6 +4,8 @@ import path from 'node:path';
 
 const workflowPath = path.join(process.cwd(), '.github', 'workflows', 'update-data.yml');
 const workflow = fs.readFileSync(workflowPath, 'utf8');
+const packageJsonPath = path.join(process.cwd(), 'package.json');
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
 function mustInclude(snippet, message) {
   assert.ok(workflow.includes(snippet), message);
@@ -91,5 +93,26 @@ for (const requiredPath of [
     `expected git add command to include ${requiredPath}`,
   );
 }
+
+const jrtJobStart = workflow.indexOf('crawl-jrt365:');
+const nextJobStart = workflow.indexOf('crawl-saihuitong:');
+assert.ok(jrtJobStart > -1 && nextJobStart > jrtJobStart, 'expected crawl-jrt365 job block to be found');
+const jrtJob = workflow.slice(jrtJobStart, nextJobStart);
+assert.ok(
+  packageJson.scripts?.['audit:jrt365-crawl-guard'],
+  'expected package script for the JRT365 crawl guard to exist',
+);
+assert.ok(
+  jrtJob.includes('- name: Verify JRT365 crawl guard'),
+  'expected crawl-jrt365 job to verify the empty-output guard before crawling',
+);
+assert.ok(
+  jrtJob.indexOf('- name: Verify JRT365 crawl guard') < jrtJob.indexOf('- name: Crawl JRT365 full'),
+  'expected JRT365 crawl guard verification to run before the external crawl',
+);
+assert.ok(
+  jrtJob.includes('npm run audit:jrt365-crawl-guard'),
+  'expected crawl-jrt365 job to run audit:jrt365-crawl-guard',
+);
 
 console.log('update-data workflow audit passed');
