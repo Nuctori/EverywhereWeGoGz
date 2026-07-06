@@ -16,6 +16,7 @@ export function useTourDetail() {
   // 递增令牌防止旧响应污染新选择（连续快速点击时）
   const requestTokenRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
+  const activeRequestTourIdRef = useRef<string | null>(null);
 
   // 关闭弹窗并清理状态（令牌递增确保随后到来的响应被忽略）
   const clearSelectedTour = useCallback(() => {
@@ -29,24 +30,32 @@ export function useTourDetail() {
   }, []);
 
   const selectTour = useCallback((tour: TourSummary) => {
-    requestTokenRef.current += 1;
-    const requestToken = requestTokenRef.current;
-    abortRef.current?.abort();
+    const cachedDetail = detailCacheRef.current[tour.id];
+    const isSameActiveTour = activeRequestTourIdRef.current === tour.id;
 
     setSelectedSummaryTour(tour);
     setResolvedTour(null);
     setDetailError(null);
 
-    // 缓存命中直接返回，避免闪烁
-    const cachedDetail = detailCacheRef.current[tour.id];
     if (cachedDetail) {
       setResolvedTour({ ...tour, ...cachedDetail });
       setDetailStatus('ready');
+      activeRequestTourIdRef.current = null;
       return;
     }
 
+    if (isSameActiveTour) {
+      setDetailStatus('loading');
+      return;
+    }
+
+    requestTokenRef.current += 1;
+    const requestToken = requestTokenRef.current;
+    abortRef.current?.abort();
+
     const controller = new AbortController();
     abortRef.current = controller;
+    activeRequestTourIdRef.current = tour.id;
     setDetailStatus('loading');
 
     fetch(getDataUrl(`tour-details/${tour.id}.json`), {
@@ -65,10 +74,12 @@ export function useTourDetail() {
         detailCacheRef.current[tour.id] = detail;
         setResolvedTour({ ...tour, ...detail });
         setDetailStatus('ready');
+        activeRequestTourIdRef.current = null;
       })
       .catch((error) => {
         if (controller.signal.aborted || requestTokenRef.current !== requestToken) return;
         setDetailStatus('error');
+        activeRequestTourIdRef.current = null;
         setDetailError(
           error instanceof Error ? error.message : 'Failed to load tour detail.',
         );

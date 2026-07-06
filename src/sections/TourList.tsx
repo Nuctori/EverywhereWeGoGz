@@ -20,6 +20,11 @@ import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { toursIndexSchema, toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { compareRecommended, getEffectiveDepartureDates } from '@/lib/tour-recommendation';
+import {
+  findTourDeepLinkResolution,
+  inflateTourSummaryFromIndexEntry,
+  readTourDeepLink,
+} from '@/lib/tour-deeplink';
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { computePriceStats, sliderToPrice, priceToSlider } from '@/lib/price-slider';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -501,11 +506,40 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const [aiClearVersion, setAiClearVersion] = useState(0);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
-  const catalogSourceTours = catalogTours.length > 0 ? catalogTours : indexTours.length > 0 ? indexTours : localTours;
+  const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
   const loadedTourById = useMemo(() => {
     const entries = catalogTours.length > 0 ? catalogTours : localTours;
     return new Map(entries.map((tour) => [tour.id, tour]));
   }, [catalogTours, localTours]);
+  const deepLinkTarget = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    return readTourDeepLink(window.location.search);
+  }, []);
+  const deepLinkResolution = useMemo(
+    () =>
+      deepLinkTarget
+        ? findTourDeepLinkResolution(deepLinkTarget, [localTours, catalogTours], indexTours)
+        : null,
+    [catalogTours, deepLinkTarget, indexTours, localTours],
+  );
+  const deepLinkIndexTour = useMemo(() => {
+    if (!deepLinkResolution) return null;
+    return indexTours.find((tour) => tour.id === deepLinkResolution.tourId) ?? null;
+  }, [deepLinkResolution, indexTours]);
+  const deepLinkLoadedTour = useMemo(() => {
+    if (!deepLinkResolution) return null;
+
+    for (const collection of [localTours, catalogTours]) {
+      const match = collection.find((tour) => tour.id === deepLinkResolution.tourId);
+      if (match) return match;
+    }
+
+    return null;
+  }, [catalogTours, deepLinkResolution, localTours]);
+  const deepLinkTour = useMemo(() => {
+    return deepLinkLoadedTour ?? (deepLinkIndexTour ? inflateTourSummaryFromIndexEntry(deepLinkIndexTour) : null);
+  }, [deepLinkIndexTour, deepLinkLoadedTour]);
+  const deepLinkRequestedPageRef = useRef<number | null>(null);
 
   const { maxPriceAll, priceStats } = useMemo(
     () => computePriceStats(catalogSourceTours),
@@ -855,6 +889,23 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     loadedTourById,
     visibleDisplayCandidates,
   ]);
+
+  useEffect(() => {
+    if (!deepLinkTarget) return;
+
+    const targetPage = deepLinkResolution?.page ?? null;
+
+    if (deepLinkTour) {
+      if (selectedSummaryTour !== deepLinkTour) {
+        selectTour(deepLinkTour);
+      }
+    }
+
+    if (targetPage !== null && deepLinkRequestedPageRef.current !== targetPage) {
+      deepLinkRequestedPageRef.current = targetPage;
+      void loadMorePages(targetPage);
+    }
+  }, [deepLinkResolution, deepLinkTarget, deepLinkTour, loadMorePages, selectTour, selectedSummaryTour]);
   const emptyStateTitle = normalizedSearchQuery && !isAiSearchMode
     ? hasNaturalLanguageQuery
       ? '这句需求没有直接卡死结果'
