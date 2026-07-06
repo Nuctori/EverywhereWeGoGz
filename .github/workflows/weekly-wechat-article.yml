@@ -10,6 +10,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  WECHAT_CONTENT_SOURCE_URL: https://nuctori.github.io/EverywhereWeGoGz/
 
 jobs:
   generate-and-publish:
