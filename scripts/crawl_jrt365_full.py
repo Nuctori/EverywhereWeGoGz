@@ -35,6 +35,24 @@ def env_int(name, default, minimum=0, maximum=None):
         value = min(maximum, value)
     return value
 
+
+def assert_min_raw_items(items, output_path):
+    min_items = env_int("JRT365_MIN_RAW_ITEMS", 1, minimum=0)
+    item_count = len(items) if isinstance(items, list) else 0
+    if item_count >= min_items:
+        return
+
+    try:
+        relative_output = os.path.relpath(output_path, os.getcwd())
+    except ValueError:
+        relative_output = output_path
+    raise SystemExit(
+        "[假日通] ERROR: crawl produced "
+        f"{item_count} items, below JRT365_MIN_RAW_ITEMS={min_items}; "
+        f"refusing to overwrite {relative_output}"
+    )
+
+
 def create_webdriver():
     from selenium import webdriver
 
@@ -410,10 +428,12 @@ def main():
     items = refresh_existing() if refresh_mode else fetch()
     data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
     data_dir = os.path.abspath(data_dir)
+    output_path = os.path.join(data_dir, "raw_jrt365_full.json")
+    assert_min_raw_items(items, output_path)
     os.makedirs(data_dir, exist_ok=True)
-    with open(os.path.join(data_dir, "raw_jrt365_full.json"), "w", encoding="utf-8") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
-    print(f"[保存] -> {os.path.join(data_dir, 'raw_jrt365_full.json')}")
+    print(f"[保存] -> {output_path}")
 
 
 if __name__ == "__main__":

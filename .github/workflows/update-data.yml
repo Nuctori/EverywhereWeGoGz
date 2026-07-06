@@ -19,8 +19,31 @@ env:
   JLB_AVAILABILITY_FILTER: 1
 
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify crawler syntax
+        run: npm run audit:crawler-syntax
+
+      - name: Verify update workflow contract
+        run: npm run audit:update-data-workflow
+
   crawl-jrt365:
     runs-on: ubuntu-latest
+    needs: preflight
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -31,8 +54,16 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
       - name: Install Python dependencies
         run: pip install requests beautifulsoup4 lxml selenium
+
+      - name: Verify JRT365 crawl guard
+        run: npm run audit:jrt365-crawl-guard
 
       - name: Crawl JRT365 full
         timeout-minutes: 60
@@ -47,6 +78,7 @@ jobs:
 
   crawl-saihuitong:
     runs-on: ubuntu-latest
+    needs: preflight
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -73,6 +105,7 @@ jobs:
 
   crawl-pintu:
     runs-on: ubuntu-latest
+    needs: preflight
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -100,6 +133,7 @@ jobs:
   crawl-gzl-api:
     runs-on: ubuntu-latest
     timeout-minutes: 180
+    needs: preflight
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -126,6 +160,7 @@ jobs:
 
   crawl-outdoors:
     runs-on: ubuntu-latest
+    needs: preflight
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -152,6 +187,7 @@ jobs:
 
   crawl-http-aggregate:
     runs-on: ubuntu-latest
+    needs: preflight
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -181,13 +217,14 @@ jobs:
     permissions:
       contents: write
     needs:
+      - preflight
       - crawl-jrt365
       - crawl-saihuitong
       - crawl-pintu
       - crawl-gzl-api
       - crawl-outdoors
       - crawl-http-aggregate
-    if: always() && !cancelled() && (github.event_name == 'workflow_dispatch' || (needs.crawl-jrt365.result == 'success' && needs.crawl-saihuitong.result == 'success' && needs.crawl-pintu.result == 'success' && needs.crawl-gzl-api.result == 'success' && needs.crawl-outdoors.result == 'success' && needs.crawl-http-aggregate.result == 'success'))
+    if: always() && !cancelled() && needs.preflight.result == 'success' && (github.event_name == 'workflow_dispatch' || (needs.crawl-jrt365.result == 'success' && needs.crawl-saihuitong.result == 'success' && needs.crawl-pintu.result == 'success' && needs.crawl-gzl-api.result == 'success' && needs.crawl-outdoors.result == 'success' && needs.crawl-http-aggregate.result == 'success'))
     steps:
       - name: Checkout
         uses: actions/checkout@v4
