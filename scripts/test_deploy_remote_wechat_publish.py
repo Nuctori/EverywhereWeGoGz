@@ -1,5 +1,6 @@
 import importlib.util
 import pathlib
+import tempfile
 import unittest
 
 
@@ -23,6 +24,26 @@ class DeployRemoteWechatPublishTests(unittest.TestCase):
         self.assertEqual(normalized['htmlPath'], '/root/wechat-publish/2026-06-24/article.html')
         self.assertEqual(normalized['uploadCoverPath'], '/root/wechat-publish/2026-06-24/cover-upload.jpg')
         self.assertEqual(normalized['title'], '示例标题')
+
+    def test_collect_support_directories_finds_wechat_assets_and_qr(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            article_dir = pathlib.Path(temp_dir)
+            html_path = article_dir / 'article.html'
+            html_path.write_text('<p>stub</p>\n', encoding='utf-8')
+            (article_dir / 'wechat-assets').mkdir()
+            (article_dir / 'qr').mkdir()
+
+            support_dirs = MODULE.collect_support_directories(str(html_path))
+
+            self.assertEqual(
+                [path.name for path in support_dirs],
+                ['wechat-assets', 'qr'],
+            )
+
+    def test_remote_script_rewrites_inline_images_before_draft_add(self):
+        self.assertIn('/media/uploadimg', MODULE.REMOTE_SCRIPT)
+        self.assertIn('article.wechat.html', MODULE.REMOTE_SCRIPT)
+        self.assertIn('rewrite_html_images', MODULE.REMOTE_SCRIPT)
 
 
 if __name__ == '__main__':

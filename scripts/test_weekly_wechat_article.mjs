@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
+  buildDetailedWeatherLead,
   buildWeeklyArticleContext,
   buildWeeklyArticlePrompt,
   generateWeeklyArticle,
@@ -339,6 +340,22 @@ assert.ok(groupedArticle.includes('### 山水亲水'));
 assert.ok(groupedArticle.includes('### 海边海岛'));
 assert.ok(groupedArticle.includes('### 住下来慢慢玩') || groupedArticle.includes('### 亲子玩乐'));
 
+const detailedWeatherLead = buildDetailedWeatherLead(
+  balancedContext,
+  '广州未来几天还是闷热夹阵雨，选线时更该看体感和下雨后的可玩性。',
+  {
+    destination: '广州',
+    source: 'open-meteo',
+    days: [
+      { date: '2026-06-24', minTemp: 26, maxTemp: 34, rainProbability: 65 },
+      { date: '2026-06-25', minTemp: 27, maxTemp: 35, rainProbability: 78 },
+    ],
+  },
+);
+assert.ok(detailedWeatherLead.includes('6月24日：26-34℃，降雨概率约 65%'));
+assert.ok(detailedWeatherLead.includes('6月25日：27-35℃，降雨概率约 78%'));
+assert.ok(detailedWeatherLead.includes('玩法提醒'));
+
 let capturedRequest = null;
 globalThis.fetch = async (url, init) => {
   capturedRequest = { url: String(url), init };
@@ -399,7 +416,19 @@ fs.mkdirSync(cliDataDir, { recursive: true });
 fs.writeFileSync(path.join(cliDataDir, 'tours.json'), `${JSON.stringify(tours, null, 2)}\n`, 'utf8');
 fs.writeFileSync(
   cliMockPath,
-  `globalThis.fetch = async () => new Response(JSON.stringify({
+  `globalThis.fetch = async (url) => {
+    if (String(url).includes('api.open-meteo.com')) {
+      return new Response(JSON.stringify({
+        daily: {
+          time: ['2026-06-24', '2026-06-25', '2026-06-26'],
+          temperature_2m_max: [34, 35, 33],
+          temperature_2m_min: [26, 27, 26],
+          precipitation_probability_max: [65, 78, 40],
+        },
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    return new Response(JSON.stringify({
     choices: [
       {
         message: {
@@ -426,7 +455,8 @@ fs.writeFileSync(
         },
       },
     ],
-  }), { status: 200, headers: { 'Content-Type': 'application/json' } });\n`,
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+};\n`,
   'utf8',
 );
 const cliRun = spawnSync(
@@ -452,7 +482,11 @@ const cliRun = spawnSync(
   },
 );
 assert.equal(cliRun.status, 0, `${cliRun.stdout}\n${cliRun.stderr}`);
-assert.ok(fs.existsSync(path.join(cliOutDir, 'article.md')));
+const cliArticlePath = path.join(cliOutDir, 'article.md');
+assert.ok(fs.existsSync(cliArticlePath));
+const cliArticle = fs.readFileSync(cliArticlePath, 'utf8');
+assert.ok(cliArticle.includes('6月24日：26-34℃，降雨概率约 65%'));
+assert.ok(cliArticle.includes('玩法提醒：'));
 const cliValidation = JSON.parse(fs.readFileSync(path.join(cliOutDir, 'validation.json'), 'utf8'));
 assert.equal(cliValidation.ok, true);
 fs.rmSync(qrOutDir, { recursive: true, force: true });

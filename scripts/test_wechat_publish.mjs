@@ -141,5 +141,7 @@ const qrRewritten = await rewriteHtmlImagesForWechat(
   'token123',
 );
 assert.ok(qrRewritten.includes('https://mmbiz.qpic.cn/'));
+fs.rmSync(inlineDir, { recursive: true, force: true });
+fs.rmSync(publicImagePath, { force: true });
 
 console.log('wechat publish tests passed');

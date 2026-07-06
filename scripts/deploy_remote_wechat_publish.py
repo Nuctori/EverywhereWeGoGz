@@ -13,7 +13,9 @@ import json
 import mimetypes
 import os
 import pathlib
+import re
 import sys
+import tempfile
 import urllib.parse
 import urllib.request
 import uuid
@@ -39,6 +41,64 @@ def multipart_body(field_name, file_path):
     body.append(b'\r\n')
     body.append(('--%s--\r\n' % boundary).encode('utf-8'))
     return boundary, b''.join(body)
+
+
+def upload_inline_image(access_token, file_path):
+    upload_url = 'https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=%s' % urllib.parse.quote(access_token)
+    boundary, body = multipart_body('media', file_path)
+    upload_data = request_json(
+        upload_url,
+        method='POST',
+        data=body,
+        headers={'Content-Type': 'multipart/form-data; boundary=%s' % boundary},
+    )
+    uploaded_url = upload_data.get('url')
+    if not uploaded_url:
+        raise RuntimeError('inline image url missing: %s' % json.dumps(upload_data, ensure_ascii=False))
+    return uploaded_url
+
+
+def collect_image_sources(html):
+    return list(dict.fromkeys(re.findall(r'<img\b[^>]*\bsrc="([^"]+)"[^>]*>', html, flags=re.IGNORECASE)))
+
+
+def resolve_image_file(html_dir, source):
+    if source.startswith('http://') or source.startswith('https://'):
+        parsed = urllib.parse.urlparse(source)
+        suffix = pathlib.Path(parsed.path).suffix or '.jpg'
+        with urllib.request.urlopen(source, timeout=30) as response:
+            payload = response.read()
+        handle = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+        handle.write(payload)
+        handle.close()
+        return pathlib.Path(handle.name), True
+
+    candidate = (html_dir / source).resolve()
+    if not candidate.exists():
+        raise RuntimeError('inline image missing: %s' % source)
+    return candidate, False
+
+
+def rewrite_html_images(bundle, html, access_token):
+    html_dir = pathlib.Path(bundle['htmlPath']).resolve().parent
+    replacements = {}
+    temp_files = []
+    try:
+        for source in collect_image_sources(html):
+            if source.startswith('https://mmbiz.qpic.cn/'):
+                continue
+            file_path, is_temp = resolve_image_file(html_dir, source)
+            if is_temp:
+                temp_files.append(file_path)
+            replacements[source] = upload_inline_image(access_token, file_path)
+
+        rewritten = html
+        for source, target in replacements.items():
+            rewritten = rewritten.replace('src="%s"' % source, 'src="%s"' % target)
+        return rewritten
+    finally:
+        for file_path in temp_files:
+            file_path.unlink(missing_ok=True)
 
 
 def main():
@@ -69,6 +129,8 @@ def main():
         raise RuntimeError('media_id missing: %s' % json.dumps(media_data, ensure_ascii=False))
 
     html = pathlib.Path(bundle['htmlPath']).read_text(encoding='utf-8')
+    html = rewrite_html_images(bundle, html, access_token)
+    (bundle_path.parent / 'article.wechat.html').write_text(html + '\n', encoding='utf-8')
     payload = {
         'articles': [
             {
@@ -147,6 +209,16 @@ def normalize_bundle_for_remote(bundle, remote_dir):
     return normalized
 
 
+def collect_support_directories(html_path):
+    html_dir = pathlib.Path(html_path).resolve().parent
+    support_dirs = []
+    for name in ('wechat-assets', 'qr'):
+        candidate = html_dir / name
+        if candidate.exists():
+            support_dirs.append(candidate)
+    return support_dirs
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', required=True)
@@ -162,6 +234,8 @@ def main():
     run(['ssh', args.host, f'mkdir -p {remote_dir}'])
     run(['scp', args.html_path, f'{args.host}:{remote_dir}/article.html'])
     run(['scp', args.cover_path, f'{args.host}:{remote_dir}/cover-upload.jpg'])
+    for support_dir in collect_support_directories(args.html_path):
+        run(['scp', '-r', str(support_dir), f'{args.host}:{remote_dir}/{support_dir.name}'])
 
     bundle = json.loads(pathlib.Path(args.bundle_path).read_text(encoding='utf-8'))
     normalized_bundle = normalize_bundle_for_remote(bundle, remote_dir)
@@ -189,6 +263,9 @@ def main():
         f"python3 remote_publish.py publish-bundle.json"
     )
     result = capture(['ssh', args.host, remote_command])
+    local_output_dir = pathlib.Path(args.html_path).resolve().parent
+    run(['scp', f'{args.host}:{remote_dir}/publish-result.json', str(local_output_dir / 'publish-result.json')])
+    run(['scp', f'{args.host}:{remote_dir}/article.wechat.html', str(local_output_dir / 'article.wechat.html')])
     print(result)
 
 
