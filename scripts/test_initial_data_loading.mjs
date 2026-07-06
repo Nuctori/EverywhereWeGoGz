@@ -31,6 +31,16 @@ assert(
 );
 
 assert(
+  tourList.includes('findTourDeepLinkResolution') && tourList.includes('readTourDeepLink'),
+  'TourList should resolve deeplinks from the index/page data path instead of the full catalog fallback.',
+);
+
+assert(
+  tourList.includes('void indexPromise.then') && !tourList.includes('const indexData = await indexPromise;'),
+  'TourList should publish index data as soon as it arrives instead of waiting for the first page chunk.',
+);
+
+assert(
   tourList.includes('visibleDisplayCandidates') && tourList.includes('missingPages'),
   'Visible filtered results should load only the missing chunk pages they need.',
 );
@@ -78,6 +88,11 @@ assert(
 assert(
   split.includes('refreshExistingPlaceholderLabels') && split.includes('老广精选线路') && !split.includes('>图片暂不可用<'),
   'Static placeholder SVG generation should refresh old unavailable-image copy.',
+);
+
+assert(
+  split.includes("'sourceId'") && merge.includes('"sourceId": raw.get(\'sourceId\')'),
+  'Data split and merge should preserve sourceId so deeplinks can use a stable share key.',
 );
 
 assert(

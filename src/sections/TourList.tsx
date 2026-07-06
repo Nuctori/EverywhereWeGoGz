@@ -1,6 +1,6 @@
 // 数据加载链：loadInitial（分页首屏）→ 按需 loadCatalog（全量列表）→ loadMorePages（滚动懒加载）
 // 筛选/排序/瀑布流、AI 推荐叠加、滚动监听加载更多
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import type {
   AiRecommendationCandidate,
   AiRecommendationResult,
@@ -131,6 +131,12 @@ function useToursData() {
           })
           .catch(() => [] as TourIndexEntry[]);
 
+        void indexPromise.then((indexData) => {
+          if (cancelled || indexData.length === 0) return;
+          setIndexTours(indexData);
+          setTotal(indexData.length);
+        });
+
         const pageRes = await fetch(getDataUrl('tours-page-0.json'));
         if (cancelled) return;
         if (!pageRes.ok) {
@@ -144,12 +150,6 @@ function useToursData() {
         hasPageChunksRef.current = true;
         setHasPageChunks(true);
         setLoading(false);
-
-        const indexData = await indexPromise;
-        if (!cancelled && indexData.length > 0) {
-          setIndexTours(indexData);
-          setTotal(indexData.length);
-        }
 
         backgroundCatalogTimerRef.current = window.setTimeout(() => {
           void loadCatalog();
@@ -890,7 +890,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     visibleDisplayCandidates,
   ]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!deepLinkTarget) return;
 
     const targetPage = deepLinkResolution?.page ?? null;
