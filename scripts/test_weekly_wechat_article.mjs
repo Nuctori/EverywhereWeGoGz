@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import {
   buildWeeklyArticleContext,
   buildWeeklyArticlePrompt,
@@ -387,6 +389,74 @@ const requestBody = JSON.parse(capturedRequest.init.body);
 assert.equal(requestBody.response_format.type, 'json_object');
 assert.equal(requestBody.max_tokens, 4096);
 assert.ok(generated.article.includes('扫码查看详情'));
+
+const cliRootDir = path.join(process.cwd(), 'tmp', 'weekly-wechat-article-cli-test');
+const cliDataDir = path.join(cliRootDir, 'public', 'data');
+const cliOutDir = path.join(cliRootDir, 'weekly-wechat-posts', '2026-06-24');
+const cliMockPath = path.join(cliRootDir, 'mock-fetch.mjs');
+fs.rmSync(cliRootDir, { recursive: true, force: true });
+fs.mkdirSync(cliDataDir, { recursive: true });
+fs.writeFileSync(path.join(cliDataDir, 'tours.json'), `${JSON.stringify(tours, null, 2)}\n`, 'utf8');
+fs.writeFileSync(
+  cliMockPath,
+  `globalThis.fetch = async () => new Response(JSON.stringify({
+    choices: [
+      {
+        message: {
+          content: JSON.stringify({
+            title: '本周适合出发的两条线路',
+            summary: '按近期班期整理的短线与避暑线。',
+            intro: '这一周更适合挑有清凉体感、路上不折腾的短线来走。',
+            weatherLead: '华南夏季常见闷热和阵雨，瀑布、山水、森林一类线路会比纯城市逛吃更舒服。',
+            items: [
+              {
+                id: 'tour-summer-nearby',
+                recommendationTitle: '清远峡谷漂流2天',
+                reason: '这条线路更适合夏天想找清凉感的人，峡谷、漂流和近场车程放在一起，周末出发不累，现场的水声和树荫也能把体感明显压下来。',
+                reminder: '班期近，适合周末轻装出发，遇雨天也记得带一件轻便替换衣物。',
+              },
+              {
+                id: 'tour-guizhou',
+                recommendationTitle: '贵州山水避暑4天',
+                reason: '如果这周想认真避暑，贵州这条山水线比单纯住酒店更有出门的意义，风景密度高，节奏也不会被压得太满，适合想把小长假用得更值的人。',
+                reminder: '4天行程更适合留一点机动时间，班期和集合信息以供应商页面为准。',
+              },
+            ],
+          }),
+        },
+      },
+    ],
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });\n`,
+  'utf8',
+);
+const cliRun = spawnSync(
+  process.execPath,
+  [
+    '--import',
+    pathToFileURL(cliMockPath).href,
+    path.join(process.cwd(), 'scripts', 'generate_weekly_wechat_article.mjs'),
+    '--date',
+    '2026-06-24',
+    '--out-dir',
+    cliOutDir,
+  ],
+  {
+    cwd: cliRootDir,
+    env: {
+      ...process.env,
+      DEEPSEEK_API_KEY: 'test-key',
+      DEEPSEEK_BASE_URL: 'https://api.deepseek.com/v1',
+      DEEPSEEK_MODEL: 'deepseek-chat',
+    },
+    encoding: 'utf8',
+  },
+);
+assert.equal(cliRun.status, 0, `${cliRun.stdout}\n${cliRun.stderr}`);
+assert.ok(fs.existsSync(path.join(cliOutDir, 'article.md')));
+const cliValidation = JSON.parse(fs.readFileSync(path.join(cliOutDir, 'validation.json'), 'utf8'));
+assert.equal(cliValidation.ok, true);
+fs.rmSync(qrOutDir, { recursive: true, force: true });
+fs.rmSync(cliRootDir, { recursive: true, force: true });
 
 console.log('weekly wechat article tests passed');
 
