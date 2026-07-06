@@ -15,6 +15,8 @@
     "data:images:webp": "node scripts/optimize_image_cache.mjs",
     "audit:data-integrity": "node scripts/audit_data_integrity.mjs",
     "audit:data-integrity:rules": "node scripts/test_audit_data_integrity_rules.mjs",
+    "audit:crawler-syntax": "node scripts/test_crawler_syntax.mjs",
+    "audit:deploy-workflow": "node scripts/test_deploy_workflow.mjs",
     "audit:jrt365-crawl-guard": "node scripts/test_jrt365_crawl_guard.mjs",
     "audit:update-data-workflow": "node scripts/test_update_data_workflow.mjs",
     "audit:merge-data-observability": "node scripts/test_merge_data_observability.mjs",

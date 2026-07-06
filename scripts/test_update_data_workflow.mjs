@@ -15,6 +15,7 @@ mustInclude("- cron: '0 3 * * 1'", 'expected scheduled update-data workflow to r
 mustInclude('skip_crawls:', 'expected workflow_dispatch skip_crawls input to exist for fast manual verification');
 
 for (const jobName of [
+  'preflight:',
   'crawl-jrt365:',
   'crawl-saihuitong:',
   'crawl-pintu:',
@@ -53,6 +54,7 @@ for (const artifactName of [
 
 mustInclude('needs:', 'expected fan-in update job to declare job dependencies');
 for (const dependency of [
+  '- preflight',
   '- crawl-jrt365',
   '- crawl-saihuitong',
   '- crawl-pintu',
@@ -93,6 +95,44 @@ for (const requiredPath of [
     `expected git add command to include ${requiredPath}`,
   );
 }
+
+assert.ok(
+  packageJson.scripts?.['audit:crawler-syntax'],
+  'expected package script for crawler syntax audit to exist',
+);
+
+const preflightStart = workflow.indexOf('preflight:');
+const firstCrawlStart = workflow.indexOf('crawl-jrt365:');
+assert.ok(preflightStart > -1 && firstCrawlStart > preflightStart, 'expected preflight job before crawl jobs');
+const preflightJob = workflow.slice(preflightStart, firstCrawlStart);
+for (const snippet of [
+  '- name: Verify crawler syntax',
+  'npm run audit:crawler-syntax',
+  '- name: Verify update workflow contract',
+  'npm run audit:update-data-workflow',
+]) {
+  assert.ok(preflightJob.includes(snippet), `expected preflight job to include ${snippet}`);
+}
+
+for (const [jobName, nextJobName] of [
+  ['crawl-jrt365:', 'crawl-saihuitong:'],
+  ['crawl-saihuitong:', 'crawl-pintu:'],
+  ['crawl-pintu:', 'crawl-gzl-api:'],
+  ['crawl-gzl-api:', 'crawl-outdoors:'],
+  ['crawl-outdoors:', 'crawl-http-aggregate:'],
+  ['crawl-http-aggregate:', 'update-and-deploy:'],
+]) {
+  const start = workflow.indexOf(jobName);
+  const end = workflow.indexOf(nextJobName);
+  assert.ok(start > -1 && end > start, `expected ${jobName} job block to be found`);
+  const job = workflow.slice(start, end);
+  assert.ok(job.includes('needs: preflight'), `expected ${jobName} to depend on preflight`);
+}
+
+const updateJobStart = workflow.indexOf('update-and-deploy:');
+assert.ok(updateJobStart > -1, 'expected update-and-deploy job block to be found');
+const updateJob = workflow.slice(updateJobStart);
+assert.ok(updateJob.includes("needs.preflight.result == 'success'"), 'expected update job to require preflight success');
 
 const jrtJobStart = workflow.indexOf('crawl-jrt365:');
 const nextJobStart = workflow.indexOf('crawl-saihuitong:');
