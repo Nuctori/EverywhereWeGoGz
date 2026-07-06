@@ -30,7 +30,7 @@ def request_json(url, method='GET', data=None, headers=None):
 
 def multipart_body(field_name, file_path):
     boundary = '----CodexBoundary%s' % uuid.uuid4().hex
-    mime_type = mimetypes.guess_type(file_path)[0] or 'application/octet-stream'
+    mime_type = mimetypes.guess_type(str(file_path))[0] or 'application/octet-stream'
     file_name = pathlib.Path(file_path).name
     file_bytes = pathlib.Path(file_path).read_bytes()
     body = []

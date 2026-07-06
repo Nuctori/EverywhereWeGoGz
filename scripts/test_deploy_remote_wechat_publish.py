@@ -44,6 +44,7 @@ class DeployRemoteWechatPublishTests(unittest.TestCase):
         self.assertIn('/media/uploadimg', MODULE.REMOTE_SCRIPT)
         self.assertIn('article.wechat.html', MODULE.REMOTE_SCRIPT)
         self.assertIn('rewrite_html_images', MODULE.REMOTE_SCRIPT)
+        self.assertIn("mimetypes.guess_type(str(file_path))", MODULE.REMOTE_SCRIPT)
 
 
 if __name__ == '__main__':
