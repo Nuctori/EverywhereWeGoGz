@@ -39,6 +39,7 @@ jobs:
           npm run test:weekly-wechat-article
           npm run test:wechat-publish
           npm run test:wechat-publish-bundle
+          python3 scripts/test_deploy_remote_wechat_publish.py
 
       - name: Generate weekly article
         env:

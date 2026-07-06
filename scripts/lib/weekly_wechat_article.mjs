@@ -163,6 +163,13 @@ const DOMESTIC_NEARBY_DESTINATIONS = new Set([
 
 const SITE_BASE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
 const WEATHER_OVERVIEW_IMAGE = 'https://file.gzl.cn/group1/M00/31/55/wKkBH1-XfHqAXFtHAAE1-x29ZjY556.jpg';
+const DEPARTURE_WEATHER_COORDS = {
+  destination: '广州',
+  latitude: 23.1291,
+  longitude: 113.2644,
+  timezone: 'Asia/Shanghai',
+};
+const WEATHER_FETCH_TIMEOUT_MS = 10000;
 const ARTICLE_BUCKET_ORDER = [
   '山水亲水',
   '海边海岛',
@@ -211,6 +218,22 @@ function stripWrappingQuotes(value) {
     return value.slice(1, -1);
   }
   return value;
+}
+
+async function fetchWithTimeout(url, init = {}, timeoutMs = WEATHER_FETCH_TIMEOUT_MS, fetchImpl = globalThis.fetch) {
+  if (typeof fetchImpl !== 'function') {
+    throw new Error('fetch is not available');
+  }
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetchImpl(url, {
+      ...init,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export function parseEnvText(text) {
@@ -282,6 +305,12 @@ export function toDateKey(value = new Date()) {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+}
+
+function formatMonthDay(dateKey) {
+  const [year, month, day] = String(dateKey || '').split('-').map(Number);
+  if (!year || !month || !day) return String(dateKey || '').trim();
+  return `${month}月${day}日`;
 }
 
 function addDays(dateKey, days) {
@@ -1035,6 +1064,125 @@ function buildFallbackIntro(context) {
 
 function buildFallbackWeatherLead(context) {
   return `进入${context.season}后，华南通常会反复出现闷热和阵雨，出游更适合优先看体感而不是只看公里数。瀑布、峡谷、森林步道、漂流、海边、泳池和住下来慢慢玩的线路，这周都会比纯暴晒型路线更顺手。`;
+}
+
+export async function fetchDepartureWeatherWindow(runDate, fetchImpl = globalThis.fetch) {
+  const query = new URLSearchParams({
+    latitude: String(DEPARTURE_WEATHER_COORDS.latitude),
+    longitude: String(DEPARTURE_WEATHER_COORDS.longitude),
+    daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+    timezone: DEPARTURE_WEATHER_COORDS.timezone,
+    forecast_days: '7',
+  });
+  const response = await fetchWithTimeout(
+    `https://api.open-meteo.com/v1/forecast?${query.toString()}`,
+    {},
+    WEATHER_FETCH_TIMEOUT_MS,
+    fetchImpl,
+  );
+  if (!response.ok) {
+    throw new Error(`Weather API failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const times = Array.isArray(data?.daily?.time) ? data.daily.time : [];
+  const maxTemps = Array.isArray(data?.daily?.temperature_2m_max) ? data.daily.temperature_2m_max : [];
+  const minTemps = Array.isArray(data?.daily?.temperature_2m_min) ? data.daily.temperature_2m_min : [];
+  const rainProbs = Array.isArray(data?.daily?.precipitation_probability_max)
+    ? data.daily.precipitation_probability_max
+    : [];
+
+  const normalizedRunDate = String(runDate || '').trim();
+  const rawDays = times.map((date, index) => ({
+    date,
+    maxTemp: Math.round(Number(maxTemps[index])),
+    minTemp: Math.round(Number(minTemps[index])),
+    rainProbability: Math.round(Number(rainProbs[index])),
+  })).filter((day) => day.date && Number.isFinite(day.maxTemp) && Number.isFinite(day.minTemp) && Number.isFinite(day.rainProbability));
+
+  const days = rawDays
+    .filter((day) => !normalizedRunDate || day.date >= normalizedRunDate)
+    .slice(0, 7);
+
+  if (days.length === 0) {
+    throw new Error('Weather API returned no daily forecast rows.');
+  }
+
+  return {
+    source: 'open-meteo',
+    destination: DEPARTURE_WEATHER_COORDS.destination,
+    days,
+  };
+}
+
+function buildWeatherRouteTips(context) {
+  const tips = [];
+  const buckets = new Set((context.selectedTours || []).map((tour) => tour.bucket));
+  const hasCoastal = buckets.has('海边海岛');
+  const hasWater = buckets.has('山水亲水') || buckets.has('亲子玩乐');
+  const hasLongHaul = (context.selectedTours || []).some((tour) => {
+    const destination = normalizeDestination(tour.destination);
+    return destination && !['广东', '港澳'].includes(destination) && Number(tour.duration || 0) >= 3;
+  });
+
+  if (hasWater) {
+    tips.push('山水溯溪和玩水线更适合带防滑鞋、替换衣物和防水袋');
+  }
+  if (hasCoastal) {
+    tips.push('海边海岛线临出发前再补看一次阵雨窗口和风浪提示');
+  }
+  if (hasLongHaul) {
+    tips.push('跨省高铁和山地线早晚体感通常比广州低一截，轻薄外套别省');
+  }
+  if (tips.length === 0) {
+    tips.push('夏季线路普遍更吃体感，防晒、防蚊和轻便替换衣物带上会更从容');
+  }
+  return tips;
+}
+
+function describeForecastDay(day) {
+  const notes = [];
+  if (day.maxTemp >= 35) {
+    notes.push('白天暴晒感会更强');
+  } else if (day.maxTemp >= 33) {
+    notes.push('午后体感偏闷');
+  }
+  if (day.rainProbability >= 70) {
+    notes.push('阵雨概率高');
+  } else if (day.rainProbability >= 40) {
+    notes.push('有阵雨可能');
+  }
+  return notes.length > 0 ? `，${notes.join('，')}` : '';
+}
+
+export function buildDetailedWeatherLead(context, baseLead, weatherWindow = null) {
+  const lines = [];
+  const intro = normalizeAiText(baseLead || buildFallbackWeatherLead(context));
+  if (intro) {
+    lines.push(intro);
+  }
+
+  if (weatherWindow?.days?.length) {
+    const minTemp = Math.min(...weatherWindow.days.map((day) => day.minTemp));
+    const maxTemp = Math.max(...weatherWindow.days.map((day) => day.maxTemp));
+    const maxRain = Math.max(...weatherWindow.days.map((day) => day.rainProbability));
+    lines.push('');
+    lines.push(
+      `按${weatherWindow.destination || '广州'}出发地未来7天看，整体大致在 ${minTemp}-${maxTemp}℃，最高降雨概率约 ${maxRain}%，还是典型的高温闷热夹午后阵雨节奏。`,
+    );
+    lines.push('');
+    for (const day of weatherWindow.days) {
+      lines.push(
+        `- ${formatMonthDay(day.date)}：${day.minTemp}-${day.maxTemp}℃，降雨概率约 ${day.rainProbability}%${describeForecastDay(day)}`,
+      );
+    }
+  } else {
+    lines.push('');
+    lines.push('- 出发前最好再补看一次广州逐日预报，夏季通常还是高温闷热夹午后阵雨的节奏。');
+  }
+
+  lines.push(`- 玩法提醒：${buildWeatherRouteTips(context).join('；')}`);
+  return lines.join('\n');
 }
 
 function defaultReasonForTour(tour) {

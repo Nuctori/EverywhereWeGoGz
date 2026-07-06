@@ -1,13 +1,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {
+  buildDetailedWeatherLead,
   buildWeeklyArticleContext,
   buildWeeklyArticlePrompt,
   defaultOutputDir,
   ensureDir,
+  fetchDepartureWeatherWindow,
   generateWeeklyArticle,
   loadEnvFiles,
   readToursData,
+  rebuildWeeklyArticleFromStructured,
   resolveDeepSeekConfig,
   toDateKey,
   validateGeneratedArticle,
@@ -60,7 +63,18 @@ async function main() {
 
   try {
     const generated = await generateWeeklyArticle(context, config);
-    const validation = validateGeneratedArticle(generated.article, context);
+    let weatherWindow = null;
+    try {
+      weatherWindow = await fetchDepartureWeatherWindow(runDate);
+    } catch {
+      weatherWindow = null;
+    }
+
+    const article = rebuildWeeklyArticleFromStructured(context, {
+      ...generated.structured,
+      weatherLead: buildDetailedWeatherLead(context, generated.structured?.weatherLead || '', weatherWindow),
+    });
+    const validation = validateGeneratedArticle(article, context);
     writeJson(path.join(outDir, 'validation.json'), validation);
     writeJson(path.join(outDir, 'generation-meta.json'), {
       runDate,
@@ -68,9 +82,10 @@ async function main() {
       model: config.model,
       baseUrl: config.baseUrl,
       validationOk: validation.ok,
+      weatherSource: weatherWindow?.source || 'fallback',
     });
     fs.writeFileSync(path.join(outDir, 'prompt.md'), `${generated.prompt.trim()}\n`, 'utf8');
-    fs.writeFileSync(path.join(outDir, 'article.md'), `${generated.article.trim()}\n`, 'utf8');
+    fs.writeFileSync(path.join(outDir, 'article.md'), `${article.trim()}\n`, 'utf8');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     writeJson(path.join(outDir, 'validation.json'), {
