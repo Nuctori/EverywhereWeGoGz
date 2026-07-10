@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { getPrimarySearchAction } from '@/lib/search-routing';
 
 interface HeroProps {
   searchQuery: string;
@@ -46,11 +47,11 @@ const planningSteps = [
 export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickDestinations }: HeroProps) {
   const logoSrc = 'brand/laoguang-logo-full.jpg';
 
-  // 主搜索按钮逻辑：非空时走 AI 搜索，空值降级普通搜索
+  // 主搜索按钮优先保留普通搜索心智；只有出现明确硬约束时才自动跟进 AI，AI 找团按钮始终走 AI
   const handlePrimarySearch = () => {
-    const query = searchQuery.trim();
-    if (query) {
-      onAiSearch(query);
+    const action = getPrimarySearchAction(searchQuery);
+    if (action === 'ai') {
+      onAiSearch(searchQuery);
       return;
     }
 
@@ -118,7 +119,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                       type="button"
                       size="lg"
                       className="h-[52px] min-h-[52px] rounded-[18px] bg-gradient-to-br from-orange-500 to-orange-600 px-6 text-sm font-medium text-white shadow-[0_8px_28px_rgba(234,88,12,0.25)] hover:from-orange-600 hover:to-orange-700"
-                      onClick={() => handlePrimarySearch()}
+                      onClick={() => onAiSearch(searchQuery)}
                     >
                       <Sparkles className="mr-1.5 h-4 w-4" />
                       AI 找团

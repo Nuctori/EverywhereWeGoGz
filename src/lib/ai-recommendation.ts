@@ -20,10 +20,7 @@ import {
   hasUnallowedPublicInterestLanguage,
   sanitizeAiIntentForTurn,
 } from '@/lib/ai-semantic-policy';
-import {
-  DESTINATION_ALIASES as DESTINATION_HINT_ALIASES,
-  isBlockedDestinationAliasMatch,
-} from '@/lib/destination-resolver';
+import { DESTINATION_ALIASES, isBlockedDestinationAliasMatch } from '@/lib/destination-resolver';
 import { storedAiProviderConfigSchema } from '@/lib/runtime-schemas';
 
 // 常量区统一描述推荐链路的容量、超时和缓存策略，避免各阶段各自硬编码。
@@ -169,48 +166,10 @@ const THEME_KEYWORDS = [
   '家庭',
 ];
 
-const DESTINATION_ALIASES: Record<string, string[]> = {
-  桂林: ['桂林', '阳朔', '漓江'],
-  三亚: ['三亚', '海南', '海口'],
-  云南: ['云南', '昆明', '大理', '丽江', '香格里拉', '西双版纳'],
-  张家界: ['张家界', '天门山', '武陵源'],
-  西藏: ['西藏', '拉萨', '林芝'],
-  新疆: ['新疆', '乌鲁木齐', '喀纳斯', '伊犁'],
-  日本: ['日本', '东京', '大阪', '京都', '北海道'],
-  韩国: ['韩国', '首尔', '济州'],
-  欧洲: ['欧洲', '法国', '意大利', '瑞士', '德国', '西班牙'],
-  贵州: ['贵州', '贵阳', '黄果树', '荔波'],
-  四川: ['四川', '成都', '九寨沟', '峨眉山'],
-  广东: ['广东', '广州', '深圳', '珠海', '潮汕'],
-  东南亚: [
-    '东南亚',
-    '泰国',
-    '普吉',
-    '普吉岛',
-    '苏梅',
-    '芭提雅',
-    '曼谷',
-    '马来西亚',
-    '沙巴',
-    '仙本那',
-    '越南',
-    '芽庄',
-    '下龙湾',
-    '美奈',
-    '巴厘',
-    '巴厘岛',
-    '印度尼西亚',
-    '菲律宾',
-    '长滩',
-    '薄荷岛',
-    '新加坡',
-    '新马',
-  ],
-};
-
 const TITLE_DESTINATION_ALIASES: Record<string, string[]> = {
   湖南: ['湖南', '郴州', '崀山', '小东江', '高椅岭', '飞天山'],
   泰国: ['泰国', '曼谷', '芭堤雅', '芭提雅', '大皇宫', '玉佛寺'],
+  港澳: ['港澳', '香港', '澳门', '香港澳门', '香港/澳门'],
 };
 
 const DESTINATION_COORDS: Record<string, { latitude: number; longitude: number }> = {
@@ -742,7 +701,7 @@ function collectDepartureTimeOfDay(text: string) {
 }
 
 function collectDestinationHints(text: string) {
-  const matched = Object.entries(DESTINATION_HINT_ALIASES)
+  const matched = Object.entries(DESTINATION_ALIASES)
     .map(([destination, aliases]) => ({
       destination,
       index: aliases.reduce((bestIndex, alias) => {
@@ -758,7 +717,7 @@ function collectDestinationHints(text: string) {
   return matched.filter((destination) =>
     !matched.some((other) =>
       other !== destination &&
-      (DESTINATION_HINT_ALIASES[destination] || []).includes(other),
+      (DESTINATION_ALIASES[destination] || []).includes(other),
     ));
 }
 
@@ -766,10 +725,10 @@ function getDestinationAliasesForHint(hint: string) {
   const normalizedHint = hint.trim().toLowerCase();
   if (!normalizedHint) return [];
 
-  const directAliases = DESTINATION_HINT_ALIASES[hint];
+  const directAliases = DESTINATION_ALIASES[hint];
   if (directAliases) return [hint, ...directAliases];
 
-  const aliasEntry = Object.entries(DESTINATION_HINT_ALIASES).find(([, aliases]) =>
+  const aliasEntry = Object.entries(DESTINATION_ALIASES).find(([, aliases]) =>
     aliases.some((alias) => alias.toLowerCase() === normalizedHint),
   );
 
@@ -792,7 +751,7 @@ function destinationHintsMatchCorpus(destinationHints: string[] | undefined, cor
 }
 
 function collectDestinationHintsFromCorpus(corpus: string) {
-  const matched = Object.entries(DESTINATION_HINT_ALIASES)
+  const matched = Object.entries(DESTINATION_ALIASES)
     .map(([destination, aliases]) => ({
       destination,
       index: aliases.reduce((bestIndex, alias) => {
@@ -808,7 +767,7 @@ function collectDestinationHintsFromCorpus(corpus: string) {
   return matched.filter((destination) =>
     !matched.some((other) =>
       other !== destination &&
-      (DESTINATION_HINT_ALIASES[destination] || []).includes(other),
+      (DESTINATION_ALIASES[destination] || []).includes(other),
     ));
 }
 
@@ -1196,12 +1155,26 @@ function scoreTour(
   }
 
   if (query.budget) {
-    if (tour.price >= query.budget.min && tour.price <= query.budget.max) {
+    const budgetMax = Number.isFinite(query.budget.max) ? query.budget.max : null;
+    const budgetMin = Number.isFinite(query.budget.min) ? query.budget.min : null;
+
+    if (budgetMin !== null && budgetMax !== null && tour.price >= budgetMin && tour.price <= budgetMax) {
       score += 12;
       signals.push(`预算接近：￥${tour.price.toLocaleString()}`);
-    } else if (Number.isFinite(query.budget.max) && tour.price <= query.budget.max * 1.25) {
+    } else if (budgetMax !== null && tour.price <= budgetMax * 1.25) {
       score += 5;
       signals.push('价格略高但仍可比较');
+    } else if (budgetMax !== null && tour.price <= budgetMax * 2) {
+      score -= 12;
+    } else if (budgetMax !== null) {
+      return null;
+    } else if (budgetMin !== null) {
+      if (tour.price >= budgetMin) {
+        score += 6;
+        signals.push(`预算达到：￥${tour.price.toLocaleString()}`);
+      } else {
+        score -= 14;
+      }
     }
   }
 
@@ -1512,6 +1485,70 @@ function getHardIntentSignalCount(intent: AiTravelIntent | null) {
     ...(intent.avoid || []),
     ...(intent.weatherSensitivity || []),
   ].filter((value) => value !== null && value !== undefined && value !== '').length;
+}
+
+export interface SearchRouteMeta {
+  action: 'plain' | 'ai';
+  reason: 'empty' | 'plain' | 'destination_only' | 'hard_constraints';
+  hardConstraintCount: number;
+  destinationHintCount: number;
+}
+
+export function getSearchRouteMeta(text: string): SearchRouteMeta {
+  const normalizedText = normalizeText(text);
+  if (!normalizedText) {
+    return { action: 'plain', reason: 'empty', hardConstraintCount: 0, destinationHintCount: 0 };
+  }
+
+  const intent = buildHardIntentFromText(normalizedText);
+  if (!intent) {
+    return { action: 'plain', reason: 'plain', hardConstraintCount: 0, destinationHintCount: 0 };
+  }
+
+  const hardConstraintCount = getHardIntentSignalCount(intent);
+  const destinationHintCount = intent.destinationHints?.length ?? 0;
+  const hasOnlyDestinationSignals = Boolean(
+    destinationHintCount > 0 &&
+    !intent.tripDays &&
+    !intent.tripDaysMin &&
+    !intent.tripDaysMax &&
+    !intent.departureWithinDays &&
+    !intent.departureTimeOfDay &&
+    !intent.budgetMin &&
+    !intent.budgetMax &&
+    !(intent.departureWeekdays || []).length &&
+    !(intent.returnWeekdays || []).length &&
+    !(intent.avoid || []).length &&
+    !(intent.weatherSensitivity || []).length,
+  );
+  if (hasOnlyDestinationSignals) {
+    return {
+      action: 'plain',
+      reason: 'destination_only',
+      hardConstraintCount,
+      destinationHintCount,
+    };
+  }
+
+  if (hardConstraintCount === 0) {
+    return {
+      action: 'plain',
+      reason: 'plain',
+      hardConstraintCount,
+      destinationHintCount,
+    };
+  }
+
+  return {
+    action: 'ai',
+    reason: 'hard_constraints',
+    hardConstraintCount,
+    destinationHintCount,
+  };
+}
+
+export function shouldAutoOpenAiSearch(text: string) {
+  return getSearchRouteMeta(text).action === 'ai';
 }
 
 function mergeAiRankingIntent(
