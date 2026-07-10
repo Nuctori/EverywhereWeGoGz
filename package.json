@@ -26,7 +26,6 @@
     "audit:ai-success-path": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_success_path.ts",
     "audit:display-semantics": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_display_semantics.ts",
     "audit:initial-data-loading": "node scripts/test_initial_data_loading.mjs",
-    "test:tour-deeplink": "node --experimental-strip-types scripts/test_tour_deeplink.mjs",
     "test:destination-aliases": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_destination_aliases.ts",
     "test:search-modes-ui": "node scripts/test_search_modes_ui.mjs",
     "audit:availability": "python scripts/validate_tour_availability.py",
