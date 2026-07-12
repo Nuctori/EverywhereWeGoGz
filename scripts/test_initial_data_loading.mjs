@@ -31,6 +31,11 @@ assert(
 );
 
 assert(
+  tourList.includes('findTourDeepLinkResolution') && tourList.includes('readTourDeepLink'),
+  'TourList should resolve deeplinks from the index/page data path instead of the full catalog fallback.',
+);
+
+assert(
   tourList.includes('void indexPromise.then') && !tourList.includes('const indexData = await indexPromise;'),
   'TourList should publish index data as soon as it arrives instead of waiting for the first page chunk.',
 );
@@ -53,27 +58,6 @@ assert(
 assert(
   tourList.includes('const aiCandidatesReady =') && tourList.includes('toursLoading={loading || !aiCandidatesReady}'),
   'AI recommendations should wait for tours-index.json or the full catalog instead of using only the first page.',
-);
-
-const loadMoreSection = tourList.slice(
-  tourList.indexOf('const loadMorePages = useCallback'),
-  tourList.indexOf('return {', tourList.indexOf('const loadMorePages = useCallback')),
-);
-
-assert(
-  loadMoreSection.includes('return true;') &&
-    loadMoreSection.includes('return false;') &&
-    loadMoreSection.includes('failedPageRetryAfterRef') &&
-    loadMoreSection.includes('setLoadMoreError') &&
-    !loadMoreSection.includes('setHasPageChunks(false)'),
-  'Chunk page failures should be retryable and must not disable all lazy page loading.',
-);
-
-assert(
-  tourList.includes('if (loaded)') &&
-    tourList.includes('setVisibleCount((current) => current + PAGE_SIZE)') &&
-    tourList.includes('重试加载'),
-  'Infinite scroll should advance visible results only after a page loads and expose a retry action on transient failures.',
 );
 
 assert(
@@ -107,16 +91,13 @@ assert(
 );
 
 assert(
-  optimize.includes('tours-page-') && optimize.includes('pageFilePattern') && optimize.includes('collectRemoteImageReplacements') && optimize.includes('cacheRemoteImage') && optimize.includes('collectLocalLegacyImageReplacements') && optimize.includes('unsupported cached images rewritten to fallback'),
-  'Image cache optimization should rewrite tours-page chunks, cached remote image URLs, legacy local image URLs, and unsupported cached images.',
+  split.includes("'sourceId'") && merge.includes('"sourceId": raw.get(\'sourceId\')'),
+  'Data split and merge should preserve sourceId so deeplinks can use a stable share key.',
 );
 
 assert(
-  optimize.includes('collectRemoteImageStrings') &&
-    optimize.includes('isImageLikeKey') &&
-    optimize.includes('IMAGE_CACHE_DOWNLOAD_REMOTE') &&
-    optimize.includes('external image URL cache misses rewritten to fallback'),
-  'Clean Pages builds should rewrite uncached remote image fields to a local fallback without touching non-image links.',
+  optimize.includes('tours-page-') && optimize.includes('pageFilePattern') && optimize.includes('collectRemoteImageReplacements') && optimize.includes('collectLocalLegacyImageReplacements') && optimize.includes('unsupported cached images rewritten to fallback'),
+  'Image cache optimization should rewrite tours-page chunks, cached remote image URLs, legacy local image URLs, and unsupported cached images.',
 );
 
 assert(

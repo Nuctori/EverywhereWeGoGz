@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', '.tmp-wechat-cdp-profile', '.baoyu-skills', 'post-to-wechat']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
