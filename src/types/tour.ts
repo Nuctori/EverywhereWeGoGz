@@ -26,6 +26,7 @@ export interface TourMeta {
 
 export interface TourSummary {
   id: string;
+  sourceId?: string;
   title: string;
   source: string;
   destination: string;
@@ -62,6 +63,7 @@ export interface TourSummary {
 
 export interface TourIndexEntry {
   id: string;
+  sourceId?: string;
   title: string;
   source: string;
   destination: string;

@@ -506,6 +506,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const [aiClearVersion, setAiClearVersion] = useState(0);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
+  const previousAiSearchRequestIdRef = useRef<number | null>(null);
   const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
   const loadedTourById = useMemo(() => {
     const entries = catalogTours.length > 0 ? catalogTours : localTours;
@@ -840,6 +841,18 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     setAiRecommendationResult(null);
     setAiClearVersion((current) => current + 1);
   }, []);
+
+  useEffect(() => {
+    if (aiSearchRequest) {
+      previousAiSearchRequestIdRef.current = aiSearchRequest.id;
+      return;
+    }
+
+    if (previousAiSearchRequestIdRef.current !== null) {
+      previousAiSearchRequestIdRef.current = null;
+      clearAiRecommendation();
+    }
+  }, [aiSearchRequest, clearAiRecommendation]);
 
   const visibleDisplayCandidates = useMemo(
     () => displayTours.slice(0, visibleCount),

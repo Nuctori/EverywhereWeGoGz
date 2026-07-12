@@ -54,6 +54,7 @@ const knownSourceLogos = new Set([
 // ?????????/???????????????? tour-details ??
 const listFields = new Set([
   'id',
+  'sourceId',
   'title',
   'source',
   'destination',
@@ -235,6 +236,7 @@ writeTextFileWithRetry(listPath, JSON.stringify(listTours));
 const PAGE_SIZE = 24;
 const indexFields = [
   'id',
+  'sourceId',
   'title',
   'price',
   'destination',

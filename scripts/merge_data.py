@@ -8,9 +8,6 @@ import hashlib
 import json
 import os
 import re
-import subprocess
-import sys
-import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -31,78 +28,37 @@ SOURCE_COLORS = {
     '广之旅': '#FF006E',
     '广东中旅': '#8338EC',
     '品途': '#3A86FF',
-    '天涯户外': '#2F855A',
 }
 
+PLACEHOLDER_LABEL = '老广精选线路'
 DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
-IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.jfif', '.png', '.webp', '.gif', '.bmp', '.svg'}
-# ?????????????????????????????
+IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'}
 RAW_FILE_PRIORITIES = {
     "raw_jrt365_full.json": 10,
-    "raw_kanghui.json": 30,
-    "raw_gdcts_full.json": 20,
-    "raw_http_full.json": 20,
+    "raw_jrt365.json": 20,
+    "raw_http_full.json": 10,
     "raw_pintu_full.json": 10,
     "raw_saihuitong_full.json": 10,
     "raw_gzl_api.json": 10,
-    "raw_outdoors_full.json": 10,
 }
 JRT365_HOST_TOKEN = "jrt365.com"
-GZL_HOST_TOKENS = ("gzl.cn", "gzl.com.cn")
-JLB_HOST_TOKEN = "360jlb.cn"
-PLACEHOLDER_IMAGE_TOKENS = ("lazyimg", "{{", "}}")
-OUTDOORS_HOST_TOKEN = "outdoors.com.cn"
-GROUPNO_RE = re.compile(r"groupno=([^&]+)", re.IGNORECASE)
-MIN_DEPARTURE_YEAR = 2000
-MAX_DEPARTURE_YEAR_OFFSET = 3
-
-
-def looks_like_image(content: bytes) -> bool:
-    signatures = (
-        b"\xff\xd8\xff",  # jpg/jpeg/jfif
-        b"\x89PNG\r\n\x1a\n",
-        b"GIF87a",
-        b"GIF89a",
-        b"RIFF",  # webp starts with RIFF....WEBP
-        b"<svg",
-    )
-    head = content[:16].lstrip()
-    return any(head.startswith(signature) for signature in signatures) or (
-        content[:12].startswith(b"RIFF") and content[8:12] == b"WEBP"
-    )
 
 
 def stable_hash(value: str) -> int:
     return int(hashlib.sha1(value.encode('utf-8')).hexdigest(), 16)
 
 
-def extract_jrt365_groupno(value: str) -> str:
-    if not value:
-        return ""
-    match = GROUPNO_RE.search(str(value))
-    return match.group(1).strip() if match else ""
-
-
-# ?????????????????????????????????
 def normalize_image_path(url: str, source: str) -> str:
     if not url:
         return url
 
-    normalized_url = str(url).strip()
-    if any(token in normalized_url.lower() for token in PLACEHOLDER_IMAGE_TOKENS):
-        return ""
+    image_cache_mode = os.environ.get("IMAGE_CACHE_MODE", "download").strip().lower()
 
-    image_cache_mode = os.environ.get("IMAGE_CACHE_MODE", "remote").strip().lower()
-
-    parsed = urlparse(normalized_url)
+    parsed = urlparse(url)
     if parsed.scheme not in {'http', 'https'}:
-        return normalized_url
-    force_cache = (
-        (source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc) or
-        (source == "假日通" and parsed.netloc == "jrttp.jrt365.com:8066")
-    )
-    if image_cache_mode in {"remote", "skip", "off"} and not force_cache:
-        return normalized_url
+        return url
+    if image_cache_mode in {"remote", "skip", "off"} and parsed.scheme == 'https':
+        return url
     ext = os.path.splitext(parsed.path)[1].lower()
     if ext not in IMAGE_EXTENSIONS:
         ext = '.jpg'
@@ -117,7 +73,7 @@ def normalize_image_path(url: str, source: str) -> str:
     )
     os.makedirs(cache_root, exist_ok=True)
 
-    filename = f"{hashlib.sha1(normalized_url.encode('utf-8')).hexdigest()[:16]}{ext}"
+    filename = f"{hashlib.sha1(url.encode('utf-8')).hexdigest()[:16]}{ext}"
     local_path = os.path.join(cache_root, filename)
     public_path = f"/data/image-cache/{parsed.netloc.replace(':', '_')}/{filename}"
 
@@ -125,21 +81,16 @@ def normalize_image_path(url: str, source: str) -> str:
         return public_path
 
     try:
-        headers = {'User-Agent': 'Mozilla/5.0'}
-        if source == "天涯户外" and OUTDOORS_HOST_TOKEN in parsed.netloc:
-            headers["Referer"] = f"https://www.{OUTDOORS_HOST_TOKEN}/"
-        elif source == "假日通" and parsed.netloc == "jrttp.jrt365.com:8066":
-            headers["Referer"] = "http://www.jrt365.com/"
-        resp = requests.get(normalized_url, headers=headers, timeout=20)
+        resp = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
         resp.raise_for_status()
         content_type = resp.headers.get('content-type', '').lower()
-        if content_type and 'image' not in content_type and not looks_like_image(resp.content):
+        if content_type and 'image' not in content_type:
             raise ValueError(f'unexpected content-type: {content_type}')
         with open(local_path, 'wb') as f:
             f.write(resp.content)
         return public_path
     except Exception as exc:
-        print(f"[图片缓存] {source} {normalized_url} -> {exc}")
+        print(f"[图片缓存] {source} {url} -> {exc}")
         return ensure_placeholder_image(source)
 
 
@@ -158,9 +109,6 @@ def ensure_placeholder_image(source: str) -> str:
     local_path = os.path.join(placeholder_root, filename)
     public_path = f"/data/image-cache/placeholders/{filename}"
 
-    if os.path.exists(local_path):
-        return public_path
-
     safe_source = source.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
     svg = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
   <defs>
@@ -171,7 +119,7 @@ def ensure_placeholder_image(source: str) -> str:
   </defs>
   <rect width="800" height="600" fill="url(#g)" />
   <rect x="60" y="60" width="680" height="480" rx="32" fill="#f8fafc" opacity="0.88" />
-  <text x="400" y="290" text-anchor="middle" font-size="42" fill="#475569" font-family="Arial, sans-serif">老广精选线路</text>
+  <text x="400" y="290" text-anchor="middle" font-size="42" fill="#475569" font-family="Arial, sans-serif">{PLACEHOLDER_LABEL}</text>
   <text x="400" y="350" text-anchor="middle" font-size="26" fill="#64748b" font-family="Arial, sans-serif">{safe_source}</text>
 </svg>'''
     with open(local_path, 'w', encoding='utf-8') as f:
@@ -184,9 +132,7 @@ def normalize_images(images, source: str):
     for img in images or []:
         if not img:
             continue
-        normalized = normalize_image_path(img, source)
-        if normalized:
-            result.append(normalized)
+        result.append(normalize_image_path(img, source))
     return result
 
 
@@ -215,123 +161,6 @@ def extract_title_dates(title: str):
         if value not in dates:
             dates.append(value)
     return dates
-
-
-def normalize_departure_dates(values):
-    normalized = []
-    seen = set()
-    max_year = datetime.now().year + MAX_DEPARTURE_YEAR_OFFSET
-    for value in values or []:
-        if not value:
-            continue
-        text = str(value).strip()
-        try:
-            parsed = datetime.strptime(text, "%Y-%m-%d")
-        except ValueError:
-            continue
-        if parsed.year < MIN_DEPARTURE_YEAR or parsed.year > max_year:
-            continue
-        iso_value = parsed.strftime("%Y-%m-%d")
-        if iso_value in seen:
-            continue
-        seen.add(iso_value)
-        normalized.append(iso_value)
-    normalized.sort()
-    return normalized
-
-
-def first_upcoming_date(dates):
-    if not dates:
-        return ""
-    today = datetime.now().date()
-    for value in dates:
-        try:
-            if datetime.strptime(value, "%Y-%m-%d").date() >= today:
-                return value
-        except ValueError:
-            continue
-    return dates[0]
-
-
-def extract_structured_departure_dates(raw):
-    candidates = []
-    if raw.get("departureDates"):
-        candidates.extend(raw.get("departureDates") or [])
-    if raw.get("departureDaysList"):
-        candidates.extend(raw.get("departureDaysList") or [])
-    if raw.get("departureDate"):
-        candidates.append(raw.get("departureDate"))
-    dates = normalize_departure_dates(candidates)
-    return first_upcoming_date(dates), dates
-
-
-def build_ai_meta(raw, source: str, departure_date: str, departure_dates: list[str]):
-    raw_meta = raw.get("meta") if isinstance(raw.get("meta"), dict) else {}
-    raw_tags = raw_meta.get("aiTags") or raw.get("pdTagNames") or []
-    ai_tags = []
-    for value in raw_tags:
-        tag = str(value or "").strip()
-        if tag and tag not in ai_tags:
-            ai_tags.append(tag)
-
-    source_features = []
-    for value in raw_meta.get("sourceFeatures") or []:
-        feature = str(value or "").strip()
-        if feature and feature not in source_features:
-            source_features.append(feature)
-
-    source_attributes = {}
-    if isinstance(raw_meta.get("sourceAttributes"), dict):
-        for key, value in raw_meta["sourceAttributes"].items():
-            text = str(value or "").strip()
-            if text:
-                source_attributes[str(key)] = text
-
-    supplier_name = str(
-        raw_meta.get("supplierName")
-        or raw.get("supplierName")
-        or raw.get("pdCompanyName")
-        or ""
-    ).strip()
-    if supplier_name:
-        source_attributes.setdefault("supplierName", supplier_name)
-
-    product_type = str(
-        raw_meta.get("productType")
-        or raw.get("productType")
-        or raw.get("type")
-        or ""
-    ).strip()
-    if product_type:
-        source_attributes.setdefault("productType", product_type)
-
-    price_source = str(
-        raw_meta.get("priceSource")
-        or raw.get("priceSource")
-        or ""
-    ).strip()
-    if price_source:
-        source_attributes.setdefault("priceSource", price_source)
-
-    risk_flags = []
-    if not departure_dates:
-        risk_flags.append("missing_structured_schedule")
-    if source == "假日通":
-        risk_flags.append("supplier_requires_strict_schedule_validation")
-
-    data_quality = {
-        "hasStructuredDepartureDates": bool(departure_dates),
-        "isDepartureDateReliable": bool(departure_date),
-        "availabilityConfidence": "high" if departure_dates else ("medium" if source != "假日通" else "low"),
-        "riskFlags": risk_flags,
-    }
-
-    return {
-        "aiTags": ai_tags[:12],
-        "sourceFeatures": source_features[:8],
-        "sourceAttributes": source_attributes,
-        "dataQuality": data_quality,
-    }
 
 
 def extract_days(title):
@@ -530,6 +359,7 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
         "id": f"tour_{id_counter}",
         "title": title,
         "source": source,
+        "sourceId": raw.get('sourceId') or raw.get('source_id') or raw.get('sourceID') or raw.get('id'),
         "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png",
         "destination": destination,
         "duration": days or 2,
@@ -582,7 +412,6 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
     }
 
 
-# ??????????????? Tour ??????????????
 def raw_to_tour(raw, id_counter, detail=None):
     source = raw.get('source', '未知')
     title = raw.get('title', '')
@@ -606,21 +435,13 @@ def raw_to_tour(raw, id_counter, detail=None):
     if not images:
         images = [ensure_placeholder_image(source)]
 
-    structured_departure_date, raw_structured_dates = extract_structured_departure_dates(raw)
-    departure_date = structured_departure_date
-    departure_dates = list(raw_structured_dates)
-    if source != "假日通" and not departure_dates:
-        parsed_dates = extract_title_dates(title)
-        if parsed_dates:
-            departure_dates = parsed_dates
-            departure_date = first_upcoming_date(parsed_dates)
-        else:
-            departure_date = ""
-            departure_dates = []
-    if source == "广之旅" and not raw_structured_dates:
-        return None
-    if source == "假日通" and not raw_structured_dates:
-        return None
+    parsed_dates = extract_title_dates(title)
+    if parsed_dates:
+        departure_date = parsed_dates[0]
+        departure_dates = parsed_dates
+    else:
+        departure_date = ""
+        departure_dates = []
 
     single_supplement_amount = detail.get("singleSupplementAmount")
     single_supplement = int(single_supplement_amount) if single_supplement_amount is not None else 0
@@ -639,15 +460,11 @@ def raw_to_tour(raw, id_counter, detail=None):
     )
     is_new = is_new_tour(title)
 
-    source_id = str(raw.get("sourceId") or raw.get("pdId") or raw.get("prodcode") or raw.get("groupno") or "").strip()
-    if not source_id and source == "假日通":
-        source_id = extract_jrt365_groupno(raw.get("url", ""))
-    ai_meta = build_ai_meta(raw, source, departure_date, departure_dates)
-
     return {
         "id": f"tour_{id_counter}",
         "title": title,
         "source": source,
+        "sourceId": raw.get('sourceId') or raw.get('source_id') or raw.get('sourceID') or raw.get('id'),
         "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png",
         "destination": destination,
         "duration": days or 2,
@@ -680,7 +497,6 @@ def raw_to_tour(raw, id_counter, detail=None):
         "rating": 0,
         "reviewCount": 0,
         "bookingUrl": raw.get('url', '#'),
-        "url": raw.get('url', '#'),
         "images": images,
         "tags": [theme, "纯玩", "品质"],
         "isHot": recommendation_score >= 5,
@@ -694,11 +510,8 @@ def raw_to_tour(raw, id_counter, detail=None):
         "difficulty": "轻松",
         "season": "全年",
         "language": "中文导游",
-        "sourceId": source_id,
         "departureDates": departure_dates,
         "hotDepartureDates": departure_dates[:4],
-        "meta": ai_meta,
-        "dataQuality": ai_meta["dataQuality"],
         "createdAt": datetime.now().isoformat(),
         "updatedAt": datetime.now().isoformat(),
     }
@@ -712,17 +525,8 @@ def clean_nulls(obj):
     return obj
 
 
-# ?????????????????????????????
 def make_tour_key(item):
-    source_id = str(item.get("sourceId") or item.get("pdId") or item.get("prodcode") or item.get("groupno") or "").strip()
     source = item.get("source", "")
-    url = str(item.get("url") or item.get("bookingUrl") or "").strip()
-    if not source_id and source == "假日通":
-        source_id = extract_jrt365_groupno(url)
-    if source_id:
-        return f"{item.get('source', '')}|id:{source_id}"
-    if source == "假日通" and url:
-        return f"{source}|url:{url.lower()}"
     title = item.get("title", "")
     price = item.get("price", 0)
     try:
@@ -735,14 +539,11 @@ def make_tour_key(item):
 def score_raw_candidate(item):
     return (
         int(item.get("_merge_priority", 0) or 0),
-        min(len(normalize_departure_dates(item.get("departureDates") or item.get("departureDaysList") or [])), 32),
-        1 if str(item.get("departureDate") or "").strip() else 0,
         1 if str(item.get("url") or "").strip() else 0,
         1 if str(item.get("img") or "").strip() else 0,
     )
 
 
-# ????????????????????????
 def prefer_raw_candidate(current, candidate):
     return score_raw_candidate(candidate) >= score_raw_candidate(current)
 
@@ -755,48 +556,12 @@ def extract_existing_detail(item):
         "exclusions": item.get("exclusions", []),
         "optionalExpenses": item.get("optionalExpenses", []),
         "importantNotes": item.get("importantNotes", []),
-        "childPolicy": item.get("childPolicy", ""),
-        "singleSupplementNote": item.get("singleSupplementNote", ""),
-        "singleSupplementAmount": item.get("singleSupplementAmount"),
-        "cancellationPolicy": item.get("cancellationPolicy", ""),
-        "refundPolicy": item.get("refundPolicy", ""),
+        "childPolicy": "",
+        "singleSupplementNote": "",
+        "singleSupplementAmount": None,
+        "cancellationPolicy": "",
+        "refundPolicy": "",
     }
-
-
-def merge_detail_with_existing(detail, existing_detail):
-    if not existing_detail:
-        return detail or empty_detail()
-
-    detail = detail or empty_detail()
-    merged = dict(existing_detail)
-
-    list_fields = [
-        "highlights",
-        "itinerary",
-        "inclusions",
-        "exclusions",
-        "optionalExpenses",
-        "importantNotes",
-    ]
-    scalar_fields = [
-        "childPolicy",
-        "singleSupplementNote",
-        "cancellationPolicy",
-        "refundPolicy",
-    ]
-
-    for field in list_fields:
-        merged[field] = detail.get(field) or existing_detail.get(field, [])
-
-    for field in scalar_fields:
-        merged[field] = detail.get(field) or existing_detail.get(field, "")
-
-    if detail.get("singleSupplementAmount") is not None:
-        merged["singleSupplementAmount"] = detail.get("singleSupplementAmount")
-    else:
-        merged["singleSupplementAmount"] = existing_detail.get("singleSupplementAmount")
-
-    return merged
 
 
 def load_detail_results(deduped, existing_tours):
@@ -831,10 +596,10 @@ def load_detail_results(deduped, existing_tours):
             except Exception as exc:
                 print(f"[详情] {key} -> {exc}")
                 detail = empty_detail()
-            if key in existing_tours:
+            if not detail_has_content(detail) and key in existing_tours:
                 existing_detail = extract_existing_detail(existing_tours[key])
                 if detail_has_content(existing_detail):
-                    detail = merge_detail_with_existing(detail, existing_detail)
+                    detail = existing_detail
             detail_results[key] = detail
             if idx % 50 == 0 or idx == total:
                 print(f"[详情] {idx}/{total}")
@@ -929,215 +694,166 @@ def is_jrt365_tour(tour):
     return JRT365_HOST_TOKEN in url
 
 
-def is_gzl_tour(tour):
-    url = str(tour.get("bookingUrl") or "").strip().lower()
-    return any(token in url for token in GZL_HOST_TOKENS)
-
-
-def is_360jlb_tour(tour):
-    url = str(tour.get("bookingUrl") or "").strip().lower()
-    return JLB_HOST_TOKEN in url
-
-
-# ?????????????????????????????
 def filter_unavailable_tours(tours):
-    enabled = os.environ.get("AVAILABILITY_FILTER", "0").strip().lower()
+    enabled = os.environ.get("AVAILABILITY_FILTER", "1").strip().lower()
     if enabled in {"0", "false", "no", "off"}:
-        jrt365_filter = os.environ.get("JRT365_AVAILABILITY_FILTER", "1").strip().lower()
-        gzl_filter = os.environ.get("GZL_AVAILABILITY_FILTER", "1").strip().lower()
-        jlb_filter = os.environ.get("JLB_AVAILABILITY_FILTER", "1").strip().lower()
-
-        enabled_predicates = []
-        if jrt365_filter in {"1", "true", "yes", "on"}:
-            enabled_predicates.append(("JRT365", is_jrt365_tour))
-        if gzl_filter in {"1", "true", "yes", "on"}:
-            enabled_predicates.append(("GZL", is_gzl_tour))
-        if jlb_filter in {"1", "true", "yes", "on"}:
-            enabled_predicates.append(("360JLB", is_360jlb_tour))
-
-        if not enabled_predicates:
+        jrt365_filter = os.environ.get("JRT365_AVAILABILITY_FILTER", "0").strip().lower()
+        if jrt365_filter not in {"1", "true", "yes", "on"}:
             print("[可用性] 已跳过自动下架过滤")
             return tours
 
-        scoped_tours = [
-            tour
-            for tour in tours
-            if any(predicate(tour) for _, predicate in enabled_predicates)
-        ]
-        if not scoped_tours:
-            print("[可用性] 全局过滤已关闭，且没有需要单独校验的线路")
+        jrt365_tours = [tour for tour in tours if is_jrt365_tour(tour)]
+        if not jrt365_tours:
+            print("[可用性] 全局过滤已关闭，且没有假日通线路需要单独校验")
             return tours
 
-        scope_names = ", ".join(name for name, _ in enabled_predicates)
-        print(f"[可用性] 全局过滤已关闭，仅校验 {scope_names} 线路 {len(scoped_tours)} 条")
-        filtered_scoped = apply_availability_filter(scoped_tours, label=f"{scope_names} only")
-        kept_ids = {tour.get("id") for tour in filtered_scoped}
+        print(f"[可用性] 全局过滤已关闭，仅校验假日通线路 {len(jrt365_tours)} 条")
+        filtered_jrt365 = apply_availability_filter(jrt365_tours, label="JRT365 only")
+        kept_ids = {tour.get("id") for tour in filtered_jrt365}
         return [
             tour
             for tour in tours
-            if not any(predicate(tour) for _, predicate in enabled_predicates) or tour.get("id") in kept_ids
+            if not is_jrt365_tour(tour) or tour.get("id") in kept_ids
         ]
 
     return apply_availability_filter(tours)
 
 
 def main():
-    started_at = time.perf_counter()
-
-    def log_stage(label: str, started: float, extra: str = "") -> None:
-        elapsed = time.perf_counter() - started
-        suffix = f" ({extra})" if extra else ""
-        print(f"[stage] {label}{suffix}: {elapsed:.1f}s")
-
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(line_buffering=True)
-
     print("=" * 60)
-    print("merge data script")
+    print("数据合并脚本")
     print("=" * 60)
 
     all_raw = []
     existing_tours = {}
-    data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "data"))
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
+    data_dir = os.path.abspath(data_dir)
     existing_json_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "public", "data", "tours.json")
     )
 
-    stage_started = time.perf_counter()
     if os.path.exists(existing_json_path):
         try:
             with open(existing_json_path, "r", encoding="utf-8-sig") as f:
                 existing_data = json.load(f)
             existing_tours = {make_tour_key(item): item for item in existing_data}
-            print(f"[existing tours.json] {len(existing_tours)} records")
-        except Exception as exc:
-            print(f"[existing tours.json] read failed: {exc}")
-    else:
-        print("[existing tours.json] missing")
-    log_stage("load existing tours.json", stage_started, f"{len(existing_tours)} records")
+            print(f"[existing tours.json] {len(existing_tours)}条")
+        except Exception as e:
+            print(f"[existing tours.json] 读取失败: {e}")
 
-    backup_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tours_json_backup.json"))
-    stage_started = time.perf_counter()
+    # 1. 尝试读取旧备份数据 (962条)
+    backup_path = os.path.join(os.path.dirname(__file__), "..", "tours_json_backup.json")
+    backup_path = os.path.abspath(backup_path)
     if os.path.exists(backup_path):
         try:
-            with open(backup_path, "r", encoding="utf-16") as f:
+            with open(backup_path, 'r', encoding='utf-16') as f:
                 old_data = json.load(f)
-            print(f"[legacy backup] {len(old_data)} records")
+            print(f"[旧数据] {len(old_data)}条")
+            # 将旧数据转换为raw格式
             for item in old_data:
-                all_raw.append(
-                    {
-                        "source": item.get("source", ""),
-                        "title": item.get("title", ""),
-                        "price": item.get("price", 0),
-                        "url": item.get("bookingUrl", "#"),
-                        "days": item.get("duration", 0),
-                        "img": item.get("images", [""])[0] if item.get("images") else "",
-                    }
-                )
-        except Exception as exc:
-            print(f"[legacy backup] read failed: {exc}")
-    else:
-        print("[legacy backup] missing")
-    log_stage("load legacy backup", stage_started, f"{len(all_raw)} raw rows")
+                raw = {
+                    "source": item.get("source", ""),
+                    "title": item.get("title", ""),
+                    "price": item.get("price", 0),
+                    "url": item.get("bookingUrl", "#"),
+                    "days": item.get("duration", 0),
+                    "img": item.get("images", [""])[0] if item.get("images") else "",
+                }
+                all_raw.append(raw)
+        except Exception as e:
+            print(f"[旧数据] 读取失败: {e}")
 
+    # 2. 读取新的raw数据
+    # 假日通保留两个抓取口径：
+    # - raw_jrt365_full.json: 全量脚本输出
+    # - raw_jrt365.json: 主爬虫输出
+    # 两者存在一定差异，先一并并入，再统一去重，避免有效线路被单一路径漏掉。
     raw_files = [
         "raw_jrt365_full.json",
-        "raw_kanghui.json",
-        "raw_gdcts_full.json",
+        "raw_jrt365.json",
         "raw_http_full.json",
         "raw_pintu_full.json",
         "raw_saihuitong_full.json",
         "raw_gzl_api.json",
-        "raw_outdoors_full.json",
     ]
     for fname in raw_files:
         fpath = os.path.join(data_dir, fname)
-        stage_started = time.perf_counter()
-        enriched = []
         if os.path.exists(fpath):
             try:
-                with open(fpath, "r", encoding="utf-8") as f:
+                with open(fpath, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                 if fname == "raw_http_full.json":
-                    data = [item for item in data if item.get("source") not in {"品途", "广之旅"}]
+                    data = [
+                        item for item in data
+                        if item.get("source") not in {"品途", "广之旅"}
+                    ]
                 priority = RAW_FILE_PRIORITIES.get(fname, 0)
+                enriched = []
                 for item in data:
                     if not isinstance(item, dict):
                         continue
                     candidate = dict(item)
                     candidate["_merge_priority"] = priority
                     enriched.append(candidate)
+                print(f"[{fname}] {len(enriched)}条")
                 all_raw.extend(enriched)
-                print(f"[{fname}] {len(enriched)} records")
-            except Exception as exc:
-                print(f"[{fname}] read failed: {exc}")
-        else:
-            print(f"[{fname}] missing")
-        log_stage(f"load {fname}", stage_started, f"{len(enriched)} records")
+            except Exception as e:
+                print(f"[{fname}] 读取失败: {e}")
 
-    print(f"[summary] raw input: {len(all_raw)} records")
+    print(f"\n[汇总] 原始数据: {len(all_raw)}条")
 
-    stage_started = time.perf_counter()
+    # 去重
     seen = {}
-    for item in all_raw:
-        key = make_tour_key(item)
+    for it in all_raw:
+        key = it.get("source", "") + "|" + it.get("title", "") + "|" + str(it.get("price", ""))
         previous = seen.get(key)
-        if previous is None or prefer_raw_candidate(previous, item):
-            seen[key] = item
+        if previous is None or prefer_raw_candidate(previous, it):
+            seen[key] = it
     deduped = list(seen.values())
-    log_stage("deduplicate raw data", stage_started, f"{len(deduped)} unique / {len(all_raw)} input")
+    print(f"[去重] 后: {len(deduped)}条")
 
-    stage_started = time.perf_counter()
-    deduped = [row for row in deduped if row.get("price", 0) > 0 and len(row.get("title", "")) > 5]
-    log_stage("filter invalid raw data", stage_started, f"{len(deduped)} valid")
+    # 过滤
+    deduped = [r for r in deduped if r.get('price', 0) > 0 and len(r.get('title', '')) > 5]
+    print(f"[过滤] 有效数据: {len(deduped)}条")
 
-    stage_started = time.perf_counter()
     detail_results = load_detail_results(deduped, existing_tours)
-    log_stage("load detail results", stage_started)
 
-    stage_started = time.perf_counter()
+    # 转换为前端格式
     tours = []
-    skipped_tours = 0
-    total = len(deduped)
-    for index, raw in enumerate(deduped, 1):
-        tour = raw_to_tour(raw, index, detail_results.get(make_tour_key(raw), empty_detail()))
-        if tour is None:
-            skipped_tours += 1
-        else:
+    for i, raw in enumerate(deduped, 1):
+        tour = raw_to_tour(raw, i, detail_results.get(make_tour_key(raw), empty_detail()))
+        if tour is not None:
             existing = existing_tours.get(make_tour_key(tour))
             if existing and existing.get("createdAt"):
                 tour["createdAt"] = existing["createdAt"]
             tours.append(tour)
-        if index % 250 == 0 or index == total:
-            print(f"[transform] {index}/{total} kept={len(tours)} skipped={skipped_tours}")
-    log_stage("transform raw to tours", stage_started, f"kept={len(tours)} skipped={skipped_tours}")
 
+    print(f"[转换] 生成 {len(tours)} 条 Tour 数据")
     for source in sorted(set(t["source"] for t in tours)):
         subset = [tour for tour in tours if tour["source"] == source]
         print(
-            f"[detail coverage] {source}: "
+            f"[详情覆盖] {source}: "
             f"itinerary={sum(1 for tour in subset if tour.get('itinerary'))}/{len(subset)} "
             f"inclusions={sum(1 for tour in subset if tour.get('inclusions'))}/{len(subset)} "
             f"exclusions={sum(1 for tour in subset if tour.get('exclusions'))}/{len(subset)} "
             f"notes={sum(1 for tour in subset if tour.get('importantNotes'))}/{len(subset)}"
         )
 
-    stage_started = time.perf_counter()
     tours = filter_unavailable_tours(tours)
-    log_stage("availability filter", stage_started, f"{len(tours)} kept")
+    print(f"[输出] 自动过滤后 {len(tours)} 条 Tour 数据")
 
-    stage_started = time.perf_counter()
+    # 生成元数据
     tours_clean = clean_nulls(tours)
     sources = sorted(set(t["source"] for t in tours_clean))
     destinations = sorted(set(t["destination"] for t in tours_clean if t.get("destination")))
     themes = sorted(set(t["theme"] for t in tours_clean if t.get("theme")))
-    log_stage("build metadata", stage_started, f"sources={len(sources)} destinations={len(destinations)} themes={len(themes)}")
 
     sources_def = [
-        {"name": s, "logo": f"/icons/{s}.png", "color": SOURCE_COLORS.get(s, "#666")}
+        {"name": s, "logo": f"/icons/{s}.png", "color": SOURCE_COLORS.get(s, '#666')}
         for s in sources
     ]
 
+    # 写入 tours.ts (元数据)
     ts_content = f'''import type {{ Tour }} from '@/types/tour';
 
 export const sources = {json.dumps(sources_def, ensure_ascii=False, indent=2)};
@@ -1150,26 +866,25 @@ export const tours: Tour[] = [];
 '''
 
     ts_path = os.path.join(data_dir, "tours.ts")
-    stage_started = time.perf_counter()
     with open(ts_path, "w", encoding="utf-8") as f:
         f.write(ts_content)
-    log_stage("write tours.ts", stage_started, ts_path)
+    print(f"[保存] tours.ts -> {ts_path}")
 
-    json_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "public", "data", "tours.json"))
+    # 写入 tours.json (数据，无BOM)
+    json_path = os.path.join(os.path.dirname(__file__), "..", "public", "data", "tours.json")
+    json_path = os.path.abspath(json_path)
     os.makedirs(os.path.dirname(json_path), exist_ok=True)
-    stage_started = time.perf_counter()
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(tours_clean, f, ensure_ascii=False, separators=(",", ":"))
-    log_stage("write tours.json", stage_started, f"{json_path} ({os.path.getsize(json_path) / 1024:.1f} KB)")
 
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(tours_clean, f, ensure_ascii=False, separators=(',', ':'))
     split_script = os.path.abspath(os.path.join(os.path.dirname(__file__), "split_tour_data.mjs"))
     if os.path.exists(split_script):
-        split_started = time.perf_counter()
-        result = subprocess.run(["node", split_script], check=False)
-        log_stage("split tour data", split_started, f"exit={result.returncode}")
+        os.system(f'node "{split_script}"')
+    print(f"[保存] tours.json -> {json_path}")
+    print(f"[文件大小] {os.path.getsize(json_path) / 1024:.1f} KB")
 
     print("=" * 60)
-    log_stage("merge pipeline complete", started_at, f"{len(tours_clean)} tours")
+    print("完成！")
 
 
 if __name__ == "__main__":

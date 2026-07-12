@@ -7,6 +7,6 @@
   </defs>
   <rect width="800" height="600" fill="url(#g)" />
   <rect x="60" y="60" width="680" height="480" rx="32" fill="#f8fafc" opacity="0.88" />
-  <text x="400" y="290" text-anchor="middle" font-size="42" fill="#475569" font-family="Arial, sans-serif">图片暂不可用</text>
+  <text x="400" y="290" text-anchor="middle" font-size="42" fill="#475569" font-family="Arial, sans-serif">老广精选线路</text>
   <text x="400" y="350" text-anchor="middle" font-size="26" fill="#64748b" font-family="Arial, sans-serif">广之旅</text>
 </svg>

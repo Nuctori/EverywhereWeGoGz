@@ -30,6 +30,7 @@ const tourMetaSchema = z.object({
 
 export const tourSummarySchema = z.object({
   id: z.string().min(1),
+  sourceId: z.string().optional(),
   title: z.string().min(1),
   source: z.string().min(1),
   destination: z.string().min(1),
@@ -97,6 +98,7 @@ export const toursListSchema = z.array(tourSummarySchema);
 
 export const tourIndexEntrySchema = z.object({
   id: z.string().min(1),
+  sourceId: z.string().optional(),
   title: z.string().min(1),
   source: z.string().min(1),
   destination: z.string().min(1),

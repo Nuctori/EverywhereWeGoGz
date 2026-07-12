@@ -29,6 +29,7 @@ function App() {
     if (typeof nextQuery === 'string') {
       setDraftSearchQuery(nextQuery);
     }
+    setAiSearchRequest(null);
     setSubmittedSearchQuery(query);
 
     const listEl = document.getElementById('tour-list');
