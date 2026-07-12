@@ -66,17 +66,16 @@ function useToursData() {
   const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [hasPageChunks, setHasPageChunks] = useState(true);
   const loadedPagesRef = useRef<Set<number>>(new Set());
   const inFlightPagesRef = useRef<Set<number>>(new Set());
-  const failedPageRetryAfterRef = useRef<Map<number, number>>(new Map());
   const hasPageChunksRef = useRef(true);
   const catalogLoadedRef = useRef(false);
   const catalogRequestRef = useRef<Promise<void> | null>(null);
   const backgroundCatalogTimerRef = useRef<number | null>(null);
   const mountedRef = useRef(false);
+
   const syncLoadingMoreState = useCallback(() => {
     setLoadingMore(inFlightPagesRef.current.size > 0);
   }, []);
@@ -208,13 +207,10 @@ function useToursData() {
     return () => { cancelled = true; };
   }, [loadCatalog]);
 
-  const loadMorePages = useCallback(async (neededPage: number, forceRetry = false) => {
-    if (!hasPageChunksRef.current) return false;
-    if (loadedPagesRef.current.has(neededPage)) return true;
-    if (inFlightPagesRef.current.has(neededPage)) return false;
-
-    const retryAfter = failedPageRetryAfterRef.current.get(neededPage) ?? 0;
-    if (!forceRetry && retryAfter > Date.now()) return false;
+  const loadMorePages = useCallback(async (neededPage: number) => {
+    if (!hasPageChunksRef.current) return;
+    if (loadedPagesRef.current.has(neededPage)) return;
+    if (inFlightPagesRef.current.has(neededPage)) return;
 
     inFlightPagesRef.current.add(neededPage);
     syncLoadingMoreState();
@@ -230,15 +226,9 @@ function useToursData() {
         const nextItems = pageData.items.filter((tour: TourSummary) => !existingIds.has(tour.id));
         return prev.concat(nextItems);
       });
-      failedPageRetryAfterRef.current.delete(neededPage);
-      if (mountedRef.current) setLoadMoreError(null);
-      return true;
     } catch {
-      failedPageRetryAfterRef.current.set(neededPage, Date.now() + 4000);
-      if (mountedRef.current) {
-        setLoadMoreError('网络刚刚抖了一下，稍后会自动重试');
-      }
-      return false;
+      hasPageChunksRef.current = false;
+      setHasPageChunks(false);
     } finally {
       inFlightPagesRef.current.delete(neededPage);
       syncLoadingMoreState();
@@ -253,7 +243,6 @@ function useToursData() {
     loadingMore,
     total,
     loadMorePages,
-    loadMoreError,
     loadedPagesRef,
     hasPageChunks,
     hasPageChunksRef,
@@ -489,7 +478,6 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     loadingMore,
     total,
     loadMorePages,
-    loadMoreError,
     hasPageChunks,
     hasPageChunksRef,
   } = useToursData();
@@ -512,13 +500,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const loadMoreTimerRef = useRef<number | null>(null);
   const viewVersionRef = useRef(0);
-  // filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
+// filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
-  const [clearedAiRequestId, setClearedAiRequestId] = useState<number | null>(null);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
+  const previousAiSearchRequestIdRef = useRef<number | null>(null);
   const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
   const loadedTourById = useMemo(() => {
     const entries = catalogTours.length > 0 ? catalogTours : localTours;
@@ -574,23 +562,6 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     () => getSourceOptions(catalogSourceTours),
     [catalogSourceTours],
   );
-
-  useLayoutEffect(() => {
-    if (!deepLinkTarget) return;
-
-    const targetPage = deepLinkResolution?.page ?? null;
-
-    if (deepLinkTour) {
-      if (selectedSummaryTour !== deepLinkTour) {
-        selectTour(deepLinkTour);
-      }
-    }
-
-    if (targetPage !== null && deepLinkRequestedPageRef.current !== targetPage) {
-      deepLinkRequestedPageRef.current = targetPage;
-      void loadMorePages(targetPage);
-    }
-  }, [deepLinkResolution, deepLinkTarget, deepLinkTour, loadMorePages, selectTour, selectedSummaryTour]);
 
   const priceRange = useMemo(
     () => [
@@ -693,14 +664,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     () => ({ normalized: normalizedSearchQuery, terms: searchTerms }),
     [normalizedSearchQuery, searchTerms],
   );
-  const isAiSearchMode = Boolean(
-    aiRecommendationResult ||
-    (
-      aiSearchRequest &&
-      aiSearchRequest.id !== clearedAiRequestId &&
-      aiSearchRequest.prompt.trim().length > 0
-    ),
-  );
+  const isAiSearchMode = Boolean(aiRecommendationResult);
   const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode;
   const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;
 
@@ -875,9 +839,21 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
-    setClearedAiRequestId(aiSearchRequest?.id ?? null);
     setAiClearVersion((current) => current + 1);
-  }, [aiSearchRequest?.id]);
+  }, []);
+
+  useEffect(() => {
+    if (aiSearchRequest) {
+      previousAiSearchRequestIdRef.current = aiSearchRequest.id;
+      return;
+    }
+
+    if (previousAiSearchRequestIdRef.current !== null) {
+      previousAiSearchRequestIdRef.current = null;
+      clearAiRecommendation();
+    }
+  }, [aiSearchRequest, clearAiRecommendation]);
+
   const visibleDisplayCandidates = useMemo(
     () => displayTours.slice(0, visibleCount),
     [displayTours, visibleCount],
@@ -927,6 +903,22 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     visibleDisplayCandidates,
   ]);
 
+  useLayoutEffect(() => {
+    if (!deepLinkTarget) return;
+
+    const targetPage = deepLinkResolution?.page ?? null;
+
+    if (deepLinkTour) {
+      if (selectedSummaryTour !== deepLinkTour) {
+        selectTour(deepLinkTour);
+      }
+    }
+
+    if (targetPage !== null && deepLinkRequestedPageRef.current !== targetPage) {
+      deepLinkRequestedPageRef.current = targetPage;
+      void loadMorePages(targetPage);
+    }
+  }, [deepLinkResolution, deepLinkTarget, deepLinkTour, loadMorePages, selectTour, selectedSummaryTour]);
   const emptyStateTitle = normalizedSearchQuery && !isAiSearchMode
     ? hasNaturalLanguageQuery
       ? '这句需求没有直接卡死结果'
@@ -938,8 +930,16 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       : '可以换个关键词，或者先放宽时间、预算、天数这些条件。'
     : '可以先放宽时间或预算条件，再看看更多线路';
 
-  const loadNextBatch = useCallback((forceRetry = false) => {
-      if (isLoadingMore || loadingMore) return;
+  const handleObserver = useCallback(
+
+        // IntersectionObserver 监听底部占位元素，进入视口时触发 loadMorePages
+    (entries: IntersectionObserverEntry[]) => {
+      const [target] = entries;
+
+      if (!target.isIntersecting || isLoadingMore || loadingMore) {
+        return;
+      }
+
       if (visibleCount < displayTours.length) {
         const viewVersion = viewVersionRef.current;
         setIsLoadingMore(true);
@@ -962,16 +962,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         const viewVersion = viewVersionRef.current;
 
         setIsLoadingMore(true);
-        void loadMorePages(nextPage, forceRetry).then((loaded) => {
+        void loadMorePages(nextPage).finally(() => {
           if (viewVersionRef.current !== viewVersion) {
             setIsLoadingMore(false);
             return;
           }
 
-          if (loaded) {
-            setVisibleCount((current) => current + PAGE_SIZE);
-          }
-        }).finally(() => {
+          setVisibleCount((current) => current + PAGE_SIZE);
           setIsLoadingMore(false);
         });
       }
@@ -987,21 +984,6 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       localTours.length,
       visibleCount,
     ],
-  );
-
-  const handleObserver = useCallback(
-
-        // IntersectionObserver 监听底部占位元素，进入视口时触发 loadMorePages
-    (entries: IntersectionObserverEntry[]) => {
-      const [target] = entries;
-
-      if (!target.isIntersecting) {
-        return;
-      }
-
-      loadNextBatch(false);
-    },
-    [loadNextBatch],
   );
 
   useEffect(() => {
@@ -1114,8 +1096,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       })),
     [catalogSourceTours],
   );
-  const aiCandidatesReady =
-    indexTours.length > 0 || catalogTours.length > 0 || localTours.length >= total || !hasPageChunks;
+  const aiCandidatesReady = indexTours.length > 0 || catalogTours.length > 0 || localTours.length >= total;
 
   const focusResults = useCallback(() => {
     document.getElementById('tour-list')?.scrollIntoView({ behavior: 'smooth' });
@@ -1805,19 +1786,6 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 <div className="flex items-center gap-2 text-stone-500">
                   <Loader2 className="w-5 h-5 animate-spin" />
                   <span className="text-sm">正在加载更多...</span>
-                </div>
-              ) : loadMoreError ? (
-                <div className="flex flex-col items-center gap-3 text-stone-500">
-                  <span className="text-sm">{loadMoreError}</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => loadNextBatch(true)}
-                  >
-                    重试加载
-                  </Button>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 text-stone-400">

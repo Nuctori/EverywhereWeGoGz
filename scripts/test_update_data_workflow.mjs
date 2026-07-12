@@ -119,10 +119,6 @@ assert.ok(
   packageJson.scripts?.['audit:crawler-syntax'],
   'expected package script for crawler syntax audit to exist',
 );
-assert.ok(
-  packageJson.scripts?.['audit:jrt365-crawl-guard'],
-  'expected package script for the JRT365 crawl guard to exist',
-);
 
 const preflightStart = workflow.indexOf('preflight:');
 const firstCrawlStart = workflow.indexOf('crawl-jrt365:');
@@ -161,6 +157,10 @@ const jrtJobStart = workflow.indexOf('crawl-jrt365:');
 const nextJobStart = workflow.indexOf('crawl-saihuitong:');
 assert.ok(jrtJobStart > -1 && nextJobStart > jrtJobStart, 'expected crawl-jrt365 job block to be found');
 const jrtJob = workflow.slice(jrtJobStart, nextJobStart);
+assert.ok(
+  packageJson.scripts?.['audit:jrt365-crawl-guard'],
+  'expected package script for the JRT365 crawl guard to exist',
+);
 assert.ok(
   jrtJob.includes('- name: Verify JRT365 crawl guard'),
   'expected crawl-jrt365 job to verify the empty-output guard before crawling',

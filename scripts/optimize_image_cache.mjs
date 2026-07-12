@@ -24,9 +24,6 @@ const stats = {
   removalDeferredCount: 0,
   failedConversionCount: 0,
   remoteRewriteCount: 0,
-  remoteDownloadedCount: 0,
-  remoteDownloadFailedCount: 0,
-  remoteFallbackCount: 0,
   localLegacyRewriteCount: 0,
   unsupportedRewriteCount: 0,
   originalBytes: 0,
@@ -95,29 +92,6 @@ function collectStrings(value, result = []) {
   return result;
 }
 
-function collectRemoteImageStrings(value, result = [], parentKey = '') {
-  if (typeof value === 'string') {
-    if (/^https?:\/\//i.test(value) && isImageLikeKey(parentKey)) {
-      result.push(value);
-    }
-    return result;
-  }
-  if (Array.isArray(value)) {
-    for (const item of value) collectRemoteImageStrings(item, result, parentKey);
-    return result;
-  }
-  if (value && typeof value === 'object') {
-    for (const [key, child] of Object.entries(value)) {
-      collectRemoteImageStrings(child, result, key);
-    }
-  }
-  return result;
-}
-
-function isImageLikeKey(key) {
-  return /image|logo|photo|cover|thumb|avatar/i.test(key);
-}
-
 function cachedPublicPathForRemoteImage(url) {
   if (!/^https?:\/\//i.test(url)) return null;
   let parsed;
@@ -137,56 +111,6 @@ function cachedPublicPathForRemoteImage(url) {
   if (fs.existsSync(cachedWebpPath)) return toPublicPath(cachedWebpPath);
   if (fs.existsSync(cachedOriginalPath)) return toPublicPath(cachedOriginalPath);
   return null;
-}
-
-async function cacheRemoteImage(url) {
-  if (process.env.IMAGE_CACHE_DOWNLOAD_REMOTE !== '1') {
-    return null;
-  }
-
-  let parsed;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return null;
-  }
-
-  const hostDir = parsed.host.replace(/:/g, '_');
-  const hostCacheDir = path.join(imageCacheDir, hostDir);
-  fs.mkdirSync(hostCacheDir, { recursive: true });
-  const hash = crypto.createHash('sha1').update(url).digest('hex').slice(0, 16);
-  const webpPath = path.join(hostCacheDir, `${hash}.webp`);
-  if (fs.existsSync(webpPath)) return toPublicPath(webpPath);
-
-  try {
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0',
-      },
-      signal: AbortSignal.timeout(Number(process.env.IMAGE_CACHE_REMOTE_TIMEOUT_MS || 15000)),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-    const contentType = response.headers.get('content-type')?.toLowerCase() || '';
-    if (contentType && !contentType.includes('image')) {
-      throw new Error(`unexpected content-type: ${contentType}`);
-    }
-    const buffer = Buffer.from(await response.arrayBuffer());
-    await sharp(buffer)
-      .rotate()
-      .webp({
-        quality,
-        effort: 4,
-      })
-      .toFile(webpPath);
-    stats.remoteDownloadedCount += 1;
-    return toPublicPath(webpPath);
-  } catch (error) {
-    stats.remoteDownloadFailedCount += 1;
-    console.warn(`remote image fallback: ${url} (${error.message})`);
-    return ensureFallbackPlaceholder();
-  }
 }
 
 function cachedPublicPathForLocalLegacyImage(value) {
@@ -210,34 +134,19 @@ function getJsonDataFiles() {
   return files;
 }
 
-async function collectRemoteImageReplacements(jsonFiles) {
+function collectRemoteImageReplacements(jsonFiles) {
   const replacements = new Map();
-  const remoteUrls = new Set();
 
   for (const filePath of jsonFiles) {
     if (!fs.existsSync(filePath)) continue;
     const parsed = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    for (const value of collectRemoteImageStrings(parsed)) remoteUrls.add(value);
-  }
-
-  const remoteValues = [...remoteUrls];
-  const concurrency = Math.max(1, Number(process.env.IMAGE_CACHE_REMOTE_CONCURRENCY || 12));
-  let cursor = 0;
-  async function worker() {
-    while (cursor < remoteValues.length) {
-      const value = remoteValues[cursor];
-      cursor += 1;
-      let cachedPath = cachedPublicPathForRemoteImage(value) || await cacheRemoteImage(value);
-      if (!cachedPath && process.env.IMAGE_CACHE_DOWNLOAD_REMOTE !== '1') {
-        cachedPath = ensureFallbackPlaceholder();
-        stats.remoteFallbackCount += 1;
-      }
+    for (const value of collectStrings(parsed)) {
+      const cachedPath = cachedPublicPathForRemoteImage(value);
       if (cachedPath && cachedPath !== value) {
         replacements.set(value, cachedPath);
       }
     }
   }
-  await Promise.all(Array.from({ length: Math.min(concurrency, remoteValues.length) }, () => worker()));
 
   return replacements;
 }
@@ -376,7 +285,7 @@ async function main() {
 
   const { replacements, deferredOriginals } = await collectReplacementsFromCache();
   const jsonFiles = getJsonDataFiles();
-  const remoteReplacements = await collectRemoteImageReplacements(jsonFiles);
+  const remoteReplacements = collectRemoteImageReplacements(jsonFiles);
   for (const [remoteUrl, cachedPath] of remoteReplacements) {
     replacements.set(remoteUrl, cachedPath);
   }
@@ -402,9 +311,6 @@ async function main() {
   console.log(`original cleanup deferred: ${stats.removalDeferredCount}`);
   console.log(`webp conversion failures: ${stats.failedConversionCount}`);
   console.log(`external image URLs rewritten to cache: ${stats.remoteRewriteCount}`);
-  console.log(`external image URLs downloaded to cache: ${stats.remoteDownloadedCount}`);
-  console.log(`external image URL download fallbacks: ${stats.remoteDownloadFailedCount}`);
-  console.log(`external image URL cache misses rewritten to fallback: ${stats.remoteFallbackCount}`);
   console.log(`legacy local image URLs rewritten to cache: ${stats.localLegacyRewriteCount}`);
   console.log(`unsupported cached images rewritten to fallback: ${stats.unsupportedRewriteCount}`);
   console.log(`remaining legacy cache images: ${remainingLegacyImages}`);

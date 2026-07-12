@@ -31,5 +31,12 @@ __pycache__/
 # Debug artifacts
 .playwright-mcp/
 output/
-weekly-wechat-posts/
+
+# Local workspace artifacts
+.tmp-wechat-cdp-profile/
 .baoyu-skills/
+.codex_user_sim_report.md
+post-to-wechat/
+audit/data-integrity-report.json
+
+weekly-wechat-posts/

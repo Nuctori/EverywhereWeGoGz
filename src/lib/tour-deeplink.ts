@@ -137,31 +137,3 @@ export function findTourDeepLinkResolution(
 
   return null;
 }
-
-export function getRequestedTourId(search: string) {
-  const normalized = typeof search === 'string' ? search.trim() : '';
-  if (!normalized) return '';
-  const params = new URLSearchParams(normalized.startsWith('?') ? normalized.slice(1) : normalized);
-  return (params.get('tour') || '').trim();
-}
-
-export function findTourByDeepLink(search: string, tours: TourSummary[]) {
-  const requestedTourId = getRequestedTourId(search);
-  if (!requestedTourId) return null;
-  return tours.find((tour) => tour.id === requestedTourId) || null;
-}
-
-export function resolveTourByDeepLink(
-  search: string,
-  primaryTours: TourSummary[],
-  fallbackTours: TourSummary[] = [],
-) {
-  const requestedTourId = getRequestedTourId(search);
-  if (!requestedTourId) return null;
-
-  return (
-    primaryTours.find((tour) => tour.id === requestedTourId) ||
-    fallbackTours.find((tour) => tour.id === requestedTourId) ||
-    null
-  );
-}
