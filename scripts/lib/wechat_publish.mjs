@@ -247,12 +247,27 @@ export function resolveCoverFile(rootDir, articlePath, frontmatter) {
 export async function prepareCoverForUpload(coverPath, outputDir) {
   const targetPath = path.join(outputDir, 'cover-upload.jpg');
   if (/^https?:\/\//i.test(String(coverPath))) {
-    const response = await fetch(String(coverPath));
-    if (!response.ok) {
-      throw new Error(`Cover image download failed: ${response.status} ${String(coverPath)}`);
+    try {
+      const response = await fetch(String(coverPath), { signal: AbortSignal.timeout(15000) });
+      if (response.ok) {
+        const bytes = Buffer.from(await response.arrayBuffer());
+        await sharp(bytes).jpeg({ quality: 88 }).toFile(targetPath);
+        return targetPath;
+      }
+      console.warn(`Cover image download failed (${response.status}), trying fallback: ${String(coverPath)}`);
+    } catch (err) {
+      console.warn(`Cover image fetch error: ${err.message}, trying fallback`);
     }
-    const bytes = Buffer.from(await response.arrayBuffer());
-    await sharp(bytes).jpeg({ quality: 88 }).toFile(targetPath);
+    // Fallback: generate a simple solid-color cover with the article title text
+    const width = 1200;
+    const height = 630;
+    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+      <rect width="${width}" height="${height}" fill="#0f766e"/>
+      <text x="${width / 2}" y="${height / 2}" font-family="sans-serif" font-size="48" fill="white" text-anchor="middle" dominant-baseline="middle">老广去边度</text>
+    </svg>`;
+    const svgBuffer = Buffer.from(svg);
+    await sharp(svgBuffer).jpeg({ quality: 88 }).toFile(targetPath);
+    console.warn(`Generated fallback cover image -> ${targetPath}`);
     return targetPath;
   }
   if (!fs.existsSync(coverPath)) {
