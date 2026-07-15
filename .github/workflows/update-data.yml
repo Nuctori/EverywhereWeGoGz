@@ -16,6 +16,7 @@ env:
   IMAGE_CACHE_MODE: remote
   AVAILABILITY_FILTER: 0
   JRT365_AVAILABILITY_FILTER: 1
+  GZL_AVAILABILITY_FILTER: 1
   JLB_AVAILABILITY_FILTER: 1
 
 jobs:
@@ -62,6 +63,12 @@ jobs:
       - name: Install Python dependencies
         run: pip install requests beautifulsoup4 lxml selenium
 
+      - name: Setup Chrome for Selenium
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq google-chrome-stable 2>/dev/null || true
+          echo "Chrome version: $(google-chrome --version 2>/dev/null || echo 'not found, will use fallback')"
+
       - name: Verify JRT365 crawl guard
         run: npm run audit:jrt365-crawl-guard
 
@@ -91,6 +98,12 @@ jobs:
 
       - name: Install Python dependencies
         run: pip install requests beautifulsoup4 lxml selenium
+
+      - name: Setup Chrome for Selenium
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq google-chrome-stable 2>/dev/null || true
+          echo "Chrome version: $(google-chrome --version 2>/dev/null || echo 'not found, will use fallback')"
 
       - name: Crawl Saihuitong full
         timeout-minutes: 60
