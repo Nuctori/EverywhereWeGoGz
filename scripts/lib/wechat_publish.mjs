@@ -370,15 +370,26 @@ async function rewriteHtmlImagesForBundle(rootDir, articlePath, html, outputDir)
 async function loadImageAsset(rootDir, articlePath, source) {
   const decodedSource = decodeHtmlEntities(source);
   if (/^https?:\/\//i.test(decodedSource)) {
-    const response = await fetch(decodedSource);
-    if (!response.ok) {
-      throw new Error(`Inline image download failed: ${response.status} ${decodedSource}`);
+    try {
+      const response = await fetch(decodedSource, { signal: AbortSignal.timeout(15000) });
+      if (response.ok) {
+        const bytes = Buffer.from(await response.arrayBuffer());
+        const url = new URL(decodedSource);
+        const fileName = path.basename(url.pathname || 'image.jpg') || 'image.jpg';
+        const contentType = response.headers.get('content-type') || mimeTypeFromFileName(fileName);
+        return normalizeInlineImageAsset({ bytes, fileName, contentType });
+      }
+      console.warn(`Inline image download failed (${response.status}), using placeholder: ${decodedSource}`);
+    } catch (err) {
+      console.warn(`Inline image fetch error: ${err.message}, using placeholder: ${decodedSource}`);
     }
-    const bytes = Buffer.from(await response.arrayBuffer());
-    const url = new URL(decodedSource);
-    const fileName = path.basename(url.pathname || 'image.jpg') || 'image.jpg';
-    const contentType = response.headers.get('content-type') || mimeTypeFromFileName(fileName);
-    return normalizeInlineImageAsset({ bytes, fileName, contentType });
+    // Return a 1x1 transparent pixel placeholder
+    const placeholderSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1" fill="#e5e7eb"/></svg>';
+    return normalizeInlineImageAsset({
+      bytes: Buffer.from(placeholderSvg),
+      fileName: 'placeholder.svg',
+      contentType: 'image/svg+xml',
+    });
   }
 
   let filePath = decodedSource;
