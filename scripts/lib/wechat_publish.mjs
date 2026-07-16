@@ -7,14 +7,57 @@ import { ensureReferencedQrAssets } from './weekly_wechat_article.mjs';
 
 const SITE_BASE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
 
-function tryResolveLocalCachedImage(url) {
-  const str = String(url || '');
-  // /data/image-cache/... -> public/data/image-cache/... (relative path)
-  const idx = str.indexOf('/data/image-cache/');
-  if (idx === -1) return null;
-  const localPath = path.join('public', str.slice(idx + 1).replace(/[/\\]/g, path.sep));
-  if (fs.existsSync(localPath)) return localPath;
+function resolveLocalImage(url) {
+  const str = String(url || '').trim();
+  if (!str) return null;
+
+  // 1) If the URL starts with SITE_BASE_URL, strip it and check public/...
+  if (str.startsWith(SITE_BASE_URL)) {
+    const relPath = str.slice(SITE_BASE_URL.length).replace(/[/\\]/g, path.sep);
+    if (relPath) {
+      const candidate = path.join('public', relPath);
+      if (fs.existsSync(candidate)) return candidate;
+    }
+  }
+
+  // 2) If the URL contains /data/image-cache/, try that path directly
+  const cacheIdx = str.indexOf('/data/image-cache/');
+  if (cacheIdx !== -1) {
+    const relPath = str.slice(cacheIdx + 1).replace(/[/\\]/g, path.sep);
+    const candidate = path.join('public', relPath);
+    if (fs.existsSync(candidate)) return candidate;
+  }
+
+  // 3) Extract filename and search the image cache directories for a match
+  try {
+    const urlObj = new URL(str);
+    const fileName = path.basename(urlObj.pathname);
+    if (fileName && fileName.length > 8) {
+      const cacheDir = 'public/data/image-cache';
+      if (fs.existsSync(cacheDir)) {
+        const domains = fs.readdirSync(cacheDir);
+        for (const domain of domains) {
+          const domainDir = path.join(cacheDir, domain);
+          if (!fs.statSync(domainDir).isDirectory()) continue;
+          const filePath = path.join(domainDir, fileName);
+          if (fs.existsSync(filePath)) return filePath;
+        }
+      }
+    }
+  } catch {
+    // URL parsing failed, skip filename search
+  }
+
   return null;
+}
+
+function generateFallbackImage(width, height, label) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+    <rect width="${width}" height="${height}" fill="#e5e7eb"/>
+    <rect x="${width/2-40}" y="${height/2-40}" width="80" height="80" rx="8" fill="#9ca3af"/>
+    <text x="${width/2}" y="${height/2+60}" font-family="sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle">${label || '图片加载中'}</text>
+  </svg>`;
+  return Buffer.from(svg);
 }
 
 function stripWrappingQuotes(value) {
@@ -259,10 +302,10 @@ export function resolveCoverFile(rootDir, articlePath, frontmatter) {
 export async function prepareCoverForUpload(coverPath, outputDir) {
   const targetPath = path.join(outputDir, 'cover-upload.jpg');
   if (/^https?:\/\//i.test(String(coverPath))) {
-    // Try local cache first
-    const localPath = tryResolveLocalCachedImage(coverPath);
+    // Try local file system first (image cache is checked out in CI)
+    const localPath = resolveLocalImage(coverPath);
     if (localPath) {
-      console.warn(`Cover image found locally: ${localPath}`);
+      console.warn(`Cover image resolved locally: ${localPath}`);
       await sharp(localPath).jpeg({ quality: 88 }).toFile(targetPath);
       return targetPath;
     }
@@ -273,19 +316,13 @@ export async function prepareCoverForUpload(coverPath, outputDir) {
         await sharp(bytes).jpeg({ quality: 88 }).toFile(targetPath);
         return targetPath;
       }
-      console.warn(`Cover image download failed (${response.status}), trying fallback: ${String(coverPath)}`);
+      console.warn(`Cover image download failed (${response.status}): ${String(coverPath)}`);
     } catch (err) {
-      console.warn(`Cover image fetch error: ${err.message}, trying fallback`);
+      console.warn(`Cover image fetch error: ${err.message}`);
     }
-    // Fallback: generate a simple solid-color cover with the article title text
-    const width = 1200;
-    const height = 630;
-    const svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="${width}" height="${height}" fill="#0f766e"/>
-      <text x="${width / 2}" y="${height / 2}" font-family="sans-serif" font-size="48" fill="white" text-anchor="middle" dominant-baseline="middle">老广去边度</text>
-    </svg>`;
-    const svgBuffer = Buffer.from(svg);
-    await sharp(svgBuffer).jpeg({ quality: 88 }).toFile(targetPath);
+    // Fallback: solid-color cover
+    const fallbackBuffer = generateFallbackImage(1200, 630, '老广去边度');
+    await sharp(fallbackBuffer).jpeg({ quality: 88 }).toFile(targetPath);
     console.warn(`Generated fallback cover image -> ${targetPath}`);
     return targetPath;
   }
@@ -389,10 +426,10 @@ async function rewriteHtmlImagesForBundle(rootDir, articlePath, html, outputDir)
 async function loadImageAsset(rootDir, articlePath, source) {
   const decodedSource = decodeHtmlEntities(source);
   if (/^https?:\/\//i.test(decodedSource)) {
-    // Try local cache first
-    const localPath = tryResolveLocalCachedImage(decodedSource);
+    // Try local file system first (image cache is checked out in CI)
+    const localPath = resolveLocalImage(decodedSource);
     if (localPath) {
-      console.warn(`Inline image found locally: ${localPath}`);
+      console.warn(`Inline image resolved locally: ${localPath}`);
       const bytes = fs.readFileSync(localPath);
       const fileName = path.basename(localPath);
       return normalizeInlineImageAsset({ bytes, fileName, contentType: mimeTypeFromFileName(fileName) });
@@ -406,14 +443,14 @@ async function loadImageAsset(rootDir, articlePath, source) {
         const contentType = response.headers.get('content-type') || mimeTypeFromFileName(fileName);
         return normalizeInlineImageAsset({ bytes, fileName, contentType });
       }
-      console.warn(`Inline image download failed (${response.status}), using placeholder: ${decodedSource}`);
+      console.warn(`Inline image download failed (${response.status}): ${decodedSource}`);
     } catch (err) {
-      console.warn(`Inline image fetch error: ${err.message}, using placeholder: ${decodedSource}`);
+      console.warn(`Inline image fetch error: ${err.message}`);
     }
-    // Return a 1x1 transparent pixel placeholder
-    const placeholderSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><rect width="1" height="1" fill="#e5e7eb"/></svg>';
+    // Fallback: visible placeholder
+    const fallbackBuffer = generateFallbackImage(400, 300, '');
     return normalizeInlineImageAsset({
-      bytes: Buffer.from(placeholderSvg),
+      bytes: fallbackBuffer,
       fileName: 'placeholder.svg',
       contentType: 'image/svg+xml',
     });
