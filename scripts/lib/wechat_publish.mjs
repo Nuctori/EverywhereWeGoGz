@@ -5,6 +5,18 @@ import crypto from 'node:crypto';
 import sharp from 'sharp';
 import { ensureReferencedQrAssets } from './weekly_wechat_article.mjs';
 
+const SITE_BASE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
+
+function tryResolveLocalCachedImage(url) {
+  const str = String(url || '');
+  // /data/image-cache/... -> public/data/image-cache/... (relative path)
+  const idx = str.indexOf('/data/image-cache/');
+  if (idx === -1) return null;
+  const localPath = path.join('public', str.slice(idx + 1).replace(/[/\\]/g, path.sep));
+  if (fs.existsSync(localPath)) return localPath;
+  return null;
+}
+
 function stripWrappingQuotes(value) {
   if (
     (value.startsWith('"') && value.endsWith('"')) ||
@@ -247,6 +259,13 @@ export function resolveCoverFile(rootDir, articlePath, frontmatter) {
 export async function prepareCoverForUpload(coverPath, outputDir) {
   const targetPath = path.join(outputDir, 'cover-upload.jpg');
   if (/^https?:\/\//i.test(String(coverPath))) {
+    // Try local cache first
+    const localPath = tryResolveLocalCachedImage(coverPath);
+    if (localPath) {
+      console.warn(`Cover image found locally: ${localPath}`);
+      await sharp(localPath).jpeg({ quality: 88 }).toFile(targetPath);
+      return targetPath;
+    }
     try {
       const response = await fetch(String(coverPath), { signal: AbortSignal.timeout(15000) });
       if (response.ok) {
@@ -370,6 +389,14 @@ async function rewriteHtmlImagesForBundle(rootDir, articlePath, html, outputDir)
 async function loadImageAsset(rootDir, articlePath, source) {
   const decodedSource = decodeHtmlEntities(source);
   if (/^https?:\/\//i.test(decodedSource)) {
+    // Try local cache first
+    const localPath = tryResolveLocalCachedImage(decodedSource);
+    if (localPath) {
+      console.warn(`Inline image found locally: ${localPath}`);
+      const bytes = fs.readFileSync(localPath);
+      const fileName = path.basename(localPath);
+      return normalizeInlineImageAsset({ bytes, fileName, contentType: mimeTypeFromFileName(fileName) });
+    }
     try {
       const response = await fetch(decodedSource, { signal: AbortSignal.timeout(15000) });
       if (response.ok) {
