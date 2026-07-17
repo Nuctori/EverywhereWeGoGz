@@ -28,24 +28,33 @@ function resolveLocalImage(url) {
     if (fs.existsSync(candidate)) return candidate;
   }
 
-  // 3) Extract filename and search the image cache directories for a match
+  // 3) For any HTTP URL, compute the cache hash and check local cache
+  //    The image cache uses: sha1(url).slice(0,16) as filename
   try {
     const urlObj = new URL(str);
-    const fileName = path.basename(urlObj.pathname);
-    if (fileName && fileName.length > 8) {
-      const cacheDir = 'public/data/image-cache';
-      if (fs.existsSync(cacheDir)) {
-        const domains = fs.readdirSync(cacheDir);
-        for (const domain of domains) {
-          const domainDir = path.join(cacheDir, domain);
-          if (!fs.statSync(domainDir).isDirectory()) continue;
-          const filePath = path.join(domainDir, fileName);
-          if (fs.existsSync(filePath)) return filePath;
-        }
+    const hostDir = urlObj.host.replace(/:/g, '_');
+    const ext = path.extname(urlObj.pathname).toLowerCase();
+    const hash = crypto.createHash('sha1').update(str).digest('hex').slice(0, 16);
+    const cacheDir = 'public/data/image-cache';
+    if (fs.existsSync(cacheDir)) {
+      // Check webp first, then original extension
+      const webpPath = path.join(cacheDir, hostDir, `${hash}.webp`);
+      if (fs.existsSync(webpPath)) return webpPath;
+      if (ext) {
+        const origPath = path.join(cacheDir, hostDir, `${hash}${ext}`);
+        if (fs.existsSync(origPath)) return origPath;
+      }
+      // Also try without hostDir — search all cache subdirs by hash
+      const domains = fs.readdirSync(cacheDir);
+      for (const domain of domains) {
+        const domainDir = path.join(cacheDir, domain);
+        if (!fs.statSync(domainDir).isDirectory()) continue;
+        const webpPath2 = path.join(domainDir, `${hash}.webp`);
+        if (fs.existsSync(webpPath2)) return webpPath2;
       }
     }
   } catch {
-    // URL parsing failed, skip filename search
+    // URL parsing failed, skip hash search
   }
 
   return null;
