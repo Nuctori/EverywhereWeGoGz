@@ -96,6 +96,11 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
       - name: Install Python dependencies
         run: pip install requests beautifulsoup4 lxml selenium
 
@@ -104,209 +109,6 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq google-chrome-stable 2>/dev/null || true
           echo "Chrome version: $(google-chrome --version 2>/dev/null || echo 'not found, will use fallback')"
-
-      - name: Crawl Saihuitong full
-        timeout-minutes: 60
-        run: python -u scripts/crawl_saihuitong_full.py
-
-      - name: Upload Saihuitong raw data
-        uses: actions/upload-artifact@v4
-        with:
-          name: raw-saihuitong
-          path: src/data/raw_saihuitong_full.json
-          if-no-files-found: error
-
-  crawl-pintu:
-    runs-on: ubuntu-latest
-    needs: preflight
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python dependencies
-        run: pip install requests beautifulsoup4 lxml selenium
-
-      - name: Crawl Pintu full
-        timeout-minutes: 60
-        run: python -u scripts/crawl_pintu_full.py
-
-      - name: Upload Pintu raw data
-        uses: actions/upload-artifact@v4
-        with:
-          name: raw-pintu
-          path: src/data/raw_pintu_full.json
-          if-no-files-found: error
-
-  crawl-gzl-api:
-    runs-on: ubuntu-latest
-    needs: preflight
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python dependencies
-        run: pip install requests beautifulsoup4 lxml selenium
-
-      - name: Crawl GZL API full
-        timeout-minutes: 60
-        run: python -u scripts/crawl_gzl_api.py
-
-      - name: Upload GZL raw data
-        uses: actions/upload-artifact@v4
-        with:
-          name: raw-gzl-api
-          path: src/data/raw_gzl_api.json
-          if-no-files-found: error
-
-  crawl-outdoors:
-    runs-on: ubuntu-latest
-    needs: preflight
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python dependencies
-        run: pip install requests beautifulsoup4 lxml selenium
-
-      - name: Crawl Outdoors full
-        timeout-minutes: 60
-        run: python -u scripts/crawl_outdoors_full.py
-
-      - name: Upload Outdoors raw data
-        uses: actions/upload-artifact@v4
-        with:
-          name: raw-outdoors
-          path: src/data/raw_outdoors_full.json
-          if-no-files-found: error
-
-  crawl-http-aggregate:
-    runs-on: ubuntu-latest
-    needs: preflight
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python dependencies
-        run: pip install requests beautifulsoup4 lxml selenium
-
-      - name: Crawl HTTP aggregate sources
-        timeout-minutes: 60
-        run: python -u scripts/full_crawl_v3.py
-
-      - name: Upload HTTP aggregate raw data
-        uses: actions/upload-artifact@v4
-        with:
-          name: raw-http
-          path: src/data/raw_http_full.json
-          if-no-files-found: error
-
-  update-and-deploy:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    needs:
-      - preflight
-      - crawl-jrt365
-      - crawl-saihuitong
-      - crawl-pintu
-      - crawl-gzl-api
-      - crawl-outdoors
-      - crawl-http-aggregate
-    if: always() && !cancelled() && needs.preflight.result == 'success' && (github.event_name == 'workflow_dispatch' || (needs.crawl-jrt365.result == 'success' && needs.crawl-saihuitong.result == 'success' && needs.crawl-pintu.result == 'success' && needs.crawl-gzl-api.result == 'success' && needs.crawl-outdoors.result == 'success' && needs.crawl-http-aggregate.result == 'success'))
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Verify crawler syntax
-        run: npm run audit:crawler-syntax
-
-      - name: Verify update workflow contract
-        run: npm run audit:update-data-workflow
-
-  crawl-jrt365:
-    runs-on: ubuntu-latest
-    needs: preflight
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Install Python dependencies
-        run: pip install requests beautifulsoup4 lxml selenium
-
-      - name: Verify JRT365 crawl guard
-        run: npm run audit:jrt365-crawl-guard
-
-      - name: Crawl JRT365 full
-        timeout-minutes: 60
-        run: python -u scripts/crawl_jrt365_full.py
-
-      - name: Upload JRT365 raw data
-        uses: actions/upload-artifact@v4
-        with:
-          name: raw-jrt365
-          path: src/data/raw_jrt365_full.json
-          if-no-files-found: error
-
-  crawl-saihuitong:
-    runs-on: ubuntu-latest
-    needs: preflight
-    if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python dependencies
-        run: pip install requests beautifulsoup4 lxml selenium
 
       - name: Crawl Saihuitong full
         timeout-minutes: 60
@@ -359,6 +161,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
       - name: Install Python dependencies
         run: pip install requests beautifulsoup4 lxml selenium
@@ -413,6 +220,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
       - name: Install Python dependencies
         run: pip install requests beautifulsoup4 lxml selenium
