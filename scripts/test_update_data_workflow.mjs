@@ -41,6 +41,37 @@ for (const stepName of [
   assert.ok(/timeout-minutes:\s+\d+/.test(stepChunk), `expected ${stepName} to have a timeout budget`);
 }
 
+
+const auditStepStart = workflow.indexOf('- name: Audit merged data');
+assert.ok(auditStepStart > -1, 'expected audit step to exist');
+assert.ok(
+  !workflow.slice(auditStepStart, auditStepStart + 200).includes('continue-on-error: true'),
+  'expected audit merged data to remain a blocking gate',
+);
+
+const fallbackJobStart = workflow.indexOf('dispatch-weekly-wechat-article-fallback:');
+assert.ok(fallbackJobStart > -1, 'expected fallback dispatch job to exist');
+assert.ok(
+  workflow.includes('actions/github-script@v7'),
+  'expected fallback job to dispatch Weekly WeChat Article via GitHub Script',
+);
+assert.ok(
+  workflow.includes("needs.update-and-deploy.result == 'failure'"),
+  'expected fallback job to only run when update-and-deploy fails',
+);
+assert.ok(
+  workflow.includes('actions: write'),
+  'expected fallback job to have actions write permission',
+);
+assert.ok(
+  workflow.includes('createWorkflowDispatch'),
+  'expected fallback job to create a workflow dispatch when audit fails',
+);
+assert.ok(
+  workflow.includes('core.setFailed('),
+  'expected fallback job to fail loudly when the audit report artifact is missing',
+);
+
 const gzlStepStart = workflow.indexOf('- name: Crawl GZL API full');
 assert.ok(gzlStepStart > -1, 'expected GZL crawl step to exist');
 assert.ok(

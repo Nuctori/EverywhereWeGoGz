@@ -371,4 +371,43 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: update tour data [$(date +%Y-%m-%d)]"
           git push
+
+  dispatch-weekly-wechat-article-fallback:
+    needs: update-and-deploy
+    if: always() && needs.update-and-deploy.result == 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Download audit report
         continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: data-integrity-report
+          path: audit
+
+      - name: Dispatch Weekly WeChat Article fallback
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('node:fs');
+            const reportPath = 'audit/data-integrity-report.json';
+            if (!fs.existsSync(reportPath)) {
+              core.setFailed('Audit report artifact is missing; fallback dispatch was not attempted.');
+              return;
+            }
+
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+            if (report.status !== 'failed') {
+              console.log(`Audit status is ${report.status}; no fallback dispatch needed.`);
+              return;
+            }
+
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'weekly-wechat-article.yml',
+              ref: context.ref.replace('refs/heads/', ''),
+            });
+            console.log('Dispatched weekly-wechat-article fallback after audit failure.');
