@@ -389,4 +389,23 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: update tour data [$(date +%Y-%m-%d)]"
           git push
-        continue-on-error: true
+
+  dispatch-weekly-wechat-article-fallback:
+    needs: update-and-deploy
+    if: always() && needs.update-and-deploy.result == 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Dispatch Weekly WeChat Article fallback
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'weekly-wechat-article.yml',
+              ref: context.ref.replace('refs/heads/', ''),
+            });
+            console.log('Dispatched weekly-wechat-article fallback using the last committed data.');
