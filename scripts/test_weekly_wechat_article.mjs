@@ -263,6 +263,9 @@ assert.ok(new Set(balancedContext.selectedTours.map((tour) => tour.bucket)).size
 assert.ok(balancedContext.selectedTours.some((tour) => tour.bucket === '酒店泡池'));
 assert.ok(balancedContext.selectedTours.some((tour) => tour.bucket === '山水亲水'));
 assert.ok(balancedContext.selectedTours.some((tour) => tour.bucket === '海边海岛'));
+assert.equal(balancedContext.selectedTours.find((tour) => tour.id === 'hotel-a').articleScope, '省内周边');
+assert.equal(balancedContext.selectedTours.find((tour) => tour.id === 'sea-a').articleScope, '周边跨省');
+assert.equal(balancedContext.selectedTours.find((tour) => tour.id === 'long-a').articleScope, '全国');
 const routeFamilyCounts = balancedContext.selectedTours.reduce((result, tour) => {
   result[tour.routeFamily] = (result[tour.routeFamily] || 0) + 1;
   return result;
@@ -339,6 +342,37 @@ const groupedArticle = renderWeeklyArticle(balancedContext, {
 assert.ok(groupedArticle.includes('### 山水亲水'));
 assert.ok(groupedArticle.includes('### 海边海岛'));
 assert.ok(groupedArticle.includes('### 住下来慢慢玩') || groupedArticle.includes('### 亲子玩乐'));
+
+const scopeSeed = [
+  ...balancedTours,
+  {
+    ...balancedTours[0],
+    id: 'international-seed',
+    title: '越南河内下龙湾双动5天',
+    destination: '其他',
+    images: ['/data/image-cache/international-seed.webp'],
+  },
+];
+const manyTours = Array.from({ length: 32 }, (_, index) => {
+  const seed = scopeSeed[index % scopeSeed.length];
+  return {
+    ...seed,
+    id: `${seed.id}-${index}`,
+    title: `${seed.title}-${index}`,
+    images: [`/data/image-cache/scope-${index}.webp`],
+  };
+});
+const expandedContext = buildWeeklyArticleContext(manyTours, {
+  runDate: '2026-06-24',
+  windowDays: 14,
+  maxCandidates: 40,
+  maxArticleItems: 28,
+});
+assert.equal(expandedContext.selectedTours.length, 28);
+assert.deepEqual(
+  new Set(expandedContext.selectedTours.map((tour) => tour.articleScope)),
+  new Set(['省内周边', '周边跨省', '全国', '跨国']),
+);
 
 const detailedWeatherLead = buildDetailedWeatherLead(
   balancedContext,

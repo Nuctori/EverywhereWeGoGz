@@ -37,7 +37,7 @@ def env_int(name, default, minimum=0, maximum=None):
 
 
 def assert_min_raw_items(items, output_path):
-    min_items = env_int("JRT365_MIN_RAW_ITEMS", 0, minimum=0)
+    min_items = env_int("JRT365_MIN_RAW_ITEMS", 1, minimum=0)
     item_count = len(items) if isinstance(items, list) else 0
     if item_count >= min_items:
         return

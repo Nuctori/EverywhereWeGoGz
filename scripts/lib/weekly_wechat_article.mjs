@@ -3,9 +3,9 @@ import path from 'node:path';
 import QRCode from 'qrcode';
 
 const DEFAULT_TOURS_FILE = 'public/data/tours.json';
-const DEFAULT_WINDOW_DAYS = 21;
+const DEFAULT_WINDOW_DAYS = 120;
 const DEFAULT_MAX_CANDIDATES = 18;
-const DEFAULT_MAX_ARTICLE_ITEMS = 25;
+const DEFAULT_MAX_ARTICLE_ITEMS = 28;
 const DEFAULT_JSON_MAX_TOKENS = 8192;
 const DEFAULT_AUTHOR = '老广去边度';
 
@@ -160,6 +160,55 @@ const DOMESTIC_NEARBY_DESTINATIONS = new Set([
   '四川',
   '华东',
 ]);
+const PROVINCIAL_DESTINATIONS = new Set(['广东']);
+const NEARBY_CROSS_PROVINCE_DESTINATIONS = new Set([
+  '广西',
+  '湖南',
+  '江西',
+  '福建',
+  '港澳',
+  '桂林',
+  '厦门',
+  '张家界',
+]);
+const INTERNATIONAL_KEYWORDS = [
+  '越南',
+  '新加坡',
+  '马来西亚',
+  '泰国',
+  '老挝',
+  '巴厘岛',
+  '韩国',
+  '日本',
+  '欧洲',
+  '澳洲',
+  '美国',
+  '加拿大',
+  '迪拜',
+  '土耳其',
+  '跨国',
+  '出境',
+  '国际',
+];
+const ARTICLE_SCOPE_ORDER = ['省内周边', '周边跨省', '全国', '跨国'];
+const ARTICLE_SCOPE_META = {
+  省内周边: {
+    title: '省内周边',
+    intro: '不想把时间耗在路上，就先看这一组。广东省内的山水、海边、温泉和亲子玩法，周末出发更轻松。',
+  },
+  周边跨省: {
+    title: '周边跨省',
+    intro: '想换个省份但又不想安排太复杂，这一组适合周末或小长假。车程、动车和玩法之间比较好平衡。',
+  },
+  全国: {
+    title: '全国',
+    intro: '时间更充裕，或者想认真换个风景，就从全国线路里挑。山河、海岛和长线目的地都有不同节奏。',
+  },
+  跨国: {
+    title: '跨国',
+    intro: '想把旅程拉到境外，可以从这组先看目的地和天数。护照、签证、航班及出入境要求请按实际情况确认。',
+  },
+};
 
 const SITE_BASE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
 const WEATHER_OVERVIEW_IMAGE = 'https://file.gzl.cn/group1/M00/31/55/wKkBH1-XfHqAXFtHAAE1-x29ZjY556.jpg';
@@ -348,6 +397,21 @@ function getWeekWindow(runDate) {
 
 function normalizeDestination(value) {
   return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : '未标注目的地';
+}
+
+function classifyArticleScope(tour) {
+  const destination = normalizeDestination(tour.destination);
+  const blob = textBlob(tour);
+  if (INTERNATIONAL_KEYWORDS.some((keyword) => blob.includes(keyword))) {
+    return '跨国';
+  }
+  if (PROVINCIAL_DESTINATIONS.has(destination)) {
+    return '省内周边';
+  }
+  if (NEARBY_CROSS_PROVINCE_DESTINATIONS.has(destination)) {
+    return '周边跨省';
+  }
+  return '全国';
 }
 
 function slugifyText(value) {
@@ -593,6 +657,7 @@ function scoreTour(tour, runDate, windowDates) {
   const routeFamily = inferRouteFamily(tour.title);
   const experienceSignals = inferExperienceSignals(tour);
   const bucket = classifyTourBucket(tour, experienceSignals);
+  const articleScope = classifyArticleScope(tour);
   const departureSpread = new Set(windowDates).size;
   const weekendFriendly = hasWeekendDeparture(windowDates);
   const highlightCount = new Set([
@@ -619,6 +684,8 @@ function scoreTour(tour, runDate, windowDates) {
   }
 
   if (DOMESTIC_NEARBY_DESTINATIONS.has(destination)) score += 16;
+  if (articleScope === '省内周边') score += 8;
+  if (articleScope === '周边跨省') score += 5;
   if (isGenericDestination(destination)) score -= 14;
   if (hasSummerSignals(tour)) score += 10;
   if (tour.title?.includes('暑假')) score += 6;
@@ -644,6 +711,7 @@ function scoreTour(tour, runDate, windowDates) {
     firstDate,
     routeFamily,
     bucket,
+    articleScope,
     experienceSignals,
     departureSpread,
     weekendFriendly,
@@ -721,6 +789,7 @@ function pickToursByStages(candidateTours, limit, stages) {
   const picked = [];
   const usedIds = new Set();
   const bucketCounts = new Map();
+  const scopeCounts = new Map();
   const destinationCounts = new Map();
   const familyCounts = new Map();
 
@@ -732,14 +801,17 @@ function pickToursByStages(candidateTours, limit, stages) {
       for (const tour of candidateTours) {
         if (usedIds.has(tour.id)) continue;
         const bucketCount = bucketCounts.get(tour.bucket) || 0;
+        const scopeCount = scopeCounts.get(tour.articleScope) || 0;
         const destinationCount = destinationCounts.get(tour.destination) || 0;
         const familyCount = familyCounts.get(tour.routeFamily) || 0;
         if (bucketCount >= stage.maxPerBucket) continue;
+        if (stage.maxPerScope && scopeCount >= stage.maxPerScope) continue;
         if (destinationCount >= stage.maxPerDestination) continue;
         if (familyCount >= stage.maxPerFamily) continue;
         picked.push(tour);
         usedIds.add(tour.id);
         bucketCounts.set(tour.bucket, bucketCount + 1);
+        scopeCounts.set(tour.articleScope, scopeCount + 1);
         destinationCounts.set(tour.destination, destinationCount + 1);
         familyCounts.set(tour.routeFamily, familyCount + 1);
         progressed = true;
@@ -769,9 +841,9 @@ function buildCandidatePool(scoredTours, limit) {
 
 function rebalanceSelectedTours(candidateTours, maxArticleItems) {
   return pickToursByStages(candidateTours, maxArticleItems, [
-    { until: Math.min(maxArticleItems, 10), maxPerBucket: 3, maxPerDestination: 2, maxPerFamily: 1 },
-    { until: Math.min(maxArticleItems, 18), maxPerBucket: 5, maxPerDestination: 3, maxPerFamily: 1 },
-    { until: maxArticleItems, maxPerBucket: 7, maxPerDestination: 4, maxPerFamily: 2 },
+    { until: Math.min(maxArticleItems, 4), maxPerScope: 1, maxPerBucket: 2, maxPerDestination: 2, maxPerFamily: 1 },
+    { until: Math.min(maxArticleItems, 12), maxPerScope: 5, maxPerBucket: 4, maxPerDestination: 3, maxPerFamily: 1 },
+    { until: maxArticleItems, maxPerScope: 12, maxPerBucket: 7, maxPerDestination: 4, maxPerFamily: 2 },
   ]);
 }
 
@@ -798,6 +870,7 @@ function formatTourForPrompt(tour) {
     qrPath: getTourQrRelativePath(tour.id),
     primaryImage,
     bucket: tour.bucket || classifyTourBucket(tour),
+    articleScope: tour.articleScope || classifyArticleScope(tour),
     routeFamily: tour.routeFamily || inferRouteFamily(tour.title),
     experienceSignals: Array.isArray(tour.experienceSignals) ? tour.experienceSignals : inferExperienceSignals(tour),
     dataQuality: {
@@ -833,6 +906,7 @@ export function buildWeeklyArticleContext(tours, options = {}) {
         editorialScore: score.score,
         availabilityConfidence: score.availabilityConfidence,
         bucket: score.bucket,
+        articleScope: score.articleScope,
         routeFamily: score.routeFamily,
         experienceSignals: score.experienceSignals,
         departureSpread: score.departureSpread,
@@ -879,6 +953,10 @@ export function buildWeeklyArticleContext(tours, options = {}) {
         result[tour.bucket] = (result[tour.bucket] || 0) + 1;
         return result;
       }, {}),
+      articleScopeCounts: selectedTours.reduce((result, tour) => {
+        result[tour.articleScope] = (result[tour.articleScope] || 0) + 1;
+        return result;
+      }, {}),
     },
     selectionRules: {
       onlyUseToursWithUpcomingDepartureDates: true,
@@ -886,6 +964,8 @@ export function buildWeeklyArticleContext(tours, options = {}) {
       preferWithImages: true,
       maxCandidates,
       maxArticleItems,
+      minimumArticleItems: 25,
+      articleScopes: ARTICLE_SCOPE_ORDER,
       avoidClaims: [
         '不要承诺一定成团',
         '不要承诺最低价',
@@ -917,6 +997,7 @@ export function buildWeeklyArticlePrompt(context) {
         `站内详情：${tour.siteUrl}`,
         `二维码文件：${tour.qrPath}`,
         `分组：${tour.bucket}`,
+        `出游范围：${tour.articleScope}`,
         `公众号分大类：${getArticleBucketMeta(tour.bucket).title}`,
       ];
       return lines.join('\n');
@@ -937,7 +1018,9 @@ export function buildWeeklyArticlePrompt(context) {
     '- 标题适合公众号，但不要夸张标题党，不要像营销口号',
     '- weatherLead 要把未来7天体感、季节节奏、节假日/时令玩法判断写在前头，但只能做保守表达，不要写成确定性天气预报',
     '- intro 是开场导语，要像老广熟门熟路地给朋友出主意，不要像答题或思维链展示',
-    '- groupIntros 要按“公众号分大类”给每个分组都写一段 40 到 80 字的导语，语气要像种草，不要像解释栏目，也不要重复“这组/这一组/如果你更想”这种开场',
+    '- 推荐至少 25 条；只要素材足够，就按 28 条组织，四类出游范围都要尽量覆盖',
+    '- 文章排版会先按“省内周边、周边跨省、全国、跨国”四类出游范围分栏，再按玩法分组；不要擅自改变线路的出游范围',
+    '- groupIntros 要按玩法分组给每个分组都写一段 40 到 80 字的导语，语气要像种草，不要像解释栏目，也不要重复“这组/这一组/如果你更想”这种开场',
     '- 每条线路只写三个字段：recommendationTitle、reason、reminder',
     '- 程序会按“公众号分大类”自动分组排版，所以你不要再额外发明新的栏目名，只把每条线路写得具体、有种草感',
     '- reason 必须 55 字以上，要讲清为什么当下去会更舒服或更值得，不要空泛，不要写“推荐方向”“取舍”“可以理解为”这种解释腔',
@@ -1204,23 +1287,40 @@ function getArticleBucketMeta(bucket) {
   };
 }
 
+function getArticleScopeMeta(scope) {
+  return ARTICLE_SCOPE_META[scope] || {
+    title: scope || '全国',
+    intro: '这一组是适合近期出发的线路，先按距离和出境范围筛选，再结合班期、价格和玩法挑选。',
+  };
+}
+
 function groupSelectedToursForArticle(selectedTours) {
-  const groups = new Map();
+  const scopes = new Map();
   for (const tour of selectedTours || []) {
+    const scope = tour.articleScope || classifyArticleScope(tour);
     const bucket = tour.bucket || '周末轻出发';
-    if (!groups.has(bucket)) {
-      groups.set(bucket, {
-        bucket,
-        ...getArticleBucketMeta(bucket),
-        tours: [],
-      });
+    if (!scopes.has(scope)) {
+      scopes.set(scope, { scope, ...getArticleScopeMeta(scope), bucketGroups: new Map() });
     }
-    groups.get(bucket).tours.push(tour);
+    const scopeGroup = scopes.get(scope);
+    if (!scopeGroup.bucketGroups.has(bucket)) {
+      scopeGroup.bucketGroups.set(bucket, { bucket, ...getArticleBucketMeta(bucket), tours: [] });
+    }
+    scopeGroup.bucketGroups.get(bucket).tours.push(tour);
   }
 
-  return [...groups.values()].sort((left, right) => {
-    const leftIndex = ARTICLE_BUCKET_ORDER.indexOf(left.bucket);
-    const rightIndex = ARTICLE_BUCKET_ORDER.indexOf(right.bucket);
+  return [...scopes.values()].map((scopeGroup) => ({
+    ...scopeGroup,
+    bucketGroups: [...scopeGroup.bucketGroups.values()].sort((left, right) => {
+      const leftIndex = ARTICLE_BUCKET_ORDER.indexOf(left.bucket);
+      const rightIndex = ARTICLE_BUCKET_ORDER.indexOf(right.bucket);
+      const safeLeftIndex = leftIndex === -1 ? ARTICLE_BUCKET_ORDER.length : leftIndex;
+      const safeRightIndex = rightIndex === -1 ? ARTICLE_BUCKET_ORDER.length : rightIndex;
+      return safeLeftIndex - safeRightIndex;
+    }),
+  })).sort((left, right) => {
+    const leftIndex = ARTICLE_SCOPE_ORDER.indexOf(left.scope);
+    const rightIndex = ARTICLE_SCOPE_ORDER.indexOf(right.scope);
     const safeLeftIndex = leftIndex === -1 ? ARTICLE_BUCKET_ORDER.length : leftIndex;
     const safeRightIndex = rightIndex === -1 ? ARTICLE_BUCKET_ORDER.length : rightIndex;
     return safeLeftIndex - safeRightIndex;
@@ -1264,7 +1364,7 @@ function renderTourSection(tour, aiItem, index) {
 export function renderWeeklyArticle(context, aiPayload) {
   const frontmatter = [
     '---',
-    `title: "${(aiPayload.title || '本周值得认真看的25条线路').replaceAll('"', '\\"')}"`,
+    `title: "${(aiPayload.title || '本周值得认真看的28条线路').replaceAll('"', '\\"')}"`,
     `summary: "${(aiPayload.summary || buildFallbackIntro(context)).replaceAll('"', '\\"')}"`,
     `author: "${DEFAULT_AUTHOR}"`,
     `cover: "${context.selectedTours[0]?.primaryImage || context.selectedTours[0]?.images?.[0] || ''}"`,
@@ -1279,26 +1379,32 @@ export function renderWeeklyArticle(context, aiPayload) {
   const groupedSections = [];
   let recommendationIndex = 1;
 
-  for (const group of groupSelectedToursForArticle(context.selectedTours)) {
+  for (const scopeGroup of groupSelectedToursForArticle(context.selectedTours)) {
     if (groupedSections.length > 0) {
       groupedSections.push('---');
       groupedSections.push('');
     }
-    groupedSections.push(`### ${group.title}`);
+    groupedSections.push(`## ${scopeGroup.title}`);
     groupedSections.push('');
-    groupedSections.push(normalizeAiText(aiGroupIntros.get(group.bucket) || group.intro));
+    groupedSections.push(normalizeAiText(scopeGroup.intro));
     groupedSections.push('');
-    for (const tour of group.tours) {
-      groupedSections.push(renderTourSection(tour, itemsById.get(tour.id) || {}, recommendationIndex));
+    for (const group of scopeGroup.bucketGroups) {
+      groupedSections.push(`### ${group.title}`);
       groupedSections.push('');
-      recommendationIndex += 1;
+      groupedSections.push(normalizeAiText(aiGroupIntros.get(group.bucket) || group.intro));
+      groupedSections.push('');
+      for (const tour of group.tours) {
+        groupedSections.push(renderTourSection(tour, itemsById.get(tour.id) || {}, recommendationIndex));
+        groupedSections.push('');
+        recommendationIndex += 1;
+      }
     }
   }
 
   return [
     frontmatter,
     '',
-    `# ${aiPayload.title || '本周值得认真看的25条线路'}`,
+    `# ${aiPayload.title || '本周值得认真看的28条线路'}`,
     '',
     intro,
     '',
