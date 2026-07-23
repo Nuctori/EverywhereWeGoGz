@@ -663,7 +663,7 @@ def apply_availability_filter(tours, label="all tours"):
     workers = max(4, min(20, int(os.environ.get("AVAILABILITY_WORKERS", "12") or "12")))
     timeout = float(os.environ.get("AVAILABILITY_TIMEOUT", "10") or "10")
     cache_path = os.environ.get("AVAILABILITY_CACHE_PATH", str(DEFAULT_CACHE)).strip()
-    cache_ttl_hours = float(os.environ.get("AVAILABILITY_CACHE_TTL_HOURS", "24") or "24")
+    cache_ttl_hours = float(os.environ.get("AVAILABILITY_CACHE_TTL_HOURS", "168") or "168")
     print(
         f"[可用性] {label}: 开始校验 {len(jobs)} 个唯一 URL，线程数 {workers}，超时 {timeout}s，"
         f"缓存 {cache_path}（TTL {cache_ttl_hours}h）"

@@ -38,5 +38,8 @@ assert.ok(saihuitongCrawler.includes("'已结束'"), 'saihuitong crawler should 
 
 const gzlCrawler = fs.readFileSync('scripts/crawl_gzl_api.py', 'utf8');
 assert.ok(gzlCrawler.includes('班期解析'), 'GZL crawler should report schedule parsing progress');
+assert.ok(gzlCrawler.includes('GZL_PARSE_WORKERS'), 'GZL crawler should expose bounded schedule concurrency');
+assert.ok(gzlCrawler.includes('get_worker_session'), 'GZL crawler should use per-worker sessions');
+assert.ok(gzlCrawler.includes('parse_product_worker'), 'GZL crawler should create sessions inside worker threads');
 
 console.log('crawler syntax audit passed');

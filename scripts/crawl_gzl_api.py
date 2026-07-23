@@ -8,6 +8,7 @@ import requests
 import json
 import os
 import time
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
@@ -50,6 +51,8 @@ SEARCH_TYPES = [
     ("VISA", "签证"),
     ("CRUISE", "邮轮"),
 ]
+
+_thread_local = threading.local()
 
 
 def extract_days(title):
@@ -207,6 +210,14 @@ def get_session():
     return session
 
 
+def get_worker_session():
+    session = getattr(_thread_local, "session", None)
+    if session is None:
+        session = get_session()
+        _thread_local.session = session
+    return session
+
+
 def fetch_products(session, dest_name, search_type, page=1):
     """获取产品列表"""
     url = f"{BASE_URL}/search/getAllProductList.json"
@@ -248,7 +259,7 @@ def fetch_products(session, dest_name, search_type, page=1):
         return []
 
 
-def parse_product(session, product, schedule_cache):
+def parse_product(session, product, schedule_cache, schedule_cache_lock=None):
     """解析产品数据"""
     title = product.get("title", "")
     list_price = coerce_price(product.get("b2cMinPrice", 0))
@@ -279,10 +290,19 @@ def parse_product(session, product, schedule_cache):
     img_url = images.get("imageStr", "") if images else ""
 
     schedule_key = f"{ptype}|{pd_id}|{url}"
-    schedule_snapshot = schedule_cache.get(schedule_key)
+    if schedule_cache_lock:
+        with schedule_cache_lock:
+            schedule_snapshot = schedule_cache.get(schedule_key)
+    else:
+        schedule_snapshot = schedule_cache.get(schedule_key)
     if schedule_snapshot is None:
         schedule_snapshot = fetch_schedule_snapshot(session, pd_id, ptype, url)
-        schedule_cache[schedule_key] = schedule_snapshot
+        if schedule_cache_lock:
+            with schedule_cache_lock:
+                schedule_cache.setdefault(schedule_key, schedule_snapshot)
+                schedule_snapshot = schedule_cache[schedule_key]
+        else:
+            schedule_cache[schedule_key] = schedule_snapshot
 
     schedule_dates = schedule_snapshot.get("departure_dates") or []
     schedule_price = coerce_price(schedule_snapshot.get("price"))
@@ -334,6 +354,15 @@ def parse_product(session, product, schedule_cache):
     return item
 
 
+def parse_product_worker(product, schedule_cache, schedule_cache_lock):
+    return parse_product(
+        get_worker_session(),
+        product,
+        schedule_cache,
+        schedule_cache_lock,
+    )
+
+
 def fetch():
     print("[广之旅] API全量抓取中...")
     session = get_session()
@@ -342,6 +371,10 @@ def fetch():
     schedule_cache = {}
     started_at = time.monotonic()
     parsed_products = 0
+    parse_workers = max(4, min(32, int(os.environ.get("GZL_PARSE_WORKERS", "16") or "16")))
+    schedule_cache_lock = threading.Lock()
+    parse_executor = ThreadPoolExecutor(max_workers=parse_workers)
+    print(f"[广之旅] 班期并发: {parse_workers} workers", flush=True)
     
     for dest in DESTINATIONS:
         for search_type, type_name in SEARCH_TYPES:
@@ -359,8 +392,17 @@ def fetch():
                     empty_count = 0
                 
                 page_items = 0
-                for product in products:
-                    item = parse_product(session, product, schedule_cache)
+                future_map = {
+                    parse_executor.submit(
+                        parse_product_worker,
+                        product,
+                        schedule_cache,
+                        schedule_cache_lock,
+                    ): product
+                    for product in products
+                }
+                for future in as_completed(future_map):
+                    item = future.result()
                     parsed_products += 1
                     if parsed_products % 50 == 0:
                         elapsed = max(time.monotonic() - started_at, 0.001)
@@ -389,6 +431,7 @@ def fetch():
                 
                 page += 1
     
+    parse_executor.shutdown(wait=True)
     print(f"[广之旅] 抓取完成: {len(all_items)} 条")
     return all_items
 
