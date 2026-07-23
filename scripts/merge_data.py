@@ -59,7 +59,7 @@ def normalize_image_path(url: str, source: str) -> str:
     parsed = urlparse(url)
     if parsed.scheme not in {'http', 'https'}:
         return url
-    if image_cache_mode in {"remote", "skip", "off"}:
+    if image_cache_mode in {"remote", "skip", "off"} and parsed.scheme == 'https':
         return url
     ext = os.path.splitext(parsed.path)[1].lower()
     if ext not in IMAGE_EXTENSIONS:
@@ -138,6 +138,42 @@ def normalize_images(images, source: str):
             continue
         result.append(normalize_image_path(img, source))
     return result
+
+
+def prefetch_image_cache(raw_items):
+    image_urls = set()
+    for raw in raw_items:
+        images = raw.get("images", [])
+        if not images and raw.get("img"):
+            images = [raw["img"]]
+        for image in images or []:
+            value = str(image or "").strip()
+            if value.startswith(("http://", "https://")):
+                image_urls.add(value)
+
+    if not image_urls:
+        return
+
+    workers = max(4, min(32, int(os.environ.get("IMAGE_CACHE_WORKERS", "16") or "16")))
+    print(f"[图片缓存] 并发预取 {len(image_urls)} 张，线程数 {workers}", flush=True)
+    started = datetime.now()
+    completed = 0
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {
+            executor.submit(normalize_image_path, image_url, "prefetch"): image_url
+            for image_url in image_urls
+        }
+        for future in as_completed(futures):
+            future.result()
+            completed += 1
+            if completed % 100 == 0 or completed == len(futures):
+                elapsed = max((datetime.now() - started).total_seconds(), 0.001)
+                rate = completed / elapsed
+                print(
+                    f"[图片缓存] {completed}/{len(futures)} | 速率 {rate:.1f}/s | "
+                    f"耗时 {elapsed / 60:.1f}min",
+                    flush=True,
+                )
 
 
 def extract_title_dates(title: str):
@@ -861,6 +897,7 @@ def main():
     ]
     print(f"[过滤] 有效数据: {len(deduped)}条")
 
+    prefetch_image_cache(deduped)
     detail_results = load_detail_results(deduped, existing_tours)
 
     # 转换为前端格式
