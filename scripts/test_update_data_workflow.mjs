@@ -18,7 +18,6 @@ for (const jobName of [
   'preflight:',
   'crawl-jrt365:',
   'crawl-saihuitong:',
-  'crawl-kanghui:',
   'crawl-pintu:',
   'crawl-gzl-api:',
   'crawl-outdoors:',
@@ -31,7 +30,6 @@ for (const jobName of [
 for (const stepName of [
   'Crawl JRT365 full',
   'Crawl Saihuitong full',
-  'Crawl Kanghui full',
   'Crawl Pintu full',
   'Crawl GZL API full',
   'Crawl Outdoors full',
@@ -91,7 +89,6 @@ for (const stepName of [
 for (const artifactName of [
   'name: raw-jrt365',
   'name: raw-saihuitong',
-  'name: raw-kanghui',
   'name: raw-pintu',
   'name: raw-gzl-api',
   'name: raw-outdoors',
@@ -105,7 +102,6 @@ for (const dependency of [
   '- preflight',
   '- crawl-jrt365',
   '- crawl-saihuitong',
-  '- crawl-kanghui',
   '- crawl-pintu',
   '- crawl-gzl-api',
   '- crawl-outdoors',
@@ -117,7 +113,6 @@ for (const dependency of [
 for (const stepName of [
   'Download JRT365 raw data',
   'Download Saihuitong raw data',
-  'Download Kanghui raw data',
   'Download Pintu raw data',
   'Download GZL raw data',
   'Download Outdoors raw data',
@@ -166,8 +161,7 @@ for (const snippet of [
 
 for (const [jobName, nextJobName] of [
   ['crawl-jrt365:', 'crawl-saihuitong:'],
-  ['crawl-saihuitong:', 'crawl-kanghui:'],
-  ['crawl-kanghui:', 'crawl-pintu:'],
+  ['crawl-saihuitong:', 'crawl-pintu:'],
   ['crawl-pintu:', 'crawl-gzl-api:'],
   ['crawl-gzl-api:', 'crawl-outdoors:'],
   ['crawl-outdoors:', 'crawl-http-aggregate:'],
