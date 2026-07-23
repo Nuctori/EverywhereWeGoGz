@@ -36,4 +36,7 @@ const saihuitongCrawler = fs.readFileSync('scripts/crawl_saihuitong_full.py', 'u
 assert.ok(saihuitongCrawler.includes("'扫码'"), 'saihuitong crawler should exclude QR-code ad entries');
 assert.ok(saihuitongCrawler.includes("'已结束'"), 'saihuitong crawler should exclude ended entries');
 
+const gzlCrawler = fs.readFileSync('scripts/crawl_gzl_api.py', 'utf8');
+assert.ok(gzlCrawler.includes('班期解析'), 'GZL crawler should report schedule parsing progress');
+
 console.log('crawler syntax audit passed');

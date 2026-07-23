@@ -7,6 +7,7 @@
 import requests
 import json
 import os
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
@@ -339,6 +340,8 @@ def fetch():
     all_items = []
     seen = set()
     schedule_cache = {}
+    started_at = time.monotonic()
+    parsed_products = 0
     
     for dest in DESTINATIONS:
         for search_type, type_name in SEARCH_TYPES:
@@ -358,6 +361,16 @@ def fetch():
                 page_items = 0
                 for product in products:
                     item = parse_product(session, product, schedule_cache)
+                    parsed_products += 1
+                    if parsed_products % 50 == 0:
+                        elapsed = max(time.monotonic() - started_at, 0.001)
+                        rate = parsed_products / elapsed
+                        print(
+                            f"  [广之旅] 班期解析 {parsed_products} 条 | "
+                            f"线路 {len(all_items)} 条 | 速率 {rate:.1f}/s | "
+                            f"耗时 {elapsed / 60:.1f}min",
+                            flush=True,
+                        )
                     if not item["title"] or item["price"] <= 0:
                         continue
                     

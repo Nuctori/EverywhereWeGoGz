@@ -738,6 +738,7 @@ def run_validation_jobs(
         stats["cache_misses"] += 1
 
     if to_validate:
+        started_at = time.monotonic()
         with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
             future_map = {
                 executor.submit(validate_url, url, title, timeout): url
@@ -768,7 +769,16 @@ def run_validation_jobs(
                 cache_entries[url] = result
                 stats["validated"] += 1
                 if idx % 50 == 0 or idx == total:
-                    print(f"[可用性缓存] 刷新 {idx}/{total}")
+                    elapsed = max(time.monotonic() - started_at, 0.001)
+                    rate = idx / elapsed
+                    remaining = max(total - idx, 0)
+                    eta = remaining / rate if rate > 0 else 0
+                    print(
+                        f"[可用性缓存] 刷新 {idx}/{total} | "
+                        f"命中 {stats['cache_hits']} | 失败/完成 {stats['validated']} | "
+                        f"速率 {rate:.1f}/s | ETA {eta / 60:.1f}min",
+                        flush=True,
+                    )
 
     if cache_path and write_cache:
         save_cache(cache_path, cache_entries)
