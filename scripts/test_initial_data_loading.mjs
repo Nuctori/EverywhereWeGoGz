@@ -63,6 +63,11 @@ assert(
 );
 
 assert(
+  tourList.includes('loadingMoreLockRef') && tourList.includes('if (loaded)') && tourList.includes('return true;'),
+  'Infinite scroll should synchronously deduplicate observer callbacks and only advance after a page actually loads.',
+);
+
+assert(
   tourList.includes('const aiCandidatesReady =') && tourList.includes('toursLoading={loading || !aiCandidatesReady}'),
   'AI recommendations should wait for tours-index.json or the full catalog instead of using only the first page.',
 );

@@ -226,9 +226,9 @@ function useToursData() {
   }, [loadCatalog]);
 
   const loadMorePages = useCallback(async (neededPage: number) => {
-    if (!hasPageChunksRef.current) return;
-    if (loadedPagesRef.current.has(neededPage)) return;
-    if (inFlightPagesRef.current.has(neededPage)) return;
+    if (!hasPageChunksRef.current) return false;
+    if (loadedPagesRef.current.has(neededPage)) return false;
+    if (inFlightPagesRef.current.has(neededPage)) return false;
 
     inFlightPagesRef.current.add(neededPage);
     syncLoadingMoreState();
@@ -247,9 +247,11 @@ function useToursData() {
         const nextItems = pageData.items.filter((tour: TourSummary) => !existingIds.has(tour.id));
         return prev.concat(nextItems);
       });
+      return true;
     } catch {
       hasPageChunksRef.current = false;
       setHasPageChunks(false);
+      return false;
     } finally {
       inFlightPagesRef.current.delete(neededPage);
       syncLoadingMoreState();
@@ -525,6 +527,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const loadMoreTimerRef = useRef<number | null>(null);
+  const loadingMoreLockRef = useRef(false);
   const viewVersionRef = useRef(0);
 // filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
@@ -966,18 +969,24 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         return;
       }
 
+      // IntersectionObserver may deliver several callbacks before React commits isLoadingMore.
+      if (loadingMoreLockRef.current) return;
+      loadingMoreLockRef.current = true;
+
       if (visibleCount < displayTours.length) {
         const viewVersion = viewVersionRef.current;
         setIsLoadingMore(true);
         loadMoreTimerRef.current = window.setTimeout(() => {
           if (viewVersionRef.current !== viewVersion) {
             setIsLoadingMore(false);
+            loadingMoreLockRef.current = false;
             loadMoreTimerRef.current = null;
             return;
           }
 
           setVisibleCount((current) => Math.min(current + PAGE_SIZE, displayTours.length));
           setIsLoadingMore(false);
+          loadingMoreLockRef.current = false;
           loadMoreTimerRef.current = null;
         }, 300);
         return;
@@ -991,16 +1000,23 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         const viewVersion = viewVersionRef.current;
 
         setIsLoadingMore(true);
-        void loadMorePages(nextPage).finally(() => {
+        void loadMorePages(nextPage).then((loaded) => {
           if (viewVersionRef.current !== viewVersion) {
             setIsLoadingMore(false);
+            loadingMoreLockRef.current = false;
             return;
           }
 
-          setVisibleCount((current) => current + PAGE_SIZE);
+          if (loaded) {
+            setVisibleCount((current) => current + PAGE_SIZE);
+          }
           setIsLoadingMore(false);
+          loadingMoreLockRef.current = false;
         });
+        return;
       }
+
+      loadingMoreLockRef.current = false;
     },
     [
       catalogTours.length,
@@ -1009,6 +1025,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       hasMorePagesRef,
       hasPageChunksRef,
       isLoadingMore,
+      loadingMoreLockRef,
       loadMorePages,
       loadingMore,
       visibleCount,
