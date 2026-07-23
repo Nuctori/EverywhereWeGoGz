@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
 import path from 'node:path';
 
 const crawlerScripts = [
@@ -30,5 +31,9 @@ assert.equal(
 for (const script of crawlerScripts) {
   assert.ok(path.extname(script) === '.py', `expected Python crawler script: ${script}`);
 }
+
+const saihuitongCrawler = fs.readFileSync('scripts/crawl_saihuitong_full.py', 'utf8');
+assert.ok(saihuitongCrawler.includes("'扫码'"), 'saihuitong crawler should exclude QR-code ad entries');
+assert.ok(saihuitongCrawler.includes("'已结束'"), 'saihuitong crawler should exclude ended entries');
 
 console.log('crawler syntax audit passed');

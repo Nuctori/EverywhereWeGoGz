@@ -43,6 +43,7 @@ RAW_FILE_PRIORITIES = {
     "raw_gzl_api.json": 10,
 }
 JRT365_HOST_TOKEN = "jrt365.com"
+SCHEDULE_REQUIRED_SOURCES = {"假日通", "广之旅"}
 
 
 def stable_hash(value: str) -> int:
@@ -551,6 +552,14 @@ def prefer_raw_candidate(current, candidate):
     return score_raw_candidate(candidate) >= score_raw_candidate(current)
 
 
+def has_structured_departure_dates(raw):
+    values = list(raw.get("departureDates") or [])
+    values.extend(raw.get("departureDaysList") or [])
+    if raw.get("departureDate"):
+        values.append(raw.get("departureDate"))
+    return any(re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(value).strip()) for value in values if value)
+
+
 def extract_existing_detail(item):
     return {
         "highlights": item.get("highlights", []),
@@ -773,13 +782,14 @@ def main():
     # 两者存在一定差异，先一并并入，再统一去重，避免有效线路被单一路径漏掉。
     raw_files = [
         "raw_jrt365_full.json",
-        "raw_jrt365.json",
         "raw_http_full.json",
         "raw_kanghui.json",
         "raw_pintu_full.json",
         "raw_saihuitong_full.json",
         "raw_gzl_api.json",
     ]
+    if not os.path.exists(os.path.join(data_dir, "raw_jrt365_full.json")):
+        raw_files.insert(1, "raw_jrt365.json")
     for fname in raw_files:
         fpath = os.path.join(data_dir, fname)
         if os.path.exists(fpath):
@@ -817,7 +827,12 @@ def main():
     print(f"[去重] 后: {len(deduped)}条")
 
     # 过滤
-    deduped = [r for r in deduped if r.get('price', 0) > 0 and len(r.get('title', '')) > 5]
+    deduped = [
+        r for r in deduped
+        if r.get('price', 0) > 0
+        and len(r.get('title', '')) > 5
+        and (r.get('source') not in SCHEDULE_REQUIRED_SOURCES or has_structured_departure_dates(r))
+    ]
     print(f"[过滤] 有效数据: {len(deduped)}条")
 
     detail_results = load_detail_results(deduped, existing_tours)

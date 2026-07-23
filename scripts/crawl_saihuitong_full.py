@@ -69,7 +69,7 @@ class GzqlxSpider:
                         
                         title = text.replace(price_m.group(0), "").strip()
                         
-                        if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定']):
+                        if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定', '扫码', '已结束']):
                             detail_url = self.BASE_URL + href
                             
                             img_url = ""
@@ -140,7 +140,7 @@ class BaozoucunSpider:
                         
                         title = text.replace(price_m.group(0), "").strip()
                         
-                        if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定', '免费']):
+                        if title and len(title) > 5 and not any(k in title for k in ['筛选', '目的地', '全部', '确定', '免费', '扫码', '已结束']):
                             detail_url = self.BASE_URL + href
                             
                             img_url = ""
