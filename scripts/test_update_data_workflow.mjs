@@ -13,6 +13,8 @@ function mustInclude(snippet, message) {
 
 mustInclude("- cron: '0 3 * * 1'", 'expected scheduled update-data workflow to run weekly on Monday UTC');
 mustInclude('skip_crawls:', 'expected workflow_dispatch skip_crawls input to exist for fast manual verification');
+mustInclude('group: update-tour-data', 'expected data updates to serialize before committing main');
+mustInclude('cancel-in-progress: false', 'expected queued data updates to finish instead of being canceled');
 mustInclude('AVAILABILITY_CACHE_TTL_HOURS: 168', 'expected weekly availability cache TTL to be seven days');
 mustInclude('GZL_PARSE_WORKERS: 16', 'expected GZL schedule concurrency to be explicitly configured');
 mustInclude('IMAGE_CACHE_WORKERS: 16', 'expected image cache concurrency to be explicitly configured');
