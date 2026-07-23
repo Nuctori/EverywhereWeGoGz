@@ -18,5 +18,10 @@ assert.ok(mergeScript.includes('tour["updatedAt"] = existing["updatedAt"]'), 'ex
 assert.ok(mergeScript.includes('if not os.path.exists(os.path.join(data_dir, "raw_jrt365_full.json"))'), 'legacy JRT365 data should only be used when the full crawl is unavailable');
 assert.ok(mergeScript.includes('SCHEDULE_REQUIRED_SOURCES'), 'schedule-required sources should be filtered before conversion');
 assert.ok(mergeScript.includes('raw.get("departureDates")'), 'merge should preserve structured raw departure dates');
+assert.ok(
+  mergeScript.includes('if image_cache_mode in {"remote", "skip", "off"}:')
+    && !mergeScript.includes('if image_cache_mode in {"remote", "skip", "off"} and parsed.scheme == \'https\':'),
+  'remote image mode should skip downloads for both HTTP and HTTPS images',
+);
 
 console.log('merge data observability audit passed');
