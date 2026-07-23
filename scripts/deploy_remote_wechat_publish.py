@@ -235,7 +235,9 @@ def main():
     run(['scp', args.html_path, f'{args.host}:{remote_dir}/article.html'])
     run(['scp', args.cover_path, f'{args.host}:{remote_dir}/cover-upload.jpg'])
     for support_dir in collect_support_directories(args.html_path):
-        run(['scp', '-r', str(support_dir), f'{args.host}:{remote_dir}/{support_dir.name}'])
+        remote_support_dir = f'{remote_dir}/{support_dir.name}'
+        run(['ssh', args.host, f'mkdir -p {remote_support_dir}'])
+        run(['scp', '-r', f'{support_dir}/.', f'{args.host}:{remote_support_dir}/'])
 
     bundle = json.loads(pathlib.Path(args.bundle_path).read_text(encoding='utf-8'))
     normalized_bundle = normalize_bundle_for_remote(bundle, remote_dir)

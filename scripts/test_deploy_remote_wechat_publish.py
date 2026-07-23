@@ -46,6 +46,11 @@ class DeployRemoteWechatPublishTests(unittest.TestCase):
         self.assertIn('rewrite_html_images', MODULE.REMOTE_SCRIPT)
         self.assertIn("mimetypes.guess_type(str(file_path))", MODULE.REMOTE_SCRIPT)
 
+    def test_support_files_copy_into_existing_remote_directory(self):
+        script = pathlib.Path(SCRIPT_PATH).read_text(encoding='utf-8')
+        self.assertIn("mkdir -p {remote_support_dir}", script)
+        self.assertIn("f'{support_dir}/.'", script)
+
 
 if __name__ == '__main__':
     unittest.main()
