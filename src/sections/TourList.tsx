@@ -68,9 +68,12 @@ function useToursData() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
   const [hasPageChunks, setHasPageChunks] = useState(true);
+  const [hasMorePages, setHasMorePages] = useState(true);
   const loadedPagesRef = useRef<Set<number>>(new Set());
+  const pageHasMoreRef = useRef<Map<number, boolean>>(new Map());
   const inFlightPagesRef = useRef<Set<number>>(new Set());
   const hasPageChunksRef = useRef(true);
+  const hasMorePagesRef = useRef(true);
   const catalogLoadedRef = useRef(false);
   const catalogRequestRef = useRef<Promise<void> | null>(null);
   const backgroundCatalogTimerRef = useRef<number | null>(null);
@@ -78,6 +81,17 @@ function useToursData() {
 
   const syncLoadingMoreState = useCallback(() => {
     setLoadingMore(inFlightPagesRef.current.size > 0);
+  }, []);
+
+  const syncHasMorePages = useCallback(() => {
+    let page = 0;
+    while (loadedPagesRef.current.has(page)) page += 1;
+    const lastContiguousPage = page - 1;
+    const contiguousHasMore = pageHasMoreRef.current.get(lastContiguousPage);
+    if (contiguousHasMore !== undefined) {
+      hasMorePagesRef.current = contiguousHasMore;
+      setHasMorePages(contiguousHasMore);
+    }
   }, []);
 
   useEffect(() => {
@@ -149,6 +163,10 @@ function useToursData() {
         loadedPagesRef.current.add(0);
         hasPageChunksRef.current = true;
         setHasPageChunks(true);
+        const initialHasMore = pageData.meta.hasMore ?? pageData.items.length >= PAGE_SIZE;
+        pageHasMoreRef.current.set(0, initialHasMore);
+        hasMorePagesRef.current = initialHasMore;
+        setHasMorePages(initialHasMore);
         setLoading(false);
 
         backgroundCatalogTimerRef.current = window.setTimeout(() => {
@@ -221,6 +239,9 @@ function useToursData() {
       }
       const pageData = toursPageSchema.parse(await res.json());
       loadedPagesRef.current.add(neededPage);
+      const pageHasMore = pageData.meta.hasMore ?? pageData.items.length >= PAGE_SIZE;
+      pageHasMoreRef.current.set(neededPage, pageHasMore);
+      syncHasMorePages();
       setTours((prev) => {
         const existingIds = new Set(prev.map((tour) => tour.id));
         const nextItems = pageData.items.filter((tour: TourSummary) => !existingIds.has(tour.id));
@@ -233,7 +254,7 @@ function useToursData() {
       inFlightPagesRef.current.delete(neededPage);
       syncLoadingMoreState();
     }
-  }, [syncLoadingMoreState]);
+  }, [syncHasMorePages, syncLoadingMoreState]);
 
   return {
     tours,
@@ -246,6 +267,8 @@ function useToursData() {
     loadedPagesRef,
     hasPageChunks,
     hasPageChunksRef,
+    hasMorePages,
+    hasMorePagesRef,
   };
 }
 
@@ -478,8 +501,11 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     loadingMore,
     total,
     loadMorePages,
+    loadedPagesRef,
     hasPageChunks,
     hasPageChunksRef,
+    hasMorePages,
+    hasMorePagesRef,
   } = useToursData();
   const isMobile = useIsMobile();
   const {
@@ -877,8 +903,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const displayResultCount = isIndexDrivenView ? displayTours.length : defaultResultCount;
   const hasMoreRemotePages =
     hasPageChunks &&
-    catalogTours.length === 0 &&
-    localTours.length < displayResultCount;
+    hasMorePages &&
+    catalogTours.length === 0;
   const shouldRenderLoadMore = hasMoreLoadedResults || hasMoreRemotePages;
 
   useEffect(() => {
@@ -957,8 +983,11 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         return;
       }
 
-      if (hasPageChunksRef.current && catalogTours.length === 0 && localTours.length < displayResultCount) {
-        const nextPage = Math.floor(localTours.length / PAGE_SIZE);
+      if (hasPageChunksRef.current && hasMorePagesRef.current && catalogTours.length === 0) {
+        let nextPage = 0;
+        while (loadedPagesRef.current.has(nextPage)) {
+          nextPage += 1;
+        }
         const viewVersion = viewVersionRef.current;
 
         setIsLoadingMore(true);
@@ -975,13 +1004,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     },
     [
       catalogTours.length,
-      displayResultCount,
       displayTours.length,
+      loadedPagesRef,
+      hasMorePagesRef,
       hasPageChunksRef,
       isLoadingMore,
       loadMorePages,
       loadingMore,
-      localTours.length,
       visibleCount,
     ],
   );

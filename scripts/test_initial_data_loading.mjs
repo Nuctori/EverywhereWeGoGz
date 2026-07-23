@@ -56,6 +56,13 @@ assert(
 );
 
 assert(
+  tourList.includes('pageData.meta.hasMore') &&
+    tourList.includes('pageHasMoreRef') &&
+    tourList.includes('lastContiguousPage'),
+  'Infinite scroll should use per-page metadata and contiguous page progress so out-of-order loads cannot stop the sentinel early.',
+);
+
+assert(
   tourList.includes('const aiCandidatesReady =') && tourList.includes('toursLoading={loading || !aiCandidatesReady}'),
   'AI recommendations should wait for tours-index.json or the full catalog instead of using only the first page.',
 );
