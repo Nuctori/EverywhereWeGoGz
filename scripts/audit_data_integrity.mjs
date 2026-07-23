@@ -328,6 +328,9 @@ const rawStructuredJrtKeys = new Set(
 for (const [source, rule] of Object.entries(sourceRules)) {
   const outputCount = outputCounts[source] || 0;
   const rawCount = rawCounts[source] || 0;
+  if (rule.allowMissing && rawCount === 0) {
+    continue;
+  }
   const required = computeRequiredOutputCount(rule, rawCount);
 
   if (outputCount < required) {

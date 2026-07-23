@@ -313,7 +313,20 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
     if not images:
         images = [ensure_placeholder_image(source)]
 
-    parsed_dates = extract_title_dates(title)
+    structured_dates = []
+    raw_date_values = list(raw.get("departureDates") or [])
+    raw_date_values.extend(raw.get("departureDaysList") or [])
+    if raw.get("departureDate"):
+        raw_date_values.append(raw.get("departureDate"))
+    for value in raw_date_values:
+        try:
+            normalized_date = datetime.strptime(str(value).strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+        except (TypeError, ValueError):
+            continue
+        if normalized_date not in structured_dates:
+            structured_dates.append(normalized_date)
+
+    parsed_dates = structured_dates or extract_title_dates(title)
     if parsed_dates:
         departure_date = parsed_dates[0]
         departure_dates = parsed_dates
