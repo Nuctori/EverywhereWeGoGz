@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-24T06:18:23Z",
+  "generated_at": "2026-07-24T07:15:01Z",
   "schema_version": 3,
   "entries": {
     "http://gftblm.360jlb.cn/m/event?id=655768": {
@@ -100135,6 +100135,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:25Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q47211558HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q47211558HOLIDAY",
+      "title": "新兴龙山温泉2天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q47211558HOLIDAY",
+      "elapsed_ms": 3874,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴龙山温泉2天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:56Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q49122989HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q49122989HOLIDAY",
       "title": "【蓝调艇好】泰国曼谷+芭提雅纯玩双飞6天1",
@@ -100229,6 +100245,22 @@
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-01T21:04:52Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q67241292HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q67241292HOLIDAY",
+      "title": "新兴龙山温泉3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q67241292HOLIDAY",
+      "elapsed_ms": 2079,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴龙山温泉3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:54Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q72414424HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265Q72414424HOLIDAY",
       "title": "新兴龙山温泉3天",
@@ -100305,6 +100337,22 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-23T06:14:35Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265R13631593HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265R13631593HOLIDAY",
+      "title": "金典云南动车6天1",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265R13631593HOLIDAY",
+      "elapsed_ms": 2547,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "金典云南动车6天1"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:50Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265R13897322HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265R13897322HOLIDAY",
@@ -100586,6 +100634,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:15Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S15143387HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S15143387HOLIDAY",
+      "title": "新丰江源温泉3天(食4餐)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S15143387HOLIDAY",
+      "elapsed_ms": 1945,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新丰江源温泉3天",
+        "食4餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:47Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S21659779HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S21659779HOLIDAY",
       "title": "新丰江源温泉3天(食4餐)",
@@ -100685,6 +100750,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:54Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S79274957HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S79274957HOLIDAY",
+      "title": "新丰云天海温泉2天（含餐）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S79274957HOLIDAY",
+      "elapsed_ms": 1868,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新丰云天海温泉2天",
+        "含餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:46Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S82382566HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S82382566HOLIDAY",
       "title": "新丰江源温泉2天(食2餐)",
@@ -100701,6 +100783,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:16Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S83456516HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S83456516HOLIDAY",
+      "title": "新丰江源温泉2天(食2餐)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265S83456516HOLIDAY",
+      "elapsed_ms": 2079,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新丰江源温泉2天",
+        "食2餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:47Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265U21213729HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265U21213729HOLIDAY",
@@ -100824,6 +100923,23 @@
       "reason": "假日通 broken schedule context",
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-01T21:05:02Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265U83522353HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265U83522353HOLIDAY",
+      "title": "【闺蜜之旅4天】韩国济州岛半自助游",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265U83522353HOLIDAY",
+      "elapsed_ms": 3335,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "韩国济州岛半自助游",
+        "闺蜜之旅4天"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:15:00Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265U87676795HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B265U87676795HOLIDAY",
@@ -100988,6 +101104,24 @@
       "reason": "假日通 broken schedule context",
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-01T21:05:06Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266198587249HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266198587249HOLIDAY",
+      "title": "暑假【五星普吉】泰国普吉岛双飞5天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266198587249HOLIDAY",
+      "elapsed_ms": 2418,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "泰国普吉岛双飞5天",
+        "五星普吉",
+        "暑假"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:14:59Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266212627731HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266212627731HOLIDAY",
@@ -101465,6 +101599,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:02Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266442344383HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266442344383HOLIDAY",
+      "title": "新丰云天海3天（含餐）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266442344383HOLIDAY",
+      "elapsed_ms": 2014,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新丰云天海3天",
+        "含餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:47Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266448001HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266448001HOLIDAY",
       "title": "莽山森林温泉3天",
@@ -101513,6 +101664,22 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:27Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266455765585HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266455765585HOLIDAY",
+      "title": "恩平山泉湾温泉2天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266455765585HOLIDAY",
+      "elapsed_ms": 3041,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "恩平山泉湾温泉2天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:45Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266456176136HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266456176136HOLIDAY",
@@ -101860,6 +102027,24 @@
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-23T14:03:42Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266654491718HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266654491718HOLIDAY",
+      "title": "马入新出【纯享新马】新加坡+马来西亚纯玩双飞5天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266654491718HOLIDAY",
+      "elapsed_ms": 3409,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "马来西亚纯玩双飞5天",
+        "马入新出",
+        "纯享新马"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:14:59Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266666197223HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266666197223HOLIDAY",
       "title": "龙门温德姆温泉3天(新)",
@@ -101981,6 +102166,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:11Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266759267572HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266759267572HOLIDAY",
+      "title": "新丰雅致酒店3天(含餐)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266759267572HOLIDAY",
+      "elapsed_ms": 4063,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新丰雅致酒店3天",
+        "含餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:46Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266761277752HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266761277752HOLIDAY",
       "title": "网红云南动车6天",
@@ -101996,6 +102198,22 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:40Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266771724228HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266771724228HOLIDAY",
+      "title": "贺州姑婆山伴山温泉3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266771724228HOLIDAY",
+      "elapsed_ms": 3140,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "贺州姑婆山伴山温泉3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:45Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266779815516HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266779815516HOLIDAY",
@@ -102076,6 +102294,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:37Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266795336243HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266795336243HOLIDAY",
+      "title": "新丰雅致酒店2天(含餐)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266795336243HOLIDAY",
+      "elapsed_ms": 2372,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新丰雅致酒店2天",
+        "含餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:47Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266817475879HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266817475879HOLIDAY",
@@ -102986,6 +103221,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:17Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C35742575HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C35742575HOLIDAY",
+      "title": "沙扒湾3天（晓港湾）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C35742575HOLIDAY",
+      "elapsed_ms": 2481,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾3天",
+        "晓港湾"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:51Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C36265175HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C36265175HOLIDAY",
       "title": "龙门庄上庄温泉2天(河畔温)",
@@ -103002,6 +103254,23 @@
       "reason": "假日通 broken schedule context",
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-23T14:02:51Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C37424447HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C37424447HOLIDAY",
+      "title": "新兴天露山3天(含早)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C37424447HOLIDAY",
+      "elapsed_ms": 2938,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴天露山3天",
+        "含早"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:57Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C38133784HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C38133784HOLIDAY",
@@ -103052,6 +103321,39 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:23Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C41978733HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C41978733HOLIDAY",
+      "title": "新兴天露山无忧谷3天(食3餐)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C41978733HOLIDAY",
+      "elapsed_ms": 2898,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴天露山无忧谷3天",
+        "食3餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:57Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C42644912HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C42644912HOLIDAY",
+      "title": "龙门玥泉庄温泉2天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C42644912HOLIDAY",
+      "elapsed_ms": 1767,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门玥泉庄温泉2天"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:14:48Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C53934873HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266C53934873HOLIDAY",
@@ -103532,6 +103834,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:56Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D27512134HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D27512134HOLIDAY",
+      "title": "新兴温德姆温泉2天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D27512134HOLIDAY",
+      "elapsed_ms": 1953,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴温德姆温泉2天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:55Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D31934793HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D31934793HOLIDAY",
       "title": "纯净江南（华东）双飞6天",
@@ -103568,6 +103886,23 @@
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-23T14:03:32Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D35633757HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D35633757HOLIDAY",
+      "title": "沙扒湾君临3天（海景）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D35633757HOLIDAY",
+      "elapsed_ms": 2231,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾君临3天",
+        "海景"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:52Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D42614519HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D42614519HOLIDAY",
       "title": "穿越呼伦贝尔（内蒙）双飞6天",
@@ -103581,6 +103916,23 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-02T06:53:40Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D45266914HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D45266914HOLIDAY",
+      "title": "沙扒湾君临3天（山景）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D45266914HOLIDAY",
+      "elapsed_ms": 2672,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾君临3天",
+        "山景"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:52Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D48415573HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D48415573HOLIDAY",
@@ -103662,6 +104014,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:56Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D64485367HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D64485367HOLIDAY",
+      "title": "阳西咸水矿温泉3天（含早)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D64485367HOLIDAY",
+      "elapsed_ms": 2489,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "阳西咸水矿温泉3天",
+        "含早"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:51Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D69258547HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D69258547HOLIDAY",
       "title": "新兴温德姆温泉2天",
@@ -103693,6 +104062,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:46Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D74883582HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D74883582HOLIDAY",
+      "title": "新兴翔顺龙山温泉3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D74883582HOLIDAY",
+      "elapsed_ms": 2186,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴翔顺龙山温泉3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:54Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D75471596HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D75471596HOLIDAY",
       "title": "阳西咸水矿温泉3天（含早)",
@@ -103723,6 +104108,22 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:21Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D88884985HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D88884985HOLIDAY",
+      "title": "新兴翔顺龙山温泉2天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D88884985HOLIDAY",
+      "elapsed_ms": 2203,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴翔顺龙山温泉2天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:53Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D97611896HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266D97611896HOLIDAY",
@@ -103783,6 +104184,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:21Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F15367234HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F15367234HOLIDAY",
+      "title": "新兴象窝酒店2天（含早）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F15367234HOLIDAY",
+      "elapsed_ms": 2265,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴象窝酒店2天",
+        "含早"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:53Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F16353652HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F16353652HOLIDAY",
       "title": "金水台温泉3天(食3餐）",
@@ -103815,6 +104233,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:14Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F18544941HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F18544941HOLIDAY",
+      "title": "金水台温泉3天(食3餐）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F18544941HOLIDAY",
+      "elapsed_ms": 2028,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "金水台温泉3天",
+        "食3餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:55Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F19229472HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F19229472HOLIDAY",
@@ -103864,6 +104299,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:46Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F31478336HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F31478336HOLIDAY",
+      "title": "金水台温泉2天（带池）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F31478336HOLIDAY",
+      "elapsed_ms": 2134,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "金水台温泉2天",
+        "带池"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:53Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F33626818HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F33626818HOLIDAY",
@@ -104047,6 +104499,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:14Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F73143971HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F73143971HOLIDAY",
+      "title": "金水台温泉2天（含晚）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F73143971HOLIDAY",
+      "elapsed_ms": 3817,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "金水台温泉2天",
+        "含晚"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:46Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F75277117HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F75277117HOLIDAY",
       "title": "新兴象窝酒店3天（含早）",
@@ -104063,6 +104532,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:25Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F79915912HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F79915912HOLIDAY",
+      "title": "金水台温泉3天带池（食3餐）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F79915912HOLIDAY",
+      "elapsed_ms": 2000,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "金水台温泉3天带池",
+        "食3餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:54Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F82693155HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F82693155HOLIDAY",
@@ -104111,6 +104597,22 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:09Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F96399335HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F96399335HOLIDAY",
+      "title": "金水台温泉2天（纯）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266F96399335HOLIDAY",
+      "elapsed_ms": 2081,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "金水台温泉2天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:53Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G13842112HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G13842112HOLIDAY",
@@ -104171,6 +104673,23 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:18Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G25658654HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G25658654HOLIDAY",
+      "title": "龙门林丰温泉3天(含午)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G25658654HOLIDAY",
+      "elapsed_ms": 2014,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门林丰温泉3天",
+        "含午"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:48Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G27475889HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G27475889HOLIDAY",
@@ -104348,6 +104867,23 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:22Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G52496897HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G52496897HOLIDAY",
+      "title": "龙门林丰温泉2天(含午+晚)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G52496897HOLIDAY",
+      "elapsed_ms": 2439,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门林丰温泉2天",
+        "含午"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:49Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G53485153HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266G53485153HOLIDAY",
@@ -104625,6 +105161,24 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:15Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266H21899324HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266H21899324HOLIDAY",
+      "title": "8B【纯玩巴厘】双飞6天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266H21899324HOLIDAY",
+      "elapsed_ms": 3399,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "纯玩巴厘",
+        "双飞6天",
+        "8b"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:59Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266H26431391HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266H26431391HOLIDAY",
@@ -105047,6 +105601,40 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:47Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266I49481592HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266I49481592HOLIDAY",
+      "title": "五星江西（庐山三清山）高铁5天1",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266I49481592HOLIDAY",
+      "elapsed_ms": 2557,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "庐山三清山",
+        "高铁5天1",
+        "五星江西"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:50Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266I62988136HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266I62988136HOLIDAY",
+      "title": "新兴禅域小镇3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266I62988136HOLIDAY",
+      "elapsed_ms": 2112,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴禅域小镇3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:54Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266I94988931HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266I94988931HOLIDAY",
       "title": "新兴禅域小镇3天",
@@ -105229,6 +105817,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:13Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J29471986HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J29471986HOLIDAY",
+      "title": "贵州全景动车5天2",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J29471986HOLIDAY",
+      "elapsed_ms": 2906,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "贵州全景动车5天2"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:50Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J32541683HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J32541683HOLIDAY",
       "title": "新兴翔顺龙山三页温泉3天",
@@ -105280,6 +105884,22 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:54Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J38251236HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J38251236HOLIDAY",
+      "title": "新兴禅域小镇2天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J38251236HOLIDAY",
+      "elapsed_ms": 2031,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴禅域小镇2天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:54Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J38759492HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J38759492HOLIDAY",
@@ -105361,6 +105981,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:56Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J47867351HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J47867351HOLIDAY",
+      "title": "沙扒湾海悦3天（海景）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J47867351HOLIDAY",
+      "elapsed_ms": 2429,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾海悦3天",
+        "海景"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:52Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J49631511HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J49631511HOLIDAY",
       "title": "新兴禅域小镇2天(雅途)",
@@ -105374,6 +106011,22 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:13Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J53739947HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J53739947HOLIDAY",
+      "title": "仙境桂林动车3天2",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J53739947HOLIDAY",
+      "elapsed_ms": 2283,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "仙境桂林动车3天2"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:50Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J53849258HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J53849258HOLIDAY",
@@ -105418,6 +106071,23 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:21Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J56693754HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J56693754HOLIDAY",
+      "title": "沙扒湾海悦3天（山景）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J56693754HOLIDAY",
+      "elapsed_ms": 2023,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾海悦3天",
+        "山景"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:52Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J57555669HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J57555669HOLIDAY",
@@ -105464,6 +106134,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:23Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J68511421HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J68511421HOLIDAY",
+      "title": "新兴禅域小镇2天(雅途)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J68511421HOLIDAY",
+      "elapsed_ms": 2109,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴禅域小镇2天",
+        "雅途"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:54Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J72991364HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J72991364HOLIDAY",
@@ -105571,6 +106258,24 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:42Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J91399279HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J91399279HOLIDAY",
+      "title": "避暑六盘水（贵州）动车5天1",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J91399279HOLIDAY",
+      "elapsed_ms": 3078,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "避暑六盘水",
+        "动车5天1",
+        "贵州"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:58Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J92001HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266J92001HOLIDAY",
       "title": "穿越独库（深度北疆）双飞8天",
@@ -105646,6 +106351,22 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:22Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266K17322852HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266K17322852HOLIDAY",
+      "title": "仙境桂林动车4天1",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266K17322852HOLIDAY",
+      "elapsed_ms": 2680,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "仙境桂林动车4天1"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:50Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266K19583185HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266K19583185HOLIDAY",
@@ -105742,6 +106463,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:19Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266K96467381HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266K96467381HOLIDAY",
+      "title": "龙门竹溪山境温泉3天(公寓)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266K96467381HOLIDAY",
+      "elapsed_ms": 2632,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门竹溪山境温泉3天",
+        "公寓"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:14:49Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266L16993748HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266L16993748HOLIDAY",
       "title": "康桥温泉3天(别墅)",
@@ -105775,6 +106513,22 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:26Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266L72178553HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266L72178553HOLIDAY",
+      "title": "阳山第一峰4天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266L72178553HOLIDAY",
+      "elapsed_ms": 3015,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "阳山第一峰4天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:45Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266L76914346HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266L76914346HOLIDAY",
@@ -106599,6 +107353,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:10Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266N78447179HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266N78447179HOLIDAY",
+      "title": "纯玩重庆动车5天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266N78447179HOLIDAY",
+      "elapsed_ms": 2950,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "纯玩重庆动车5天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:57Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266N78827972HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266N78827972HOLIDAY",
       "title": "安远三百山热泉河温泉3天",
@@ -106709,6 +107479,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:22Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O12967362HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O12967362HOLIDAY",
+      "title": "星耀肇城蓝钟喜来登3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O12967362HOLIDAY",
+      "elapsed_ms": 2399,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "星耀肇城蓝钟喜来登3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:44Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O13341556HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O13341556HOLIDAY",
       "title": "山水恩施双飞5天",
@@ -106802,6 +107588,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:34Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O37767211HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O37767211HOLIDAY",
+      "title": "龙门地派温泉2天(含早)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O37767211HOLIDAY",
+      "elapsed_ms": 2565,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门地派温泉2天",
+        "含早"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:58Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O42001HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O42001HOLIDAY",
@@ -107016,6 +107819,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:21Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O64456851HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O64456851HOLIDAY",
+      "title": "十星茂名花涧乐天温泉3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O64456851HOLIDAY",
+      "elapsed_ms": 1978,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "十星茂名花涧乐天温泉3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:46Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O64624953HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266O64624953HOLIDAY",
       "title": "十星茂名花涧乐天温泉3天",
@@ -107200,6 +108019,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:45Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P18546446HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P18546446HOLIDAY",
+      "title": "沙扒湾海悦2天（山景）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P18546446HOLIDAY",
+      "elapsed_ms": 2182,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾海悦2天",
+        "山景"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:53Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P18694179HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P18694179HOLIDAY",
       "title": "私享普者黑动车4天",
@@ -107275,6 +108111,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:42Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P22148928HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P22148928HOLIDAY",
+      "title": "沙扒湾君临2天（海景）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P22148928HOLIDAY",
+      "elapsed_ms": 1911,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾君临2天",
+        "海景"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:52Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P23002HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P23002HOLIDAY",
@@ -107399,6 +108252,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:35Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P49179823HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P49179823HOLIDAY",
+      "title": "沙扒湾君临2天（山景）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P49179823HOLIDAY",
+      "elapsed_ms": 1950,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾君临2天",
+        "山景"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:52Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P49526455HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P49526455HOLIDAY",
       "title": "奇遇大觉山（江西）高铁5天",
@@ -107430,6 +108300,23 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:25Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P57623889HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P57623889HOLIDAY",
+      "title": "沙扒湾2天（晓港湾宾馆）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P57623889HOLIDAY",
+      "elapsed_ms": 2293,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾2天",
+        "晓港湾宾馆"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:51Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P59371369HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P59371369HOLIDAY",
@@ -107626,6 +108513,23 @@
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-23T14:03:58Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P83619414HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P83619414HOLIDAY",
+      "title": "沙扒湾海悦2天（海景）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P83619414HOLIDAY",
+      "elapsed_ms": 2254,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾海悦2天",
+        "海景"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:52Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P83641531HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P83641531HOLIDAY",
       "title": "海陆空全景厦门动车3天1",
@@ -107702,6 +108606,22 @@
       "reason": "假日通 broken schedule context",
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-01T21:04:49Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P96186363HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P96186363HOLIDAY",
+      "title": "私享普者黑动车4天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P96186363HOLIDAY",
+      "elapsed_ms": 2825,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "私享普者黑动车4天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:50Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P97647325HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266P97647325HOLIDAY",
@@ -108119,6 +109039,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:28Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266Q87653417HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266Q87653417HOLIDAY",
+      "title": "福见闽南动车4天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266Q87653417HOLIDAY",
+      "elapsed_ms": 2490,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "福见闽南动车4天"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:14:58Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266Q88175776HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266Q88175776HOLIDAY",
       "title": "清远新银盏3天(食4餐)",
@@ -108350,6 +109286,24 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:20Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S15471693HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S15471693HOLIDAY",
+      "title": "秘境仙都（神仙居）双飞5天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S15471693HOLIDAY",
+      "elapsed_ms": 2315,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "秘境仙都",
+        "双飞5天",
+        "神仙居"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:58Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S17751548HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S17751548HOLIDAY",
       "title": "美林湖温泉度假3天",
@@ -108365,6 +109319,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:11Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S19991824HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S19991824HOLIDAY",
+      "title": "沙扒湾4天（晓港湾）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S19991824HOLIDAY",
+      "elapsed_ms": 1691,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "沙扒湾4天",
+        "晓港湾"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:56Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S21565967HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266S21565967HOLIDAY",
@@ -108607,6 +109578,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:30Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T17658175HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T17658175HOLIDAY",
+      "title": "龙门温德姆温泉2天(新)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T17658175HOLIDAY",
+      "elapsed_ms": 2308,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门温德姆温泉2天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:44Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T21844522HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T21844522HOLIDAY",
       "title": "龙门温德姆温泉3天(新)",
@@ -108717,6 +109704,23 @@
       "reason": "假日通 detail shell without content",
       "matched_keyword": "",
       "checked_at": "2026-07-02T06:53:40Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T62415646HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T62415646HOLIDAY",
+      "title": "龙门云顶2天(威士忌雅泡)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T62415646HOLIDAY",
+      "elapsed_ms": 1767,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门云顶2天",
+        "威士忌雅泡"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:48Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T65144481HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T65144481HOLIDAY",
@@ -108864,6 +109868,39 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:19Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T92497372HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T92497372HOLIDAY",
+      "title": "龙门温德姆温泉3天(新)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T92497372HOLIDAY",
+      "elapsed_ms": 3061,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门温德姆温泉3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:45Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T92671474HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T92671474HOLIDAY",
+      "title": "龙门云顶2天(威士忌畔山)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266T92671474HOLIDAY",
+      "elapsed_ms": 2406,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门云顶2天",
+        "威士忌畔山"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:44Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U19996664HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U19996664HOLIDAY",
       "title": "趣玩迪士尼（华东）双飞6天",
@@ -108971,6 +110008,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-10T06:59:22Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U49114871HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U49114871HOLIDAY",
+      "title": "龙门竹溪山境温泉2天(含餐)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U49114871HOLIDAY",
+      "elapsed_ms": 2329,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门竹溪山境温泉2天",
+        "含餐"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:14:44Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U52273842HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U52273842HOLIDAY",
       "title": "【金色吴哥】柬埔寨金边+吴哥双飞5天",
@@ -109052,6 +110106,23 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:41Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U63989648HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U63989648HOLIDAY",
+      "title": "龙门竹溪山境温泉3天(含4餐)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U63989648HOLIDAY",
+      "elapsed_ms": 2440,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "龙门竹溪山境温泉3天",
+        "含4餐"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:14:49Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U64727974HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B266U64727974HOLIDAY",
@@ -109602,6 +110673,23 @@
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-23T14:03:55Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267382673973HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267382673973HOLIDAY",
+      "title": "三水温泉3天(欧式别墅)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267382673973HOLIDAY",
+      "elapsed_ms": 2102,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "三水温泉3天",
+        "欧式别墅"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:58Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267398166838HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267398166838HOLIDAY",
       "title": "【越南三城记】升级版 胡志明+美奈+芽庄双飞6天",
@@ -109635,6 +110723,22 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:47Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267426781966HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267426781966HOLIDAY",
+      "title": "韶关丽宫温泉3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267426781966HOLIDAY",
+      "elapsed_ms": 2313,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "韶关丽宫温泉3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:56Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267459825377HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267459825377HOLIDAY",
@@ -109721,6 +110825,40 @@
       "reason": "假日通 broken schedule context",
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-23T14:03:51Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267541149925HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267541149925HOLIDAY",
+      "title": "纯美桂林动车4天K",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267541149925HOLIDAY",
+      "elapsed_ms": 3084,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "纯美桂林动车4天k"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:51Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267554117194HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267554117194HOLIDAY",
+      "title": "一价全含【越南越美】河内+下龙湾纯玩双动5天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267554117194HOLIDAY",
+      "elapsed_ms": 3580,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "下龙湾纯玩双动5天",
+        "一价全含",
+        "越南越美"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:14:59Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267558473124HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267558473124HOLIDAY",
@@ -109927,6 +111065,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:07:42Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267716684267HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267716684267HOLIDAY",
+      "title": "喜运来温泉2天(1号楼)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267716684267HOLIDAY",
+      "elapsed_ms": 1775,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "喜运来温泉2天",
+        "1号楼"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:46Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267739667415HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267739667415HOLIDAY",
       "title": "四会贞山嬉水3天",
@@ -109992,6 +111147,22 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:57Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267748149769HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267748149769HOLIDAY",
+      "title": "四会贞山嬉水3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267748149769HOLIDAY",
+      "elapsed_ms": 1498,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "四会贞山嬉水3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:56Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267749713532HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267749713532HOLIDAY",
@@ -110284,6 +111455,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:12Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267B46656766HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267B46656766HOLIDAY",
+      "title": "从化卓思道2天(食2餐)",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267B46656766HOLIDAY",
+      "elapsed_ms": 1905,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "从化卓思道2天",
+        "食2餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:48Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267B62986389HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267B62986389HOLIDAY",
       "title": "颐和温泉3天(澜庭)",
@@ -110469,6 +111657,22 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:29Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267D91465827HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267D91465827HOLIDAY",
+      "title": "尊品全景金秀纯玩动车3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267D91465827HOLIDAY",
+      "elapsed_ms": 2351,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "尊品全景金秀纯玩动车3天"
+      ],
+      "category": "unavailable",
+      "reason": "假日通 broken schedule context",
+      "matched_keyword": "empty-tourname-or-schedule",
+      "checked_at": "2026-07-24T07:14:57Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267E36449623HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267E36449623HOLIDAY",
       "title": "帝道长安（西安）双飞5天",
@@ -110604,6 +111808,23 @@
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-23T14:02:46Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G19219745HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G19219745HOLIDAY",
+      "title": "新丰江源温泉酒店（竹林宾馆高级房）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G19219745HOLIDAY",
+      "elapsed_ms": 1817,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新丰江源温泉酒店",
+        "竹林宾馆高级房"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:49Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G37001HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G37001HOLIDAY",
       "title": "贺州西溪3天(悦泉居-食4餐)",
@@ -110621,6 +111842,38 @@
       "reason": "假日通 detail content found",
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:46Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G81242456HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G81242456HOLIDAY",
+      "title": "新兴三页温泉2天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G81242456HOLIDAY",
+      "elapsed_ms": 2382,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴三页温泉2天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:55Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G81397915HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G81397915HOLIDAY",
+      "title": "新兴三页温泉3天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G81397915HOLIDAY",
+      "elapsed_ms": 2178,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "新兴三页温泉3天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:55Z"
     },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G82281359HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267G82281359HOLIDAY",
@@ -111040,6 +112293,23 @@
       "matched_keyword": "",
       "checked_at": "2026-07-24T06:08:57Z"
     },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267K88875343HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267K88875343HOLIDAY",
+      "title": "肇庆星湖大酒店3天（食3餐）",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267K88875343HOLIDAY",
+      "elapsed_ms": 4017,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "肇庆星湖大酒店3天",
+        "食3餐"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:46Z"
+    },
     "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267L28001HOLIDAY": {
       "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267L28001HOLIDAY",
       "title": "黄山入画双飞4天",
@@ -111286,6 +112556,94 @@
       "reason": "假日通 broken schedule context",
       "matched_keyword": "empty-tourname-or-schedule",
       "checked_at": "2026-07-23T14:03:58Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O17627335HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O17627335HOLIDAY",
+      "title": "扬州明月夜（华东）双飞6天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O17627335HOLIDAY",
+      "elapsed_ms": 2630,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "扬州明月夜",
+        "双飞6天",
+        "华东"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:15:00Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O30001HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O30001HOLIDAY",
+      "title": "萌娃游湖南高铁5天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O30001HOLIDAY",
+      "elapsed_ms": 3949,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "萌娃游湖南高铁5天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:46Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O31614928HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O31614928HOLIDAY",
+      "title": "华东（零钱旅游）双飞6天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O31614928HOLIDAY",
+      "elapsed_ms": 3784,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "零钱旅游",
+        "双飞6天",
+        "华东"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:15:01Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O73442956HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O73442956HOLIDAY",
+      "title": "尊品阿尔山（金秋呼伦贝尔）双飞7天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O73442956HOLIDAY",
+      "elapsed_ms": 2537,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "金秋呼伦贝尔",
+        "尊品阿尔山",
+        "双飞7天"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:14:47Z"
+    },
+    "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O73592712HOLIDAY": {
+      "url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O73592712HOLIDAY",
+      "title": "纯玩江南（华东）双飞6天",
+      "domain_rule": "假日通",
+      "status_code": 200,
+      "final_url": "http://www.jrt365.com/tourgroup/tourgroup_ziliao.aspx?groupno=B267O73592712HOLIDAY",
+      "elapsed_ms": 3347,
+      "text_sample": "广州市假日通国际旅行社_广州旅行社_假日通旅行社唯一官网_客服热线_020-66825678_83398139 你好 ，欢迎来到广东省内游专家：广州市假日通国际旅行社官网！ [登录] [免费注册] | 会员中心 | 非会员订单查询 | 假日通各分店电话 官方微信 官方微博 |收藏广州旅行社假日通官网 热门分类： 品质 | 海滩 | 温泉 | 休闲 | 生态 | 跨省 | 一天游 首 页 热销 自由行 包团定制 您现在所在的位置： 首页 ",
+      "title_token_hits": [
+        "纯玩江南",
+        "双飞6天",
+        "华东"
+      ],
+      "category": "ok",
+      "reason": "假日通 detail content found",
+      "matched_keyword": "",
+      "checked_at": "2026-07-24T07:15:00Z"
     },
     "https://www.outdoors.com.cn/route/linedetail/id/1172/did/185485.html": {
       "url": "https://www.outdoors.com.cn/route/linedetail/id/1172/did/185485.html",
