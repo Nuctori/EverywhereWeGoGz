@@ -11,6 +11,7 @@ export const dataQualitySchema = z.object({
   isDepartureDateReliable: z.boolean().optional(),
   availabilityConfidence: z.enum(['low', 'medium', 'high']).optional(),
   riskFlags: z.array(z.string()).optional(),
+  syntheticFields: z.array(z.string()).optional(),
   fieldSources: z.record(z.string(), z.enum(['source', 'detail', 'inferred', 'unknown', 'synthetic'])).optional(),
 });
 
@@ -41,7 +42,7 @@ const tourMetaSchema = z.object({
   sourceAttributes: z.record(z.string(), z.unknown()).optional().default({}),
   structuredDetails: z.object({
     accommodationDetails: stringArrayDefaultEmpty,
-    mealCounts: mealCountsSchema,
+    mealCounts: mealCountsSchema.optional(),
     serviceStatus: serviceStatusSchema,
   }).optional(),
   dataQuality: dataQualitySchema.optional(),

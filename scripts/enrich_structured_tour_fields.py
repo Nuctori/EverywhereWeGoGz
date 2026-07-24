@@ -45,10 +45,14 @@ def enrich(tour: dict, detail: dict) -> None:
     if not tour.get("accommodationStars"):
         tour["accommodationStars"] = stars
     tour["accommodationDetails"] = accommodation_details
-    tour["mealCounts"] = meal_counts if any(meal_counts.values()) else None
+    if any(meal_counts.values()):
+        tour["mealCounts"] = meal_counts
+    else:
+        tour.pop("mealCounts", None)
     tour["serviceStatus"] = service_status
 
     quality = tour.setdefault("dataQuality", {})
+    quality.setdefault("syntheticFields", [])
     sources = quality.setdefault("fieldSources", {})
     if accommodation_details:
         sources["accommodationLevel"] = sources.get("accommodationLevel") or "detail"
@@ -60,22 +64,37 @@ def enrich(tour: dict, detail: dict) -> None:
     sources["serviceStatus"] = (
         "detail" if any(value != "unknown" for value in service_status.values()) else "unknown"
     )
-    tour.setdefault("meta", {}).setdefault("structuredDetails", {})
-    tour["meta"]["structuredDetails"] = {
+    structured_details = {
         "accommodationDetails": accommodation_details,
-        "mealCounts": meal_counts if any(meal_counts.values()) else {},
         "serviceStatus": service_status,
     }
+    if any(meal_counts.values()):
+        structured_details["mealCounts"] = meal_counts
+    tour.setdefault("meta", {})["structuredDetails"] = structured_details
+
+
+def enrich_tours(tours: list[dict], details_by_id: dict[str, dict]) -> list[dict]:
+    for tour in tours:
+        enrich(tour, details_by_id.get(tour.get("id"), empty_detail()))
+    return tours
+
+
+def detail_ids_for_tours(tours: list[dict]) -> set[str]:
+    return {str(tour.get("id")) for tour in tours if str(tour.get("id") or "").strip()}
+
+
+def orphan_detail_ids(tours: list[dict], detail_ids: list[str]) -> set[str]:
+    return set(detail_ids) - detail_ids_for_tours(tours)
 
 
 def main() -> None:
     tours_path = DATA_DIR / "tours.json"
     details_dir = DATA_DIR / "tour-details"
     tours = json.loads(tours_path.read_text(encoding="utf-8"))
-    for tour in tours:
-        detail_path = details_dir / f"{tour['id']}.json"
-        detail = json.loads(detail_path.read_text(encoding="utf-8")) if detail_path.exists() else empty_detail()
-        enrich(tour, detail)
+    details = {}
+    for detail_path in details_dir.glob("*.json"):
+        details[detail_path.stem] = json.loads(detail_path.read_text(encoding="utf-8"))
+    enrich_tours(tours, details)
     write_json_atomically(tours_path, tours)
     print(f"enriched {len(tours)} tours")
 
