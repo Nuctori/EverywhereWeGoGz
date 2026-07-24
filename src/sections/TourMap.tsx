@@ -11,6 +11,9 @@ import 'leaflet/dist/leaflet.css';
 interface TourMapProps {
   tours: TourSummary[];
   onSelectTour: (tour: TourSummary) => void;
+  catalogLoading?: boolean;
+  catalogError?: string | null;
+  onRetryCatalog?: () => void;
 }
 
 const REGION_COLORS: Record<TourRegion, string> = {
@@ -32,7 +35,13 @@ function MapViewport({ points }: { points: Array<{ latitude: number; longitude: 
   return null;
 }
 
-export function TourMap({ tours, onSelectTour }: TourMapProps) {
+export function TourMap({
+  tours,
+  onSelectTour,
+  catalogLoading = false,
+  catalogError = null,
+  onRetryCatalog,
+}: TourMapProps) {
   const [region, setRegion] = useState<TourRegion | 'all'>('all');
   const [selectedPoint, setSelectedPoint] = useState<string | null>(null);
   const points = useMemo(() => {
@@ -62,7 +71,18 @@ export function TourMap({ tours, onSelectTour }: TourMapProps) {
             <MapPinned className="h-5 w-5 text-stone-700" />
             <h2 className="text-lg font-semibold text-stone-900">旅行团目的地地图</h2>
           </div>
-          <p className="mt-1 text-xs leading-5 text-stone-500">地图点位为目的地城市/国家中心点估算，打开线路详情查看真实行程。</p>
+          <p className="mt-1 text-xs leading-5 text-stone-500">当前按目的地范围分类，出发地字段尚未纳入数据源；点位为城市/国家中心估算，详情页查看真实行程。</p>
+          {catalogLoading && <p className="mt-1 text-xs text-blue-600">正在同步全部线路...</p>}
+          {catalogError && (
+            <div className="mt-1 flex items-center gap-2 text-xs text-red-600">
+              <span>{catalogError}</span>
+              {onRetryCatalog && (
+                <button type="button" className="underline underline-offset-2" onClick={onRetryCatalog}>
+                  重试
+                </button>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex flex-wrap gap-2">
           {(['all', 'local', 'nearby-province', 'national', 'international'] as const).map((value) => (

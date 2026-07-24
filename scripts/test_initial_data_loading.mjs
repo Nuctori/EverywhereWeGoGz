@@ -37,6 +37,16 @@ assert(
 );
 
 assert(
+  tourList.includes('deepLinkIndexPromise.then(() => loadFullIndex())') &&
+    tourList.includes('void loadCatalog()') &&
+    tourList.includes('indexTours.map(inflateTourSummaryFromIndexEntry)') &&
+    tourList.includes('indexSummaryTours.length > 0') &&
+    tourList.includes('loadedTourById.get(tour.id) ?? tour') &&
+    tourList.includes('if (mountedRef.current) setCatalogLoading(false)'),
+  'Deep links should restore the full search index for search and maps should request the full catalog on demand.',
+);
+
+assert(
   tourList.includes('findTourDeepLinkResolution') && tourList.includes('readTourDeepLink'),
   'TourList should resolve deeplinks from the index/page data path instead of the full catalog fallback.',
 );

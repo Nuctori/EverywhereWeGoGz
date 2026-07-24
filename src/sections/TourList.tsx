@@ -69,6 +69,8 @@ function useToursData() {
   const [indexTours, setIndexTours] = useState<TourIndexEntry[]>([]);
   const [deepLinkIndexTours, setDeepLinkIndexTours] = useState<TourDeepLinkIndexEntry[]>([]);
   const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
@@ -121,6 +123,10 @@ function useToursData() {
     if (catalogRequestRef.current) return catalogRequestRef.current;
 
     catalogRequestRef.current = (async () => {
+      if (mountedRef.current) {
+        setCatalogLoading(true);
+        setCatalogError(null);
+      }
       try {
         const listRes = await fetch(getDataUrl('tours-list.json'));
         if (!listRes.ok) {
@@ -134,9 +140,11 @@ function useToursData() {
       } catch {
         if (mountedRef.current) {
           setCatalogTours([]);
+          setCatalogError('全部线路同步失败');
         }
       } finally {
         catalogRequestRef.current = null;
+        if (mountedRef.current) setCatalogLoading(false);
       }
     })();
 
@@ -148,9 +156,7 @@ function useToursData() {
 
     async function loadInitial() {
       try {
-        const indexPromise = hasDeepLink
-          ? Promise.resolve([] as TourIndexEntry[])
-          : fetch(getDataUrl('tours-index.json'))
+        const loadFullIndex = () => fetch(getDataUrl('tours-index.json'))
           .then(async (indexRes) => {
             if (!indexRes.ok) {
               throw new Error(`Failed to load tours index: ${indexRes.status}`);
@@ -176,6 +182,10 @@ function useToursData() {
                 }
               })
           : Promise.resolve([] as TourDeepLinkIndexEntry[]);
+
+        const indexPromise = hasDeepLink
+          ? deepLinkIndexPromise.then(() => loadFullIndex())
+          : loadFullIndex();
 
         void indexPromise.then((indexData) => {
           if (cancelled || indexData.length === 0) return;
@@ -299,9 +309,12 @@ function useToursData() {
     indexTours,
     deepLinkIndexTours,
     catalogTours,
+    catalogLoading,
+    catalogError,
     loading,
     loadingMore,
     total,
+    loadCatalog,
     loadMorePages,
     loadedPagesRef,
     hasPageChunks,
@@ -537,6 +550,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     indexTours,
     deepLinkIndexTours,
     catalogTours,
+    catalogLoading,
+    catalogError,
+    loadCatalog,
     loading,
     loadingMore,
     total,
@@ -576,6 +592,10 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     useState<AiRecommendationResult | null>(null);
   const previousAiSearchRequestIdRef = useRef<number | null>(null);
   const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
+  const indexSummaryTours = useMemo(
+    () => indexTours.map(inflateTourSummaryFromIndexEntry),
+    [indexTours],
+  );
   const loadedTourById = useMemo(() => {
     const entries = catalogTours.length > 0 ? catalogTours : localTours;
     return new Map(entries.map((tour) => [tour.id, tour]));
@@ -734,7 +754,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   );
   const isAiSearchMode = Boolean(aiRecommendationResult);
   const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode;
-  const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;
+  const resultSourceTours = isIndexDrivenView
+    ? catalogTours.length > 0
+      ? catalogTours
+      : indexSummaryTours.length > 0
+        ? indexSummaryTours
+        : localTours
+    : localTours;
 
   const aiRecommendedCount = useMemo(
     () => aiRecommendationResult?.items.filter((item) => Boolean(item.reason)).length ?? 0,
@@ -938,7 +964,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const waterfallTours = useMemo(
     () =>
       visibleDisplayCandidates
-        .map((tour) => loadedTourById.get(tour.id))
+        .map((tour) => loadedTourById.get(tour.id) ?? tour)
         .filter((tour): tour is TourSummary => Boolean(tour)),
     [loadedTourById, visibleDisplayCandidates],
   );
@@ -1745,7 +1771,10 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 type="button"
                 aria-label="地图视图"
                 className={cn('flex h-8 items-center gap-1 rounded-full px-2.5 text-xs', viewMode === 'map' ? 'bg-stone-900 text-white' : 'text-stone-500 hover:text-stone-900')}
-                onClick={() => setViewMode('map')}
+                onClick={() => {
+                  setViewMode('map');
+                  void loadCatalog();
+                }}
               >
                 <MapIcon className="h-3.5 w-3.5" />地图
               </button>
@@ -1877,7 +1906,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       ) : (
         <>
           {viewMode === 'map' ? (
-            <TourMap tours={mapTours} onSelectTour={handleCardClick} />
+            <TourMap
+              tours={mapTours}
+              onSelectTour={handleCardClick}
+              catalogLoading={catalogLoading}
+              catalogError={catalogError}
+              onRetryCatalog={() => void loadCatalog()}
+            />
           ) : (
             <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
               {waterfallTours.map((tour) => {
