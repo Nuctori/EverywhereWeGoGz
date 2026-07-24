@@ -10,6 +10,8 @@ export const dataQualitySchema = z.object({
   isDepartureDateReliable: z.boolean().optional(),
   availabilityConfidence: z.enum(['low', 'medium', 'high']).optional(),
   riskFlags: z.array(z.string()).optional(),
+  fieldSources: z.record(z.string(), z.enum(['source', 'detail', 'inferred', 'synthetic', 'unknown'])).optional(),
+  syntheticFields: z.array(z.string()).optional(),
 });
 
 export const dayItinerarySchema = z.object({

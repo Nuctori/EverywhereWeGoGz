@@ -23,5 +23,11 @@ assert.ok(
   'remote image mode should preserve HTTP downloads',
 );
 assert.ok(mergeScript.includes('def prefetch_image_cache('), 'merge should prefetch image cache concurrently');
+assert.ok(mergeScript.includes('def build_source_meta('), 'merge should preserve source-specific metadata');
+assert.ok(mergeScript.includes('syntheticFields'), 'merge should label generated fields instead of presenting them as source facts');
+assert.ok(mergeScript.includes('"startingPrice"') && mergeScript.includes('"productType"') && mergeScript.includes('raw_meta.get(key)'), 'merge should retain extracted GZL fields');
+assert.ok(mergeScript.includes('isinstance(raw_attributes, dict)'), 'source metadata must tolerate malformed legacy attributes');
+assert.ok(mergeScript.includes('"accommodationStars": "synthetic"') && mergeScript.includes('"visaRequirements": "synthetic"'), 'all generated detail fields must be classified');
+assert.ok(mergeScript.includes("duration_source = 'source' if raw_days else ('inferred' if title_days else 'unknown')"), 'duration provenance must distinguish source, inferred, and unknown values');
 
 console.log('merge data observability audit passed');

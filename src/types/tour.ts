@@ -15,6 +15,8 @@ export interface DataQuality {
   // availabilityConfidence 取值：low=结构化数据不可信，medium=部分可信，high=来源稳定可信
   availabilityConfidence?: 'low' | 'medium' | 'high';
   riskFlags?: string[];
+  fieldSources?: Record<string, 'source' | 'detail' | 'inferred' | 'synthetic' | 'unknown'>;
+  syntheticFields?: string[];
 }
 
 export interface TourMeta {

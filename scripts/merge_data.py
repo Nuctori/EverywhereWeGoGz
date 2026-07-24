@@ -50,6 +50,102 @@ def stable_hash(value: str) -> int:
     return int(hashlib.sha1(value.encode('utf-8')).hexdigest(), 16)
 
 
+def build_source_meta(
+    raw: dict,
+    detail: dict,
+    *,
+    destination_source: str,
+    dates_source: str,
+    duration_source: str,
+) -> dict:
+    """Keep source-specific fields without changing the legacy Tour shape."""
+    raw_meta = raw.get("meta") if isinstance(raw.get("meta"), dict) else {}
+    raw_attributes = raw_meta.get("sourceAttributes")
+    source_attributes = dict(raw_attributes) if isinstance(raw_attributes, dict) else {}
+    for key in (
+        "supplierName",
+        "productType",
+        "priceSource",
+        "startingPrice",
+        "groupno",
+        "tournameno",
+        "printUrl",
+        "hasDetailContent",
+    ):
+        value = raw.get(key)
+        if value in (None, "", [], {}):
+            value = raw_meta.get(key)
+        if value not in (None, "", [], {}):
+            source_attributes[key] = value
+
+    raw_ai_tags = raw_meta.get("aiTags")
+    raw_features = raw_meta.get("sourceFeatures")
+    source_meta = {
+        "aiTags": raw_ai_tags if isinstance(raw_ai_tags, list) else [],
+        "sourceFeatures": raw_features if isinstance(raw_features, list) else [],
+        "sourceAttributes": source_attributes,
+    }
+    detail_fields = {
+        field
+        for field in (
+            "itinerary",
+            "inclusions",
+            "exclusions",
+            "optionalExpenses",
+            "importantNotes",
+            "childPolicy",
+            "singleSupplementNote",
+            "cancellationPolicy",
+            "refundPolicy",
+        )
+        if detail.get(field)
+    }
+    field_sources = {
+        "price": "source" if raw.get("price") is not None else "unknown",
+        "duration": duration_source,
+        "destination": destination_source,
+        "departureDates": dates_source,
+        "highlights": "detail" if detail.get("highlights") else "synthetic",
+        "theme": "inferred",
+        "leisureLevel": "inferred",
+        "transportType": "inferred",
+        "tags": "synthetic",
+        "groupSize": "synthetic",
+        "accommodationLevel": "synthetic",
+        "accommodationStars": "synthetic",
+        "meals": "synthetic",
+        "suitableFor": "synthetic",
+        "season": "synthetic",
+        "visaRequirements": "synthetic",
+        "difficulty": "synthetic",
+        "language": "synthetic",
+        "travelInsurance": "synthetic",
+        "tourGuideService": "synthetic",
+        "freeWiFi": "synthetic",
+        "rating": "synthetic",
+        "reviewCount": "synthetic",
+        "availableSeats": "synthetic",
+        "totalSeats": "synthetic",
+        "singleSupplement": "detail" if detail.get("singleSupplementAmount") is not None else "unknown",
+        "singleSupplementNote": "detail" if detail.get("singleSupplementNote") else "unknown",
+        "returnDate": "inferred" if raw.get("departureDate") or detail.get("itinerary") else "unknown",
+        "isHot": "inferred",
+        "isNew": "inferred",
+        "isFlashSale": "synthetic",
+        "originalPrice": "unknown",
+        "discountRate": "unknown",
+    }
+    for field in detail_fields:
+        field_sources[field] = "detail"
+    synthetic_fields = [field for field, source in field_sources.items() if source == "synthetic"]
+    source_meta["dataQuality"] = {
+        "fieldSources": field_sources,
+        "syntheticFields": synthetic_fields,
+        "riskFlags": [f"synthetic:{field}" for field in synthetic_fields],
+    }
+    return source_meta
+
+
 def normalize_image_path(url: str, source: str) -> str:
     if not url:
         return url
@@ -338,7 +434,9 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
         return None
 
     days = raw.get('days', 0) or extract_days(title)
-    destination = raw.get('destination', '') or guess_destination(title)
+    raw_destination = str(raw.get('destination') or '').strip()
+    destination = raw_destination or guess_destination(title)
+    destination_source = 'source' if raw_destination else 'inferred'
     theme = guess_theme(title)
     leisure_level = guess_leisure_level(title, days, theme)
 
@@ -476,8 +574,13 @@ def raw_to_tour(raw, id_counter, detail=None):
     if source == '广之旅' and '/hotel/' in str(raw.get('url', '')).lower():
         return None
 
-    days = raw.get('days', 0) or extract_days(title)
-    destination = raw.get('destination', '') or guess_destination(title)
+    raw_days = raw.get('days', 0)
+    title_days = extract_days(title)
+    days = raw_days or title_days
+    duration_source = 'source' if raw_days else ('inferred' if title_days else 'unknown')
+    raw_destination = str(raw.get('destination') or '').strip()
+    destination = raw_destination or guess_destination(title)
+    destination_source = 'source' if raw_destination else 'inferred'
     theme = guess_theme(title)
     leisure_level = guess_leisure_level(title, days, theme)
 
@@ -509,6 +612,8 @@ def raw_to_tour(raw, id_counter, detail=None):
         departure_date = ""
         departure_dates = []
 
+    dates_source = 'source' if structured_dates else ('inferred' if parsed_dates else 'unknown')
+
     single_supplement_amount = detail.get("singleSupplementAmount")
     single_supplement = int(single_supplement_amount) if single_supplement_amount is not None else 0
 
@@ -525,12 +630,21 @@ def raw_to_tour(raw, id_counter, detail=None):
         detail,
     )
     is_new = is_new_tour(title)
+    source_meta = build_source_meta(
+        raw,
+        detail,
+        destination_source=destination_source,
+        dates_source=dates_source,
+        duration_source=duration_source,
+    )
 
     return {
         "id": f"tour_{id_counter}",
         "title": title,
         "source": source,
         "sourceId": raw.get('sourceId') or raw.get('source_id') or raw.get('sourceID') or raw.get('id'),
+        "meta": source_meta,
+        "dataQuality": source_meta["dataQuality"],
         "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png",
         "destination": destination,
         "duration": days or 2,
