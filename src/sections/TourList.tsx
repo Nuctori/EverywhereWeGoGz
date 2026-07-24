@@ -4,12 +4,14 @@ import { useState, useMemo, useEffect, useLayoutEffect, useRef, useCallback } fr
 import type {
   AiRecommendationCandidate,
   AiRecommendationResult,
+  TourDeepLinkIndexEntry,
   TourIndexEntry,
   TourSummary,
   FilterState,
 } from '@/types/tour';
 import { TourCard } from './TourCard';
 import { TourDetailModal } from './TourDetailModal';
+import { TourMap } from './TourMap';
 import { AiRecommendPanel } from './AiRecommendPanel';
 import type { AiSearchRequest } from '@/App';
 import { Button } from '@/components/ui/button';
@@ -17,7 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { cn, getDataUrl } from '@/lib/utils';
 import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
-import { toursIndexSchema, toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
+import { tourDeepLinkIndexSchema, toursIndexSchema, toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { compareRecommended, getEffectiveDepartureDates } from '@/lib/tour-recommendation';
 import {
@@ -51,6 +53,8 @@ import {
   Flame,
   Loader2,
   MapPin,
+  Map as MapIcon,
+  List,
   SlidersHorizontal,
   Sparkles,
   X,
@@ -63,6 +67,7 @@ import { zhCN } from 'date-fns/locale';
 function useToursData() {
   const [tours, setTours] = useState<TourSummary[]>([]);
   const [indexTours, setIndexTours] = useState<TourIndexEntry[]>([]);
+  const [deepLinkIndexTours, setDeepLinkIndexTours] = useState<TourDeepLinkIndexEntry[]>([]);
   const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -78,6 +83,13 @@ function useToursData() {
   const catalogRequestRef = useRef<Promise<void> | null>(null);
   const backgroundCatalogTimerRef = useRef<number | null>(null);
   const mountedRef = useRef(false);
+  const hasDeepLink = typeof window !== 'undefined' && Boolean(
+    new URLSearchParams(window.location.search).get('tour') ||
+    new URLSearchParams(window.location.search).get('tourId') ||
+    new URLSearchParams(window.location.search).get('id') ||
+    new URLSearchParams(window.location.search).get('sourceId') ||
+    new URLSearchParams(window.location.search).get('sid'),
+  );
 
   const syncLoadingMoreState = useCallback(() => {
     setLoadingMore(inFlightPagesRef.current.size > 0);
@@ -136,7 +148,9 @@ function useToursData() {
 
     async function loadInitial() {
       try {
-        const indexPromise = fetch(getDataUrl('tours-index.json'))
+        const indexPromise = hasDeepLink
+          ? Promise.resolve([] as TourIndexEntry[])
+          : fetch(getDataUrl('tours-index.json'))
           .then(async (indexRes) => {
             if (!indexRes.ok) {
               throw new Error(`Failed to load tours index: ${indexRes.status}`);
@@ -145,10 +159,32 @@ function useToursData() {
           })
           .catch(() => [] as TourIndexEntry[]);
 
+        const deepLinkIndexPromise = hasDeepLink
+          ? fetch(getDataUrl('tour-deeplink-index.json'))
+              .then(async (indexRes) => {
+                if (!indexRes.ok) throw new Error(`Failed to load tour deeplink index: ${indexRes.status}`);
+                return tourDeepLinkIndexSchema.parse(await indexRes.json());
+              })
+              .catch(async () => {
+                // 兼容旧部署：轻量索引尚未发布时才回退完整索引，正常深链不会触发大文件请求。
+                try {
+                  const fallbackRes = await fetch(getDataUrl('tours-index.json'));
+                  if (!fallbackRes.ok) return [] as TourDeepLinkIndexEntry[];
+                  return toursIndexSchema.parse(await fallbackRes.json()).map(({ id, sourceId, page }) => ({ id, sourceId, page }));
+                } catch {
+                  return [] as TourDeepLinkIndexEntry[];
+                }
+              })
+          : Promise.resolve([] as TourDeepLinkIndexEntry[]);
+
         void indexPromise.then((indexData) => {
           if (cancelled || indexData.length === 0) return;
           setIndexTours(indexData);
           setTotal(indexData.length);
+        });
+        void deepLinkIndexPromise.then((indexData) => {
+          if (cancelled || indexData.length === 0) return;
+          setDeepLinkIndexTours(indexData);
         });
 
         const pageRes = await fetch(getDataUrl('tours-page-0.json'));
@@ -223,7 +259,7 @@ function useToursData() {
     }
     loadInitial();
     return () => { cancelled = true; };
-  }, [loadCatalog]);
+  }, [hasDeepLink, loadCatalog]);
 
   const loadMorePages = useCallback(async (neededPage: number) => {
     if (!hasPageChunksRef.current) return false;
@@ -261,6 +297,7 @@ function useToursData() {
   return {
     tours,
     indexTours,
+    deepLinkIndexTours,
     catalogTours,
     loading,
     loadingMore,
@@ -498,6 +535,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const {
     tours: localTours,
     indexTours,
+    deepLinkIndexTours,
     catalogTours,
     loading,
     loadingMore,
@@ -525,6 +563,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const loadMoreTimerRef = useRef<number | null>(null);
   const loadingMoreLockRef = useRef(false);
@@ -547,10 +586,10 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   }, []);
   const deepLinkResolution = useMemo(
     () =>
-      deepLinkTarget
-        ? findTourDeepLinkResolution(deepLinkTarget, [localTours, catalogTours], indexTours)
+        deepLinkTarget
+        ? findTourDeepLinkResolution(deepLinkTarget, [localTours, catalogTours], [...indexTours, ...deepLinkIndexTours])
         : null,
-    [catalogTours, deepLinkTarget, indexTours, localTours],
+    [catalogTours, deepLinkIndexTours, deepLinkTarget, indexTours, localTours],
   );
   const deepLinkIndexTour = useMemo(() => {
     if (!deepLinkResolution) return null;
@@ -856,6 +895,15 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     normalizedSearchQuery,
     today,
   ]);
+  const mapTours = useMemo(
+    () => {
+      const source = isIndexDrivenView ? displayTours : catalogSourceTours.filter(isDisplayableTour);
+      return source.filter((tour): tour is TourSummary =>
+        'priceUnit' in tour && 'singleSupplementNote' in tour && 'images' in tour,
+      );
+    },
+    [catalogSourceTours, displayTours, isIndexDrivenView],
+  );
   const visibleTourIds = useMemo(
     () => new Set(displayTours.map((tour) => tour.id)),
     [displayTours],
@@ -1684,6 +1732,24 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 </SelectItem>
               </SelectContent>
             </Select>
+            <div className="flex items-center rounded-full border border-stone-200 bg-white p-1">
+              <button
+                type="button"
+                aria-label="列表视图"
+                className={cn('flex h-8 items-center gap-1 rounded-full px-2.5 text-xs', viewMode === 'list' ? 'bg-stone-900 text-white' : 'text-stone-500 hover:text-stone-900')}
+                onClick={() => setViewMode('list')}
+              >
+                <List className="h-3.5 w-3.5" />列表
+              </button>
+              <button
+                type="button"
+                aria-label="地图视图"
+                className={cn('flex h-8 items-center gap-1 rounded-full px-2.5 text-xs', viewMode === 'map' ? 'bg-stone-900 text-white' : 'text-stone-500 hover:text-stone-900')}
+                onClick={() => setViewMode('map')}
+              >
+                <MapIcon className="h-3.5 w-3.5" />地图
+              </button>
+            </div>
           </div>
 
           {aiRecommendationResult && aiRecommendationResult.items.length > 0 && (
@@ -1810,23 +1876,27 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
-            {waterfallTours.map((tour) => {
-              const recommendation = aiRecommendationByTourId.get(tour.id);
+          {viewMode === 'map' ? (
+            <TourMap tours={mapTours} onSelectTour={handleCardClick} />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {waterfallTours.map((tour) => {
+                const recommendation = aiRecommendationByTourId.get(tour.id);
 
-              return (
-                <TourCard
-                  key={tour.id}
-                  tour={tour}
-                  onClick={() => handleCardClick(tour)}
-                  recommendationReason={recommendation?.reason}
-                  recommendationRank={recommendation?.rank}
-                />
-              );
-            })}
-          </div>
+                return (
+                  <TourCard
+                    key={tour.id}
+                    tour={tour}
+                    onClick={() => handleCardClick(tour)}
+                    recommendationReason={recommendation?.reason}
+                    recommendationRank={recommendation?.rank}
+                  />
+                );
+              })}
+            </div>
+          )}
 
-          {shouldRenderLoadMore && (
+          {viewMode === 'list' && shouldRenderLoadMore && (
             <div ref={loadMoreRef} className="flex items-center justify-center py-8">
               {isLoadingMore || loadingMore ? (
                 <div className="flex items-center gap-2 text-stone-500">
@@ -1842,7 +1912,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
             </div>
           )}
 
-          {!shouldRenderLoadMore && displayResultCount > INITIAL_LOAD_COUNT && (
+          {viewMode === 'list' && !shouldRenderLoadMore && displayResultCount > INITIAL_LOAD_COUNT && (
             <div className="py-8 text-center text-sm text-stone-400">
               已加载全部 {displayResultCount.toLocaleString()} 条结果
             </div>

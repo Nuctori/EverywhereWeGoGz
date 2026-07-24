@@ -129,6 +129,12 @@ export const tourIndexEntrySchema = z.object({
 });
 export const toursIndexSchema = z.array(tourIndexEntrySchema);
 
+export const tourDeepLinkIndexSchema = z.array(z.object({
+  id: z.string().min(1),
+  sourceId: z.string().optional(),
+  page: z.coerce.number().int().nonnegative(),
+}));
+
 export const toursPageSchema = z.object({
   items: z.array(tourSummarySchema),
   meta: z

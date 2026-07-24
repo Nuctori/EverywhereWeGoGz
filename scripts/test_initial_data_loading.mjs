@@ -31,6 +31,12 @@ assert(
 );
 
 assert(
+  tourList.includes("fetch(getDataUrl('tour-deeplink-index.json'))") &&
+    split.includes('tour-deeplink-index.json'),
+  'Deep links should use a lightweight id/page index instead of downloading the full index first.',
+);
+
+assert(
   tourList.includes('findTourDeepLinkResolution') && tourList.includes('readTourDeepLink'),
   'TourList should resolve deeplinks from the index/page data path instead of the full catalog fallback.',
 );

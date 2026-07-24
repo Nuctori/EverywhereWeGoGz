@@ -93,6 +93,12 @@ export interface TourIndexEntry {
   searchText?: string;
 }
 
+export interface TourDeepLinkIndexEntry {
+  id: string;
+  sourceId?: string;
+  page: number;
+}
+
 export interface TourDetail {
   sourceLogo: string;
   returnDate: string;
