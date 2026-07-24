@@ -32,7 +32,7 @@ assert.ok(mergeScript.includes("duration_source = 'source' if raw_days else ('in
 assert.ok(mergeScript.includes('meals_value') && mergeScript.includes('transport_value') && mergeScript.includes('raw_tags'), 'available source/detail values should feed legacy fields when present');
 assert.ok(mergeScript.includes('group_size = group_match.group(0) if group_match else ""'), 'group size must not fall back to a fabricated fixed value');
 assert.ok(mergeScript.includes('"highlights": detail.get("highlights", [])'), 'highlights must not fall back to fabricated generic claims');
-assert.ok(mergeScript.includes('if not days:\n        return None'), 'records without a source or title duration must be rejected');
+assert.ok(/if not days:\r?\n        return None/.test(mergeScript), 'records without a source or title duration must be rejected');
 assert.ok(mergeScript.includes('if not isinstance(meals, list):'), 'malformed itinerary meals must keep the legacy fallback');
 assert.ok(mergeScript.includes('isinstance(source_features, list) and source_features'), 'empty source features must not overwrite compatible fallback values');
 assert.ok(mergeScript.includes('def string_list(value)') && mergeScript.includes('raw_tags = string_list(raw.get("tags"))'), 'legacy list fields must be normalized before entering the runtime schema');
