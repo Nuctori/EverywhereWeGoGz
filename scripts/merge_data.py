@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -16,6 +17,7 @@ from urllib.parse import urlparse
 import requests
 
 from detail_parsers import detail_has_content, empty_detail, fetch_detail_data
+from geo_catalog import classify_route, normalize_tour_geo
 from tour_blacklist import is_blacklisted_title
 from validate_tour_availability import DEFAULT_CACHE, HTTP_ERROR, UNAVAILABLE, run_validation_jobs
 
@@ -31,21 +33,187 @@ SOURCE_COLORS = {
 }
 
 PLACEHOLDER_LABEL = '老广精选线路'
+GENERIC_HIGHLIGHTS = {
+    ("其他必打卡", "特色美食", "精品住宿"),
+    ("广东必打卡", "特色美食", "精品住宿"),
+    ("云南必打卡", "特色美食", "精品住宿"),
+    ("北京必打卡", "特色美食", "精品住宿"),
+    ("新疆必打卡", "特色美食", "精品住宿"),
+}
 DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
 IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'}
 RAW_FILE_PRIORITIES = {
     "raw_jrt365_full.json": 10,
     "raw_jrt365.json": 20,
     "raw_http_full.json": 10,
+    "raw_kanghui.json": 10,
     "raw_pintu_full.json": 10,
     "raw_saihuitong_full.json": 10,
     "raw_gzl_api.json": 10,
 }
 JRT365_HOST_TOKEN = "jrt365.com"
+SCHEDULE_REQUIRED_SOURCES = {"假日通", "广之旅"}
 
 
 def stable_hash(value: str) -> int:
     return int(hashlib.sha1(value.encode('utf-8')).hexdigest(), 16)
+
+
+def string_list(value) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item).strip() for item in value if item is not None and str(item).strip()]
+
+
+def nonnegative_number(value, default=0):
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return default
+    if number < 0:
+        return default
+    return int(number) if number.is_integer() else number
+
+
+def build_source_meta(
+    raw: dict,
+    detail: dict,
+    *,
+    destination_source: str,
+    dates_source: str,
+    duration_source: str,
+    geo_field_sources: dict,
+) -> dict:
+    """Keep source-specific fields without changing the legacy Tour shape."""
+    raw_meta = raw.get("meta") if isinstance(raw.get("meta"), dict) else {}
+    raw_attributes = raw_meta.get("sourceAttributes")
+    source_attributes = dict(raw_attributes) if isinstance(raw_attributes, dict) else {}
+    for key in (
+        "supplierName",
+        "productType",
+        "priceSource",
+        "startingPrice",
+        "groupno",
+        "tournameno",
+        "printUrl",
+        "hasDetailContent",
+    ):
+        value = raw.get(key)
+        if value in (None, "", [], {}):
+            value = raw_meta.get(key)
+        if value not in (None, "", [], {}):
+            source_attributes[key] = value
+
+    raw_ai_tags = string_list(raw_meta.get("aiTags"))
+    raw_features = string_list(raw_meta.get("sourceFeatures"))
+    source_meta = {
+        "aiTags": raw_ai_tags,
+        "sourceFeatures": raw_features,
+        "sourceAttributes": source_attributes,
+    }
+    detail_fields = {
+        field
+        for field in (
+            "itinerary",
+            "inclusions",
+            "exclusions",
+            "optionalExpenses",
+            "importantNotes",
+            "childPolicy",
+            "singleSupplementNote",
+            "cancellationPolicy",
+            "refundPolicy",
+        )
+        if detail.get(field)
+    }
+    raw_tags = string_list(raw.get("tags"))
+    source_features = raw_features
+    detail_itinerary = detail.get("itinerary") if isinstance(detail.get("itinerary"), list) else []
+    has_detail_meals = any(
+        isinstance(day.get("meals"), list) and any(str(meal).strip() for meal in day.get("meals"))
+        for day in detail_itinerary
+        if isinstance(day, dict)
+    )
+    field_sources = {
+        "price": "source" if raw.get("price") is not None else "unknown",
+        "duration": duration_source,
+        "destination": destination_source,
+        "departureDates": dates_source,
+        "highlights": "detail" if detail.get("highlights") else "unknown",
+        "theme": "inferred",
+        "leisureLevel": "inferred",
+        "transportType": "source" if str(raw.get("transportType") or "").strip() else "inferred",
+        "tags": "source" if isinstance(raw_tags, list) and raw_tags else "unknown",
+        "groupSize": "unknown",
+        "accommodationLevel": "unknown",
+        "accommodationStars": "unknown",
+        "meals": "detail" if has_detail_meals else "unknown",
+        "suitableFor": "unknown",
+        "season": "unknown",
+        "visaRequirements": "unknown",
+        "difficulty": "unknown",
+        "language": "unknown",
+        "travelInsurance": "unknown",
+        "tourGuideService": "unknown",
+        "freeWiFi": "source" if isinstance(source_features, list) and source_features else "unknown",
+        "rating": "unknown",
+        "reviewCount": "unknown",
+        "availableSeats": "unknown",
+        "totalSeats": "unknown",
+        "singleSupplement": "detail" if detail.get("singleSupplementAmount") is not None else "unknown",
+        "singleSupplementNote": "detail" if detail.get("singleSupplementNote") else "unknown",
+        "returnDate": "inferred" if raw.get("departureDate") or detail.get("itinerary") else "unknown",
+        "isHot": "inferred",
+        "isNew": "inferred",
+        "isFlashSale": "unknown",
+        "originalPrice": "unknown",
+        "discountRate": "unknown",
+    }
+    field_sources.update(geo_field_sources)
+    field_sources.setdefault("routeRegion", "inferred")
+    if str(raw.get("accommodationLevel") or "").strip():
+        field_sources["accommodationLevel"] = "source"
+    if str(raw.get("groupSize") or "").strip():
+        field_sources["groupSize"] = "source"
+    elif re.search(r"\d+\s*人(?:小团|精品团|常规团|大团)", str(raw.get("title") or "")):
+        field_sources["groupSize"] = "inferred"
+    if raw.get("originalPrice") is not None:
+        field_sources["originalPrice"] = "source"
+    if raw.get("discountRate") is not None:
+        field_sources["discountRate"] = "source"
+    if "isFlashSale" in raw:
+        field_sources["isFlashSale"] = "source"
+    raw_provenance_fields = {
+        "groupSize": raw.get("groupSize"),
+        "accommodationLevel": raw.get("accommodationLevel"),
+        "accommodationStars": raw.get("accommodationStars"),
+        "meals": raw.get("meals"),
+        "suitableFor": raw.get("suitableFor"),
+        "season": raw.get("season"),
+        "visaRequirements": raw.get("visaRequirements"),
+        "difficulty": raw.get("difficulty"),
+        "language": raw.get("language"),
+        "travelInsurance": raw.get("travelInsurance"),
+        "tourGuideService": raw.get("tourGuideService"),
+        "rating": raw.get("rating"),
+        "reviewCount": raw.get("reviewCount"),
+        "availableSeats": raw.get("availableSeats"),
+        "totalSeats": raw.get("totalSeats"),
+    }
+    for field, value in raw_provenance_fields.items():
+        if value not in (None, "", [], {}):
+            field_sources[field] = "source"
+    if "wifi_available" in raw_features:
+        field_sources["freeWiFi"] = "source"
+    for field in detail_fields:
+        field_sources[field] = "detail"
+    synthetic_fields = [field for field, source in field_sources.items() if source == "synthetic"]
+    source_meta["dataQuality"] = {
+        "fieldSources": field_sources,
+        "syntheticFields": synthetic_fields,
+        "riskFlags": [f"synthetic:{field}" for field in synthetic_fields],
+    }
+    return source_meta
 
 
 def normalize_image_path(url: str, source: str) -> str:
@@ -57,7 +225,7 @@ def normalize_image_path(url: str, source: str) -> str:
     parsed = urlparse(url)
     if parsed.scheme not in {'http', 'https'}:
         return url
-    if image_cache_mode in {"remote", "skip", "off"} and parsed.scheme == 'https':
+    if image_cache_mode in {"remote", "skip", "off"}:
         return url
     ext = os.path.splitext(parsed.path)[1].lower()
     if ext not in IMAGE_EXTENSIONS:
@@ -79,8 +247,6 @@ def normalize_image_path(url: str, source: str) -> str:
 
     if os.path.exists(local_path):
         return public_path
-    if image_cache_mode in {"skip", "off"}:
-        return normalized_url
 
     try:
         resp = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}, timeout=20)
@@ -136,6 +302,42 @@ def normalize_images(images, source: str):
             continue
         result.append(normalize_image_path(img, source))
     return result
+
+
+def prefetch_image_cache(raw_items):
+    image_urls = set()
+    for raw in raw_items:
+        images = raw.get("images", [])
+        if not images and raw.get("img"):
+            images = [raw["img"]]
+        for image in images or []:
+            value = str(image or "").strip()
+            if value.startswith(("http://", "https://")):
+                image_urls.add(value)
+
+    if not image_urls:
+        return
+
+    workers = max(4, min(32, int(os.environ.get("IMAGE_CACHE_WORKERS", "16") or "16")))
+    print(f"[图片缓存] 并发预取 {len(image_urls)} 张，线程数 {workers}", flush=True)
+    started = datetime.now()
+    completed = 0
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {
+            executor.submit(normalize_image_path, image_url, "prefetch"): image_url
+            for image_url in image_urls
+        }
+        for future in as_completed(futures):
+            future.result()
+            completed += 1
+            if completed % 100 == 0 or completed == len(futures):
+                elapsed = max((datetime.now() - started).total_seconds(), 0.001)
+                rate = completed / elapsed
+                print(
+                    f"[图片缓存] {completed}/{len(futures)} | 速率 {rate:.1f}/s | "
+                    f"耗时 {elapsed / 60:.1f}min",
+                    flush=True,
+                )
 
 
 def extract_title_dates(title: str):
@@ -300,7 +502,9 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
         return None
 
     days = raw.get('days', 0) or extract_days(title)
-    destination = raw.get('destination', '') or guess_destination(title)
+    raw_destination = str(raw.get('destination') or '').strip()
+    destination = raw_destination or guess_destination(title)
+    destination_source = 'source' if raw_destination else 'inferred'
     theme = guess_theme(title)
     leisure_level = guess_leisure_level(title, days, theme)
 
@@ -311,7 +515,20 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
     if not images:
         images = [ensure_placeholder_image(source)]
 
-    parsed_dates = extract_title_dates(title)
+    structured_dates = []
+    raw_date_values = list(raw.get("departureDates") or [])
+    raw_date_values.extend(raw.get("departureDaysList") or [])
+    if raw.get("departureDate"):
+        raw_date_values.append(raw.get("departureDate"))
+    for value in raw_date_values:
+        try:
+            normalized_date = datetime.strptime(str(value).strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+        except (TypeError, ValueError):
+            continue
+        if normalized_date not in structured_dates:
+            structured_dates.append(normalized_date)
+
+    parsed_dates = structured_dates or extract_title_dates(title)
     if parsed_dates:
         departure_date = parsed_dates[0]
         departure_dates = parsed_dates
@@ -392,7 +609,7 @@ def raw_to_tour_legacy(raw, id_counter, detail=None):
         "refundPolicy": "未消费项目按实结算退还",
         "rating": rating,
         "reviewCount": review_count,
-        "bookingUrl": raw.get('url', '#'),
+        "bookingUrl": str(raw.get('url') or '').strip(),
         "images": images,
         "tags": [theme, "纯玩", "品质"],
         "isHot": stable_hash(title + source) % 3 == 0,
@@ -425,8 +642,17 @@ def raw_to_tour(raw, id_counter, detail=None):
     if source == '广之旅' and '/hotel/' in str(raw.get('url', '')).lower():
         return None
 
-    days = raw.get('days', 0) or extract_days(title)
-    destination = raw.get('destination', '') or guess_destination(title)
+    raw_days = raw.get('days', 0)
+    title_days = extract_days(title)
+    days = raw_days or title_days
+    if not days:
+        return None
+    duration_source = 'source' if raw_days else ('inferred' if title_days else 'unknown')
+    raw_destination = str(raw.get('destination') or '').strip()
+    destination = raw_destination or guess_destination(title)
+    destination_source = 'source' if raw_destination else 'inferred'
+    geo_fields, geo_field_sources = normalize_tour_geo(raw, title, destination)
+    geo_fields["routeRegion"] = classify_route(geo_fields)
     theme = guess_theme(title)
     leisure_level = guess_leisure_level(title, days, theme)
 
@@ -437,7 +663,20 @@ def raw_to_tour(raw, id_counter, detail=None):
     if not images:
         images = [ensure_placeholder_image(source)]
 
-    parsed_dates = extract_title_dates(title)
+    structured_dates = []
+    raw_date_values = list(raw.get("departureDates") or [])
+    raw_date_values.extend(raw.get("departureDaysList") or [])
+    if raw.get("departureDate"):
+        raw_date_values.append(raw.get("departureDate"))
+    for value in raw_date_values:
+        try:
+            normalized_date = datetime.strptime(str(value).strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+        except (TypeError, ValueError):
+            continue
+        if normalized_date not in structured_dates:
+            structured_dates.append(normalized_date)
+
+    parsed_dates = structured_dates or extract_title_dates(title)
     if parsed_dates:
         departure_date = parsed_dates[0]
         departure_dates = parsed_dates
@@ -445,8 +684,10 @@ def raw_to_tour(raw, id_counter, detail=None):
         departure_date = ""
         departure_dates = []
 
+    dates_source = 'source' if structured_dates else ('inferred' if parsed_dates else 'unknown')
+
     single_supplement_amount = detail.get("singleSupplementAmount")
-    single_supplement = int(single_supplement_amount) if single_supplement_amount is not None else 0
+    single_supplement = nonnegative_number(single_supplement_amount)
 
     if departure_date:
         departure = datetime.strptime(departure_date, "%Y-%m-%d")
@@ -461,57 +702,115 @@ def raw_to_tour(raw, id_counter, detail=None):
         detail,
     )
     is_new = is_new_tour(title)
+    source_meta = build_source_meta(
+        raw,
+        detail,
+        destination_source=destination_source,
+        dates_source=dates_source,
+        duration_source=duration_source,
+        geo_field_sources=geo_field_sources,
+    )
+
+    raw_meta = raw.get("meta") if isinstance(raw.get("meta"), dict) else {}
+    raw_tags = string_list(raw.get("tags"))
+    detail_meals = []
+    for day in detail.get("itinerary") or []:
+        if not isinstance(day, dict):
+            continue
+        meals = day.get("meals")
+        if not isinstance(meals, list):
+            continue
+        for meal in meals:
+            if meal is None:
+                continue
+            value = str(meal).strip()
+            if value and value not in detail_meals:
+                detail_meals.append(value)
+    raw_meals = str(raw.get("meals") or "").strip()
+    meals_value = "、".join(detail_meals) or raw_meals
+    transport_value = str(raw.get("transportType") or "").strip()
+    if not transport_value:
+        transport_value = "大巴往返" if days and days <= 3 else ("高铁往返" if days and days <= 5 else "飞机往返")
+    group_size = str(raw.get("groupSize") or "").strip()
+    if not group_size:
+        group_match = re.search(r"\d+\s*人(?:小团|精品团|常规团|大团)", title)
+        group_size = group_match.group(0) if group_match else ""
+    source_features = string_list(raw_meta.get("sourceFeatures"))
+    if isinstance(source_features, list) and source_features:
+        free_wifi = "wifi_available" in source_features
+    else:
+        free_wifi = False
+    original_price = raw.get("originalPrice")
+    try:
+        original_price = int(float(original_price)) if original_price is not None else None
+    except (TypeError, ValueError):
+        original_price = None
+    discount_rate = raw.get("discountRate")
+    try:
+        discount_rate = float(discount_rate) if discount_rate is not None else None
+    except (TypeError, ValueError):
+        discount_rate = None
+    raw_accommodation_level = str(raw.get("accommodationLevel") or "").strip()
+    accommodation_level = raw_accommodation_level
+    accommodation_stars = raw.get("accommodationStars")
+    try:
+        accommodation_stars = int(float(accommodation_stars)) if accommodation_stars is not None else 0
+    except (TypeError, ValueError):
+        accommodation_stars = 0
 
     return {
         "id": f"tour_{id_counter}",
         "title": title,
         "source": source,
         "sourceId": raw.get('sourceId') or raw.get('source_id') or raw.get('sourceID') or raw.get('id'),
+        "meta": source_meta,
+        "dataQuality": source_meta["dataQuality"],
         "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png",
         "destination": destination,
+        **geo_fields,
         "duration": days or 2,
         "price": int(price),
-        "originalPrice": None,
+        "originalPrice": original_price,
         "priceUnit": "人",
         "departureDate": departure_date,
         "returnDate": return_date,
-        "transportType": "大巴往返" if days and days <= 3 else ("高铁往返" if days and days <= 5 else "飞机往返"),
-        "accommodationLevel": "舒适型",
-        "accommodationStars": 3,
-        "meals": f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐",
+        "transportType": transport_value,
+        "accommodationLevel": accommodation_level,
+        "accommodationStars": accommodation_stars,
+        "meals": meals_value,
         "singleSupplement": single_supplement,
         "singleSupplementNote": detail.get("singleSupplementNote", ""),
-        "availableSeats": 0,
-        "totalSeats": 0,
-        "highlights": detail.get("highlights") or [f"{destination}必打卡", "特色美食", "精品住宿"],
+        "availableSeats": nonnegative_number(raw.get("availableSeats")),
+        "totalSeats": nonnegative_number(raw.get("totalSeats")),
+        "highlights": detail.get("highlights", []),
         "itinerary": detail.get("itinerary", []),
         "inclusions": detail.get("inclusions", []),
         "exclusions": detail.get("exclusions", []),
         "optionalExpenses": detail.get("optionalExpenses", []),
         "importantNotes": detail.get("importantNotes", []),
-        "visaRequirements": "无需签证（国内游）",
-        "travelInsurance": True,
-        "tourGuideService": True,
-        "freeWiFi": stable_hash(title) % 2 == 0,
+        "visaRequirements": str(raw.get("visaRequirements") or "").strip(),
+        "travelInsurance": bool(raw.get("travelInsurance", False)),
+        "tourGuideService": bool(raw.get("tourGuideService", False)),
+        "freeWiFi": free_wifi,
         "childPolicy": detail.get("childPolicy", ""),
         "cancellationPolicy": detail.get("cancellationPolicy", ""),
         "refundPolicy": detail.get("refundPolicy", ""),
-        "rating": 0,
-        "reviewCount": 0,
-        "bookingUrl": raw.get('url', '#'),
+        "rating": nonnegative_number(raw.get("rating")),
+        "reviewCount": nonnegative_number(raw.get("reviewCount")),
+        "bookingUrl": str(raw.get('url') or '').strip(),
         "images": images,
-        "tags": [theme, "纯玩", "品质"],
+        "tags": raw_tags,
         "isHot": recommendation_score >= 5,
         "isNew": is_new,
         "isFlashSale": False,
-        "discountRate": None,
-        "groupSize": "30人常规团",
+        "discountRate": discount_rate,
+        "groupSize": group_size,
         "theme": theme,
         "leisureLevel": leisure_level,
-        "suitableFor": ["亲子", "情侣"],
-        "difficulty": "轻松",
-        "season": "全年",
-        "language": "中文导游",
+        "suitableFor": string_list(raw.get("suitableFor")),
+        "difficulty": str(raw.get("difficulty") or "").strip(),
+        "season": str(raw.get("season") or "").strip(),
+        "language": str(raw.get("language") or "").strip(),
         "departureDates": departure_dates,
         "hotDepartureDates": departure_dates[:4],
         "createdAt": datetime.now().isoformat(),
@@ -525,6 +824,21 @@ def clean_nulls(obj):
     elif isinstance(obj, list):
         return [clean_nulls(v) for v in obj]
     return obj
+
+
+def write_json_atomically(path, value):
+    directory = os.path.dirname(path) or "."
+    fd, temp_path = tempfile.mkstemp(prefix=".merge-", suffix=".json", dir=directory)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(value, f, ensure_ascii=False, separators=(",", ":"))
+        os.replace(temp_path, path)
+    except Exception:
+        try:
+            os.unlink(temp_path)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 def make_tour_key(item):
@@ -550,19 +864,38 @@ def prefer_raw_candidate(current, candidate):
     return score_raw_candidate(candidate) >= score_raw_candidate(current)
 
 
+def has_structured_departure_dates(raw):
+    values = list(raw.get("departureDates") or [])
+    values.extend(raw.get("departureDaysList") or [])
+    if raw.get("departureDate"):
+        values.append(raw.get("departureDate"))
+    return any(re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(value).strip()) for value in values if value)
+
+
 def extract_existing_detail(item):
+    quality = item.get("dataQuality") or item.get("meta", {}).get("dataQuality") or {}
+    field_sources = quality.get("fieldSources", {}) if isinstance(quality, dict) else {}
+
+    def cached_value(field, default):
+        if field_sources.get(field) == "synthetic":
+            return default
+        value = item.get(field, default)
+        if field == "highlights" and tuple(value or ()) in GENERIC_HIGHLIGHTS:
+            return default
+        return value
+
     return {
-        "highlights": item.get("highlights", []),
-        "itinerary": item.get("itinerary", []),
-        "inclusions": item.get("inclusions", []),
-        "exclusions": item.get("exclusions", []),
-        "optionalExpenses": item.get("optionalExpenses", []),
-        "importantNotes": item.get("importantNotes", []),
-        "childPolicy": "",
-        "singleSupplementNote": "",
-        "singleSupplementAmount": None,
-        "cancellationPolicy": "",
-        "refundPolicy": "",
+        "highlights": cached_value("highlights", []),
+        "itinerary": cached_value("itinerary", []),
+        "inclusions": cached_value("inclusions", []),
+        "exclusions": cached_value("exclusions", []),
+        "optionalExpenses": cached_value("optionalExpenses", []),
+        "importantNotes": cached_value("importantNotes", []),
+        "childPolicy": cached_value("childPolicy", ""),
+        "singleSupplementNote": cached_value("singleSupplementNote", ""),
+        "singleSupplementAmount": cached_value("singleSupplement", None),
+        "cancellationPolicy": cached_value("cancellationPolicy", ""),
+        "refundPolicy": cached_value("refundPolicy", ""),
     }
 
 
@@ -627,7 +960,7 @@ def apply_availability_filter(tours, label="all tours"):
     workers = max(4, min(20, int(os.environ.get("AVAILABILITY_WORKERS", "12") or "12")))
     timeout = float(os.environ.get("AVAILABILITY_TIMEOUT", "10") or "10")
     cache_path = os.environ.get("AVAILABILITY_CACHE_PATH", str(DEFAULT_CACHE)).strip()
-    cache_ttl_hours = float(os.environ.get("AVAILABILITY_CACHE_TTL_HOURS", "24") or "24")
+    cache_ttl_hours = float(os.environ.get("AVAILABILITY_CACHE_TTL_HOURS", "168") or "168")
     print(
         f"[可用性] {label}: 开始校验 {len(jobs)} 个唯一 URL，线程数 {workers}，超时 {timeout}s，"
         f"缓存 {cache_path}（TTL {cache_ttl_hours}h）"
@@ -772,12 +1105,14 @@ def main():
     # 两者存在一定差异，先一并并入，再统一去重，避免有效线路被单一路径漏掉。
     raw_files = [
         "raw_jrt365_full.json",
-        "raw_jrt365.json",
         "raw_http_full.json",
+        "raw_kanghui.json",
         "raw_pintu_full.json",
         "raw_saihuitong_full.json",
         "raw_gzl_api.json",
     ]
+    if not os.path.exists(os.path.join(data_dir, "raw_jrt365_full.json")):
+        raw_files.insert(1, "raw_jrt365.json")
     for fname in raw_files:
         fpath = os.path.join(data_dir, fname)
         if os.path.exists(fpath):
@@ -815,9 +1150,15 @@ def main():
     print(f"[去重] 后: {len(deduped)}条")
 
     # 过滤
-    deduped = [r for r in deduped if r.get('price', 0) > 0 and len(r.get('title', '')) > 5]
+    deduped = [
+        r for r in deduped
+        if r.get('price', 0) > 0
+        and len(r.get('title', '')) > 5
+        and (r.get('source') not in SCHEDULE_REQUIRED_SOURCES or has_structured_departure_dates(r))
+    ]
     print(f"[过滤] 有效数据: {len(deduped)}条")
 
+    prefetch_image_cache(deduped)
     detail_results = load_detail_results(deduped, existing_tours)
 
     # 转换为前端格式
@@ -879,8 +1220,7 @@ export const tours: Tour[] = [];
     json_path = os.path.abspath(json_path)
     os.makedirs(os.path.dirname(json_path), exist_ok=True)
 
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(tours_clean, f, ensure_ascii=False, separators=(',', ':'))
+    write_json_atomically(json_path, tours_clean)
     split_script = os.path.abspath(os.path.join(os.path.dirname(__file__), "split_tour_data.mjs"))
     if os.path.exists(split_script):
         os.system(f'node "{split_script}"')

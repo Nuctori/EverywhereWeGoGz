@@ -29,10 +29,11 @@ const sourceRules = {
   // Thresholds follow the current stable merged baseline so skip_crawls CI
   // validates real regressions instead of stale historical counts.
   '假日通': { min: 70, ratio: 0.28, requireStructuredDates: true, allowMissing: true},
-  '康辉': { min: 850, ratio: 0.7, allowMissing: true},
+  // Records without a source/title duration are excluded by merge_data.py.
+  '康辉': { min: 800, ratio: 0.7, allowMissing: true},
   '广东中旅': { min: 400, ratio: 0.75, allowMissing: true},
   '品途': { min: 0, ratio: 0.0, allowMissing: true },
-  '广州去旅行': { min: 22, ratio: 0.7, allowMissing: true},
+  '广州去旅行': { min: 20, ratio: 0.7, allowMissing: true},
   '暴走村': { min: 40, ratio: 0.35, allowMissing: true},
   '广之旅': { min: 1700, ratio: 0.7, requireStructuredDates: true, allowMissing: true},
 };
@@ -131,6 +132,12 @@ function hasStructuredDepartureDates(item) {
   return structuredDepartureDatesOf(item).length > 0;
 }
 
+function hasUsableDuration(item) {
+  const rawDays = Number(item?.days || 0);
+  if (Number.isFinite(rawDays) && rawDays > 0) return true;
+  return /\d+(?:\.\d+)?\s*[天日]/.test(String(item?.title || item?.name || ''));
+}
+
 function hasInvalidDepartureDateToken(item) {
   const maxYear = new Date().getFullYear() + MAX_DEPARTURE_YEAR_OFFSET;
   const values = [
@@ -185,6 +192,9 @@ function loadRawCounts() {
       const title = String(item.title || item.name || '').trim();
       const price = Number(item.price || 0);
       if (title.length <= 5 || !(price > 0)) {
+        continue;
+      }
+      if (!hasUsableDuration(item)) {
         continue;
       }
 
@@ -328,6 +338,9 @@ const rawStructuredJrtKeys = new Set(
 for (const [source, rule] of Object.entries(sourceRules)) {
   const outputCount = outputCounts[source] || 0;
   const rawCount = rawCounts[source] || 0;
+  if (rule.allowMissing && rawCount === 0) {
+    continue;
+  }
   const required = computeRequiredOutputCount(rule, rawCount);
 
   if (outputCount < required) {
@@ -362,6 +375,10 @@ for (const tour of fullTours) {
 
   if (sourceOf(tour) === '广之旅' && !hasStructuredDepartureDates(tour)) {
     fail(errors, `GZL tour missing valid structured departure dates: ${tour.id} ${tour.bookingUrl || tour.url || ''}`);
+  }
+
+  if ((tour.dataQuality?.syntheticFields || []).length > 0) {
+    fail(errors, `Tour contains fabricated fields: ${tour.id} ${tour.dataQuality.syntheticFields.join(', ')}`);
   }
 
   const bookingUrl = normalizeUrl(tour?.bookingUrl || tour?.url);
