@@ -4,7 +4,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from detail_parsers import empty_detail
-from merge_data import build_source_meta, raw_to_tour
+from merge_data import build_source_meta, extract_service_status, raw_to_tour
 
 
 def test_missing_values_are_not_fabricated():
@@ -70,6 +70,51 @@ def test_records_without_duration_are_rejected():
         "url": "https://example.test/tour/1",
     }
     assert raw_to_tour(raw, 1, empty_detail()) is None
+
+
+def test_detail_fields_are_structured_without_invention():
+    raw = {
+        "source": "测试来源",
+        "title": "南非线路5天",
+        "price": 999,
+        "days": 5,
+    }
+    detail = {
+        **empty_detail(),
+        "itinerary": [{
+            "day": 1,
+            "title": "出发",
+            "description": "",
+            "meals": ["早餐", "午餐"],
+            "accommodation": "当地四星酒店",
+            "activities": [],
+        }],
+        "inclusions": ["含旅行保险", "含中文导游"],
+        "exclusions": ["个人消费"],
+    }
+
+    tour = raw_to_tour(raw, 1, detail)
+
+    assert tour["accommodationDetails"] == ["当地四星酒店"]
+    assert tour["accommodationLevel"] == "4星酒店"
+    assert tour["accommodationStars"] == 4
+    assert tour["mealCounts"] == {"breakfast": 1, "lunch": 1, "dinner": 0}
+    assert tour["serviceStatus"] == {
+        "visaRequirements": "unknown",
+        "travelInsurance": "included",
+        "tourGuideService": "included",
+    }
+    assert tour["dataQuality"]["fieldSources"]["serviceStatus"] == "detail"
+
+
+def test_conflicting_service_text_stays_unknown():
+    detail = {
+        **empty_detail(),
+        "inclusions": ["含导游服务"],
+        "exclusions": ["导游服务费另付"],
+    }
+
+    assert extract_service_status(detail, ("导游",)) == "unknown"
 
 
 def test_existing_detail_cache_is_not_erased():

@@ -75,6 +75,66 @@ def nonnegative_number(value, default=0):
     return int(number) if number.is_integer() else number
 
 
+SERVICE_STATUS_VALUES = {"included", "excluded", "unknown"}
+
+
+def extract_service_status(detail: dict, keywords: tuple[str, ...]) -> str:
+    included = "\n".join(string_list(detail.get("inclusions")))
+    excluded = "\n".join(string_list(detail.get("exclusions")))
+    in_match = any(keyword in included for keyword in keywords)
+    out_match = any(keyword in excluded for keyword in keywords)
+    if in_match == out_match:
+        return "unknown"
+    return "included" if in_match else "excluded"
+
+
+def extract_accommodation_details(detail: dict) -> list[str]:
+    values = []
+    for day in detail.get("itinerary") or []:
+        if not isinstance(day, dict):
+            continue
+        value = str(day.get("accommodation") or "").strip()
+        if value and value not in values:
+            values.append(value)
+    return values
+
+
+def extract_meal_counts(detail: dict) -> dict[str, int]:
+    counts = {"breakfast": 0, "lunch": 0, "dinner": 0}
+    tokens = {
+        "breakfast": ("早餐", "早餐"),
+        "lunch": ("午餐", "中餐"),
+        "dinner": ("晚餐", "晚饭", "晚餐"),
+    }
+    for day in detail.get("itinerary") or []:
+        if not isinstance(day, dict):
+            continue
+        for meal in string_list(day.get("meals")):
+            for name, names in tokens.items():
+                if any(token in meal for token in names):
+                    counts[name] += 1
+                    break
+    return counts
+
+
+def summarize_accommodation(values: list[str]) -> tuple[str, int]:
+    hotel_values = [value for value in values if "酒店" in value or "宾馆" in value or "客栈" in value]
+    if not hotel_values:
+        return "", 0
+    stars = set()
+    for value in hotel_values:
+        match = re.search(r"([1-5一二三四五])\s*星", value)
+        if match:
+            token = match.group(1)
+            star = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5}.get(token, 0)
+            stars.add(star or int(token))
+    stars.discard(0)
+    if len(stars) == 1:
+        star = next(iter(stars))
+        return f"{star}星酒店", star
+    return "酒店住宿", 0
+
+
 def build_source_meta(
     raw: dict,
     detail: dict,
@@ -134,6 +194,13 @@ def build_source_meta(
         for day in detail_itinerary
         if isinstance(day, dict)
     )
+    accommodation_details = extract_accommodation_details(detail)
+    meal_counts = extract_meal_counts(detail)
+    service_status = {
+        "visaRequirements": extract_service_status(detail, ("签证",)),
+        "travelInsurance": extract_service_status(detail, ("保险", "意外险")),
+        "tourGuideService": extract_service_status(detail, ("导游", "领队", "司导")),
+    }
     field_sources = {
         "price": "source" if raw.get("price") is not None else "unknown",
         "duration": duration_source,
@@ -168,6 +235,9 @@ def build_source_meta(
         "isFlashSale": "unknown",
         "originalPrice": "unknown",
         "discountRate": "unknown",
+        "accommodationDetails": "detail" if accommodation_details else "unknown",
+        "mealCounts": "detail" if any(meal_counts.values()) else "unknown",
+        "serviceStatus": "detail" if any(value != "unknown" for value in service_status.values()) else "unknown",
     }
     field_sources.update(geo_field_sources)
     field_sources.setdefault("routeRegion", "inferred")
@@ -207,11 +277,19 @@ def build_source_meta(
         field_sources["freeWiFi"] = "source"
     for field in detail_fields:
         field_sources[field] = "detail"
+    if accommodation_details:
+        field_sources["accommodationLevel"] = "source" if field_sources.get("accommodationLevel") == "source" else "detail"
+        field_sources["accommodationStars"] = "detail"
     synthetic_fields = [field for field, source in field_sources.items() if source == "synthetic"]
     source_meta["dataQuality"] = {
         "fieldSources": field_sources,
         "syntheticFields": synthetic_fields,
         "riskFlags": [f"synthetic:{field}" for field in synthetic_fields],
+    }
+    source_meta["structuredDetails"] = {
+        "accommodationDetails": accommodation_details,
+        "mealCounts": meal_counts if any(meal_counts.values()) else {},
+        "serviceStatus": service_status,
     }
     return source_meta
 
@@ -489,148 +567,6 @@ def compute_recommendation_score(
     return score
 
 
-def raw_to_tour_legacy(raw, id_counter, detail=None):
-    return raw_to_tour(raw, id_counter, detail=detail)
-    source = raw.get('source', '未知')
-    title = raw.get('title', '')
-    price = raw.get('price', 0)
-    detail = detail or empty_detail()
-
-    if is_blacklisted_title(title):
-        return None
-    if source == '广之旅' and '/hotel/' in str(raw.get('url', '')).lower():
-        return None
-
-    days = raw.get('days', 0) or extract_days(title)
-    raw_destination = str(raw.get('destination') or '').strip()
-    destination = raw_destination or guess_destination(title)
-    destination_source = 'source' if raw_destination else 'inferred'
-    theme = guess_theme(title)
-    leisure_level = guess_leisure_level(title, days, theme)
-
-    images = raw.get('images', [])
-    if not images and raw.get('img'):
-        images = [raw['img']]
-    images = normalize_images(images, source)
-    if not images:
-        images = [ensure_placeholder_image(source)]
-
-    structured_dates = []
-    raw_date_values = list(raw.get("departureDates") or [])
-    raw_date_values.extend(raw.get("departureDaysList") or [])
-    if raw.get("departureDate"):
-        raw_date_values.append(raw.get("departureDate"))
-    for value in raw_date_values:
-        try:
-            normalized_date = datetime.strptime(str(value).strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
-        except (TypeError, ValueError):
-            continue
-        if normalized_date not in structured_dates:
-            structured_dates.append(normalized_date)
-
-    parsed_dates = structured_dates or extract_title_dates(title)
-    if parsed_dates:
-        departure_date = parsed_dates[0]
-        departure_dates = parsed_dates
-    else:
-        days_offset = (stable_hash(title) % 60) + 1
-        departure = datetime.now() + timedelta(days=days_offset)
-        departure_date = departure.strftime("%Y-%m-%d")
-        departure_dates = [departure_date]
-
-    discount_rate = None
-    original_price = None
-    if price > 1000:
-        discount_rate = (stable_hash(title) % 16) + 5
-        original_price = int(price / (1 - discount_rate / 100))
-
-    if days <= 1:
-        estimated_single_supplement = 0
-    elif days <= 3:
-        estimated_single_supplement = max(50, int(price * 0.15))
-    else:
-        estimated_single_supplement = max(100, int(price * 0.25))
-
-    actual_single_supplement = detail.get("singleSupplementAmount")
-    single_supplement = int(actual_single_supplement) if actual_single_supplement is not None else estimated_single_supplement
-
-    rating = round(3.8 + (stable_hash(source + title) % 12) / 10, 1)
-    review_count = (stable_hash(title + source) % 500) + 50
-
-    departure = datetime.strptime(departure_date, "%Y-%m-%d")
-    return_date = departure + timedelta(days=days or 2)
-
-    itinerary = []
-    for d in range(1, (days or 2) + 1):
-        itinerary.append({
-            "day": d,
-            "title": f"第{d}天：{destination}游览" if d > 1 and d < (days or 2) else (f"出发前往{destination}" if d == 1 else f"告别{destination}，返回温馨的家"),
-            "description": f"今日安排{destination}精彩活动，感受当地独特魅力。",
-            "meals": ["早餐", "午餐"] if d < (days or 2) else ["早餐"],
-            "accommodation": "当地酒店" if d < (days or 2) else "温馨的家",
-            "activities": ["景点游览", "自由活动"],
-        })
-
-    available_seats = max(3, 20 - int(price / 1000))
-    total_seats = available_seats + (stable_hash(title) % 10) + 5
-
-    return {
-        "id": f"tour_{id_counter}",
-        "title": title,
-        "source": source,
-        "sourceId": raw.get('sourceId') or raw.get('source_id') or raw.get('sourceID') or raw.get('id'),
-        "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png",
-        "destination": destination,
-        "duration": days or 2,
-        "price": int(price),
-        "originalPrice": original_price,
-        "priceUnit": "人",
-        "departureDate": departure.strftime("%Y-%m-%d"),
-        "returnDate": return_date.strftime("%Y-%m-%d"),
-        "transportType": "大巴往返" if days and days <= 3 else ("高铁往返" if days and days <= 5 else "飞机往返"),
-        "accommodationLevel": "舒适型",
-        "accommodationStars": 3,
-        "meals": f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐",
-        "singleSupplement": single_supplement,
-        "singleSupplementNote": detail.get("singleSupplementNote", ""),
-        "availableSeats": available_seats,
-        "totalSeats": total_seats,
-        "highlights": [f"{destination}必打卡", "特色美食", "精品住宿"],
-        "itinerary": itinerary,
-        "inclusions": ["往返交通", "酒店住宿", "景点门票", "导游服务"],
-        "exclusions": ["个人消费", "单房差", "自费项目"],
-        "importantNotes": ["请携带有效身份证件", "行程可能因天气调整"],
-        "visaRequirements": "无需签证（国内游）",
-        "travelInsurance": True,
-        "tourGuideService": True,
-        "freeWiFi": stable_hash(title) % 2 == 0,
-        "childPolicy": "2-12岁儿童不占床享半价",
-        "cancellationPolicy": "出发前7天可无损退改",
-        "refundPolicy": "未消费项目按实结算退还",
-        "rating": rating,
-        "reviewCount": review_count,
-        "bookingUrl": str(raw.get('url') or '').strip(),
-        "images": images,
-        "tags": [theme, "纯玩", "品质"],
-        "isHot": stable_hash(title + source) % 3 == 0,
-        "isNew": stable_hash(title + source) % 5 == 0,
-        "isFlashSale": stable_hash(title + source) % 10 == 0,
-        "discountRate": discount_rate if discount_rate is not None else None,
-        "groupSize": "30人常规团",
-        "theme": theme,
-        "leisureLevel": leisure_level,
-        "suitableFor": ["亲子", "情侣"],
-        "difficulty": "轻松",
-        "season": "全年",
-        "language": "中文导游",
-        "departureDate": departure_date,
-        "departureDates": departure_dates,
-        "hotDepartureDates": departure_dates[:4],
-        "createdAt": datetime.now().isoformat(),
-        "updatedAt": datetime.now().isoformat(),
-    }
-
-
 def raw_to_tour(raw, id_counter, detail=None):
     source = raw.get('source', '未知')
     title = raw.get('title', '')
@@ -757,6 +693,18 @@ def raw_to_tour(raw, id_counter, detail=None):
         accommodation_stars = int(float(accommodation_stars)) if accommodation_stars is not None else 0
     except (TypeError, ValueError):
         accommodation_stars = 0
+    accommodation_details = extract_accommodation_details(detail)
+    accommodation_summary, detail_accommodation_stars = summarize_accommodation(accommodation_details)
+    if not accommodation_level:
+        accommodation_level = accommodation_summary
+    if not accommodation_stars:
+        accommodation_stars = detail_accommodation_stars
+    meal_counts = extract_meal_counts(detail)
+    service_status = {
+        "visaRequirements": extract_service_status(detail, ("签证",)),
+        "travelInsurance": extract_service_status(detail, ("保险", "意外险")),
+        "tourGuideService": extract_service_status(detail, ("导游", "领队", "司导")),
+    }
 
     return {
         "id": f"tour_{id_counter}",
@@ -777,6 +725,9 @@ def raw_to_tour(raw, id_counter, detail=None):
         "transportType": transport_value,
         "accommodationLevel": accommodation_level,
         "accommodationStars": accommodation_stars,
+        "accommodationDetails": accommodation_details,
+        "mealCounts": meal_counts if any(meal_counts.values()) else None,
+        "serviceStatus": service_status,
         "meals": meals_value,
         "singleSupplement": single_supplement,
         "singleSupplementNote": detail.get("singleSupplementNote", ""),

@@ -4,12 +4,26 @@ import { z } from 'zod';
 const nonNegativeNumber = z.coerce.number().finite().nonnegative();
 const booleanDefaultFalse = z.boolean().optional().default(false);
 const stringArrayDefaultEmpty = z.array(z.string()).optional().default([]);
+const serviceAvailability = z.enum(['included', 'excluded', 'unknown']);
 
 export const dataQualitySchema = z.object({
   hasStructuredDepartureDates: z.boolean().optional(),
   isDepartureDateReliable: z.boolean().optional(),
   availabilityConfidence: z.enum(['low', 'medium', 'high']).optional(),
   riskFlags: z.array(z.string()).optional(),
+  fieldSources: z.record(z.string(), z.enum(['source', 'detail', 'inferred', 'unknown', 'synthetic'])).optional(),
+});
+
+const mealCountsSchema = z.object({
+  breakfast: z.coerce.number().int().nonnegative(),
+  lunch: z.coerce.number().int().nonnegative(),
+  dinner: z.coerce.number().int().nonnegative(),
+});
+
+const serviceStatusSchema = z.object({
+  visaRequirements: serviceAvailability,
+  travelInsurance: serviceAvailability,
+  tourGuideService: serviceAvailability,
 });
 
 export const dayItinerarySchema = z.object({
@@ -25,6 +39,11 @@ const tourMetaSchema = z.object({
   aiTags: stringArrayDefaultEmpty,
   sourceFeatures: stringArrayDefaultEmpty,
   sourceAttributes: z.record(z.string(), z.unknown()).optional().default({}),
+  structuredDetails: z.object({
+    accommodationDetails: stringArrayDefaultEmpty,
+    mealCounts: mealCountsSchema,
+    serviceStatus: serviceStatusSchema,
+  }).optional(),
   dataQuality: dataQualitySchema.optional(),
 });
 
@@ -68,6 +87,9 @@ export const tourDetailSchema = z.object({
   sourceLogo: z.string().optional().default(''),
   returnDate: z.string().optional().default(''),
   accommodationStars: nonNegativeNumber.optional().default(0),
+  accommodationDetails: stringArrayDefaultEmpty,
+  mealCounts: mealCountsSchema.optional(),
+  serviceStatus: serviceStatusSchema.optional(),
   singleSupplement: nonNegativeNumber.optional().default(0),
   availableSeats: nonNegativeNumber.optional().default(0),
   totalSeats: nonNegativeNumber.optional().default(0),

@@ -24,6 +24,10 @@ assert.ok(
 );
 assert.ok(mergeScript.includes('def prefetch_image_cache('), 'merge should prefetch image cache concurrently');
 assert.ok(mergeScript.includes('def build_source_meta('), 'merge should preserve source-specific metadata');
+assert.ok(mergeScript.includes('def extract_accommodation_details('), 'accommodation details should be structured from itinerary data');
+assert.ok(mergeScript.includes('def extract_meal_counts('), 'meal counts should be structured from itinerary data');
+assert.ok(mergeScript.includes('def extract_service_status('), 'service status should be derived from explicit inclusion/exclusion text');
+assert.ok(!mergeScript.includes('def raw_to_tour_legacy('), 'legacy fabricated conversion must not remain callable');
 assert.ok(mergeScript.includes('syntheticFields'), 'merge should retain provenance metadata for compatibility');
 assert.ok(mergeScript.includes('"startingPrice"') && mergeScript.includes('"productType"') && mergeScript.includes('raw_meta.get(key)'), 'merge should retain extracted GZL fields');
 assert.ok(mergeScript.includes('isinstance(raw_attributes, dict)'), 'source metadata must tolerate malformed legacy attributes');

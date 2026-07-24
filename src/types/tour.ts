@@ -15,12 +15,32 @@ export interface DataQuality {
   // availabilityConfidence 取值：low=结构化数据不可信，medium=部分可信，high=来源稳定可信
   availabilityConfidence?: 'low' | 'medium' | 'high';
   riskFlags?: string[];
+  fieldSources?: Record<string, 'source' | 'detail' | 'inferred' | 'unknown' | 'synthetic'>;
+}
+
+export type ServiceAvailability = 'included' | 'excluded' | 'unknown';
+
+export interface MealCounts {
+  breakfast: number;
+  lunch: number;
+  dinner: number;
+}
+
+export interface ServiceStatus {
+  visaRequirements: ServiceAvailability;
+  travelInsurance: ServiceAvailability;
+  tourGuideService: ServiceAvailability;
 }
 
 export interface TourMeta {
   aiTags?: string[];
   sourceFeatures?: string[];
   sourceAttributes?: Record<string, unknown>;
+  structuredDetails?: {
+    accommodationDetails: string[];
+    mealCounts: MealCounts;
+    serviceStatus: ServiceStatus;
+  };
   dataQuality?: DataQuality;
 }
 
@@ -95,6 +115,9 @@ export interface TourDetail {
   sourceLogo: string;
   returnDate: string;
   accommodationStars: number;
+  accommodationDetails?: string[];
+  mealCounts?: MealCounts;
+  serviceStatus?: ServiceStatus;
   singleSupplement: number;
   availableSeats: number;
   totalSeats: number;
