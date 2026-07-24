@@ -18,7 +18,7 @@ mustInclude('npm run audit:deploy-workflow', 'expected deploy workflow to run it
 mustInclude('uses: actions/upload-pages-artifact@v3', 'expected official Pages artifact upload action');
 mustInclude('uses: actions/deploy-pages@v4', 'expected official Pages deploy action');
 mustInclude('uses: actions/setup-python@v5', 'expected Python runtime for structured data audits');
-mustInclude('python -m pip install beautifulsoup4 lxml', 'expected dependencies for structured data audits');
+mustInclude('python -m pip install requests beautifulsoup4 lxml', 'expected dependencies for structured data audits');
 
 assert.ok(
   workflow.indexOf('- name: Verify deploy workflow contract') < workflow.indexOf('- name: Install dependencies'),
