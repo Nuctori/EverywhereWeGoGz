@@ -42,7 +42,7 @@ const tourMetaSchema = z.object({
   sourceAttributes: z.record(z.string(), z.unknown()).optional().default({}),
   structuredDetails: z.object({
     accommodationDetails: stringArrayDefaultEmpty,
-    mealCounts: mealCountsSchema.optional(),
+    mealCounts: mealCountsSchema.nullable().optional(),
     serviceStatus: serviceStatusSchema,
   }).optional(),
   dataQuality: dataQualitySchema.optional(),
@@ -89,7 +89,7 @@ export const tourDetailSchema = z.object({
   returnDate: z.string().optional().default(''),
   accommodationStars: nonNegativeNumber.optional().default(0),
   accommodationDetails: stringArrayDefaultEmpty,
-  mealCounts: mealCountsSchema.optional(),
+  mealCounts: mealCountsSchema.nullable().optional(),
   serviceStatus: serviceStatusSchema.optional(),
   singleSupplement: nonNegativeNumber.optional().default(0),
   availableSeats: nonNegativeNumber.optional().default(0),

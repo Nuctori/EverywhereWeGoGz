@@ -39,7 +39,7 @@ export interface TourMeta {
   sourceAttributes?: Record<string, unknown>;
   structuredDetails?: {
     accommodationDetails: string[];
-    mealCounts?: MealCounts;
+    mealCounts?: MealCounts | null;
     serviceStatus: ServiceStatus;
   };
   dataQuality?: DataQuality;

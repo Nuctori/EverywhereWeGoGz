@@ -152,6 +152,16 @@ function prettyJson(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
+function normalizeDetailPayload(detail) {
+  if (detail.mealCounts === null) {
+    delete detail.mealCounts;
+  }
+  if (detail.meta?.structuredDetails?.mealCounts === null) {
+    delete detail.meta.structuredDetails.mealCounts;
+  }
+  return detail;
+}
+
 // ??????????/??/?????????????????
 function inferDestinationFromTour(tour) {
   const title = String(tour.title || '').trim();
@@ -224,6 +234,7 @@ const listTours = tours.map((tour) => {
       detailTour[key] = value;
     }
   }
+  normalizeDetailPayload(detailTour);
 
   const detailFile = `${tour.id}.json`;
   writeTextFileWithRetry(path.join(detailsDir, detailFile), compactJson(detailTour));

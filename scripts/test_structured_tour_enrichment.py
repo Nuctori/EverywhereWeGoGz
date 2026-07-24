@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from detail_parsers import empty_detail
-from enrich_structured_tour_fields import enrich_tours, orphan_detail_ids
+from enrich_structured_tour_fields import enrich_tours, normalize_detail_payload, orphan_detail_ids
 
 
 def sample_detail():
@@ -56,8 +56,15 @@ def test_orphan_detail_ids_are_only_unreferenced_files():
     assert orphan_detail_ids(tours, ["tour_1", "tour_2", "tour_legacy"]) == {"tour_legacy"}
 
 
+def test_null_detail_fields_are_normalized_away():
+    detail = {"mealCounts": None, "meta": {"structuredDetails": {"mealCounts": None}}}
+    assert normalize_detail_payload(detail) is True
+    assert detail == {"meta": {"structuredDetails": {}}}
+
+
 if __name__ == "__main__":
     test_enrichment_is_idempotent_and_marks_real_sources()
     test_empty_detail_preserves_unknown_semantics_without_zero_meals()
     test_orphan_detail_ids_are_only_unreferenced_files()
+    test_null_detail_fields_are_normalized_away()
     print("structured tour enrichment tests passed")

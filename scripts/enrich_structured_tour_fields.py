@@ -30,6 +30,18 @@ def write_json_atomically(path: Path, value):
             os.unlink(temporary)
 
 
+def normalize_detail_payload(detail: dict) -> bool:
+    changed = False
+    if detail.get("mealCounts") is None and "mealCounts" in detail:
+        detail.pop("mealCounts")
+        changed = True
+    structured = detail.get("meta", {}).get("structuredDetails")
+    if isinstance(structured, dict) and structured.get("mealCounts") is None and "mealCounts" in structured:
+        structured.pop("mealCounts")
+        changed = True
+    return changed
+
+
 def enrich(tour: dict, detail: dict) -> None:
     accommodation_details = extract_accommodation_details(detail)
     accommodation_summary, stars = summarize_accommodation(accommodation_details)
@@ -93,7 +105,10 @@ def main() -> None:
     tours = json.loads(tours_path.read_text(encoding="utf-8"))
     details = {}
     for detail_path in details_dir.glob("*.json"):
-        details[detail_path.stem] = json.loads(detail_path.read_text(encoding="utf-8"))
+        detail = json.loads(detail_path.read_text(encoding="utf-8"))
+        if normalize_detail_payload(detail):
+            write_json_atomically(detail_path, detail)
+        details[detail_path.stem] = detail
     enrich_tours(tours, details)
     write_json_atomically(tours_path, tours)
     print(f"enriched {len(tours)} tours")

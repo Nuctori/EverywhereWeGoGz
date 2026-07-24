@@ -71,8 +71,18 @@ export function useTourDetail() {
         // 请求令牌不匹配说明已有新选择，丢弃旧响应
         if (requestTokenRef.current !== requestToken) return;
         const detail = tourDetailSchema.parse(rawDetail);
-        detailCacheRef.current[tour.id] = detail;
-        setResolvedTour({ ...tour, ...detail });
+        const structuredDetails = tour.meta?.structuredDetails;
+        const resolvedDetail = {
+          ...detail,
+          accommodationDetails:
+            detail.accommodationDetails?.length
+              ? detail.accommodationDetails
+              : structuredDetails?.accommodationDetails ?? detail.accommodationDetails,
+          mealCounts: detail.mealCounts ?? structuredDetails?.mealCounts ?? undefined,
+          serviceStatus: detail.serviceStatus ?? structuredDetails?.serviceStatus,
+        };
+        detailCacheRef.current[tour.id] = resolvedDetail;
+        setResolvedTour({ ...tour, ...resolvedDetail });
         setDetailStatus('ready');
         activeRequestTourIdRef.current = null;
       })
