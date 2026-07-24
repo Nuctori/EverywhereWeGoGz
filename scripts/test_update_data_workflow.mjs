@@ -160,6 +160,8 @@ for (const snippet of [
   'npm run audit:crawler-syntax',
   '- name: Verify update workflow contract',
   'npm run audit:update-data-workflow',
+  '- name: Verify geo catalog',
+  'npm run test:geo-catalog',
 ]) {
   assert.ok(preflightJob.includes(snippet), `expected preflight job to include ${snippet}`);
 }

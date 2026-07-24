@@ -26,6 +26,8 @@
     "audit:ai-success-path": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_success_path.ts",
     "audit:display-semantics": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_display_semantics.ts",
     "audit:initial-data-loading": "node scripts/test_initial_data_loading.mjs",
+    "audit:geo-quality": "node scripts/audit_geo_quality.mjs",
+    "test:geo-catalog": "python scripts/test_geo_catalog.py",
     "test:tour-geo": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_tour_geo.mjs",
     "test:tour-deeplink": "node --experimental-strip-types scripts/test_tour_deeplink.mjs",
     "test:destination-aliases": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_destination_aliases.ts",

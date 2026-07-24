@@ -38,5 +38,6 @@ output/
 .codex_user_sim_report.md
 post-to-wechat/
 audit/data-integrity-report.json
+audit/geo-report.json
 
 weekly-wechat-posts/

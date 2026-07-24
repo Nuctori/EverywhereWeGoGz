@@ -49,6 +49,9 @@ jobs:
       - name: Verify update workflow contract
         run: npm run audit:update-data-workflow
 
+      - name: Verify geo catalog
+        run: npm run test:geo-catalog
+
   crawl-jrt365:
     runs-on: ubuntu-latest
     needs: preflight
@@ -328,6 +331,17 @@ jobs:
 
       - name: Split merged data
         run: npm run data:split
+
+      - name: Audit geographic data quality
+        run: npm run audit:geo-quality
+
+      - name: Upload geographic audit report
+        if: always() && hashFiles('audit/geo-report.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: geo-quality-report
+          path: audit/geo-report.json
+          if-no-files-found: error
 
       - name: Optimize cached images
         run: npm run data:images:webp

@@ -65,6 +65,16 @@ const inflated = inflateTourSummaryFromIndexEntry({
   title: 'Stable match',
   source: '假日通',
   destination: '广东',
+  departureCity: '广州',
+  departureProvince: '广东',
+  departureCountry: '中国',
+  destinationCity: '桂林',
+  destinationProvince: '广西',
+  destinationCountry: '中国',
+  geoStatus: 'complete',
+  geoConfidence: 'medium',
+  geoSource: 'local-place-catalog',
+  routeRegion: 'nearby-province',
   duration: 3,
   price: 199,
   bookingUrl: 'https://example.com/tour/9000',
@@ -85,6 +95,9 @@ const inflated = inflateTourSummaryFromIndexEntry({
   season: '全年',
   page: 7,
 });
+assert.equal(inflated.departureCity, '广州');
+assert.equal(inflated.destinationProvince, '广西');
+assert.equal(inflated.routeRegion, 'nearby-province');
 
 assert.equal(inflated.priceUnit, '人');
 assert.deepEqual(inflated.images, []);

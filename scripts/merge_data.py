@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 import requests
 
 from detail_parsers import detail_has_content, empty_detail, fetch_detail_data
+from geo_catalog import classify_route, normalize_tour_geo
 from tour_blacklist import is_blacklisted_title
 from validate_tour_availability import DEFAULT_CACHE, HTTP_ERROR, UNAVAILABLE, run_validation_jobs
 
@@ -63,6 +64,7 @@ def build_source_meta(
     destination_source: str,
     dates_source: str,
     duration_source: str,
+    geo_field_sources: dict,
 ) -> dict:
     """Keep source-specific fields without changing the legacy Tour shape."""
     raw_meta = raw.get("meta") if isinstance(raw.get("meta"), dict) else {}
@@ -149,6 +151,8 @@ def build_source_meta(
         "originalPrice": "unknown",
         "discountRate": "unknown",
     }
+    field_sources.update(geo_field_sources)
+    field_sources.setdefault("routeRegion", "inferred")
     if str(raw.get("accommodationLevel") or "").strip():
         field_sources["accommodationLevel"] = "source"
     if str(raw.get("groupSize") or "").strip():
@@ -607,6 +611,8 @@ def raw_to_tour(raw, id_counter, detail=None):
     raw_destination = str(raw.get('destination') or '').strip()
     destination = raw_destination or guess_destination(title)
     destination_source = 'source' if raw_destination else 'inferred'
+    geo_fields, geo_field_sources = normalize_tour_geo(raw, title, destination)
+    geo_fields["routeRegion"] = classify_route(geo_fields)
     theme = guess_theme(title)
     leisure_level = guess_leisure_level(title, days, theme)
 
@@ -662,6 +668,7 @@ def raw_to_tour(raw, id_counter, detail=None):
         destination_source=destination_source,
         dates_source=dates_source,
         duration_source=duration_source,
+        geo_field_sources=geo_field_sources,
     )
 
     raw_meta = raw.get("meta") if isinstance(raw.get("meta"), dict) else {}
@@ -719,6 +726,7 @@ def raw_to_tour(raw, id_counter, detail=None):
         "dataQuality": source_meta["dataQuality"],
         "sourceLogo": f"/icons/{source.lower().replace(' ', '').replace('之旅', '').replace('旅行', '')}.png",
         "destination": destination,
+        **geo_fields,
         "duration": days or 2,
         "price": int(price),
         "originalPrice": original_price,
