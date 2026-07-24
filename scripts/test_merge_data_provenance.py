@@ -108,10 +108,24 @@ def test_synthetic_existing_detail_cache_is_ignored():
     assert detail["highlights"] == []
 
 
+def test_legacy_generic_highlights_are_ignored_even_when_mislabeled():
+    from merge_data import extract_existing_detail
+
+    detail = extract_existing_detail(
+        {
+            "highlights": ["广东必打卡", "特色美食", "精品住宿"],
+            "dataQuality": {"fieldSources": {"highlights": "detail"}},
+        }
+    )
+
+    assert detail["highlights"] == []
+
+
 if __name__ == "__main__":
     test_missing_values_are_not_fabricated()
     test_source_fields_are_preserved_and_marked_source()
     test_records_without_duration_are_rejected()
     test_existing_detail_cache_is_not_erased()
     test_synthetic_existing_detail_cache_is_ignored()
+    test_legacy_generic_highlights_are_ignored_even_when_mislabeled()
     print("merge data provenance tests passed")

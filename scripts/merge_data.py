@@ -33,6 +33,13 @@ SOURCE_COLORS = {
 }
 
 PLACEHOLDER_LABEL = '老广精选线路'
+GENERIC_HIGHLIGHTS = {
+    ("其他必打卡", "特色美食", "精品住宿"),
+    ("广东必打卡", "特色美食", "精品住宿"),
+    ("云南必打卡", "特色美食", "精品住宿"),
+    ("北京必打卡", "特色美食", "精品住宿"),
+    ("新疆必打卡", "特色美食", "精品住宿"),
+}
 DATE_TOKEN_RE = re.compile(r'(?<!\d)(\d{1,2})[./-](\d{1,2})(?!\d)')
 IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'}
 RAW_FILE_PRIORITIES = {
@@ -872,7 +879,10 @@ def extract_existing_detail(item):
     def cached_value(field, default):
         if field_sources.get(field) == "synthetic":
             return default
-        return item.get(field, default)
+        value = item.get(field, default)
+        if field == "highlights" and tuple(value or ()) in GENERIC_HIGHLIGHTS:
+            return default
+        return value
 
     return {
         "highlights": cached_value("highlights", []),
