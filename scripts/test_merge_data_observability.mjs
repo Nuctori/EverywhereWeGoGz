@@ -29,5 +29,9 @@ assert.ok(mergeScript.includes('"startingPrice"') && mergeScript.includes('"prod
 assert.ok(mergeScript.includes('isinstance(raw_attributes, dict)'), 'source metadata must tolerate malformed legacy attributes');
 assert.ok(mergeScript.includes('"accommodationStars": "synthetic"') && mergeScript.includes('"visaRequirements": "synthetic"'), 'all generated detail fields must be classified');
 assert.ok(mergeScript.includes("duration_source = 'source' if raw_days else ('inferred' if title_days else 'unknown')"), 'duration provenance must distinguish source, inferred, and unknown values');
+assert.ok(mergeScript.includes('meals_value') && mergeScript.includes('transport_value') && mergeScript.includes('raw_tags'), 'available source/detail values should feed legacy fields when present');
+assert.ok(mergeScript.includes('if not isinstance(meals, list):'), 'malformed itinerary meals must keep the legacy fallback');
+assert.ok(mergeScript.includes('isinstance(source_features, list) and source_features'), 'empty source features must not overwrite compatible fallback values');
+assert.ok(mergeScript.includes('def string_list(value)') && mergeScript.includes('raw_tags = string_list(raw.get("tags"))'), 'legacy list fields must be normalized before entering the runtime schema');
 
 console.log('merge data observability audit passed');

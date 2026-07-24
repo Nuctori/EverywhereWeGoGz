@@ -50,6 +50,12 @@ def stable_hash(value: str) -> int:
     return int(hashlib.sha1(value.encode('utf-8')).hexdigest(), 16)
 
 
+def string_list(value) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return [str(item).strip() for item in value if item is not None and str(item).strip()]
+
+
 def build_source_meta(
     raw: dict,
     detail: dict,
@@ -78,11 +84,11 @@ def build_source_meta(
         if value not in (None, "", [], {}):
             source_attributes[key] = value
 
-    raw_ai_tags = raw_meta.get("aiTags")
-    raw_features = raw_meta.get("sourceFeatures")
+    raw_ai_tags = string_list(raw_meta.get("aiTags"))
+    raw_features = string_list(raw_meta.get("sourceFeatures"))
     source_meta = {
-        "aiTags": raw_ai_tags if isinstance(raw_ai_tags, list) else [],
-        "sourceFeatures": raw_features if isinstance(raw_features, list) else [],
+        "aiTags": raw_ai_tags,
+        "sourceFeatures": raw_features,
         "sourceAttributes": source_attributes,
     }
     detail_fields = {
@@ -100,6 +106,14 @@ def build_source_meta(
         )
         if detail.get(field)
     }
+    raw_tags = string_list(raw.get("tags"))
+    source_features = raw_features
+    detail_itinerary = detail.get("itinerary") if isinstance(detail.get("itinerary"), list) else []
+    has_detail_meals = any(
+        isinstance(day.get("meals"), list) and any(str(meal).strip() for meal in day.get("meals"))
+        for day in detail_itinerary
+        if isinstance(day, dict)
+    )
     field_sources = {
         "price": "source" if raw.get("price") is not None else "unknown",
         "duration": duration_source,
@@ -108,12 +122,12 @@ def build_source_meta(
         "highlights": "detail" if detail.get("highlights") else "synthetic",
         "theme": "inferred",
         "leisureLevel": "inferred",
-        "transportType": "inferred",
-        "tags": "synthetic",
+        "transportType": "source" if str(raw.get("transportType") or "").strip() else "inferred",
+        "tags": "source" if isinstance(raw_tags, list) and raw_tags else "synthetic",
         "groupSize": "synthetic",
         "accommodationLevel": "synthetic",
         "accommodationStars": "synthetic",
-        "meals": "synthetic",
+        "meals": "detail" if has_detail_meals else "synthetic",
         "suitableFor": "synthetic",
         "season": "synthetic",
         "visaRequirements": "synthetic",
@@ -121,7 +135,7 @@ def build_source_meta(
         "language": "synthetic",
         "travelInsurance": "synthetic",
         "tourGuideService": "synthetic",
-        "freeWiFi": "synthetic",
+        "freeWiFi": "source" if isinstance(source_features, list) and source_features else "synthetic",
         "rating": "synthetic",
         "reviewCount": "synthetic",
         "availableSeats": "synthetic",
@@ -135,6 +149,18 @@ def build_source_meta(
         "originalPrice": "unknown",
         "discountRate": "unknown",
     }
+    if str(raw.get("accommodationLevel") or "").strip():
+        field_sources["accommodationLevel"] = "source"
+    if str(raw.get("groupSize") or "").strip():
+        field_sources["groupSize"] = "source"
+    elif re.search(r"\d+\s*人(?:小团|精品团|常规团|大团)", str(raw.get("title") or "")):
+        field_sources["groupSize"] = "inferred"
+    if raw.get("originalPrice") is not None:
+        field_sources["originalPrice"] = "source"
+    if raw.get("discountRate") is not None:
+        field_sources["discountRate"] = "source"
+    if "isFlashSale" in raw:
+        field_sources["isFlashSale"] = "source"
     for field in detail_fields:
         field_sources[field] = "detail"
     synthetic_fields = [field for field, source in field_sources.items() if source == "synthetic"]
@@ -638,6 +664,52 @@ def raw_to_tour(raw, id_counter, detail=None):
         duration_source=duration_source,
     )
 
+    raw_meta = raw.get("meta") if isinstance(raw.get("meta"), dict) else {}
+    raw_tags = string_list(raw.get("tags"))
+    detail_meals = []
+    for day in detail.get("itinerary") or []:
+        if not isinstance(day, dict):
+            continue
+        meals = day.get("meals")
+        if not isinstance(meals, list):
+            continue
+        for meal in meals:
+            if meal is None:
+                continue
+            value = str(meal).strip()
+            if value and value not in detail_meals:
+                detail_meals.append(value)
+    meals_value = "、".join(detail_meals) or f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐"
+    transport_value = str(raw.get("transportType") or "").strip()
+    if not transport_value:
+        transport_value = "大巴往返" if days and days <= 3 else ("高铁往返" if days and days <= 5 else "飞机往返")
+    group_size = str(raw.get("groupSize") or "").strip()
+    if not group_size:
+        group_match = re.search(r"\d+\s*人(?:小团|精品团|常规团|大团)", title)
+        group_size = group_match.group(0) if group_match else "30人常规团"
+    source_features = string_list(raw_meta.get("sourceFeatures"))
+    if isinstance(source_features, list) and source_features:
+        free_wifi = "wifi_available" in source_features
+    else:
+        free_wifi = stable_hash(title) % 2 == 0
+    original_price = raw.get("originalPrice")
+    try:
+        original_price = int(float(original_price)) if original_price is not None else None
+    except (TypeError, ValueError):
+        original_price = None
+    discount_rate = raw.get("discountRate")
+    try:
+        discount_rate = float(discount_rate) if discount_rate is not None else None
+    except (TypeError, ValueError):
+        discount_rate = None
+    raw_accommodation_level = str(raw.get("accommodationLevel") or "").strip()
+    accommodation_level = raw_accommodation_level or "舒适型"
+    accommodation_stars = raw.get("accommodationStars", 3)
+    try:
+        accommodation_stars = int(float(accommodation_stars))
+    except (TypeError, ValueError):
+        accommodation_stars = 3
+
     return {
         "id": f"tour_{id_counter}",
         "title": title,
@@ -649,14 +721,14 @@ def raw_to_tour(raw, id_counter, detail=None):
         "destination": destination,
         "duration": days or 2,
         "price": int(price),
-        "originalPrice": None,
+        "originalPrice": original_price,
         "priceUnit": "人",
         "departureDate": departure_date,
         "returnDate": return_date,
-        "transportType": "大巴往返" if days and days <= 3 else ("高铁往返" if days and days <= 5 else "飞机往返"),
-        "accommodationLevel": "舒适型",
-        "accommodationStars": 3,
-        "meals": f"{days or 2}早餐{max(0, (days or 2) - 1)}正餐",
+        "transportType": transport_value,
+        "accommodationLevel": accommodation_level,
+        "accommodationStars": accommodation_stars,
+        "meals": meals_value,
         "singleSupplement": single_supplement,
         "singleSupplementNote": detail.get("singleSupplementNote", ""),
         "availableSeats": 0,
@@ -670,7 +742,7 @@ def raw_to_tour(raw, id_counter, detail=None):
         "visaRequirements": "无需签证（国内游）",
         "travelInsurance": True,
         "tourGuideService": True,
-        "freeWiFi": stable_hash(title) % 2 == 0,
+        "freeWiFi": free_wifi,
         "childPolicy": detail.get("childPolicy", ""),
         "cancellationPolicy": detail.get("cancellationPolicy", ""),
         "refundPolicy": detail.get("refundPolicy", ""),
@@ -678,12 +750,12 @@ def raw_to_tour(raw, id_counter, detail=None):
         "reviewCount": 0,
         "bookingUrl": raw.get('url', '#'),
         "images": images,
-        "tags": [theme, "纯玩", "品质"],
+        "tags": raw_tags or [theme, "纯玩", "品质"],
         "isHot": recommendation_score >= 5,
         "isNew": is_new,
         "isFlashSale": False,
-        "discountRate": None,
-        "groupSize": "30人常规团",
+        "discountRate": discount_rate,
+        "groupSize": group_size,
         "theme": theme,
         "leisureLevel": leisure_level,
         "suitableFor": ["亲子", "情侣"],
