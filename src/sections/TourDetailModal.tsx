@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn, resolveAssetUrl } from '@/lib/utils';
 import { getFallbackImage } from '@/lib/image';
-import { getReadableDestination, getReadableHighlights, formatDate } from '@/lib/tour-display';
+import { getReadableDestination, getReadableHighlights, formatDate, hasReliableField } from '@/lib/tour-display';
 import { DepartureDateSelector } from '@/components/ui/departure-date-selector';
 import {
   MapPin, Clock, Users, Star, Flame, Sparkles, Zap,
@@ -145,6 +145,20 @@ export function TourDetailModal({
     Boolean(cancellationPolicy) ||
     Boolean(refundPolicy) ||
     Boolean(childPolicy);
+  const reliableAccommodation = hasReliableField(tour, 'accommodationLevel');
+  const reliableAccommodationStars = hasReliableField(tour, 'accommodationStars');
+  const reliableMeals = hasReliableField(tour, 'meals');
+  const reliableGroupSize = hasReliableField(tour, 'groupSize');
+  const reliableTransport = hasReliableField(tour, 'transportType');
+  const reliableDifficulty = hasReliableField(tour, 'difficulty');
+  const reliableLanguage = hasReliableField(tour, 'language');
+  const reliableVisaRequirements = hasReliableField(tour, 'visaRequirements');
+  const reliableLeisureLevel = hasReliableField(tour, 'leisureLevel');
+  const reliableSeason = hasReliableField(tour, 'season');
+  const reliableTravelInsurance = hasReliableField(tour, 'travelInsurance');
+  const reliableTourGuideService = hasReliableField(tour, 'tourGuideService');
+  const reliableFreeWiFi = hasReliableField(tour, 'freeWiFi');
+  const hasReliableServiceData = reliableTravelInsurance || reliableTourGuideService || reliableFreeWiFi;
 
 
   // 根据 detailStatus 切换加载态/错误态/就绪态
@@ -292,15 +306,15 @@ export function TourDetailModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InfoItem icon={<Calendar className="w-4 h-4" />} label="返程日期" value={resolvedTour?.returnDate ? formatDate(resolvedTour.returnDate) : ''} />
-            <InfoItem icon={<Bus className="w-4 h-4" />} label="交通方式" value={tour.transportType} />
-            <InfoItem icon={<Hotel className="w-4 h-4" />} label="住宿标准" value={resolvedTour?.accommodationStars ? `${tour.accommodationLevel} (${resolvedTour.accommodationStars}星)` : tour.accommodationLevel} />
-            <InfoItem icon={<Utensils className="w-4 h-4" />} label="餐饮安排" value={tour.meals} />
-            <InfoItem icon={<Users className="w-4 h-4" />} label="团队规模" value={tour.groupSize} />
-            <InfoItem icon={<BarChart3 className="w-4 h-4" />} label="难度等级" value={resolvedTour?.difficulty || ''} />
-            <LeisureLevelItem level={tour.leisureLevel} />
-            <InfoItem icon={<Globe className="w-4 h-4" />} label="出行季节" value={tour.season} />
-            <InfoItem icon={<HeartHandshake className="w-4 h-4" />} label="导游语言" value={resolvedTour?.language || ''} />
-            <InfoItem icon={<Plane className="w-4 h-4" />} label="签证要求" value={resolvedTour?.visaRequirements || ''} />
+            <InfoItem icon={<Bus className="w-4 h-4" />} label="交通方式" value={reliableTransport ? tour.transportType : ''} />
+            <InfoItem icon={<Hotel className="w-4 h-4" />} label="住宿标准" value={reliableAccommodation ? (reliableAccommodationStars && resolvedTour?.accommodationStars ? `${tour.accommodationLevel} (${resolvedTour.accommodationStars}星)` : tour.accommodationLevel) : ''} />
+            <InfoItem icon={<Utensils className="w-4 h-4" />} label="餐饮安排" value={reliableMeals ? tour.meals : ''} />
+            <InfoItem icon={<Users className="w-4 h-4" />} label="团队规模" value={reliableGroupSize ? tour.groupSize : ''} />
+            <InfoItem icon={<BarChart3 className="w-4 h-4" />} label="难度等级" value={reliableDifficulty ? (resolvedTour?.difficulty || '') : ''} />
+            {reliableLeisureLevel && <LeisureLevelItem level={tour.leisureLevel} />}
+            <InfoItem icon={<Globe className="w-4 h-4" />} label="出行季节" value={reliableSeason ? tour.season : ''} />
+            <InfoItem icon={<HeartHandshake className="w-4 h-4" />} label="导游语言" value={reliableLanguage ? (resolvedTour?.language || '') : ''} />
+            <InfoItem icon={<Plane className="w-4 h-4" />} label="签证要求" value={reliableVisaRequirements ? (resolvedTour?.visaRequirements || '') : ''} />
           </div>
 
           <div className="mt-4">
@@ -467,10 +481,15 @@ export function TourDetailModal({
 
         <TabsContent value="service" className="space-y-4 mt-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            <ServiceItem icon={<Shield className="w-5 h-5" />} label="旅游保险" available={Boolean(resolvedTour?.travelInsurance)} />
-            <ServiceItem icon={<User className="w-5 h-5" />} label="导游服务" available={Boolean(resolvedTour?.tourGuideService)} />
-            <ServiceItem icon={<Wifi className="w-5 h-5" />} label="免费WiFi" available={Boolean(resolvedTour?.freeWiFi)} />
+            {reliableTravelInsurance && <ServiceItem icon={<Shield className="w-5 h-5" />} label="旅游保险" available={Boolean(resolvedTour?.travelInsurance)} />}
+            {reliableTourGuideService && <ServiceItem icon={<User className="w-5 h-5" />} label="导游服务" available={Boolean(resolvedTour?.tourGuideService)} />}
+            {reliableFreeWiFi && <ServiceItem icon={<Wifi className="w-5 h-5" />} label="免费WiFi" available={Boolean(resolvedTour?.freeWiFi)} />}
           </div>
+          {!hasReliableServiceData && (
+            <div className="rounded-lg border border-dashed border-stone-200 bg-stone-50 p-4 text-sm leading-6 text-stone-500">
+              暂未抓取到可靠的服务信息，请以来源页面为准。
+            </div>
+          )}
 
           <div className="rounded-lg border border-stone-200 bg-white p-4">
             <h4 className="mb-2 flex items-center gap-2 font-semibold text-stone-800">

@@ -1,11 +1,13 @@
 // ?????????????????????????????????
 import { strict as assert } from 'node:assert';
+import fs from 'node:fs';
 import {
   buildTitleSummary,
   getDepartureDateBadgeLabel,
   getReadableDestination,
   getReadableHighlights,
   getReadableTheme,
+  hasReliableField,
 } from '../src/lib/tour-display.ts';
 import { compareRecommended } from '../src/lib/tour-recommendation.ts';
 import type { Tour } from '../src/types/tour.ts';
@@ -110,6 +112,45 @@ assert.deepEqual(
   })),
   ['盐洲岛'],
 );
+
+assert.equal(hasReliableField(candidate({
+  dataQuality: { fieldSources: { meals: 'source' } },
+}), 'meals'), true);
+assert.equal(hasReliableField(candidate({
+  dataQuality: { fieldSources: { meals: 'synthetic' } },
+}), 'meals'), false);
+assert.equal(hasReliableField(candidate({
+  dataQuality: { syntheticFields: ['groupSize'] },
+}), 'groupSize'), false);
+assert.equal(hasReliableField(candidate(), 'groupSize'), true);
+assert.equal(hasReliableField(candidate({
+  dataQuality: { fieldSources: {} },
+}), 'groupSize'), true);
+assert.equal(hasReliableField(candidate({
+  dataQuality: { fieldSources: { originalPrice: 'synthetic', discountRate: 'synthetic' } },
+}), 'originalPrice'), false);
+assert.equal(hasReliableField(candidate({
+  dataQuality: {},
+  meta: { dataQuality: { fieldSources: { meals: 'source' } } },
+}), 'meals'), true);
+assert.equal(hasReliableField(candidate({
+  dataQuality: { fieldSources: { price: 'source' } },
+  meta: { dataQuality: { fieldSources: { meals: 'source' } } },
+}), 'meals'), true);
+assert.equal(hasReliableField(candidate({
+  dataQuality: { fieldSources: { freeWiFi: 'unknown' } },
+}), 'freeWiFi'), false);
+assert.equal(hasReliableField(candidate({
+  dataQuality: { syntheticFields: ['groupSize'] },
+  meta: { dataQuality: { syntheticFields: ['meals'] } },
+}), 'meals'), false);
+
+const detailModalSource = fs.readFileSync(new URL('../src/sections/TourDetailModal.tsx', import.meta.url), 'utf8');
+const tourCardSource = fs.readFileSync(new URL('../src/sections/TourCard.tsx', import.meta.url), 'utf8');
+assert.match(detailModalSource, /hasReliableField\(tour, 'travelInsurance'\)/);
+assert.match(detailModalSource, /hasReliableField\(tour, 'groupSize'\)/);
+assert.match(tourCardSource, /hasReliableField\(tour, 'originalPrice'\)/);
+assert.match(tourCardSource, /hasReliableField\(tour, 'groupSize'\)/);
 
 assert.deepEqual(
   getReadableHighlights(candidate({

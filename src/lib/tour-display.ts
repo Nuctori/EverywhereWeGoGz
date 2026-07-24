@@ -183,3 +183,24 @@ export function buildTitleSummary(tour: Tour) {
   if (tour.transportType) chunks.push(tour.transportType.replace('往返', ''));
   return chunks.filter(Boolean).join(' · ');
 }
+
+/**
+ * 判断字段是否有来源支撑。旧数据没有 provenance 时保持兼容，
+ * 只有明确标记过来源的字段才拒绝 synthetic/inferred/unknown 值。
+ */
+export function hasReliableField(tour: Tour, field: string) {
+  const topQuality = tour.dataQuality;
+  const metaQuality = tour.meta?.dataQuality;
+  const source = topQuality?.fieldSources?.[field] ?? metaQuality?.fieldSources?.[field];
+  const syntheticFields = new Set([
+    ...(topQuality?.syntheticFields || []),
+    ...(metaQuality?.syntheticFields || []),
+  ]);
+  const hasProvenance =
+    Object.keys(topQuality?.fieldSources || {}).length > 0 ||
+    Object.keys(metaQuality?.fieldSources || {}).length > 0 ||
+    syntheticFields.size > 0;
+  if (!hasProvenance) return true;
+  if (syntheticFields.has(field) && source !== 'source' && source !== 'detail') return false;
+  return source === 'source' || source === 'detail';
+}
