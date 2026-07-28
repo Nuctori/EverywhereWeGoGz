@@ -3864,9 +3864,27 @@ function buildSharedBikeCaveat(primitive: RecommendationPrimitive, userText: str
   if (index !== 0 || !/共享电瓶车|共享电动车|电瓶车/.test(userText)) return '';
   const corpus = `${primitive.title} ${primitive.destination} ${primitive.theme} ${primitive.highlights.join(' ')}`;
   if (/惠州|盐洲岛|双湾|海湾|海边|小镇|古镇/.test(corpus)) {
-    return '这类沿海度假区的短途接驳和租车便利值得问一下，共享电瓶车我会优先核实';
+    return '盐洲岛这一带更适合靠短途接驳或租车慢慢逛，若能找到共享电瓶车，去镇上和海边都会轻松很多，我会把它列为出发前优先核实项';
   }
   return '共享电瓶车属于目的地便利项，是否有共享服务值得先问清';
+}
+
+function ensureSharedBikeRecommendationNote(
+  items: AiRecommendationItem[],
+  candidateTours: RecommendationPrimitive[],
+  userText: string,
+) {
+  if (!/共享电瓶车|共享电动车|电瓶车/.test(userText) || items.length === 0) return items;
+  const primitiveByTourId = new Map(candidateTours.map((primitive) => [primitive.id, primitive]));
+  return items.map((item, index) => {
+    const primitive = primitiveByTourId.get(item.tourId);
+    const caveat = primitive ? buildSharedBikeCaveat(primitive, userText, index) : '';
+    if (!caveat || item.reason?.includes(caveat)) return item;
+    return {
+      ...item,
+      reason: `${stripTerminalPunctuation(item.reason || '')}${item.reason ? '。' : ''}${caveat}。`,
+    };
+  });
 }
 
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
@@ -7289,7 +7307,8 @@ export async function requestAiRecommendations({
           )
         : Promise.resolve([] as DestinationWeatherInsight[]),
     ]);
-    const mergedItems = prioritizeRecommendationItems(
+    const mergedItems = ensureSharedBikeRecommendationNote(
+      prioritizeRecommendationItems(
       rewriteRecommendationCopy({
         items: attachWeatherGuidanceToItems(
           baseMergedItems,
@@ -7308,6 +7327,9 @@ export async function requestAiRecommendations({
         intent: finalIntent,
         userText: finalEffectiveUserText,
       },
+      ),
+      mergedCandidateTours.map(buildTourPrimitive),
+      text,
     ).slice(0, aiItems.length > 0 ? MAX_AI_SELECTED_ITEMS : MAX_AI_RANKED_ITEMS);
     emitProgress(onProgress, {
       stage: 'completed',
