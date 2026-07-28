@@ -3,14 +3,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const workflowPath = path.join(process.cwd(), '.github', 'workflows', 'update-data.yml');
-const workflow = fs.readFileSync(workflowPath, 'utf8');
+const workflow = fs.readFileSync(workflowPath, 'utf8').replace(/\r\n/g, '\n');
 const availabilityWorkflowPath = path.join(
   process.cwd(),
   '.github',
   'workflows',
   'refresh-availability-cache.yml',
 );
-const availabilityWorkflow = fs.readFileSync(availabilityWorkflowPath, 'utf8');
+const availabilityWorkflow = fs.readFileSync(availabilityWorkflowPath, 'utf8').replace(/\r\n/g, '\n');
 const packageJsonPath = path.join(process.cwd(), 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
