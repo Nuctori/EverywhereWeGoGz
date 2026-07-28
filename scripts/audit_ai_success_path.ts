@@ -8,6 +8,7 @@ const {
   auditAiRecommendationsStrict,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
+  keepAiItemsForCompoundExperience,
 } = __aiRecommendationTestHooks;
 
 function candidate(
@@ -194,5 +195,23 @@ const expandedShortCopy = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok((expandedShortCopy[0]?.reason?.length ?? 0) > '海边温泉。'.length);
+
+const weakCompoundCandidate = candidate({
+  id: 'weak-compound',
+  title: '金水台温泉2天',
+  destination: '广东',
+  price: 329,
+  tags: ['温泉'],
+  highlights: ['泡汤'],
+});
+assert.deepEqual(
+  keepAiItemsForCompoundExperience(
+    [{ tourId: 'weak-compound', score: 99, reason: '温泉价格合适。', matchedSignals: ['温泉'] }],
+    [weakCompoundCandidate],
+    '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  ),
+  [],
+  'compound requests must not fall back to a weak single-theme candidate when no strong candidate exists',
+);
 
 console.log('AI success-path audit passed');

@@ -6349,7 +6349,7 @@ function keepAiItemsForCompoundExperience(
     0,
     ...candidateTours.map((tour) => getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount),
   );
-  if (maxCoverage < 2) return items;
+  if (maxCoverage < 2) return [];
 
   const strongCandidateCount = candidateTours.filter((tour) =>
     getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount >= 2,
@@ -6377,8 +6377,9 @@ function keepAiItemsForCompoundExperience(
     return getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= minimumCoverage;
   });
 
-  // AI 只选出了弱候选时保留原结果，避免因数据稀疏把结果清空；有足够证据时不展示“顺手凑数”的团。
-  return kept.length > 0 ? kept : items;
+  // 复合需求没有证据充分的入选项时返回空集，让上层明确展示“暂时没有足够匹配”，
+  // 不能把只占一项的弱候选重新塞回结果，伪装成推荐。
+  return kept;
 }
 
 function normalizeIntent(value: unknown): AiTravelIntent | null {
@@ -7272,13 +7273,17 @@ export async function requestAiRecommendations({
       text,
     );
 
+    const compoundRequest = getCoverageTermsForQuality(text).length >= 2;
     const rankedAiItems = aiItems.length > 0
       ? aiItems
-      : compactedLocalItems.slice(0, MAX_AI_RANKED_ITEMS);
+      : compoundRequest
+        ? []
+        : compactedLocalItems.slice(0, MAX_AI_RANKED_ITEMS);
+    const localItemsForFinalMerge = compoundRequest && aiItems.length === 0 ? [] : compactedLocalItems;
 
     const baseMergedItems = buildPaddedRecommendationItems(
-      mergeAiAndLocalRecommendations(rankedAiItems, compactedLocalItems),
-      localItemsForMerge,
+      mergeAiAndLocalRecommendations(rankedAiItems, localItemsForFinalMerge),
+      compoundRequest && aiItems.length === 0 ? [] : localItemsForMerge,
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
     const mergedCandidateTours = availableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));
