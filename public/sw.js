@@ -11,16 +11,16 @@ const STATE_URL = '/__cdn_pool_state__';
 const CDN_TIMEOUT_MS = 1800;
 const STATE_TTL_MS = 10 * 60 * 1000;
 const DEFAULT_CDN_POOL = [
-  { id: 'jsdmirror-cn', origin: 'https://cdn.jsdmirror.cn', pathPrefix: '', fallback: false },
-  { id: 'jsdmirror-com', origin: 'https://cdn.jsdmirror.com', pathPrefix: '', fallback: false },
-  { id: 'jsdelivr', origin: 'https://cdn.jsdelivr.net', pathPrefix: '', fallback: false },
-  { id: 'jsdelivr-fastly', origin: 'https://fastly.jsdelivr.net', pathPrefix: '', fallback: false },
-  { id: 'jsdelivr-gcore', origin: 'https://gcore.jsdelivr.net', pathPrefix: '', fallback: false },
-  { id: 'jsdelivr-originfastly', origin: 'https://originfastly.jsdelivr.net', pathPrefix: '', fallback: false },
+  { id: 'jsdmirror-cn', origin: 'https://cdn.jsdmirror.cn', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
+  { id: 'jsdmirror-com', origin: 'https://cdn.jsdmirror.com', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
+  { id: 'jsdelivr', origin: 'https://cdn.jsdelivr.net', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
+  { id: 'jsdelivr-fastly', origin: 'https://fastly.jsdelivr.net', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
+  { id: 'jsdelivr-gcore', origin: 'https://gcore.jsdelivr.net', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
+  { id: 'jsdelivr-originfastly', origin: 'https://originfastly.jsdelivr.net', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
   {
     id: 'github-raw',
     origin: 'https://raw.githubusercontent.com',
-    pathPrefix: '/Nuctori/EverywhereWeGoGz/main/public',
+    pathPrefix: '/Nuctori/EverywhereWeGoGz/cdn-assets',
     fallback: true,
   },
 ];
@@ -143,12 +143,16 @@ async function writeState(cache, state) {
 function cdnUrl(candidate, publicPath, search) {
   const path = candidate.pathPrefix
     ? `${candidate.pathPrefix}/${publicPath}`
-    : `/gh/Nuctori/EverywhereWeGoGz@main/public/${publicPath}`;
+    : `/gh/Nuctori/EverywhereWeGoGz@cdn-assets/${publicPath}`;
   return `${candidate.origin}${path}${search || ''}`;
 }
 
 function probeUrl(candidate) {
   return cdnUrl(candidate, 'data/tours-meta.json', '?pool_probe=1');
+}
+
+function probePageUrl(candidate) {
+  return cdnUrl(candidate, 'data/tours-page-0.json', '?pool_probe=1');
 }
 
 function acceptableStaticResponse(response) {
@@ -158,16 +162,36 @@ function acceptableStaticResponse(response) {
   return !contentType.includes('text/html');
 }
 
+function acceptableProbePayload(meta, page) {
+  if (!meta || Number(meta.totalRecords) <= 0) return false;
+  if (!page || !Array.isArray(page.items) || page.items.length === 0) return false;
+
+  const first = page.items[0];
+  if (typeof first.id !== 'string' || typeof first.title !== 'string') return false;
+  const mealCounts = first?.meta?.structuredDetails?.mealCounts;
+  if (!mealCounts) return true;
+  return ['breakfast', 'lunch', 'dinner'].every((key) => Number.isFinite(Number(mealCounts[key])));
+}
+
 async function probeCandidate(candidate) {
   const startedAt = performance.now();
   try {
-    const response = await fetchWithTimeout(probeUrl(candidate), {
-      credentials: 'omit',
-      mode: 'cors',
-      cache: 'no-store',
-    });
-    const body = response.ok ? await response.json() : null;
-    if (!response.ok || !body || Number(body.totalRecords) <= 0) return null;
+    const [metaResponse, pageResponse] = await Promise.all([
+      fetchWithTimeout(probeUrl(candidate), {
+        credentials: 'omit',
+        mode: 'cors',
+        cache: 'no-store',
+      }),
+      fetchWithTimeout(probePageUrl(candidate), {
+        credentials: 'omit',
+        mode: 'cors',
+        cache: 'no-store',
+      }),
+    ]);
+    if (!acceptableStaticResponse(metaResponse) || !acceptableStaticResponse(pageResponse)) return null;
+    const meta = await metaResponse.json();
+    const page = await pageResponse.json();
+    if (!acceptableProbePayload(meta, page)) return null;
 
     return {
       id: candidate.id,

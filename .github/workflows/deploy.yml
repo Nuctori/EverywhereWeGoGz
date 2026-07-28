@@ -9,7 +9,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -67,6 +67,16 @@ jobs:
           VITE_AI_FALLBACK_BASE_URL: https://api.deepseek.com/v1
           VITE_AI_FALLBACK_MODEL: deepseek-v4-flash
           VITE_AI_FALLBACK_API_KEY_B64: c2stMjVkMjY5ZjNjNGRkNGU4NmFmMDg3YmEzNzE1MTk4Mzk=
+
+      - name: Publish build artifacts to CDN branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: cdn-assets
+          publish_dir: ./dist
+          force_orphan: true
+          keep_files: false
+          commit_message: "chore: publish Pages build artifacts"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
