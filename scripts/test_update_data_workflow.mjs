@@ -145,6 +145,7 @@ assert.ok(gitAddMatch, 'expected Check if data changed to stage generated data f
 const gitAddCommand = gitAddMatch[1];
 for (const requiredPath of [
   'public/data/tours-index.json',
+  'public/data/tour-deeplink-index.json',
   'public/data/tours-page-*.json',
   'public/data/tour-details',
   'public/data/image-cache',
