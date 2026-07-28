@@ -3860,6 +3860,15 @@ function buildCoverageAwareReason(
   return `${lead}；${verificationLead}${priceText ? `，参考价${priceText}` : ''}。`;
 }
 
+function buildSharedBikeCaveat(primitive: RecommendationPrimitive, userText: string, index: number) {
+  if (index !== 0 || !/共享电瓶车|共享电动车|电瓶车/.test(userText)) return '';
+  const corpus = `${primitive.title} ${primitive.destination} ${primitive.theme} ${primitive.highlights.join(' ')}`;
+  if (/惠州|盐洲岛|双湾|海湾|海边|小镇|古镇/.test(corpus)) {
+    return '这类沿海度假区的短途接驳和租车便利值得问一下，共享电瓶车我会优先核实';
+  }
+  return '共享电瓶车属于目的地便利项，是否有共享服务值得先问清';
+}
+
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
   const trimmed = typeof reason === 'string' ? reason.trim() : '';
   if (!primitive) return trimmed || '综合用户需求、天气和线路特点后较为合适';
@@ -4768,7 +4777,7 @@ function rewriteRecommendationCopy(params: {
         : `${currentReason}。`;
       return {
         ...item,
-        reason: finalizedReason,
+        reason: `${finalizedReason}${buildSharedBikeCaveat(primitive, params.userText, index) ? ` ${buildSharedBikeCaveat(primitive, params.userText, index)}。` : ''}`,
       };
     }
 
@@ -4787,9 +4796,10 @@ function rewriteRecommendationCopy(params: {
       !coverageReason,
     );
 
+    const sharedBikeCaveat = buildSharedBikeCaveat(primitive, params.userText, index);
     return {
       ...item,
-      reason: `${stripTerminalPunctuation(fallbackReason)}${shouldAddWeatherNote ? `。${weatherReason}` : ''}。`,
+      reason: `${stripTerminalPunctuation(fallbackReason)}${shouldAddWeatherNote ? `。${weatherReason}` : ''}${sharedBikeCaveat ? `。${sharedBikeCaveat}` : ''}。`,
     };
   });
 }
