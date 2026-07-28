@@ -3183,6 +3183,12 @@ function shouldKeepAiReason(reason: string, primitive: RecommendationPrimitive) 
   return true;
 }
 
+function hasFormulaicRecommendationOpening(reason: string) {
+  return /^(?:如果你是(?:冲着|想要)|这条线(?:适合|主打|更像)|从(?:标题|线路资料|候选)看)/.test(
+    stripTerminalPunctuation(reason).trim(),
+  );
+}
+
 function hasMalformedAiTitleEcho(reason: string, primitive: RecommendationPrimitive) {
   const title = normalizeText(primitive.title).replace(/[^\p{Script=Han}a-z0-9]/giu, '');
   const normalizedReason = normalizeText(reason).replace(/[^\p{Script=Han}a-z0-9]/giu, '');
@@ -4784,7 +4790,8 @@ function rewriteRecommendationCopy(params: {
         sortedPrices,
       }) &&
       reasonAddressesUserNeed(currentReason, primitive, params.userText) &&
-      shouldKeepAiReason(currentReason, primitive)
+      shouldKeepAiReason(currentReason, primitive) &&
+      !hasFormulaicRecommendationOpening(currentReason)
     ) {
       const finalizedReason = shouldExpandShortRecommendationCopy(currentReason, primitive)
         ? expandShortRecommendationCopy(currentReason, primitive, profile)
