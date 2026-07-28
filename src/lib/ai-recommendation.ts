@@ -29,7 +29,8 @@ const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 // 仍然保留上限，避免把全量线路直接塞进模型上下文。
 const MAX_AI_CANDIDATES = 96;
 const MAX_AI_COMMENTARY_ITEMS = 24;
-const MAX_AI_PROMPT_REASON_ITEMS = 8;
+const MAX_AI_SELECTED_ITEMS = 6;
+const MAX_AI_PROMPT_REASON_ITEMS = MAX_AI_SELECTED_ITEMS;
 const MAX_AI_RANKED_ITEMS = 24;
 const MAX_DESTINATION_WEATHER_INSIGHTS = 6;
 const ROUTE_ATLAS_MAX_GROUPS = 8;
@@ -1997,7 +1998,7 @@ function mergeAiAndLocalRecommendations(
       recommendationTier: isDetailedAiRecommendation(item) ? 'ai-detailed' : 'ai-brief',
     } satisfies AiRecommendationItem));
   if (primaryAiItems.length > 0) {
-    return limitRecommendationCommentary(primaryAiItems).slice(0, MAX_AI_RANKED_ITEMS);
+    return limitRecommendationCommentary(primaryAiItems).slice(0, MAX_AI_SELECTED_ITEMS);
   }
 
   return limitRecommendationCommentary(localItems.map((item) => ({
@@ -3166,6 +3167,14 @@ function shouldKeepAiReason(reason: string, primitive: RecommendationPrimitive) 
   return true;
 }
 
+function softenAiEvidenceCaveats(reason: string) {
+  return reason
+    .replace(/在候选(?:里|中)没有(?:明确)?提及/g, '目前没有看到明确安排')
+    .replace(/候选(?:里|中)没有(?:明确)?提及/g, '目前没有看到明确安排')
+    .replace(/候选(?:里|中)未(?:明确)?提及/g, '目前没有看到明确安排')
+    .replace(/候选(?:里|中)未写明/g, '目前没有看到明确安排');
+}
+
 function hasPublicInterestNeed(intent: AiTravelIntent | null, userText: string) {
   const corpus = [
     userText,
@@ -3796,14 +3805,15 @@ function buildCoverageAwareReason(
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
   const trimmed = typeof reason === 'string' ? reason.trim() : '';
   if (!primitive) return trimmed || '综合用户需求、天气和线路特点后较为合适';
-  if (trimmed && hasUnsupportedPublicInterestClaim(trimmed, primitive)) {
+  const softened = softenAiEvidenceCaveats(trimmed);
+  if (softened && hasUnsupportedPublicInterestClaim(softened, primitive)) {
     return buildPublicInterestAlternativeReason(primitive);
   }
   // Experience: do not force every AI reason through a fixed price/weather/play checklist.
   // Soft needs such as public-interest, study travel, or rural value often explain fit through
   // world knowledge and candidate wording; overwriting those with local templates degrades copy.
-  if (trimmed && shouldKeepAiReason(trimmed, primitive)) {
-    return trimmed;
+  if (softened && shouldKeepAiReason(softened, primitive)) {
+    return softened;
   }
   return buildPrimitiveConcreteReason(primitive);
 }
@@ -5407,7 +5417,7 @@ function buildAiMessages(params: {
   );
 
   const dynamicRequest = {
-    t: 'rank_top24',
+    t: 'rank_top6',
     q: params.userText,
     sq: params.searchQuery,
     rc: compactRecentConversation(params.messages),
@@ -5418,7 +5428,7 @@ function buildAiMessages(params: {
     wx: compactWeatherContextForPrompt(params.weatherContext),
     dw: compactDestinationWeatherInsightsForPrompt(params.destinationWeatherInsights),
     sg: semanticGuidance,
-    ol: MAX_AI_RANKED_ITEMS,
+    ol: MAX_AI_SELECTED_ITEMS,
     cl: MAX_AI_PROMPT_REASON_ITEMS,
     schema: {
       summary: '2-4 句中文，写推荐方向、天气/季节判断、注意事项或替代逻辑',
@@ -5456,7 +5466,7 @@ function buildAiMessages(params: {
           matchedSignals: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。2-3 个中文短语；其余条目省略`,
         },
       ],
-      itemCountLimit: MAX_AI_RANKED_ITEMS,
+      itemCountLimit: MAX_AI_SELECTED_ITEMS,
     },
     rq: [
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。先做整体体验判断，再做候选排序。',
@@ -5472,7 +5482,7 @@ function buildAiMessages(params: {
       ...promptPolicy.requestRules,
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
-        `第 ${MAX_AI_PROMPT_REASON_ITEMS + 1}-${MAX_AI_RANKED_ITEMS} 个只需要 tourId 和 score。`,
+        `最多返回 ${MAX_AI_SELECTED_ITEMS} 个 items，每个都可以写完整推荐理由。`,
       ].join(''),
     ],
   };
@@ -5543,14 +5553,14 @@ function buildLiteAiMessages(params: {
         ss: '仅前8条需要，最多3个短词',
         sb: '仅前8条需要，24字内，不能断言的边界',
       }],
-      itemCountLimit: MAX_AI_RANKED_ITEMS,
+      itemCountLimit: MAX_AI_SELECTED_ITEMS,
     },
     rq: [
       '只输出 JSON，不要 Markdown。',
       '返回 intent、intentNotes、clarification、assumptions、tradeoffs 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
       '用紧凑 JSON；中文短句不超过32字。',
-      `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
+      `最多返回 ${MAX_AI_SELECTED_ITEMS} 个 items，每个都可以写完整推荐理由。`,
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
       ...(hasTurnPublicInterestNeed

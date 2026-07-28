@@ -694,6 +694,12 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
       const isAiRecommendedTour = aiRecommendationByTourId.has(tour.id);
 
+      // AI 模式展示的是 AI 真正选中的少量方案；未入选候选留在普通浏览模式，
+      // 避免用户把整池候选误认为 AI 推荐结果。
+      if (isAiSearchMode && !isAiRecommendedTour) {
+        return false;
+      }
+
       if (isAiRecommendedTour) {
         return true;
       }
