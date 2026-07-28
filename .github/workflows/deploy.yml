@@ -69,14 +69,27 @@ jobs:
           VITE_AI_FALLBACK_API_KEY_B64: c2stMjVkMjY5ZjNjNGRkNGU4NmFmMDg3YmEzNzE1MTk4Mzk=
 
       - name: Publish build artifacts to CDN branch
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: cdn-assets
-          publish_dir: ./dist
-          force_orphan: true
-          keep_files: false
-          commit_message: "chore: publish Pages build artifacts"
+        shell: bash
+        run: |
+          set -euo pipefail
+          artifact_dir="$RUNNER_TEMP/cdn-assets"
+          rm -rf "$artifact_dir"
+
+          git fetch origin cdn-assets:refs/remotes/origin/cdn-assets || true
+          if git show-ref --verify --quiet refs/remotes/origin/cdn-assets; then
+            git worktree add --detach "$artifact_dir" refs/remotes/origin/cdn-assets
+          else
+            git worktree add --detach "$artifact_dir" HEAD
+            git -C "$artifact_dir" checkout --orphan cdn-assets
+          fi
+
+          git -C "$artifact_dir" rm -rf . || true
+          find "$artifact_dir" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a dist/. "$artifact_dir/"
+          git -C "$artifact_dir" add --all
+          git -C "$artifact_dir" -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore: publish Pages build artifacts'
+          git -C "$artifact_dir" push --force origin HEAD:cdn-assets
+          git worktree remove --force "$artifact_dir"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

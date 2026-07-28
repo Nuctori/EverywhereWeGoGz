@@ -30,8 +30,12 @@ const results = await Promise.all(config.origins.map(async (candidate) => {
       && (!mealCounts || ['breakfast', 'lunch', 'dinner'].every((key) => Number.isFinite(Number(mealCounts[key]))));
     return {
       id: candidate.id,
+      url,
       status: response.status,
       latencyMs: Date.now() - started,
+      totalRecords: Number(body?.totalRecords || 0),
+      firstTourId: first?.id || null,
+      firstMealCounts: mealCounts || null,
       valid: response.ok && body && Number(body.totalRecords) > 0 && validPage,
     };
   } catch (error) {

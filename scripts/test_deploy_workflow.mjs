@@ -17,9 +17,9 @@ mustInclude('- name: Verify deploy workflow contract', 'expected deploy workflow
 mustInclude('npm run audit:deploy-workflow', 'expected deploy workflow to run its self-check');
 mustInclude('uses: actions/upload-pages-artifact@v3', 'expected official Pages artifact upload action');
 mustInclude('uses: actions/deploy-pages@v4', 'expected official Pages deploy action');
-mustInclude('uses: peaceiris/actions-gh-pages@v4', 'expected CDN artifact branch publishing action');
-mustInclude('publish_branch: cdn-assets', 'expected CDN artifact branch');
-mustInclude('publish_dir: ./dist', 'expected built dist directory to be published to CDN branch');
+mustInclude('git worktree add --detach', 'expected CDN artifact publishing to use the checked-out repository credentials');
+mustInclude('push --force origin HEAD:cdn-assets', 'expected CDN artifact branch push');
+mustInclude('cp -a dist/.', 'expected built dist directory to be published to CDN branch');
 mustInclude('uses: actions/setup-python@v5', 'expected Python runtime for structured data audits');
 mustInclude('python -m pip install requests beautifulsoup4 lxml', 'expected dependencies for structured data audits');
 
