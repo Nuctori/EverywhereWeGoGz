@@ -1578,7 +1578,17 @@ function mergeAiRankingIntent(
   aiIntent: AiTravelIntent | null,
 ): AiTravelIntent | null {
   if (!hardIntent && !aiIntent) return null;
-  if (!hardIntent) return aiIntent;
+  if (!hardIntent) {
+    if (!aiIntent) return null;
+    const aiDestinationJudgement =
+      aiIntent.destinationHints?.length &&
+      ['refine_previous', 'broaden', 'replace_destination'].includes(String(aiIntent.refinementMode));
+    return {
+      ...aiIntent,
+      // 出发城市不是目的地。没有用户明确目的地时，AI 的省份猜测只能用于排序，不能制造硬冲突。
+      destinationHints: aiDestinationJudgement ? aiIntent.destinationHints || [] : [],
+    };
+  }
   if (!aiIntent) return hardIntent;
   const aiDestinationJudgement =
     aiIntent.destinationHints?.length &&
@@ -3173,8 +3183,11 @@ function hasMalformedAiTitleEcho(reason: string, primitive: RecommendationPrimit
   // 长标题经常被模型截成“……小镇2把 / ……温泉酒”一类残句。
   // 这不是世界知识推理，而是输出损坏；宁可回到本地事实文案，也不把坏句子展示给用户。
   if (title.length < 18 || normalizedReason.includes(title)) return false;
-  const prefix = title.slice(0, Math.min(12, title.length));
-  return prefix.length >= 8 && normalizedReason.includes(prefix);
+  for (let start = 0; start <= Math.max(0, title.length - 10); start += 1) {
+    const fragment = title.slice(start, start + 10);
+    if (fragment.length === 10 && normalizedReason.includes(fragment)) return true;
+  }
+  return false;
 }
 
 function softenAiEvidenceCaveats(reason: string) {
