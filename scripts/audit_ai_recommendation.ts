@@ -26,6 +26,7 @@ const {
   finalizeRecommendationSummary,
   getAiResponseIntentQualityIssue,
   getConcreteAiReason,
+  getPrimitiveCoverageScore,
   getPrimitiveConflictReasons,
   reasonAddressesUserNeed,
   localRecommendations,
@@ -34,6 +35,7 @@ const {
   mergeAiAndLocalRecommendations,
   mergeAiRankingIntent,
   mergeIntentWithMemory,
+  keepAiItemsForCompoundExperience,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
@@ -284,6 +286,36 @@ assert.ok(indoorCoolPrimitive.experienceCategories.includes('室内度假'));
 assert.ok(!indoorCoolPrimitive.experienceCategories.includes('玩水清凉'));
 assert.ok(indoorCoolPrimitive.seasonalComfortAtoms.some((atom) => atom.includes('清凉室内')));
 assert.ok(!indoorCoolPrimitive.seasonalComfortAtoms.some((atom) => atom.includes('玩水')));
+
+const coastalHotSpringPrimitive = buildTourPrimitive(candidate({
+  id: 'coastal-hot-spring',
+  title: '惠州双湾盐洲岛温泉联游3天',
+  destination: '广东',
+  duration: 3,
+  price: 399,
+  theme: '温泉泡汤',
+}));
+assert.equal(
+  getPrimitiveCoverageScore(coastalHotSpringPrimitive, ['温泉泡汤', '玩水清凉']),
+  2,
+  '滨水温泉目的地 should count as both hot spring and water play for a compound request',
+);
+const compoundSelection = keepAiItemsForCompoundExperience(
+  [
+    { tourId: 'coastal-hot-spring', score: 70, reason: '海边温泉度假', matchedSignals: [] },
+    { tourId: hotSpringTour.id, score: 99, reason: '纯温泉', matchedSignals: [] },
+  ],
+  [
+    candidate({ id: 'coastal-hot-spring', title: '惠州双湾盐洲岛温泉联游3天', destination: '广东', price: 399, duration: 3, theme: '温泉泡汤' }),
+    hotSpringTour,
+  ],
+  '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+);
+assert.deepEqual(
+  compoundSelection.map((item) => item.tourId),
+  ['coastal-hot-spring'],
+  'compound recommendation should prefer a coastal hot-spring match over a pure hot-spring filler',
+);
 const avoidCompacted = compactCandidates([hotSpringTour, nonHotSpringTour], [], avoidIntent);
 assert.ok(avoidCompacted.some((item) =>
   item.id === 'hot-spring' &&

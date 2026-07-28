@@ -824,7 +824,9 @@ const COVERAGE_TERM_GROUPS = [
   },
   {
     label: '玩水清凉',
-    aliases: ['玩水', '水上', '漂流', '溯溪', '桨板', '浆板', '冲浪', '游泳', '嬉水', '亲水', '水世界', '水上乐园', '泳池'],
+    // 用户说“玩水”时，海湾、海滩和盐洲岛这类滨水目的地也属于实际玩法，
+    // 不能因为数据只写了“温泉联游”就把它误判成纯泡汤线路。
+    aliases: ['玩水', '水上', '漂流', '溯溪', '桨板', '浆板', '冲浪', '游泳', '嬉水', '亲水', '水世界', '水上乐园', '泳池', '海边', '海滩', '沙滩', '海湾', '双湾', '双月湾', '盐洲岛', '沙扒湾', '南澳岛', '海陵岛'],
   },
   {
     label: '森林山水',
@@ -913,8 +915,12 @@ function canonicalizeCoverageTerm(term: string) {
 }
 
 function collectCoverageTermsFromAliases(text: string) {
+  const explicitlyWantsWaterPlay = /玩水|水上|漂流|溯溪|桨板|浆板|冲浪|游泳|嬉水|亲水|水世界|水上乐园|泳池/.test(text);
   return COVERAGE_TERM_GROUPS
-    .filter((group) => group.aliases.some((alias) => text.includes(alias)) || text.includes(group.label))
+    .filter((group) => {
+      if (group.label === '玩水清凉' && !explicitlyWantsWaterPlay) return false;
+      return group.aliases.some((alias) => text.includes(alias)) || text.includes(group.label);
+    })
     .map((group) => group.label);
 }
 
@@ -5893,6 +5899,7 @@ export const __aiRecommendationTestHooks = {
   enrichPromptCandidatesWithMemoryCoverage,
   finalizeRecommendationSummary,
   getConcreteAiReason,
+  getPrimitiveCoverageScore,
   getAiResponseIntentQualityIssue,
   getPrimitiveConflictReasons,
   reasonAddressesUserNeed,
@@ -5903,6 +5910,7 @@ export const __aiRecommendationTestHooks = {
   mergeAiRankingIntent,
   mergeIntentWithMemory,
   normalizeIntent,
+  keepAiItemsForCompoundExperience,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
