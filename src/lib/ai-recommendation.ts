@@ -1586,18 +1586,16 @@ function mergeAiRankingIntent(
   if (!hardIntent && !aiIntent) return null;
   if (!hardIntent) {
     if (!aiIntent) return null;
-    const aiDestinationJudgement =
-      aiIntent.destinationHints?.length &&
-      ['refine_previous', 'broaden', 'replace_destination'].includes(String(aiIntent.refinementMode));
     return {
       ...aiIntent,
       // 出发城市不是目的地。没有用户明确目的地时，AI 的省份猜测只能用于排序，不能制造硬冲突。
-      destinationHints: aiDestinationJudgement ? aiIntent.destinationHints || [] : [],
+      destinationHints: [],
     };
   }
   if (!aiIntent) return hardIntent;
   const aiDestinationJudgement =
     aiIntent.destinationHints?.length &&
+    hardIntent.destinationHints?.length &&
     ['refine_previous', 'broaden', 'replace_destination'].includes(String(aiIntent.refinementMode));
 
   return {
