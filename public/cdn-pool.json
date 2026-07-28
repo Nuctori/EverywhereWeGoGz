@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "probe": "data/tours-meta.json",
+  "origins": [
+    {
+      "id": "jsdmirror-cn",
+      "origin": "https://cdn.jsdmirror.cn"
+    },
+    {
+      "id": "jsdmirror-com",
+      "origin": "https://cdn.jsdmirror.com"
+    },
+    {
+      "id": "jsdelivr",
+      "origin": "https://cdn.jsdelivr.net"
+    },
+    {
+      "id": "jsdelivr-fastly",
+      "origin": "https://fastly.jsdelivr.net"
+    },
+    {
+      "id": "jsdelivr-gcore",
+      "origin": "https://gcore.jsdelivr.net"
+    },
+    {
+      "id": "jsdelivr-originfastly",
+      "origin": "https://originfastly.jsdelivr.net"
+    },
+    {
+      "id": "github-raw",
+      "origin": "https://raw.githubusercontent.com",
+      "pathPrefix": "/Nuctori/EverywhereWeGoGz/main/public",
+      "fallback": true
+    }
+  ]
+}
