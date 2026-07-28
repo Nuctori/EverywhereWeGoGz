@@ -4667,7 +4667,7 @@ function rewriteRecommendationCopy(params: {
         sortedPrices,
       }) &&
       reasonAddressesUserNeed(currentReason, primitive, params.userText) &&
-      shouldKeepAiReason(currentReason, primitive)
+      (shouldKeepAiReason(currentReason, primitive) || item.reasonSource === 'ai')
     ) {
       const finalizedReason = shouldExpandShortRecommendationCopy(currentReason, primitive)
         ? expandShortRecommendationCopy(currentReason, primitive, profile)
@@ -5928,6 +5928,8 @@ function validateAiItems(
     const semanticFit = normalizeAiText(item.semanticFit ?? item.sf, 140);
     const semanticSignals = normalizeAiTextList(item.semanticSignals ?? item.ss, 4, 40);
     const semanticBoundary = normalizeAiText(item.semanticBoundary ?? item.sb, 120);
+    const aiReason = normalizeAiText(item.reason ?? semanticFit, 180);
+    const normalizedReason = getConcreteAiReason(aiReason, primitive);
     const matchedSignals = validatedIndex < MAX_AI_COMMENTARY_ITEMS
       ? getConcreteMatchedSignals(item.matchedSignals, primitive)
       : [];
@@ -5935,12 +5937,13 @@ function validateAiItems(
       tourId: resolvedTourId,
       score: Number.isFinite(Number(item.score)) ? Number(item.score) : 80 - index,
       reason: validatedIndex < MAX_AI_COMMENTARY_ITEMS
-        ? getConcreteAiReason(item.reason || semanticFit, primitive)
+        ? normalizedReason
         : undefined,
       matchedSignals: uniqueStrings([...semanticSignals, ...matchedSignals]).slice(0, 5),
       semanticFit: semanticFit || undefined,
       semanticSignals,
       semanticBoundary: semanticBoundary || undefined,
+      reasonSource: aiReason && normalizedReason === aiReason ? 'ai' : 'fallback',
     });
   }
 

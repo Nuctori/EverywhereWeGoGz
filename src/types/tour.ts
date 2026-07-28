@@ -178,6 +178,8 @@ export interface AiRecommendationItem {
   semanticFit?: string;
   semanticSignals?: string[];
   semanticBoundary?: string;
+  /** 内部文案来源：模型原文优先，只有模型没有给出可用文案时才是兜底。 */
+  reasonSource?: 'ai' | 'fallback';
   recommendationTier?: 'ai-detailed' | 'ai-brief' | 'local-supplement';
 }
 
