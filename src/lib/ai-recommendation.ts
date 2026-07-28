@@ -1590,7 +1590,7 @@ function mergeAiRankingIntent(
       ? aiIntent.destinationHints || []
       : hardIntent.destinationHints?.length
       ? hardIntent.destinationHints
-      : aiIntent.destinationHints || [],
+      : [],
     semanticFocus: uniqueStrings([
       ...(hardIntent.semanticFocus || []),
       ...(aiIntent.semanticFocus || []),
@@ -3167,6 +3167,16 @@ function shouldKeepAiReason(reason: string, primitive: RecommendationPrimitive) 
   return true;
 }
 
+function hasMalformedAiTitleEcho(reason: string, primitive: RecommendationPrimitive) {
+  const title = normalizeText(primitive.title).replace(/[^\p{Script=Han}a-z0-9]/giu, '');
+  const normalizedReason = normalizeText(reason).replace(/[^\p{Script=Han}a-z0-9]/giu, '');
+  // 长标题经常被模型截成“……小镇2把 / ……温泉酒”一类残句。
+  // 这不是世界知识推理，而是输出损坏；宁可回到本地事实文案，也不把坏句子展示给用户。
+  if (title.length < 18 || normalizedReason.includes(title)) return false;
+  const prefix = title.slice(0, Math.min(12, title.length));
+  return prefix.length >= 8 && normalizedReason.includes(prefix);
+}
+
 function softenAiEvidenceCaveats(reason: string) {
   return reason
     .replace(/在候选(?:里|中)没有(?:明确)?提及/g, '目前没有看到明确安排')
@@ -3815,7 +3825,7 @@ function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive
   // Experience: do not force every AI reason through a fixed price/weather/play checklist.
   // Soft needs such as public-interest, study travel, or rural value often explain fit through
   // world knowledge and candidate wording; overwriting those with local templates degrades copy.
-  if (softened && shouldKeepAiReason(softened, primitive)) {
+  if (softened && !hasMalformedAiTitleEcho(softened, primitive) && shouldKeepAiReason(softened, primitive)) {
     return softened;
   }
   return buildPrimitiveConcreteReason(primitive);
@@ -6250,6 +6260,42 @@ function auditAiRecommendationsStrict(
   ].slice(0, MAX_AI_RANKED_ITEMS);
 }
 
+function keepAiItemsForCompoundExperience(
+  items: AiRecommendationItem[],
+  candidateTours: AiRecommendationCandidate[],
+  userText: string,
+) {
+  const coverageTerms = getCoverageTermsForQuality(userText);
+  if (coverageTerms.length < 2 || items.length === 0) return items;
+
+  const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
+  const maxCoverage = Math.max(
+    0,
+    ...candidateTours.map((tour) => getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount),
+  );
+  if (maxCoverage < 2) return items;
+
+  const strongCandidateCount = candidateTours.filter((tour) =>
+    getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount >= 2,
+  ).length;
+  const coreTerms = coverageTerms.filter((term) => !['周边小镇', '共享电瓶车'].includes(term));
+  const coreCandidateCount = candidateTours.filter((tour) =>
+    getItemCoverageMetrics(buildTourPrimitive(tour), coreTerms).coverageCount >= coreTerms.length,
+  ).length;
+  const minimumCoverage = strongCandidateCount >= 3 ? 2 : 1;
+  const kept = items.filter((item) => {
+    const primitive = primitiveByTourId.get(item.tourId);
+    if (!primitive) return false;
+    if (coreTerms.length >= 2 && coreCandidateCount >= 2) {
+      return getItemCoverageMetrics(primitive, coreTerms).coverageCount >= coreTerms.length;
+    }
+    return getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= minimumCoverage;
+  });
+
+  // AI 只选出了弱候选时保留原结果，避免因数据稀疏把结果清空；有足够证据时不展示“顺手凑数”的团。
+  return kept.length > 0 ? kept : items;
+}
+
 function normalizeIntent(value: unknown): AiTravelIntent | null {
 
   if (!value || typeof value !== 'object') return null;
@@ -7130,11 +7176,15 @@ export async function requestAiRecommendations({
     if (validatedAiItems.length === 0 && Array.isArray(aiResponse.items)) {
       throw new Error('AI API unusable items_unmapped: returned tourIds did not match current candidates');
     }
-    const aiItems = auditAiRecommendationsStrict(
+    const aiItems = keepAiItemsForCompoundExperience(
+      auditAiRecommendationsStrict(
       validatedAiItems,
       [],
       compactedCandidateTours,
       finalIntent,
+      ),
+      compactedCandidateTours,
+      text,
     );
 
     const rankedAiItems = aiItems.length > 0
