@@ -3845,7 +3845,13 @@ function buildCoverageAwareReason(
   ];
   const lead = leadTemplates[(getStableTextIndex(`${primitive.id}:coverage`, leadTemplates.length) + variant) % leadTemplates.length];
   if (missingCoverageTerms.length === 0) return priceText ? `${lead}；参考价${priceText}。` : `${lead}。`;
-  return `${lead}；至于${missingText}，详情里还没有明确安排，最好先问清再决定${priceText ? `，参考价${priceText}` : ''}。`;
+  const verificationLeads = [
+    `我会把${missingText}列为出发前最先核实的一项`,
+    `${missingText}这件事值得在报名时顺手问清`,
+    `如果${missingText}也能对上，这趟的完整度会更高`,
+  ];
+  const verificationLead = verificationLeads[(getStableTextIndex(`${primitive.id}:coverage-check`, verificationLeads.length) + variant) % verificationLeads.length];
+  return `${lead}；${verificationLead}${priceText ? `，参考价${priceText}` : ''}。`;
 }
 
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
