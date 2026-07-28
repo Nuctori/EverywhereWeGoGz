@@ -820,13 +820,13 @@ const COVERAGE_TERM_GROUPS = [
   },
   {
     label: '海边沙滩',
-    aliases: ['海边', '海滩', '沙滩', '海景', '海岸', '海湾', '双湾', '双月湾', '巽寮湾', '盐洲岛', '沙扒湾', '南澳岛', '海陵岛', '上下川', '放鸡岛'],
+    aliases: ['海边', '海滩', '沙滩', '海景', '海岸', '海湾', '湾'],
   },
   {
     label: '玩水清凉',
     // 用户说“玩水”时，海湾、海滩和盐洲岛这类滨水目的地也属于实际玩法，
     // 不能因为数据只写了“温泉联游”就把它误判成纯泡汤线路。
-    aliases: ['玩水', '水上', '漂流', '溯溪', '桨板', '浆板', '冲浪', '游泳', '嬉水', '亲水', '水世界', '水上乐园', '泳池', '海边', '海滩', '沙滩', '海湾', '双湾', '双月湾', '盐洲岛', '沙扒湾', '南澳岛', '海陵岛'],
+    aliases: ['玩水', '水上', '漂流', '溯溪', '桨板', '浆板', '冲浪', '游泳', '嬉水', '亲水', '水世界', '水上乐园', '泳池', '海边', '海滩', '沙滩', '海湾', '湾'],
   },
   {
     label: '森林山水',
@@ -2617,7 +2617,7 @@ function extractExperienceCategories(tour: AiRecommendationCandidate) {
   ].filter(Boolean).join(' ').toLowerCase();
   const categories: string[] = [];
   const lodgingOnly = /住宿套餐|酒店住宿|门票|门票套餐|景点套票|接载|单程接送|摄影写真/.test(corpus);
-  const hasBeachSignal = /海滩|沙滩|海景|海岛|双月湾|巽寮湾|沙扒湾|盐洲岛|南澳岛|海陵岛|上下川|放鸡岛|游艇|浮潜|潜水|私家海滩|滨海度假/.test(corpus);
+  const hasBeachSignal = /海滩|沙滩|海景|海岛|海湾|湾|游艇|浮潜|潜水|私家海滩|滨海度假/.test(corpus);
   const hasIndoorSignal = /冰世界|冰雪世界|室内|度假村|别墅|庄园|亲子|乐园/.test(corpus);
   const hasMountainSignal = /森林|氧吧|瀑布|峡谷|溶洞|山水|山泉|湿地|绿道|星湖|丹霞|九瀑|云门山|白水寨|古龙峡|黄腾峡|三百山|天露山|紫云谷|姑婆山|草原|长白山|呼伦贝尔|喀纳斯|香格里拉|玉龙雪山|九寨沟/.test(corpus);
   const hasWaterPlaySignal = /漂流|溯溪|桨板|浆板|sup|水上乐园|水世界|冲浪|游泳|嬉水|亲水|山泉水泳道/.test(corpus);
@@ -2684,7 +2684,7 @@ function extractSeasonalComfortAtoms(tour: AiRecommendationCandidate) {
   if (/徒步|登山|爬山|穿越|峡谷|瀑布|溯溪|漂流|山峰|古龙峡|黄腾峡|白水寨|紫云谷|天露山|云门山|姑婆山|三百山/.test(corpus)) {
     riskAtoms.push('雨天需取舍：山水户外或涉水风险');
   }
-  if (/海边|海滩|沙滩|海景|海岛|双月湾|巽寮湾|沙扒湾|盐洲岛|南澳岛|海陵岛/.test(corpus)) {
+  if (/海边|海滩|沙滩|海景|海岛|海湾|湾/.test(corpus)) {
     riskAtoms.push('天气敏感：海边晴雨和风浪');
   }
 
@@ -3860,13 +3860,9 @@ function buildCoverageAwareReason(
   return `${lead}；${verificationLead}${priceText ? `，参考价${priceText}` : ''}。`;
 }
 
-function buildSharedBikeCaveat(primitive: RecommendationPrimitive, userText: string, index: number) {
+function buildSharedBikeCaveat(userText: string, index: number) {
   if (index !== 0 || !/共享电瓶车|共享电动车|电瓶车/.test(userText)) return '';
-  const corpus = `${primitive.title} ${primitive.destination} ${primitive.theme} ${primitive.highlights.join(' ')}`;
-  if (/惠州|盐洲岛|双湾|海湾|海边|小镇|古镇/.test(corpus)) {
-    return '盐洲岛这一带更适合靠短途接驳或租车慢慢逛，若能找到共享电瓶车，去镇上和海边都会轻松很多，我会把它列为出发前优先核实项';
-  }
-  return '共享电瓶车属于目的地便利项，是否有共享服务值得先问清';
+  return '共享电瓶车属于当地便利项，候选资料通常不会写全；如果你在意这一点，建议出发前直接问清是否有共享服务或短途接驳';
 }
 
 function ensureSharedBikeRecommendationNote(
@@ -3878,7 +3874,7 @@ function ensureSharedBikeRecommendationNote(
   const primitiveByTourId = new Map(candidateTours.map((primitive) => [primitive.id, primitive]));
   return items.map((item, index) => {
     const primitive = primitiveByTourId.get(item.tourId);
-    const caveat = primitive ? buildSharedBikeCaveat(primitive, userText, index) : '';
+    const caveat = primitive ? buildSharedBikeCaveat(userText, index) : '';
     if (!caveat || item.reason?.includes(caveat)) return item;
     return {
       ...item,
@@ -4795,7 +4791,7 @@ function rewriteRecommendationCopy(params: {
         : `${currentReason}。`;
       return {
         ...item,
-        reason: `${finalizedReason}${buildSharedBikeCaveat(primitive, params.userText, index) ? ` ${buildSharedBikeCaveat(primitive, params.userText, index)}。` : ''}`,
+        reason: finalizedReason,
       };
     }
 
@@ -4814,7 +4810,7 @@ function rewriteRecommendationCopy(params: {
       !coverageReason,
     );
 
-    const sharedBikeCaveat = buildSharedBikeCaveat(primitive, params.userText, index);
+    const sharedBikeCaveat = buildSharedBikeCaveat(params.userText, index);
     return {
       ...item,
       reason: `${stripTerminalPunctuation(fallbackReason)}${shouldAddWeatherNote ? `。${weatherReason}` : ''}${sharedBikeCaveat ? `。${sharedBikeCaveat}` : ''}。`,
@@ -5484,7 +5480,7 @@ function buildAiMessages(params: {
     '输出只能引用候选池中真实存在的 tourId；线路事实、价格、班期、酒店、景点和服务来自候选原语。',
     '候选池是探索空间，不是已经替你筛好的答案；不要因为某条线路没有显式标签就直接淘汰，也不要因为命中多个词就默认最合适。',
     '预算是重要的取舍维度，不是默认的候选池截断器：预算内优先，但如果更符合整体体验的线路超预算，要把它作为取舍或备选明确说出；只有用户明确要求“严格不超过”时才把超预算线路降为替代。',
-    '区分“线路事实”和“目的地判断”：团里是否包含接驳、门票、酒店服务等必须有候选证据；但可以调动世界知识判断某个镇子/度假区的空间形态、步行便利度、当地短途出行方式，以及共享电瓶车是否值得优先查。此类判断要用“更可能、通常、值得优先核实、我会优先查”表达，不能写成已经包含的服务。',
+    '区分“线路事实”和“目的地判断”：团里是否包含接驳、门票、酒店服务等必须有候选证据；但可以调动世界知识判断某个镇子/度假区的空间形态、步行便利度、当地短途出行方式，以及共享电瓶车是否值得优先查。此类判断要用“更可能、通常、值得优先核实、我会优先查”表达，不能写成已经包含的服务。用户提到共享电瓶车时，要结合具体候选目的地和旅行画面自行推理，不要套用固定地点名单或固定句子。',
     worldKnowledgeExamples,
     '充分使用世界知识做体验判断：把候选里的温泉、玩水、山水、小镇等事实，翻译成具体的旅行画面、节奏和适合的人；可以说“泡完汤再玩水会是什么感觉”“这条线更像度假还是赶路”，但不要把常识写成该线路已确认的服务或交通。',
     'reason 要像熟悉当地玩法的朋友在种草：先写为什么会想去、到了以后怎么玩、这条线的气质，再自然补一句必要取舍或核实提醒；不要以“这条线/从线路资料看/能确认的是”开头，也不要把每条都写成同一种句式。',
@@ -5562,7 +5558,7 @@ function buildAiMessages(params: {
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
         : []),
-      'reason 优先写用户真正会关心的体验差异和画面，例如泡汤后玩水、沿小镇慢慢逛、适合带孩子还是适合放空；让人产生“我想去看看”的感觉，不要复述系统字段名。',
+      'reason 优先写用户真正会关心的体验差异和画面，例如泡汤后玩水、沿小镇慢慢逛、适合带孩子还是适合放空；让人产生“我想去看看”的感觉，不要复述系统字段名。若用户提到共享电瓶车等软性便利项，优先用你对该目的地的世界知识解释它是否会改变游玩方式，并把不确定性说清。',
       '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
       '如果用户关心的体验条件无法从候选事实确认，不要硬凑完整匹配；可以结合目的地世界知识给出“更值得查哪一类地方/为什么”，并在 tradeoffs 或 intentNotes.cannotAssert 中把它标成判断或待核实项。',
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
