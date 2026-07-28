@@ -1,6 +1,16 @@
 import assert from 'node:assert/strict';
-globalThis.fetch = async (url) => {
+globalThis.fetch = async (url, init = {}) => {
   if (String(url).includes('/media/uploadimg')) {
+    const media = init.body?.get?.('media');
+    if (media?.arrayBuffer) {
+      const metadata = await sharp(Buffer.from(await media.arrayBuffer())).metadata();
+      uploadedImageMetadata.push({
+        name: media.name,
+        type: media.type,
+        width: metadata.width,
+        height: metadata.height,
+      });
+    }
     return new Response(JSON.stringify({ url: 'https://mmbiz.qpic.cn/mock-uploaded.png' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -13,9 +23,13 @@ import {
   rewriteHtmlImagesForWechat,
   markdownToHtml,
   parseFrontmatter,
+  WECHAT_INLINE_IMAGE_MAX_EDGE,
 } from './lib/wechat_publish.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
+import sharp from 'sharp';
+
+const uploadedImageMetadata = [];
 
 const markdown = `---
 title: "本周线路推荐"
@@ -141,6 +155,30 @@ const qrRewritten = await rewriteHtmlImagesForWechat(
   'token123',
 );
 assert.ok(qrRewritten.includes('https://mmbiz.qpic.cn/'));
+
+const oversizedImagePath = path.join(inlineDir, 'oversized.png');
+await sharp({
+  create: {
+    width: 4096,
+    height: 2730,
+    channels: 3,
+    background: '#2f6f68',
+  },
+})
+  .png()
+  .toFile(oversizedImagePath);
+const oversizedRewritten = await rewriteHtmlImagesForWechat(
+  tmpRoot,
+  path.join(inlineDir, 'article.md'),
+  `<p><img src="${oversizedImagePath}" alt="oversized"></p>`,
+  'token123',
+);
+assert.ok(oversizedRewritten.includes('https://mmbiz.qpic.cn/'));
+const oversizedUpload = uploadedImageMetadata.at(-1);
+assert.equal(oversizedUpload.type, 'image/jpeg');
+assert.match(oversizedUpload.name, /\.jpg$/);
+assert.ok(oversizedUpload.width <= WECHAT_INLINE_IMAGE_MAX_EDGE);
+assert.ok(oversizedUpload.height <= WECHAT_INLINE_IMAGE_MAX_EDGE);
 fs.rmSync(inlineDir, { recursive: true, force: true });
 fs.rmSync(publicImagePath, { force: true });
 

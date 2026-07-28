@@ -4,6 +4,13 @@ import path from 'node:path';
 
 const workflowPath = path.join(process.cwd(), '.github', 'workflows', 'update-data.yml');
 const workflow = fs.readFileSync(workflowPath, 'utf8');
+const availabilityWorkflowPath = path.join(
+  process.cwd(),
+  '.github',
+  'workflows',
+  'refresh-availability-cache.yml',
+);
+const availabilityWorkflow = fs.readFileSync(availabilityWorkflowPath, 'utf8');
 const packageJsonPath = path.join(process.cwd(), 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
@@ -13,6 +20,13 @@ function mustInclude(snippet, message) {
 
 mustInclude("- cron: '0 3 * * 1'", 'expected scheduled update-data workflow to run weekly on Monday UTC');
 mustInclude('skip_crawls:', 'expected workflow_dispatch skip_crawls input to exist for fast manual verification');
+
+const sharedWriteLock = 'concurrency:\n  group: tour-data-writes\n  cancel-in-progress: false';
+assert.ok(workflow.includes(sharedWriteLock), 'expected update-data workflow to serialize data writes');
+assert.ok(
+  availabilityWorkflow.includes(sharedWriteLock),
+  'expected availability cache workflow to share the data write lock',
+);
 
 for (const jobName of [
   'preflight:',

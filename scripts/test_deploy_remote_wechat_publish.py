@@ -1,7 +1,10 @@
 import importlib.util
+import json
 import pathlib
 import tempfile
 import unittest
+import urllib.request
+from unittest import mock
 
 
 SCRIPT_PATH = pathlib.Path(__file__).with_name('deploy_remote_wechat_publish.py')
@@ -45,6 +48,49 @@ class DeployRemoteWechatPublishTests(unittest.TestCase):
         self.assertIn('article.wechat.html', MODULE.REMOTE_SCRIPT)
         self.assertIn('rewrite_html_images', MODULE.REMOTE_SCRIPT)
         self.assertIn("mimetypes.guess_type(str(file_path))", MODULE.REMOTE_SCRIPT)
+
+    def test_remote_script_executes_inline_upload_and_rewrites_html(self):
+        namespace = {'__name__': 'remote_publish_test'}
+        exec(MODULE.REMOTE_SCRIPT, namespace)
+
+        class FakeResponse:
+            def __init__(self, payload):
+                self.payload = json.dumps(payload).encode('utf-8')
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, exc_type, exc_value, traceback):
+                return False
+
+            def read(self):
+                return self.payload
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            article_dir = pathlib.Path(temp_dir)
+            asset_dir = article_dir / 'wechat-assets'
+            asset_dir.mkdir()
+            image_path = asset_dir / 'normalized.jpg'
+            image_path.write_bytes(b'normalized-jpeg')
+            html_path = article_dir / 'article.html'
+            html_path.write_text(
+                '<p><img src="wechat-assets/normalized.jpg" alt="inline"></p>\n',
+                encoding='utf-8',
+            )
+            requests = []
+
+            def fake_urlopen(request, timeout=30):
+                requests.append(request)
+                self.assertIn('/media/uploadimg', request.full_url)
+                self.assertIn(b'normalized-jpeg', request.data)
+                return FakeResponse({'url': 'https://mmbiz.qpic.cn/inline.jpg'})
+
+            bundle = {'htmlPath': str(html_path)}
+            with mock.patch.object(urllib.request, 'urlopen', fake_urlopen):
+                rewritten = namespace['rewrite_html_images'](bundle, html_path.read_text(), 'token123')
+
+            self.assertEqual(len(requests), 1)
+            self.assertIn('https://mmbiz.qpic.cn/inline.jpg', rewritten)
 
 
 if __name__ == '__main__':
