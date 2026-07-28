@@ -214,4 +214,33 @@ assert.deepEqual(
   'compound requests must not fall back to a weak single-theme candidate when no strong candidate exists',
 );
 
+const strongCompoundCandidate = candidate({
+  id: 'strong-compound',
+  title: '惠州双湾盐洲岛温泉嬉水3天',
+  destination: '广东',
+  price: 399,
+  tags: ['温泉', '玩水'],
+  highlights: ['温泉', '嬉水', '海边'],
+});
+const weakMixedCandidate = candidate({
+  id: 'weak-mixed',
+  title: '惠州温泉小镇2天',
+  destination: '广东',
+  price: 329,
+  tags: ['温泉', '小镇'],
+  highlights: ['温泉', '小镇漫步'],
+});
+assert.deepEqual(
+  keepAiItemsForCompoundExperience(
+    [
+      { tourId: 'strong-compound', score: 80, reason: '温泉和玩水都对得上。', matchedSignals: ['温泉', '玩水'] },
+      { tourId: 'weak-mixed', score: 99, reason: '温泉和小镇都不错。', matchedSignals: ['温泉', '小镇'] },
+    ],
+    [strongCompoundCandidate, weakMixedCandidate],
+    '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  ).map((item) => item.tourId),
+  ['strong-compound'],
+  'when a core-coverage candidate exists, weak mixed candidates must not be padded into recommendations',
+);
+
 console.log('AI success-path audit passed');

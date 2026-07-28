@@ -6371,7 +6371,7 @@ function keepAiItemsForCompoundExperience(
   const kept = items.filter((item) => {
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive) return false;
-    if (coreTerms.length >= 2 && coreCandidateCount >= 2) {
+    if (coreTerms.length >= 2 && coreCandidateCount > 0) {
       return getItemCoverageMetrics(primitive, coreTerms).coverageCount >= coreTerms.length;
     }
     return getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= minimumCoverage;
