@@ -196,6 +196,40 @@ const expandedShortCopy = rewriteRecommendationCopy({
 });
 assert.ok((expandedShortCopy[0]?.reason?.length ?? 0) > '海边温泉。'.length);
 
+const semanticFitAfterFormulaicReason = rewriteRecommendationCopy({
+  items: [{
+    tourId: 'semantic-copy',
+    score: 96,
+    reason: '如果你是冲着温泉和海边去的，这条线会更有针对性',
+    semanticFit: '盐洲岛把海边的慢节奏和温泉放在同一趟里，适合想带孩子玩水又不想把行程排满的家庭。',
+    semanticBoundary: '共享电动车是否方便需要出发前确认。',
+    matchedSignals: ['海边', '温泉'],
+  }],
+  candidateTours: [candidate({
+    id: 'semantic-copy',
+    title: '惠州双湾盐洲岛温泉联游3天',
+    destination: '广东',
+    price: 799,
+    tags: ['温泉', '海边', '玩水'],
+    highlights: ['盐洲岛', '温泉', '海边慢游'],
+    theme: '海岛度假',
+  })],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '惠州',
+    travelDate: '2026-06-12',
+    forecastSummary: '',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '适合带孩子的海边温泉，附近最好能骑电动车逛逛',
+  allowPublicInterest: false,
+});
+assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('盐洲岛'));
+assert.ok(!semanticFitAfterFormulaicReason[0]?.reason?.startsWith('如果你是冲着'));
+assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('共享电动车'));
+
 const weakCompoundCandidate = candidate({
   id: 'weak-compound',
   title: '金水台温泉2天',
