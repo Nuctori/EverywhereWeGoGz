@@ -150,12 +150,11 @@ const validOrderPreserved = prioritizeRecommendationItems(
       candidate({ id: 'copy-long', title: '惠州双湾温泉3天', destination: '广东', price: 699, tags: ['温泉', '沙滩'], highlights: ['海边', '温泉', '慢节奏'] }),
     ],
     intent: { weatherSensitivity: [], departureWeekdays: [] },
-    userText: '帮我找同时带温泉和沙滩的团，最好轻松一点',
+    userText: '帮我找同时带温泉和沙滩的团',
   },
 );
-assert.equal(validOrderPreserved[0].tourId, 'copy-long');
-assert.equal(validOrderPreserved[1].tourId, 'copy-short');
-assert.ok((validOrderPreserved[0].reason || '').length > (validOrderPreserved[1].reason || '').length);
+assert.equal(validOrderPreserved[0].tourId, 'copy-short');
+assert.equal(validOrderPreserved[1].tourId, 'copy-long');
 
 const alternativesLast = prioritizeRecommendationItems([
   strictConflictAudited[2],

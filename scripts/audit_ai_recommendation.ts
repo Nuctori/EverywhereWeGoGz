@@ -149,6 +149,20 @@ const mergedAiOrder = mergeAiAndLocalRecommendations(
 );
 assert.equal(mergedAiOrder[0].tourId, 'ai-lower-score-first');
 assert.equal(mergedAiOrder[1].tourId, 'ai-higher-score-second');
+const mergedPartialAi = mergeAiAndLocalRecommendations(
+  [{ tourId: 'ai-only-choice', score: 70, reason: 'AI 认为这条最符合整体玩法。', matchedSignals: [] }],
+  [{ tourId: 'local-not-selected', score: 999, reason: '本地补位高分', matchedSignals: [] }],
+);
+assert.deepEqual(
+  mergedPartialAi.map((item) => item.tourId),
+  ['ai-only-choice'],
+  'a partial AI result must not be padded with unselected local candidates',
+);
+const mergedLocalFallback = mergeAiAndLocalRecommendations(
+  [],
+  [{ tourId: 'local-fallback', score: 20, reason: 'AI 不可用时的本地兜底', matchedSignals: [] }],
+);
+assert.deepEqual(mergedLocalFallback.map((item) => item.tourId), ['local-fallback']);
 const mergedCapItems = mergeAiAndLocalRecommendations(
   Array.from({ length: 12 }, (_, index) => ({
     tourId: `ai-${index}`,
@@ -163,7 +177,7 @@ const mergedCapItems = mergeAiAndLocalRecommendations(
     matchedSignals: [],
   })),
 );
-assert.ok(mergedCapItems.length > 24);
+assert.ok(mergedCapItems.length <= 24);
 assert.ok(mergedCapItems.filter((item) => item.reason).length <= 24);
 const auditCapTours = Array.from({ length: 30 }, (_, index) => candidate({
   id: `audit-cap-${index}`,
@@ -1192,7 +1206,7 @@ const noPublicInterestRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/扶贫|公益|贫困/.test(noPublicInterestRewrite[0].reason || ''));
-assert.ok(/古村|山水|广东县域/.test(noPublicInterestRewrite[0].reason || ''));
+assert.ok(/常规休闲线|不太对得上|不建议默认|排在前面/.test(noPublicInterestRewrite[0].reason || ''));
 
 const explicitPublicInterestRewrite = rewriteRecommendationCopy({
   items: semanticBoundaryItems,
@@ -2400,8 +2414,8 @@ const reordered = prioritizeRecommendationItems(
   );
   assert.deepEqual(
     sorted.map((item) => item.tourId),
-    ['detailed-guangxi-vietnam', 'brief-guangxi', 'local-supplement'],
-    'detailed AI recommendation should rank before brief AI and local supplement',
+    ['detailed-guangxi-vietnam', 'brief-guangxi'],
+    'detailed AI recommendation should rank before brief AI without reintroducing local candidates',
   );
 }
 
