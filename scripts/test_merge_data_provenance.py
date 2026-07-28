@@ -72,6 +72,73 @@ def test_records_without_duration_are_rejected():
     assert raw_to_tour(raw, 1, empty_detail()) is None
 
 
+def test_title_place_miner_resolves_named_place_to_city_anchor():
+    raw = {
+        "source": "测试来源",
+        "title": "珠海海泉湾3天",
+        "destination": "广东",
+        "price": 999,
+        "days": 3,
+    }
+    tour = raw_to_tour(raw, 1, empty_detail())
+
+    assert tour["destinationCity"] == "珠海"
+    assert tour["destinationPlaceName"] == "珠海海泉湾"
+    assert tour["destinationLatitude"] == 22.271
+    assert tour["destinationLongitude"] == 113.5767
+    assert tour["geoSource"] == "title-place-miner"
+    assert tour["geoConfidence"] == "low"
+    assert tour["dataQuality"]["fieldSources"]["destinationPlaceName"] == "inferred"
+
+
+def test_title_place_miner_does_not_turn_departure_into_destination():
+    raw = {
+        "source": "测试来源",
+        "title": "欧洲线路5天（广州起止）",
+        "destination": "广东",
+        "price": 999,
+        "days": 5,
+    }
+    tour = raw_to_tour(raw, 1, empty_detail())
+
+    assert tour["destinationCity"] == ""
+    assert tour["destinationPlaceName"] == ""
+    assert tour["departureCity"] == "广州"
+
+
+def test_title_place_miner_rejects_departure_prefixed_route_text():
+    raw = {
+        "source": "测试来源",
+        "title": "重庆线路广州武隆仙女山双动5天",
+        "destination": "广东",
+        "price": 999,
+        "days": 5,
+    }
+    tour = raw_to_tour(raw, 1, empty_detail())
+
+    assert tour["destinationCity"] == ""
+    assert tour["destinationPlaceName"] == ""
+
+
+def test_title_place_miner_keeps_destination_after_departure_phrase():
+    for title in (
+        "广州出发珠海海泉湾5天",
+        "广州集合后游珠海海泉湾5天",
+        "广州-珠海海泉湾5天",
+    ):
+        raw = {
+            "source": "测试来源",
+            "title": title,
+            "destination": "广东",
+            "price": 999,
+            "days": 5,
+        }
+        tour = raw_to_tour(raw, 1, empty_detail())
+        assert tour["destinationCity"] == "珠海"
+        assert tour["destinationPlaceName"] == "珠海海泉湾"
+        assert tour["geoConfidence"] == "low"
+
+
 def test_detail_fields_are_structured_without_invention():
     raw = {
         "source": "测试来源",

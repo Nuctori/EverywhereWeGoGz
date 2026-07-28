@@ -99,6 +99,11 @@ DEPARTURE_PATTERNS = (
     re.compile(r"(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)(?:[/／](?:广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)){0,2}(?:[A-Za-z]{0,4})(?:起止|起程|出发|直飞(?:往返)?|往返|联运)"),
     re.compile(r"(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)[-—至到]"),
 )
+DEPARTURE_MARKERS = re.compile(r"(?:起止|起程|出发|往返|直飞|集合|起飞|返程|回程|联运)")
+PLACE_LABEL_SUFFIXES = re.compile(
+    "|".join(sorted(("海泉湾", "森林公园", "度假区", "古镇", "古村", "庄园", "乐园", "景区", "酒店", "公园", "温泉", "湾", "岛", "湖"), key=len, reverse=True))
+)
+TEXT_SEPARATORS = "|｜丨/／+&＆()（）[]【】,，。；;、"
 
 
 def find_place(text):
@@ -117,6 +122,123 @@ def find_region(text):
     return None
 
 
+def _iter_place_mentions(text):
+    value = str(text or "")
+    matches = []
+    for alias, place in ALIAS_ROWS:
+        start = 0
+        while alias:
+            index = value.find(alias, start)
+            if index < 0:
+                break
+            matches.append({
+                "place": place,
+                "alias": alias,
+                "start": index,
+                "end": index + len(alias),
+            })
+            start = index + 1
+    matches.sort(key=lambda item: (item["start"], -len(item["alias"])))
+    selected = []
+    occupied_until = -1
+    seen_places = set()
+    for item in matches:
+        if item["start"] < occupied_until:
+            continue
+        name = item["place"]["name"]
+        if name in seen_places:
+            continue
+        seen_places.add(name)
+        selected.append(item)
+        occupied_until = item["end"]
+    return selected
+
+
+def _is_departure_mention(text, mention):
+    value = str(text or "")
+    start = mention["start"]
+    end = mention["end"]
+    after = value[end:min(len(value), end + 16)]
+    if DEPARTURE_MARKERS.match(after.lstrip()):
+        return True
+    if re.match(r"\s*[-—]", after):
+        return True
+    before = value[max(0, start - 8):start]
+    if re.search(r"(?:从|由|自|在|于)\s*$", before):
+        return True
+    return False
+
+
+def _place_label(text, mention):
+    value = str(text or "")
+    end = mention["end"]
+    tail_match = re.match(r"[^%s\d\s]{0,18}" % re.escape(TEXT_SEPARATORS), value[end:])
+    tail = tail_match.group(0) if tail_match else ""
+    suffix_matches = list(PLACE_LABEL_SUFFIXES.finditer(tail))
+    suffix_match = suffix_matches[-1] if suffix_matches else None
+    if tail.startswith(("回", "返", "去", "住", "入住", "返回")):
+        return mention["place"]["name"]
+    if suffix_match:
+        return f"{mention['place']['name']}{tail[:suffix_match.end()]}".strip()
+    return mention["place"]["name"]
+
+
+def mine_destination_place(raw, title, destination, detail=None):
+    """Extract a named destination from title/detail text without treating departure as destination."""
+    destination_text = str(destination or "").strip()
+    direct_place = find_place(destination_text)
+    if direct_place:
+        return direct_place, direct_place["name"], "medium", "local-place-catalog"
+
+    texts = [str(title or "")]
+    detail = detail if isinstance(detail, dict) else {}
+    for day in detail.get("itinerary") or []:
+        if not isinstance(day, dict):
+            continue
+        texts.extend(str(day.get(key) or "") for key in ("title", "description"))
+        texts.extend(str(value or "") for value in day.get("activities") or [])
+    texts.extend(str(value or "") for value in detail.get("highlights") or [])
+
+    candidates = []
+    for text_index, text in enumerate(texts):
+        for mention in _iter_place_mentions(text):
+            if _is_departure_mention(text, mention):
+                continue
+            label = _place_label(text, mention)
+            is_named_place = (
+                label != mention["place"]["name"]
+                and len(label) - len(mention["place"]["name"]) <= 6
+            )
+            candidates.append((
+                text_index,
+                mention["start"],
+                mention["place"],
+                label,
+                is_named_place,
+            ))
+
+    if not candidates:
+        return None, "", "low", "unknown"
+    region = find_region(destination_text)
+    if region and region.get("province"):
+        outside_region = [
+            item for item in candidates
+            if item[2].get("province") != region["province"]
+            or item[2].get("country") != region.get("country")
+        ]
+        if outside_region:
+            candidates = outside_region
+    named_candidates = [item for item in candidates if item[4]]
+    if named_candidates:
+        candidates = named_candidates
+    elif destination_text not in {"", "其他", "全国"}:
+        # A bare city under a broad region is too easy to confuse with the departure city.
+        return None, "", "low", "unknown"
+    candidates.sort(key=lambda item: (item[0], item[1]))
+    _, _, place, label, _ = candidates[0]
+    return place, label, "low", "title-place-miner"
+
+
 def _raw_departure(raw):
     for key in ("departureCity", "departureProvince", "departureCountry"):
         if str(raw.get(key) or "").strip():
@@ -129,7 +251,7 @@ def _raw_departure(raw):
     return {}, "unknown"
 
 
-def normalize_tour_geo(raw, title, destination):
+def normalize_tour_geo(raw, title, destination, detail=None):
     departure, departure_source = _raw_departure(raw)
     departure_place = None
     if not departure:
@@ -152,9 +274,12 @@ def normalize_tour_geo(raw, title, destination):
         departure.setdefault("departureCountry", departure_place["country"])
 
     destination_text = str(destination or "").strip()
-    if destination_text in {"", "其他", "全国"}:
-        destination_text = re.split(r"(?:往返|出发|起程|集合|起止)", str(title or ""), maxsplit=1)[-1]
-    destination_place = find_place(destination_text)
+    destination_place, destination_label, destination_confidence, destination_geo_source = mine_destination_place(
+        raw,
+        title,
+        destination_text,
+        detail,
+    )
     destination_region = find_region(destination_text)
     destination_country = destination_place["country"] if destination_place else (destination_region["country"] if destination_region else "")
     destination_province = (destination_place.get("province") or "") if destination_place else (destination_region.get("province") or "") if destination_region else ""
@@ -162,13 +287,14 @@ def normalize_tour_geo(raw, title, destination):
     fields = {
         **departure,
         "destinationCity": destination_place["name"] if destination_place else "",
+        "destinationPlaceName": destination_label if destination_place else "",
         "destinationProvince": (destination_place.get("province") or "") if destination_place else "",
         "destinationCountry": destination_country,
         "destinationLatitude": destination_place["latitude"] if destination_place else None,
         "destinationLongitude": destination_place["longitude"] if destination_place else None,
         "geoStatus": "complete" if departure_place and destination_place else ("destination_only" if destination_place or destination_region else "unmapped"),
-        "geoConfidence": "medium" if destination_place else "low",
-        "geoSource": "local-place-catalog" if destination_place else ("local-region-catalog" if destination_region else "unknown"),
+        "geoConfidence": destination_confidence if destination_place else "low",
+        "geoSource": destination_geo_source if destination_place else ("local-region-catalog" if destination_region else "unknown"),
     }
     if departure_place:
         fields.update({
@@ -180,6 +306,7 @@ def normalize_tour_geo(raw, title, destination):
         "departureProvince": departure_source if departure.get("departureProvince") else "unknown",
         "departureCountry": departure_source if departure.get("departureCountry") else "unknown",
         "destinationCity": destination_source if destination_place else "unknown",
+        "destinationPlaceName": "inferred" if destination_place else "unknown",
         "destinationProvince": "inferred" if destination_place or destination_region else "unknown",
         "destinationCountry": "inferred" if destination_place or destination_region else "unknown",
         "destinationLatitude": "inferred" if destination_place else "unknown",
