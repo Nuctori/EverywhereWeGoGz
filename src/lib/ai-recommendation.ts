@@ -25,7 +25,9 @@ import { storedAiProviderConfigSchema } from '@/lib/runtime-schemas';
 
 // 常量区统一描述推荐链路的容量、超时和缓存策略，避免各阶段各自硬编码。
 const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
-const MAX_AI_CANDIDATES = 60;
+// AI 需要看到足够多的异质候选，才能比较“整体体验”而不是只在同一关键词簇里排序。
+// 仍然保留上限，避免把全量线路直接塞进模型上下文。
+const MAX_AI_CANDIDATES = 96;
 const MAX_AI_COMMENTARY_ITEMS = 24;
 const MAX_AI_PROMPT_REASON_ITEMS = 8;
 const MAX_AI_RANKED_ITEMS = 24;
@@ -68,6 +70,8 @@ interface AiTravelIntent {
   destinationHints?: string[];
   budgetMax?: number | null;
   budgetMin?: number | null;
+  /** 只有用户明确要求严格不超预算时才启用价格硬冲突。 */
+  budgetHardLimit?: boolean;
   travelStyle?: string[];
   mustHave?: string[];
   avoid?: string[];
@@ -560,6 +564,12 @@ function parseBudget(text: string) {
   }
 
   return { min: 0, max: value * (text.includes('左右') ? 1.2 : 1) };
+}
+
+function hasStrictBudgetLanguage(text: string) {
+  return /严格|必须|不能超过|不超过|最多|封顶|上限|只要预算内|只能预算内/.test(
+    text.replace(/\s+/g, ''),
+  );
 }
 
 function parseDuration(text: string) {
@@ -1159,15 +1169,17 @@ function scoreTour(
     const budgetMin = Number.isFinite(query.budget.min) ? query.budget.min : null;
 
     if (budgetMin !== null && budgetMax !== null && tour.price >= budgetMin && tour.price <= budgetMax) {
-      score += 12;
+      score += 32;
       signals.push(`预算接近：￥${tour.price.toLocaleString()}`);
     } else if (budgetMax !== null && tour.price <= budgetMax * 1.25) {
-      score += 5;
+      score += 1;
       signals.push('价格略高但仍可比较');
     } else if (budgetMax !== null && tour.price <= budgetMax * 2) {
       score -= 12;
     } else if (budgetMax !== null) {
-      return null;
+      // 普通预算是偏好，不是召回硬门槛；保留远价候选给 AI 或本地补位比较，
+      // 但让它明显落后于预算内和轻微超预算候选。
+      score -= 24;
     } else if (budgetMin !== null) {
       if (tour.price >= budgetMin) {
         score += 6;
@@ -1445,6 +1457,7 @@ function buildHardIntentFromText(text: string): AiTravelIntent | null {
     weatherSensitivity,
     budgetMin: hasTextBudget && budget?.min && Number.isFinite(budget.min) ? budget.min : null,
     budgetMax: hasTextBudget && budget?.max && Number.isFinite(budget.max) ? budget.max : null,
+    budgetHardLimit: hasTextBudget && hasStrictBudgetLanguage(normalizedText),
     tripDaysMin: inferredTripWindow.tripDaysMin,
     tripDaysMax: inferredTripWindow.tripDaysMax,
     departureWithinDays: promptDateWindow
@@ -1588,6 +1601,7 @@ function mergeAiRankingIntent(
     ]),
     budgetMin: hardIntent.budgetMin ?? aiIntent.budgetMin ?? null,
     budgetMax: hardIntent.budgetMax ?? aiIntent.budgetMax ?? null,
+    budgetHardLimit: hardIntent.budgetHardLimit ?? aiIntent.budgetHardLimit ?? false,
     tripDays: hardIntent.tripDays ?? aiIntent.tripDays ?? null,
     tripDaysMin: hardIntent.tripDaysMin ?? aiIntent.tripDaysMin ?? null,
     tripDaysMax: hardIntent.tripDaysMax ?? aiIntent.tripDaysMax ?? null,
@@ -1657,9 +1671,14 @@ function scoreBudgetFit(
   price: number,
   intent: AiTravelIntent,
 ): { score: number; signal?: string } {
+  const hardBudget = intent.budgetHardLimit === true;
   if (intent.budgetMin && intent.budgetMax && intent.budgetMin <= intent.budgetMax) {
     if (price < intent.budgetMin) return { score: -14 };
-    if (price > intent.budgetMax) return { score: -18 };
+    if (price > intent.budgetMax) {
+      return hardBudget
+        ? { score: -18 }
+        : { score: -5, signal: '价格略超预算，需权衡' };
+    }
 
     return {
       score: 10,
@@ -1668,7 +1687,11 @@ function scoreBudgetFit(
   }
 
   if (intent.budgetMax) {
-    if (price > intent.budgetMax) return { score: -18 };
+    if (price > intent.budgetMax) {
+      return hardBudget
+        ? { score: -18 }
+        : { score: -5, signal: '价格略超预算，需权衡' };
+    }
 
     return {
       score: 8,
@@ -2182,7 +2205,7 @@ function getBudgetFitTier(price: number, intent: AiTravelIntent | null) {
   if (budgetMax !== null) {
     if (price <= budgetMax) return 2;
     if (price <= budgetMax * 1.25) return 1;
-    return -2;
+    return intent?.budgetHardLimit ? -2 : price <= budgetMax * 2 ? 0 : -1;
   }
 
   return 2;
@@ -2947,7 +2970,7 @@ function getPrimitiveConflictReasons(intent: AiTravelIntent | null, primitive: R
   if (intent.budgetMin && primitive.price < intent.budgetMin) {
     reasons.push(`价格低于预算下限￥${intent.budgetMin.toLocaleString()}`);
   }
-  if (intent.budgetMax && primitive.price > intent.budgetMax) {
+  if (intent.budgetHardLimit && intent.budgetMax && primitive.price > intent.budgetMax) {
     reasons.push(`价格高于预算上限￥${intent.budgetMax.toLocaleString()}`);
   }
 
@@ -3569,6 +3592,19 @@ function normalizeAiSemanticNotes(value: unknown): AiRecommendationSemanticNotes
   return notes.worldKnowledgeUse || notes.softCriteria.length || notes.cannotAssert.length || notes.caveat
     ? notes
     : undefined;
+}
+
+function normalizeAiClarification(value: unknown) {
+  if (!value || typeof value !== 'object') return undefined;
+  const raw = value as { question?: unknown; reason?: unknown; options?: unknown };
+  const question = normalizeAiText(raw.question, 120);
+  if (!question) return undefined;
+  const options = normalizeAiTextList(raw.options, 4, 32);
+  return {
+    question,
+    reason: normalizeAiText(raw.reason, 120) || undefined,
+    options: options.length > 0 ? options : undefined,
+  };
 }
 
 function hasInternalRecommendationLanguage(text: string) {
@@ -5232,8 +5268,11 @@ function buildAiMessages(params: {
   // 经验：想让 provider cache 命中，关键不是少输出，而是让大块稳定上下文稳定。
   // system message 只放身份、候选边界和输出格式，排序取舍尽量交给模型。
   const systemPrompt = [
-    '你是旅行团推荐顾问，充分发挥你的世界知识来理解用户需求，从给定候选池中真正推荐适合的线路。',
+    '你是旅行顾问，不是关键词筛选器，也不是给筛选结果写文案的排序器。你要先理解用户想要的整体旅行体验，再从候选池中比较、推理和取舍。',
     '输出只能引用候选池中真实存在的 tourId；线路事实、价格、班期、酒店、景点和服务来自候选原语。',
+    '候选池是探索空间，不是已经替你筛好的答案；不要因为某条线路没有显式标签就直接淘汰，也不要因为命中多个词就默认最合适。',
+    '预算是重要的取舍维度，不是默认的候选池截断器：预算内优先，但如果更符合整体体验的线路超预算，要把它作为取舍或备选明确说出；只有用户明确要求“严格不超过”时才把超预算线路降为替代。',
+    '如果用户关心的周边配套或交通方式没有候选证据，只能说未知，不能用常识冒充线路事实。',
     worldKnowledgeExamples,
     'reason 要像旅行顾问在给朋友提建议：先说这条最具体的玩法或体验，再补一句必要的取舍或天气提醒。',
     '不要解释规则，不要写“命中/对题/标题和标签/候选/软语义/综合匹配/预算友好”这类评审腔。',
@@ -5273,6 +5312,13 @@ function buildAiMessages(params: {
         cannotAssert: promptPolicy.cannotAssertDescription,
         caveat: '一句中文，说明近似替代或证据边界',
       },
+      clarification: {
+        question: '如果当前信息不足以做出可靠判断，提出一个最能改变排序的追问；否则省略',
+        reason: '为什么这个问题会改变推荐方向；可省略',
+        options: '最多4个简短选项；可省略',
+      },
+      assumptions: 'string[]，最多3条；仅写你对用户未明说但影响判断的合理假设',
+      tradeoffs: 'string[]，最多4条；写候选之间最重要的取舍',
       intent: {
         destinationHints: 'string[]，本轮语义判断后的目的地；若用户在纠偏上一轮偏差，应保留/修正上一轮目的地组合；若明确重开搜索才替换',
         semanticFocus: promptPolicy.semanticFocusDescription,
@@ -5295,7 +5341,7 @@ function buildAiMessages(params: {
       itemCountLimit: MAX_AI_RANKED_ITEMS,
     },
     rq: [
-      '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。',
+      '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。先做整体体验判断，再做候选排序。',
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
       'candidates 里 pc/pricePct 是价格上下文，atoms/cats/seasonAtoms/conflicts 是候选事实摘要。',
       ...(hasTurnPublicInterestNeed
@@ -5303,6 +5349,8 @@ function buildAiMessages(params: {
         : []),
       'reason 优先写用户真正会关心的体验差异，例如温泉/沙滩/古城/节奏/团期天气，不要复述系统字段名。',
       '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
+      '如果用户关心的体验条件无法从候选事实确认，不要硬凑完整匹配；可以给出最接近的线路，并在 tradeoffs 或 intentNotes.cannotAssert 中说明缺口。',
+      '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
       ...promptPolicy.requestRules,
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
@@ -5363,6 +5411,13 @@ function buildLiteAiMessages(params: {
         ca: 'string[]，候选无证据时不能断言的事实',
         cv: '短句，近似替代或证据边界',
       },
+      clarification: {
+        question: '信息不足且会明显改变排序时才提一个关键问题；否则省略',
+        reason: '问题为何重要；可省略',
+        options: '最多4个简短选项；可省略',
+      },
+      assumptions: 'string[]，最多3条合理假设；可省略',
+      tradeoffs: 'string[]，最多4条候选取舍；可省略',
       items: [{
         tourId: '候选 id',
         score: '0-100 number',
@@ -5374,12 +5429,12 @@ function buildLiteAiMessages(params: {
     },
     rq: [
       '只输出 JSON，不要 Markdown。',
-      '返回 intent、intentNotes 和 items；不要 summary、reason、matchedSignals。',
+      '返回 intent、intentNotes、clarification、assumptions、tradeoffs 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
       '用紧凑 JSON；中文短句不超过32字。',
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
-      '结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 理解软语义。',
+      '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，优先按 sg 去理解这类软语义；它是理解镜头，不是硬过滤规则。']
         : ['像带老人、怕热、想放松这类软语义，要借助世界知识理解节奏、气候和体验差异。']),
@@ -5391,7 +5446,7 @@ function buildLiteAiMessages(params: {
   return [
     {
       role: 'system' as const,
-      content: '你是旅行团候选排序器。只基于给定候选排序，严格输出 JSON。不要编造 tourId。',
+      content: '你是旅行顾问。先理解整体体验，再基于给定候选比较排序；严格输出 JSON，不要编造 tourId 或候选事实。',
     },
     { role: 'user' as const, content: JSON.stringify(request) },
   ];
@@ -6078,6 +6133,7 @@ function normalizeIntent(value: unknown): AiTravelIntent | null {
     destinationHints: Array.isArray(raw.destinationHints) ? raw.destinationHints.map(String).filter(Boolean) : [],
     budgetMin: raw.budgetMin ? Number(raw.budgetMin) : null,
     budgetMax: raw.budgetMax ? Number(raw.budgetMax) : null,
+    budgetHardLimit: raw.budgetHardLimit === true,
     travelStyle: Array.isArray(raw.travelStyle) ? raw.travelStyle.map(String).filter(Boolean) : [],
     mustHave: Array.isArray(raw.mustHave) ? raw.mustHave.map(String).filter(Boolean) : [],
     avoid: Array.isArray(raw.avoid) ? raw.avoid.map(String).filter(Boolean) : [],
@@ -6882,7 +6938,15 @@ export async function requestAiRecommendations({
           candidateTours: aiCandidatePool,
           userText: effectiveUserText,
         }),
-    }) as { intent?: unknown; intentNotes?: unknown; summary?: unknown; items?: unknown };
+    }) as {
+      intent?: unknown;
+      intentNotes?: unknown;
+      summary?: unknown;
+      items?: unknown;
+      clarification?: unknown;
+      assumptions?: unknown;
+      tradeoffs?: unknown;
+    };
     const rawSemanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
     const normalizedAiIntent = sanitizeAiBudgetBoundsForTurn(
       normalizeIntent(aiResponse.intent),
@@ -6912,6 +6976,9 @@ export async function requestAiRecommendations({
       userText: text,
       hardIntent: intent,
     });
+    const clarification = normalizeAiClarification(aiResponse.clarification);
+    const assumptions = normalizeAiTextList(aiResponse.assumptions, 3, 80);
+    const tradeoffs = normalizeAiTextList(aiResponse.tradeoffs, 4, 100);
     const finalPreferenceMemory = normalizePreferenceMemory(
       mergePreferenceMemory(
         memoryForThisTurn,
@@ -7031,6 +7098,9 @@ export async function requestAiRecommendations({
       },
       ...(finalPreferenceMemory ? { preferenceMemory: finalPreferenceMemory } : {}),
       ...(semanticNotes ? { semanticNotes } : {}),
+      ...(clarification ? { clarification } : {}),
+      ...(assumptions.length > 0 ? { assumptions } : {}),
+      ...(tradeoffs.length > 0 ? { tradeoffs } : {}),
     };
   } catch (error) {
     const failureDetail = getAiFailureDetail(error);

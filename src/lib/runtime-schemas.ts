@@ -222,6 +222,12 @@ const aiRecommendationSemanticNotesSchema = z.object({
   caveat: z.string().optional(),
 });
 
+const aiRecommendationClarificationSchema = z.object({
+  question: z.string().min(1),
+  reason: z.string().optional(),
+  options: z.array(z.string()).optional(),
+});
+
 export const aiPreferenceMemorySchema = z.object({
   destinationHints: z.array(z.string()).optional().default([]),
   travelStyle: z.array(z.string()).optional().default([]),
@@ -256,6 +262,9 @@ export const aiRecommendationResultSchema = z.object({
   status: aiRecommendationStatusSchema.optional(),
   preferenceMemory: aiPreferenceMemorySchema.optional(),
   semanticNotes: aiRecommendationSemanticNotesSchema.optional(),
+  clarification: aiRecommendationClarificationSchema.optional(),
+  assumptions: z.array(z.string()).optional(),
+  tradeoffs: z.array(z.string()).optional(),
 });
 
 export const storedAiProviderConfigSchema = z.object({

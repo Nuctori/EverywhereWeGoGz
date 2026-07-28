@@ -430,7 +430,7 @@ export function AiRecommendPanel({
             </span>
           </div>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-stone-500 sm:text-sm">
-            先用筛选器缩小范围；拿不准时，让 AI 把更合适的线路排到前面。
+            AI 会先理解你想要的旅行体验，再比较线路；预算、偏好和取舍都会一起考虑。
           </p>
         </div>
         <Button
@@ -653,6 +653,40 @@ export function AiRecommendPanel({
               <p className="mt-3 rounded-xl bg-white/70 px-3 py-3 text-sm leading-6 text-stone-700">
                 {result?.summary}
               </p>
+              {result?.clarification && (
+                <div className="mt-3 rounded-xl border border-orange-200 bg-orange-50/80 px-3 py-3 text-sm text-stone-800">
+                  <div className="font-medium">为了把方向排得更准，我想确认一下：</div>
+                  <div className="mt-1 leading-6">{result.clarification.question}</div>
+                  {result.clarification.reason && (
+                    <div className="mt-1 text-xs leading-5 text-stone-500">{result.clarification.reason}</div>
+                  )}
+                  {result.clarification.options?.length ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {result.clarification.options.map((option) => (
+                        <Badge key={option} className="rounded-full bg-white text-stone-700 ring-1 ring-orange-200 hover:bg-white">
+                          {option}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              )}
+              {(result?.assumptions?.length || result?.tradeoffs?.length) ? (
+                <div className="mt-3 grid gap-2 text-xs leading-5 text-stone-600 sm:grid-cols-2">
+                  {result.assumptions?.length ? (
+                    <div className="rounded-xl bg-stone-50 px-3 py-2">
+                      <div className="font-medium text-stone-800">本轮理解</div>
+                      <div className="mt-1">{result.assumptions.join('；')}</div>
+                    </div>
+                  ) : null}
+                  {result.tradeoffs?.length ? (
+                    <div className="rounded-xl bg-stone-50 px-3 py-2">
+                      <div className="font-medium text-stone-800">主要取舍</div>
+                      <div className="mt-1">{result.tradeoffs.join('；')}</div>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           )}
 

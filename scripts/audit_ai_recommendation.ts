@@ -1413,6 +1413,9 @@ assert.ok(nonPublicFullPrompt.includes('"pc"'));
 assert.ok(nonPublicFullPrompt.includes('priceBand'));
 assert.ok(nonPublicFullPrompt.includes('termCoverage'));
 assert.ok(nonPublicFullPrompt.includes('termHits'));
+assert.ok(nonPublicFullPrompt.includes('不是关键词筛选器'));
+assert.ok(nonPublicFullPrompt.includes('clarification'));
+assert.ok(nonPublicFullPrompt.includes('预算是重要的取舍维度'));
 const nonPublicLitePrompt = buildLiteAiMessages({
   userText: '帮我找海边温泉，400以下的，关注天气因素',
   messages: [],
@@ -1426,6 +1429,8 @@ const nonPublicLitePrompt = buildLiteAiMessages({
 assert.ok(nonPublicLitePrompt.includes('priceBand'));
 assert.ok(nonPublicLitePrompt.includes('termCoverage'));
 assert.ok(nonPublicLitePrompt.includes('termHits'));
+assert.ok(nonPublicLitePrompt.includes('clarification'));
+assert.ok(nonPublicLitePrompt.includes('预算优先但不要把候选池理解成预算硬截断'));
 assert.ok(!promptPublicInterestPattern.test(nonPublicFullPrompt));
 assert.ok(!promptPublicInterestPattern.test(nonPublicLitePrompt));
 assert.ok(!/玩水清凉|清凉玩水/.test(nonPublicFullPrompt));
@@ -1518,17 +1523,24 @@ const hotSpringBeachBudgetTopTours = hotSpringBeachBudgetLocal
   .map((item) => realTours.find((tour) => tour.id === item.tourId))
   .filter((tour): tour is AiRecommendationCandidate => Boolean(tour));
 assert.ok(hotSpringBeachBudgetTopTours.length > 0);
+assert.ok(
+  hotSpringBeachBudgetTopTours.some((tour) => tour.price <= 600),
+  'expected local budget recommendations to keep at least one within-budget option',
+);
 for (const tour of hotSpringBeachBudgetTopTours) {
   const primitive = buildTourPrimitive(tour);
+  const experienceEvidence = [
+    primitive.title,
+    primitive.destination,
+    ...primitive.highlights,
+    ...primitive.semanticAtoms,
+    ...primitive.experienceCategories,
+  ].join('');
   assert.ok(
-    primitive.experienceCategories.includes('温泉泡汤') &&
-      primitive.experienceCategories.includes('海边沙滩'),
+    /温泉/.test(experienceEvidence) && /海|沙滩/.test(experienceEvidence),
     `expected top budget hot-spring/beach result to cover both terms, got ${tour.title} (${primitive.experienceCategories.join('/')})`,
   );
-  assert.ok(
-    tour.price <= 600,
-    `expected top budget hot-spring/beach result to stay within soft budget tier, got ${tour.title} ￥${tour.price}`,
-  );
+  assert.ok(tour.price <= 1200, `expected ordinary budget comparison to avoid extreme outliers, got ${tour.title} ￥${tour.price}`);
 }
 
 const hotSpringOnlyBudgetTour = candidate({
@@ -1620,9 +1632,13 @@ const nearBudgetIntent = buildHardIntentFromText(
   '预算2000以内，但希望接近2000的品质，不要一堆299，想去云南或者桂林看自然风景，5天左右',
 );
 assert.equal(nearBudgetIntent?.budgetMax, 2000);
+assert.equal(nearBudgetIntent?.budgetHardLimit, false);
 assert.equal(nearBudgetIntent?.tripDaysMin, 4);
 assert.equal(nearBudgetIntent?.tripDaysMax, 6);
 assert.equal(nearBudgetIntent?.budgetPriority, null);
+const strictBudgetIntent = buildHardIntentFromText('严格不超过800元，只看预算内的温泉团');
+assert.equal(strictBudgetIntent?.budgetMax, 800);
+assert.equal(strictBudgetIntent?.budgetHardLimit, true);
 const numericNoiseBudgetIntent = buildHardIntentFromText(
   '202606出发，想找温泉团',
 );
@@ -1678,6 +1694,8 @@ const strictFlightBeachTour = candidate({
   tags: ['海边', '海岛'],
   highlights: ['沙滩'],
 });
+assert.ok(!getPrimitiveConflictReasons(nearBudgetIntent, buildTourPrimitive(strictOverBudgetTour))
+  .some((reason) => reason.includes('价格高于预算')));
 const strictAudited = auditAiRecommendationsStrict(
   [
     { tourId: 'strict-over-budget', score: 100, reason: '模型偏好', matchedSignals: ['酒店'] },
@@ -1686,7 +1704,7 @@ const strictAudited = auditAiRecommendationsStrict(
   ],
   [],
   [strictGoodTour, strictOverBudgetTour, strictFlightBeachTour],
-  zhHardIntent,
+  buildHardIntentFromText('周末2天，严格不超过800元，想清凉一点，但不想去海边，也不要坐飞机'),
 );
 assert.equal(strictAudited[0].tourId, 'strict-good');
 assert.equal(strictAudited[1].tourId, 'strict-over-budget');

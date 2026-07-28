@@ -224,6 +224,12 @@ export interface AiRecommendationSemanticNotes {
   caveat?: string;
 }
 
+export interface AiRecommendationClarification {
+  question: string;
+  reason?: string;
+  options?: string[];
+}
+
 export interface AiRecommendationResult {
   conversationId: string;
   summary: string;
@@ -233,6 +239,9 @@ export interface AiRecommendationResult {
   status?: AiRecommendationStatus;
   preferenceMemory?: AiPreferenceMemory;
   semanticNotes?: AiRecommendationSemanticNotes;
+  clarification?: AiRecommendationClarification;
+  assumptions?: string[];
+  tradeoffs?: string[];
 }
 
 export interface AiProviderConfig {
