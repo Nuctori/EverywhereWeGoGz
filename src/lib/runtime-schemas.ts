@@ -6,6 +6,29 @@ const booleanDefaultFalse = z.boolean().optional().default(false);
 const stringArrayDefaultEmpty = z.array(z.string()).optional().default([]);
 const serviceAvailability = z.enum(['included', 'excluded', 'unknown']);
 
+const geoPointSchema = z.object({
+  placeId: z.string().min(1),
+  name: z.string().min(1),
+  normalizedName: z.string().min(1),
+  country: z.string().optional(),
+  province: z.string().optional(),
+  city: z.string().optional(),
+  latitude: z.coerce.number().finite().gte(-90).lte(90),
+  longitude: z.coerce.number().finite().gte(-180).lte(180),
+  coordinateSystem: z.literal('wgs84'),
+  level: z.enum(['country', 'region', 'city', 'poi']),
+  source: z.enum(['source', 'catalog', 'inferred', 'unknown']),
+  confidence: z.enum(['low', 'medium', 'high']),
+});
+
+const tourGeoSchema = z.object({
+  departure: geoPointSchema.optional(),
+  destination: geoPointSchema.optional(),
+  stops: z.array(geoPointSchema).default([]),
+  status: z.enum(['complete', 'destination_only', 'unmapped']),
+  routeRegion: z.enum(['local', 'nearby-province', 'national', 'international', 'unknown']).optional(),
+});
+
 export const dataQualitySchema = z.object({
   hasStructuredDepartureDates: z.boolean().optional(),
   isDepartureDateReliable: z.boolean().optional(),
@@ -82,6 +105,7 @@ export const tourSummarySchema = z.object({
   hotDepartureDates: z.array(z.string()).optional(),
   meta: tourMetaSchema.optional(),
   dataQuality: dataQualitySchema.optional(),
+  geo: tourGeoSchema.optional(),
 });
 
 export const tourDetailSchema = z.object({
@@ -147,6 +171,7 @@ export const tourIndexEntrySchema = z.object({
   season: z.string().optional().default(''),
   page: z.coerce.number().int().nonnegative(),
   searchText: z.string().optional(),
+  geo: tourGeoSchema.optional(),
 });
 export const toursIndexSchema = z.array(tourIndexEntrySchema);
 

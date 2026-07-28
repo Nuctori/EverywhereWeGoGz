@@ -186,6 +186,7 @@ function useToursData() {
             groupSize: tour.groupSize,
             suitableFor: tour.suitableFor,
             season: tour.season,
+            geo: tour.geo,
             page: Math.floor(index / PAGE_SIZE),
           })));
           setTours(data);
