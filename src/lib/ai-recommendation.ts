@@ -3690,7 +3690,23 @@ function hasUnsupportedCompoundCoverageClaim(
   );
   if (claimedTerms.length < 2) return false;
 
-  return claimedTerms.some((term) => getPrimitiveCoverageScore(primitive, [term]) <= 0);
+  return claimedTerms.some((term) => {
+    if (getPrimitiveCoverageScore(primitive, [term]) > 0) return false;
+    return !isCoverageTermCaveated(normalizedText, term);
+  });
+}
+
+function isCoverageTermCaveated(text: string, term: string) {
+  const aliases = getCoverageTermAliases(term).map(normalizeText).filter(Boolean);
+  const gapWords = ['未确认', '未标注', '没有证据', '暂无证据', '资料未提', '资料没有', '需核实', '待核实', '无法确认', '不能确认', '不确定', '未知', '缺少'];
+  return aliases.some((alias) => {
+    const termIndex = text.indexOf(alias);
+    if (termIndex < 0) return false;
+    return gapWords.some((word) => {
+      const gapIndex = text.indexOf(normalizeText(word));
+      return gapIndex >= 0 && Math.abs(gapIndex - termIndex) <= 18;
+    });
+  });
 }
 
 function reasonAddressesUserNeed(
@@ -3709,7 +3725,7 @@ function reasonAddressesUserNeed(
   if (mentionedTerms.length === requestedTerms.length) return true;
 
   const missingTerms = requestedTerms.filter((term) => !mentionedTerms.includes(term));
-  const acknowledgesGap = /(未确认|未标注|没有证据|暂无证据|资料未提|资料没有|需核实|待核实|无法确认|不能确认|不确定|未知|缺少)/.test(reason);
+  const acknowledgesGap = /(未确认|未标注|没有证据|暂无证据|资料未提|资料没有|没有明确|暂无明确安排|需核实|待核实|无法确认|不能确认|不确定|未知|缺少)/.test(reason);
   if (!acknowledgesGap) return false;
 
   // 只允许把候选确实覆盖的条件写成“已满足”；缺口必须显式保留。
@@ -3732,17 +3748,24 @@ function buildCoverageAwareReason(
   const missingText = missingTerms.map((term) => term.replace(/泡汤$/, '')).join('、');
 
   if (matchedTerms.length === 0) {
-    return `这条线路的资料暂时没有确认${missingText}，不建议把它当作这次需求的优先答案；可以先核实详情里的具体玩法和周边交通。`;
+    const noMatchTemplates = [
+      `这条更像常规休闲线，暂时看不出${missingText}的明确亮点；如果你是冲着这些玩法去，建议先别把它排在前面。`,
+      `它的气质和这次想找的${missingText}还不太对得上，除非详情能补充具体安排，否则不建议默认完全满足。`,
+      `如果你期待的是${missingText}，这条目前缺少能让人放心下单的依据；可以先把它当备选，问清玩法和周边交通。`,
+    ];
+    return noMatchTemplates[(getStableTextIndex(`${primitive.id}:coverage-empty`, noMatchTemplates.length) + variant) % noMatchTemplates.length];
   }
 
   const leadTemplates = [
-    `这条线目前能确认的是${matchedText}`,
-    `从线路资料看，它主要能对上${matchedText}`,
-    `如果你看重${matchedText}，这条线有明确依据`,
+    matchedTerms.includes('温泉泡汤') && matchedTerms.includes('玩水清凉')
+      ? '想把泡汤和玩水放在同一趟里，这条的方向比较对'
+      : `如果你看重${matchedText}，这条的玩法方向比较对`,
+    `${matchedText}是这条线比较值得期待的部分`,
+    `它更适合把时间花在${matchedText}上，而不是一路赶景点`,
   ];
   const lead = leadTemplates[(getStableTextIndex(`${primitive.id}:coverage`, leadTemplates.length) + variant) % leadTemplates.length];
-  if (missingTerms.length === 0) return `${lead}；其余关键条件也有对应信息，适合继续看详情确认。`;
-  return `${lead}；但${missingText}在现有线路资料里未确认，建议把它作为近似候选，不要默认完全满足。`;
+  if (missingTerms.length === 0) return `${lead}，整体更适合想把这几种体验放在一起的人。`;
+  return `${lead}；至于${missingText}，详情里还没有明确安排，最好先问清再决定。`;
 }
 
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
@@ -5337,7 +5360,8 @@ function buildAiMessages(params: {
     '预算是重要的取舍维度，不是默认的候选池截断器：预算内优先，但如果更符合整体体验的线路超预算，要把它作为取舍或备选明确说出；只有用户明确要求“严格不超过”时才把超预算线路降为替代。',
     '如果用户关心的周边配套或交通方式没有候选证据，只能说未知，不能用常识冒充线路事实。',
     worldKnowledgeExamples,
-    'reason 要像旅行顾问在给朋友提建议：先说这条最具体的玩法或体验，再补一句必要的取舍或天气提醒。',
+    '充分使用世界知识做体验判断：把候选里的温泉、玩水、山水、小镇等事实，翻译成具体的旅行画面、节奏和适合的人；可以说“泡完汤再玩水会是什么感觉”“这条线更像度假还是赶路”，但不要把常识写成该线路已确认的服务或交通。',
+    'reason 要像熟悉当地玩法的朋友在种草：先写为什么会想去、到了以后怎么玩、这条线的气质，再自然补一句必要取舍或核实提醒；不要以“这条线/从线路资料看/能确认的是”开头，也不要把每条都写成同一种句式。',
     '不要解释规则，不要写“命中/对题/标题和标签/候选/软语义/综合匹配/预算友好”这类评审腔。',
     ...promptPolicy.systemRules,
     '严格输出 JSON，不要 Markdown，不要额外解释。',
@@ -5397,7 +5421,9 @@ function buildAiMessages(params: {
         {
           tourId: '候选 id',
           score: '0-100 number',
-          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。1 句中文，像旅行顾问推荐朋友出行；必须点出候选里的具体玩法/场景，再补一句必要取舍；不要写命中规则或评审话术；其余条目省略`,
+          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。2句以内中文，写出让人想去的具体场景、节奏或适合人群；使用世界知识做一般体验判断，但不能虚构候选没有提供的交通/服务事实；必要时把未确认条件放在末尾轻轻提醒；不要复述目的地、天数、大巴、价格字段，不要使用固定模板；其余条目省略`,
+          semanticFit: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。一句说明这条线路为什么适合用户想要的旅行体验，优先写场景和气质；其余条目省略`,
+          semanticBoundary: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。只有存在真实缺口时，简短说明需要核实什么；其余条目省略`,
           matchedSignals: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。2-3 个中文短语；其余条目省略`,
         },
       ],
@@ -5410,7 +5436,7 @@ function buildAiMessages(params: {
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
         : []),
-      'reason 优先写用户真正会关心的体验差异，例如温泉/沙滩/古城/节奏/团期天气，不要复述系统字段名。',
+      'reason 优先写用户真正会关心的体验差异和画面，例如泡汤后玩水、沿小镇慢慢逛、适合带孩子还是适合放空；让人产生“我想去看看”的感觉，不要复述系统字段名。',
       '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
       '如果用户关心的体验条件无法从候选事实确认，不要硬凑完整匹配；可以给出最接近的线路，并在 tradeoffs 或 intentNotes.cannotAssert 中说明缺口。',
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
@@ -5484,7 +5510,7 @@ function buildLiteAiMessages(params: {
       items: [{
         tourId: '候选 id',
         score: '0-100 number',
-        sf: '仅前8条需要，32字内，像旅行顾问的自然短句，点出具体玩法或取舍',
+        sf: '仅前8条需要，32字内，像熟悉当地玩法的朋友在种草：写具体场景、节奏或适合的人，不要复述天数/交通/价格，不要套模板',
         ss: '仅前8条需要，最多3个短词',
         sb: '仅前8条需要，24字内，不能断言的边界',
       }],
@@ -5497,7 +5523,7 @@ function buildLiteAiMessages(params: {
       '用紧凑 JSON；中文短句不超过32字。',
       `前8个 items 可写 sf/ss/sb；第9-${MAX_AI_RANKED_ITEMS}个 items 只写 tourId 和 score。`,
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
-      '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。',
+      '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，优先按 sg 去理解这类软语义；它是理解镜头，不是硬过滤规则。']
         : ['像带老人、怕热、想放松这类软语义，要借助世界知识理解节奏、气候和体验差异。']),

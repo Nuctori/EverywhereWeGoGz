@@ -1437,8 +1437,8 @@ assert.ok(!promptPublicInterestPattern.test(nonPublicFullPrompt));
 assert.ok(!promptPublicInterestPattern.test(nonPublicLitePrompt));
 assert.ok(!/玩水清凉|清凉玩水/.test(nonPublicFullPrompt));
 assert.ok(!/玩水清凉|清凉玩水/.test(nonPublicLitePrompt));
-assert.ok(!/玩水/.test(nonPublicFullPrompt));
-assert.ok(!/玩水/.test(nonPublicLitePrompt));
+assert.ok(nonPublicFullPrompt.includes('旅行画面'));
+assert.ok(nonPublicLitePrompt.includes('具体旅行画面'));
 
 const explicitPublicFullPrompt = buildAiMessages({
   userText: '我要扶贫或者公益属性更强的路线，没有就直说最接近替代',

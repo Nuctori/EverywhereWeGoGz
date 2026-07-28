@@ -29,7 +29,6 @@ export const TourCard = memo(function TourCard({
   tour,
   onClick,
   recommendationReason,
-  recommendationRank,
 }: TourCardProps) {
   const hasImage = tour.images && tour.images.length > 0;
   // 图片不可用时（含模板占位图或加载失败），用 getFallbackImage 生成来源占位图冒底。
@@ -98,7 +97,7 @@ export const TourCard = memo(function TourCard({
           >
             <p className="line-clamp-3">
               <span className="font-medium">
-                AI推荐{recommendationRank ? ' TOP ' : ''}：
+                推荐理由：
               </span>
               {recommendationReason}
             </p>
