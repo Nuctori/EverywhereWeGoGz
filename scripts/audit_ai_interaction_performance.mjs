@@ -21,6 +21,11 @@ assert.match(
   /const isAiSearchMode = Boolean\(aiRecommendationResult\);/,
   'pending AI requests must not switch TourList into AI mode before results exist',
 );
+assert.match(
+  tourListSource,
+  /if \(isAiSearchMode && !isAiRecommendedTour\) \{[\s\S]*?return false;/,
+  'AI mode should display only tours explicitly selected by AI',
+);
 
 assert.ok(
   aiPanelSource.includes('waitForNextPaint') &&

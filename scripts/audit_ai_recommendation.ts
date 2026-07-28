@@ -1172,6 +1172,12 @@ const semanticBoundaryItems = validateAiItems({
 assert.ok(semanticBoundaryItems[0].semanticFit?.includes('近似替代'));
 assert.ok(semanticBoundaryItems[0].matchedSignals.includes('近似替代'));
 assert.ok(semanticBoundaryItems[0].semanticBoundary?.includes('不能断言'));
+const softenedEvidenceReason = getConcreteAiReason(
+  '水世界是这条线最直接的玩法，候选里没有提及共享电瓶车，建议优先核实。',
+  buildTourPrimitive(semanticBoundaryTour),
+);
+assert.ok(softenedEvidenceReason.includes('目前没有看到明确安排'));
+assert.ok(!softenedEvidenceReason.includes('候选里没有提及'));
 
 const pollutedPublicInterestIntent = sanitizeAiIntentForTurn({
   semanticFocus: ['扶贫', '海边'],
