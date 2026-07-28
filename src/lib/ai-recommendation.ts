@@ -4810,10 +4810,9 @@ function rewriteRecommendationCopy(params: {
       !coverageReason,
     );
 
-    const sharedBikeCaveat = buildSharedBikeCaveat(params.userText, index);
     return {
       ...item,
-      reason: `${stripTerminalPunctuation(fallbackReason)}${shouldAddWeatherNote ? `。${weatherReason}` : ''}${sharedBikeCaveat ? `。${sharedBikeCaveat}` : ''}。`,
+      reason: `${stripTerminalPunctuation(fallbackReason)}${shouldAddWeatherNote ? `。${weatherReason}` : ''}。`,
     };
   });
 }
@@ -7308,8 +7307,7 @@ export async function requestAiRecommendations({
           )
         : Promise.resolve([] as DestinationWeatherInsight[]),
     ]);
-    const mergedItems = ensureSharedBikeRecommendationNote(
-      prioritizeRecommendationItems(
+    const mergedItems = prioritizeRecommendationItems(
       rewriteRecommendationCopy({
         items: attachWeatherGuidanceToItems(
           baseMergedItems,
@@ -7328,9 +7326,6 @@ export async function requestAiRecommendations({
         intent: finalIntent,
         userText: finalEffectiveUserText,
       },
-      ),
-      mergedCandidateTours.map(buildTourPrimitive),
-      text,
     ).slice(0, aiItems.length > 0 ? MAX_AI_SELECTED_ITEMS : MAX_AI_RANKED_ITEMS);
     emitProgress(onProgress, {
       stage: 'completed',
