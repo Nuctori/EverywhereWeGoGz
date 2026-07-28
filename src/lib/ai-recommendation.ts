@@ -7345,7 +7345,19 @@ export async function requestAiRecommendations({
     };
   } catch (error) {
     const failureDetail = getAiFailureDetail(error);
-    const fallbackItems = runtimeFallbackItems.length > 0 ? runtimeFallbackItems : getMemoryBackedLocalItems();
+    const fallbackPool = runtimeFallbackItems.length > 0 ? runtimeFallbackItems : getMemoryBackedLocalItems();
+    // AI 失败时也不能退回“把本地候选全展示出来”。对复合需求，备用路径
+    // 仍然要沿用同一套体验组合判断；没有强组合候选时宁可少给，也不拿纯
+    // 温泉/纯玩水线路凑成一长串“推荐”。
+    const compoundFallback = keepAiItemsForCompoundExperience(
+      fallbackPool,
+      candidatePool,
+      text,
+    );
+    const fallbackItems = (getCoverageTermsForQuality(text).length >= 2
+      ? compoundFallback
+      : fallbackPool
+    ).slice(0, MAX_AI_SELECTED_ITEMS);
     if (typeof console !== 'undefined' && typeof console.warn === 'function') {
       console.warn('[ai-recommendation] fallback to local recommendations:', failureDetail);
     }
@@ -7373,7 +7385,7 @@ export async function requestAiRecommendations({
       status: {
         mode: 'fallback',
         label: 'AI 未完成，本次已降级到本地推荐',
-        detail: `为了不中断结果展示，已先返回 ${fallbackItems.length} 条本地候选补位结果。${failureDetail ? ` (${failureDetail})` : ''}`,
+      detail: `为了不中断结果展示，已先返回 ${fallbackItems.length} 条本地候选补位结果。${failureDetail ? ` (${failureDetail})` : ''}`,
       },
       ...(runtimePreferenceMemory ? { preferenceMemory: runtimePreferenceMemory } : {}),
     };
