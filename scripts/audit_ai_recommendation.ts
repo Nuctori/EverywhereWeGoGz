@@ -1109,6 +1109,38 @@ const naturalAiReasonRewrite = rewriteRecommendationCopy({
 });
 assert.equal(naturalAiReasonRewrite[0].reason, '这条把海边散步和温泉都放进去了，3天节奏也不赶。');
 
+const truncatedTitleReasonRewrite = rewriteRecommendationCopy({
+  items: [{
+    tourId: 'truncated-title',
+    score: 99,
+    reason: '云浮新兴翔顺金水台温泉小镇2把泡汤和玩水放在同一趟里，节奏很舒服。',
+    matchedSignals: ['温泉', '玩水'],
+  }],
+  candidateTours: [candidate({
+    id: 'truncated-title',
+    title: '云浮新兴翔顺金水台温泉小镇2天（含晚）',
+    destination: '广东',
+    duration: 2,
+    price: 399,
+    tags: ['温泉', '玩水'],
+    highlights: ['金水台温泉小镇'],
+    theme: '温泉泡汤',
+  })],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '多云',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  allowPublicInterest: false,
+});
+assert.ok(!truncatedTitleReasonRewrite[0].reason?.startsWith('云浮新兴翔顺金水台温泉小镇2把'));
+assert.ok(truncatedTitleReasonRewrite[0].reason?.includes('温泉'));
+
 const metaAiReasonRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: hotSpringBeachTour.id,
