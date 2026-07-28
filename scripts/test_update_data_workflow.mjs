@@ -159,6 +159,15 @@ assert.ok(
   !gitAddCommand.includes('src/data/tour-availability-cache.json'),
   'expected update-data workflow to leave availability cache ownership to the refresh workflow',
 );
+const splitScript = fs.readFileSync(
+  path.join(process.cwd(), 'scripts', 'split_tour_data.mjs'),
+  'utf8',
+);
+assert.ok(
+  splitScript.includes("path.join(dataDir, 'tour-deeplink-index.json')") &&
+    splitScript.includes('indexTours.map(({ id, sourceId, page }) => ({ id, sourceId, page }))'),
+  'expected split step to rebuild the deeplink index from current tours',
+);
 assert.ok(
   workflow.includes('git restore src/data/tour-availability-cache.json'),
   'expected update-data workflow to discard its ephemeral availability cache before rebasing',

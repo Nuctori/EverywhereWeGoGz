@@ -285,6 +285,10 @@ const indexTours = listTours.map((tour, index) => {
   return idx;
 });
 writeTextFileWithRetry(path.join(dataDir, 'tours-index.json'), compactJson(indexTours));
+writeTextFileWithRetry(
+  path.join(dataDir, 'tour-deeplink-index.json'),
+  compactJson(indexTours.map(({ id, sourceId, page }) => ({ id, sourceId, page }))),
+);
 
 const totalPages = Math.ceil(listTours.length / PAGE_SIZE);
 const pageDir = path.join(dataDir);
@@ -298,6 +302,7 @@ for (let page = 0; page < totalPages; page++) {
   writeTextFileWithRetry(path.join(pageDir, `tours-page-${page}.json`), compactJson(pageData));
 }
 console.log(`tours-index.json ${Buffer.byteLength(JSON.stringify(indexTours), 'utf8')} bytes`);
+console.log(`tour-deeplink-index.json ${fs.statSync(path.join(dataDir, 'tour-deeplink-index.json')).size} bytes`);
 console.log(`Generated ${totalPages} page chunks (tours-page-0.json ~ tours-page-${totalPages - 1}.json)`);
 
 
