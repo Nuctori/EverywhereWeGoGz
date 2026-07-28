@@ -7386,10 +7386,10 @@ export async function requestAiRecommendations({
       candidatePool,
       text,
     );
-    const fallbackItems = (getCoverageTermsForQuality(text).length >= 2
+    const fallbackItems = ensureSharedBikeRecommendationNote((getCoverageTermsForQuality(text).length >= 2
       ? compoundFallback
       : fallbackPool
-    ).slice(0, MAX_AI_SELECTED_ITEMS);
+    ).slice(0, MAX_AI_SELECTED_ITEMS), candidatePool.map(buildTourPrimitive), text);
     if (typeof console !== 'undefined' && typeof console.warn === 'function') {
       console.warn('[ai-recommendation] fallback to local recommendations:', failureDetail);
     }
