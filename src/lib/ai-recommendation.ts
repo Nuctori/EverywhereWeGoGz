@@ -3188,7 +3188,26 @@ function hasMalformedAiTitleEcho(reason: string, primitive: RecommendationPrimit
     title.slice(4, 14),
     title.slice(6, 16),
   ].filter((fragment) => fragment.length === 10);
-  return fragments.some((fragment) => normalizedReason.includes(fragment));
+  if (fragments.some((fragment) => normalizedReason.includes(fragment))) return true;
+
+  // 流式输出更常见的损坏形态是：标题只写到中途，紧接着就拼上了
+  // “把/的重点/主打/更适合”等正文。比如“……温泉小镇2把泡汤……”。
+  // 只在理由开头检查，避免误伤正文中正常提到一次线路名的情况。
+  const prefixLimit = Math.min(title.length, 22);
+  for (let prefixLength = 8; prefixLength <= prefixLimit; prefixLength += 1) {
+    if (!normalizedReason.startsWith(title.slice(0, prefixLength))) continue;
+    const titleNext = title[prefixLength] || '';
+    const reasonNext = normalizedReason[prefixLength] || '';
+    if (
+      reasonNext &&
+      reasonNext !== titleNext &&
+      /[把的主打更适合适合是有能让值得冲着去]/.test(reasonNext)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 function softenAiEvidenceCaveats(reason: string) {
@@ -4719,6 +4738,7 @@ function rewriteRecommendationCopy(params: {
     if (
       currentReason &&
       !(hasTurnPublicInterestNeed && hasPublicInterestSemanticNote) &&
+      !hasMalformedAiTitleEcho(currentReason, primitive) &&
       !hasUnallowedPublicInterestLanguage(currentReason, params) &&
       !hasUnsupportedCompoundCoverageClaim(currentReason, primitive, params.userText) &&
       !hasUnsupportedPositivePriceClaim({
@@ -7255,7 +7275,7 @@ export async function requestAiRecommendations({
         intent: finalIntent,
         userText: finalEffectiveUserText,
       },
-    );
+    ).slice(0, aiItems.length > 0 ? MAX_AI_SELECTED_ITEMS : MAX_AI_RANKED_ITEMS);
     emitProgress(onProgress, {
       stage: 'completed',
       label: '推荐结果已生成',
