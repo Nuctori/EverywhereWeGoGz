@@ -834,6 +834,14 @@ const COVERAGE_TERM_GROUPS = [
     aliases: ['文化', '古城', '古镇', '博物馆', '非遗', '骑楼', '祠', '寺', '水乡', '碉楼'],
   },
   {
+    label: '周边小镇',
+    aliases: ['镇子', '小镇', '镇上', '周边有镇', '周边小镇', '县城'],
+  },
+  {
+    label: '共享电瓶车',
+    aliases: ['共享电瓶车', '共享电动车', '电瓶车', '电动车接驳', '骑电瓶车'],
+  },
+  {
     label: '美食体验',
     aliases: ['美食', '海鲜', '早茶', '寻味', '牛肉', '火锅', '烧鹅', '茶点'],
   },
@@ -3664,6 +3672,7 @@ function buildItemSemanticReason(
   if (hasUnallowedPublicInterestLanguage(text, options)) return '';
   if (hasUnsupportedPublicInterestClaim(text, primitive)) return '';
   if (hasUnsupportedCompoundCoverageClaim(text, primitive, options.userText)) return '';
+  if (!reasonAddressesUserNeed(text, primitive, options.userText)) return '';
   return text;
 }
 
@@ -3682,6 +3691,58 @@ function hasUnsupportedCompoundCoverageClaim(
   if (claimedTerms.length < 2) return false;
 
   return claimedTerms.some((term) => getPrimitiveCoverageScore(primitive, [term]) <= 0);
+}
+
+function reasonAddressesUserNeed(
+  reason: string,
+  primitive: RecommendationPrimitive,
+  userText: string | undefined,
+) {
+  const requestedTerms = getCoverageTermsForQuality(userText);
+  if (requestedTerms.length < 2) return true;
+
+  const normalizedReason = normalizeText(reason);
+  const mentionedTerms = requestedTerms.filter((term) =>
+    getCoverageTermAliases(term).some((alias) => normalizedReason.includes(normalizeText(alias))),
+  );
+  if (mentionedTerms.length === 0) return false;
+  if (mentionedTerms.length === requestedTerms.length) return true;
+
+  const missingTerms = requestedTerms.filter((term) => !mentionedTerms.includes(term));
+  const acknowledgesGap = /(未确认|未标注|没有证据|暂无证据|资料未提|资料没有|需核实|待核实|无法确认|不能确认|不确定|未知|缺少)/.test(reason);
+  if (!acknowledgesGap) return false;
+
+  // 只允许把候选确实覆盖的条件写成“已满足”；缺口必须显式保留。
+  return missingTerms.length > 0 && mentionedTerms.some((term) =>
+    getPrimitiveCoverageScore(primitive, [term]) > 0,
+  );
+}
+
+function buildCoverageAwareReason(
+  primitive: RecommendationPrimitive,
+  userText: string | undefined,
+  variant = 0,
+) {
+  const requestedTerms = getCoverageTermsForQuality(userText);
+  if (requestedTerms.length < 2) return '';
+
+  const matchedTerms = requestedTerms.filter((term) => getPrimitiveCoverageScore(primitive, [term]) > 0);
+  const missingTerms = requestedTerms.filter((term) => !matchedTerms.includes(term));
+  const matchedText = matchedTerms.map((term) => term.replace(/泡汤$/, '')).join('和');
+  const missingText = missingTerms.map((term) => term.replace(/泡汤$/, '')).join('、');
+
+  if (matchedTerms.length === 0) {
+    return `这条线路的资料暂时没有确认${missingText}，不建议把它当作这次需求的优先答案；可以先核实详情里的具体玩法和周边交通。`;
+  }
+
+  const leadTemplates = [
+    `这条线目前能确认的是${matchedText}`,
+    `从线路资料看，它主要能对上${matchedText}`,
+    `如果你看重${matchedText}，这条线有明确依据`,
+  ];
+  const lead = leadTemplates[(getStableTextIndex(`${primitive.id}:coverage`, leadTemplates.length) + variant) % leadTemplates.length];
+  if (missingTerms.length === 0) return `${lead}；其余关键条件也有对应信息，适合继续看详情确认。`;
+  return `${lead}；但${missingText}在现有线路资料里未确认，建议把它作为近似候选，不要默认完全满足。`;
 }
 
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
@@ -4582,6 +4643,7 @@ function rewriteRecommendationCopy(params: {
         userText: params.userText,
         sortedPrices,
       }) &&
+      reasonAddressesUserNeed(currentReason, primitive, params.userText) &&
       shouldKeepAiReason(currentReason, primitive)
     ) {
       const finalizedReason = shouldExpandShortRecommendationCopy(currentReason, primitive)
@@ -4597,6 +4659,7 @@ function rewriteRecommendationCopy(params: {
     const semanticReason = buildItemSemanticReason(item, primitive, params);
     const fallbackReason = uniqueStrings([
       semanticReason,
+      buildCoverageAwareReason(primitive, params.userText, index),
       hasTurnPublicInterestNeed
         ? buildPublicInterestAlternativeReason(primitive)
         : buildExpandedFallbackReason(primitive, profile, index),
@@ -5698,6 +5761,7 @@ export const __aiRecommendationTestHooks = {
   auditAiRecommendations,
   buildAiMessages,
   buildHardIntentFromText,
+  buildCoverageAwareReason,
   buildLiteAiMessages,
   buildRecommendationAuditContext,
   buildRouteAtlas,
@@ -5713,6 +5777,7 @@ export const __aiRecommendationTestHooks = {
   getConcreteAiReason,
   getAiResponseIntentQualityIssue,
   getPrimitiveConflictReasons,
+  reasonAddressesUserNeed,
   localRecommendations,
   matchesActiveDateFilters,
   matchesDateWindow,

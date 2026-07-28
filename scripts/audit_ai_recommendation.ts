@@ -12,6 +12,7 @@ const {
   auditAiRecommendations,
   buildAiMessages,
   buildHardIntentFromText,
+  buildCoverageAwareReason,
   buildLiteAiMessages,
   buildLocalRecommendationQuery,
   buildRecommendationAuditContext,
@@ -26,6 +27,7 @@ const {
   getAiResponseIntentQualityIssue,
   getConcreteAiReason,
   getPrimitiveConflictReasons,
+  reasonAddressesUserNeed,
   localRecommendations,
   matchesActiveDateFilters,
   matchesDateWindow,
@@ -1513,6 +1515,42 @@ const defaultSliderBudgetIntent = buildHardIntentFromText(
   '帮我找同时带温泉和沙滩的团',
 );
 assert.equal(defaultSliderBudgetIntent?.budgetMax ?? null, null);
+
+const waterTownEbikeCandidate = buildTourPrimitive(candidate({
+  id: 'water-town-ebike',
+  title: '温泉水上乐园与古镇2天',
+  destination: '广东',
+  duration: 2,
+  price: 499,
+  theme: '温泉玩水',
+  tags: ['温泉', '玩水', '古镇'],
+  highlights: ['温泉', '水上乐园', '古镇漫步'],
+}));
+const waterOnlyCandidate = buildTourPrimitive(candidate({
+  id: 'water-only',
+  title: '温泉水上乐园2天',
+  destination: '广东',
+  duration: 2,
+  price: 399,
+  theme: '温泉玩水',
+  tags: ['温泉', '玩水'],
+  highlights: ['温泉', '水上乐园'],
+}));
+const waterTownEbikeQuery = '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先';
+assert.ok(reasonAddressesUserNeed(
+  '这条线有温泉和玩水，但周边小镇、共享电瓶车暂无资料确认。',
+  waterOnlyCandidate,
+  waterTownEbikeQuery,
+));
+assert.ok(!reasonAddressesUserNeed(
+  '广东、2天、大巴往返，节奏偏轻松；参考价￥399。',
+  waterOnlyCandidate,
+  waterTownEbikeQuery,
+));
+assert.match(
+  buildCoverageAwareReason(waterTownEbikeCandidate, waterTownEbikeQuery),
+  /温泉|玩水|小镇|电瓶车/,
+);
 
 const hotSpringBeachBudgetQuery = '帮我找同时带温泉和沙滩的团. 预算600以内。';
 const hotSpringBeachBudgetIntent = buildHardIntentFromText(hotSpringBeachBudgetQuery);
