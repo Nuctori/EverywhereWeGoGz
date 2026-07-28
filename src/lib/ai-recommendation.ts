@@ -6316,7 +6316,16 @@ function keepAiItemsForCompoundExperience(
   const coreCandidateCount = candidateTours.filter((tour) =>
     getItemCoverageMetrics(buildTourPrimitive(tour), coreTerms).coverageCount >= coreTerms.length,
   ).length;
-  const minimumCoverage = strongCandidateCount >= 3 ? 2 : 1;
+  // 复合需求的核心条件必须共同决定入选。只要候选池里有同时覆盖核心条件
+  // 的团，就不能用“只占一项”的温泉/玩水线路把结果凑满；这类线路不是推荐，
+  // 最多应该在用户主动放宽条件后再出现。
+  const minimumCoverage = coreTerms.length >= 2 && coreCandidateCount > 0
+    ? coreTerms.length
+    : maxCoverage >= 2
+      ? maxCoverage
+      : strongCandidateCount >= 3
+        ? 2
+        : 1;
   const kept = items.filter((item) => {
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive) return false;
