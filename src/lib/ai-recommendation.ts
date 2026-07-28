@@ -1977,13 +1977,14 @@ function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecomme
   });
 }
 
-// 把 AI 排名结果与本地候选池融合，优先保留 AI 判断，同时补齐可解释的兜底项。
+// AI 已经做出选择后，不再把本地候选池批量塞回推荐结果。
+// 本地结果只在 AI 完全不可用时承担 fallback，避免“每个候选都写一段推荐语”。
 function mergeAiAndLocalRecommendations(
   aiItems: AiRecommendationItem[],
   localItems: AiRecommendationItem[],
 ): AiRecommendationItem[] {
-  // 经验：合并阶段保持 AI 排序主导，只拿本地结果做补位。
-  // 如果这里让本地分数反向覆盖 AI，规则器和智能会互相打架，复杂软语义会被拉回低价/热门启发式。
+  // 合并阶段只保留 AI 已经选中的团；只在 AI 完全没有可用结果时回退本地推荐。
+  // 只要 AI 有一个有效选择，就不能把未入选的本地候选重新塞回最终列表。
   const seenTourIds = new Set<string>();
   const primaryAiItems = aiItems
     .filter((item) => {
@@ -1995,16 +1996,14 @@ function mergeAiAndLocalRecommendations(
       ...item,
       recommendationTier: isDetailedAiRecommendation(item) ? 'ai-detailed' : 'ai-brief',
     } satisfies AiRecommendationItem));
-  const supplementalLocalItems = localItems.filter((item) => {
-    if (seenTourIds.has(item.tourId)) return false;
-    seenTourIds.add(item.tourId);
-    return true;
-  }).map((item) => ({
+  if (primaryAiItems.length > 0) {
+    return limitRecommendationCommentary(primaryAiItems).slice(0, MAX_AI_RANKED_ITEMS);
+  }
+
+  return limitRecommendationCommentary(localItems.map((item) => ({
     ...item,
     recommendationTier: 'local-supplement',
-  } satisfies AiRecommendationItem));
-
-  return limitRecommendationCommentary([...primaryAiItems, ...supplementalLocalItems]);
+  } satisfies AiRecommendationItem))).slice(0, MAX_AI_RANKED_ITEMS);
 }
 
 function uniqueStrings(values: Array<string | undefined | null>) {
@@ -2161,16 +2160,11 @@ function countCommentaryItems(items: AiRecommendationItem[]) {
   return items.reduce((count, item) => count + (item.reason ? 1 : 0), 0);
 }
 
-function shouldKeepRecommendationListIntentBound(intent: AiTravelIntent | null) {
-  return Boolean(intent?.destinationHints?.length);
-}
-
 function buildPaddedRecommendationItems(
   items: AiRecommendationItem[],
   fallbackPool: AiRecommendationItem[],
-  intent: AiTravelIntent | null,
 ) {
-  if (shouldKeepRecommendationListIntentBound(intent) && items.length > 0) {
+  if (items.length > 0) {
     return limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
   }
   return padRecommendationItems(items, fallbackPool);
@@ -2394,6 +2388,16 @@ function prioritizeRecommendationItems(
       const tierGap = right.recommendationTierWeight - left.recommendationTierWeight;
       if (tierGap !== 0) return tierGap;
 
+      // AI 已经做过一次整体旅行判断时，保留它的选择顺序；
+      // 本地覆盖率和价格只用于打破接近分数的平手，不再反向替 AI 选团。
+      const aiSelectionGap = Number(Boolean(right.item.recommendationTier?.startsWith('ai'))) -
+        Number(Boolean(left.item.recommendationTier?.startsWith('ai')));
+      if (aiSelectionGap !== 0) return aiSelectionGap;
+      if (left.item.recommendationTier?.startsWith('ai') && right.item.recommendationTier?.startsWith('ai')) {
+        const aiScoreGap = right.aiScore - left.aiScore;
+        if (aiScoreGap !== 0) return aiScoreGap;
+      }
+
       const destinationCoverageGap = right.matchedDestinationHints.length - left.matchedDestinationHints.length;
       if (destinationCoverageGap !== 0) return destinationCoverageGap;
 
@@ -2420,6 +2424,21 @@ function prioritizeRecommendationItems(
       const conflictGap = left.totalConflictCount - right.totalConflictCount;
       if (conflictGap !== 0) return conflictGap;
 
+      // 尚未打上 recommendationTier 的 AI 结果仍要保留模型分数顺序；
+      // 多目的地请求先让目的地覆盖和解释质量完成组合判断，再用分数打破平手。
+      const untypedAiScoreGap = right.aiScore - left.aiScore;
+      const hasMultiDestinationIntent = (intent.destinationHints?.length ?? 0) >= 2;
+      const hasSoftPacePreference = /轻松|不赶|悠闲|慢节奏/.test(context.userText || '');
+      const hasScheduleIntent = Boolean(
+        intent.departureWeekdays?.length ||
+        intent.returnWeekdays?.length ||
+        intent.departureTimeOfDay ||
+        intent.tripDaysMin ||
+        intent.tripDaysMax ||
+        intent.departureWithinDays,
+      );
+      if (!hasMultiDestinationIntent && !hasSoftPacePreference && !hasScheduleIntent && untypedAiScoreGap !== 0) return untypedAiScoreGap;
+
       const reasonQualityGap = right.reasonQualityScore - left.reasonQualityScore;
       if (reasonQualityGap !== 0) return reasonQualityGap;
 
@@ -2429,9 +2448,9 @@ function prioritizeRecommendationItems(
       const reasonGap = right.reasonLength - left.reasonLength;
       if (Math.abs(reasonGap) > 4) return reasonGap;
 
+      if ((hasMultiDestinationIntent || hasSoftPacePreference || hasScheduleIntent) && untypedAiScoreGap !== 0) return untypedAiScoreGap;
+
       if (left.hasReason !== right.hasReason) return left.hasReason ? -1 : 1;
-      const aiGap = right.aiScore - left.aiScore;
-      if (aiGap !== 0) return aiGap;
       if (left.localRank >= 0 && right.localRank >= 0 && left.localRank !== right.localRank) {
         return left.localRank - right.localRank;
       }
@@ -3699,10 +3718,11 @@ function hasUnsupportedCompoundCoverageClaim(
 function isCoverageTermCaveated(text: string, term: string) {
   const aliases = getCoverageTermAliases(term).map(normalizeText).filter(Boolean);
   const gapWords = ['未确认', '未标注', '没有证据', '暂无证据', '资料未提', '资料没有', '需核实', '待核实', '无法确认', '不能确认', '不确定', '未知', '缺少'];
+  const worldKnowledgeWords = ['通常', '更可能', '值得优先查', '我会优先查', '适合先查', '一般会', '常见于', '大概率', '从当地形态看', '从目的地形态看'];
   return aliases.some((alias) => {
     const termIndex = text.indexOf(alias);
     if (termIndex < 0) return false;
-    return gapWords.some((word) => {
+    return [...gapWords, ...worldKnowledgeWords].some((word) => {
       const gapIndex = text.indexOf(normalizeText(word));
       return gapIndex >= 0 && Math.abs(gapIndex - termIndex) <= 18;
     });
@@ -3725,7 +3745,7 @@ function reasonAddressesUserNeed(
   if (mentionedTerms.length === requestedTerms.length) return true;
 
   const missingTerms = requestedTerms.filter((term) => !mentionedTerms.includes(term));
-  const acknowledgesGap = /(未确认|未标注|没有证据|暂无证据|资料未提|资料没有|没有明确|暂无明确安排|需核实|待核实|无法确认|不能确认|不确定|未知|缺少)/.test(reason);
+  const acknowledgesGap = /(未确认|未标注|没有证据|暂无证据|资料未提|资料没有|没有明确|暂无明确安排|需核实|待核实|无法确认|不能确认|不确定|未知|缺少|通常|更可能|值得优先查|我会优先查|适合先查|一般会|常见于|大概率)/.test(reason);
   if (!acknowledgesGap) return false;
 
   // 只允许把候选确实覆盖的条件写成“已满足”；缺口必须显式保留。
@@ -3746,6 +3766,10 @@ function buildCoverageAwareReason(
   const missingTerms = requestedTerms.filter((term) => !matchedTerms.includes(term));
   const matchedText = matchedTerms.map((term) => term.replace(/泡汤$/, '')).join('和');
   const missingText = missingTerms.map((term) => term.replace(/泡汤$/, '')).join('、');
+  const titleFact = getPrimitiveTitleFact(primitive);
+  const experienceText = describePrimitiveExperience(primitive).replace(/泡汤/g, '泡汤');
+  const paceText = describePrimitivePace(primitive);
+  const priceText = formatPrimitivePrice(primitive);
 
   if (matchedTerms.length === 0) {
     const noMatchTemplates = [
@@ -3753,19 +3777,20 @@ function buildCoverageAwareReason(
       `它的气质和这次想找的${missingText}还不太对得上，除非详情能补充具体安排，否则不建议默认完全满足。`,
       `如果你期待的是${missingText}，这条目前缺少能让人放心下单的依据；可以先把它当备选，问清玩法和周边交通。`,
     ];
-    return noMatchTemplates[(getStableTextIndex(`${primitive.id}:coverage-empty`, noMatchTemplates.length) + variant) % noMatchTemplates.length];
+    const noMatchReason = noMatchTemplates[(getStableTextIndex(`${primitive.id}:coverage-empty`, noMatchTemplates.length) + variant) % noMatchTemplates.length];
+    return priceText ? `${noMatchReason}参考价${priceText}。` : `${noMatchReason}。`;
   }
 
   const leadTemplates = [
     matchedTerms.includes('温泉泡汤') && matchedTerms.includes('玩水清凉')
-      ? '想把泡汤和玩水放在同一趟里，这条的方向比较对'
-      : `如果你看重${matchedText}，这条的玩法方向比较对`,
-    `${matchedText}是这条线比较值得期待的部分`,
-    `它更适合把时间花在${matchedText}上，而不是一路赶景点`,
+      ? `${titleFact}把泡汤和玩水放在同一趟里，${paceText}`
+      : `${titleFact}更适合把时间留给${matchedText}，${paceText}`,
+    `${titleFact}的重点不是一路赶景点，而是${experienceText}，${paceText}`,
+    `如果你是冲着${matchedText}去的，${titleFact}会比普通打卡线更有针对性`,
   ];
   const lead = leadTemplates[(getStableTextIndex(`${primitive.id}:coverage`, leadTemplates.length) + variant) % leadTemplates.length];
-  if (missingTerms.length === 0) return `${lead}，整体更适合想把这几种体验放在一起的人。`;
-  return `${lead}；至于${missingText}，详情里还没有明确安排，最好先问清再决定。`;
+  if (missingTerms.length === 0) return priceText ? `${lead}；参考价${priceText}。` : `${lead}。`;
+  return `${lead}；至于${missingText}，详情里还没有明确安排，最好先问清再决定${priceText ? `，参考价${priceText}` : ''}。`;
 }
 
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
@@ -4680,18 +4705,22 @@ function rewriteRecommendationCopy(params: {
 
     const insight = findWeatherInsightForPrimitive(primitive, params.destinationWeatherInsights);
     const semanticReason = buildItemSemanticReason(item, primitive, params);
-    const fallbackReason = uniqueStrings([
-      semanticReason,
-      buildCoverageAwareReason(primitive, params.userText, index),
+    const coverageReason = buildCoverageAwareReason(primitive, params.userText, index);
+    const fallbackReason = semanticReason || coverageReason || (
       hasTurnPublicInterestNeed
         ? buildPublicInterestAlternativeReason(primitive)
-        : buildExpandedFallbackReason(primitive, profile, index),
-      buildWeatherReasonSuffix(primitive, insight),
-    ]).join('。');
+        : buildExpandedFallbackReason(primitive, profile, index)
+    );
+    const weatherReason = buildWeatherReasonSuffix(primitive, insight);
+    const shouldAddWeatherNote = Boolean(
+      weatherReason &&
+      !fallbackReason.includes(weatherReason) &&
+      !coverageReason,
+    );
 
     return {
       ...item,
-      reason: `${stripTerminalPunctuation(fallbackReason)}。`,
+      reason: `${stripTerminalPunctuation(fallbackReason)}${shouldAddWeatherNote ? `。${weatherReason}` : ''}。`,
     };
   });
 }
@@ -5358,7 +5387,7 @@ function buildAiMessages(params: {
     '输出只能引用候选池中真实存在的 tourId；线路事实、价格、班期、酒店、景点和服务来自候选原语。',
     '候选池是探索空间，不是已经替你筛好的答案；不要因为某条线路没有显式标签就直接淘汰，也不要因为命中多个词就默认最合适。',
     '预算是重要的取舍维度，不是默认的候选池截断器：预算内优先，但如果更符合整体体验的线路超预算，要把它作为取舍或备选明确说出；只有用户明确要求“严格不超过”时才把超预算线路降为替代。',
-    '如果用户关心的周边配套或交通方式没有候选证据，只能说未知，不能用常识冒充线路事实。',
+    '区分“线路事实”和“目的地判断”：团里是否包含接驳、门票、酒店服务等必须有候选证据；但可以调动世界知识判断某个镇子/度假区的空间形态、步行便利度、当地短途出行方式，以及共享电瓶车是否值得优先查。此类判断要用“更可能、通常、值得优先核实、我会优先查”表达，不能写成已经包含的服务。',
     worldKnowledgeExamples,
     '充分使用世界知识做体验判断：把候选里的温泉、玩水、山水、小镇等事实，翻译成具体的旅行画面、节奏和适合的人；可以说“泡完汤再玩水会是什么感觉”“这条线更像度假还是赶路”，但不要把常识写成该线路已确认的服务或交通。',
     'reason 要像熟悉当地玩法的朋友在种草：先写为什么会想去、到了以后怎么玩、这条线的气质，再自然补一句必要取舍或核实提醒；不要以“这条线/从线路资料看/能确认的是”开头，也不要把每条都写成同一种句式。',
@@ -5438,7 +5467,7 @@ function buildAiMessages(params: {
         : []),
       'reason 优先写用户真正会关心的体验差异和画面，例如泡汤后玩水、沿小镇慢慢逛、适合带孩子还是适合放空；让人产生“我想去看看”的感觉，不要复述系统字段名。',
       '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
-      '如果用户关心的体验条件无法从候选事实确认，不要硬凑完整匹配；可以给出最接近的线路，并在 tradeoffs 或 intentNotes.cannotAssert 中说明缺口。',
+      '如果用户关心的体验条件无法从候选事实确认，不要硬凑完整匹配；可以结合目的地世界知识给出“更值得查哪一类地方/为什么”，并在 tradeoffs 或 intentNotes.cannotAssert 中把它标成判断或待核实项。',
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
       ...promptPolicy.requestRules,
       [
@@ -6900,8 +6929,7 @@ export async function requestAiRecommendations({
     const localItemsForMerge = buildPaddedRecommendationItems(
       strictLocalItems,
       fallbackRecommendations(availableCandidates),
-      effectiveIntent,
-    );
+      );
     runtimeFallbackItems = localItemsForMerge;
     runtimePreferenceMemory = nextPreferenceMemory;
     const auditContext = buildRecommendationAuditContext(availableCandidates, previousResult, effectiveIntent);
@@ -7091,7 +7119,7 @@ export async function requestAiRecommendations({
     }
     const aiItems = auditAiRecommendationsStrict(
       validatedAiItems,
-      compactedLocalItems,
+      [],
       compactedCandidateTours,
       finalIntent,
     );
@@ -7103,7 +7131,6 @@ export async function requestAiRecommendations({
     const baseMergedItems = buildPaddedRecommendationItems(
       mergeAiAndLocalRecommendations(rankedAiItems, compactedLocalItems),
       localItemsForMerge,
-      finalIntent,
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
     const mergedCandidateTours = availableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));
