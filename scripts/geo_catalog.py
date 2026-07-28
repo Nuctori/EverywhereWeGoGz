@@ -7,15 +7,15 @@ import re
 PLACE_ROWS = [
     ("广州", "中国", "广东", 23.1291, 113.2644, ("广州", "广州市")),
     ("深圳", "中国", "广东", 22.5431, 114.0579, ("深圳", "深圳市")),
-    ("珠海", "中国", "广东", 22.271, 113.5767, ("珠海", "珠海市")),
-    ("惠州", "中国", "广东", 23.1115, 114.4152, ("惠州", "惠州市")),
+    ("珠海", "中国", "广东", 22.271, 113.5767, ("珠海", "珠海市", "海泉湾", "东澳岛", "桂山岛", "外伶仃岛")),
+    ("惠州", "中国", "广东", 23.1115, 114.4152, ("惠州", "惠州市", "巽寮湾")),
     ("清远", "中国", "广东", 23.6818, 113.056, ("清远", "清远市")),
     ("韶关", "中国", "广东", 24.8104, 113.5972, ("韶关", "韶关市")),
     ("肇庆", "中国", "广东", 23.0472, 112.4651, ("肇庆", "肇庆市")),
     ("佛山", "中国", "广东", 23.0218, 113.1219, ("佛山", "佛山市")),
     ("江门", "中国", "广东", 22.5787, 113.0815, ("江门", "江门市")),
     ("阳江", "中国", "广东", 21.8579, 111.9822, ("阳江", "阳江市")),
-    ("汕头", "中国", "广东", 23.3541, 116.6819, ("汕头", "汕头市")),
+    ("汕头", "中国", "广东", 23.3541, 116.6819, ("汕头", "汕头市", "南澳岛", "青澳湾", "贝沙湾")),
     ("潮州", "中国", "广东", 23.6567, 116.6226, ("潮州", "潮州市")),
     ("湛江", "中国", "广东", 21.2707, 110.3594, ("湛江", "湛江市")),
     ("茂名", "中国", "广东", 21.6627, 110.9255, ("茂名", "茂名市")),
@@ -26,7 +26,7 @@ PLACE_ROWS = [
     ("三亚", "中国", "海南", 18.2528, 109.5119, ("三亚", "三亚市")),
     ("昆明", "中国", "云南", 25.0389, 102.7183, ("昆明", "昆明市")),
     ("成都", "中国", "四川", 30.5728, 104.0668, ("成都", "成都市")),
-    ("重庆", "中国", "重庆", 29.563, 106.5516, ("重庆", "重庆市")),
+    ("重庆", "中国", "重庆", 29.563, 106.5516, ("重庆", "重庆市", "武隆", "仙女山")),
     ("北京", "中国", "北京", 39.9042, 116.4074, ("北京", "北京市")),
     ("上海", "中国", "上海", 31.2304, 121.4737, ("上海", "上海市")),
     ("西安", "中国", "陕西", 34.3416, 108.9398, ("西安", "西安市")),
@@ -122,6 +122,21 @@ def find_region(text):
     return None
 
 
+def _find_direct_place_match(text):
+    value = str(text or "").strip()
+    named_matches = [
+        (alias, place)
+        for alias, place in ALIAS_ROWS
+        if alias != place["name"] and alias in value and PLACE_LABEL_SUFFIXES.search(alias)
+    ]
+    if named_matches:
+        alias, place = max(named_matches, key=lambda item: len(item[0]))
+        label = alias if alias.startswith(place["name"]) else f"{place['name']}{alias}"
+        return place, label
+    place = find_place(value)
+    return (place, place["name"]) if place else (None, "")
+
+
 def _iter_place_mentions(text):
     value = str(text or "")
     matches = []
@@ -141,14 +156,15 @@ def _iter_place_mentions(text):
     matches.sort(key=lambda item: (item["start"], -len(item["alias"])))
     selected = []
     occupied_until = -1
-    seen_places = set()
+    seen_mentions = set()
     for item in matches:
         if item["start"] < occupied_until:
             continue
         name = item["place"]["name"]
-        if name in seen_places:
+        mention_key = (name, item["alias"])
+        if mention_key in seen_mentions:
             continue
-        seen_places.add(name)
+        seen_mentions.add(mention_key)
         selected.append(item)
         occupied_until = item["end"]
     return selected
@@ -159,7 +175,10 @@ def _is_departure_mention(text, mention):
     start = mention["start"]
     end = mention["end"]
     after = value[end:min(len(value), end + 16)]
-    if DEPARTURE_MARKERS.match(after.lstrip()):
+    if DEPARTURE_MARKERS.match(after.lstrip()) or re.match(
+        r"[A-Za-z0-9]{0,8}(?:起止|起程|出发|往返|直飞|集合|起飞|返程|回程|联运)",
+        after.lstrip(),
+    ):
         return True
     if re.match(r"\s*[-—]", after):
         return True
@@ -171,24 +190,28 @@ def _is_departure_mention(text, mention):
 
 def _place_label(text, mention):
     value = str(text or "")
+    alias = mention["alias"]
+    canonical_name = mention["place"]["name"]
+    if alias != canonical_name and PLACE_LABEL_SUFFIXES.search(alias):
+        return f"{canonical_name}{alias}" if not alias.startswith(canonical_name) else alias
     end = mention["end"]
-    tail_match = re.match(r"[^%s\d\s]{0,18}" % re.escape(TEXT_SEPARATORS), value[end:])
+    tail_match = re.match(r"[\u4e00-\u9fff]{0,18}", value[end:])
     tail = tail_match.group(0) if tail_match else ""
     suffix_matches = list(PLACE_LABEL_SUFFIXES.finditer(tail))
     suffix_match = suffix_matches[-1] if suffix_matches else None
     if tail.startswith(("回", "返", "去", "住", "入住", "返回")):
         return mention["place"]["name"]
     if suffix_match:
-        return f"{mention['place']['name']}{tail[:suffix_match.end()]}".strip()
-    return mention["place"]["name"]
+        return f"{canonical_name}{tail[:suffix_match.end()]}".strip()
+    return canonical_name
 
 
 def mine_destination_place(raw, title, destination, detail=None):
     """Extract a named destination from title/detail text without treating departure as destination."""
     destination_text = str(destination or "").strip()
-    direct_place = find_place(destination_text)
+    direct_place, direct_label = _find_direct_place_match(destination_text)
     if direct_place:
-        return direct_place, direct_place["name"], "medium", "local-place-catalog"
+        return direct_place, direct_label, "medium", "local-place-catalog"
 
     texts = [str(title or "")]
     detail = detail if isinstance(detail, dict) else {}

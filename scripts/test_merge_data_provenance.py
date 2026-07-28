@@ -91,6 +91,24 @@ def test_title_place_miner_resolves_named_place_to_city_anchor():
     assert tour["dataQuality"]["fieldSources"]["destinationPlaceName"] == "inferred"
 
 
+def test_catalog_destination_preserves_named_place_alias():
+    for destination, expected_city, expected_label in (
+        ("南澳岛", "汕头", "汕头南澳岛"),
+        ("珠海海泉湾", "珠海", "珠海海泉湾"),
+    ):
+        raw = {
+            "source": "测试来源",
+            "title": f"{destination}3天",
+            "destination": destination,
+            "price": 999,
+            "days": 3,
+        }
+        tour = raw_to_tour(raw, 1, empty_detail())
+        assert tour["destinationCity"] == expected_city
+        assert tour["destinationPlaceName"] == expected_label
+        assert tour["geoSource"] == "local-place-catalog"
+
+
 def test_title_place_miner_does_not_turn_departure_into_destination():
     raw = {
         "source": "测试来源",
@@ -137,6 +155,19 @@ def test_title_place_miner_keeps_destination_after_departure_phrase():
         assert tour["destinationCity"] == "珠海"
         assert tour["destinationPlaceName"] == "珠海海泉湾"
         assert tour["geoConfidence"] == "low"
+
+
+def test_title_place_miner_does_not_absorb_transport_text_into_place_label():
+    raw = {
+        "source": "测试来源",
+        "title": "逸游仙本那|臻选水屋5天4晚-广州AK直飞斗湖",
+        "destination": "其他",
+        "price": 999,
+        "days": 5,
+    }
+    tour = raw_to_tour(raw, 1, empty_detail())
+
+    assert tour["destinationPlaceName"] == ""
 
 
 def test_detail_fields_are_structured_without_invention():
