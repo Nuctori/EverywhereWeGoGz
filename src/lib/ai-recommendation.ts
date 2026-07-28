@@ -3183,11 +3183,12 @@ function hasMalformedAiTitleEcho(reason: string, primitive: RecommendationPrimit
   // 长标题经常被模型截成“……小镇2把 / ……温泉酒”一类残句。
   // 这不是世界知识推理，而是输出损坏；宁可回到本地事实文案，也不把坏句子展示给用户。
   if (title.length < 18 || normalizedReason.includes(title)) return false;
-  for (let start = 0; start <= Math.max(0, title.length - 10); start += 1) {
-    const fragment = title.slice(start, start + 10);
-    if (fragment.length === 10 && normalizedReason.includes(fragment)) return true;
-  }
-  return false;
+  const fragments = [
+    title.slice(0, 10),
+    title.slice(4, 14),
+    title.slice(6, 16),
+  ].filter((fragment) => fragment.length === 10);
+  return fragments.some((fragment) => normalizedReason.includes(fragment));
 }
 
 function softenAiEvidenceCaveats(reason: string) {
@@ -4728,7 +4729,7 @@ function rewriteRecommendationCopy(params: {
         sortedPrices,
       }) &&
       reasonAddressesUserNeed(currentReason, primitive, params.userText) &&
-      (shouldKeepAiReason(currentReason, primitive) || item.reasonSource === 'ai')
+      shouldKeepAiReason(currentReason, primitive)
     ) {
       const finalizedReason = shouldExpandShortRecommendationCopy(currentReason, primitive)
         ? expandShortRecommendationCopy(currentReason, primitive, profile)
