@@ -3774,13 +3774,16 @@ function buildCoverageAwareReason(
   const matchedTerms = requestedTerms.filter((term) => getPrimitiveCoverageScore(primitive, [term]) > 0);
   const missingTerms = requestedTerms.filter((term) => !matchedTerms.includes(term));
   const matchedText = matchedTerms.map((term) => term.replace(/泡汤$/, '')).join('和');
-  const missingText = missingTerms.map((term) => term.replace(/泡汤$/, '')).join('、');
+  // 共享电瓶车属于目的地层面的待核实判断，不把它机械地追加到每张卡的缺口清单；
+  // AI 若有具体世界知识判断可以保留，否则由整体摘要统一提醒。
+  const missingCoverageTerms = missingTerms.filter((term) => term !== '共享电瓶车');
+  const missingText = missingCoverageTerms.map((term) => term.replace(/泡汤$/, '')).join('、');
   const titleFact = getPrimitiveTitleFact(primitive);
   const experienceText = describePrimitiveExperience(primitive).replace(/泡汤/g, '泡汤');
   const paceText = describePrimitivePace(primitive);
   const priceText = formatPrimitivePrice(primitive);
 
-  if (matchedTerms.length === 0) {
+  if (matchedTerms.length === 0 && missingText) {
     const noMatchTemplates = [
       `这条更像常规休闲线，暂时看不出${missingText}的明确亮点；如果你是冲着这些玩法去，建议先别把它排在前面。`,
       `它的气质和这次想找的${missingText}还不太对得上，除非详情能补充具体安排，否则不建议默认完全满足。`,
@@ -3798,7 +3801,7 @@ function buildCoverageAwareReason(
     `如果你是冲着${matchedText}去的，${titleFact}会比普通打卡线更有针对性`,
   ];
   const lead = leadTemplates[(getStableTextIndex(`${primitive.id}:coverage`, leadTemplates.length) + variant) % leadTemplates.length];
-  if (missingTerms.length === 0) return priceText ? `${lead}；参考价${priceText}。` : `${lead}。`;
+  if (missingCoverageTerms.length === 0) return priceText ? `${lead}；参考价${priceText}。` : `${lead}。`;
   return `${lead}；至于${missingText}，详情里还没有明确安排，最好先问清再决定${priceText ? `，参考价${priceText}` : ''}。`;
 }
 

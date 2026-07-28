@@ -1571,6 +1571,11 @@ assert.match(
   buildCoverageAwareReason(waterTownEbikeCandidate, waterTownEbikeQuery),
   /温泉|玩水|小镇|电瓶车/,
 );
+assert.doesNotMatch(
+  buildCoverageAwareReason(waterOnlyCandidate, waterTownEbikeQuery),
+  /共享电瓶车/,
+  'fallback copy should not repeat the unverifiable shared-ebike gap on every card',
+);
 
 const hotSpringBeachBudgetQuery = '帮我找同时带温泉和沙滩的团. 预算600以内。';
 const hotSpringBeachBudgetIntent = buildHardIntentFromText(hotSpringBeachBudgetQuery);
