@@ -21,6 +21,7 @@
     "test:cdn-pool": "node scripts/test_cdn_pool.mjs",
     "audit:jrt365-crawl-guard": "node scripts/test_jrt365_crawl_guard.mjs",
     "audit:update-data-workflow": "node scripts/test_update_data_workflow.mjs",
+    "audit:push-generated-commit": "node scripts/test_push_generated_commit.mjs",
     "audit:merge-data-observability": "node scripts/test_merge_data_observability.mjs",
     "audit:structured-tour-fields": "python scripts/test_structured_tour_enrichment.py",
     "audit:structured-tour-data": "python scripts/audit_structured_tour_fields.py",

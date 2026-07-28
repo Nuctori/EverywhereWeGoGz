@@ -154,10 +154,38 @@ for (const requiredPath of [
     `expected git add command to include ${requiredPath}`,
   );
 }
+assert.ok(
+  !gitAddCommand.includes('src/data/tour-availability-cache.json'),
+  'expected update-data workflow to leave availability cache ownership to the refresh workflow',
+);
+assert.ok(
+  workflow.includes('git restore src/data/tour-availability-cache.json'),
+  'expected update-data workflow to discard its ephemeral availability cache before rebasing',
+);
+assert.ok(
+  workflow.includes('bash scripts/push_generated_commit.sh'),
+  'expected update-data workflow to publish through the rebase-and-retry helper',
+);
+assert.ok(
+  availabilityWorkflow.includes('bash scripts/push_generated_commit.sh'),
+  'expected availability cache workflow to publish through the rebase-and-retry helper',
+);
+
+const publishHelper = fs.readFileSync(
+  path.join(process.cwd(), 'scripts', 'push_generated_commit.sh'),
+  'utf8',
+);
+assert.ok(publishHelper.includes('git pull --rebase origin "$branch"'), 'expected publish helper to rebase onto the latest remote branch');
+assert.ok(publishHelper.includes('git push origin "HEAD:$branch"'), 'expected publish helper to push the rebased commit');
+assert.ok(publishHelper.includes('max_attempts=5'), 'expected publish helper to retry transient push races');
 
 assert.ok(
   packageJson.scripts?.['audit:crawler-syntax'],
   'expected package script for crawler syntax audit to exist',
+);
+assert.ok(
+  packageJson.scripts?.['audit:push-generated-commit'],
+  'expected package script for generated commit publish integration audit to exist',
 );
 
 const preflightStart = workflow.indexOf('preflight:');

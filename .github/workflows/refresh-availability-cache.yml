@@ -39,4 +39,4 @@ jobs:
             exit 0
           fi
           git commit -m "chore: refresh availability cache [$(date +%Y-%m-%d)]"
-          git push
+          bash scripts/push_generated_commit.sh
