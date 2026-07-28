@@ -3739,6 +3739,29 @@ function isBoundedPublicInterestStatement(text: string) {
   return /(候选|原文|显式|证据|没有|未标注|不能|不可|不等于|近似|替代|只能|无法断言)/.test(text);
 }
 
+function semanticReasonAddressesCoreNeed(
+  reason: string,
+  primitive: RecommendationPrimitive,
+  userText: string | undefined,
+) {
+  const softTerms = new Set(['亲子家庭', '周边小镇', '共享电瓶车']);
+  const coreTerms = getCoverageTermsForQuality(userText).filter((term) => !softTerms.has(term));
+  if (coreTerms.length < 2) return reasonAddressesUserNeed(reason, primitive, userText);
+
+  const normalizedReason = normalizeText(reason);
+  const mentionedTerms = coreTerms.filter((term) =>
+    getCoverageTermAliases(term).some((alias) => normalizedReason.includes(normalizeText(alias))),
+  );
+  if (mentionedTerms.length === coreTerms.length) return true;
+  if (mentionedTerms.length === 0) return false;
+
+  const missingTerms = coreTerms.filter((term) => !mentionedTerms.includes(term));
+  const acknowledgesGap = /(未确认|未标注|没有证据|暂无证据|资料未提|资料没有|没有明确|暂无明确安排|需核实|待核实|无法确认|不能确认|不确定|未知|缺少|通常|更可能|值得优先查|我会优先查|适合先查|一般会|常见于|大概率)/.test(reason);
+  return acknowledgesGap && missingTerms.length > 0 && mentionedTerms.some((term) =>
+    getPrimitiveCoverageScore(primitive, [term]) > 0,
+  );
+}
+
 function buildItemSemanticReason(
   item: AiRecommendationItem,
   primitive: RecommendationPrimitive,
@@ -3746,17 +3769,41 @@ function buildItemSemanticReason(
 ) {
   const semanticFit = normalizeAiText(item.semanticFit, 140);
   const semanticBoundary = normalizeAiText(item.semanticBoundary, 120);
-  const parts = uniqueStrings([
-    semanticFit,
-    isMeaningfulSemanticBoundary(semanticBoundary) ? semanticBoundary : '',
-  ]).filter(Boolean);
+  const boundary = isMeaningfulSemanticBoundary(semanticBoundary) ? semanticBoundary : '';
+  const parts = uniqueStrings([semanticFit, boundary]).filter(Boolean);
   if (parts.length === 0) return '';
+
+  // semanticFit and semanticBoundary are two different model judgements.  Validate
+  // them together first, but do not discard a useful fit merely because an optional
+  // caveat contains a weak/ambiguous claim.  The model's own fit is the best source
+  // of destination/world-knowledge context; the local fallback should be last resort.
   const text = parts.join('；');
-  if (hasUnallowedPublicInterestLanguage(text, options)) return '';
-  if (hasUnsupportedPublicInterestClaim(text, primitive)) return '';
-  if (hasUnsupportedCompoundCoverageClaim(text, primitive, options.userText)) return '';
-  if (!reasonAddressesUserNeed(text, primitive, options.userText)) return '';
-  return text;
+  if (
+    !hasUnallowedPublicInterestLanguage(text, options) &&
+    !hasUnsupportedPublicInterestClaim(text, primitive) &&
+    !hasUnsupportedCompoundCoverageClaim(text, primitive, options.userText) &&
+    semanticReasonAddressesCoreNeed(text, primitive, options.userText)
+  ) {
+    return text;
+  }
+
+  if (
+    semanticFit &&
+    !hasUnallowedPublicInterestLanguage(semanticFit, options) &&
+    !hasUnsupportedPublicInterestClaim(semanticFit, primitive) &&
+    !hasUnsupportedCompoundCoverageClaim(semanticFit, primitive, options.userText) &&
+    semanticReasonAddressesCoreNeed(semanticFit, primitive, options.userText)
+  ) {
+    const safeBoundary = boundary &&
+      !hasUnallowedPublicInterestLanguage(boundary, options) &&
+      !hasUnsupportedPublicInterestClaim(boundary, primitive) &&
+      /(未确认|未标注|没有证据|暂无证据|资料未提|资料没有|需核实|待核实|需要[^。；]{0,8}确认|无法确认|不能确认|不确定|未知|缺少|通常|更可能|值得优先查|我会优先查|适合先查|一般会|常见于|大概率)/.test(boundary)
+      ? boundary
+      : '';
+    return [semanticFit, safeBoundary].filter(Boolean).join('；');
+  }
+
+  return '';
 }
 
 function hasUnsupportedCompoundCoverageClaim(
@@ -3789,7 +3836,7 @@ function isCoverageTermCaveated(text: string, term: string) {
     return [...gapWords, ...worldKnowledgeWords].some((word) => {
       const gapIndex = text.indexOf(normalizeText(word));
       return gapIndex >= 0 && Math.abs(gapIndex - termIndex) <= 18;
-    });
+    }) || /需要[^。；]{0,8}确认/.test(text);
   });
 }
 
@@ -5916,6 +5963,7 @@ export const __aiRecommendationTestHooks = {
   buildAiMessages,
   buildHardIntentFromText,
   buildCoverageAwareReason,
+  buildItemSemanticReason,
   buildLiteAiMessages,
   buildRecommendationAuditContext,
   buildRouteAtlas,
