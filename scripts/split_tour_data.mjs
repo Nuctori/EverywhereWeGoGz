@@ -10,10 +10,70 @@ const listPath = path.join(dataDir, 'tours-list.json');
 const metaPath = path.join(dataDir, 'tours-meta.json');
 const detailsDir = path.join(dataDir, 'tour-details');
 const imageCacheDir = path.join(dataDir, 'image-cache', 'placeholders');
+const geoPlacesPath = path.join(dataDir, 'geo-places.json');
+const tourMapIndexPath = path.join(dataDir, 'tour-map-index.json');
 // ?? token ?????????????????????????
 const invalidImageTokens = ['lazyimg', '{{', '}}'];
 const writeRetries = 5;
 const placeholderLabel = '老广精选线路';
+
+function nonEmpty(value) {
+  const text = String(value ?? '').trim();
+  return text || undefined;
+}
+
+function validCoordinate(latitude, longitude) {
+  return Number.isFinite(Number(latitude)) && Number.isFinite(Number(longitude))
+    && Number(latitude) >= -90 && Number(latitude) <= 90
+    && Number(longitude) >= -180 && Number(longitude) <= 180;
+}
+
+function buildPlaceId(point) {
+  return crypto.createHash('sha1')
+    .update([
+      point.country || '', point.province || '', point.city || '', point.name || '',
+    ].join('|'))
+    .digest('hex')
+    .slice(0, 16);
+}
+
+function buildGeoPoint(tour, role) {
+  const destination = role === 'destination';
+  const latitude = tour[destination ? 'destinationLatitude' : 'departureLatitude'];
+  const longitude = tour[destination ? 'destinationLongitude' : 'departureLongitude'];
+  const name = nonEmpty(tour[destination ? 'destinationCity' : 'departureCity']);
+  if (!name || !validCoordinate(latitude, longitude)) return undefined;
+
+  const point = {
+    name,
+    normalizedName: name,
+    country: nonEmpty(tour[destination ? 'destinationCountry' : 'departureCountry']),
+    province: nonEmpty(tour[destination ? 'destinationProvince' : 'departureProvince']),
+    city: name,
+    latitude: Number(latitude),
+    longitude: Number(longitude),
+    coordinateSystem: 'wgs84',
+    level: 'city',
+    source: tour.geoSource === 'local-place-catalog' ? 'catalog' : 'inferred',
+    confidence: ['low', 'medium', 'high'].includes(tour.geoConfidence) ? tour.geoConfidence : 'low',
+  };
+  return { placeId: buildPlaceId(point), ...point };
+}
+
+function buildGeo(tour) {
+  const departure = buildGeoPoint(tour, 'departure');
+  const destination = buildGeoPoint(tour, 'destination');
+  const status = destination
+    ? (departure ? 'complete' : 'destination_only')
+    : 'unmapped';
+  return {
+    ...(departure ? { departure } : {}),
+    ...(destination ? { destination } : {}),
+    stops: [],
+    status,
+    routeRegion: tour.routeRegion || 'unknown',
+  };
+}
 const destinationKeywordMap = [
   ['华东', ['华东', '江南', '上海', '苏州', '杭州', '南京', '无锡', '乌镇', '周庄', '南浔', '西湖', '外滩', '迪士尼', '拈花湾', '牛首山']],
   ['广东', ['广东', '广州', '深圳', '珠海', '从化', '增城', '龙门', '新丰', '英德', '佛冈', '江门', '惠州', '双月湾', '巽寮湾', '古兜', '恩平', '新兴', '清远', '沙扒湾', '温泉']],
@@ -234,6 +294,7 @@ const listTours = tours.map((tour) => {
       detailTour[key] = value;
     }
   }
+  listTour.geo = buildGeo(tour);
   normalizeDetailPayload(detailTour);
 
   const detailFile = `${tour.id}.json`;
@@ -250,6 +311,34 @@ for (const staleFile of existingDetailFiles) {
 }
 
 writeTextFileWithRetry(listPath, compactJson(listTours));
+
+const placeMap = new Map();
+const tourMapIndex = listTours.map((tour) => {
+  for (const role of ['departure', 'destination']) {
+    const point = tour.geo?.[role];
+    if (!point) continue;
+    const existing = placeMap.get(point.placeId);
+    if (existing) {
+      existing.tourIds.push(tour.id);
+      if (!existing.roles.includes(role)) existing.roles.push(role);
+      if (existing.confidence !== point.confidence) existing.confidence = 'medium';
+    } else {
+      placeMap.set(point.placeId, { ...point, tourIds: [tour.id], roles: [role] });
+    }
+  }
+  return {
+    tourId: tour.id,
+    departurePlaceId: tour.geo?.departure?.placeId,
+    destinationPlaceId: tour.geo?.destination?.placeId,
+    status: tour.geo?.status || 'unmapped',
+  };
+});
+
+const geoPlaces = [...placeMap.values()]
+  .map((place) => ({ ...place, tourCount: place.tourIds.length }))
+  .sort((left, right) => right.tourCount - left.tourCount || left.name.localeCompare(right.name));
+writeTextFileWithRetry(geoPlacesPath, compactJson(geoPlaces));
+writeTextFileWithRetry(tourMapIndexPath, compactJson(tourMapIndex));
 
 // ====== Generate tours-index.json + tours-page-*.json chunks ======
 const PAGE_SIZE = 24;
@@ -275,6 +364,7 @@ const indexFields = [
   'rating',
   'suitableFor',
   'season',
+  'geo',
 ];
 const indexTours = listTours.map((tour, index) => {
   const idx = {};
@@ -351,6 +441,14 @@ const meta = {
     details: {
       path: 'data/tour-details/',
       size: detailSize,
+    },
+    geoPlaces: {
+      path: 'data/geo-places.json',
+      size: fs.statSync(geoPlacesPath).size,
+    },
+    mapIndex: {
+      path: 'data/tour-map-index.json',
+      size: fs.statSync(tourMapIndexPath).size,
     },
   },
 };

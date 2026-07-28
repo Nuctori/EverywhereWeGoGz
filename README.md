@@ -5,6 +5,8 @@
 - 列表页：`public/data/tours-list.json`
 - 详情弹窗：`public/data/tour-details/*.json`
 - 后台数据概览：`public/data/tours-meta.json`
+- 地点索引：`public/data/geo-places.json`
+- 旅行团地图索引：`public/data/tour-map-index.json`
 - 原始全量数据：`public/data/tours.json`
 
 筛选、排序、搜索和详情弹窗都在浏览器端完成，不依赖后端服务。
@@ -32,6 +34,8 @@ npm run preview
 ## 静态数据说明
 
 `src/data/tours.ts` 目前只保留来源、目的地、主题等前台筛选元数据，不再作为旅行团列表的真实数据源。
+
+地图数据使用列表数据中的 `geo` 契约，与具体地图 SDK 解耦。`geo-places.json` 提供地点聚合索引，`tour-map-index.json` 提供旅行团与地点的关联；未映射线路保留在列表中，但不会被强行放置到地图上。
 
 后台页显示的是 `public/data/tours-meta.json` 中的静态快照，包括记录数、文件大小、详情分片数、来源分布和生成时间。它不会在浏览器里启动爬虫，也不会生成模拟数据。
 

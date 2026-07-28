@@ -68,6 +68,7 @@ export function inflateTourSummaryFromIndexEntry(entry: TourIndexEntry): TourSum
     season: entry.season ?? '',
     departureDates: entry.departureDates,
     hotDepartureDates: entry.hotDepartureDates,
+    geo: entry.geo,
   };
 }
 

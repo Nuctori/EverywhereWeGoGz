@@ -19,6 +19,34 @@ export interface DataQuality {
   fieldSources?: Record<string, 'source' | 'detail' | 'inferred' | 'unknown' | 'synthetic'>;
 }
 
+export type GeoLevel = 'country' | 'region' | 'city' | 'poi';
+export type GeoStatus = 'complete' | 'destination_only' | 'unmapped';
+export type GeoSource = 'source' | 'catalog' | 'inferred' | 'unknown';
+export type GeoConfidence = 'low' | 'medium' | 'high';
+
+export interface TourGeoPoint {
+  placeId: string;
+  name: string;
+  normalizedName: string;
+  country?: string;
+  province?: string;
+  city?: string;
+  latitude: number;
+  longitude: number;
+  coordinateSystem: 'wgs84';
+  level: GeoLevel;
+  source: GeoSource;
+  confidence: GeoConfidence;
+}
+
+export interface TourGeo {
+  departure?: TourGeoPoint;
+  destination?: TourGeoPoint;
+  stops: TourGeoPoint[];
+  status: GeoStatus;
+  routeRegion?: 'local' | 'nearby-province' | 'national' | 'international' | 'unknown';
+}
+
 export type ServiceAvailability = 'included' | 'excluded' | 'unknown';
 
 export interface MealCounts {
@@ -80,6 +108,7 @@ export interface TourSummary {
   hotDepartureDates?: string[];
   meta?: TourMeta;
   dataQuality?: DataQuality;
+  geo?: TourGeo;
 }
 
 export interface TourIndexEntry {
@@ -110,6 +139,7 @@ export interface TourIndexEntry {
   season: string;
   page: number;
   searchText?: string;
+  geo?: TourGeo;
 }
 
 export interface TourDetail {
