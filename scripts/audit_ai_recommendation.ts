@@ -2547,6 +2547,20 @@ const reordered = prioritizeRecommendationItems(
     'AI replacement mode should be preserved through memory merge',
   );
 
+  const worldKnowledgeDestination = mergeAiRankingIntent(
+    null,
+    {
+      destinationHints: ['惠州盐洲岛'],
+      departureWeekdays: [],
+      refinementMode: 'replace_destination',
+    },
+  );
+  assert.deepEqual(
+    worldKnowledgeDestination?.destinationHints,
+    [],
+    'AI-inferred destinations must rank candidates without becoming a hard user destination when the user did not name one',
+  );
+
   const basePromptCandidates = compactCandidates(
     [
       candidate({
