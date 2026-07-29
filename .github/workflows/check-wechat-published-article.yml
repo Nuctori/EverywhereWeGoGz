@@ -1,0 +1,79 @@
+name: Check WeChat Published Article
+
+on:
+  schedule:
+    # 10:00 Asia/Shanghai = 02:00 UTC.
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: check-wechat-published-article
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  WECHAT_LAST_ARTICLE_VARIABLE: WECHAT_LAST_ARTICLE_ID
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check published article
+        id: check_article
+        env:
+          WECHAT_APP_ID: ${{ secrets.WECHAT_APP_ID }}
+          WECHAT_APP_SECRET: ${{ secrets.WECHAT_APP_SECRET }}
+          PREVIOUS_ARTICLE_ID: ${{ vars.WECHAT_LAST_ARTICLE_ID }}
+        run: |
+          result_file="$RUNNER_TEMP/wechat-article-check.json"
+          node scripts/check_wechat_published_article.mjs \
+            --previous-article-id "$PREVIOUS_ARTICLE_ID" > "$result_file"
+
+          node --input-type=module - "$result_file" "$GITHUB_OUTPUT" <<'EOF'
+          import fs from 'node:fs';
+
+          const [resultPath, outputPath] = process.argv.slice(2);
+          const result = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+          const latest = result.latestArticle;
+          const output = [
+            `has_new_article=${result.hasNewArticle}`,
+            `should_update_baseline=${result.shouldUpdateBaseline}`,
+            `latest_article_id=${latest?.articleId || ''}`,
+          ].join('\n') + '\n';
+          fs.appendFileSync(outputPath, output);
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, [
+            '## WeChat article check',
+            '',
+            `- New article: **${result.hasNewArticle ? 'yes' : 'no'}**`,
+            `- Latest article: ${latest?.title || 'none'}`,
+            `- Article ID: ${latest?.articleId || 'none'}`,
+            `- Article URL: ${latest?.url || 'none'}`,
+            result.shouldUpdateBaseline && !result.hasNewArticle
+              ? '- Baseline: initialized on this first check'
+              : '',
+            '',
+          ].filter(Boolean).join('\n') + '\n');
+          EOF
+
+      - name: Update last article baseline
+        if: steps.check_article.outputs.should_update_baseline == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTICLE_ID: ${{ steps.check_article.outputs.latest_article_id }}
+          VARIABLE_NAME: ${{ env.WECHAT_LAST_ARTICLE_VARIABLE }}
+        run: |
+          variable_path="repos/${GITHUB_REPOSITORY}/actions/variables/${VARIABLE_NAME}"
+          if gh api "$variable_path" >/dev/null 2>&1; then
+            gh api --method PATCH "$variable_path" -f value="$ARTICLE_ID" >/dev/null
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/actions/variables" \
+              -f name="$VARIABLE_NAME" \
+              -f value="$ARTICLE_ID" >/dev/null
+          fi
