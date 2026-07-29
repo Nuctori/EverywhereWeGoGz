@@ -3174,28 +3174,8 @@ function reasonMentionsCandidateFact(reason: string, primitive: RecommendationPr
   return facts.some((fact) => normalizedReason.includes(normalizeText(fact)));
 }
 
-function isGenericReason(reason: string) {
-  return /^(价格|低价|班期|热门|性价比|预算|天数|行程|综合)|综合匹配|性价比高|班期多|价格低|自然风光生态|适合轻松|天气取舍/.test(reason);
-}
-
 function hasMetaRecommendationLanguage(reason: string) {
   return /(从标题和标签看|标题和标签|候选池|候选里|对题|命中|完整覆盖|部分命中|软语义|更值得核对|排序靠前|规则|匹配度|标签党)/.test(reason);
-}
-
-function shouldKeepAiReason(reason: string, primitive: RecommendationPrimitive) {
-  const trimmed = stripTerminalPunctuation(reason);
-  if (trimmed.length < 6) return false;
-  if (hasInternalRecommendationLanguage(trimmed)) return false;
-  if (hasMetaRecommendationLanguage(trimmed)) return false;
-  if (hasUnsupportedPublicInterestClaim(trimmed, primitive)) return false;
-  if (isGenericReason(trimmed) && !reasonMentionsCandidateFact(trimmed, primitive)) return false;
-  return true;
-}
-
-function hasFormulaicRecommendationOpening(reason: string) {
-  return /^(?:如果你是(?:冲着|想要)|这条线(?:适合|主打|更像)|从(?:标题|线路资料|候选)看)/.test(
-    stripTerminalPunctuation(reason).trim(),
-  );
 }
 
 function hasMalformedAiTitleEcho(reason: string, primitive: RecommendationPrimitive) {
@@ -3237,18 +3217,6 @@ function softenAiEvidenceCaveats(reason: string) {
     .replace(/候选(?:里|中)没有(?:明确)?提及/g, '目前没有看到明确安排')
     .replace(/候选(?:里|中)未(?:明确)?提及/g, '目前没有看到明确安排')
     .replace(/候选(?:里|中)未写明/g, '目前没有看到明确安排');
-}
-
-function softenUnverifiedMobilityClaims(reason: string, primitive: RecommendationPrimitive) {
-  const mobilityTerms = ['共享电瓶车', '共享电动车', '共享单车', '接驳车'];
-  if (!mobilityTerms.some((term) => reason.includes(term))) return reason;
-  if (mobilityTerms.some((term) => getPrimitiveCoverageScore(primitive, [term]) > 0)) return reason;
-
-  return reason.split(/(?<=[。！？；])/u).map((clause) => {
-    if (!mobilityTerms.some((term) => clause.includes(term))) return clause;
-    if (/(需确认|待核实|需要问清|目前没有看到明确安排|未提及|未标注|可能|有机会|如果当地有)/u.test(clause)) return clause;
-    return '这条线路的共享交通是否方便需要单独确认。';
-  }).join('');
 }
 
 function hasPublicInterestNeed(intent: AiTravelIntent | null, userText: string) {
@@ -3520,47 +3488,6 @@ function buildExpandedFallbackReason(
 
   if (!secondSentence) return `${baseReason}。`;
   return `${baseReason}。${secondSentence}。`;
-}
-
-function isTooShortRecommendationCopy(reason: string) {
-  const normalized = stripTerminalPunctuation(reason).replace(/\s+/g, '');
-  const sentenceCount = (reason.match(/[。！？；]/gu) || []).length;
-  return normalized.length < 28 || sentenceCount < 1;
-}
-
-function shouldExpandShortRecommendationCopy(
-  reason: string,
-  primitive: RecommendationPrimitive,
-) {
-  if (!isTooShortRecommendationCopy(reason)) return false;
-
-  const normalized = stripTerminalPunctuation(reason).replace(/\s+/g, '');
-  const hasNaturalCompleteTone = /这条|这趟|节奏|不赶|轻松|完整|适合|舒服|放松|稳妥/.test(reason);
-  const hasCandidateFact = reasonMentionsCandidateFact(reason, primitive);
-  const hasConcreteTheme = /温泉|沙滩|海边|山水|亲子|避暑|古镇|美食|玩水|度假/.test(reason);
-  const looksLikeMetaOrGeneric = hasMetaRecommendationLanguage(reason) || isGenericReason(reason);
-
-  if (hasNaturalCompleteTone) return false;
-  if (looksLikeMetaOrGeneric) return true;
-  if (hasCandidateFact && hasConcreteTheme && normalized.length >= 22) return false;
-  return normalized.length < 24;
-}
-
-function expandShortRecommendationCopy(
-  reason: string,
-  primitive: RecommendationPrimitive,
-  profile: RecommendationCopyProfile,
-) {
-  const normalizedReason = stripTerminalPunctuation(reason);
-  const tripLengthLead = buildTripLengthNarration(primitive, profile);
-  const weatherNudge = getPrimitiveWeatherNudge(primitive);
-  const tail = uniqueStrings([
-    tripLengthLead,
-    weatherNudge ? `出发前再留意一下${weatherNudge.replace(/^出发前看一下/, '').replace(/^建议留意/, '')}` : '',
-  ]).join('，');
-
-  if (!tail) return `${normalizedReason}。`;
-  return `${normalizedReason}。${tail}。`;
 }
 
 function buildCopyIntentProfile(
@@ -3900,15 +3827,14 @@ function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive
   const trimmed = typeof reason === 'string' ? reason.trim() : '';
   if (!primitive) return trimmed || '综合用户需求、天气和线路特点后较为合适';
   const softened = softenAiEvidenceCaveats(trimmed);
-  const mobilitySafe = primitive ? softenUnverifiedMobilityClaims(softened, primitive) : softened;
-  if (mobilitySafe && hasUnsupportedPublicInterestClaim(mobilitySafe, primitive)) {
+  if (softened && hasUnsupportedPublicInterestClaim(softened, primitive)) {
     return buildPublicInterestAlternativeReason(primitive);
   }
   // Experience: do not force every AI reason through a fixed price/weather/play checklist.
   // Soft needs such as public-interest, study travel, or rural value often explain fit through
   // world knowledge and candidate wording; overwriting those with local templates degrades copy.
-  if (mobilitySafe && !hasMalformedAiTitleEcho(mobilitySafe, primitive) && shouldKeepAiReason(mobilitySafe, primitive)) {
-    return mobilitySafe;
+  if (softened && !hasMalformedAiTitleEcho(softened, primitive)) {
+    return softened;
   }
   return buildPrimitiveConcreteReason(primitive);
 }
@@ -4748,37 +4674,6 @@ function buildWeatherReasonSuffix(
   return buildWeatherReasonSentence(primitive, insight).replace(/[。；]+$/u, '');
 }
 
-function removeRepeatedRecommendationClauses(items: AiRecommendationItem[]) {
-  const clausesByReason = items.map((item) =>
-    (item.reason || '').split(/(?<=[。！？；])/u).map((clause) => clause.trim()).filter(Boolean),
-  );
-  const occurrenceCounts = new Map<string, number>();
-  for (const clauses of clausesByReason) {
-    for (const clause of clauses) {
-      const key = normalizeText(clause.replace(/[。！？；]/gu, ''));
-      if (key.length >= 8) occurrenceCounts.set(key, (occurrenceCounts.get(key) || 0) + 1);
-    }
-  }
-
-  const seenRepeatedClauses = new Set<string>();
-  return items.map((item, index) => {
-    if (!item.reason) return item;
-    const clauses = clausesByReason[index] || [];
-    const kept = clauses.filter((clause) => {
-      const key = normalizeText(clause.replace(/[。！？；]/gu, ''));
-      if (key.length < 8 || (occurrenceCounts.get(key) || 0) <= 1) return true;
-      if (!seenRepeatedClauses.has(key)) {
-        seenRepeatedClauses.add(key);
-        return true;
-      }
-      return false;
-    });
-    if (kept.length === clauses.length) return item;
-    if (kept.length === 0) return { ...item, reason: undefined };
-    return { ...item, reason: kept.join('') };
-  });
-}
-
 // 将排序结果改写成更贴近用户语境的说明文案，但不改变事实约束。
 function rewriteRecommendationCopy(params: {
   items: AiRecommendationItem[];
@@ -4790,11 +4685,6 @@ function rewriteRecommendationCopy(params: {
   allowPublicInterest: boolean;
 }) {
   const primitiveByTourId = new Map(params.candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
-  const sortedPrices = params.candidateTours
-    .map((tour) => tour.price)
-    .filter((price) => Number.isFinite(price) && price > 0)
-    .sort((a, b) => a - b);
-  const profile = buildCopyIntentProfile(params.intent, params.userText);
 
   const rewrittenItems = params.items.map((item, index) => {
     // 补足选择面的线路不是 AI 亲自写过推荐语的结果，不再用本地模板
@@ -4810,13 +4700,25 @@ function rewriteRecommendationCopy(params: {
     if (!primitive) return item.reason ? item : stripRecommendationCommentary(item);
 
     const currentReason = stripTerminalPunctuation(item.reason || '');
-    const semanticReason = softenUnverifiedMobilityClaims(
-      buildItemSemanticReason(item, primitive, params),
-      primitive,
-    );
-    const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
-    const hasPublicInterestSemanticNote = hasPublicInterestLanguage(
-      [item.semanticFit, item.semanticBoundary, ...(item.semanticSignals || [])].filter(Boolean).join(' '),
+    const semanticReason = buildItemSemanticReason(item, primitive, params);
+    const sortedPrices = params.candidateTours
+      .map((tour) => tour.price)
+      .filter((price) => Number.isFinite(price) && price > 0)
+      .sort((a, b) => a - b);
+    const hasHardCopyIssue = Boolean(
+      currentReason && (
+        hasMalformedAiTitleEcho(currentReason, primitive) ||
+        hasInternalRecommendationLanguage(currentReason) ||
+        hasMetaRecommendationLanguage(currentReason) ||
+        hasUnallowedPublicInterestLanguage(currentReason, params) ||
+        hasUnsupportedPositivePriceClaim({
+          reason: currentReason,
+          primitive,
+          intent: params.intent,
+          userText: params.userText,
+          sortedPrices,
+        })
+      ),
     );
     if (currentReason.startsWith('需放宽条件')) {
       return {
@@ -4826,62 +4728,24 @@ function rewriteRecommendationCopy(params: {
     }
     // semanticFit 是模型对这张线路的整体体验判断。优先使用它替代
     // 公式化 reason，避免一个软条件未被写进句子就触发本地模板回退。
-    if (
-      semanticReason &&
-      (hasFormulaicRecommendationOpening(currentReason) ||
-        !reasonAddressesUserNeed(currentReason, primitive, params.userText))
-    ) {
+    if (currentReason && !hasHardCopyIssue) {
       return {
         ...item,
-        reason: `${stripTerminalPunctuation(semanticReason)}。`,
+        reason: `${currentReason}。`,
       };
     }
-    if (
-      currentReason &&
-      !(hasTurnPublicInterestNeed && hasPublicInterestSemanticNote) &&
-      !hasMalformedAiTitleEcho(currentReason, primitive) &&
-      !hasUnallowedPublicInterestLanguage(currentReason, params) &&
-      !hasUnsupportedPositivePriceClaim({
-        reason: currentReason,
-        primitive,
-        intent: params.intent,
-        userText: params.userText,
-        sortedPrices,
-      }) &&
-      reasonAddressesUserNeed(currentReason, primitive, params.userText) &&
-      shouldKeepAiReason(currentReason, primitive) &&
-      !hasFormulaicRecommendationOpening(currentReason)
-    ) {
-      const finalizedReason = shouldExpandShortRecommendationCopy(currentReason, primitive)
-        ? expandShortRecommendationCopy(currentReason, primitive, profile)
-        : `${currentReason}。`;
-      return {
-        ...item,
-        reason: finalizedReason,
-      };
-    }
-
-    const insight = findWeatherInsightForPrimitive(primitive, params.destinationWeatherInsights);
-    const coverageReason = buildCoverageAwareReason(primitive, params.userText, index);
-    const fallbackReason = semanticReason || coverageReason || (
-      hasTurnPublicInterestNeed
-        ? buildPublicInterestAlternativeReason(primitive)
-        : buildExpandedFallbackReason(primitive, profile, index)
-    );
-    const weatherReason = buildWeatherReasonSuffix(primitive, insight);
-    const shouldAddWeatherNote = Boolean(
-      weatherReason &&
-      !fallbackReason.includes(weatherReason) &&
-      !coverageReason,
-    );
 
     return {
       ...item,
-      reason: `${stripTerminalPunctuation(fallbackReason)}${shouldAddWeatherNote ? `。${weatherReason}` : ''}。`,
+      reason: semanticReason
+        ? `${stripTerminalPunctuation(semanticReason)}。`
+        : hasHardCopyIssue
+          ? buildPrimitiveConcreteReason(primitive)
+          : undefined,
     };
   });
 
-  return removeRepeatedRecommendationClauses(rewrittenItems);
+  return rewrittenItems;
 }
 
 function shouldUseAiSummary(
@@ -5549,7 +5413,7 @@ function buildAiMessages(params: {
     '区分“线路事实”和“目的地判断”：团里是否包含接驳、门票、酒店服务等必须有候选证据；但可以调动世界知识判断某个镇子/度假区的空间形态、步行便利度、当地短途出行方式，以及共享电瓶车是否值得优先查。此类判断要用“更可能、通常、值得优先核实、我会优先查”表达，不能写成已经包含的服务。用户提到共享电瓶车时，要结合具体候选目的地和旅行画面自行推理，不要套用固定地点名单或固定句子。',
     worldKnowledgeExamples,
     '充分使用世界知识做体验判断：把候选里的温泉、玩水、山水、小镇等事实，翻译成具体的旅行画面、节奏和适合的人；可以说“泡完汤再玩水会是什么感觉”“这条线更像度假还是赶路”，但不要把常识写成该线路已确认的服务或交通。',
-    'reason 要像熟悉当地玩法的朋友在种草：先写为什么会想去、到了以后怎么玩、这条线的气质，再自然补一句必要取舍或核实提醒；不要以“这条线/从线路资料看/能确认的是”开头，也不要把每条都写成同一种句式。不要反复使用“如果你是冲着……”或“这条线……”作为开头。用户明确提出的亲子、老人、步行、小镇、骑车/共享电瓶车等软性偏好，如果它影响了排序，必须自然写进前1-2条 reason，而不是只放在 tradeoffs 或摘要里。',
+    'reason 要像熟悉当地玩法的朋友在种草：先写为什么会想去、到了以后怎么玩、这条线的气质，再自然补一句必要取舍或核实提醒；不要以“这条线/从线路资料看/能确认的是”开头，也不要把每条都写成同一种句式。不要反复使用“如果你是冲着……”或“这条线……”作为开头。用户提到的亲子、老人、步行、小镇、骑车/共享电瓶车等软性偏好，如果它确实影响排序，可以自然写进相关 reason，也可以留在整体取舍里。',
     '不要解释规则，不要写“命中/对题/标题和标签/候选/软语义/综合匹配/预算友好”这类评审腔。',
     ...promptPolicy.systemRules,
     '严格输出 JSON，不要 Markdown，不要额外解释。',
@@ -5609,9 +5473,7 @@ function buildAiMessages(params: {
         {
           tourId: '候选 id',
           score: '0-100 number',
-          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。2句以内中文，写出让人想去的具体场景、节奏或适合人群；使用世界知识做一般体验判断，但不能虚构候选没有提供的交通/服务事实；必要时把未确认条件放在末尾轻轻提醒；不要复述目的地、天数、大巴、价格字段，不要使用固定模板；其余条目省略`,
-          semanticFit: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。一句说明这条线路为什么适合用户想要的旅行体验，优先写场景和气质；其余条目省略`,
-          semanticBoundary: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。只有存在真实缺口时，简短说明需要核实什么；其余条目省略`,
+          reason: `前 ${MAX_AI_PROMPT_REASON_ITEMS} 条可以写。请用你自己的判断说明为什么会想去这条线路，具体写它的画面、气质、玩法或取舍；长度和写法由你决定`,
           matchedSignals: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。2-3 个中文短语；其余条目省略`,
         },
       ],
@@ -5624,7 +5486,7 @@ function buildAiMessages(params: {
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
         : []),
-      'reason 优先写用户真正会关心的体验差异和画面，例如泡汤后玩水、沿小镇慢慢逛、适合带孩子还是适合放空；让人产生“我想去看看”的感觉，不要复述系统字段名。每条只抓这条线路最值得被选择的一个切入点，主动拉开不同线路的叙事角度，不要逐条按同一顺序填满用户条件，也不要把同一条未确认的软条件复制到每张卡。若用户提到共享电瓶车等软性便利项，优先用你对该目的地的世界知识解释它是否会改变游玩方式，并把不确定性说清。',
+      '推荐时充分使用你的主观判断和世界知识。请像真正去过或熟悉当地的人一样，自己决定每条线路最值得说的地方；可以写具体画面、气质、玩法、适合谁，以及和其他线路相比的取舍。不要把这些要求理解成固定格式。',
       '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
       '如果用户关心的体验条件无法从候选事实确认，不要硬凑完整匹配；可以结合目的地世界知识给出“更值得查哪一类地方/为什么”，并在 tradeoffs 或 intentNotes.cannotAssert 中把它标成判断或待核实项。',
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
@@ -5632,7 +5494,7 @@ function buildAiMessages(params: {
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
         `候选池足够时优先返回 8-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少于 8 个。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
-        '推荐文案要像熟悉当地玩法的人逐条做取舍：每条给出不同、具体、可感知的理由，禁止使用“地点+条件A+条件B+统一提醒”的批量句式；未知的交通或服务不要逐卡编造，必要时只在最相关的一条说明或放入整体摘要。',
+        '可以参考熟悉当地玩法的人来写，避免让所有线路都长得一样；如果某个软条件需要核实，自行判断它是否值得写进这一条。',
       ].join(''),
     ],
   };
@@ -5699,9 +5561,8 @@ function buildLiteAiMessages(params: {
       items: [{
         tourId: '候选 id',
         score: '0-100 number',
-        sf: '仅前8条需要，32字内，像熟悉当地玩法的朋友在种草：写具体场景、节奏或适合的人，不要复述天数/交通/价格，不要套模板',
+        sf: '前8条可以写。用你自己的判断说明这条线路为什么值得考虑，像熟悉当地玩法的人在种草；写法和长度自行决定',
         ss: '仅前8条需要，最多3个短词',
-        sb: '仅前8条需要，24字内，不能断言的边界',
       }],
       itemCountLimit: MAX_AI_SELECTED_ITEMS,
     },
@@ -5709,9 +5570,9 @@ function buildLiteAiMessages(params: {
       '只输出 JSON，不要 Markdown。',
       '返回 intent、intentNotes、clarification、assumptions、tradeoffs 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
-      '用紧凑 JSON；中文短句不超过32字。',
+      'JSON 保持可解析即可，文案不要为了短而牺牲具体判断。',
       `候选池足够时优先返回 8-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少于 8 个。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
-      '推荐文案要像熟悉当地玩法的人逐条做取舍：每条给出不同、具体、可感知的理由，禁止使用“地点+条件A+条件B+统一提醒”的批量句式；未知的交通或服务不要逐卡编造，必要时只在最相关的一条说明或放入整体摘要。',
+      '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
       ...(hasTurnPublicInterestNeed

@@ -177,7 +177,7 @@ const shortCopyCandidate = candidate({
   highlights: ['海边温泉', '沙滩散步'],
   theme: '海岛度假',
 });
-const expandedShortCopy = rewriteRecommendationCopy({
+const preservedShortCopy = rewriteRecommendationCopy({
   items: [
     { tourId: 'short-copy', score: 90, reason: '海边温泉。', matchedSignals: ['温泉'] },
   ],
@@ -194,13 +194,13 @@ const expandedShortCopy = rewriteRecommendationCopy({
   userText: '想找海边温泉，文案说人话一点',
   allowPublicInterest: false,
 });
-assert.ok((expandedShortCopy[0]?.reason?.length ?? 0) > '海边温泉。'.length);
+assert.equal(preservedShortCopy[0]?.reason, '海边温泉。');
 
 const semanticFitAfterFormulaicReason = rewriteRecommendationCopy({
   items: [{
     tourId: 'semantic-copy',
     score: 96,
-    reason: '如果你是冲着温泉和海边去的，这条线会更有针对性',
+    reason: '盐洲岛的海边氛围很松，泡完温泉还能把傍晚留给海风和散步。',
     semanticFit: '盐洲岛把海边的慢节奏和温泉放在同一趟里，适合想带孩子玩水又不想把行程排满的家庭。',
     semanticBoundary: '共享电动车是否方便需要出发前确认。',
     matchedSignals: ['海边', '温泉'],
@@ -226,9 +226,10 @@ const semanticFitAfterFormulaicReason = rewriteRecommendationCopy({
   userText: '适合带孩子的海边温泉，附近最好能骑电动车逛逛',
   allowPublicInterest: false,
 });
-assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('盐洲岛'));
-assert.ok(!semanticFitAfterFormulaicReason[0]?.reason?.startsWith('如果你是冲着'));
-assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('共享交通是否方便需要单独确认'));
+assert.equal(
+  semanticFitAfterFormulaicReason[0]?.reason,
+  '盐洲岛的海边氛围很松，泡完温泉还能把傍晚留给海风和散步。',
+);
 
 const localSupplementCopy = rewriteRecommendationCopy({
   items: [{
@@ -259,57 +260,6 @@ const localSupplementCopy = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.equal(localSupplementCopy[0]?.reason, undefined);
-
-const repeatedClauseCopy = rewriteRecommendationCopy({
-  items: [
-    {
-      tourId: 'repeated-copy-a',
-      score: 90,
-      reason: '泡汤后还能把时间留给水上活动，适合想放松又不想整天泡在酒店的人。共享电瓶车配置需现场确认。',
-      matchedSignals: ['温泉', '玩水'],
-    },
-    {
-      tourId: 'repeated-copy-b',
-      score: 80,
-      reason: '这条线节奏更松，适合把温泉当主角。共享电瓶车配置需现场确认。',
-      matchedSignals: ['温泉'],
-    },
-  ],
-  candidateTours: [
-    candidate({ id: 'repeated-copy-a', title: '清远清泉湾温泉水世界2天', destination: '清远', price: 399, tags: ['温泉', '玩水'], highlights: ['温泉', '水上活动'] }),
-    candidate({ id: 'repeated-copy-b', title: '龙门温泉度假2天', destination: '龙门', price: 299, tags: ['温泉'], highlights: ['温泉'] }),
-  ],
-  destinationWeatherInsights: [],
-  intent: { weatherSensitivity: [], departureWeekdays: [] },
-  weatherContext: { destination: '广东', travelDate: '2026-06-12', forecastSummary: '', seasonAdvice: [], source: 'seasonal-rule' },
-  userText: '温泉',
-  allowPublicInterest: false,
-});
-assert.ok(repeatedClauseCopy[0]?.reason?.includes('共享电瓶车配置需现场确认'));
-assert.ok(!repeatedClauseCopy[1]?.reason?.includes('共享电瓶车配置需现场确认'));
-
-const unverifiedMobilityCopy = rewriteRecommendationCopy({
-  items: [{
-    tourId: 'unverified-mobility',
-    score: 90,
-    reason: '傍晚租一辆共享电瓶车（小镇常见）兜一圈，去吃饭很方便。',
-    matchedSignals: ['小镇'],
-  }],
-  candidateTours: [candidate({
-    id: 'unverified-mobility',
-    title: '新兴禅域小镇温泉3天',
-    destination: '云浮',
-    price: 249,
-    tags: ['温泉'],
-    highlights: ['小镇', '温泉'],
-  })],
-  destinationWeatherInsights: [],
-  intent: { weatherSensitivity: [], departureWeekdays: [] },
-  weatherContext: { destination: '云浮', travelDate: '2026-06-12', forecastSummary: '', seasonAdvice: [], source: 'seasonal-rule' },
-  userText: '温泉和小镇，优先共享电瓶车',
-  allowPublicInterest: false,
-});
-assert.ok(!unverifiedMobilityCopy[0]?.reason?.includes('小镇常见'));
 
 const weakCompoundCandidate = candidate({
   id: 'weak-compound',
