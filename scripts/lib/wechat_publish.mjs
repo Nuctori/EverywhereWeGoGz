@@ -135,15 +135,13 @@ function renderMarkdownImage(alt, src, options = {}) {
   return `<div style="margin:16px 0 18px;text-align:center;"><img src="${escapeHtml(src)}" alt="${escapeHtml(alt || '')}" style="display:${display};width:${width};max-width:${maxWidth};height:auto;border-radius:${borderRadius};"></div>`;
 }
 
-function renderSupportBlock({ ctaLabel, href, address, qrAlt, qrSrc }) {
+function renderSupportBlock({ ctaLabel, href, qrAlt, qrSrc }) {
   return [
-    '<div style="margin:16px 0 0;padding:16px 18px;border:1px solid #e5e7eb;border-radius:14px;background:#f8fafc;">',
-    `<a href="${escapeHtml(href)}" style="display:inline-block;padding:8px 16px;border-radius:999px;background:#0f766e;color:#ffffff;text-decoration:none;font-size:15px;line-height:1.2;font-weight:600;">${escapeHtml(ctaLabel)}</a>`,
-    '<div style="margin:14px 0 6px;font-size:13px;line-height:1.5;color:#6b7280;">详情地址</div>',
-    `<a href="${escapeHtml(address)}" style="display:block;font-size:14px;line-height:1.7;color:#0f172a;text-decoration:none;font-weight:600;">老广去边度站内详情页</a>`,
-    `<div style="margin-top:6px;font-size:12px;line-height:1.6;color:#64748b;word-break:break-all;">${escapeHtml(address)}</div>`,
-    '<div style="margin:14px 0 8px;font-size:13px;line-height:1.5;color:#6b7280;">扫码查看详情</div>',
-    `<div style="text-align:center;"><img src="${escapeHtml(qrSrc)}" alt="${escapeHtml(qrAlt || '报名二维码')}" style="display:block;margin:0 auto;width:200px;max-width:100%;height:auto;border-radius:0;"></div>`,
+    '<div style="margin:22px 0 8px;padding:18px 16px 20px;border:1px solid #d7e7e3;border-radius:12px;background:#f7fbfa;text-align:center;">',
+    `<a href="${escapeHtml(href)}" style="display:block;margin:0 auto 16px;padding:10px 18px;border-radius:6px;background:#0f766e;color:#ffffff;text-decoration:none;font-size:15px;line-height:1.35;font-weight:600;">${escapeHtml(ctaLabel)}</a>`,
+    '<div style="margin:0 0 10px;font-size:13px;line-height:1.5;color:#50716c;">扫码查看详情</div>',
+    `<div style="text-align:center;"><img src="${escapeHtml(qrSrc)}" alt="${escapeHtml(qrAlt || '报名二维码')}" style="display:block;margin:0 auto;width:180px;max-width:100%;height:auto;border-radius:0;"></div>`,
+    '<div style="margin-top:10px;font-size:12px;line-height:1.5;color:#78918d;">长按识别二维码，查看完整行程</div>',
     '</div>',
   ].join('');
 }
@@ -160,9 +158,9 @@ function tryRenderSupportBlock(lines, startIndex) {
 
   let cursor = consumeBlankLines(lines, startIndex + 1);
   const addressMatch = lines[cursor]?.trim().match(/^地址[:：]\s*(https?:\/\/\S+)$/);
-  if (!addressMatch) return null;
-
-  cursor = consumeBlankLines(lines, cursor + 1);
+  if (addressMatch) {
+    cursor = consumeBlankLines(lines, cursor + 1);
+  }
   const qrHint = lines[cursor]?.trim();
   if (!qrHint || !qrHint.startsWith('扫码')) return null;
 
@@ -175,7 +173,6 @@ function tryRenderSupportBlock(lines, startIndex) {
     html: renderSupportBlock({
       ctaLabel: ctaMatch[1],
       href: ctaMatch[2],
-      address: addressMatch[1],
       qrAlt: qrMatch[1],
       qrSrc: qrMatch[2],
     }),
@@ -199,6 +196,16 @@ function renderParagraph(lines) {
   return `<p style="margin:0 0 14px;font-size:16px;line-height:1.82;color:#1f2937;">${lines.map(renderInlineMarkdown).join('<br>')}</p>`;
 }
 
+function renderInfoLine(label, value) {
+  const isReminder = label === '提醒';
+  const wrapperStyle = isReminder
+    ? 'margin:10px 0;padding:10px 12px;border-left:3px solid #e7a23b;background:#fff9ed;'
+    : 'margin:8px 0;color:#334155;';
+  const labelStyle = isReminder
+    ? 'color:#9a651d;'
+    : 'color:#0f766e;';
+  return `<div style="${wrapperStyle}font-size:14px;line-height:1.75;"><strong style="${labelStyle}font-weight:700;">${escapeHtml(label)}</strong><span style="color:#334155;">：${renderInlineMarkdown(value)}</span></div>`;
+}
 function renderList(items) {
   return `<ul style="margin:0 0 14px;padding-left:1.35em;color:#1f2937;">${items.map((item) => `<li style="margin:0 0 8px;font-size:15px;line-height:1.75;">${renderInlineMarkdown(item)}</li>`).join('')}</ul>`;
 }
@@ -263,6 +270,13 @@ export function markdownToHtml(markdown) {
       continue;
     }
 
+    const infoLineMatch = trimmed.match(/^(?:\*\*)?(适合|行程|提醒)(?:\*\*)?[:：]\s*(.+)$/);
+    if (infoLineMatch) {
+      flushParagraph();
+      flushList();
+      blocks.push(renderInfoLine(infoLineMatch[1], infoLineMatch[2]));
+      continue;
+    }
     const imageMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
     if (imageMatch) {
       flushParagraph();
