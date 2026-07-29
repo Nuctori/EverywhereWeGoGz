@@ -3766,8 +3766,7 @@ function buildItemSemanticReason(
   const text = parts.join('；');
   if (
     !hasUnallowedPublicInterestLanguage(text, options) &&
-    !hasUnsupportedPublicInterestClaim(text, primitive) &&
-    !hasUnsupportedCompoundCoverageClaim(text, primitive, options.userText)
+    !hasUnsupportedPublicInterestClaim(text, primitive)
   ) {
     return text;
   }
@@ -3775,8 +3774,7 @@ function buildItemSemanticReason(
   if (
     semanticFit &&
     !hasUnallowedPublicInterestLanguage(semanticFit, options) &&
-    !hasUnsupportedPublicInterestClaim(semanticFit, primitive) &&
-    !hasUnsupportedCompoundCoverageClaim(semanticFit, primitive, options.userText)
+    !hasUnsupportedPublicInterestClaim(semanticFit, primitive)
   ) {
     const safeBoundary = boundary &&
       !hasUnallowedPublicInterestLanguage(boundary, options) &&
@@ -3788,40 +3786,6 @@ function buildItemSemanticReason(
   }
 
   return '';
-}
-
-function hasUnsupportedCompoundCoverageClaim(
-  text: string,
-  primitive: RecommendationPrimitive,
-  userText: string | undefined,
-) {
-  const requestedTerms = getCoverageTermsForQuality(userText);
-  if (requestedTerms.length < 2) return false;
-
-  const normalizedText = normalizeText(text);
-  const claimedTerms = requestedTerms.filter((term) =>
-    getCoverageTermAliases(term).some((alias) => normalizedText.includes(normalizeText(alias)))
-  );
-  if (claimedTerms.length < 2) return false;
-
-  return claimedTerms.some((term) => {
-    if (getPrimitiveCoverageScore(primitive, [term]) > 0) return false;
-    return !isCoverageTermCaveated(normalizedText, term);
-  });
-}
-
-function isCoverageTermCaveated(text: string, term: string) {
-  const aliases = getCoverageTermAliases(term).map(normalizeText).filter(Boolean);
-  const gapWords = ['未确认', '未标注', '没有证据', '暂无证据', '资料未提', '资料没有', '需核实', '待核实', '无法确认', '不能确认', '不确定', '未知', '缺少'];
-  const worldKnowledgeWords = ['通常', '更可能', '值得优先查', '我会优先查', '适合先查', '一般会', '常见于', '大概率', '从当地形态看', '从目的地形态看'];
-  return aliases.some((alias) => {
-    const termIndex = text.indexOf(alias);
-    if (termIndex < 0) return false;
-    return [...gapWords, ...worldKnowledgeWords].some((word) => {
-      const gapIndex = text.indexOf(normalizeText(word));
-      return gapIndex >= 0 && Math.abs(gapIndex - termIndex) <= 18;
-    }) || /需要[^。；]{0,8}确认/.test(text);
-  });
 }
 
 function reasonAddressesUserNeed(
@@ -4825,7 +4789,6 @@ function rewriteRecommendationCopy(params: {
       !(hasTurnPublicInterestNeed && hasPublicInterestSemanticNote) &&
       !hasMalformedAiTitleEcho(currentReason, primitive) &&
       !hasUnallowedPublicInterestLanguage(currentReason, params) &&
-      !hasUnsupportedCompoundCoverageClaim(currentReason, primitive, params.userText) &&
       !hasUnsupportedPositivePriceClaim({
         reason: currentReason,
         primitive,
