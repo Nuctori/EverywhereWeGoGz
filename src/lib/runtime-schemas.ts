@@ -10,6 +10,7 @@ const geoPointSchema = z.object({
   placeId: z.string().min(1),
   name: z.string().min(1),
   normalizedName: z.string().min(1),
+  label: z.string().optional(),
   country: z.string().optional(),
   province: z.string().optional(),
   city: z.string().optional(),
@@ -20,6 +21,14 @@ const geoPointSchema = z.object({
   source: z.enum(['source', 'catalog', 'inferred', 'unknown']),
   confidence: z.enum(['low', 'medium', 'high']),
 });
+
+export const geoPlaceIndexEntrySchema = geoPointSchema.extend({
+  tourIds: z.array(z.string().min(1)),
+  tourCount: z.coerce.number().int().nonnegative(),
+  roles: z.array(z.enum(['departure', 'destination', 'stop'])),
+});
+
+export const geoPlacesSchema = z.array(geoPlaceIndexEntrySchema);
 
 const tourGeoSchema = z.object({
   departure: geoPointSchema.optional(),

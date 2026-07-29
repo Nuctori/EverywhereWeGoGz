@@ -41,15 +41,16 @@ function buildGeoPoint(tour, role) {
   const destination = role === 'destination';
   const latitude = tour[destination ? 'destinationLatitude' : 'departureLatitude'];
   const longitude = tour[destination ? 'destinationLongitude' : 'departureLongitude'];
-  const name = nonEmpty(tour[destination ? 'destinationCity' : 'departureCity']);
-  if (!name || !validCoordinate(latitude, longitude)) return undefined;
+  const cityName = nonEmpty(tour[destination ? 'destinationCity' : 'departureCity']);
+  const name = destination ? (nonEmpty(tour.destinationPlaceName) || cityName) : cityName;
+  if (!name || !cityName || !validCoordinate(latitude, longitude)) return undefined;
 
   const point = {
     name,
     normalizedName: name,
     country: nonEmpty(tour[destination ? 'destinationCountry' : 'departureCountry']),
     province: nonEmpty(tour[destination ? 'destinationProvince' : 'departureProvince']),
-    city: name,
+    city: cityName,
     latitude: Number(latitude),
     longitude: Number(longitude),
     coordinateSystem: 'wgs84',
@@ -57,7 +58,7 @@ function buildGeoPoint(tour, role) {
     source: tour.geoSource === 'local-place-catalog' ? 'catalog' : 'inferred',
     confidence: ['low', 'medium', 'high'].includes(tour.geoConfidence) ? tour.geoConfidence : 'low',
   };
-  return { placeId: buildPlaceId(point), ...point };
+  return { placeId: buildPlaceId(point), ...point, ...(name !== cityName ? { label: name } : {}) };
 }
 
 function buildGeo(tour) {
@@ -319,7 +320,7 @@ const tourMapIndex = listTours.map((tour) => {
     if (!point) continue;
     const existing = placeMap.get(point.placeId);
     if (existing) {
-      existing.tourIds.push(tour.id);
+      if (!existing.tourIds.includes(tour.id)) existing.tourIds.push(tour.id);
       if (!existing.roles.includes(role)) existing.roles.push(role);
       if (existing.confidence !== point.confidence) existing.confidence = 'medium';
     } else {
