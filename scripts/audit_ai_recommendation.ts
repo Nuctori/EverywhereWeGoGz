@@ -1761,6 +1761,8 @@ const weatherInsights = [
     dateSpecificSummary: '6月20日预计晴到多云，降雨概率约20%',
     weatherWindowLabel: '6月20日这班',
     weatherRiskLevel: 'better' as const,
+    weatherComfortScore: 96,
+    weatherComfortSummary: '12-21点天气影响较小',
     seasonAdvice: [],
     role: 'destination' as const,
     source: 'open-meteo' as const,
@@ -1772,11 +1774,66 @@ const weatherInsights = [
     dateSpecificSummary: '6月20日预计有阵雨，降雨概率约80%',
     weatherWindowLabel: '6月20日这班',
     weatherRiskLevel: 'worse' as const,
+    weatherComfortScore: 42,
+    weatherComfortSummary: '12-21点降雨影响较大',
     seasonAdvice: [],
     role: 'destination' as const,
     source: 'open-meteo' as const,
   },
 ];
+
+const weatherAlternativePrompt = buildAiMessages({
+  userText: '这周广东团期天气都不好，找天气好一点的地方',
+  messages: [],
+  candidates: compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
+    userText: '这周广东团期天气都不好，找天气好一点的地方',
+  }),
+  routeAtlas: buildRouteAtlas([qingyuanWeatherTour, yangjiangWeatherTour]),
+  auditContext: buildRecommendationAuditContext(
+    [qingyuanWeatherTour, yangjiangWeatherTour],
+    null,
+    { destinationHints: ['广东'], weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+  ),
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-20',
+    forecastSummary: '广州团期天气偏差',
+    seasonAdvice: [],
+    source: 'open-meteo',
+  },
+  destinationWeatherInsights: weatherInsights,
+  searchQuery: '',
+  intent: { destinationHints: ['广东'], weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+  preferenceMemory: null,
+  allowPublicInterest: false,
+});
+const weatherAlternativePromptText = weatherAlternativePrompt.map((message) => message.content).join('\n');
+assert.ok(weatherAlternativePromptText.includes('天气替代'));
+assert.ok(weatherAlternativePromptText.includes('weatherComfortScore'));
+assert.ok(weatherAlternativePromptText.includes('清远'));
+const weatherAlternativeLitePrompt = buildLiteAiMessages({
+  userText: '这周广东团期天气都不好，找天气好一点的地方',
+  messages: [],
+  candidates: compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
+    userText: '这周广东团期天气都不好，找天气好一点的地方',
+  }),
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-20',
+    forecastSummary: '广州团期天气偏差',
+    seasonAdvice: [],
+    source: 'open-meteo',
+  },
+  destinationWeatherInsights: weatherInsights,
+  searchQuery: '',
+  intent: { destinationHints: ['广东'], weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+  preferenceMemory: null,
+  allowPublicInterest: false,
+});
+const weatherAlternativeLitePromptText = weatherAlternativeLitePrompt.map((message) => message.content).join('\n');
+assert.ok(weatherAlternativeLitePromptText.includes('天气更好的替代'));
+assert.ok(weatherAlternativeLitePromptText.includes('weatherComfortScore'));
+assert.ok(weatherAlternativeLitePromptText.includes('清远'));
 
 function hourlyWeather(overrides: Record<number, Partial<{
   precipitationProbability: number;
@@ -1884,18 +1941,18 @@ assert.equal(
   getWeatherRankingScore(buildTourPrimitive(chaozhouWeatherTour), [
     { ...weatherInsights[0], destination: '潮州' },
   ]),
-  10,
+  9.2,
   '具体城市应优先于粤东代表点，避免把潮州错配到汕尾',
 );
 
 assert.equal(
   getWeatherRankingScore(buildTourPrimitive(qingyuanWeatherTour), weatherInsights),
-  10,
+  9.2,
   '广东线路应按标题识别清远天气锚点',
 );
 assert.equal(
   getWeatherRankingScore(buildTourPrimitive(yangjiangWeatherTour), weatherInsights),
-  -10,
+  -1.6,
   '广东线路应按标题识别阳江天气锚点',
 );
 const weatherAwareSorted = prioritizeRecommendationItems(

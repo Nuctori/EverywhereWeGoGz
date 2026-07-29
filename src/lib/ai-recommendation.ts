@@ -5894,6 +5894,7 @@ function buildAiMessages(params: {
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。先做整体体验判断，再做候选排序。',
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
       'candidates 里 pc/pricePct 是价格上下文，atoms/cats/seasonAtoms/conflicts 是候选事实摘要。',
+      '如果用户明确表示当前目的地天气都不好、想找天气好一点的地方，先比较 dw 中同一团期的 weatherComfortScore、weatherRiskLevel 和 weatherComfortSummary；当前目标都为 worse/mixed 时，可以从候选池中选择 weatherRiskLevel=better 的目的地作为天气替代，并在 summary 或 tradeoffs 说明“为什么替代”。但不能为了天气悄悄突破严格预算、班期、避开条件或用户明确限定的目的地；没有 open-meteo 实时数据时不要伪造天气更好。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
         : []),
@@ -5922,6 +5923,7 @@ function buildLiteAiMessages(params: {
   messages: AiRecommendationMessage[];
   candidates: ReturnType<typeof compactCandidates>;
   weatherContext: AiWeatherContext;
+  destinationWeatherInsights?: DestinationWeatherInsight[];
   searchQuery: string;
   intent: AiTravelIntent | null;
   preferenceMemory: AiPreferenceMemory | null;
@@ -5944,6 +5946,7 @@ function buildLiteAiMessages(params: {
     pm: compactPreferenceMemoryForPrompt(params.preferenceMemory),
     it: compactIntentForPrompt(params.intent),
     wx: compactWeatherContextForPrompt(params.weatherContext),
+    dw: compactDestinationWeatherInsightsForPrompt(params.destinationWeatherInsights || []),
     sg: semanticGuidance,
     ck: [
       'id', 'title', 'destination', 'days', 'price', 'match', 'atoms', 'cats', 'weather', 'conflict',
@@ -5985,6 +5988,7 @@ function buildLiteAiMessages(params: {
       `最多返回 ${MAX_AI_SELECTED_ITEMS} 个 items，每个都可以写完整推荐理由。`,
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
+      '如果用户明确想找天气更好的替代，先比较 dw 中同一团期的 weatherComfortScore、weatherRiskLevel 和 weatherComfortSummary；只有 open-meteo 实时数据支持时，才可从候选池选择 weatherRiskLevel=better 的目的地。不得突破严格预算、班期、避开条件或明确目的地限制。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，优先按 sg 去理解这类软语义；它是理解镜头，不是硬过滤规则。']
         : ['像带老人、怕热、想放松这类软语义，要借助世界知识理解节奏、气候和体验差异。']),
@@ -7492,6 +7496,31 @@ export async function requestAiRecommendations({
       };
     }
     const compactedCandidateIds = new Set(aiCandidatePool.map((candidate) => candidate.id));
+    const destinationWeatherCandidates = useWeatherResearch
+      ? buildDestinationWeatherCandidates(
+          aiCandidatePool,
+          searchQuery,
+          effectiveIntent,
+        )
+      : [];
+    const destinationWeatherInsightsPromise = useWeatherResearch
+      ? Promise.all(
+          destinationWeatherCandidates.map((candidate) =>
+            fetchDestinationWeatherInsight({
+              destination: candidate.destination,
+              travelDate: candidate.travelDate || weatherContextForRanking.travelDate,
+              inferredFrom: ['候选目的地补充查询'],
+              role: 'destination',
+              queryReason: `该目的地天气和观赏期可能显著影响体验：${candidate.evidence.join(' / ')}`,
+              corpus: candidate.corpus,
+            }),
+          ),
+        )
+      : Promise.resolve([] as DestinationWeatherInsight[]);
+    const [weatherContext, destinationWeatherInsights] = await Promise.all([
+      weatherContextPromise,
+      destinationWeatherInsightsPromise,
+    ]);
     emitProgress(onProgress, {
       stage: 'ranking',
       label: '正在生成推荐结果',
@@ -7514,8 +7543,8 @@ export async function requestAiRecommendations({
         candidates: aiCandidatePool,
         routeAtlas: await routeAtlasPromise,
         auditContext,
-        weatherContext: weatherContextForRanking,
-        destinationWeatherInsights: [],
+        weatherContext,
+        destinationWeatherInsights,
         searchQuery,
         intent: effectiveIntent,
         preferenceMemory: aiContextMemoryForThisTurn,
@@ -7526,6 +7555,7 @@ export async function requestAiRecommendations({
         messages,
         candidates: aiCandidatePool,
         weatherContext: weatherContextForRanking,
+        destinationWeatherInsights,
         searchQuery,
         intent: effectiveIntent,
         preferenceMemory: aiContextMemoryForThisTurn,
@@ -7625,30 +7655,6 @@ export async function requestAiRecommendations({
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
     const mergedCandidateTours = availableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));
-    const destinationWeatherCandidates = useWeatherResearch
-      ? buildDestinationWeatherCandidates(
-          aiCandidatePool,
-          searchQuery,
-          finalIntent,
-        )
-      : [];
-    const [weatherContext, destinationWeatherInsights] = await Promise.all([
-      weatherContextPromise,
-      useWeatherResearch
-        ? Promise.all(
-            destinationWeatherCandidates.map((candidate) =>
-              fetchDestinationWeatherInsight({
-                destination: candidate.destination,
-                travelDate: candidate.travelDate || weatherContextForRanking.travelDate,
-                inferredFrom: ['候选目的地补充查询'],
-                role: 'destination',
-                queryReason: `该目的地天气和观赏期可能显著影响体验：${candidate.evidence.join(' / ')}`,
-                corpus: candidate.corpus,
-              }),
-            ),
-          )
-        : Promise.resolve([] as DestinationWeatherInsight[]),
-    ]);
     const mergedItems = prioritizeRecommendationItems(
       rewriteRecommendationCopy({
         items: attachWeatherGuidanceToItems(
@@ -7667,8 +7673,8 @@ export async function requestAiRecommendations({
         candidateTours: mergedCandidateTours,
         intent: finalIntent,
         userText: finalEffectiveUserText,
-      },
         destinationWeatherInsights,
+      },
     ).slice(0, aiItems.length > 0 ? MAX_AI_SELECTED_ITEMS : MAX_AI_RANKED_ITEMS);
     emitProgress(onProgress, {
       stage: 'completed',
