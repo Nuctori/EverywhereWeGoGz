@@ -81,21 +81,44 @@ assert.ok(groupedHtml.includes('font-size:19px'));
 assert.ok(groupedHtml.includes('font-size:18px'));
 assert.ok(groupedHtml.includes('border-top:1px solid #dbe4ea'));
 
+const infoLinesHtml = markdownToHtml(`
+**适合**：亲子、朋友｜当下看点：峡谷和漂流
+**行程**：2天｜399元/人｜近期班期 2026-06-27
+**提醒**：出发前查看天气并准备替换衣物
+`);
+assert.ok(infoLinesHtml.includes('适合'));
+assert.ok(infoLinesHtml.includes('行程'));
+assert.ok(infoLinesHtml.includes('border-left:3px solid #e7a23b'));
+assert.ok(infoLinesHtml.includes('background:#fff9ed'));
+
+const legacyInfoLinesHtml = markdownToHtml('提醒：旧文章也应使用提醒样式');
+assert.ok(legacyInfoLinesHtml.includes('background:#fff9ed'));
+
 const supportBlockHtml = markdownToHtml(`
 [查看行程](https://nuctori.github.io/EverywhereWeGoGz/?tour=tour_2705&source=wechat)
-
-地址：https://nuctori.github.io/EverywhereWeGoGz/?tour=tour_2705&source=wechat
 
 扫码查看详情
 
 ![查看行程 报名二维码](qr/tour_2705.png)
 `);
-assert.ok(supportBlockHtml.includes('详情地址'));
 assert.ok(supportBlockHtml.includes('扫码查看详情'));
-assert.ok(supportBlockHtml.includes('width:200px'));
-assert.ok(supportBlockHtml.includes('老广去边度站内详情页'));
+assert.ok(supportBlockHtml.includes('width:180px'));
+assert.ok(supportBlockHtml.includes('长按识别二维码，查看完整行程'));
+assert.ok(!supportBlockHtml.includes('详情地址'));
+assert.ok(!supportBlockHtml.includes('source=wechat</div>'));
 assert.ok(supportBlockHtml.includes('qr/tour_2705.png'));
-assert.ok(!supportBlockHtml.includes('<p>地址：https://nuctori.github.io/EverywhereWeGoGz/?tour=tour_2705&amp;source=wechat</p>'));
+
+const legacySupportBlockHtml = markdownToHtml(`
+[查看行程](https://example.com/tour)
+
+地址：https://example.com/tour
+
+扫码查看详情
+
+![报名二维码](qr/legacy.png)
+`);
+assert.ok(!legacySupportBlockHtml.includes('详情地址'));
+assert.ok(legacySupportBlockHtml.includes('qr/legacy.png'));
 
 const payload = buildDraftPayload({
   frontmatter: parsed.data,

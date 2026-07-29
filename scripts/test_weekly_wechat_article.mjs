@@ -318,6 +318,7 @@ assert.ok(article.includes('#### 1. 清远峡谷漂流2天'));
 assert.ok(article.includes('这一组看的是能把人一下子从闷热里拎出来的水声和树荫'));
 assert.ok(article.includes('扫码查看详情'));
 assert.ok(article.includes('qr/tour-summer-nearby.png'));
+assert.ok(!article.includes('地址：https://nuctori.github.io/EverywhereWeGoGz/'));
 assert.ok((article.match(/^---$/gm) || []).length >= context.selectedTours.length + 2);
 
 const groupedArticle = renderWeeklyArticle(balancedContext, {
