@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ChevronRight, Map, MapPinned, RefreshCw, X } from 'lucide-react';
+import { Map, MapPinned, RefreshCw, X } from 'lucide-react';
 import { useGeoPlaces } from '@/hooks/use-geo-places';
+import { MAP_TILE_PROVIDERS, wgs84ToGcj02, type MapTileProvider } from '@/lib/map-tile-pool';
 import type { GeoPlaceIndexEntry } from '@/types/tour';
 
-const OSM_TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-const OSM_ATTRIBUTION = '&copy; OpenStreetMap contributors';
 const DEFAULT_CENTER: L.LatLngExpression = [23.5, 113.5];
 const DEFAULT_ZOOM = 5;
 
@@ -35,15 +35,29 @@ function placeMeta(place: GeoPlaceIndexEntry) {
   return `${level} · ${confidence} · ${place.tourCount} 条线路`;
 }
 
+function pointForProvider(place: GeoPlaceIndexEntry, provider: MapTileProvider): L.LatLngExpression {
+  if (provider.coordinateSystem === 'gcj02' && isWithinChinaCoverage(place)) {
+    return wgs84ToGcj02(place.latitude, place.longitude);
+  }
+  return [place.latitude, place.longitude];
+}
+
+function isWithinChinaCoverage(place: GeoPlaceIndexEntry) {
+  return place.longitude >= 73 && place.longitude <= 135 && place.latitude >= 18 && place.latitude <= 54;
+}
+
 export function MapView({ onPlaceSelect }: MapViewProps) {
   const { places, loading, error, fetchPlaces } = useGeoPlaces();
   const [isOpen, setIsOpen] = useState(false);
+  const [providerIndex, setProviderIndex] = useState(0);
   const [tileError, setTileError] = useState(false);
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const tileLayerRef = useRef<L.TileLayer | null>(null);
   const markersRef = useRef<L.LayerGroup | null>(null);
+  const tileLoadCountRef = useRef(0);
+  const tileErrorCountRef = useRef(0);
   const sortedPlaces = places.slice().sort((a, b) => b.tourCount - a.tourCount);
-  const previewPlaces = sortedPlaces.slice(0, 4);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -56,11 +70,7 @@ export function MapView({ onPlaceSelect }: MapViewProps) {
 
   useEffect(() => {
     if (!isOpen || !mapElementRef.current || mapRef.current) return;
-    setTileError(false);
     const map = L.map(mapElementRef.current, { zoomControl: true, scrollWheelZoom: false });
-    const tileLayer = L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 });
-    tileLayer.on('tileerror', () => setTileError(true));
-    tileLayer.addTo(map);
     map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
     mapRef.current = map;
     markersRef.current = L.layerGroup().addTo(map);
@@ -70,6 +80,7 @@ export function MapView({ onPlaceSelect }: MapViewProps) {
       window.cancelAnimationFrame(resizeFrame);
       map.remove();
       mapRef.current = null;
+      tileLayerRef.current = null;
       markersRef.current = null;
     };
   }, [isOpen]);
@@ -79,64 +90,88 @@ export function MapView({ onPlaceSelect }: MapViewProps) {
     const markers = markersRef.current;
     if (!isOpen || !map || !markers || places.length === 0) return;
 
+    const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
     markers.clearLayers();
     const bounds = L.latLngBounds([]);
     places.forEach((place) => {
-      const marker = L.marker([place.latitude, place.longitude]);
-      marker.bindPopup(
-        `<strong>${escapeHtml(place.name)}</strong><br/><span>${escapeHtml(placeMeta(place))}</span>`,
-      );
+      const point = pointForProvider(place, provider);
+      const marker = L.marker(point);
+      marker.bindPopup(`<strong>${escapeHtml(place.name)}</strong><br/><span>${escapeHtml(placeMeta(place))}</span>`);
       marker.on('click', () => selectPlace(place));
       marker.addTo(markers);
-      bounds.extend([place.latitude, place.longitude]);
+      bounds.extend(point);
     });
-
-    if (bounds.isValid()) map.fitBounds(bounds.pad(0.12), { maxZoom: 7 });
+    const viewportPlaces = provider.coordinateSystem === 'gcj02' ? places.filter(isWithinChinaCoverage) : places;
+    const viewportBounds = L.latLngBounds(viewportPlaces.map((place) => pointForProvider(place, provider)));
+    if (viewportBounds.isValid()) {
+      map.fitBounds(viewportBounds.pad(0.12), { maxZoom: 7 });
+    } else if (bounds.isValid()) {
+      map.fitBounds(bounds.pad(0.12), { maxZoom: 7 });
+    }
     map.invalidateSize();
-  }, [isOpen, onPlaceSelect, places]);
+  }, [isOpen, onPlaceSelect, places, providerIndex]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!isOpen || !map) return;
+
+    tileLayerRef.current?.remove();
+    tileLayerRef.current = null;
+    if (providerIndex >= MAP_TILE_PROVIDERS.length) {
+      setTileError(true);
+      return;
+    }
+
+    const provider = MAP_TILE_PROVIDERS[providerIndex];
+    tileLoadCountRef.current = 0;
+    tileErrorCountRef.current = 0;
+    setTileError(false);
+    const tileLayer = L.tileLayer(provider.url, {
+      attribution: provider.attribution,
+      maxZoom: 19,
+      subdomains: provider.subdomains,
+    });
+    let active = true;
+    const moveToNextProvider = () => {
+      if (!active || tileLoadCountRef.current > 0) return;
+      setProviderIndex((current) => (current === providerIndex ? current + 1 : current));
+    };
+    tileLayer.on('tileload', () => {
+      tileLoadCountRef.current += 1;
+    });
+    tileLayer.on('tileerror', () => {
+      tileErrorCountRef.current += 1;
+      if (tileErrorCountRef.current >= 8) moveToNextProvider();
+    });
+    tileLayer.once('load', moveToNextProvider);
+    tileLayer.addTo(map);
+    tileLayerRef.current = tileLayer;
+    const fallbackTimer = window.setTimeout(moveToNextProvider, 8000);
+    return () => {
+      active = false;
+      window.clearTimeout(fallbackTimer);
+    };
+  }, [isOpen, places.length, providerIndex]);
 
   const selectPlace = (place: GeoPlaceIndexEntry) => {
     setIsOpen(false);
     onPlaceSelect(place.name);
   };
 
-  return (
-    <>
-      <section className="mx-auto max-w-7xl px-4 py-2 sm:px-6 sm:py-3 lg:px-8" aria-labelledby="map-view-title">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[22px] border border-stone-200/80 bg-white/90 px-4 py-3 shadow-[0_10px_26px_rgba(15,23,42,0.04)] sm:px-5">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
-              <Map className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                <h2 id="map-view-title" className="text-sm font-semibold text-stone-950">按地点找团</h2>
-                <span className="text-xs text-stone-400">{places.length > 0 ? `${places.length} 个地点` : '正在加载地点'}</span>
-              </div>
-              <div className="mt-1 flex max-w-[min(70vw,620px)] flex-wrap gap-1.5 overflow-hidden">
-                {previewPlaces.map((place) => (
-                  <button key={place.placeId} type="button" onClick={() => selectPlace(place)} className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-stone-50 px-2.5 py-1 text-xs text-stone-600 transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-stone-900">
-                    {place.name}<span className="text-stone-400">{place.tourCount}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          <button type="button" onClick={() => setIsOpen(true)} className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-stone-900 px-4 text-sm font-medium text-white transition-colors hover:bg-stone-800">
-            <MapPinned className="h-4 w-4" />
-            打开地图
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-      </section>
+  const openMap = () => {
+    setProviderIndex(0);
+    setTileError(false);
+    setIsOpen(true);
+  };
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[70] flex items-end justify-center bg-stone-950/35 p-0 backdrop-blur-[2px] sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="map-dialog-title">
+  const mapDialog = isOpen && (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-stone-950/35 p-0 backdrop-blur-[2px] sm:items-center sm:p-6" role="dialog" aria-modal="true" aria-labelledby="map-dialog-title">
           <div className="flex h-[min(92dvh,760px)] w-full max-w-6xl flex-col overflow-hidden rounded-t-[28px] border border-stone-200 bg-white shadow-2xl sm:h-[min(88dvh,760px)] sm:rounded-[28px]">
             <div className="flex shrink-0 items-center justify-between border-b border-stone-200/80 px-5 py-3.5 sm:px-6">
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-orange-600">目的地地图</p>
                 <h2 id="map-dialog-title" className="mt-0.5 text-lg font-semibold text-stone-950">选择一个地方，查看对应线路</h2>
+                {providerIndex < MAP_TILE_PROVIDERS.length && <p className="mt-0.5 text-xs text-stone-400">底图：{MAP_TILE_PROVIDERS[providerIndex].label}</p>}
               </div>
               <button type="button" onClick={() => setIsOpen(false)} aria-label="关闭地图" className="flex h-9 w-9 items-center justify-center rounded-full text-stone-500 transition-colors hover:bg-stone-100 hover:text-stone-900">
                 <X className="h-5 w-5" />
@@ -147,11 +182,12 @@ export function MapView({ onPlaceSelect }: MapViewProps) {
               <div className="relative min-h-[280px]">
                 <div ref={mapElementRef} className="h-full min-h-[280px] w-full bg-[#f4f0e8]" aria-label="旅行目的地地图" />
                 {tileError && (
-                  <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-[#f4f0e8]/95 p-6 text-center">
+                  <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-[#f4f0e8] p-6 text-center">
                     <div className="max-w-xs">
                       <MapPinned className="mx-auto h-8 w-8 text-orange-500" />
-                      <p className="mt-3 text-sm font-semibold text-stone-800">地图底图暂时无法加载</p>
-                      <p className="mt-1 text-xs leading-5 text-stone-500">你仍然可以直接点击右侧地点查看线路。</p>
+                      <p className="mt-3 text-sm font-semibold text-stone-800">底图暂时无法连接</p>
+                      <p className="mt-1 text-xs leading-5 text-stone-500">所有免费瓦片源都不可用，请直接点击右侧地点查看线路。</p>
+                      <button type="button" onClick={openMap} className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-orange-700"><RefreshCw className="h-3.5 w-3.5" /> 重新尝试</button>
                     </div>
                   </div>
                 )}
@@ -177,8 +213,16 @@ export function MapView({ onPlaceSelect }: MapViewProps) {
               </aside>
             </div>
           </div>
-        </div>
-      )}
+    </div>
+  );
+
+  return (
+    <>
+      <button type="button" onClick={openMap} aria-label="打开目的地地图" className="inline-flex h-9 items-center gap-1.5 rounded-full border border-stone-200 bg-white/80 px-3.5 text-sm font-medium text-stone-700 shadow-sm transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-stone-950">
+        <Map className="h-4 w-4 text-orange-600" />
+        <span className="hidden sm:inline">地图找团</span>
+      </button>
+      {mapDialog && createPortal(mapDialog, document.body)}
     </>
   );
 }

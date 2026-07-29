@@ -63,7 +63,9 @@ function App() {
   return (
     <div className="min-h-screen text-slate-900">
       <div className="relative min-h-screen">
-        <Header />
+        <Header>
+          <MapView onPlaceSelect={handleSearch} />
+        </Header>
 
         <main className="pb-16">
           <Hero
@@ -73,7 +75,6 @@ function App() {
             onAiSearch={handleAiSearch}
             quickDestinations={QUICK_DESTINATIONS}
           />
-          <MapView onPlaceSelect={handleSearch} />
           <div id="tour-list" className="scroll-mt-24">
             <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} />
           </div>
