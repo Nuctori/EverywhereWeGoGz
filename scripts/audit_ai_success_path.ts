@@ -291,8 +291,8 @@ assert.deepEqual(
     [strongCompoundCandidate, weakMixedCandidate],
     '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
   ).map((item) => item.tourId),
-  ['strong-compound'],
-  'when a core-coverage candidate exists, weak mixed candidates must not be padded into recommendations',
+  ['strong-compound', 'weak-mixed'],
+  'AI-ranked alternatives remain available alongside the strongest compound candidate',
 );
 
 console.log('AI success-path audit passed');

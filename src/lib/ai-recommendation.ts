@@ -29,7 +29,9 @@ const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 // 仍然保留上限，避免把全量线路直接塞进模型上下文。
 const MAX_AI_CANDIDATES = 96;
 const MAX_AI_COMMENTARY_ITEMS = 24;
-const MAX_AI_SELECTED_ITEMS = 6;
+// 推荐是给用户挑选，不是把候选池裁成“唯一正确答案”；保留更宽的 AI 排序结果，
+// 让次优但可能合适的线路也能进入选择范围。
+const MAX_AI_SELECTED_ITEMS = 12;
 const MAX_AI_PROMPT_REASON_ITEMS = MAX_AI_SELECTED_ITEMS;
 const MAX_AI_RANKED_ITEMS = 24;
 const MAX_DESTINATION_WEATHER_INSIGHTS = 6;
@@ -6195,69 +6197,6 @@ function getAiResponseIntentQualityIssue(params: {
     : 'public-interest_need_missed: evidence-backed routes available but top results ignored them';
 }
 
-function getAiResponseSemanticCoverageIssue(params: {
-  response: unknown;
-  candidateTours: Array<AiRecommendationCandidate | CandidateAuditPrimitive>;
-  userText: string;
-}) {
-  const coverageTerms = getCoverageTermsForQuality(params.userText);
-  if (coverageTerms.length < 2) return null;
-
-  const asPrimitive = (tour: AiRecommendationCandidate | CandidateAuditPrimitive) =>
-    'matchStatus' in tour ? tour : buildTourPrimitive(tour);
-  const primitives = params.candidateTours.map(asPrimitive);
-  const primitiveByTourId = new Map(primitives.map((primitive) => [primitive.id, primitive]));
-  const maxCoverageCount = Math.max(
-    0,
-    ...primitives.map((primitive) => getItemCoverageMetrics(primitive, coverageTerms).coverageCount),
-  );
-  const requiredCoverageCount = Math.min(maxCoverageCount, 2);
-  if (requiredCoverageCount < 2) return null;
-
-  const lookup = buildAiCandidateLookup(params.candidateTours as unknown as AiRecommendationCandidate[]);
-  const rawItems = Array.isArray((params.response as { items?: unknown[] })?.items)
-    ? (params.response as { items: unknown[] }).items
-    : [];
-  const seenTourIds = new Set<string>();
-  const mappedAiTourIds = rawItems
-    .map((rawItem) => resolveAiCandidateTourId(
-      rawItem as Partial<AiRecommendationItem> & {
-        id?: unknown;
-        title?: unknown;
-        destination?: unknown;
-      },
-      params.candidateTours as unknown as AiRecommendationCandidate[],
-      lookup,
-    ))
-    .filter((tourId): tourId is string => Boolean(tourId))
-    .filter((tourId) => {
-      if (seenTourIds.has(tourId)) return false;
-      seenTourIds.add(tourId);
-      return true;
-    });
-  if (mappedAiTourIds.length === 0) return null;
-
-  const topWindow = mappedAiTourIds.slice(0, Math.min(4, mappedAiTourIds.length));
-  const topCoverageCount = Math.max(
-    0,
-    ...topWindow.map((tourId) => {
-      const primitive = primitiveByTourId.get(tourId);
-      return primitive ? getItemCoverageMetrics(primitive, coverageTerms).coverageCount : 0;
-    }),
-  );
-  if (topCoverageCount >= requiredCoverageCount) return null;
-
-  const exampleTitles = uniqueStrings(
-    primitives
-      .filter((primitive) => getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= requiredCoverageCount)
-      .slice(0, 2)
-      .map((primitive) => primitive.title),
-  );
-  return exampleTitles.length > 0
-    ? `semantic_need_missed: top results under-covered compound request (${coverageTerms.join(' / ')}; examples: ${exampleTitles.join(' / ')})`
-    : `semantic_need_missed: top results under-covered compound request (${coverageTerms.join(' / ')})`;
-}
-
 function getAuditNote(reasons: string[]) {
   if (reasons.length === 0) return null;
   const visibleReasons = reasons.slice(0, 2).join('；');
@@ -6391,47 +6330,11 @@ function keepAiItemsForCompoundExperience(
 ) {
   const coverageTerms = getCoverageTermsForQuality(userText);
   if (coverageTerms.length < 2 || items.length === 0) return items;
-
-  const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
-  const maxCoverage = Math.max(
-    0,
-    ...candidateTours.map((tour) => getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount),
-  );
-  // 没有同时覆盖至少两项时，不要把结果清空。AI 已经基于候选事实和
-  // 世界知识做过排序，此处应保留它选出的最近替代，让用户还有可行动的
-  // 方向；后续文案会把未覆盖的条件写成待核实/缺口，而不是伪装成完整匹配。
-  if (maxCoverage < 2) return items.slice(0, MAX_AI_SELECTED_ITEMS);
-
-  const strongCandidateCount = candidateTours.filter((tour) =>
-    getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount >= 2,
-  ).length;
-  const coreTerms = coverageTerms.filter((term) => !['周边小镇', '共享电瓶车'].includes(term));
-  const coreCandidateCount = candidateTours.filter((tour) =>
-    getItemCoverageMetrics(buildTourPrimitive(tour), coreTerms).coverageCount >= coreTerms.length,
-  ).length;
-  // 复合需求的核心条件必须共同决定入选。只要候选池里有同时覆盖核心条件
-  // 的团，就不能用“只占一项”的温泉/玩水线路把结果凑满；这类线路不是推荐，
-  // 最多应该在用户主动放宽条件后再出现。
-  const minimumCoverage = coreTerms.length >= 2 && coreCandidateCount > 0
-    ? coreTerms.length
-    : maxCoverage >= 2
-      ? maxCoverage
-      : strongCandidateCount >= 3
-        ? 2
-        : 1;
-  const kept = items.filter((item) => {
-    const primitive = primitiveByTourId.get(item.tourId);
-    if (!primitive) return false;
-    if (coreTerms.length >= 2 && coreCandidateCount > 0) {
-      return getItemCoverageMetrics(primitive, coreTerms).coverageCount >= coreTerms.length;
-    }
-    return getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= minimumCoverage;
-  });
-
-  // 有强组合候选且 AI 选中了它们时只保留强候选；如果 AI 返回的列表
-  // 漏掉了候选池里的强团，过滤结果也不能变成空集，保留 AI 已经选出的
-  // 最近替代，并由文案明确说明它没有完整覆盖需求。
-  return kept.length > 0 ? kept : items.slice(0, MAX_AI_SELECTED_ITEMS);
+  // AI 已经基于候选事实、世界知识和用户取舍完成排序；这里不再按覆盖项
+  // 做二次硬过滤。完整匹配、近似匹配和可核实的替代都应保留，由每条理由
+  // 说明缺口，避免把“推荐”退化成“只显示满足全部关键词的团”。
+  void candidateTours;
+  return items.slice(0, MAX_AI_SELECTED_ITEMS);
 }
 
 function normalizeIntent(value: unknown): AiTravelIntent | null {
@@ -7252,10 +7155,6 @@ export async function requestAiRecommendations({
           response,
           candidateTours: aiCandidatePool,
           intent: effectiveIntent,
-        }) || getAiResponseSemanticCoverageIssue({
-          response,
-          candidateTours: aiCandidatePool,
-          userText: effectiveUserText,
         }),
     }) as {
       intent?: unknown;

@@ -313,8 +313,8 @@ const compoundSelection = keepAiItemsForCompoundExperience(
 );
 assert.deepEqual(
   compoundSelection.map((item) => item.tourId),
-  ['coastal-hot-spring'],
-  'compound recommendation should prefer a coastal hot-spring match over a pure hot-spring filler',
+  ['coastal-hot-spring', 'hot-spring'],
+  'compound recommendation keeps the strongest match and a lower-coverage alternative available',
 );
 const avoidCompacted = compactCandidates([hotSpringTour, nonHotSpringTour], [], avoidIntent);
 assert.ok(avoidCompacted.some((item) =>
