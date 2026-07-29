@@ -3748,29 +3748,6 @@ function isBoundedPublicInterestStatement(text: string) {
   return /(候选|原文|显式|证据|没有|未标注|不能|不可|不等于|近似|替代|只能|无法断言)/.test(text);
 }
 
-function semanticReasonAddressesCoreNeed(
-  reason: string,
-  primitive: RecommendationPrimitive,
-  userText: string | undefined,
-) {
-  const softTerms = new Set(['亲子家庭', '周边小镇', '共享电瓶车']);
-  const coreTerms = getCoverageTermsForQuality(userText).filter((term) => !softTerms.has(term));
-  if (coreTerms.length < 2) return reasonAddressesUserNeed(reason, primitive, userText);
-
-  const normalizedReason = normalizeText(reason);
-  const mentionedTerms = coreTerms.filter((term) =>
-    getCoverageTermAliases(term).some((alias) => normalizedReason.includes(normalizeText(alias))),
-  );
-  if (mentionedTerms.length === coreTerms.length) return true;
-  if (mentionedTerms.length === 0) return false;
-
-  const missingTerms = coreTerms.filter((term) => !mentionedTerms.includes(term));
-  const acknowledgesGap = /(未确认|未标注|没有证据|暂无证据|资料未提|资料没有|没有明确|暂无明确安排|需核实|待核实|无法确认|不能确认|不确定|未知|缺少|通常|更可能|值得优先查|我会优先查|适合先查|一般会|常见于|大概率)/.test(reason);
-  return acknowledgesGap && missingTerms.length > 0 && mentionedTerms.some((term) =>
-    getPrimitiveCoverageScore(primitive, [term]) > 0,
-  );
-}
-
 function buildItemSemanticReason(
   item: AiRecommendationItem,
   primitive: RecommendationPrimitive,
@@ -3790,8 +3767,7 @@ function buildItemSemanticReason(
   if (
     !hasUnallowedPublicInterestLanguage(text, options) &&
     !hasUnsupportedPublicInterestClaim(text, primitive) &&
-    !hasUnsupportedCompoundCoverageClaim(text, primitive, options.userText) &&
-    semanticReasonAddressesCoreNeed(text, primitive, options.userText)
+    !hasUnsupportedCompoundCoverageClaim(text, primitive, options.userText)
   ) {
     return text;
   }
@@ -3800,8 +3776,7 @@ function buildItemSemanticReason(
     semanticFit &&
     !hasUnallowedPublicInterestLanguage(semanticFit, options) &&
     !hasUnsupportedPublicInterestClaim(semanticFit, primitive) &&
-    !hasUnsupportedCompoundCoverageClaim(semanticFit, primitive, options.userText) &&
-    semanticReasonAddressesCoreNeed(semanticFit, primitive, options.userText)
+    !hasUnsupportedCompoundCoverageClaim(semanticFit, primitive, options.userText)
   ) {
     const safeBoundary = boundary &&
       !hasUnallowedPublicInterestLanguage(boundary, options) &&
@@ -4822,6 +4797,7 @@ function rewriteRecommendationCopy(params: {
     if (!primitive) return item.reason ? item : stripRecommendationCommentary(item);
 
     const currentReason = stripTerminalPunctuation(item.reason || '');
+    const semanticReason = buildItemSemanticReason(item, primitive, params);
     const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
     const hasPublicInterestSemanticNote = hasPublicInterestLanguage(
       [item.semanticFit, item.semanticBoundary, ...(item.semanticSignals || [])].filter(Boolean).join(' '),
@@ -4830,6 +4806,18 @@ function rewriteRecommendationCopy(params: {
       return {
         ...item,
         reason: `${currentReason}。`,
+      };
+    }
+    // semanticFit 是模型对这张线路的整体体验判断。优先使用它替代
+    // 公式化 reason，避免一个软条件未被写进句子就触发本地模板回退。
+    if (
+      semanticReason &&
+      (hasFormulaicRecommendationOpening(currentReason) ||
+        !reasonAddressesUserNeed(currentReason, primitive, params.userText))
+    ) {
+      return {
+        ...item,
+        reason: `${stripTerminalPunctuation(semanticReason)}。`,
       };
     }
     if (
@@ -4859,7 +4847,6 @@ function rewriteRecommendationCopy(params: {
     }
 
     const insight = findWeatherInsightForPrimitive(primitive, params.destinationWeatherInsights);
-    const semanticReason = buildItemSemanticReason(item, primitive, params);
     const coverageReason = buildCoverageAwareReason(primitive, params.userText, index);
     const fallbackReason = semanticReason || coverageReason || (
       hasTurnPublicInterestNeed
