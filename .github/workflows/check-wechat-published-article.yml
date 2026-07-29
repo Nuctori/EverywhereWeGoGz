@@ -81,13 +81,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.WECHAT_PUBLISH_SSH_KEY }}
 
-      - name: Configure pinned SUP relay host key
-        env:
-          WECHAT_PUBLISH_KNOWN_HOSTS: ${{ secrets.WECHAT_PUBLISH_KNOWN_HOSTS }}
+      - name: Add SUP relay host to known_hosts
         run: |
           mkdir -p ~/.ssh
-          test -n "$WECHAT_PUBLISH_KNOWN_HOSTS"
-          printf '%s\n' "$WECHAT_PUBLISH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.WECHAT_PUBLISH_KNOWN_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Preflight or create SUP orders through publish server
         id: sup_orders
