@@ -157,8 +157,8 @@ const mergedPartialAi = mergeAiAndLocalRecommendations(
 );
 assert.deepEqual(
   mergedPartialAi.map((item) => item.tourId),
-  ['ai-only-choice'],
-  'a partial AI result must not be padded with unselected local candidates',
+  ['ai-only-choice', 'local-not-selected'],
+  'a partial AI result keeps AI choices first and exposes local alternatives for comparison',
 );
 const mergedLocalFallback = mergeAiAndLocalRecommendations(
   [],
@@ -2489,8 +2489,8 @@ const reordered = prioritizeRecommendationItems(
   );
   assert.deepEqual(
     sorted.map((item) => item.tourId),
-    ['detailed-guangxi-vietnam', 'brief-guangxi'],
-    'detailed AI recommendation should rank before brief AI without reintroducing local candidates',
+    ['detailed-guangxi-vietnam', 'brief-guangxi', 'local-supplement'],
+    'detailed AI recommendation should rank before brief AI, followed by a local comparison option',
   );
 }
 

@@ -1994,14 +1994,12 @@ function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecomme
   });
 }
 
-// AI 已经做出选择后，不再把本地候选池批量塞回推荐结果。
-// 本地结果只在 AI 完全不可用时承担 fallback，避免“每个候选都写一段推荐语”。
+// AI 结果排在最前；当 AI 返回较少时，用本地排序补充可比较的次优候选，
+// 让用户有选择空间。补充项不改变 AI 已选项的顺序，也不会被包装成 AI 结论。
 function mergeAiAndLocalRecommendations(
   aiItems: AiRecommendationItem[],
   localItems: AiRecommendationItem[],
 ): AiRecommendationItem[] {
-  // 合并阶段只保留 AI 已经选中的团；只在 AI 完全没有可用结果时回退本地推荐。
-  // 只要 AI 有一个有效选择，就不能把未入选的本地候选重新塞回最终列表。
   const seenTourIds = new Set<string>();
   const primaryAiItems = aiItems
     .filter((item) => {
@@ -2014,7 +2012,18 @@ function mergeAiAndLocalRecommendations(
       recommendationTier: isDetailedAiRecommendation(item) ? 'ai-detailed' : 'ai-brief',
     } satisfies AiRecommendationItem));
   if (primaryAiItems.length > 0) {
-    return limitRecommendationCommentary(primaryAiItems).slice(0, MAX_AI_SELECTED_ITEMS);
+    const supplementalItems = localItems
+      .filter((item) => {
+        if (seenTourIds.has(item.tourId)) return false;
+        seenTourIds.add(item.tourId);
+        return true;
+      })
+      .map((item) => ({
+        ...item,
+        recommendationTier: 'local-supplement',
+      } satisfies AiRecommendationItem));
+    return limitRecommendationCommentary([...primaryAiItems, ...supplementalItems])
+      .slice(0, MAX_AI_SELECTED_ITEMS);
   }
 
   return limitRecommendationCommentary(localItems.map((item) => ({
@@ -7230,7 +7239,11 @@ export async function requestAiRecommendations({
       : compoundRequest
         ? []
         : compactedLocalItems.slice(0, MAX_AI_RANKED_ITEMS);
-    const localItemsForFinalMerge = compoundRequest && aiItems.length === 0 ? [] : compactedLocalItems;
+    const localItemsForFinalMerge = compoundRequest && aiItems.length === 0
+      ? []
+      : aiItems.length > 0
+        ? padRecommendationItems(compactedLocalItems, fallbackRecommendations(compactedCandidateTours))
+        : compactedLocalItems;
 
     const baseMergedItems = buildPaddedRecommendationItems(
       mergeAiAndLocalRecommendations(rankedAiItems, localItemsForFinalMerge),
