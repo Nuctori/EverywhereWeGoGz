@@ -28,6 +28,7 @@ export interface TourGeoPoint {
   placeId: string;
   name: string;
   normalizedName: string;
+  label?: string;
   country?: string;
   province?: string;
   city?: string;
@@ -288,6 +289,11 @@ export interface AiWeatherContext {
   forecastSummary: string;
   dateSpecificSummary?: string;
   weatherWindowLabel?: string;
+  weatherComfortScore?: number;
+  weatherComfortSummary?: string;
+  weatherTemperatureComfort?: number;
+  weatherHumidityComfort?: number;
+  weatherOutdoorIndex?: number;
   weatherRiskLevel?: 'better' | 'mixed' | 'worse' | 'unknown';
   seasonAdvice: string[];
   inferredFrom?: string[];
