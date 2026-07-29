@@ -6428,9 +6428,10 @@ function keepAiItemsForCompoundExperience(
     return getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= minimumCoverage;
   });
 
-  // 有强组合候选时只保留强候选；没有时保留 AI 选出的最近替代，不能把
-  // 未被 AI 选择的本地候选批量补进来，也不能把次优候选伪装成完整满足。
-  return kept;
+  // 有强组合候选且 AI 选中了它们时只保留强候选；如果 AI 返回的列表
+  // 漏掉了候选池里的强团，过滤结果也不能变成空集，保留 AI 已经选出的
+  // 最近替代，并由文案明确说明它没有完整覆盖需求。
+  return kept.length > 0 ? kept : items.slice(0, MAX_AI_SELECTED_ITEMS);
 }
 
 function normalizeIntent(value: unknown): AiTravelIntent | null {

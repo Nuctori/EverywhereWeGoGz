@@ -248,6 +248,24 @@ assert.deepEqual(
   'when no strong compound candidate exists, retain the AI-selected nearest alternative',
 );
 
+const unselectedStrongCandidate = candidate({
+  id: 'unselected-strong',
+  title: '海边温泉嬉水3天',
+  destination: '广东',
+  price: 499,
+  tags: ['温泉', '玩水'],
+  highlights: ['温泉', '嬉水'],
+});
+assert.deepEqual(
+  keepAiItemsForCompoundExperience(
+    [{ tourId: 'weak-compound', score: 60, reason: '温泉可泡。', matchedSignals: ['温泉'] }],
+    [unselectedStrongCandidate, weakCompoundCandidate],
+    '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  ).map((item) => item.tourId),
+  ['weak-compound'],
+  'an AI omission must degrade to its selected alternative instead of returning an empty result',
+);
+
 const strongCompoundCandidate = candidate({
   id: 'strong-compound',
   title: '惠州双湾盐洲岛温泉嬉水3天',
