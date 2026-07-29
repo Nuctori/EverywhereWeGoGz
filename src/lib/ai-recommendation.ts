@@ -5618,7 +5618,7 @@ function buildAiMessages(params: {
       ...promptPolicy.requestRules,
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
-        `最多返回 ${MAX_AI_SELECTED_ITEMS} 个 items，每个都可以写完整推荐理由。`,
+        `候选池足够时优先返回 8-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序；只有候选确实不足或存在明显硬冲突时才少于 8 个。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
       ].join(''),
     ],
   };
@@ -5696,7 +5696,7 @@ function buildLiteAiMessages(params: {
       '返回 intent、intentNotes、clarification、assumptions、tradeoffs 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
       '用紧凑 JSON；中文短句不超过32字。',
-      `最多返回 ${MAX_AI_SELECTED_ITEMS} 个 items，每个都可以写完整推荐理由。`,
+      `候选池足够时优先返回 8-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序；只有候选确实不足或存在明显硬冲突时才少于 8 个。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
       ...(hasTurnPublicInterestNeed
