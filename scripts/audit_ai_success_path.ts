@@ -260,6 +260,34 @@ const localSupplementCopy = rewriteRecommendationCopy({
 });
 assert.equal(localSupplementCopy[0]?.reason, undefined);
 
+const repeatedClauseCopy = rewriteRecommendationCopy({
+  items: [
+    {
+      tourId: 'repeated-copy-a',
+      score: 90,
+      reason: '泡汤后还能把时间留给水上活动，适合想放松又不想整天泡在酒店的人。共享电瓶车配置需现场确认。',
+      matchedSignals: ['温泉', '玩水'],
+    },
+    {
+      tourId: 'repeated-copy-b',
+      score: 80,
+      reason: '这条线节奏更松，适合把温泉当主角。共享电瓶车配置需现场确认。',
+      matchedSignals: ['温泉'],
+    },
+  ],
+  candidateTours: [
+    candidate({ id: 'repeated-copy-a', title: '清远清泉湾温泉水世界2天', destination: '清远', price: 399, tags: ['温泉', '玩水'], highlights: ['温泉', '水上活动'] }),
+    candidate({ id: 'repeated-copy-b', title: '龙门温泉度假2天', destination: '龙门', price: 299, tags: ['温泉'], highlights: ['温泉'] }),
+  ],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: { destination: '广东', travelDate: '2026-06-12', forecastSummary: '', seasonAdvice: [], source: 'seasonal-rule' },
+  userText: '温泉',
+  allowPublicInterest: false,
+});
+assert.ok(repeatedClauseCopy[0]?.reason?.includes('共享电瓶车配置需现场确认'));
+assert.ok(!repeatedClauseCopy[1]?.reason?.includes('共享电瓶车配置需现场确认'));
+
 const weakCompoundCandidate = candidate({
   id: 'weak-compound',
   title: '金水台温泉2天',

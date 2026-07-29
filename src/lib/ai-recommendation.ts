@@ -4735,6 +4735,37 @@ function buildWeatherReasonSuffix(
   return buildWeatherReasonSentence(primitive, insight).replace(/[。；]+$/u, '');
 }
 
+function removeRepeatedRecommendationClauses(items: AiRecommendationItem[]) {
+  const clausesByReason = items.map((item) =>
+    (item.reason || '').split(/(?<=[。！？；])/u).map((clause) => clause.trim()).filter(Boolean),
+  );
+  const occurrenceCounts = new Map<string, number>();
+  for (const clauses of clausesByReason) {
+    for (const clause of clauses) {
+      const key = normalizeText(clause.replace(/[。！？；]/gu, ''));
+      if (key.length >= 8) occurrenceCounts.set(key, (occurrenceCounts.get(key) || 0) + 1);
+    }
+  }
+
+  const seenRepeatedClauses = new Set<string>();
+  return items.map((item, index) => {
+    if (!item.reason) return item;
+    const clauses = clausesByReason[index] || [];
+    const kept = clauses.filter((clause) => {
+      const key = normalizeText(clause.replace(/[。！？；]/gu, ''));
+      if (key.length < 8 || (occurrenceCounts.get(key) || 0) <= 1) return true;
+      if (!seenRepeatedClauses.has(key)) {
+        seenRepeatedClauses.add(key);
+        return true;
+      }
+      return false;
+    });
+    if (kept.length === clauses.length) return item;
+    if (kept.length === 0) return { ...item, reason: undefined };
+    return { ...item, reason: kept.join('') };
+  });
+}
+
 // 将排序结果改写成更贴近用户语境的说明文案，但不改变事实约束。
 function rewriteRecommendationCopy(params: {
   items: AiRecommendationItem[];
@@ -4752,7 +4783,7 @@ function rewriteRecommendationCopy(params: {
     .sort((a, b) => a - b);
   const profile = buildCopyIntentProfile(params.intent, params.userText);
 
-  return params.items.map((item, index) => {
+  const rewrittenItems = params.items.map((item, index) => {
     // 补足选择面的线路不是 AI 亲自写过推荐语的结果，不再用本地模板
     // 替它伪造一段“推荐理由”；用户仍可通过卡片事实自行比较。
     if (item.recommendationTier === 'local-supplement') {
@@ -4833,6 +4864,8 @@ function rewriteRecommendationCopy(params: {
       reason: `${stripTerminalPunctuation(fallbackReason)}${shouldAddWeatherNote ? `。${weatherReason}` : ''}。`,
     };
   });
+
+  return removeRepeatedRecommendationClauses(rewrittenItems);
 }
 
 function shouldUseAiSummary(
@@ -5575,7 +5608,7 @@ function buildAiMessages(params: {
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
         : []),
-      'reason 优先写用户真正会关心的体验差异和画面，例如泡汤后玩水、沿小镇慢慢逛、适合带孩子还是适合放空；让人产生“我想去看看”的感觉，不要复述系统字段名。若用户提到共享电瓶车等软性便利项，优先用你对该目的地的世界知识解释它是否会改变游玩方式，并把不确定性说清。',
+      'reason 优先写用户真正会关心的体验差异和画面，例如泡汤后玩水、沿小镇慢慢逛、适合带孩子还是适合放空；让人产生“我想去看看”的感觉，不要复述系统字段名。每条只抓这条线路最值得被选择的一个切入点，主动拉开不同线路的叙事角度，不要逐条按同一顺序填满用户条件，也不要把同一条未确认的软条件复制到每张卡。若用户提到共享电瓶车等软性便利项，优先用你对该目的地的世界知识解释它是否会改变游玩方式，并把不确定性说清。',
       '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
       '如果用户关心的体验条件无法从候选事实确认，不要硬凑完整匹配；可以结合目的地世界知识给出“更值得查哪一类地方/为什么”，并在 tradeoffs 或 intentNotes.cannotAssert 中把它标成判断或待核实项。',
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
@@ -5583,6 +5616,7 @@ function buildAiMessages(params: {
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
         `候选池足够时优先返回 8-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少于 8 个。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
+        '推荐文案要像熟悉当地玩法的人逐条做取舍：每条给出不同、具体、可感知的理由，禁止使用“地点+条件A+条件B+统一提醒”的批量句式；未知的交通或服务不要逐卡编造，必要时只在最相关的一条说明或放入整体摘要。',
       ].join(''),
     ],
   };
@@ -5661,6 +5695,7 @@ function buildLiteAiMessages(params: {
       '只允许使用 candidates 中存在的 id。',
       '用紧凑 JSON；中文短句不超过32字。',
       `候选池足够时优先返回 8-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少于 8 个。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
+      '推荐文案要像熟悉当地玩法的人逐条做取舍：每条给出不同、具体、可感知的理由，禁止使用“地点+条件A+条件B+统一提醒”的批量句式；未知的交通或服务不要逐卡编造，必要时只在最相关的一条说明或放入整体摘要。',
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
       ...(hasTurnPublicInterestNeed
