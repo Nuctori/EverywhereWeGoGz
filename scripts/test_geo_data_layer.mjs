@@ -55,9 +55,15 @@ for (const tour of list) {
 
 for (const place of places) {
   assert(validPoint(place), `${place.name} has invalid place coordinates`);
-  assert(Array.isArray(place.tourIds) && place.tourIds.length === place.tourCount, `${place.name} has invalid tour count`);
+  assert(typeof place.name === 'string' && place.name.trim().length > 0, 'map place name must be non-empty');
+  assert(['country', 'region', 'city', 'poi'].includes(place.level), `${place.name} has invalid level`);
+  assert(['low', 'medium', 'high'].includes(place.confidence), `${place.name} has invalid confidence`);
+  assert(Array.isArray(place.tourIds), `${place.name} tourIds must be an array`);
+  assert(new Set(place.tourIds).size === place.tourIds.length, `${place.name} contains duplicate tour ids`);
+  assert(place.tourIds.length === place.tourCount, `${place.name} has invalid tour count`);
   assert(place.tourIds.every((id) => tourIds.has(id)), `${place.name} references an unknown tour`);
   assert(Array.isArray(place.roles) && place.roles.length > 0, `${place.name} must have at least one role`);
+  assert(place.roles.every((role) => ['departure', 'destination', 'stop'].includes(role)), `${place.name} has an invalid role`);
 }
 
 for (const entry of mapIndex) {

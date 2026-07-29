@@ -40,6 +40,12 @@ export interface TourGeoPoint {
   confidence: GeoConfidence;
 }
 
+export interface GeoPlaceIndexEntry extends TourGeoPoint {
+  tourIds: string[];
+  tourCount: number;
+  roles: ('departure' | 'destination' | 'stop')[];
+}
+
 export interface TourGeo {
   departure?: TourGeoPoint;
   destination?: TourGeoPoint;
@@ -289,12 +295,12 @@ export interface AiWeatherContext {
   forecastSummary: string;
   dateSpecificSummary?: string;
   weatherWindowLabel?: string;
+  weatherRiskLevel?: 'better' | 'mixed' | 'worse' | 'unknown';
   weatherComfortScore?: number;
   weatherComfortSummary?: string;
   weatherTemperatureComfort?: number;
   weatherHumidityComfort?: number;
   weatherOutdoorIndex?: number;
-  weatherRiskLevel?: 'better' | 'mixed' | 'worse' | 'unknown';
   seasonAdvice: string[];
   inferredFrom?: string[];
   queryReason?: string;

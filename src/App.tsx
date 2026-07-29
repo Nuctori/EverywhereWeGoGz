@@ -2,6 +2,7 @@
 import { Header } from './sections/Header';
 import { Hero } from './sections/Hero';
 import { TourList } from './sections/TourList';
+import { MapView } from './sections/MapView';
 
 const QUICK_DESTINATIONS = [
   '广东',
@@ -72,6 +73,7 @@ function App() {
             onAiSearch={handleAiSearch}
             quickDestinations={QUICK_DESTINATIONS}
           />
+          <MapView onPlaceSelect={handleSearch} />
           <div id="tour-list" className="scroll-mt-24">
             <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} />
           </div>
