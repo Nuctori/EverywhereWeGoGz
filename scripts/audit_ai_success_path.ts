@@ -231,6 +231,30 @@ assert.equal(
   '盐洲岛的海边氛围很松，泡完温泉还能把傍晚留给海风和散步。',
 );
 
+const invalidSemanticCopy = rewriteRecommendationCopy({
+  items: [{
+    tourId: 'semantic-copy',
+    score: 95,
+    reason: '从标题和标签看，匹配度较高。',
+    semanticFit: '从候选原语 atoms 看，这条线适合放松。',
+    matchedSignals: ['温泉'],
+  }],
+  candidateTours: [candidate({
+    id: 'semantic-copy',
+    title: '惠州双湾盐洲岛温泉联游3天',
+    destination: '广东',
+    price: 799,
+    tags: ['温泉', '海边'],
+    highlights: ['盐洲岛', '温泉'],
+  })],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: { destination: '惠州', travelDate: '2026-06-12', forecastSummary: '', seasonAdvice: [], source: 'seasonal-rule' },
+  userText: '海边温泉',
+  allowPublicInterest: false,
+});
+assert.ok(!/标题和标签|候选原语|匹配度/.test(invalidSemanticCopy[0]?.reason || ''));
+
 const localSupplementCopy = rewriteRecommendationCopy({
   items: [{
     tourId: 'semantic-copy',

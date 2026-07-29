@@ -4700,7 +4700,12 @@ function rewriteRecommendationCopy(params: {
     if (!primitive) return item.reason ? item : stripRecommendationCommentary(item);
 
     const currentReason = stripTerminalPunctuation(item.reason || '');
-    const semanticReason = buildItemSemanticReason(item, primitive, params);
+    const semanticReasonCandidate = buildItemSemanticReason(item, primitive, params);
+    const semanticReason = semanticReasonCandidate &&
+      !hasInternalRecommendationLanguage(semanticReasonCandidate) &&
+      !hasMetaRecommendationLanguage(semanticReasonCandidate)
+      ? semanticReasonCandidate
+      : '';
     const sortedPrices = params.candidateTours
       .map((tour) => tour.price)
       .filter((price) => Number.isFinite(price) && price > 0)
