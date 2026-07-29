@@ -228,7 +228,7 @@ const semanticFitAfterFormulaicReason = rewriteRecommendationCopy({
 });
 assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('盐洲岛'));
 assert.ok(!semanticFitAfterFormulaicReason[0]?.reason?.startsWith('如果你是冲着'));
-assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('共享电动车'));
+assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('共享交通是否方便需要单独确认'));
 
 const localSupplementCopy = rewriteRecommendationCopy({
   items: [{
@@ -287,6 +287,29 @@ const repeatedClauseCopy = rewriteRecommendationCopy({
 });
 assert.ok(repeatedClauseCopy[0]?.reason?.includes('共享电瓶车配置需现场确认'));
 assert.ok(!repeatedClauseCopy[1]?.reason?.includes('共享电瓶车配置需现场确认'));
+
+const unverifiedMobilityCopy = rewriteRecommendationCopy({
+  items: [{
+    tourId: 'unverified-mobility',
+    score: 90,
+    reason: '傍晚租一辆共享电瓶车（小镇常见）兜一圈，去吃饭很方便。',
+    matchedSignals: ['小镇'],
+  }],
+  candidateTours: [candidate({
+    id: 'unverified-mobility',
+    title: '新兴禅域小镇温泉3天',
+    destination: '云浮',
+    price: 249,
+    tags: ['温泉'],
+    highlights: ['小镇', '温泉'],
+  })],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: { destination: '云浮', travelDate: '2026-06-12', forecastSummary: '', seasonAdvice: [], source: 'seasonal-rule' },
+  userText: '温泉和小镇，优先共享电瓶车',
+  allowPublicInterest: false,
+});
+assert.ok(!unverifiedMobilityCopy[0]?.reason?.includes('小镇常见'));
 
 const weakCompoundCandidate = candidate({
   id: 'weak-compound',

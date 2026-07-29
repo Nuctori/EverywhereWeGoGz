@@ -3239,6 +3239,18 @@ function softenAiEvidenceCaveats(reason: string) {
     .replace(/候选(?:里|中)未写明/g, '目前没有看到明确安排');
 }
 
+function softenUnverifiedMobilityClaims(reason: string, primitive: RecommendationPrimitive) {
+  const mobilityTerms = ['共享电瓶车', '共享电动车', '共享单车', '接驳车'];
+  if (!mobilityTerms.some((term) => reason.includes(term))) return reason;
+  if (mobilityTerms.some((term) => getPrimitiveCoverageScore(primitive, [term]) > 0)) return reason;
+
+  return reason.split(/(?<=[。！？；])/u).map((clause) => {
+    if (!mobilityTerms.some((term) => clause.includes(term))) return clause;
+    if (/(需确认|待核实|需要问清|目前没有看到明确安排|未提及|未标注|可能|有机会|如果当地有)/u.test(clause)) return clause;
+    return '这条线路的共享交通是否方便需要单独确认。';
+  }).join('');
+}
+
 function hasPublicInterestNeed(intent: AiTravelIntent | null, userText: string) {
   const corpus = [
     userText,
@@ -3888,14 +3900,15 @@ function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive
   const trimmed = typeof reason === 'string' ? reason.trim() : '';
   if (!primitive) return trimmed || '综合用户需求、天气和线路特点后较为合适';
   const softened = softenAiEvidenceCaveats(trimmed);
-  if (softened && hasUnsupportedPublicInterestClaim(softened, primitive)) {
+  const mobilitySafe = primitive ? softenUnverifiedMobilityClaims(softened, primitive) : softened;
+  if (mobilitySafe && hasUnsupportedPublicInterestClaim(mobilitySafe, primitive)) {
     return buildPublicInterestAlternativeReason(primitive);
   }
   // Experience: do not force every AI reason through a fixed price/weather/play checklist.
   // Soft needs such as public-interest, study travel, or rural value often explain fit through
   // world knowledge and candidate wording; overwriting those with local templates degrades copy.
-  if (softened && !hasMalformedAiTitleEcho(softened, primitive) && shouldKeepAiReason(softened, primitive)) {
-    return softened;
+  if (mobilitySafe && !hasMalformedAiTitleEcho(mobilitySafe, primitive) && shouldKeepAiReason(mobilitySafe, primitive)) {
+    return mobilitySafe;
   }
   return buildPrimitiveConcreteReason(primitive);
 }
@@ -4797,7 +4810,10 @@ function rewriteRecommendationCopy(params: {
     if (!primitive) return item.reason ? item : stripRecommendationCommentary(item);
 
     const currentReason = stripTerminalPunctuation(item.reason || '');
-    const semanticReason = buildItemSemanticReason(item, primitive, params);
+    const semanticReason = softenUnverifiedMobilityClaims(
+      buildItemSemanticReason(item, primitive, params),
+      primitive,
+    );
     const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
     const hasPublicInterestSemanticNote = hasPublicInterestLanguage(
       [item.semanticFit, item.semanticBoundary, ...(item.semanticSignals || [])].filter(Boolean).join(' '),
