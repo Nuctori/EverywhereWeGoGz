@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import {
   __aiRecommendationTestHooks,
 } from '../src/lib/ai-recommendation.ts';
-import { requestAiRecommendations } from '../src/lib/ai-recommendation.ts';
+import { getSearchRouteMeta, requestAiRecommendations } from '../src/lib/ai-recommendation.ts';
 import type { AiRecommendationCandidate } from '../src/types/tour.ts';
 
 const {
@@ -24,7 +24,6 @@ const {
   allowsPublicInterestForTurn,
   enrichPromptCandidatesWithMemoryCoverage,
   finalizeRecommendationSummary,
-  getAiResponseIntentQualityIssue,
   getConcreteAiReason,
   getPrimitiveCoverageScore,
   getPrimitiveConflictReasons,
@@ -37,7 +36,6 @@ const {
   mergeAiAndLocalRecommendations,
   mergeAiRankingIntent,
   mergeIntentWithMemory,
-  keepAiItemsForCompoundExperience,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
@@ -302,21 +300,24 @@ assert.equal(
   2,
   '滨水温泉目的地 should count as both hot spring and water play for a compound request',
 );
-const compoundSelection = keepAiItemsForCompoundExperience(
+const compoundSelection = prioritizeRecommendationItems(
   [
-    { tourId: 'coastal-hot-spring', score: 70, reason: '海边温泉度假', matchedSignals: [] },
+    { tourId: 'coastal-hot-spring', score: 99, reason: '海边温泉度假', matchedSignals: [] },
     { tourId: hotSpringTour.id, score: 99, reason: '纯温泉', matchedSignals: [] },
   ],
-  [
-    candidate({ id: 'coastal-hot-spring', title: '惠州双湾盐洲岛温泉联游3天', destination: '广东', price: 399, duration: 3, theme: '温泉泡汤' }),
-    hotSpringTour,
-  ],
-  '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  {
+    candidateTours: [
+      candidate({ id: 'coastal-hot-spring', title: '惠州双湾盐洲岛温泉联游3天', destination: '广东', price: 399, duration: 3, theme: '温泉泡汤' }),
+      hotSpringTour,
+    ],
+    intent: { semanticFocus: ['玩水', '周边小镇'], weatherSensitivity: [], departureWeekdays: [] },
+    userText: '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  },
 );
 assert.deepEqual(
   compoundSelection.map((item) => item.tourId),
-  ['coastal-hot-spring'],
-  'compound recommendation should prefer a coastal hot-spring match over a pure hot-spring filler',
+  ['coastal-hot-spring', hotSpringTour.id],
+  'compound recommendation should prefer a strong match while retaining partial candidates',
 );
 const avoidCompacted = compactCandidates([hotSpringTour, nonHotSpringTour], [], avoidIntent);
 assert.ok(avoidCompacted.some((item) =>
@@ -1043,9 +1044,9 @@ const sanitizedImplicitSemanticIntent = sanitizeAiPreferenceArraysForTurn(
     },
   },
 );
-assert.deepEqual(sanitizedImplicitSemanticIntent?.travelStyle ?? [], []);
-assert.deepEqual(sanitizedImplicitSemanticIntent?.mustHave ?? [], []);
-assert.deepEqual(sanitizedImplicitSemanticIntent?.semanticFocus ?? [], []);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.travelStyle ?? [], ['联游', '深度游']);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.mustHave ?? [], ['山水']);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.semanticFocus ?? [], ['东南亚']);
 assert.deepEqual(sanitizedImplicitSemanticIntent?.weatherSensitivity ?? [], []);
 
 const sanitizedImplicitSemanticNotes = sanitizeAiSemanticNotesForTurn(
@@ -1059,16 +1060,18 @@ const sanitizedImplicitSemanticNotes = sanitizeAiSemanticNotesForTurn(
     cannotAssert: ['\u8fd1\u671f\u53ef\u8d70'],
     caveat: '\u5f53\u524d\u5019\u9009\u91cc\u4e5f\u53ef\u4ee5\u987a\u624b\u627e\u6cf0\u56fd',
   },
-  {
-    userText: '\u6211\u60f3\u73a9\u5e7f\u897f\u548c\u8d8a\u5357',
-    hardIntent: {
-      destinationHints: ['\u5e7f\u897f', '\u8d8a\u5357'],
-      weatherSensitivity: [],
-      departureWeekdays: [],
-    },
-  },
 );
-assert.equal(sanitizedImplicitSemanticNotes, undefined);
+assert.equal(sanitizedImplicitSemanticNotes?.worldKnowledgeUse, '先把越南扩写成东南亚方向');
+assert.deepEqual(sanitizedImplicitSemanticNotes?.softCriteria, [
+  '区域：东南亚',
+  '偏好：联游、深度游',
+  '潜在约束：天气敏感（海边/户外）',
+]);
+assert.deepEqual(sanitizedImplicitSemanticNotes?.cannotAssert, ['近期可走']);
+assert.equal(sanitizedImplicitSemanticNotes?.caveat, '当前候选里也可以顺手找泰国');
+
+assert.equal(getSearchRouteMeta('天气有点热，想找舒服的玩法').action, 'plain');
+assert.equal(getSearchRouteMeta('最近天气有点热，想找舒服的玩法').action, 'plain');
 
 const variedReasonTours = [
   highPriceBeachTour,
@@ -1366,11 +1369,12 @@ const povertyPromptText = povertyPromptMessages.map((message) => message.content
 assert.ok(povertyPromptText.includes('世界知识'));
 assert.ok(povertyPromptText.includes('贫穷地方'));
 assert.ok(!povertyPromptText.includes('filterCandidateToursForPublicInterestNeed'));
-assert.ok(
+assert.equal(
   getPrimitiveConflictReasons(
     { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
     buildTourPrimitive(majorCityTour),
   ).some((reason) => reason.includes('不像县域乡村或公益方向')),
+  false,
 );
 assert.equal(
   getPrimitiveConflictReasons(
@@ -1389,35 +1393,12 @@ const publicInterestAuditedOrder = auditAiRecommendationsStrict(
   [majorCityTour, ruralCountyTour, explicitPublicTour],
   { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
 );
-assert.equal(publicInterestAuditedOrder[0]?.tourId, 'public-interest-tour');
-assert.equal(publicInterestAuditedOrder[1]?.tourId, 'rural-county');
-assert.equal(publicInterestAuditedOrder[2]?.tourId, 'major-city');
-assert.ok(publicInterestAuditedOrder[2]?.reason?.includes('需放宽条件'));
-
-const publicInterestQualityIssue = getAiResponseIntentQualityIssue({
-  response: {
-    items: [
-      { tourId: 'major-city', score: 99, reason: '北京文化地标很多', matchedSignals: ['文化'] },
-    ],
-  },
-  candidateTours: [majorCityTour, ruralCountyTour, explicitPublicTour],
-  intent: { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
-});
-assert.ok(publicInterestQualityIssue?.includes('public-interest_need_missed'));
-assert.ok(publicInterestQualityIssue?.includes('助农古寨'));
-assert.equal(
-  getAiResponseIntentQualityIssue({
-    response: {
-      items: [
-        { tourId: 'public-interest-tour', score: 99, reason: '助农古寨体验更贴近公益方向', matchedSignals: ['助农', '古寨'] },
-        { tourId: 'rural-county', score: 95, reason: '县域古村山水更接近乡村方向', matchedSignals: ['县域', '古村'] },
-      ],
-    },
-    candidateTours: [majorCityTour, ruralCountyTour, explicitPublicTour],
-    intent: { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
-  }),
-  null,
+assert.deepEqual(
+  publicInterestAuditedOrder.map((item) => item.tourId),
+  ['major-city', 'public-interest-tour', 'rural-county'],
+  'soft public-interest semantics do not reorder or exclude candidates at the audit boundary',
 );
+assert.ok(publicInterestAuditedOrder.every((item) => !item.reason?.startsWith('需放宽条件')));
 
 const weirdSemanticSummary = finalizeRecommendationSummary({
   aiSummary: '用户寻找海边温泉、预算400元以内，关注天气因素。软语义判断：海边、温泉、400元以内、天气敏感。边界：候选中无明确标注海边的温泉，需结合目的地判断，无法断言某候选为扶贫或公益项目。温泉需匹配atoms中的温泉泡汤。',

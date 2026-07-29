@@ -8,7 +8,6 @@ const {
   auditAiRecommendationsStrict,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
-  keepAiItemsForCompoundExperience,
 } = __aiRecommendationTestHooks;
 
 function candidate(
@@ -238,14 +237,16 @@ const weakCompoundCandidate = candidate({
   tags: ['温泉'],
   highlights: ['泡汤'],
 });
-assert.deepEqual(
-  keepAiItemsForCompoundExperience(
-    [{ tourId: 'weak-compound', score: 99, reason: '温泉价格合适。', matchedSignals: ['温泉'] }],
-    [weakCompoundCandidate],
-    '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
-  ),
+const weakCompoundItems = auditAiRecommendationsStrict(
+  [{ tourId: 'weak-compound', score: 99, reason: '温泉价格合适。', matchedSignals: ['温泉'] }],
   [],
-  'compound requests must not fall back to a weak single-theme candidate when no strong candidate exists',
+  [weakCompoundCandidate],
+  { semanticFocus: ['玩水', '周边小镇'], weatherSensitivity: [], departureWeekdays: [] },
+);
+assert.deepEqual(
+  weakCompoundItems.map((item) => item.tourId),
+  ['weak-compound'],
+  'partial compound matches remain visible as candidates instead of being hard-filtered',
 );
 
 const strongCompoundCandidate = candidate({
@@ -265,16 +266,19 @@ const weakMixedCandidate = candidate({
   highlights: ['温泉', '小镇漫步'],
 });
 assert.deepEqual(
-  keepAiItemsForCompoundExperience(
+  prioritizeRecommendationItems(
     [
-      { tourId: 'strong-compound', score: 80, reason: '温泉和玩水都对得上。', matchedSignals: ['温泉', '玩水'] },
+      { tourId: 'strong-compound', score: 99, reason: '温泉和玩水都对得上。', matchedSignals: ['温泉', '玩水'] },
       { tourId: 'weak-mixed', score: 99, reason: '温泉和小镇都不错。', matchedSignals: ['温泉', '小镇'] },
     ],
-    [strongCompoundCandidate, weakMixedCandidate],
-    '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+    {
+      candidateTours: [strongCompoundCandidate, weakMixedCandidate],
+      intent: { semanticFocus: ['玩水', '周边小镇'], weatherSensitivity: [], departureWeekdays: [] },
+      userText: '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+    },
   ).map((item) => item.tourId),
-  ['strong-compound'],
-  'when a core-coverage candidate exists, weak mixed candidates must not be padded into recommendations',
+  ['strong-compound', 'weak-mixed'],
+  'strong compound matches rank first while partial matches remain visible',
 );
 
 console.log('AI success-path audit passed');

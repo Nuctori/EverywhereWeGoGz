@@ -1739,7 +1739,6 @@ function getHardIntentSignalCount(intent: AiTravelIntent | null) {
     ...(intent.returnWeekdays || []),
     ...(intent.destinationHints || []),
     ...(intent.avoid || []),
-    ...(intent.weatherSensitivity || []),
   ].filter((value) => value !== null && value !== undefined && value !== '').length;
 }
 
@@ -3289,15 +3288,6 @@ function getPrimitiveConflictReasons(intent: AiTravelIntent | null, primitive: R
   const avoidMatches = primitiveMatchesAvoid(primitive, intent.avoid);
   if (avoidMatches.length > 0) {
     reasons.push(`命中需避开条件：${avoidMatches.join('/')}`);
-  }
-
-  if (hasPublicInterestNeedFromIntent(intent) && !primitiveHasPublicInterestEvidence(primitive)) {
-    const contradictionLabels: string[] = [];
-    if (primitiveHasUrbanLeisureEvidence(primitive)) contradictionLabels.push('城市休闲');
-    if (primitiveHasLuxuryResortEvidence(primitive)) contradictionLabels.push('品质度假');
-    if (contradictionLabels.length > 0) {
-      reasons.push(`更像${contradictionLabels.join('和')}，不像县域乡村或公益方向`);
-    }
   }
 
   return reasons;
@@ -5145,16 +5135,6 @@ function shouldUseAiSummary(
   return true;
 }
 
-function aiSummaryMissesCoverage(summary: string, userText: string | undefined) {
-  const coverageTerms = getCoverageTermsForQuality(userText);
-  if (coverageTerms.length < 2) return false;
-  const normalizedSummary = normalizeText(summary);
-  const mentionedCount = coverageTerms.filter((term) =>
-    normalizedSummary.includes(normalizeText(term))
-  ).length;
-  return mentionedCount < 2;
-}
-
 function attachWeatherGuidanceToItems(
   items: AiRecommendationItem[],
   candidateTours: AiRecommendationCandidate[],
@@ -5212,10 +5192,6 @@ function finalizeRecommendationSummary(params: {
   );
   const hasTurnPublicInterestNeed = allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText || '');
   if (hasTurnPublicInterestNeed) {
-    const fallbackSummary = buildRecommendationSummary(params);
-    return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
-  }
-  if (aiSummaryMissesCoverage(aiSummary, params.userText)) {
     const fallbackSummary = buildRecommendationSummary(params);
     return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
   }
@@ -6268,7 +6244,6 @@ export const __aiRecommendationTestHooks = {
   finalizeRecommendationSummary,
   getConcreteAiReason,
   getPrimitiveCoverageScore,
-  getAiResponseIntentQualityIssue,
   getPrimitiveConflictReasons,
   getWeatherRankingScore,
   assessWeatherComfortForDate,
@@ -6280,7 +6255,6 @@ export const __aiRecommendationTestHooks = {
   mergeAiRankingIntent,
   mergeIntentWithMemory,
   normalizeIntent,
-  keepAiItemsForCompoundExperience,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
@@ -6420,138 +6394,6 @@ function validateAiItems(
   return validatedItems;
 }
 
-function getAiResponseIntentQualityIssue(params: {
-  response: unknown;
-  candidateTours: Array<AiRecommendationCandidate | CandidateAuditPrimitive>;
-  intent: AiTravelIntent | null;
-}) {
-  const { response, candidateTours, intent } = params;
-  if (!hasPublicInterestNeedFromIntent(intent)) return null;
-
-  const asPrimitive = (tour: AiRecommendationCandidate | CandidateAuditPrimitive) =>
-    'matchStatus' in tour ? tour : buildTourPrimitive(tour);
-  const primitives = candidateTours.map(asPrimitive);
-  const primitiveByTourId = new Map(primitives.map((primitive) => [primitive.id, primitive]));
-  const evidenceTourIds = primitives
-    .filter((primitive) =>
-      primitiveHasPublicInterestEvidence(primitive) &&
-      getPrimitiveConflictReasons(intent, primitive).length === 0,
-    )
-    .map((primitive) => primitive.id);
-
-  if (evidenceTourIds.length === 0) return null;
-
-  const lookup = buildAiCandidateLookup(candidateTours as unknown as AiRecommendationCandidate[]);
-  const rawItems = Array.isArray((response as { items?: unknown[] })?.items)
-    ? (response as { items: unknown[] }).items
-    : [];
-  const seenTourIds = new Set<string>();
-  const mappedAiTourIds = rawItems
-    .map((rawItem) => resolveAiCandidateTourId(
-      rawItem as Partial<AiRecommendationItem> & {
-        id?: unknown;
-        title?: unknown;
-        destination?: unknown;
-      },
-      candidateTours as unknown as AiRecommendationCandidate[],
-      lookup,
-    ))
-    .filter((tourId): tourId is string => Boolean(tourId))
-    .filter((tourId) => {
-      if (seenTourIds.has(tourId)) return false;
-      seenTourIds.add(tourId);
-      return true;
-    });
-  if (mappedAiTourIds.length === 0) {
-    return 'public-interest_need_missed: no mapped AI items';
-  }
-
-  const topWindow = mappedAiTourIds.slice(0, Math.min(4, mappedAiTourIds.length));
-  const hasEvidenceNearTop = topWindow.some((tourId) => {
-    const primitive = primitiveByTourId.get(tourId);
-    return Boolean(
-      primitive &&
-      primitiveHasPublicInterestEvidence(primitive) &&
-      getPrimitiveConflictReasons(intent, primitive).length === 0,
-    );
-  });
-
-  if (hasEvidenceNearTop) return null;
-
-  const exampleTitles = uniqueStrings(
-    evidenceTourIds
-      .slice(0, 2)
-      .map((tourId) => primitiveByTourId.get(tourId)?.title || '')
-      .filter(Boolean),
-  );
-  return exampleTitles.length > 0
-    ? `public-interest_need_missed: evidence-backed routes available but top results ignored them (${exampleTitles.join(' / ')})`
-    : 'public-interest_need_missed: evidence-backed routes available but top results ignored them';
-}
-
-function getAiResponseSemanticCoverageIssue(params: {
-  response: unknown;
-  candidateTours: Array<AiRecommendationCandidate | CandidateAuditPrimitive>;
-  userText: string;
-}) {
-  const coverageTerms = getCoverageTermsForQuality(params.userText);
-  if (coverageTerms.length < 2) return null;
-
-  const asPrimitive = (tour: AiRecommendationCandidate | CandidateAuditPrimitive) =>
-    'matchStatus' in tour ? tour : buildTourPrimitive(tour);
-  const primitives = params.candidateTours.map(asPrimitive);
-  const primitiveByTourId = new Map(primitives.map((primitive) => [primitive.id, primitive]));
-  const maxCoverageCount = Math.max(
-    0,
-    ...primitives.map((primitive) => getItemCoverageMetrics(primitive, coverageTerms).coverageCount),
-  );
-  const requiredCoverageCount = Math.min(maxCoverageCount, 2);
-  if (requiredCoverageCount < 2) return null;
-
-  const lookup = buildAiCandidateLookup(params.candidateTours as unknown as AiRecommendationCandidate[]);
-  const rawItems = Array.isArray((params.response as { items?: unknown[] })?.items)
-    ? (params.response as { items: unknown[] }).items
-    : [];
-  const seenTourIds = new Set<string>();
-  const mappedAiTourIds = rawItems
-    .map((rawItem) => resolveAiCandidateTourId(
-      rawItem as Partial<AiRecommendationItem> & {
-        id?: unknown;
-        title?: unknown;
-        destination?: unknown;
-      },
-      params.candidateTours as unknown as AiRecommendationCandidate[],
-      lookup,
-    ))
-    .filter((tourId): tourId is string => Boolean(tourId))
-    .filter((tourId) => {
-      if (seenTourIds.has(tourId)) return false;
-      seenTourIds.add(tourId);
-      return true;
-    });
-  if (mappedAiTourIds.length === 0) return null;
-
-  const topWindow = mappedAiTourIds.slice(0, Math.min(4, mappedAiTourIds.length));
-  const topCoverageCount = Math.max(
-    0,
-    ...topWindow.map((tourId) => {
-      const primitive = primitiveByTourId.get(tourId);
-      return primitive ? getItemCoverageMetrics(primitive, coverageTerms).coverageCount : 0;
-    }),
-  );
-  if (topCoverageCount >= requiredCoverageCount) return null;
-
-  const exampleTitles = uniqueStrings(
-    primitives
-      .filter((primitive) => getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= requiredCoverageCount)
-      .slice(0, 2)
-      .map((primitive) => primitive.title),
-  );
-  return exampleTitles.length > 0
-    ? `semantic_need_missed: top results under-covered compound request (${coverageTerms.join(' / ')}; examples: ${exampleTitles.join(' / ')})`
-    : `semantic_need_missed: top results under-covered compound request (${coverageTerms.join(' / ')})`;
-}
-
 function getAuditNote(reasons: string[]) {
   if (reasons.length === 0) return null;
   const visibleReasons = reasons.slice(0, 2).join('；');
@@ -6676,52 +6518,6 @@ function auditAiRecommendationsStrict(
     ...alternativeAiItems,
     ...alternativeLocalItems,
   ].slice(0, MAX_AI_RANKED_ITEMS);
-}
-
-function keepAiItemsForCompoundExperience(
-  items: AiRecommendationItem[],
-  candidateTours: AiRecommendationCandidate[],
-  userText: string,
-) {
-  const coverageTerms = getCoverageTermsForQuality(userText);
-  if (coverageTerms.length < 2 || items.length === 0) return items;
-
-  const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
-  const maxCoverage = Math.max(
-    0,
-    ...candidateTours.map((tour) => getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount),
-  );
-  if (maxCoverage < 2) return [];
-
-  const strongCandidateCount = candidateTours.filter((tour) =>
-    getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount >= 2,
-  ).length;
-  const coreTerms = coverageTerms.filter((term) => !['周边小镇', '共享电瓶车'].includes(term));
-  const coreCandidateCount = candidateTours.filter((tour) =>
-    getItemCoverageMetrics(buildTourPrimitive(tour), coreTerms).coverageCount >= coreTerms.length,
-  ).length;
-  // 复合需求的核心条件必须共同决定入选。只要候选池里有同时覆盖核心条件
-  // 的团，就不能用“只占一项”的温泉/玩水线路把结果凑满；这类线路不是推荐，
-  // 最多应该在用户主动放宽条件后再出现。
-  const minimumCoverage = coreTerms.length >= 2 && coreCandidateCount > 0
-    ? coreTerms.length
-    : maxCoverage >= 2
-      ? maxCoverage
-      : strongCandidateCount >= 3
-        ? 2
-        : 1;
-  const kept = items.filter((item) => {
-    const primitive = primitiveByTourId.get(item.tourId);
-    if (!primitive) return false;
-    if (coreTerms.length >= 2 && coreCandidateCount > 0) {
-      return getItemCoverageMetrics(primitive, coreTerms).coverageCount >= coreTerms.length;
-    }
-    return getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= minimumCoverage;
-  });
-
-  // 复合需求没有证据充分的入选项时返回空集，让上层明确展示“暂时没有足够匹配”，
-  // 不能把只占一项的弱候选重新塞回结果，伪装成推荐。
-  return kept;
 }
 
 function normalizeIntent(value: unknown): AiTravelIntent | null {
@@ -6950,9 +6746,12 @@ function sanitizeAiPreferenceArraysForTurn(
 
   return {
     ...intent,
-    travelStyle: (intent.travelStyle || []).filter((term) => isAiInferredPreferenceGrounded(term, params)),
-    mustHave: (intent.mustHave || []).filter((term) => isAiInferredPreferenceGrounded(term, params)),
-    semanticFocus: (intent.semanticFocus || []).filter((term) => isAiInferredPreferenceGrounded(term, params)),
+    // These are model-derived ranking hints for the current turn. Keep them so
+    // the model can apply world knowledge and explain its tradeoffs; only hard
+    // fields are allowed to affect routing or candidate exclusion.
+    travelStyle: uniqueStrings(intent.travelStyle || []),
+    mustHave: uniqueStrings(intent.mustHave || []),
+    semanticFocus: uniqueStrings(intent.semanticFocus || []),
     weatherSensitivity: hasExplicitWeatherLanguage(params.userText)
       ? intent.weatherSensitivity || []
       : [],
@@ -6961,21 +6760,13 @@ function sanitizeAiPreferenceArraysForTurn(
 
 function sanitizeAiSemanticNotesForTurn(
   notes: AiRecommendationSemanticNotes | undefined,
-  params: {
-    userText: string;
-    hardIntent: AiTravelIntent | null;
-  },
 ): AiRecommendationSemanticNotes | undefined {
   if (!notes) return undefined;
 
-  const softCriteria = notes.softCriteria.filter((term) => isAiInferredPreferenceGrounded(term, params));
-  const cannotAssert = notes.cannotAssert.filter((term) => isAiInferredPreferenceGrounded(term, params));
-  const worldKnowledgeUse = notes.worldKnowledgeUse && isAiInferredPreferenceGrounded(notes.worldKnowledgeUse, params)
-    ? notes.worldKnowledgeUse
-    : undefined;
-  const caveat = notes.caveat && isAiInferredPreferenceGrounded(notes.caveat, params)
-    ? notes.caveat
-    : undefined;
+  const softCriteria = uniqueStrings(notes.softCriteria);
+  const cannotAssert = uniqueStrings(notes.cannotAssert);
+  const worldKnowledgeUse = notes.worldKnowledgeUse;
+  const caveat = notes.caveat;
 
   return worldKnowledgeUse || softCriteria.length > 0 || cannotAssert.length > 0 || caveat
     ? {
@@ -6987,6 +6778,26 @@ function sanitizeAiSemanticNotesForTurn(
     : undefined;
 }
 
+function sanitizeAiPreferenceArraysForMemory(
+  intent: AiTravelIntent | null,
+  params: {
+    userText: string;
+    hardIntent: AiTravelIntent | null;
+  },
+): AiTravelIntent | null {
+  if (!intent) return intent;
+
+  const turnIntent = sanitizeAiPreferenceArraysForTurn(intent, params);
+  if (!turnIntent) return turnIntent;
+
+  return {
+    ...turnIntent,
+    travelStyle: turnIntent.travelStyle?.filter((term) => isAiInferredPreferenceGrounded(term, params)),
+    mustHave: turnIntent.mustHave?.filter((term) => isAiInferredPreferenceGrounded(term, params)),
+    semanticFocus: turnIntent.semanticFocus?.filter((term) => isAiInferredPreferenceGrounded(term, params)),
+  };
+}
+
 function buildPreferenceMemoryIntentForTurn(
   intent: AiTravelIntent | null,
   params: {
@@ -6996,7 +6807,7 @@ function buildPreferenceMemoryIntentForTurn(
 ): AiTravelIntent | null {
   if (!intent) return intent;
 
-  const sanitized = sanitizeAiPreferenceArraysForTurn(intent, params);
+  const sanitized = sanitizeAiPreferenceArraysForMemory(intent, params);
   if (!sanitized) return sanitized;
 
   return {
@@ -7101,7 +6912,6 @@ async function callSingleAiProvider(params: {
   liteMessages?: ReturnType<typeof buildLiteAiMessages>;
   maxTokens?: number;
   liteMaxTokens?: number;
-  qualityCheck?: (response: unknown, config: AiProviderConfig) => string | null;
   signal?: AbortSignal;
 }) {
   const { config } = params;
@@ -7157,12 +6967,7 @@ async function callSingleAiProvider(params: {
 
       const data = await response.json();
       shouldRetry = false;
-      const parsed = parseAiProviderResponse(data, config);
-      const qualityIssue = params.qualityCheck?.(parsed, config);
-      if (qualityIssue) {
-        throw new Error(getAiProviderParseErrorLabel(config, 'quality_check_failed', qualityIssue));
-      }
-      return parsed;
+      return parseAiProviderResponse(data, config);
     } catch (error) {
       providerLastError = normalizeAiProviderError(error, config);
       if (providerLastError.message.includes('tokens_seen')) {
@@ -7188,7 +6993,6 @@ async function callAiApi(params: {
   liteMessages?: ReturnType<typeof buildLiteAiMessages>;
   maxTokens?: number;
   liteMaxTokens?: number;
-  qualityCheck?: (response: unknown, config: AiProviderConfig) => string | null;
 }) {
   const providerErrors: string[] = [];
   const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
@@ -7278,7 +7082,6 @@ export async function requestAiRecommendations({
   activeFilters,
   searchQuery,
   aiConfig,
-  preferenceMemory,
   previousResult,
   onProgress,
 }: AiRecommendationRequest): Promise<AiRecommendationResult> {
@@ -7300,7 +7103,9 @@ export async function requestAiRecommendations({
   await yieldToMain();
 
   const text = getLatestUserText(messages);
-  const basePreferenceMemory = preferenceMemory ?? null;
+  // 历史偏好不参与新的推荐请求。每次请求只根据当前用户原话判断，
+  // 避免上一轮的目的地或体验偏好污染新的搜索。
+  const basePreferenceMemory: AiPreferenceMemory | null = null;
   const baseHardIntent = buildHardIntentFromText(text);
   const memoryForThisTurn = shouldInheritPreferenceMemoryForTurn(text, baseHardIntent, basePreferenceMemory)
     ? basePreferenceMemory
@@ -7336,7 +7141,7 @@ export async function requestAiRecommendations({
     return cachedMemoryBackedLocalItems;
   };
   let runtimeFallbackItems: AiRecommendationItem[] = [];
-  let runtimePreferenceMemory = memoryForThisTurn;
+  let runtimePreferenceMemory: AiPreferenceMemory | null = memoryForThisTurn;
   const configs = getResolvedAiConfigs(aiConfig);
   const config = configs[0] || null;
 
@@ -7563,16 +7368,6 @@ export async function requestAiRecommendations({
       }),
       maxTokens: 1600,
       liteMaxTokens: 1000,
-      qualityCheck: (response) =>
-        getAiResponseIntentQualityIssue({
-          response,
-          candidateTours: aiCandidatePool,
-          intent: effectiveIntent,
-        }) || getAiResponseSemanticCoverageIssue({
-          response,
-          candidateTours: aiCandidatePool,
-          userText: effectiveUserText,
-        }),
     }) as {
       intent?: unknown;
       intentNotes?: unknown;
@@ -7607,10 +7402,7 @@ export async function requestAiRecommendations({
       text,
       { allowPublicInterest: allowPublicInterestForTurn },
     );
-    const semanticNotes = sanitizeAiSemanticNotesForTurn(rawSemanticNotes, {
-      userText: text,
-      hardIntent: intent,
-    });
+    const semanticNotes = sanitizeAiSemanticNotesForTurn(rawSemanticNotes);
     const clarification = normalizeAiClarification(aiResponse.clarification);
     const assumptions = normalizeAiTextList(aiResponse.assumptions, 3, 80);
     const tradeoffs = normalizeAiTextList(aiResponse.tradeoffs, 4, 100);
@@ -7630,28 +7422,21 @@ export async function requestAiRecommendations({
     if (validatedAiItems.length === 0 && Array.isArray(aiResponse.items)) {
       throw new Error('AI API unusable items_unmapped: returned tourIds did not match current candidates');
     }
-    const aiItems = keepAiItemsForCompoundExperience(
-      auditAiRecommendationsStrict(
+    const aiItems = auditAiRecommendationsStrict(
       validatedAiItems,
       [],
       compactedCandidateTours,
       finalIntent,
-      ),
-      compactedCandidateTours,
-      text,
     );
 
-    const compoundRequest = getCoverageTermsForQuality(text).length >= 2;
     const rankedAiItems = aiItems.length > 0
       ? aiItems
-      : compoundRequest
-        ? []
-        : compactedLocalItems.slice(0, MAX_AI_RANKED_ITEMS);
-    const localItemsForFinalMerge = compoundRequest && aiItems.length === 0 ? [] : compactedLocalItems;
+      : compactedLocalItems.slice(0, MAX_AI_RANKED_ITEMS);
+    const localItemsForFinalMerge = compactedLocalItems;
 
     const baseMergedItems = buildPaddedRecommendationItems(
       mergeAiAndLocalRecommendations(rankedAiItems, localItemsForFinalMerge),
-      compoundRequest && aiItems.length === 0 ? [] : localItemsForMerge,
+      localItemsForMerge,
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
     const mergedCandidateTours = availableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));
@@ -7723,18 +7508,11 @@ export async function requestAiRecommendations({
   } catch (error) {
     const failureDetail = getAiFailureDetail(error);
     const fallbackPool = runtimeFallbackItems.length > 0 ? runtimeFallbackItems : getMemoryBackedLocalItems();
-    // AI 失败时也不能退回“把本地候选全展示出来”。对复合需求，备用路径
-    // 仍然要沿用同一套体验组合判断；没有强组合候选时宁可少给，也不拿纯
-    // 温泉/纯玩水线路凑成一长串“推荐”。
-    const compoundFallback = keepAiItemsForCompoundExperience(
-      fallbackPool,
-      candidatePool,
+    const fallbackItems = ensureSharedBikeRecommendationNote(
+      fallbackPool.slice(0, MAX_AI_SELECTED_ITEMS),
+      candidatePool.map(buildTourPrimitive),
       text,
     );
-    const fallbackItems = ensureSharedBikeRecommendationNote((getCoverageTermsForQuality(text).length >= 2
-      ? compoundFallback
-      : fallbackPool
-    ).slice(0, MAX_AI_SELECTED_ITEMS), candidatePool.map(buildTourPrimitive), text);
     if (typeof console !== 'undefined' && typeof console.warn === 'function') {
       console.warn('[ai-recommendation] fallback to local recommendations:', failureDetail);
     }

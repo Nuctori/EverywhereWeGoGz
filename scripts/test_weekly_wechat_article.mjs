@@ -93,6 +93,37 @@ assert.ok(new Set(context.selectedTours.map((tour) => tour.bucket)).size >= 1);
 assert.ok(context.selectedTours.every((tour) => tour.siteUrl.includes('source=wechat')));
 assert.ok(context.selectionDiagnostics.eligibleTours >= context.selectedTours.length);
 
+const metadataOnlyContext = buildWeeklyArticleContext([
+  {
+    ...tours[0],
+    id: 'tour-no-image-or-booking',
+    title: '清远峡谷无图测试线2天',
+    images: [],
+    bookingUrl: '',
+  },
+], {
+  runDate: '2026-06-24',
+  windowDays: 14,
+  maxCandidates: 1,
+  maxArticleItems: 1,
+  weatherWindow,
+});
+assert.equal(metadataOnlyContext.selectedTours.length, 1);
+const metadataOnlyArticle = renderWeeklyArticle(metadataOnlyContext, {
+  title: '无图线路测试',
+  summary: '无图线路仍可进入候选。',
+  intro: '这是一条没有配图和 bookingUrl 的测试线路。',
+  weatherLead: '暂无目的地天气判断。',
+  items: [{
+    id: 'tour-no-image-or-booking',
+    recommendationTitle: '清远峡谷无图测试线2天',
+    reason: '近期班期仍然可供编辑参考。',
+    reminder: '班期和报名信息以站内详情为准。',
+  }],
+});
+assert.ok(metadataOnlyArticle.includes('cover: "/brand/laoguang-logo-full.jpg"'));
+assert.equal(validateGeneratedArticle(metadataOnlyArticle, metadataOnlyContext).ok, true);
+
 const balancedTours = [
   {
     id: 'hotel-a',

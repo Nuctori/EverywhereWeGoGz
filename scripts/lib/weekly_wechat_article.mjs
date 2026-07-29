@@ -8,6 +8,7 @@ const DEFAULT_MAX_CANDIDATES = 18;
 const DEFAULT_MAX_ARTICLE_ITEMS = 25;
 const DEFAULT_JSON_MAX_TOKENS = 8192;
 const DEFAULT_AUTHOR = '老广去边度';
+const DEFAULT_COVER = '/brand/laoguang-logo-full.jpg';
 
 const FORBIDDEN_PHRASES = [
   '最低价',
@@ -823,8 +824,6 @@ export function buildWeeklyArticleContext(tours, options = {}) {
     .map((tour) => {
       const selectedDepartureDates = getTravelWindowDates(tour, runDate, endDate);
       if (selectedDepartureDates.length === 0) return null;
-      if (!Array.isArray(tour.images) || tour.images.length === 0) return null;
-      if (typeof tour.bookingUrl !== 'string' || !tour.bookingUrl.trim()) return null;
 
       const score = scoreTour(tour, runDate, selectedDepartureDates);
       return {
@@ -1265,7 +1264,7 @@ export function renderWeeklyArticle(context, aiPayload) {
     `title: "${(aiPayload.title || '本周值得认真看的25条线路').replaceAll('"', '\\"')}"`,
     `summary: "${(aiPayload.summary || buildFallbackIntro(context)).replaceAll('"', '\\"')}"`,
     `author: "${DEFAULT_AUTHOR}"`,
-    `cover: "${context.selectedTours[0]?.primaryImage || context.selectedTours[0]?.images?.[0] || ''}"`,
+    `cover: "${context.selectedTours[0]?.primaryImage || context.selectedTours[0]?.images?.[0] || DEFAULT_COVER}"`,
     '---',
   ].join('\n');
 
