@@ -4753,6 +4753,11 @@ function rewriteRecommendationCopy(params: {
   const profile = buildCopyIntentProfile(params.intent, params.userText);
 
   return params.items.map((item, index) => {
+    // 补足选择面的线路不是 AI 亲自写过推荐语的结果，不再用本地模板
+    // 替它伪造一段“推荐理由”；用户仍可通过卡片事实自行比较。
+    if (item.recommendationTier === 'local-supplement') {
+      return stripRecommendationCommentary(item);
+    }
     if (index >= MAX_AI_COMMENTARY_ITEMS) {
       return stripRecommendationCommentary(item);
     }

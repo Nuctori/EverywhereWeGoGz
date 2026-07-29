@@ -1781,6 +1781,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                   onClick={() => handleCardClick(tour)}
                   recommendationReason={recommendation?.reason}
                   recommendationRank={recommendation?.rank}
+                  recommendationTier={recommendation?.recommendationTier}
                 />
               );
             })}

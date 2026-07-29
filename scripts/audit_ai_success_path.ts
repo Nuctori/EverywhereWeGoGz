@@ -230,6 +230,36 @@ assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('盐洲岛'));
 assert.ok(!semanticFitAfterFormulaicReason[0]?.reason?.startsWith('如果你是冲着'));
 assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('共享电动车'));
 
+const localSupplementCopy = rewriteRecommendationCopy({
+  items: [{
+    tourId: 'semantic-copy',
+    score: 40,
+    reason: '这条线更适合把时间留给温泉，节奏偏轻松。',
+    matchedSignals: ['本地补位'],
+    recommendationTier: 'local-supplement',
+  }],
+  candidateTours: [candidate({
+    id: 'semantic-copy',
+    title: '惠州双湾盐洲岛温泉联游3天',
+    destination: '广东',
+    price: 799,
+    tags: ['温泉'],
+    highlights: ['盐洲岛', '温泉'],
+  })],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '惠州',
+    travelDate: '2026-06-12',
+    forecastSummary: '',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  allowPublicInterest: false,
+});
+assert.equal(localSupplementCopy[0]?.reason, undefined);
+
 const weakCompoundCandidate = candidate({
   id: 'weak-compound',
   title: '金水台温泉2天',
