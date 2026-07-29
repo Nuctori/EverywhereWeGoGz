@@ -47,6 +47,10 @@ export function getCompletedArticleIds(newArticles, targets, completedOrderKeys)
     .map((article) => article.articleId);
 }
 
+export function mergeProcessedArticleIds(previousIds, completedArticleIds) {
+  return [...new Set([...completedArticleIds, ...previousIds])].slice(0, 100);
+}
+
 export async function createOrders(pendingOrders, completedOrderKeys, requestOrder) {
   const nextCompletedOrderKeys = new Set(completedOrderKeys);
   const orders = [];
@@ -212,7 +216,7 @@ async function main() {
   writeResult(outputPath, {
     status: orderResult.errors.length > 0 ? 'partial_failure' : 'orders_created',
     updateState: true,
-    processedArticleIds: [...new Set([...previousIds, ...completedArticleIds])].slice(0, 100),
+    processedArticleIds: mergeProcessedArticleIds(previousIds, completedArticleIds),
     completedOrderKeys: [...orderResult.completedOrderKeys].slice(-500),
     preflight,
     orders: orderResult.orders,

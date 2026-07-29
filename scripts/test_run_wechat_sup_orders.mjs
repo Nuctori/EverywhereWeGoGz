@@ -4,6 +4,7 @@ import {
   createOrders,
   getCompletedArticleIds,
   getPendingOrders,
+  mergeProcessedArticleIds,
   parseCompletedOrderKeys,
 } from './run_wechat_sup_orders.mjs';
 
@@ -50,5 +51,10 @@ assert.deepEqual(orderResult.orders.map((order) => order.orderSn), ['order-1']);
 assert.deepEqual(orderResult.errors.map((error) => error.productKey), ['18944']);
 assert.equal(orderResult.completedOrderKeys.has('article-1:18958'), true);
 assert.equal(orderResult.completedOrderKeys.has('article-1:18944'), false);
+const previousIds = Array.from({ length: 100 }, (_, index) => `old-${index}`);
+assert.deepEqual(mergeProcessedArticleIds(previousIds, ['new-article']), [
+  'new-article',
+  ...previousIds.slice(0, 99),
+]);
 
 console.log('run_wechat_sup_orders tests passed');

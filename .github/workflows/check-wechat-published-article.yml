@@ -34,6 +34,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Verify SUP relay helper
+        run: |
+          python3 scripts/test_run_remote_wechat_sup_orders.py
+          python3 scripts/test_deploy_remote_wechat_sup_orders.py
+
       - name: Check published articles
         id: check_articles
         env:
@@ -71,7 +76,20 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
           EOF
 
-      - name: Preflight or create SUP orders
+      - name: Start SSH agent for SUP relay
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.WECHAT_PUBLISH_SSH_KEY }}
+
+      - name: Configure pinned SUP relay host key
+        env:
+          WECHAT_PUBLISH_KNOWN_HOSTS: ${{ secrets.WECHAT_PUBLISH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          test -n "$WECHAT_PUBLISH_KNOWN_HOSTS"
+          printf '%s\n' "$WECHAT_PUBLISH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Preflight or create SUP orders through publish server
         id: sup_orders
         env:
           SUP_APP_ID: ${{ secrets.SUP_APP_ID }}
@@ -79,13 +97,17 @@ jobs:
           SUP_PURCHASE_ENABLED: ${{ vars.SUP_PURCHASE_ENABLED }}
           COMPLETED_ORDER_KEYS: ${{ vars.WECHAT_SUP_COMPLETED_ORDER_KEYS }}
           FORCE_EXECUTE_ORDERS: ${{ inputs.execute_orders }}
+          WECHAT_PUBLISH_SSH_TARGET: ${{ secrets.WECHAT_PUBLISH_SSH_TARGET }}
+          WECHAT_PUBLISH_REMOTE_DIR: ${{ secrets.WECHAT_PUBLISH_REMOTE_DIR }}
         run: |
           execute_orders=false
           if [ "$SUP_PURCHASE_ENABLED" = "true" ] || [ "$FORCE_EXECUTE_ORDERS" = "true" ]; then
             execute_orders=true
           fi
 
-          node scripts/run_wechat_sup_orders.mjs \
+          python3 scripts/deploy_remote_wechat_sup_orders.py \
+            --host "$WECHAT_PUBLISH_SSH_TARGET" \
+            --remote-dir "${WECHAT_PUBLISH_REMOTE_DIR%/}/sup-orders/$GITHUB_RUN_ID" \
             --check-result "$CHECK_RESULT_PATH" \
             --execute "$execute_orders" \
             --output "$SUP_RESULT_PATH"
