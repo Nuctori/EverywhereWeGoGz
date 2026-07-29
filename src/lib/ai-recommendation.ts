@@ -6397,7 +6397,10 @@ function keepAiItemsForCompoundExperience(
     0,
     ...candidateTours.map((tour) => getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount),
   );
-  if (maxCoverage < 2) return [];
+  // 没有同时覆盖至少两项时，不要把结果清空。AI 已经基于候选事实和
+  // 世界知识做过排序，此处应保留它选出的最近替代，让用户还有可行动的
+  // 方向；后续文案会把未覆盖的条件写成待核实/缺口，而不是伪装成完整匹配。
+  if (maxCoverage < 2) return items.slice(0, MAX_AI_SELECTED_ITEMS);
 
   const strongCandidateCount = candidateTours.filter((tour) =>
     getItemCoverageMetrics(buildTourPrimitive(tour), coverageTerms).coverageCount >= 2,
@@ -6425,8 +6428,8 @@ function keepAiItemsForCompoundExperience(
     return getItemCoverageMetrics(primitive, coverageTerms).coverageCount >= minimumCoverage;
   });
 
-  // 复合需求没有证据充分的入选项时返回空集，让上层明确展示“暂时没有足够匹配”，
-  // 不能把只占一项的弱候选重新塞回结果，伪装成推荐。
+  // 有强组合候选时只保留强候选；没有时保留 AI 选出的最近替代，不能把
+  // 未被 AI 选择的本地候选批量补进来，也不能把次优候选伪装成完整满足。
   return kept;
 }
 

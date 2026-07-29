@@ -244,8 +244,8 @@ assert.deepEqual(
     [weakCompoundCandidate],
     '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
   ),
-  [],
-  'compound requests must not fall back to a weak single-theme candidate when no strong candidate exists',
+  [{ tourId: 'weak-compound', score: 99, reason: '温泉价格合适。', matchedSignals: ['温泉'] }],
+  'when no strong compound candidate exists, retain the AI-selected nearest alternative',
 );
 
 const strongCompoundCandidate = candidate({
