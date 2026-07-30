@@ -20,6 +20,7 @@
     "audit:deploy-workflow": "node scripts/test_deploy_workflow.mjs",
     "test:static-asset-fallback": "node scripts/test_static_asset_fallback.mjs",
     "test:cdn-pool": "node scripts/test_cdn_pool.mjs",
+    "test:cdn-pool-validation": "node scripts/test_cdn_pool_validation.mjs",
     "audit:jrt365-crawl-guard": "node scripts/test_jrt365_crawl_guard.mjs",
     "audit:update-data-workflow": "node scripts/test_update_data_workflow.mjs",
     "audit:push-generated-commit": "node scripts/test_push_generated_commit.mjs",

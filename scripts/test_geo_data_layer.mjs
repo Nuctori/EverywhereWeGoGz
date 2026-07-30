@@ -73,12 +73,47 @@ for (const entry of mapIndex) {
   }
 }
 
+for (const tour of list) {
+  if (!tour.geo.destination) continue;
+  const place = places.find((candidate) => candidate.placeId === tour.geo.destination.placeId);
+  assert(place, `${tour.id} destination place must exist in geo-places.json`);
+  assert(place.tourIds.includes(tour.id), `${place.name} must index destination tour ${tour.id}`);
+}
+
 const withDestination = list.filter((tour) => tour.geo.destination).length;
 const withDeparture = list.filter((tour) => tour.geo.departure).length;
+const namedDestinationCount = list.filter((tour) => tour.geo.destination?.label).length;
+const seaSpringTours = list.filter((tour) => String(tour.title || '').includes('海泉湾'));
+assert(namedDestinationCount > 0, 'generated geo data must retain mined destination labels');
+assert(seaSpringTours.length > 0, 'fixture data must include the 海泉湾 destination example');
+assert(seaSpringTours.every((tour) => tour.geo.destination?.name === '珠海海泉湾'), '海泉湾 titles must resolve to the mined named destination');
+assert(seaSpringTours.every((tour) => tour.geo.destination?.level === 'poi'), 'named 海泉湾 destinations must remain POI-level map locations');
+const redBayTours = list.filter((tour) => String(tour.title || '').includes('汕尾红海湾'));
+assert(redBayTours.length > 0 && redBayTours.every((tour) => tour.geo.destination?.label === '汕尾红海湾'), '红海湾 titles must retain their named destination label');
+assert(redBayTours.every((tour) => tour.geo.destination?.level === 'poi'), 'named 红海湾 destinations must remain POI-level map locations');
+const minedAliasCases = [
+  ['西溪', '贺州西溪'],
+  ['云顶', '龙门云顶'],
+  ['禅域小镇', '新兴禅域小镇'],
+];
+for (const [token, expectedLabel] of minedAliasCases) {
+  const matchingTours = list.filter((tour) => String(tour.title || '').includes(token));
+  assert(matchingTours.length > 0, `fixture data must include the ${token} destination example`);
+  assert(matchingTours.some((tour) => tour.geo.destination?.label === expectedLabel), `${token} titles must retain the mined named destination`);
+}
+const marrakechTours = list.filter((tour) => String(tour.title || '').includes('马拉喀什'));
+assert(marrakechTours.length > 0, 'fixture data must include the 马拉喀什 destination example');
+assert(marrakechTours.every((tour) => tour.geo.destination?.name === '马拉喀什'), '马拉喀什 titles must not resolve to the 喀什 substring');
+assert(marrakechTours.every((tour) => tour.geo.destination?.country === '摩洛哥'), '马拉喀什 titles must retain the correct country');
+for (const tourId of ['tour_858', 'tour_877']) {
+  const tour = list.find((candidate) => candidate.id === tourId);
+  assert(tour?.geo.destination?.name === '伦敦', `${tourId} must retain the international destination before 往返`);
+}
 console.log(JSON.stringify({
   tours: list.length,
   places: places.length,
   withDestination,
   withDeparture,
+  namedDestinationCount,
   unmapped: list.filter((tour) => tour.geo.status === 'unmapped').length,
 }));

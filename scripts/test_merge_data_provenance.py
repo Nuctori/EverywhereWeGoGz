@@ -143,6 +143,7 @@ def test_title_place_miner_keeps_destination_after_departure_phrase():
         "广州出发珠海海泉湾5天",
         "广州集合后游珠海海泉湾5天",
         "广州-珠海海泉湾5天",
+        "行走清迈-邂逅小资广州往返5天",
     ):
         raw = {
             "source": "测试来源",
@@ -152,22 +153,87 @@ def test_title_place_miner_keeps_destination_after_departure_phrase():
             "days": 5,
         }
         tour = raw_to_tour(raw, 1, empty_detail())
-        assert tour["destinationCity"] == "珠海"
-        assert tour["destinationPlaceName"] == "珠海海泉湾"
+        if "清迈" in title:
+            assert tour["destinationCity"] == "清迈"
+            assert tour["destinationPlaceName"] == "清迈"
+        else:
+            assert tour["destinationCity"] == "珠海"
+            assert tour["destinationPlaceName"] == "珠海海泉湾"
         assert tour["geoConfidence"] == "low"
 
 
-def test_title_place_miner_does_not_absorb_transport_text_into_place_label():
+def test_title_place_miner_recognizes_named_destination_before_transport_text():
     raw = {
         "source": "测试来源",
         "title": "逸游仙本那|臻选水屋5天4晚-广州AK直飞斗湖",
-        "destination": "其他",
+        "destination": "广东",
         "price": 999,
         "days": 5,
     }
     tour = raw_to_tour(raw, 1, empty_detail())
 
-    assert tour["destinationPlaceName"] == ""
+    assert tour["destinationCity"] == "仙本那"
+    assert tour["destinationPlaceName"] == "仙本那"
+    assert tour["geoSource"] == "title-place-miner"
+
+
+def test_title_place_miner_promotes_catalog_aliases_to_specific_destinations():
+    cases = (
+        ("贺州西溪3天", "贺州", "贺州西溪"),
+        ("龙门云顶温泉3天", "龙门", "龙门云顶温泉"),
+        ("新兴禅域小镇2天", "新兴", "新兴禅域小镇"),
+    )
+    for title, expected_city, expected_label in cases:
+        raw = {
+            "source": "测试来源",
+            "title": title,
+            "destination": "广东",
+            "price": 999,
+            "days": 3,
+        }
+        tour = raw_to_tour(raw, 1, empty_detail())
+        assert tour["destinationCity"] == expected_city
+        assert tour["destinationPlaceName"] == expected_label
+        assert tour["geoSource"] == "title-place-miner"
+
+
+def test_title_place_miner_keeps_standalone_short_alias_as_city():
+    raw = {
+        "source": "测试来源",
+        "title": "8B【纯玩巴厘】双飞6天",
+        "destination": "其他",
+        "price": 999,
+        "days": 6,
+    }
+    tour = raw_to_tour(raw, 1, empty_detail())
+    assert tour["destinationCity"] == "巴厘岛"
+    assert tour["destinationPlaceName"] == "巴厘岛"
+
+
+def test_title_place_miner_does_not_use_departure_port_as_destination():
+    raw = {
+        "source": "测试来源",
+        "title": "广州南沙－马尼拉－文莱－芽庄－广州南沙16晚17天",
+        "destination": "广东",
+        "price": 999,
+        "days": 17,
+    }
+    tour = raw_to_tour(raw, 1, empty_detail())
+    assert tour["destinationCity"] == "芽庄"
+    assert tour["destinationPlaceName"] == "芽庄"
+
+
+def test_title_place_miner_keeps_international_destination_before_return_flight():
+    raw = {
+        "source": "测试来源",
+        "title": "英格兰苏格兰四星10天 广州直飞==伦敦往返",
+        "destination": "广东",
+        "price": 999,
+        "days": 10,
+    }
+    tour = raw_to_tour(raw, 1, empty_detail())
+    assert tour["destinationCity"] == "伦敦"
+    assert tour["destinationPlaceName"] == "伦敦"
 
 
 def test_detail_fields_are_structured_without_invention():
