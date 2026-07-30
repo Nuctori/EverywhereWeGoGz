@@ -23,15 +23,20 @@ function nonEmpty(value) {
 }
 
 function validCoordinate(latitude, longitude) {
-  return Number.isFinite(Number(latitude)) && Number.isFinite(Number(longitude))
-    && Number(latitude) >= -90 && Number(latitude) <= 90
-    && Number(longitude) >= -180 && Number(longitude) <= 180;
+  const missing = (value) => value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
+  if (missing(latitude) || missing(longitude)) return false;
+  const numericLatitude = Number(latitude);
+  const numericLongitude = Number(longitude);
+  return Number.isFinite(numericLatitude) && Number.isFinite(numericLongitude)
+    && numericLatitude >= -90 && numericLatitude <= 90
+    && numericLongitude >= -180 && numericLongitude <= 180;
 }
 
 function buildPlaceId(point) {
   return crypto.createHash('sha1')
     .update([
       point.country || '', point.province || '', point.city || '', point.name || '',
+      point.locality || '', point.level || '',
     ].join('|'))
     .digest('hex')
     .slice(0, 16);
@@ -44,6 +49,11 @@ function buildGeoPoint(tour, role) {
   const cityName = nonEmpty(tour[destination ? 'destinationCity' : 'departureCity']);
   const name = destination ? (nonEmpty(tour.destinationPlaceName) || cityName) : cityName;
   if (!name || !cityName || !validCoordinate(latitude, longitude)) return undefined;
+  const level = nonEmpty(tour[destination ? 'destinationGeoLevel' : 'departureGeoLevel'])
+    || (name !== cityName ? 'poi' : 'city');
+  const locality = nonEmpty(tour[destination ? 'destinationLocality' : 'departureLocality']);
+  const coordinateSource = nonEmpty(tour[destination ? 'destinationCoordinateSource' : 'departureCoordinateSource'])
+    || (tour.geoSource === 'local-place-catalog' ? 'catalog' : 'inferred');
 
   const point = {
     name,
@@ -54,8 +64,10 @@ function buildGeoPoint(tour, role) {
     latitude: Number(latitude),
     longitude: Number(longitude),
     coordinateSystem: 'wgs84',
-    level: 'city',
-    source: tour.geoSource === 'local-place-catalog' ? 'catalog' : 'inferred',
+    level,
+    ...(locality ? { locality } : {}),
+    coordinateSource,
+    source: tour.geoSource === 'local-place-catalog' ? 'catalog' : tour.geoSource === 'geocoder' ? 'geocoder' : 'inferred',
     confidence: ['low', 'medium', 'high'].includes(tour.geoConfidence) ? tour.geoConfidence : 'low',
   };
   return { placeId: buildPlaceId(point), ...point, ...(name !== cityName ? { label: name } : {}) };
@@ -190,14 +202,31 @@ function refreshExistingPlaceholderLabels() {
 
 // Windows ????????????????????????????
 function writeTextFileWithRetry(filePath, content) {
+  if (fs.existsSync(filePath)) {
+    try {
+      if (fs.readFileSync(filePath, 'utf8') === content) return;
+    } catch {
+      // Continue to the retry loop when a concurrent file observer briefly holds the file.
+    }
+  }
+
   let lastError;
 
   for (let attempt = 1; attempt <= writeRetries; attempt += 1) {
+    const tempPath = `${filePath}.${process.pid}.${attempt}.tmp`;
     try {
-      fs.writeFileSync(filePath, content, 'utf8');
+      fs.writeFileSync(tempPath, content, 'utf8');
+      fs.renameSync(tempPath, filePath);
       return;
     } catch (error) {
       lastError = error;
+      if (fs.existsSync(tempPath)) {
+        try {
+          fs.unlinkSync(tempPath);
+        } catch {
+          // The next attempt uses a unique temp path.
+        }
+      }
       Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, attempt * 75);
     }
   }

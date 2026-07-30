@@ -308,6 +308,9 @@ jobs:
       - name: Split merged data
         run: npm run data:split
 
+      - name: Resolve mined destination coordinates
+        run: python -u scripts/rebuild_geo_data.py --network
+
       - name: Optimize cached images
         run: npm run data:images:webp
 
@@ -359,7 +362,7 @@ jobs:
       - name: Check if data changed
         id: check_changes
         run: |
-          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json public/data/image-cache
+          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/geo-places.json scripts/geo-geocode-cache.json src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json public/data/image-cache
           if git diff --cached --quiet; then
             echo "Data unchanged, skipping build and deploy"
             echo "changed=false" >> $GITHUB_OUTPUT
