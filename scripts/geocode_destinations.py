@@ -47,7 +47,11 @@ ADMIN_CONTEXT_PATTERN = re.compile(r"([\u4e00-\u9fff]{2,8}(?:省|市|县|区|镇
 GENERIC_NAME_PARTS = {
     "中国", "广东", "广西", "湖南", "江西", "福建", "海南", "肇庆", "温泉", "酒店", "森林", "旅游",
 }
-POI_DESCRIPTIVE_SUFFIXES = ("景区", "风景区", "旅游区", "公园")
+POI_DESCRIPTIVE_SUFFIXES = ("景区", "风景区", "旅游区", "度假区", "风景名胜区", "公园")
+ADDRESS_FIELDS = (
+    "formatted", "country", "province", "city", "district", "locality",
+    "street", "houseNumber", "postalCode",
+)
 
 
 def normalize_query(value: str) -> str:
@@ -207,10 +211,8 @@ def _named_result_quality(label: str, name: str, expected_city: str = "") -> int
 
 
 def _result_locality(address: dict, display_name: str, expected_city: str = "") -> str:
-    locality = str(
-        address.get("town") or address.get("village") or address.get("municipality")
-        or address.get("county") or address.get("city_district") or address.get("city") or ""
-    )
+    normalized = _address_from_mapping(address, display_name)
+    locality = normalized.get("locality", "")
     if locality:
         return locality
     for match in ADMIN_CONTEXT_PATTERN.finditer(display_name):
@@ -223,6 +225,101 @@ def _result_locality(address: dict, display_name: str, expected_city: str = "") 
     return ""
 
 
+def _address_from_mapping(values: dict, display_name: str = "") -> dict:
+    """Normalize provider-specific address fields into the map data contract."""
+    if not isinstance(values, dict):
+        values = {}
+    address = {
+        "formatted": str(display_name or "").strip(),
+        "country": str(values.get("country") or "").strip(),
+        "province": str(values.get("province") or values.get("state") or values.get("region") or "").strip(),
+        "city": str(values.get("city") or values.get("municipality_city") or "").strip(),
+        "district": str(
+            values.get("district") or values.get("county") or values.get("city_district")
+            or values.get("subregion") or ""
+        ).strip(),
+        "locality": str(
+            values.get("town") or values.get("village") or values.get("locality")
+            or values.get("suburb") or values.get("neighbourhood") or values.get("municipality") or ""
+        ).strip(),
+        "street": str(values.get("road") or values.get("street") or "").strip(),
+        "houseNumber": str(values.get("house_number") or values.get("housenumber") or values.get("houseNumber") or "").strip(),
+        "postalCode": str(values.get("postcode") or values.get("postal_code") or values.get("postalCode") or "").strip(),
+    }
+    return {key: value for key, value in address.items() if value}
+
+
+def _address_from_display_name(display_name: str) -> dict:
+    """Recover administrative levels from a provider's formatted address."""
+    formatted = str(display_name or "").strip()
+    address = {"formatted": formatted} if formatted else {}
+    parts = [part.strip() for part in re.split(r"[,，;；/]+", formatted) if part.strip()]
+    for index, part in enumerate(parts):
+        value = part.strip()
+        if index == 0 and not (
+            value in {"中国", "China"}
+            or (
+                value.endswith(("省", "市", "自治州", "区", "县", "旗", "镇", "街道", "乡"))
+                and not value.endswith(POI_DESCRIPTIVE_SUFFIXES)
+            )
+        ):
+            continue
+        if not value:
+            continue
+        if value in {"中国", "China"}:
+            address.setdefault("country", value)
+        elif value.endswith("省"):
+            address.setdefault("province", value)
+        elif value.endswith(("市", "自治州")):
+            address.setdefault("city", value)
+        elif value.endswith(("区", "县", "旗")) and not value.endswith(POI_DESCRIPTIVE_SUFFIXES):
+            address.setdefault("district", value)
+        elif value.endswith(("镇", "街道", "乡")):
+            address.setdefault("locality", value)
+    return address
+
+
+def _merge_address_values(primary: dict, secondary: dict) -> dict:
+    merged = dict(primary) if isinstance(primary, dict) else {}
+    for key in ADDRESS_FIELDS:
+        if not merged.get(key) and isinstance(secondary, dict) and secondary.get(key):
+            merged[key] = str(secondary[key]).strip()
+    return {key: value for key, value in merged.items() if value}
+
+
+def _same_place_area(left: dict, right: dict) -> bool:
+    try:
+        latitude_delta = abs(float(left["latitude"]) - float(right["latitude"]))
+        longitude_delta = abs(float(left["longitude"]) - float(right["longitude"]))
+    except (KeyError, TypeError, ValueError):
+        return False
+    return latitude_delta <= 0.08 and longitude_delta <= 0.08
+
+
+def _merge_geocoder_results(results: list[dict]) -> dict | None:
+    if not results:
+        return None
+    ranked = sorted(
+        results,
+        key=lambda result: (
+            int(result.get("matchQuality") or 0),
+            float(result.get("providerScore") or 0),
+            len(result.get("address") or {}),
+        ),
+        reverse=True,
+    )
+    winner = dict(ranked[0])
+    merged_address = {}
+    for candidate in ranked:
+        if _same_place_area(winner, candidate):
+            merged_address = _merge_address_values(merged_address, candidate.get("address") or {})
+    if merged_address:
+        winner["address"] = merged_address
+        winner["locality"] = merged_address.get("locality") or winner.get("locality", "")
+    winner.pop("matchQuality", None)
+    return winner
+
+
 def _valid_cached_result(label: str, expected_city: str, result: object) -> bool:
     if not isinstance(result, dict):
         return False
@@ -230,6 +327,7 @@ def _valid_cached_result(label: str, expected_city: str, result: object) -> bool
     latitude = result.get("latitude")
     longitude = result.get("longitude")
     display_name = str(result.get("displayName") or "")
+    address = result.get("address")
     return (
         provider in GEOCODER_PROVIDERS
         and isinstance(latitude, (int, float)) and not isinstance(latitude, bool) and -90 <= latitude <= 90
@@ -237,6 +335,7 @@ def _valid_cached_result(label: str, expected_city: str, result: object) -> bool
         and _has_named_evidence(label, display_name, expected_city)
         and _has_admin_evidence(expected_city, display_name)
         and result.get("level") in {"town", "poi"}
+        and (address is None or isinstance(address, dict))
     )
 
 
@@ -246,19 +345,32 @@ def _arcgis_result(label: str, payload: dict | list | None, expected_city: str =
         if not isinstance(item, dict) or not isinstance(item.get("location"), dict):
             continue
         address = str(item.get("address") or "")
+        attributes = item.get("attributes") if isinstance(item.get("attributes"), dict) else {}
         score = float(item.get("score") or 0)
         if score < 70 or not _has_named_evidence(label, address, expected_city):
             continue
         if expected_city and not _has_admin_evidence(expected_city, address):
             continue
         location = item["location"]
+        normalized_address = _address_from_mapping({
+            "country": attributes.get("Country") or attributes.get("CountryCode"),
+            "province": attributes.get("Region") or attributes.get("State") or attributes.get("RegionAbbr"),
+            "city": attributes.get("City") or attributes.get("PlaceName"),
+            "district": attributes.get("District") or attributes.get("Subregion"),
+            "locality": attributes.get("Neighborhood") or attributes.get("Locality"),
+            "street": attributes.get("Address") or attributes.get("Street"),
+            "house_number": attributes.get("HouseNumber"),
+            "postcode": attributes.get("PostalCode") or attributes.get("Postal"),
+        }, address)
         return {
             "latitude": float(location["y"]),
             "longitude": float(location["x"]),
             "displayName": address,
             "level": "town" if any(token in address for token in ("镇", "街道")) else "poi",
-            "locality": address,
+            "locality": normalized_address.get("locality") or _result_locality(attributes, address, expected_city),
             "providerScore": score,
+            "address": normalized_address,
+            "matchQuality": _named_result_quality(label, attributes.get("PlaceName") or address, expected_city) or 70,
         }
     return None
 
@@ -285,6 +397,8 @@ def _nominatim_result(label: str, payload: dict | list | None, expected_city: st
             "level": "town" if address.get("town") or address.get("village") else "poi",
             "locality": locality,
             "providerScore": 80,
+            "address": _address_from_mapping(address, display_name),
+            "matchQuality": name_quality or 70,
         }
         ranking = (name_quality, float(item.get("importance") or 0))
         if best is None or ranking > best[0]:
@@ -323,6 +437,21 @@ def _photon_result(label: str, payload: dict | list | None, expected_city: str =
             "level": "town" if properties.get("town") or properties.get("village") else "poi",
             "locality": locality,
             "providerScore": 80,
+            "address": _address_from_mapping({
+                "name": properties.get("name"),
+                "country": properties.get("country"),
+                "state": properties.get("state"),
+                "city": properties.get("city"),
+                "district": properties.get("district"),
+                "county": properties.get("county"),
+                "town": properties.get("town"),
+                "village": properties.get("village"),
+                "locality": properties.get("locality"),
+                "street": properties.get("street"),
+                "housenumber": properties.get("housenumber"),
+                "postcode": properties.get("postcode"),
+            }, display_name),
+            "matchQuality": name_quality or 70,
         }
         ranking = (name_quality, float(properties.get("importance") or 0))
         if best is None or ranking > best[0]:
@@ -335,6 +464,7 @@ def reset_geocoder_pool_health() -> None:
 
 
 def geocode_query(label: str, query: str, expected_city: str = "") -> dict | None:
+    results = []
     for config in GEOCODER_POOL:
         provider = config["provider"]
         endpoint = config["endpoint"]
@@ -366,8 +496,9 @@ def geocode_query(label: str, query: str, expected_city: str = "") -> dict | Non
             continue
         _provider_failures[provider] = 0
         if result:
-            return {"provider": provider, "query": query, **result}
-    return None
+            results.append({"provider": provider, **result})
+    merged = _merge_geocoder_results(results)
+    return {"query": query, **merged} if merged else None
 
 
 def _apply_result(tour: dict, result: dict) -> None:
@@ -376,6 +507,21 @@ def _apply_result(tour: dict, result: dict) -> None:
     tour["destinationGeoLevel"] = result["level"]
     if result.get("locality"):
         tour["destinationLocality"] = result["locality"]
+    address = _merge_address_values(
+        _address_from_display_name(result.get("displayName", "")),
+        result.get("address") or {},
+    )
+    if result.get("displayName"):
+        address.setdefault("formatted", str(result["displayName"]))
+    for key, tour_key in (
+        ("country", "destinationCountry"),
+        ("province", "destinationProvince"),
+        ("city", "destinationCity"),
+    ):
+        if not address.get(key) and tour.get(tour_key):
+            address[key] = str(tour[tour_key])
+    if address:
+        tour["destinationAddress"] = address
     tour["destinationCoordinateSource"] = "geocoder"
     tour["geoConfidence"] = "medium"
     tour["geoSource"] = "geocoder"
@@ -384,6 +530,7 @@ def _apply_result(tour: dict, result: dict) -> None:
     quality.setdefault("fieldSources", {})["destinationLatitude"] = "inferred"
     quality["fieldSources"]["destinationLongitude"] = "inferred"
     quality["fieldSources"]["destinationLocality"] = "inferred"
+    quality["fieldSources"]["destinationAddress"] = "inferred"
 
 
 def enrich_tours(tours: list[dict], allow_network: bool = False, cache_path: Path = CACHE_PATH) -> tuple[int, int]:
@@ -392,7 +539,9 @@ def enrich_tours(tours: list[dict], allow_network: bool = False, cache_path: Pat
     candidates = 0
     changed = False
     for tour in tours:
-        if tour.get("destinationCoordinateSource") in {"catalog", "geocoder"}:
+        if tour.get("destinationCoordinateSource") == "catalog":
+            continue
+        if tour.get("destinationCoordinateSource") == "geocoder" and tour.get("destinationAddress"):
             continue
         queries = destination_queries(tour)
         if not queries:

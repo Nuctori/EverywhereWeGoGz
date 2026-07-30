@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getDataUrl } from '@/lib/utils';
 import { inflateTourSummaryFromIndexEntry } from '@/lib/tour-deeplink';
 import { toursIndexSchema } from '@/lib/runtime-schemas';
-import type { TourSummary } from '@/types/tour';
+import type { GeoAddress, TourSummary } from '@/types/tour';
 
 export type MapTourLocation = {
   placeId: string;
@@ -13,6 +13,7 @@ export type MapTourLocation = {
   province?: string;
   city?: string;
   locality?: string;
+  address?: GeoAddress;
   latitude: number;
   longitude: number;
   coordinateSystem: 'wgs84';
@@ -37,10 +38,28 @@ const initialState: MapToursState = {
   error: null,
 };
 
-function hasTrustedMapPoint(point: NonNullable<TourSummary['geo']>['destination'] | undefined) {
-  if (!point) return false;
-  return point.coordinateSource !== 'fallback'
-    && (point.coordinateSource !== 'inferred' || point.confidence !== 'low');
+type DestinationMapPoint = NonNullable<NonNullable<TourSummary['geo']>['destination']>;
+
+function hasMapPoint(point: DestinationMapPoint | undefined): point is DestinationMapPoint {
+  return Boolean(
+    point
+    && Number.isFinite(point.latitude)
+    && Number.isFinite(point.longitude)
+    && point.latitude >= -90
+    && point.latitude <= 90
+    && point.longitude >= -180
+    && point.longitude <= 180,
+  );
+}
+
+function isApproximateMapPoint(point: DestinationMapPoint | undefined) {
+  return Boolean(point && (
+    point.coordinateSource === 'fallback'
+    || point.level === 'city'
+    || point.level === 'region'
+    || point.level === 'country'
+    || (point.coordinateSource === 'inferred' && point.confidence === 'low')
+  ));
 }
 
 export function useMapTours() {
@@ -83,9 +102,10 @@ export function useMapTours() {
     const locations = new Map<string, MapTourLocation>();
     for (const tour of state.tours) {
       const point = tour.geo?.destination;
-      // The map is a destination picker. City-only points do not identify a
-      // selectable place, so keep them in list/search data but omit them here.
-      if (!point || !['poi', 'town'].includes(point.level) || !hasTrustedMapPoint(point)) continue;
+      // A city or fallback point is still useful when no better coordinate is
+      // available. Its precision is shown in the map UI instead of dropping
+      // the related tours from the destination picker.
+      if (!hasMapPoint(point)) continue;
       const existing = locations.get(point.placeId);
       if (existing) {
         existing.tourIds.push(tour.id);
@@ -106,7 +126,8 @@ export function useMapTours() {
     ...state,
     places,
     toursById,
-    unmappedTours: state.tours.filter((tour) => !hasTrustedMapPoint(tour.geo?.destination)),
+    unmappedTours: state.tours.filter((tour) => !hasMapPoint(tour.geo?.destination)),
+    approximateTours: state.tours.filter((tour) => isApproximateMapPoint(tour.geo?.destination)),
     fetchTours,
   };
 }

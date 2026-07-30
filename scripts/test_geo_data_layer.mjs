@@ -125,14 +125,15 @@ for (const [token, expectedLabel] of namedPoiCases) {
   assert(indexedMatches.every((tour) => tour.geo.destination.coordinateSource === 'fallback' || tour.geo.destination.coordinateSource === 'geocoder'), `${token} must use a precise search result or an explicit fallback`);
 }
 const precisePoiExpectations = [
-  ['肇庆七星岩', 23.0805699, 112.4727006, '城东街道'],
-  ['肇庆紫云谷', 23.1267137, 112.585637, '金渡镇'],
+  ['肇庆七星岩', 23.0805699, 112.4727006, '城东街道', '端州区'],
+  ['肇庆紫云谷', 23.1267137, 112.585637, '金渡镇', '高要区'],
 ];
-for (const [name, latitude, longitude, locality] of precisePoiExpectations) {
+for (const [name, latitude, longitude, locality, district] of precisePoiExpectations) {
   const place = places.find((candidate) => candidate.name === name);
   assert(place?.coordinateSource === 'geocoder', `${name} must use the verified geocoder result`);
   assert(place?.latitude === latitude && place?.longitude === longitude, `${name} must retain its verified coordinates`);
   assert(place?.locality === locality, `${name} must retain its town or street locality`);
+  assert(place?.address?.district === district, `${name} must retain its district address`);
 }
 assert(list.some((tour) => String(tour.title || '').includes('七星岩') && tour.geo?.destination?.name === '新兴象窝'), 'incidental 七星岩 itinerary text must not rewrite the destination');
 const minedAliasCases = [
