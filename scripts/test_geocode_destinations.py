@@ -28,7 +28,7 @@ def test_cached_geocoder_result_overrides_city_fallback(tmp_path: Path):
         "destinationLatitude": 23.0472,
         "destinationLongitude": 112.4651,
         "destinationGeoLevel": "poi",
-        "destinationCoordinateSource": "inferred",
+        "destinationCoordinateSource": "fallback",
         "geoConfidence": "low",
         "geoSource": "title-place-miner",
         "meta": {"dataQuality": {"fieldSources": {}}},

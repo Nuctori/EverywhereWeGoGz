@@ -22,7 +22,7 @@ const validPoint = (point) => point
   && point.latitude >= -90 && point.latitude <= 90
   && point.longitude >= -180 && point.longitude <= 180
   && point.coordinateSystem === 'wgs84'
-  && ['catalog', 'geocoder', 'inferred'].includes(point.coordinateSource)
+  && ['catalog', 'geocoder', 'fallback', 'inferred'].includes(point.coordinateSource)
   && typeof point.placeId === 'string' && point.placeId.length > 0;
 
 assert(Array.isArray(list) && list.length > 0, 'tours-list.json must be a non-empty array');
@@ -105,7 +105,7 @@ assert(redBayTours.every((tour) => tour.geo.destination?.level === 'poi'), 'name
 const blueBellSourceTours = sourceTours.filter((tour) => String(tour.title || '').includes('蓝钟'));
 assert(blueBellSourceTours.length > 0, 'fixture data must include 蓝钟 destination examples');
 assert(blueBellSourceTours.every((tour) => tour.destinationPlaceName?.includes('蓝钟')), '蓝钟 titles must retain the mined named destination');
-assert(blueBellSourceTours.every((tour) => tour.destinationLatitude === null && tour.destinationLongitude === null), 'unverified 蓝钟 coordinates must not inherit 肇庆 city centre');
+assert(blueBellSourceTours.every((tour) => tour.destinationCoordinateSource === 'fallback'), 'unverified 蓝钟 coordinates must be marked as fallback');
 const minedAliasCases = [
   ['西溪', '贺州西溪'],
   ['云顶', '龙门云顶'],

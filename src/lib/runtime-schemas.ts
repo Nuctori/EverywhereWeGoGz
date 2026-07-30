@@ -14,11 +14,13 @@ const geoPointSchema = z.object({
   country: z.string().optional(),
   province: z.string().optional(),
   city: z.string().optional(),
+  locality: z.string().optional(),
   latitude: z.coerce.number().finite().gte(-90).lte(90),
   longitude: z.coerce.number().finite().gte(-180).lte(180),
   coordinateSystem: z.literal('wgs84'),
-  level: z.enum(['country', 'region', 'city', 'poi']),
-  source: z.enum(['source', 'catalog', 'inferred', 'unknown']),
+  level: z.enum(['country', 'region', 'city', 'town', 'poi']),
+  coordinateSource: z.enum(['catalog', 'geocoder', 'fallback', 'inferred']),
+  source: z.enum(['source', 'catalog', 'geocoder', 'inferred', 'unknown']),
   confidence: z.enum(['low', 'medium', 'high']),
 });
 
