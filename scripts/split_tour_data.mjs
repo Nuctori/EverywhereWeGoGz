@@ -220,6 +220,18 @@ function writeTextFileWithRetry(filePath, content) {
       return;
     } catch (error) {
       lastError = error;
+      // Some Windows file observers deny replace-style rename even after the
+      // target is readable. Copy the complete temp file as a last-resort
+      // fallback so a generated index can still be refreshed.
+      if (fs.existsSync(tempPath)) {
+        try {
+          fs.copyFileSync(tempPath, filePath);
+          fs.unlinkSync(tempPath);
+          return;
+        } catch {
+          // Continue with the retry loop when the target is still locked.
+        }
+      }
       if (fs.existsSync(tempPath)) {
         try {
           fs.unlinkSync(tempPath);

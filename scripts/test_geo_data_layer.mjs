@@ -103,9 +103,38 @@ const redBayTours = list.filter((tour) => String(tour.title || '').includes('汕
 assert(redBayTours.length > 0 && redBayTours.every((tour) => tour.geo.destination?.label === '汕尾红海湾'), '红海湾 titles must retain their named destination label');
 assert(redBayTours.every((tour) => tour.geo.destination?.level === 'poi'), 'named 红海湾 destinations must remain POI-level map locations');
 const blueBellSourceTours = sourceTours.filter((tour) => String(tour.title || '').includes('蓝钟'));
+const blueBellIndexedTours = list.filter((tour) => String(tour.title || '').includes('蓝钟'));
 assert(blueBellSourceTours.length > 0, 'fixture data must include 蓝钟 destination examples');
 assert(blueBellSourceTours.every((tour) => tour.destinationPlaceName?.includes('蓝钟')), '蓝钟 titles must retain the mined named destination');
 assert(blueBellSourceTours.every((tour) => tour.destinationCoordinateSource === 'fallback'), 'unverified 蓝钟 coordinates must be marked as fallback');
+assert(blueBellIndexedTours.length === blueBellSourceTours.length, '蓝钟 examples must survive into the map index');
+assert(blueBellIndexedTours.every((tour) => tour.geo?.destination), '蓝钟 fallback destinations must remain map-selectable');
+assert(blueBellIndexedTours.every((tour) => places.some((place) => place.placeId === tour.geo.destination.placeId && place.tourIds.includes(tour.id))), '蓝钟 fallback destinations must be indexed in geo-places.json');
+const namedPoiCases = [
+  ['七星岩', '肇庆七星岩'],
+  ['紫云谷', '肇庆紫云谷'],
+];
+for (const [token, expectedLabel] of namedPoiCases) {
+  const sourceMatches = sourceTours.filter((tour) => String(tour.title || '').includes(token) && tour.destinationPlaceName === expectedLabel);
+  const indexedMatches = list.filter((tour) => String(tour.title || '').includes(token) && tour.geo?.destination?.name === expectedLabel);
+  assert(sourceMatches.length > 0, `fixture data must include ${token} examples`);
+  assert(sourceMatches.every((tour) => tour.destinationPlaceName === expectedLabel), `${token} titles must retain the named destination`);
+  assert(indexedMatches.length === sourceMatches.length, `${token} examples must survive into the map index`);
+  assert(indexedMatches.every((tour) => tour.geo?.destination), `${token} destinations must remain map-selectable`);
+  assert(indexedMatches.every((tour) => tour.geo.destination.name === expectedLabel), `${token} must not collapse to the parent city`);
+  assert(indexedMatches.every((tour) => tour.geo.destination.coordinateSource === 'fallback' || tour.geo.destination.coordinateSource === 'geocoder'), `${token} must use a precise search result or an explicit fallback`);
+}
+const precisePoiExpectations = [
+  ['肇庆七星岩', 23.0805699, 112.4727006, '城东街道'],
+  ['肇庆紫云谷', 23.1267137, 112.585637, '金渡镇'],
+];
+for (const [name, latitude, longitude, locality] of precisePoiExpectations) {
+  const place = places.find((candidate) => candidate.name === name);
+  assert(place?.coordinateSource === 'geocoder', `${name} must use the verified geocoder result`);
+  assert(place?.latitude === latitude && place?.longitude === longitude, `${name} must retain its verified coordinates`);
+  assert(place?.locality === locality, `${name} must retain its town or street locality`);
+}
+assert(list.some((tour) => String(tour.title || '').includes('七星岩') && tour.geo?.destination?.name === '新兴象窝'), 'incidental 七星岩 itinerary text must not rewrite the destination');
 const minedAliasCases = [
   ['西溪', '贺州西溪'],
   ['云顶', '龙门云顶'],

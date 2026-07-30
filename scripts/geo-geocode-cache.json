@@ -1,0 +1,62 @@
+{
+  "七星岩 肇庆市 广东省 中国": {
+    "provider": "nominatim",
+    "query": "七星岩 肇庆市 广东省 中国",
+    "latitude": 23.0805699,
+    "longitude": 112.4727006,
+    "displayName": "七星岩景区, 城东街道, 端州区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "城东街道",
+    "providerScore": 80
+  },
+  "肇庆紫云谷 广东 中国": {
+    "provider": "nominatim",
+    "query": "紫云谷 肇庆市 广东省 中国",
+    "latitude": 23.1267137,
+    "longitude": 112.585637,
+    "displayName": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "金渡镇",
+    "providerScore": 80
+  },
+  "肇庆七星岩 广东 中国": {
+    "provider": "nominatim",
+    "query": "七星岩 肇庆市 广东省 中国",
+    "latitude": 23.0805699,
+    "longitude": 112.4727006,
+    "displayName": "七星岩景区, 城东街道, 端州区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "城东街道",
+    "providerScore": 80
+  },
+  "肇庆七星岩 广东省 中国": {
+    "provider": "nominatim",
+    "query": "七星岩 肇庆市 广东省 中国",
+    "latitude": 23.0805699,
+    "longitude": 112.4727006,
+    "displayName": "七星岩景区, 城东街道, 端州区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "城东街道",
+    "providerScore": 80
+  },
+  "紫云谷 肇庆市 广东省 中国": {
+    "provider": "nominatim",
+    "query": "紫云谷 肇庆市 广东省 中国",
+    "latitude": 23.1267137,
+    "longitude": 112.585637,
+    "displayName": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "金渡镇",
+    "providerScore": 80
+  },
+  "肇庆紫云谷 广东省 中国": {
+    "provider": "nominatim",
+    "query": "紫云谷 肇庆市 广东省 中国",
+    "latitude": 23.1267137,
+    "longitude": 112.585637,
+    "displayName": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "金渡镇",
+    "providerScore": 80
+  }
+}
