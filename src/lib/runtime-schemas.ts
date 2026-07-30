@@ -5,6 +5,17 @@ const nonNegativeNumber = z.coerce.number().finite().nonnegative();
 const booleanDefaultFalse = z.boolean().optional().default(false);
 const stringArrayDefaultEmpty = z.array(z.string()).optional().default([]);
 const serviceAvailability = z.enum(['included', 'excluded', 'unknown']);
+const geoAddressSchema = z.object({
+  formatted: z.string().optional(),
+  country: z.string().optional(),
+  province: z.string().optional(),
+  city: z.string().optional(),
+  district: z.string().optional(),
+  locality: z.string().optional(),
+  street: z.string().optional(),
+  houseNumber: z.string().optional(),
+  postalCode: z.string().optional(),
+});
 
 const geoPointSchema = z.object({
   placeId: z.string().min(1),
@@ -15,6 +26,7 @@ const geoPointSchema = z.object({
   province: z.string().optional(),
   city: z.string().optional(),
   locality: z.string().optional(),
+  address: geoAddressSchema.optional(),
   latitude: z.coerce.number().finite().gte(-90).lte(90),
   longitude: z.coerce.number().finite().gte(-180).lte(180),
   coordinateSystem: z.literal('wgs84'),

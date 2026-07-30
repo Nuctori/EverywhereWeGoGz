@@ -24,6 +24,18 @@ export type GeoStatus = 'complete' | 'destination_only' | 'unmapped';
 export type GeoSource = 'source' | 'catalog' | 'geocoder' | 'inferred' | 'unknown';
 export type GeoConfidence = 'low' | 'medium' | 'high';
 
+export interface GeoAddress {
+  formatted?: string;
+  country?: string;
+  province?: string;
+  city?: string;
+  district?: string;
+  locality?: string;
+  street?: string;
+  houseNumber?: string;
+  postalCode?: string;
+}
+
 export interface TourGeoPoint {
   placeId: string;
   name: string;
@@ -32,6 +44,7 @@ export interface TourGeoPoint {
   province?: string;
   city?: string;
   locality?: string;
+  address?: GeoAddress;
   latitude: number;
   longitude: number;
   coordinateSystem: 'wgs84';

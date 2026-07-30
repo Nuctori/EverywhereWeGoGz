@@ -6,6 +6,8 @@ from pathlib import Path
 import geocode_destinations as geocoder
 from geocode_destinations import (
     _arcgis_result,
+    _address_from_display_name,
+    _merge_geocoder_results,
     _nominatim_result,
     _photon_result,
     destination_queries,
@@ -54,6 +56,10 @@ def test_cached_geocoder_result_overrides_city_fallback(tmp_path: Path):
     assert tour["destinationLatitude"] == 24.2
     assert tour["destinationLongitude"] == 112.2
     assert tour["destinationLocality"] == "蓝钟镇"
+    assert tour["destinationAddress"]["formatted"] == "蓝钟温泉, 蓝钟镇, 肇庆市, 广东省, 中国"
+    assert tour["destinationAddress"]["city"] == "肇庆市"
+    assert tour["destinationAddress"]["locality"] == "蓝钟镇"
+    assert tour["destinationAddress"]["province"] == "广东省"
     assert tour["destinationCoordinateSource"] == "geocoder"
     assert tour["geoSource"] == "geocoder"
     assert normalize_query(" 肇庆蓝钟温泉 广东 中国 ") in __import__("json").loads(cache_path.read_text(encoding="utf-8"))
@@ -181,6 +187,7 @@ def test_geocoder_requires_poi_name_and_expected_city():
     result = _nominatim_result("肇庆紫云谷", nominatim, "肇庆")
     assert result["latitude"] == 23.12
     assert result["longitude"] == 112.55
+    assert result["address"]["city"] == "肇庆市"
     assert _nominatim_result("肇庆七星岩", [{
         "display_name": "七星公园, 肇庆市, 广东省, 中国",
         "lat": "23.12",
@@ -206,6 +213,7 @@ def test_photon_result_uses_geojson_longitude_then_latitude():
     result = _photon_result("肇庆紫云谷", photon, "肇庆")
     assert result["latitude"] == 23.13
     assert result["longitude"] == 112.56
+    assert result["address"]["city"] == "肇庆市"
     assert _photon_result("肇庆七星岩", {
         "features": [{
             "geometry": {"type": "Point", "coordinates": [112.5, 23.1]},
@@ -218,6 +226,89 @@ def test_photon_result_uses_geojson_longitude_then_latitude():
             "properties": {"name": "七星岩景区", "city": "肇庆市", "state": "广东省", "country": "中国"},
         }]
     }, "肇庆")["latitude"] == 23.08
+
+
+def test_geocoder_pool_merges_address_fields_from_all_matching_providers():
+    results = [
+        {
+            "provider": "photon",
+            "latitude": 23.1267,
+            "longitude": 112.5856,
+            "displayName": "紫云谷景区, 肇庆市, 广东省, 中国",
+            "level": "poi",
+            "locality": "金渡镇",
+            "providerScore": 80,
+            "matchQuality": 100,
+            "address": {"formatted": "紫云谷景区, 肇庆市, 广东省, 中国", "locality": "金渡镇"},
+        },
+        {
+            "provider": "nominatim",
+            "latitude": 23.1268,
+            "longitude": 112.5857,
+            "displayName": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+            "level": "poi",
+            "locality": "金渡镇",
+            "providerScore": 80,
+            "matchQuality": 100,
+            "address": {"formatted": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国", "district": "高要区", "street": "紫云谷路"},
+        },
+    ]
+
+    merged = _merge_geocoder_results(results)
+
+    assert merged["provider"] in {"photon", "nominatim"}
+    assert merged["address"]["district"] == "高要区"
+    assert merged["address"]["street"] == "紫云谷路"
+
+
+def test_formatted_poi_name_is_not_treated_as_district():
+    for formatted, locality, district in (
+        ("紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国", "金渡镇", "高要区"),
+        ("海泉湾度假区, 平沙镇, 珠海市, 广东省, 中国", "平沙镇", None),
+        ("丹霞山风景名胜区, 丹霞街道, 仁化县, 韶关市, 广东省, 中国", "丹霞街道", "仁化县"),
+    ):
+        address = _address_from_display_name(formatted)
+
+        assert address["locality"] == locality
+        assert address.get("district") == district
+        assert address["city"].endswith("市")
+
+
+def test_geocoder_query_collects_all_provider_candidates():
+    original_request = geocoder._request_json
+    calls = []
+
+    def provider_request(endpoint, params, timeout):
+        calls.append(endpoint)
+        if "photon" in endpoint:
+            return {"features": [{
+                "geometry": {"type": "Point", "coordinates": [112.5856, 23.1267]},
+                "properties": {"name": "紫云谷景区", "city": "肇庆市", "state": "广东省", "country": "中国"},
+            }]}
+        if "nominatim" in endpoint:
+            return [{
+                "display_name": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+                "lat": "23.1268",
+                "lon": "112.5857",
+                "address": {"tourism": "紫云谷景区", "town": "金渡镇", "county": "高要区", "city": "肇庆市", "state": "广东省", "country": "中国", "road": "紫云谷路"},
+            }]
+        return {"candidates": [{
+            "address": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+            "score": 98,
+            "location": {"x": 112.5858, "y": 23.1269},
+        }]}
+
+    try:
+        geocoder.reset_geocoder_pool_health()
+        geocoder._request_json = provider_request
+        result = geocoder.geocode_query("肇庆紫云谷", "紫云谷 肇庆市 广东省 中国", "肇庆")
+    finally:
+        geocoder._request_json = original_request
+        geocoder.reset_geocoder_pool_health()
+
+    assert len(calls) == len(geocoder.GEOCODER_POOL)
+    assert result["address"]["district"] == "高要区"
+    assert result["address"]["street"] == "紫云谷路"
 
 
 def test_geocoder_pool_skips_repeatedly_unavailable_providers():
@@ -264,6 +355,9 @@ if __name__ == "__main__":
     test_named_poi_aliases_become_geocoder_candidates()
     test_geocoder_requires_poi_name_and_expected_city()
     test_photon_result_uses_geojson_longitude_then_latitude()
+    test_geocoder_pool_merges_address_fields_from_all_matching_providers()
+    test_formatted_poi_name_is_not_treated_as_district()
+    test_geocoder_query_collects_all_provider_candidates()
     test_geocoder_pool_skips_repeatedly_unavailable_providers()
     test_unique_alias_without_canonical_city_does_not_inherit_city_centroid()
     print("geocoder destination tests passed")

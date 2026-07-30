@@ -52,6 +52,9 @@ function buildGeoPoint(tour, role) {
   const level = nonEmpty(tour[destination ? 'destinationGeoLevel' : 'departureGeoLevel'])
     || (name !== cityName ? 'poi' : 'city');
   const locality = nonEmpty(tour[destination ? 'destinationLocality' : 'departureLocality']);
+  const address = destination && tour.destinationAddress && typeof tour.destinationAddress === 'object'
+    ? Object.fromEntries(Object.entries(tour.destinationAddress).filter(([, value]) => nonEmpty(value)))
+    : undefined;
   const coordinateSource = nonEmpty(tour[destination ? 'destinationCoordinateSource' : 'departureCoordinateSource'])
     || (tour.geoSource === 'local-place-catalog' ? 'catalog' : 'inferred');
 
@@ -66,6 +69,7 @@ function buildGeoPoint(tour, role) {
     coordinateSystem: 'wgs84',
     level,
     ...(locality ? { locality } : {}),
+    ...(address && Object.keys(address).length > 0 ? { address } : {}),
     coordinateSource,
     source: tour.geoSource === 'local-place-catalog' ? 'catalog' : tour.geoSource === 'geocoder' ? 'geocoder' : 'inferred',
     confidence: ['low', 'medium', 'high'].includes(tour.geoConfidence) ? tour.geoConfidence : 'low',
