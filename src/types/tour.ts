@@ -19,9 +19,9 @@ export interface DataQuality {
   fieldSources?: Record<string, 'source' | 'detail' | 'inferred' | 'unknown' | 'synthetic'>;
 }
 
-export type GeoLevel = 'country' | 'region' | 'city' | 'poi';
+export type GeoLevel = 'country' | 'region' | 'city' | 'town' | 'poi';
 export type GeoStatus = 'complete' | 'destination_only' | 'unmapped';
-export type GeoSource = 'source' | 'catalog' | 'inferred' | 'unknown';
+export type GeoSource = 'source' | 'catalog' | 'geocoder' | 'inferred' | 'unknown';
 export type GeoConfidence = 'low' | 'medium' | 'high';
 
 export interface TourGeoPoint {
@@ -31,10 +31,12 @@ export interface TourGeoPoint {
   country?: string;
   province?: string;
   city?: string;
+  locality?: string;
   latitude: number;
   longitude: number;
   coordinateSystem: 'wgs84';
   level: GeoLevel;
+  coordinateSource: 'catalog' | 'geocoder' | 'fallback' | 'inferred';
   source: GeoSource;
   confidence: GeoConfidence;
 }

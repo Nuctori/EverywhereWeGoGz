@@ -9,7 +9,7 @@ import tempfile
 import argparse
 from pathlib import Path
 
-from geo_catalog import classify_route, normalize_tour_geo
+from geo_catalog import classify_route, find_place, normalize_tour_geo
 from geocode_destinations import enrich_tours
 
 
@@ -26,6 +26,34 @@ def atomic_write_json(path: Path, value) -> None:
             os.unlink(temp_name)
 
 
+def _valid_coordinate_pair(latitude, longitude) -> bool:
+    return (
+        isinstance(latitude, (int, float))
+        and isinstance(longitude, (int, float))
+        and -90 <= latitude <= 90
+        and -180 <= longitude <= 180
+    )
+
+
+def _apply_coordinate_fallback(tour: dict, fields: dict) -> None:
+    """Keep a coarse parent-city point available without treating it as a map point."""
+    if fields.get("destinationLatitude") is not None or fields.get("destinationLongitude") is not None:
+        return
+    destination_city = str(fields.get("destinationCity") or "").strip()
+    destination_place = str(fields.get("destinationPlaceName") or "").strip()
+    if not destination_city or not destination_place or destination_city == destination_place:
+        return
+    parent = find_place(destination_city)
+    if not parent or not _valid_coordinate_pair(parent.get("latitude"), parent.get("longitude")):
+        return
+    fields["destinationLatitude"] = parent["latitude"]
+    fields["destinationLongitude"] = parent["longitude"]
+    fields["destinationGeoLevel"] = "poi"
+    fields["destinationCoordinateSource"] = "fallback"
+    fields["geoConfidence"] = "low"
+    fields["geoSource"] = "title-place-miner"
+
+
 def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int, int, int]:
     before = sum(1 for tour in tours if tour.get("destinationLatitude") is not None)
     for tour in tours:
@@ -35,6 +63,7 @@ def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int, i
             str(tour.get("destination") or ""),
             tour,
         )
+        _apply_coordinate_fallback(tour, fields)
         fields["routeRegion"] = classify_route(fields)
         tour.update(fields)
 
