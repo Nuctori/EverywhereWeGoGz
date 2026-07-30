@@ -23,6 +23,7 @@ function App() {
   const [draftSearchQuery, setDraftSearchQuery] = useState('');
   const [submittedSearchQuery, setSubmittedSearchQuery] = useState('');
   const [aiSearchRequest, setAiSearchRequest] = useState<AiSearchRequest | null>(null);
+  const [mapExpanded, setMapExpanded] = useState(false);
 
   // handleSearch 全文检索文本匹配；handleAiSearch 触发 AI 推荐→无结果时自动回退 handleSearch
   const handleSearch = (nextQuery?: string) => {
@@ -63,9 +64,7 @@ function App() {
   return (
     <div className="min-h-screen text-slate-900">
       <div className="relative min-h-screen">
-        <Header>
-          <MapView onPlaceSelect={handleSearch} />
-        </Header>
+        <Header onOpenMap={() => setMapExpanded(true)} />
 
         <main className="pb-16">
           <Hero
@@ -75,6 +74,7 @@ function App() {
             onAiSearch={handleAiSearch}
             quickDestinations={QUICK_DESTINATIONS}
           />
+          <MapView expanded={mapExpanded} onExpandedChange={setMapExpanded} />
           <div id="tour-list" className="scroll-mt-24">
             <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} />
           </div>
