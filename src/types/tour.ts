@@ -21,7 +21,7 @@ export interface DataQuality {
 
 export type GeoLevel = 'country' | 'region' | 'city' | 'town' | 'poi';
 export type GeoStatus = 'complete' | 'destination_only' | 'unmapped';
-export type GeoSource = 'source' | 'catalog' | 'geocoder' | 'inferred' | 'unknown';
+export type GeoSource = 'source' | 'catalog' | 'geocoder' | 'osm' | 'inferred' | 'unknown';
 export type GeoConfidence = 'low' | 'medium' | 'high';
 
 export interface GeoAddress {
@@ -49,7 +49,7 @@ export interface TourGeoPoint {
   longitude: number;
   coordinateSystem: 'wgs84';
   level: GeoLevel;
-  coordinateSource: 'catalog' | 'geocoder' | 'fallback' | 'inferred';
+  coordinateSource: 'catalog' | 'geocoder' | 'osm' | 'fallback' | 'inferred';
   source: GeoSource;
   confidence: GeoConfidence;
 }

@@ -11,6 +11,7 @@ from pathlib import Path
 
 from geo_catalog import classify_route, find_place, normalize_tour_geo
 from geocode_destinations import enrich_tours
+from osm_poi_resolver import enrich_tours_from_osm
 
 
 def atomic_write_json(path: Path, value) -> None:
@@ -54,7 +55,7 @@ def _apply_coordinate_fallback(tour: dict, fields: dict) -> None:
     fields["geoSource"] = "title-place-miner"
 
 
-def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int, int, int]:
+def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int]:
     before = sum(1 for tour in tours if tour.get("destinationLatitude") is not None)
     for tour in tours:
         fields, field_sources = normalize_tour_geo(
@@ -63,8 +64,6 @@ def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int, i
             str(tour.get("destination") or ""),
             tour,
         )
-        _apply_coordinate_fallback(tour, fields)
-        fields["routeRegion"] = classify_route(fields)
         tour.update(fields)
 
         meta = tour.get("meta")
@@ -83,8 +82,14 @@ def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int, i
         quality.setdefault("syntheticFields", [])
         quality.setdefault("riskFlags", [])
 
+    osm_candidates, osm_resolved = enrich_tours_from_osm(tours)
+    for tour in tours:
+        _apply_coordinate_fallback(tour, tour)
+        tour["routeRegion"] = classify_route(tour)
+
     candidates, resolved = enrich_tours(tours, allow_network=allow_network)
     after = sum(1 for tour in tours if tour.get("destinationLatitude") is not None)
+    print(f"OSM POI resolution: candidates {osm_candidates}; resolved {osm_resolved}")
     return before, after
 
 

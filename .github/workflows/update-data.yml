@@ -40,11 +40,17 @@ jobs:
         with:
           node-version: 24
 
+      - name: Install OSM parser for index checks
+        run: pip install osmium
+
       - name: Verify crawler syntax
         run: npm run audit:crawler-syntax
 
       - name: Verify update workflow contract
-        run: npm run audit:update-data-workflow
+        run: |
+          npm run audit:update-data-workflow
+          npm run test:osm-poi-workflow
+          python scripts/test_osm_poi_index.py
 
   crawl-jrt365:
     runs-on: ubuntu-latest
