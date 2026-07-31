@@ -197,6 +197,8 @@ def main() -> None:
             download(str(region["url"]), pbf_path, max_bytes)
             rows.extend(extract_pois(pbf_path, region))
         index = build_index(rows, [str(region["id"]) for region in regions])
+        if not index["pois"]:
+            raise RuntimeError("OSM POI extraction produced no places; refusing to publish an empty index")
         atomic_write_json(args.output, index)
         print(f"OSM POI index built: {len(index['pois'])} places across {len(regions)} regions")
     finally:

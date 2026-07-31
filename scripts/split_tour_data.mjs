@@ -49,7 +49,9 @@ function buildGeoPoint(tour, role) {
   const cityName = nonEmpty(tour[destination ? 'destinationCity' : 'departureCity']);
   const name = destination ? (nonEmpty(tour.destinationPlaceName) || cityName) : cityName;
   if (!name || !cityName || !validCoordinate(latitude, longitude)) return undefined;
-  const level = nonEmpty(tour[destination ? 'destinationGeoLevel' : 'departureGeoLevel'])
+  const semanticLevel = nonEmpty(tour[destination ? 'destinationGeoLevel' : 'departureGeoLevel']);
+  const level = nonEmpty(tour[destination ? 'destinationCoordinatePrecision' : 'departureCoordinatePrecision'])
+    || semanticLevel
     || (name !== cityName ? 'poi' : 'city');
   const locality = nonEmpty(tour[destination ? 'destinationLocality' : 'departureLocality']);
   const address = destination && tour.destinationAddress && typeof tour.destinationAddress === 'object'
@@ -68,6 +70,7 @@ function buildGeoPoint(tour, role) {
     longitude: Number(longitude),
     coordinateSystem: 'wgs84',
     level,
+    ...(semanticLevel && semanticLevel !== level ? { semanticLevel } : {}),
     ...(locality ? { locality } : {}),
     ...(address && Object.keys(address).length > 0 ? { address } : {}),
     coordinateSource,

@@ -31,13 +31,20 @@ jobs:
         run: python -u scripts/osm_poi_index.py
 
       - name: Verify OSM POI index
-        run: python scripts/test_osm_poi_index.py
+        run: |
+          python scripts/test_osm_poi_index.py
+          python scripts/audit_osm_poi_index.py
+
+      - name: Apply OSM POIs to tour map data
+        run: |
+          python -u scripts/rebuild_geo_data.py
+          node scripts/test_geo_data_layer.mjs
 
       - name: Commit POI index update
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/data/osm-poi-index.json
+          git add public/data/osm-poi-index.json public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/geo-places.json public/data/tour-map-index.json
           if git diff --cached --quiet; then
             echo "OSM POI index unchanged"
             exit 0

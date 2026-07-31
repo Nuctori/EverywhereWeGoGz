@@ -11,7 +11,10 @@ for (const snippet of [
   'pip install osmium',
   'python -u scripts/osm_poi_index.py',
   'python scripts/test_osm_poi_index.py',
-  'git add public/data/osm-poi-index.json',
+  'python scripts/audit_osm_poi_index.py',
+  'python -u scripts/rebuild_geo_data.py',
+  'node scripts/test_geo_data_layer.mjs',
+  'git add public/data/osm-poi-index.json public/data/tours.json',
   'bash scripts/push_generated_commit.sh',
 ]) {
   assert.ok(workflow.includes(snippet), `expected OSM POI workflow to include ${snippet}`);

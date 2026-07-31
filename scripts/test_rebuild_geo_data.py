@@ -41,6 +41,8 @@ def test_rebuild_preserves_coarse_coordinate_as_non_map_fallback():
     assert after == 1
     assert tour["destinationPlaceName"] == "肇庆蓝钟温泉"
     assert tour["destinationCoordinateSource"] == "fallback"
+    assert tour["destinationGeoLevel"] == "poi"
+    assert tour["destinationCoordinatePrecision"] == "city"
     assert tour["destinationLatitude"] == 23.0472
     assert tour["destinationLongitude"] == 112.4651
     assert tour["geoConfidence"] == "low"

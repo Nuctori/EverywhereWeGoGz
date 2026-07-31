@@ -18,6 +18,7 @@ export type MapTourLocation = {
   longitude: number;
   coordinateSystem: 'wgs84';
   level: 'country' | 'region' | 'city' | 'town' | 'poi';
+  semanticLevel?: 'country' | 'region' | 'city' | 'town' | 'poi';
   coordinateSource: 'catalog' | 'geocoder' | 'osm' | 'fallback' | 'inferred';
   source: 'source' | 'catalog' | 'geocoder' | 'osm' | 'inferred' | 'unknown';
   confidence: 'low' | 'medium' | 'high';

@@ -106,6 +106,7 @@ def enrich_tours_from_osm(tours: list[dict], index_path: Path = DEFAULT_INDEX_PA
         tour["destinationLatitude"] = result["latitude"]
         tour["destinationLongitude"] = result["longitude"]
         tour["destinationGeoLevel"] = "poi"
+        tour["destinationCoordinatePrecision"] = "poi"
         tour["destinationCoordinateSource"] = "osm"
         tour["geoConfidence"] = "high"
         tour["geoSource"] = "osm"

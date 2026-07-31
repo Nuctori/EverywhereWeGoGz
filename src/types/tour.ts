@@ -49,6 +49,8 @@ export interface TourGeoPoint {
   longitude: number;
   coordinateSystem: 'wgs84';
   level: GeoLevel;
+  /** The recognized entity may be a POI even when only a city fallback coordinate exists. */
+  semanticLevel?: GeoLevel;
   coordinateSource: 'catalog' | 'geocoder' | 'osm' | 'fallback' | 'inferred';
   source: GeoSource;
   confidence: GeoConfidence;

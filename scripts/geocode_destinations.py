@@ -505,6 +505,7 @@ def _apply_result(tour: dict, result: dict) -> None:
     tour["destinationLatitude"] = result["latitude"]
     tour["destinationLongitude"] = result["longitude"]
     tour["destinationGeoLevel"] = result["level"]
+    tour["destinationCoordinatePrecision"] = result["level"]
     if result.get("locality"):
         tour["destinationLocality"] = result["locality"]
     address = _merge_address_values(

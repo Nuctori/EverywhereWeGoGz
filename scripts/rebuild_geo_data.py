@@ -49,7 +49,9 @@ def _apply_coordinate_fallback(tour: dict, fields: dict) -> None:
         return
     fields["destinationLatitude"] = parent["latitude"]
     fields["destinationLongitude"] = parent["longitude"]
-    fields["destinationGeoLevel"] = "poi"
+    # Keep the extracted POI entity, but expose the actual coordinate
+    # precision to the map. A city centroid must never render as a POI point.
+    fields["destinationCoordinatePrecision"] = "city"
     fields["destinationCoordinateSource"] = "fallback"
     fields["geoConfidence"] = "low"
     fields["geoSource"] = "title-place-miner"

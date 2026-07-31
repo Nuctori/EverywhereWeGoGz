@@ -117,7 +117,7 @@ def test_named_title_destination_does_not_inherit_city_centroid():
         {},
     )
 
-    assert fields["destinationPlaceName"] == "肇庆蓝钟"
+    assert fields["destinationPlaceName"] == "肇庆怀集蓝钟森林温泉酒店"
     assert fields["destinationCity"] == "肇庆"
     assert fields["destinationLatitude"] is None
     assert fields["destinationLongitude"] is None
@@ -140,6 +140,73 @@ def test_named_destination_from_title_is_geocoder_candidate():
     queries = destination_queries(tour)
     assert queries[0] == "肇庆蓝钟温泉 广东 中国"
     assert tour["destinationCoordinateSource"] == "inferred"
+
+
+def test_title_hotel_suffix_is_a_geocoder_candidate_without_a_static_alias():
+    fields, _ = normalize_tour_geo(
+        {"destination": "广东", "title": "龙门温德姆温泉3天"},
+        "龙门温德姆温泉3天",
+        "广东",
+        {},
+    )
+
+    assert fields["destinationCity"] == "龙门"
+    assert fields["destinationPlaceName"] == "龙门温德姆温泉"
+    assert fields["destinationGeoLevel"] == "poi"
+    assert fields["destinationCoordinatePrecision"] == ""
+    assert fields["destinationCoordinateSource"] == "inferred"
+    assert destination_queries({"title": "龙门温德姆温泉3天", **fields})[0] == "龙门温德姆温泉 广东 中国"
+
+
+def test_short_city_substrings_and_flight_cities_do_not_become_destinations():
+    fields, _ = normalize_tour_geo(
+        {"destination": "其他", "title": "山西双飞6天丨五台山丨平遥古城"},
+        "山西双飞6天丨五台山丨平遥古城",
+        "其他",
+        {},
+    )
+    assert fields["destinationCity"] != "台山"
+
+    fields, _ = normalize_tour_geo(
+        {"destination": "港澳", "title": "澳门大三巴 外观巴黎人铁塔 珠海日月贝2天"},
+        "澳门大三巴 外观巴黎人铁塔 珠海日月贝2天",
+        "港澳",
+        {},
+    )
+    assert fields["destinationCity"] != "巴黎"
+
+    fields, _ = normalize_tour_geo(
+        {"destination": "其他", "title": "南航广州起止北京飞 巴黎连住12天"},
+        "南航广州起止北京飞 巴黎连住12天",
+        "其他",
+        {},
+    )
+    assert fields["departureCity"] == "北京"
+    assert fields["destinationCity"] == "巴黎"
+
+    fields, _ = normalize_tour_geo(
+        {"destination": "广东", "title": "马来西亚潮玩沙巴5天4晚游-广州CZ南航直飞亚庇"},
+        "马来西亚潮玩沙巴5天4晚游-广州CZ南航直飞亚庇",
+        "广东",
+        {},
+    )
+    assert fields["destinationCity"] != "广州"
+
+    fields, _ = normalize_tour_geo(
+        {"destination": "广东", "title": "广州增城、东莞3天"},
+        "广州增城、东莞3天",
+        "广东",
+        {},
+    )
+    assert fields.get("departureCity") != "广州"
+
+    fields, _ = normalize_tour_geo(
+        {"destination": "湖北", "title": "湖北恩施高铁5天＊中国仙本那屏山大峡谷"},
+        "湖北恩施高铁5天＊中国仙本那屏山大峡谷",
+        "湖北",
+        {},
+    )
+    assert fields["destinationCity"] == "恩施"
 
 
 def test_named_poi_aliases_become_geocoder_candidates():
@@ -352,6 +419,8 @@ if __name__ == "__main__":
     test_invalid_cached_result_does_not_upgrade_the_wrong_poi(Path("."))
     test_named_title_destination_does_not_inherit_city_centroid()
     test_named_destination_from_title_is_geocoder_candidate()
+    test_title_hotel_suffix_is_a_geocoder_candidate_without_a_static_alias()
+    test_short_city_substrings_and_flight_cities_do_not_become_destinations()
     test_named_poi_aliases_become_geocoder_candidates()
     test_geocoder_requires_poi_name_and_expected_city()
     test_photon_result_uses_geojson_longitude_then_latitude()

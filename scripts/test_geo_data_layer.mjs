@@ -22,7 +22,7 @@ const validPoint = (point) => point
   && point.latitude >= -90 && point.latitude <= 90
   && point.longitude >= -180 && point.longitude <= 180
   && point.coordinateSystem === 'wgs84'
-  && ['catalog', 'geocoder', 'fallback', 'inferred'].includes(point.coordinateSource)
+  && ['catalog', 'geocoder', 'osm', 'fallback', 'inferred'].includes(point.coordinateSource)
   && typeof point.placeId === 'string' && point.placeId.length > 0;
 
 assert(Array.isArray(list) && list.length > 0, 'tours-list.json must be a non-empty array');
@@ -69,6 +69,11 @@ for (const place of places) {
   assert(place.roles.every((role) => ['departure', 'destination', 'stop'].includes(role)), `${place.name} has an invalid role`);
 }
 
+for (const tour of sourceTours) {
+  if (tour.destinationCoordinateSource !== 'fallback') continue;
+  assert(tour.destinationCoordinatePrecision === 'city', `${tour.id} fallback coordinates must be city-precision`);
+}
+
 for (const entry of mapIndex) {
   assert(tourIds.has(entry.tourId), `map index references unknown tour ${entry.tourId}`);
   for (const key of ['departurePlaceId', 'destinationPlaceId']) {
@@ -107,8 +112,11 @@ const blueBellIndexedTours = list.filter((tour) => String(tour.title || '').incl
 assert(blueBellSourceTours.length > 0, 'fixture data must include 蓝钟 destination examples');
 assert(blueBellSourceTours.every((tour) => tour.destinationPlaceName?.includes('蓝钟')), '蓝钟 titles must retain the mined named destination');
 assert(blueBellSourceTours.every((tour) => tour.destinationCoordinateSource === 'fallback'), 'unverified 蓝钟 coordinates must be marked as fallback');
+assert(blueBellSourceTours.every((tour) => tour.destinationCoordinatePrecision === 'city'), '蓝钟 fallback coordinates must be city-precision');
 assert(blueBellIndexedTours.length === blueBellSourceTours.length, '蓝钟 examples must survive into the map index');
 assert(blueBellIndexedTours.every((tour) => tour.geo?.destination), '蓝钟 fallback destinations must remain map-selectable');
+assert(blueBellIndexedTours.every((tour) => tour.geo?.destination?.level === 'city'), '蓝钟 map points must show city-level coordinate precision');
+assert(blueBellIndexedTours.every((tour) => tour.geo?.destination?.semanticLevel === 'poi'), '蓝钟 must retain the extracted POI entity');
 assert(blueBellIndexedTours.every((tour) => places.some((place) => place.placeId === tour.geo.destination.placeId && place.tourIds.includes(tour.id))), '蓝钟 fallback destinations must be indexed in geo-places.json');
 const namedPoiCases = [
   ['七星岩', '肇庆七星岩'],
@@ -160,9 +168,10 @@ const foreignDepartureTitles = list.filter((tour) => /南方航空.*广州.*马�
 assert(foreignDepartureTitles.length > 0, 'fixture data must include extended departure-context examples');
 assert(foreignDepartureTitles.every((tour) => tour.geo.destination?.name !== '广州'), 'extended departure contexts must not become destination Guangzhou');
 const guangzhouDepartureTours = list.filter((tour) => (
-  String(tour.title || '').includes('广州') && tour.geo?.departure?.name === '广州'
+  /(?:从|由)?广州(?:出发|往返|起止|直飞|直航|联运)/.test(String(tour.title || ''))
+  && tour.geo?.departure?.name === '广州'
 ));
-assert(guangzhouDepartureTours.length > 0, 'current data must include Guangzhou departure examples');
+assert(guangzhouDepartureTours.length > 0, 'current data must include explicit Guangzhou departure examples');
 assert(
   guangzhouDepartureTours.every((tour) => tour.geo.destination?.name !== '广州'),
   'Guangzhou departure context must not become the destination',
