@@ -258,14 +258,24 @@ function prettyJson(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
-function normalizeDetailPayload(detail) {
-  if (detail.mealCounts === null) {
-    delete detail.mealCounts;
+function isEmptyObject(value) {
+  return value !== null
+    && typeof value === 'object'
+    && !Array.isArray(value)
+    && Object.keys(value).length === 0;
+}
+
+function normalizeTourPayload(payload) {
+  if (payload.mealCounts === null || isEmptyObject(payload.mealCounts)) {
+    delete payload.mealCounts;
   }
-  if (detail.meta?.structuredDetails?.mealCounts === null) {
-    delete detail.meta.structuredDetails.mealCounts;
+  if (
+    payload.meta?.structuredDetails?.mealCounts === null ||
+    isEmptyObject(payload.meta?.structuredDetails?.mealCounts)
+  ) {
+    delete payload.meta.structuredDetails.mealCounts;
   }
-  return detail;
+  return payload;
 }
 
 // ??????????/??/?????????????????
@@ -341,7 +351,8 @@ const listTours = tours.map((tour) => {
     }
   }
   listTour.geo = buildGeo(tour);
-  normalizeDetailPayload(detailTour);
+  normalizeTourPayload(listTour);
+  normalizeTourPayload(detailTour);
 
   const detailFile = `${tour.id}.json`;
   writeTextFileWithRetry(path.join(detailsDir, detailFile), compactJson(detailTour));

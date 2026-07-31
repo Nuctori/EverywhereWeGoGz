@@ -66,6 +66,20 @@ const mealCountsSchema = z.object({
   lunch: z.coerce.number().int().nonnegative(),
   dinner: z.coerce.number().int().nonnegative(),
 });
+const optionalMealCountsSchema = z.preprocess(
+  (value) => {
+    if (
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === 0
+    ) {
+      return undefined;
+    }
+    return value;
+  },
+  mealCountsSchema.nullable().optional(),
+);
 
 const serviceStatusSchema = z.object({
   visaRequirements: serviceAvailability,
@@ -88,7 +102,7 @@ const tourMetaSchema = z.object({
   sourceAttributes: z.record(z.string(), z.unknown()).optional().default({}),
   structuredDetails: z.object({
     accommodationDetails: stringArrayDefaultEmpty,
-    mealCounts: mealCountsSchema.nullable().optional(),
+    mealCounts: optionalMealCountsSchema,
     serviceStatus: serviceStatusSchema,
   }).optional(),
   dataQuality: dataQualitySchema.optional(),
@@ -136,7 +150,7 @@ export const tourDetailSchema = z.object({
   returnDate: z.string().optional().default(''),
   accommodationStars: nonNegativeNumber.optional().default(0),
   accommodationDetails: stringArrayDefaultEmpty,
-  mealCounts: mealCountsSchema.nullable().optional(),
+  mealCounts: optionalMealCountsSchema,
   serviceStatus: serviceStatusSchema.optional(),
   singleSupplement: nonNegativeNumber.optional().default(0),
   availableSeats: nonNegativeNumber.optional().default(0),
