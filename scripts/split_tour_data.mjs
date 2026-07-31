@@ -56,7 +56,7 @@ function buildGeoPoint(tour, role) {
     ? Object.fromEntries(Object.entries(tour.destinationAddress).filter(([, value]) => nonEmpty(value)))
     : undefined;
   const coordinateSource = nonEmpty(tour[destination ? 'destinationCoordinateSource' : 'departureCoordinateSource'])
-    || (tour.geoSource === 'local-place-catalog' ? 'catalog' : 'inferred');
+    || (tour.geoSource === 'local-place-catalog' ? 'catalog' : tour.geoSource === 'osm' ? 'osm' : 'inferred');
 
   const point = {
     name,
@@ -71,7 +71,7 @@ function buildGeoPoint(tour, role) {
     ...(locality ? { locality } : {}),
     ...(address && Object.keys(address).length > 0 ? { address } : {}),
     coordinateSource,
-    source: tour.geoSource === 'local-place-catalog' ? 'catalog' : tour.geoSource === 'geocoder' ? 'geocoder' : 'inferred',
+    source: tour.geoSource === 'local-place-catalog' ? 'catalog' : tour.geoSource === 'geocoder' ? 'geocoder' : tour.geoSource === 'osm' ? 'osm' : 'inferred',
     confidence: ['low', 'medium', 'high'].includes(tour.geoConfidence) ? tour.geoConfidence : 'low',
   };
   return { placeId: buildPlaceId(point), ...point, ...(name !== cityName ? { label: name } : {}) };

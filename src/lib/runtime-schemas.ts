@@ -31,8 +31,8 @@ const geoPointSchema = z.object({
   longitude: z.coerce.number().finite().gte(-180).lte(180),
   coordinateSystem: z.literal('wgs84'),
   level: z.enum(['country', 'region', 'city', 'town', 'poi']),
-  coordinateSource: z.enum(['catalog', 'geocoder', 'fallback', 'inferred']),
-  source: z.enum(['source', 'catalog', 'geocoder', 'inferred', 'unknown']),
+  coordinateSource: z.enum(['catalog', 'geocoder', 'osm', 'fallback', 'inferred']),
+  source: z.enum(['source', 'catalog', 'geocoder', 'osm', 'inferred', 'unknown']),
   confidence: z.enum(['low', 'medium', 'high']),
 });
 

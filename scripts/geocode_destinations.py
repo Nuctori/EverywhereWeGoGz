@@ -539,7 +539,7 @@ def enrich_tours(tours: list[dict], allow_network: bool = False, cache_path: Pat
     candidates = 0
     changed = False
     for tour in tours:
-        if tour.get("destinationCoordinateSource") == "catalog":
+        if tour.get("destinationCoordinateSource") in {"catalog", "osm"}:
             continue
         if tour.get("destinationCoordinateSource") == "geocoder" and tour.get("destinationAddress"):
             continue

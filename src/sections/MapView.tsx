@@ -32,12 +32,14 @@ function isWithinChinaCoverage(place: MapTourLocation) {
 
 function placePrecisionLabel(place: Pick<MapTourLocation, 'level' | 'locality' | 'coordinateSource' | 'confidence'>) {
   const levelLabel = place.level === 'town' ? '镇/街道' : place.level === 'poi' ? '景区/地点' : place.level === 'city' ? '城市范围' : place.level === 'region' ? '区域范围' : place.level === 'country' ? '国家范围' : '';
-  const approximationLabel = place.coordinateSource === 'fallback'
+  const sourceLabel = place.coordinateSource === 'osm'
+    ? 'OSM POI'
+    : place.coordinateSource === 'fallback'
     ? '模糊定位'
     : place.coordinateSource === 'inferred' && place.confidence === 'low'
       ? '推断位置'
       : '';
-  return [place.locality, levelLabel, approximationLabel].filter(Boolean).join(' · ');
+  return [place.locality, levelLabel, sourceLabel].filter(Boolean).join(' · ');
 }
 
 function placeAddressLabel(place: Pick<MapTourLocation, 'address'>) {
@@ -151,6 +153,7 @@ function PlaceToursPanel({
           <h3 className="mt-0.5 truncate text-base font-semibold text-stone-950">{place.label || place.name}</h3>
           <p className="mt-0.5 text-xs text-stone-500">{placePrecisionLabel(place)} · {place.tourCount} 条线路 · 点击卡片查看详情</p>
           {placeAddressLabel(place) && <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-stone-400">{placeAddressLabel(place)}</p>}
+          {place.coordinateSource === 'osm' && <p className="mt-1 text-[10px] text-stone-400">地点数据：OpenStreetMap contributors</p>}
         </div>
         <button type="button" onClick={onClose} aria-label="关闭地点线路" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100 hover:text-stone-900">
           <X className="h-4 w-4" />

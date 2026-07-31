@@ -40,3 +40,4 @@ post-to-wechat/
 audit/data-integrity-report.json
 
 weekly-wechat-posts/
+*.osm.pbf
