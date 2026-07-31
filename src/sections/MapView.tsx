@@ -359,7 +359,14 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             const markerPoint = group.candidates.length === 1
               ? candidate.point
               : map.containerPointToLatLng(candidate.pixel);
-            const marker = L.marker(markerPoint);
+            const marker = L.marker(markerPoint, {
+              icon: L.divIcon({
+                className: 'destination-marker-icon',
+                html: '<div style="height:20px;width:20px;border:3px solid white;border-radius:9999px;background:#ea580c;box-shadow:0 2px 8px rgba(28,25,23,.3)"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10],
+              }),
+            });
             marker.options.title = locationLabel;
             marker.options.alt = `旅行团目的地：${locationLabel}`;
             marker.bindTooltip(`${locationLabel} · ${placePrecisionLabel(place)} · ${place.tourCount}条线路`, { direction: 'top', offset: [0, -8] });

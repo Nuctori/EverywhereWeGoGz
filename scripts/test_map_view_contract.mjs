@@ -25,6 +25,7 @@ assert(source.includes('tourIds.map'), 'marker selection must resolve tours from
 assert(!source.includes('slice(0, MAP_TOUR_LIMIT)'), 'place panel must expose every tour indexed at the selected destination');
 assert(source.includes('PlaceToursPanel'), 'marker selection must open the place tour panel');
 assert(source.includes('marker.options.title = locationLabel'), 'markers must expose the specific mined location label');
+assert(source.includes("className: 'destination-marker-icon'"), 'individual destination markers must not depend on missing Leaflet image assets');
 assert(source.includes('selectTour'), 'map tour cards must open the existing tour detail flow');
 assert(source.includes('setSelectedPlace(null);'), 'opening tour details must close the place panel');
 assert(source.includes('onTourClick={openTourDetail}'), 'place panel must use the single-step tour detail handler');
