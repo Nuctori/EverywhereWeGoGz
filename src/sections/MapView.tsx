@@ -475,9 +475,15 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             <button type="button" onClick={openExpandedMap} className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full border border-stone-200 bg-white px-2.5 text-xs font-medium text-stone-700 shadow-sm transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-stone-950"><Map className="h-3.5 w-3.5 text-orange-600" /> 放大</button>
           </div>
           <p className="mb-2 px-1 text-[11px] text-stone-400">
-            已定位 {visiblePlaces.length} 个地点
-            {approximateTours.length > 0 && ` · ${approximateTours.length} 条线路使用模糊坐标`}
-            {unmappedTours.length > 0 && ` · ${unmappedTours.length} 条线路待补全`}
+            {placesLoading ? (
+              '正在加载已定位地点…'
+            ) : (
+              <>
+                已定位 {visiblePlaces.length} 个地点
+                {approximateTours.length > 0 && ` · ${approximateTours.length} 条线路使用模糊坐标`}
+                {unmappedTours.length > 0 && ` · ${unmappedTours.length} 条线路待补全`}
+              </>
+            )}
           </p>
           {mapSurface}
         </section>

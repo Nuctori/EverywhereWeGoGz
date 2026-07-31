@@ -33,6 +33,7 @@ assert(source.includes('z-[40]'), 'expanded map must remain below the tour detai
 assert((detailModal.match(/z-\[80\]/g) || []).length >= 2, 'desktop and mobile tour detail layers must sit above the expanded map');
 assert(source.includes('embedded?: boolean'), 'MapView must support an embedded homepage placement');
 assert(source.includes('!expanded && embedded'), 'embedded MapView must render the homepage preview');
+assert(source.includes("'正在加载已定位地点…'"), 'homepage map must not label an in-flight location load as zero places');
 assert(source.includes('放大地图'), 'home map must provide an expand control');
 assert(source.includes('点地点，直接看对应旅行团'), 'expanded map must keep place-first interaction');
 assert(mapTours.includes("tours-index.json"), 'map tours must use the lightweight tours index');
