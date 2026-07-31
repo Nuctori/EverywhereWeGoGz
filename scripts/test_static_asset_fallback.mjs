@@ -24,6 +24,7 @@ assert.match(worker, /return fetch\(request\);/);
 assert.match(worker, /CDN_TIMEOUT_MS/);
 assert.match(worker, /staleWhileRevalidate/);
 assert.match(worker, /cacheFirst/);
+assert.match(worker, /relativePublicPath\(requestUrl\)\?\.startsWith\('data\/'\)/);
 assert.match(worker, /scope/);
 assert.match(entry, /serviceWorker\.register/);
 assert.match(entry, /serviceWorker\.ready/);
