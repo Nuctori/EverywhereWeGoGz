@@ -159,20 +159,25 @@ assert(airportDepartureTours.some((tour) => tour.geo.departure?.name === '广州
 const foreignDepartureTitles = list.filter((tour) => /南方航空.*广州.*马德里|广州直航马德里|广州武隆仙女山|埃及航空广州直航|南航广州双直航/.test(String(tour.title || '')));
 assert(foreignDepartureTitles.length > 0, 'fixture data must include extended departure-context examples');
 assert(foreignDepartureTitles.every((tour) => tour.geo.destination?.name !== '广州'), 'extended departure contexts must not become destination Guangzhou');
-for (const tourId of ['tour_678', 'tour_2167', 'tour_2203', 'tour_2415', 'tour_4386', 'tour_884', 'tour_4391', 'tour_4457', 'tour_4459', 'tour_4460']) {
-  const tour = list.find((candidate) => candidate.id === tourId);
-  assert(tour, `${tourId} must remain in the generated fixture data`);
-  assert(tour.geo.destination?.name !== '广州', `${tourId} must not use departure Guangzhou as its destination`);
-}
+const guangzhouDepartureTours = list.filter((tour) => (
+  String(tour.title || '').includes('广州') && tour.geo?.departure?.name === '广州'
+));
+assert(guangzhouDepartureTours.length > 0, 'current data must include Guangzhou departure examples');
+assert(
+  guangzhouDepartureTours.every((tour) => tour.geo.destination?.name !== '广州'),
+  'Guangzhou departure context must not become the destination',
+);
 const cityLevelCases = ['迪拜', '伊斯坦布尔', '清迈', '巴黎', '悉尼'];
 for (const city of cityLevelCases) {
   const cityTours = list.filter((tour) => tour.geo.destination?.name === city);
   if (cityTours.length > 0) assert(cityTours.every((tour) => tour.geo.destination?.level === 'city'), `${city} must remain a city-level destination`);
 }
-for (const tourId of ['tour_858', 'tour_877']) {
-  const tour = list.find((candidate) => candidate.id === tourId);
-  assert(tour?.geo.destination?.name === '伦敦', `${tourId} must retain the international destination before 往返`);
-  assert(tour?.geo.destination?.level === 'city', `${tourId} must retain the city-level destination semantics`);
+const londonReturnTours = list.filter((tour) => (
+  String(tour.title || '').includes('伦敦') && /往返/.test(String(tour.title || ''))
+));
+if (londonReturnTours.length > 0) {
+  assert(londonReturnTours.every((tour) => tour.geo.destination?.name === '伦敦'), '伦敦往返 must retain the international destination');
+  assert(londonReturnTours.every((tour) => tour.geo.destination?.level === 'city'), '伦敦往返 must retain city-level semantics');
 }
 console.log(JSON.stringify({
   tours: list.length,

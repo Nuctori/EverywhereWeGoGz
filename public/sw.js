@@ -304,6 +304,8 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  if (self.location.hostname === 'localhost') return;
+
   const requestUrl = new URL(event.request.url);
   if (!isCacheableRequest(event.request, requestUrl)) return;
 

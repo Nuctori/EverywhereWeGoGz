@@ -54,6 +54,12 @@ export interface TourGeoPoint {
   confidence: GeoConfidence;
 }
 
+export interface GeoPlaceIndexEntry extends TourGeoPoint {
+  tourIds: string[];
+  tourCount: number;
+  roles: ('departure' | 'destination' | 'stop')[];
+}
+
 export interface TourGeo {
   departure?: TourGeoPoint;
   destination?: TourGeoPoint;

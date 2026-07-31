@@ -6,6 +6,23 @@ import App from './App.tsx'
 async function registerStaticAssetServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
 
+  const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  if (isLocalDevelopment) {
+    const wasControlled = Boolean(navigator.serviceWorker.controller);
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+    if ('caches' in window) {
+      const cacheKeys = await caches.keys();
+      await Promise.all(
+        cacheKeys
+          .filter((key) => key.startsWith('everywhere-we-go-static-'))
+          .map((key) => caches.delete(key)),
+      );
+    }
+    if (wasControlled) window.location.reload();
+    return;
+  }
+
   const baseUrl = import.meta.env.BASE_URL || '/';
   try {
     await navigator.serviceWorker.register(`${baseUrl}sw.js`, {

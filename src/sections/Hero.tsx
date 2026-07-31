@@ -9,6 +9,7 @@ import {
   WalletCards,
   X,
 } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,7 @@ interface HeroProps {
   onSearch: (value?: string) => void;
   onAiSearch: (value?: string) => void;
   quickDestinations: string[];
+  map?: ReactNode;
 }
 
 // 展示给用户的示例目的地：label 为按钮显示文本，hint 为场景说明
@@ -44,7 +46,7 @@ const planningSteps = [
   { title: '最后把合适的团置顶', detail: '不用自己一页页翻' },
 ];
 
-export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickDestinations }: HeroProps) {
+export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickDestinations, map }: HeroProps) {
   const logoSrc = 'brand/laoguang-logo-full.jpg';
 
   // 主搜索按钮优先保留普通搜索心智；只有出现明确硬约束时才自动跟进 AI，AI 找团按钮始终走 AI
@@ -165,7 +167,8 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
               </div>
             </div>
 
-            <div className="hidden lg:block">
+            <div>
+              {map || (
               <div className="rounded-[26px] border border-stone-200/80 bg-white/78 p-4 shadow-[0_20px_50px_rgba(28,25,23,0.07)] backdrop-blur">
                 <div className="flex items-center justify-between gap-4 border-b border-stone-200/70 pb-4">
                   <img src={logoSrc} alt="老广去边度" className="h-20 w-auto object-contain" />
@@ -216,6 +219,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                   </div>
                 </div>
               </div>
+              )}
             </div>
           </div>
         </div>

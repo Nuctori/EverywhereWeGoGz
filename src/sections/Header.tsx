@@ -1,10 +1,12 @@
 import type { ReactNode } from 'react';
+import { Map } from 'lucide-react';
 
 interface HeaderProps {
   children?: ReactNode;
+  onOpenMap?: () => void;
 }
 
-export function Header({ children }: HeaderProps) {
+export function Header({ children, onOpenMap }: HeaderProps) {
   const logoSrc = 'brand/laoguang-logo-tight.jpg';
 
   return (
@@ -16,6 +18,17 @@ export function Header({ children }: HeaderProps) {
             alt="老广去边度"
             className="h-11 w-auto max-w-[172px] object-contain sm:h-12 sm:max-w-[200px]"
           />
+          {onOpenMap && (
+            <button
+              type="button"
+              onClick={onOpenMap}
+              className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 text-sm font-medium text-stone-700 shadow-sm transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-stone-950"
+              title="打开地图"
+            >
+              <Map className="h-4 w-4 text-orange-600" />
+              地图
+            </button>
+          )}
           {children}
         </div>
       </div>
