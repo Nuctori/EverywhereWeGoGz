@@ -1,6 +1,7 @@
 // 统一加载态/错误态/就绪态、移动端 Sheet vs 桌面端 Dialog
 import type { DayItinerary, ResolvedTour, TourSummary } from '@/types/tour';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { resolveSourceDetailUrl } from '@/lib/source-detail-url';
 import {
   Dialog,
   DialogContent,
@@ -104,6 +105,7 @@ export function TourDetailModal({
   const isMobile = useIsMobile();
   const tour = resolvedTour ?? summaryTour;
   if (!tour) return null;
+  const sourceDetailUrl = resolveSourceDetailUrl(tour);
   const heroImage = resolveAssetUrl(tour.images?.[0] || '');
   const heroFallbackImage = getFallbackImage(tour.title);
   const destinationLabel = getReadableDestination(tour);
@@ -515,7 +517,7 @@ export function TourDetailModal({
           isMobile ? 'col-span-2 h-11 rounded-2xl' : 'flex-1',
         )}
         size="lg"
-        onClick={() => openExternalLink(tour.bookingUrl)}
+        onClick={() => openExternalLink(sourceDetailUrl)}
       >
         <ExternalLink className="w-4 h-4 mr-2" />打开来源页面
       </Button>
