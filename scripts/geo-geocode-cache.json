@@ -1659,5 +1659,3734 @@
       "city": "旅顺口区",
       "district": "龙王塘街道"
     }
+  },
+  "应星楼 中国": {
+    "query": "应星楼 中国",
+    "provider": "photon",
+    "latitude": 25.8004667,
+    "longitude": 114.7643885,
+    "displayName": "应星楼 章田路 章良村 唐江镇 南康区 江西省 中国",
+    "level": "poi",
+    "locality": "紫竂下",
+    "providerScore": 80,
+    "address": {
+      "formatted": "应星楼 章田路 章良村 唐江镇 南康区 江西省 中国",
+      "country": "中国",
+      "province": "江西省",
+      "city": "唐江镇",
+      "district": "章良村",
+      "locality": "紫竂下",
+      "street": "章田路",
+      "postalCode": "341411"
+    }
+  },
+  "来福士 四川 中国": {
+    "query": "来福士 四川 中国",
+    "provider": "photon",
+    "latitude": 22.514764,
+    "longitude": 113.9207686,
+    "displayName": "来福士 南海公园地下车道 南山街道 深圳市  广东省 中国",
+    "level": "poi",
+    "locality": "登良社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "来福士 南海公园地下车道 南山街道 深圳市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "深圳市",
+      "district": "南山街道",
+      "locality": "登良社区",
+      "street": "南海公园地下车道",
+      "postalCode": "518000"
+    }
+  },
+  "状元桥 内蒙古 中国": {
+    "query": "状元桥 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 28.6831891,
+    "longitude": 115.8897743,
+    "displayName": "状元桥  百花洲街道 东湖区 南昌市 江西省 中国",
+    "level": "poi",
+    "locality": "状元桥社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "状元桥  百花洲街道 东湖区 南昌市 江西省 中国",
+      "country": "中国",
+      "province": "江西省",
+      "city": "东湖区",
+      "district": "百花洲街道",
+      "locality": "状元桥社区",
+      "postalCode": "330006"
+    }
+  },
+  "建设 广东 中国": {
+    "query": "建设 广东 中国",
+    "provider": "photon",
+    "latitude": 31.5798046,
+    "longitude": 117.2556429,
+    "displayName": "建设   合肥市  安徽省 中国",
+    "level": "poi",
+    "locality": "合肥市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "建设   合肥市  安徽省 中国",
+      "country": "中国",
+      "province": "安徽省",
+      "city": "合肥市"
+    }
+  },
+  "梵净山 贵州 中国": {
+    "query": "梵净山 贵州 中国",
+    "provider": "arcgis",
+    "latitude": 27.9193854,
+    "longitude": 108.6921395,
+    "displayName": "梵净山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "梵净山",
+      "country": "中国",
+      "province": "贵州省",
+      "district": "印江土家族苗族自治县",
+      "postalCode": "558000"
+    }
+  },
+  "韶山 湖南 中国": {
+    "query": "韶山 湖南 中国",
+    "provider": "photon",
+    "latitude": 27.9247488,
+    "longitude": 112.5236705,
+    "displayName": "韶山 车站路 清溪镇 韶山市 湘潭市 湖南省 中国",
+    "level": "poi",
+    "locality": "韶山市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "韶山 车站路 清溪镇 韶山市 湘潭市 湖南省 中国",
+      "country": "中国",
+      "province": "湖南省",
+      "city": "韶山市",
+      "district": "清溪镇",
+      "street": "车站路"
+    }
+  },
+  "明仕田园 崇左 广西 中国": {
+    "query": "明仕田园 崇左 广西 中国",
+    "provider": "photon",
+    "latitude": 22.7056464,
+    "longitude": 106.924709,
+    "displayName": "明仕田园  堪圩乡 大新县 崇左市 广西壮族自治区 中国",
+    "level": "poi",
+    "locality": "大新县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "明仕田园  堪圩乡 大新县 崇左市 广西壮族自治区 中国",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "大新县",
+      "district": "堪圩乡"
+    }
+  },
+  "青秀山风景区 中国": {
+    "query": "青秀山风景区 中国",
+    "provider": "arcgis",
+    "latitude": 22.791758993365,
+    "longitude": 108.385225001281,
+    "displayName": "青秀山风景区",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "青秀山风景区",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "南宁市",
+      "district": "青秀区",
+      "street": "凤岭南路",
+      "houseNumber": "6",
+      "postalCode": "530000"
+    }
+  },
+  "天露山旅游度假区 新兴 广东 中国": {
+    "query": "天露山旅游度假区 新兴 广东 中国",
+    "provider": "photon",
+    "latitude": 22.4889055,
+    "longitude": 112.2244895,
+    "displayName": "天露山旅游度假区  庄谷坪 里洞镇 新兴县 广东省 中国",
+    "level": "poi",
+    "locality": "梅溪小镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "天露山旅游度假区  庄谷坪 里洞镇 新兴县 广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "里洞镇",
+      "district": "庄谷坪",
+      "locality": "梅溪小镇"
+    }
+  },
+  "餐饮 广东 中国": {
+    "query": "餐饮 广东 中国",
+    "provider": "arcgis",
+    "latitude": 29.0248813,
+    "longitude": 104.2622072,
+    "displayName": "餐饮",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80.0,
+    "address": {
+      "formatted": "餐饮"
+    }
+  },
+  "娱乐 中国": {
+    "query": "娱乐 中国",
+    "provider": "photon",
+    "latitude": 45.2945065,
+    "longitude": 130.9606315,
+    "displayName": "娱乐 和平北大街 西山街道 鸡冠区 鸡西市 黑龙江省 中国",
+    "level": "poi",
+    "locality": "鸡冠区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "娱乐 和平北大街 西山街道 鸡冠区 鸡西市 黑龙江省 中国",
+      "country": "中国",
+      "province": "黑龙江省",
+      "city": "鸡冠区",
+      "district": "西山街道",
+      "street": "和平北大街",
+      "postalCode": "158100"
+    }
+  },
+  "靖西 广西 中国": {
+    "query": "靖西 广西 中国",
+    "provider": "photon",
+    "latitude": 23.1371896,
+    "longitude": 106.4138603,
+    "displayName": "靖西市   百色市  广西壮族自治区 中国",
+    "level": "poi",
+    "locality": "百色市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "靖西市   百色市  广西壮族自治区 中国",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "百色市"
+    }
+  },
+  "西塘 华东 中国": {
+    "query": "西塘 华东 中国",
+    "provider": "photon",
+    "latitude": 28.9807453,
+    "longitude": 114.0679571,
+    "displayName": "西塘    修水县 江西省 中国",
+    "level": "poi",
+    "locality": "修水县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "西塘    修水县 江西省 中国",
+      "country": "中国",
+      "province": "江西省",
+      "district": "修水县"
+    }
+  },
+  "高老庄 贵州 中国": {
+    "query": "高老庄 贵州 中国",
+    "provider": "photon",
+    "latitude": 33.4350968,
+    "longitude": 113.2027496,
+    "displayName": "高老庄   平顶山市  河南省 中国",
+    "level": "poi",
+    "locality": "平顶山市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "高老庄   平顶山市  河南省 中国",
+      "country": "中国",
+      "province": "河南省",
+      "city": "平顶山市"
+    }
+  },
+  "野鸡坪 贵州 中国": {
+    "query": "野鸡坪 贵州 中国",
+    "provider": "photon",
+    "latitude": 29.2643154,
+    "longitude": 103.0488631,
+    "displayName": "野鸡坪   永和镇 金口河区 四川省 中国",
+    "level": "poi",
+    "locality": "永和镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "野鸡坪   永和镇 金口河区 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "city": "永和镇",
+      "district": "金口河区"
+    }
+  },
+  "外滩 华东 中国": {
+    "query": "外滩 华东 中国",
+    "provider": "photon",
+    "latitude": 31.2353356,
+    "longitude": 121.487632,
+    "displayName": "外滩  外滩街道 黄浦区  上海市 中国",
+    "level": "poi",
+    "locality": "新北门",
+    "providerScore": 80,
+    "address": {
+      "formatted": "外滩  外滩街道 黄浦区  上海市 中国",
+      "country": "中国",
+      "province": "上海市",
+      "city": "黄浦区",
+      "district": "外滩街道",
+      "locality": "新北门",
+      "postalCode": "200002"
+    }
+  },
+  "广济桥 杭州 浙江 中国": {
+    "query": "广济桥 杭州 浙江 中国",
+    "provider": "photon",
+    "latitude": 30.4803348,
+    "longitude": 120.178787,
+    "displayName": "广济桥  塘栖镇 杭州市  浙江省 中国",
+    "level": "poi",
+    "locality": "杭州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "广济桥  塘栖镇 杭州市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "杭州市",
+      "district": "塘栖镇"
+    }
+  },
+  "穿山 广西 中国": {
+    "query": "穿山 广西 中国",
+    "provider": "photon",
+    "latitude": 24.5185819,
+    "longitude": 109.2387703,
+    "displayName": "穿山   柳城县 柳州市 广西壮族自治区 中国",
+    "level": "poi",
+    "locality": "柳城县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "穿山   柳城县 柳州市 广西壮族自治区 中国",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "柳城县",
+      "district": "柳州市",
+      "postalCode": "545208"
+    }
+  },
+  "成功 中国": {
+    "query": "成功 中国",
+    "provider": "photon",
+    "latitude": 32.1392584,
+    "longitude": 115.725719,
+    "displayName": "成功   固始县 信阳市 河南省 中国",
+    "level": "poi",
+    "locality": "固始县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "成功   固始县 信阳市 河南省 中国",
+      "country": "中国",
+      "province": "河南省",
+      "city": "固始县",
+      "district": "信阳市"
+    }
+  },
+  "邛海 中国": {
+    "query": "邛海 中国",
+    "provider": "arcgis",
+    "latitude": 27.824549837417,
+    "longitude": 102.31023605961,
+    "displayName": "邛海",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "邛海",
+      "country": "中国",
+      "province": "四川省",
+      "city": "海南街道",
+      "district": "西昌市 ꀒꎂꏃ"
+    }
+  },
+  "沧浪亭 华东 中国": {
+    "query": "沧浪亭 华东 中国",
+    "provider": "arcgis",
+    "latitude": 45.7153336,
+    "longitude": 126.7096583,
+    "displayName": "沧浪亭",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "沧浪亭"
+    }
+  },
+  "神仙居 中国": {
+    "query": "神仙居 中国",
+    "provider": "photon",
+    "latitude": 28.7486067,
+    "longitude": 120.6158604,
+    "displayName": "神仙居 诸永高速 仙居县 台州市  浙江省 中国",
+    "level": "poi",
+    "locality": "台州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "神仙居 诸永高速 仙居县 台州市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "台州市",
+      "district": "仙居县",
+      "street": "诸永高速"
+    }
+  },
+  "郭亮村 河南 中国": {
+    "query": "郭亮村 河南 中国",
+    "provider": "photon",
+    "latitude": 35.7318986,
+    "longitude": 113.5974111,
+    "displayName": "郭亮村   辉县市 新乡市 河南省 中国",
+    "level": "town",
+    "locality": "辉县市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "郭亮村   辉县市 新乡市 河南省 中国",
+      "country": "中国",
+      "province": "河南省",
+      "city": "辉县市",
+      "district": "新乡市"
+    }
+  },
+  "郭亮 河南 中国": {
+    "query": "郭亮 河南 中国",
+    "provider": "photon",
+    "latitude": 41.1264253,
+    "longitude": 113.1845337,
+    "displayName": "郭亮  马莲渠乡 乌兰察布市 ᠤᠯᠠᠭᠠᠨᠴᠠᠪ  内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+    "level": "poi",
+    "locality": "乌兰察布市 ᠤᠯᠠᠭᠠᠨᠴᠠᠪ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "郭亮  马莲渠乡 乌兰察布市 ᠤᠯᠠᠭᠠᠨᠴᠠᠪ  内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+      "country": "中国",
+      "province": "内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ",
+      "city": "乌兰察布市 ᠤᠯᠠᠭᠠᠨᠴᠠᠪ",
+      "district": "马莲渠乡",
+      "postalCode": "012000"
+    }
+  },
+  "百货 杭州 浙江 中国": {
+    "query": "百货 杭州 浙江 中国",
+    "provider": "nominatim",
+    "latitude": 30.1701355,
+    "longitude": 120.0974468,
+    "displayName": "银泰百货(之江店), 49, 转塘街道, 西湖区, 杭州市, 浙江省, 中国",
+    "level": "poi",
+    "locality": "转塘街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "银泰百货(之江店), 49, 转塘街道, 西湖区, 杭州市, 浙江省, 中国"
+    }
+  },
+  "高椅岭 湖南 中国": {
+    "query": "高椅岭 湖南 中国",
+    "provider": "photon",
+    "latitude": 25.9699519,
+    "longitude": 113.1637163,
+    "displayName": "高椅岭 郴永大道 新屋里 郴州市  湖南省 中国",
+    "level": "poi",
+    "locality": "郴州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "高椅岭 郴永大道 新屋里 郴州市  湖南省 中国",
+      "country": "中国",
+      "province": "湖南省",
+      "city": "郴州市",
+      "district": "新屋里",
+      "street": "郴永大道"
+    }
+  },
+  "南华寺 韶关 广东 中国": {
+    "query": "南华寺 韶关 广东 中国",
+    "provider": "nominatim",
+    "latitude": 24.649105,
+    "longitude": 113.6316237,
+    "displayName": "南华寺, 曹溪路, 惠英, 南华村, 马坝镇, 曲江区, 韶关市, 广东省, 中国",
+    "level": "poi",
+    "locality": "马坝镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "南华寺, 曹溪路, 惠英, 南华村, 马坝镇, 曲江区, 韶关市, 广东省, 中国"
+    }
+  },
+  "卓思道温泉度假酒店 从化 广东 中国": {
+    "query": "卓思道温泉度假酒店 从化 广东 中国",
+    "provider": "nominatim",
+    "latitude": 23.6907277,
+    "longitude": 113.7029491,
+    "displayName": "卓思道温泉度假酒店, 御泉大道, 良口镇, 从化区, 广州市, 广东省, 中国",
+    "level": "poi",
+    "locality": "良口镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "卓思道温泉度假酒店, 御泉大道, 良口镇, 从化区, 广州市, 广东省, 中国"
+    }
+  },
+  "五台山 中国": {
+    "query": "五台山 中国",
+    "provider": "photon",
+    "latitude": 32.0522202,
+    "longitude": 118.7713051,
+    "displayName": "五台山 上海路 华侨路街道 南京市  江苏省 中国",
+    "level": "poi",
+    "locality": "华侨路街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "五台山 上海路 华侨路街道 南京市  江苏省 中国",
+      "country": "中国",
+      "province": "江苏省",
+      "city": "南京市",
+      "district": "华侨路街道",
+      "locality": "华侨路街道",
+      "street": "上海路",
+      "postalCode": "210005"
+    }
+  },
+  "天星桥 贵州 中国": {
+    "query": "天星桥 贵州 中国",
+    "provider": "photon",
+    "latitude": 27.4131,
+    "longitude": 105.501,
+    "displayName": "天星桥   七星关区 毕节市 贵州省 中国",
+    "level": "poi",
+    "locality": "七星关区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "天星桥   七星关区 毕节市 贵州省 中国",
+      "country": "中国",
+      "province": "贵州省",
+      "city": "七星关区",
+      "district": "毕节市"
+    }
+  },
+  "渔人码头 广州 广东 中国": {
+    "query": "渔人码头 广州 广东 中国",
+    "provider": "photon",
+    "latitude": 23.0335277,
+    "longitude": 113.2986498,
+    "displayName": "渔人码头 新虹楼 洛浦街道 广州市  广东省 中国",
+    "level": "poi",
+    "locality": "丽江花园",
+    "providerScore": 80,
+    "address": {
+      "formatted": "渔人码头 新虹楼 洛浦街道 广州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "广州市",
+      "district": "洛浦街道",
+      "locality": "丽江花园",
+      "street": "新虹楼",
+      "postalCode": "511400"
+    }
+  },
+  "明仕田园 广西 中国": {
+    "query": "明仕田园 广西 中国",
+    "provider": "photon",
+    "latitude": 22.7056464,
+    "longitude": 106.924709,
+    "displayName": "明仕田园  堪圩乡 大新县 崇左市 广西壮族自治区 中国",
+    "level": "poi",
+    "locality": "大新县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "明仕田园  堪圩乡 大新县 崇左市 广西壮族自治区 中国",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "大新县",
+      "district": "堪圩乡"
+    }
+  },
+  "陈皮村 中国": {
+    "query": "陈皮村 中国",
+    "provider": "photon",
+    "latitude": 22.80208,
+    "longitude": 111.6235,
+    "displayName": "陈皮村   双东街道 罗定市 广东省 中国",
+    "level": "town",
+    "locality": "双东街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "陈皮村   双东街道 罗定市 广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "双东街道",
+      "district": "罗定市"
+    }
+  },
+  "那西 中国": {
+    "query": "那西 中国",
+    "provider": "photon",
+    "latitude": 24.8178,
+    "longitude": 105.358,
+    "displayName": "那西   百色市  广西壮族自治区 中国",
+    "level": "poi",
+    "locality": "百色市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "那西   百色市  广西壮族自治区 中国",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "百色市"
+    }
+  },
+  "官鹅沟 中国": {
+    "query": "官鹅沟 中国",
+    "provider": "photon",
+    "latitude": 33.9910445,
+    "longitude": 104.3852122,
+    "displayName": "官鹅沟   官鹅 宕昌县 甘肃省 中国",
+    "level": "poi",
+    "locality": "官鹅",
+    "providerScore": 80,
+    "address": {
+      "formatted": "官鹅沟   官鹅 宕昌县 甘肃省 中国",
+      "country": "中国",
+      "province": "甘肃省",
+      "city": "官鹅",
+      "district": "宕昌县"
+    }
+  },
+  "梵宫 华东 中国": {
+    "query": "梵宫 华东 中国",
+    "provider": "photon",
+    "latitude": 31.4306546,
+    "longitude": 120.0974554,
+    "displayName": "梵宫 古竹路 马山街道 无锡市  江苏省 中国",
+    "level": "poi",
+    "locality": "马山",
+    "providerScore": 80,
+    "address": {
+      "formatted": "梵宫 古竹路 马山街道 无锡市  江苏省 中国",
+      "country": "中国",
+      "province": "江苏省",
+      "city": "无锡市",
+      "district": "马山街道",
+      "locality": "马山",
+      "street": "古竹路",
+      "postalCode": "214000"
+    }
+  },
+  "留园 华东 中国": {
+    "query": "留园 华东 中国",
+    "provider": "photon",
+    "latitude": 31.3176166,
+    "longitude": 120.5879588,
+    "displayName": "留园  虎丘街道 苏州市  江苏省 中国",
+    "level": "poi",
+    "locality": "留园社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "留园  虎丘街道 苏州市  江苏省 中国",
+      "country": "中国",
+      "province": "江苏省",
+      "city": "苏州市",
+      "district": "虎丘街道",
+      "locality": "留园社区"
+    }
+  },
+  "纳林湖 中国": {
+    "query": "纳林湖 中国",
+    "provider": "photon",
+    "latitude": 40.543059,
+    "longitude": 106.6335293,
+    "displayName": "纳林湖   纳林套海农场 磴口县 ᠳ᠋ᠧᠩᠺᠧᠦ ᠰᠢᠶᠠᠨ 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+    "level": "poi",
+    "locality": "纳林套海农场",
+    "providerScore": 80,
+    "address": {
+      "formatted": "纳林湖   纳林套海农场 磴口县 ᠳ᠋ᠧᠩᠺᠧᠦ ᠰᠢᠶᠠᠨ 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+      "country": "中国",
+      "province": "内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ",
+      "city": "纳林套海农场",
+      "district": "磴口县 ᠳ᠋ᠧᠩᠺᠧᠦ ᠰᠢᠶᠠᠨ"
+    }
+  },
+  "长春 中国": {
+    "query": "长春 中国",
+    "provider": "photon",
+    "latitude": 43.9088384,
+    "longitude": 125.3177297,
+    "displayName": "长春 长白路 站前街道 长春市 绿园区 吉林省 中国",
+    "level": "poi",
+    "locality": "长春市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "长春 长白路 站前街道 长春市 绿园区 吉林省 中国",
+      "country": "中国",
+      "province": "吉林省",
+      "city": "长春市",
+      "district": "站前街道",
+      "street": "长白路",
+      "houseNumber": "5",
+      "postalCode": "130000"
+    }
+  },
+  "小黄山 中国": {
+    "query": "小黄山 中国",
+    "provider": "photon",
+    "latitude": 35.446269,
+    "longitude": 119.4062283,
+    "displayName": "小黄山   日照市  山东省 中国",
+    "level": "poi",
+    "locality": "日照市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "小黄山   日照市  山东省 中国",
+      "country": "中国",
+      "province": "山东省",
+      "city": "日照市",
+      "postalCode": "276800"
+    }
+  },
+  "桌山 广东 中国": {
+    "query": "桌山 广东 中国",
+    "provider": "photon",
+    "latitude": 28.8562439,
+    "longitude": 115.9848417,
+    "displayName": "桌山   樵舍镇 新建区 江西省 中国",
+    "level": "poi",
+    "locality": "樵舍镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "桌山   樵舍镇 新建区 江西省 中国",
+      "country": "中国",
+      "province": "江西省",
+      "city": "樵舍镇",
+      "district": "新建区"
+    }
+  },
+  "太阳城 广东 中国": {
+    "query": "太阳城 广东 中国",
+    "provider": "photon",
+    "latitude": 22.8498326,
+    "longitude": 114.0952291,
+    "displayName": "太阳城 东深路辅路 塘厦镇 东莞市  广东省 中国",
+    "level": "poi",
+    "locality": "东莞市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "太阳城 东深路辅路 塘厦镇 东莞市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "东莞市",
+      "district": "塘厦镇",
+      "street": "东深路辅路",
+      "postalCode": "523637"
+    }
+  },
+  "外观 广东 中国": {
+    "query": "外观 广东 中国",
+    "provider": "photon",
+    "latitude": 29.7415891,
+    "longitude": 118.4151219,
+    "displayName": "外观  王村镇 黄山市 歙县 安徽省 中国",
+    "level": "poi",
+    "locality": "黄山市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "外观  王村镇 黄山市 歙县 安徽省 中国",
+      "country": "中国",
+      "province": "安徽省",
+      "city": "黄山市",
+      "district": "王村镇"
+    }
+  },
+  "水坝 新疆 中国": {
+    "query": "水坝 新疆 中国",
+    "provider": "photon",
+    "latitude": 28.883507,
+    "longitude": 109.411328,
+    "displayName": "水坝    龙山县 湖南省 中国",
+    "level": "poi",
+    "locality": "龙山县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "水坝    龙山县 湖南省 中国",
+      "country": "中国",
+      "province": "湖南省",
+      "district": "龙山县"
+    }
+  },
+  "阿苏 内蒙古 中国": {
+    "query": "阿苏 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 27.171524,
+    "longitude": 109.348248,
+    "displayName": "阿苏    新晃侗族自治县 湖南省 中国",
+    "level": "poi",
+    "locality": "新晃侗族自治县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "阿苏    新晃侗族自治县 湖南省 中国",
+      "country": "中国",
+      "province": "湖南省",
+      "district": "新晃侗族自治县"
+    }
+  },
+  "马赛村 广东 中国": {
+    "query": "马赛村 广东 中国",
+    "provider": "photon",
+    "latitude": 30.4849536,
+    "longitude": 113.8311998,
+    "displayName": "马赛村   武汉市  湖北省 中国",
+    "level": "town",
+    "locality": "武汉市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "马赛村   武汉市  湖北省 中国",
+      "country": "中国",
+      "province": "湖北省",
+      "city": "武汉市"
+    }
+  },
+  "长颈鹿公园镇 广东 中国": {
+    "query": "长颈鹿公园镇 广东 中国",
+    "provider": "arcgis",
+    "latitude": 25.686756390129,
+    "longitude": 119.420264661822,
+    "displayName": "长颈鹿",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 70.5,
+    "address": {
+      "formatted": "长颈鹿"
+    },
+    "precision": "approximate"
+  },
+  "深圳 中国": {
+    "query": "深圳 中国",
+    "provider": "photon",
+    "latitude": 22.5445741,
+    "longitude": 114.0545429,
+    "displayName": "深圳市     广东省 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "深圳市     广东省 中国",
+      "country": "中国",
+      "province": "广东省"
+    }
+  },
+  "和平大桥 新疆 中国": {
+    "query": "和平大桥 新疆 中国",
+    "provider": "arcgis",
+    "latitude": 20.051420775215,
+    "longitude": 110.352173341197,
+    "displayName": "和平大桥",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80.99,
+    "address": {
+      "formatted": "和平大桥"
+    }
+  },
+  "米拉之家 中国": {
+    "query": "米拉之家 中国",
+    "provider": "arcgis",
+    "latitude": 41.39528,
+    "longitude": 2.16167,
+    "displayName": "米拉之家",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80.33,
+    "address": {
+      "formatted": "米拉之家"
+    }
+  },
+  "和平桥 新疆 中国": {
+    "query": "和平桥 新疆 中国",
+    "provider": "photon",
+    "latitude": 36.6031105,
+    "longitude": 77.1485154,
+    "displayName": "和平桥  永康镇 岑岭县 سېنلىڭ 喀什地区 新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی 中国",
+    "level": "poi",
+    "locality": "岑岭县 سېنلىڭ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "和平桥  永康镇 岑岭县 سېنلىڭ 喀什地区 新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی 中国",
+      "country": "中国",
+      "province": "新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی",
+      "city": "岑岭县 سېنلىڭ",
+      "district": "永康镇"
+    }
+  },
+  "缆车 新疆 中国": {
+    "query": "缆车 新疆 中国",
+    "provider": "photon",
+    "latitude": 39.3269349,
+    "longitude": 114.6731292,
+    "displayName": "缆车 荣乌高速 涞源县 保定市  河北省 中国",
+    "level": "poi",
+    "locality": "保定市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "缆车 荣乌高速 涞源县 保定市  河北省 中国",
+      "country": "中国",
+      "province": "河北省",
+      "city": "保定市",
+      "district": "涞源县",
+      "street": "荣乌高速"
+    }
+  },
+  "公里 中国": {
+    "query": "公里 中国",
+    "provider": "photon",
+    "latitude": 25.4475,
+    "longitude": 106.528,
+    "displayName": "公里    罗甸县 贵州省 中国",
+    "level": "poi",
+    "locality": "罗甸县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "公里    罗甸县 贵州省 中国",
+      "country": "中国",
+      "province": "贵州省",
+      "district": "罗甸县",
+      "postalCode": "558000"
+    }
+  },
+  "金融大道 中国": {
+    "query": "金融大道 中国",
+    "provider": "photon",
+    "latitude": 31.2956179,
+    "longitude": 121.0460357,
+    "displayName": "金融大道  花桥镇 苏州市  江苏省 中国",
+    "level": "poi",
+    "locality": "苏州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "金融大道  花桥镇 苏州市  江苏省 中国",
+      "country": "中国",
+      "province": "江苏省",
+      "city": "苏州市",
+      "district": "花桥镇"
+    }
+  },
+  "观日出 中国": {
+    "query": "观日出 中国",
+    "provider": "arcgis",
+    "latitude": 36.2545561,
+    "longitude": 117.0983313,
+    "displayName": "观日出",
+    "level": "poi",
+    "locality": "日观峰气象站",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "观日出",
+      "country": "中国",
+      "province": "山东省",
+      "city": "泰安市",
+      "district": "泰前街道",
+      "locality": "日观峰气象站",
+      "street": "觀測場",
+      "postalCode": "271000"
+    }
+  },
+  "玫瑰宫 中国": {
+    "query": "玫瑰宫 中国",
+    "provider": "photon",
+    "latitude": 22.5552999,
+    "longitude": 114.111406,
+    "displayName": "玫瑰宫 情侣桥 东门街道 深圳市  广东省 中国",
+    "level": "poi",
+    "locality": "花场社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玫瑰宫 情侣桥 东门街道 深圳市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "深圳市",
+      "district": "东门街道",
+      "locality": "花场社区",
+      "street": "情侣桥",
+      "postalCode": "518000"
+    }
+  },
+  "天坑 北京 中国": {
+    "query": "天坑 北京 中国",
+    "provider": "photon",
+    "latitude": 39.8900257,
+    "longitude": 115.9293393,
+    "displayName": "天坑 东港天坑小道（非成熟路线） 潭柘寺镇 北京市   中国",
+    "level": "poi",
+    "locality": "北京市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "天坑 东港天坑小道（非成熟路线） 潭柘寺镇 北京市   中国",
+      "country": "中国",
+      "city": "北京市",
+      "district": "潭柘寺镇",
+      "street": "东港天坑小道（非成熟路线）"
+    }
+  },
+  "小镇 广东 中国": {
+    "query": "小镇 广东 中国",
+    "provider": "arcgis",
+    "latitude": 38.186,
+    "longitude": 115.088,
+    "displayName": "河北石家庄小镇",
+    "level": "town",
+    "locality": "河北石家庄小镇",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "河北石家庄小镇"
+    }
+  },
+  "天坑 中国": {
+    "query": "天坑 中国",
+    "provider": "arcgis",
+    "latitude": 32.646975099,
+    "longitude": 107.5853925,
+    "displayName": "天坑",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "天坑"
+    }
+  },
+  "总统府 中国": {
+    "query": "总统府 中国",
+    "provider": "arcgis",
+    "latitude": 32.044818699,
+    "longitude": 118.7911118,
+    "displayName": "总统府",
+    "level": "poi",
+    "locality": "梅园新村街道",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "总统府",
+      "country": "中国",
+      "province": "江苏省",
+      "city": "南京市",
+      "district": "梅园新村街道",
+      "locality": "梅园新村街道",
+      "street": "东箭道",
+      "postalCode": "210018"
+    }
+  },
+  "唐人街 中国": {
+    "query": "唐人街 中国",
+    "provider": "arcgis",
+    "latitude": 22.052675,
+    "longitude": 113.3418546,
+    "displayName": "唐人街",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "唐人街"
+    }
+  },
+  "鸟岛 中国": {
+    "query": "鸟岛 中国",
+    "provider": "arcgis",
+    "latitude": 34.6348802,
+    "longitude": 115.927856033333,
+    "displayName": "鸟岛",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "鸟岛"
+    }
+  },
+  "天坑 广东 中国": {
+    "query": "天坑 广东 中国",
+    "provider": "photon",
+    "latitude": 32.7427665,
+    "longitude": 107.3639517,
+    "displayName": "天坑    西乡县 陕西省 中国",
+    "level": "poi",
+    "locality": "西乡县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "天坑    西乡县 陕西省 中国",
+      "country": "中国",
+      "province": "陕西省",
+      "district": "西乡县"
+    }
+  },
+  "护国寺 中国": {
+    "query": "护国寺 中国",
+    "provider": "photon",
+    "latitude": 30.2860465,
+    "longitude": 120.4086637,
+    "displayName": "护国寺  南阳街道 杭州市  浙江省 中国",
+    "level": "poi",
+    "locality": "杭州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "护国寺  南阳街道 杭州市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "杭州市",
+      "district": "南阳街道"
+    }
+  },
+  "硅谷 中国": {
+    "query": "硅谷 中国",
+    "provider": "photon",
+    "latitude": 43.799913,
+    "longitude": 125.2292142,
+    "displayName": "硅谷街道  长春高新技术产业开发区 长春市  吉林省 中国",
+    "level": "town",
+    "locality": "长春市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "硅谷街道  长春高新技术产业开发区 长春市  吉林省 中国",
+      "country": "中国",
+      "province": "吉林省",
+      "city": "长春市",
+      "district": "长春高新技术产业开发区",
+      "postalCode": "130000"
+    }
+  },
+  "珍珠港 中国": {
+    "query": "珍珠港 中国",
+    "provider": "photon",
+    "latitude": 21.5628749,
+    "longitude": 108.1951539,
+    "displayName": "珍珠港   江平镇 东兴市 广西壮族自治区 中国",
+    "level": "poi",
+    "locality": "江平镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "珍珠港   江平镇 东兴市 广西壮族自治区 中国",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "江平镇",
+      "district": "东兴市"
+    }
+  },
+  "外观 中国": {
+    "query": "外观 中国",
+    "provider": "photon",
+    "latitude": 29.7415891,
+    "longitude": 118.4151219,
+    "displayName": "外观  王村镇 黄山市 歙县 安徽省 中国",
+    "level": "poi",
+    "locality": "黄山市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "外观  王村镇 黄山市 歙县 安徽省 中国",
+      "country": "中国",
+      "province": "安徽省",
+      "city": "黄山市",
+      "district": "王村镇"
+    }
+  },
+  "龙达 广东 中国": {
+    "query": "龙达 广东 中国",
+    "provider": "photon",
+    "latitude": 34.2709953,
+    "longitude": 99.8943376,
+    "displayName": "龙达    甘德县 དགའ་བདེ་རྫོང། 青海省 中国",
+    "level": "poi",
+    "locality": "甘德县 དགའ་བདེ་རྫོང།",
+    "providerScore": 80,
+    "address": {
+      "formatted": "龙达    甘德县 དགའ་བདེ་རྫོང། 青海省 中国",
+      "country": "中国",
+      "province": "青海省",
+      "district": "甘德县 དགའ་བདེ་རྫོང།",
+      "postalCode": "814100"
+    }
+  },
+  "圣殿广场 中国": {
+    "query": "圣殿广场 中国",
+    "provider": "arcgis",
+    "latitude": 40.7705,
+    "longitude": -111.89244,
+    "displayName": "圣殿广场",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80.33,
+    "address": {
+      "formatted": "圣殿广场"
+    }
+  },
+  "马车 广东 中国": {
+    "query": "马车 广东 中国",
+    "provider": "photon",
+    "latitude": 21.6719997,
+    "longitude": 111.4432074,
+    "displayName": "马车  新圩镇 福安村 阳江市 广东省 中国",
+    "level": "poi",
+    "locality": "福安村",
+    "providerScore": 80,
+    "address": {
+      "formatted": "马车  新圩镇 福安村 阳江市 广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "福安村",
+      "district": "新圩镇"
+    }
+  },
+  "烧烤 中国": {
+    "query": "烧烤 中国",
+    "provider": "arcgis",
+    "latitude": 45.296604701,
+    "longitude": 130.9696214,
+    "displayName": "烧烤",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "烧烤"
+    }
+  },
+  "钟楼 广东 中国": {
+    "query": "钟楼 广东 中国",
+    "provider": "photon",
+    "latitude": 23.1804951,
+    "longitude": 113.4662045,
+    "displayName": "钟楼 应元广场 联和街道 广州市  广东省 中国",
+    "level": "poi",
+    "locality": "科学城",
+    "providerScore": 80,
+    "address": {
+      "formatted": "钟楼 应元广场 联和街道 广州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "广州市",
+      "district": "联和街道",
+      "locality": "科学城",
+      "street": "应元广场",
+      "postalCode": "510530"
+    }
+  },
+  "桌山 中国": {
+    "query": "桌山 中国",
+    "provider": "photon",
+    "latitude": 28.8562439,
+    "longitude": 115.9848417,
+    "displayName": "桌山   樵舍镇 新建区 江西省 中国",
+    "level": "poi",
+    "locality": "樵舍镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "桌山   樵舍镇 新建区 江西省 中国",
+      "country": "中国",
+      "province": "江西省",
+      "city": "樵舍镇",
+      "district": "新建区"
+    }
+  },
+  "茶园 广东 中国": {
+    "query": "茶园 广东 中国",
+    "provider": "photon",
+    "latitude": 23.9980016,
+    "longitude": 113.4570031,
+    "displayName": "茶园   清远市  广东省 中国",
+    "level": "poi",
+    "locality": "清远市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "茶园   清远市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "清远市"
+    }
+  },
+  "哥里 新疆 中国": {
+    "query": "哥里 新疆 中国",
+    "provider": "arcgis",
+    "latitude": 22.61291,
+    "longitude": 107.5383,
+    "displayName": "广西崇左哥里",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "广西崇左哥里"
+    }
+  },
+  "广州 中国": {
+    "query": "广州 中国",
+    "provider": "photon",
+    "latitude": 23.1526233,
+    "longitude": 113.2522641,
+    "displayName": "广州 环市西路 流花街道 广州市  广东省 中国",
+    "level": "poi",
+    "locality": "桂花岗",
+    "providerScore": 80,
+    "address": {
+      "formatted": "广州 环市西路 流花街道 广州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "广州市",
+      "district": "流花街道",
+      "locality": "桂花岗",
+      "street": "环市西路",
+      "houseNumber": "159",
+      "postalCode": "510010"
+    }
+  },
+  "欢乐岛 中国": {
+    "query": "欢乐岛 中国",
+    "provider": "arcgis",
+    "latitude": 38.529875716734,
+    "longitude": 106.191520644275,
+    "displayName": "欢乐岛",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "欢乐岛"
+    }
+  },
+  "马拉河 广东 中国": {
+    "query": "马拉河 广东 中国",
+    "provider": "photon",
+    "latitude": 33.7196081,
+    "longitude": 113.7482362,
+    "displayName": "马拉河   姜庄乡 襄城县 河南省 中国",
+    "level": "poi",
+    "locality": "姜庄乡",
+    "providerScore": 80,
+    "address": {
+      "formatted": "马拉河   姜庄乡 襄城县 河南省 中国",
+      "country": "中国",
+      "province": "河南省",
+      "city": "姜庄乡",
+      "district": "襄城县"
+    }
+  },
+  "奥斯陆 广东 中国": {
+    "query": "奥斯陆 广东 中国",
+    "provider": "nominatim",
+    "latitude": 22.4989,
+    "longitude": 113.4603671,
+    "displayName": "奥斯陆公园, 博凯社区, 中山港街道, 中山市, 广东省, 中国",
+    "level": "poi",
+    "locality": "中山港街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "奥斯陆公园, 博凯社区, 中山港街道, 中山市, 广东省, 中国"
+    }
+  },
+  "龙达 中国": {
+    "query": "龙达 中国",
+    "provider": "photon",
+    "latitude": 34.2709953,
+    "longitude": 99.8943376,
+    "displayName": "龙达    甘德县 དགའ་བདེ་རྫོང། 青海省 中国",
+    "level": "poi",
+    "locality": "甘德县 དགའ་བདེ་རྫོང།",
+    "providerScore": 80,
+    "address": {
+      "formatted": "龙达    甘德县 དགའ་བདེ་རྫོང། 青海省 中国",
+      "country": "中国",
+      "province": "青海省",
+      "district": "甘德县 དགའ་བདེ་རྫོང།",
+      "postalCode": "814100"
+    }
+  },
+  "长颈鹿公园镇 湖南 中国": {
+    "query": "长颈鹿公园镇 湖南 中国",
+    "provider": "arcgis",
+    "latitude": 28.0352503,
+    "longitude": 113.0051512,
+    "displayName": "长颈鹿",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 82.3,
+    "address": {
+      "formatted": "长颈鹿"
+    },
+    "precision": "approximate"
+  },
+  "哥里 广东 中国": {
+    "query": "哥里 广东 中国",
+    "provider": "arcgis",
+    "latitude": 22.61291,
+    "longitude": 107.5383,
+    "displayName": "广西崇左哥里",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "广西崇左哥里"
+    }
+  },
+  "星期五 中国": {
+    "query": "星期五 中国",
+    "provider": "photon",
+    "latitude": 23.1355075,
+    "longitude": 106.4171485,
+    "displayName": "星期五 新生街 新靖镇 百色市  广西壮族自治区 中国",
+    "level": "poi",
+    "locality": "城中社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "星期五 新生街 新靖镇 百色市  广西壮族自治区 中国",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "百色市",
+      "district": "新靖镇",
+      "locality": "城中社区",
+      "street": "新生街",
+      "postalCode": "533800"
+    }
+  },
+  "星期日 中国": {
+    "query": "星期日 中国",
+    "provider": "nominatim",
+    "latitude": 50.2512751,
+    "longitude": 127.4817911,
+    "displayName": "茶炊星期日, 中央街, 西兴街道, 幸福乡, 爱辉区, 黑河市, 黑龙江省, 164300, 中国",
+    "level": "poi",
+    "locality": "西兴街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "茶炊星期日, 中央街, 西兴街道, 幸福乡, 爱辉区, 黑河市, 黑龙江省, 164300, 中国"
+    }
+  },
+  "柏林 中国": {
+    "query": "柏林 中国",
+    "provider": "photon",
+    "latitude": 29.167844,
+    "longitude": 105.943906,
+    "displayName": "柏林  柏林 何埂镇 永川区 重庆市 中国",
+    "level": "poi",
+    "locality": "何埂镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "柏林  柏林 何埂镇 永川区 重庆市 中国",
+      "country": "中国",
+      "province": "重庆市",
+      "city": "何埂镇",
+      "district": "柏林"
+    }
+  },
+  "奥本 中国": {
+    "query": "奥本 中国",
+    "provider": "arcgis",
+    "latitude": 35.20134628,
+    "longitude": 134.20014187,
+    "displayName": "鳥取県八頭郡智頭町奥本",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80.0,
+    "address": {
+      "formatted": "鳥取県八頭郡智頭町奥本"
+    }
+  },
+  "首都 中国": {
+    "query": "首都 中国",
+    "provider": "nominatim",
+    "latitude": 22.296051,
+    "longitude": 114.2718656,
+    "displayName": "首都, 1, 小赤沙, 西貢區, 將軍澳, 香港, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "首都, 1, 小赤沙, 西貢區, 將軍澳, 香港, 中国"
+    }
+  },
+  "德国小镇 广东 中国": {
+    "query": "德国小镇 广东 中国",
+    "provider": "photon",
+    "latitude": 29.0533781,
+    "longitude": 111.7053386,
+    "displayName": "德国小镇  七里桥街道 常德市  湖南省 中国",
+    "level": "town",
+    "locality": "常德市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "德国小镇  七里桥街道 常德市  湖南省 中国",
+      "country": "中国",
+      "province": "湖南省",
+      "city": "常德市",
+      "district": "七里桥街道"
+    }
+  },
+  "安道尔 广东 中国": {
+    "query": "安道尔 广东 中国",
+    "provider": "arcgis",
+    "latitude": 42.545303201,
+    "longitude": 1.576286302,
+    "displayName": "安道尔",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 76.37,
+    "address": {
+      "formatted": "安道尔"
+    }
+  },
+  "布拉格 广东 中国": {
+    "query": "布拉格 广东 中国",
+    "provider": "photon",
+    "latitude": 43.3478383,
+    "longitude": 120.2169922,
+    "displayName": "布拉格   新苏莫苏木 ᠰᠢᠨᠡᠰᠦ᠋ᠮ᠎ᠡ ᠰᠤᠮᠤ 翁牛特旗 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+    "level": "poi",
+    "locality": "新苏莫苏木 ᠰᠢᠨᠡᠰᠦ᠋ᠮ᠎ᠡ ᠰᠤᠮᠤ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "布拉格   新苏莫苏木 ᠰᠢᠨᠡᠰᠦ᠋ᠮ᠎ᠡ ᠰᠤᠮᠤ 翁牛特旗 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+      "country": "中国",
+      "province": "内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ",
+      "city": "新苏莫苏木 ᠰᠢᠨᠡᠰᠦ᠋ᠮ᠎ᠡ ᠰᠤᠮᠤ",
+      "district": "翁牛特旗"
+    }
+  },
+  "竹岛 广东 中国": {
+    "query": "竹岛 广东 中国",
+    "provider": "photon",
+    "latitude": 30.5382468,
+    "longitude": 104.0727513,
+    "displayName": "竹岛  双流区 成都市  四川省 中国",
+    "level": "poi",
+    "locality": "中和街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "竹岛  双流区 成都市  四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "city": "成都市",
+      "district": "双流区",
+      "locality": "中和街道"
+    }
+  },
+  "市政厅 广东 中国": {
+    "query": "市政厅 广东 中国",
+    "provider": "photon",
+    "latitude": 30.7923838,
+    "longitude": 120.9853505,
+    "displayName": "市政厅 歌斐颂大道  嘉兴市  浙江省 中国",
+    "level": "poi",
+    "locality": "嘉兴市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "市政厅 歌斐颂大道  嘉兴市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "嘉兴市",
+      "street": "歌斐颂大道"
+    }
+  },
+  "花房 广东 中国": {
+    "query": "花房 广东 中国",
+    "provider": "photon",
+    "latitude": 26.4533452,
+    "longitude": 102.4407345,
+    "displayName": "花房   会理市 ꑌꄷꏃ 凉山彝族自治州 ꆃꎭꆈꌠꊨꏦꏱꅉꍏ 四川省 中国",
+    "level": "poi",
+    "locality": "会理市 ꑌꄷꏃ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "花房   会理市 ꑌꄷꏃ 凉山彝族自治州 ꆃꎭꆈꌠꊨꏦꏱꅉꍏ 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "city": "会理市 ꑌꄷꏃ",
+      "district": "凉山彝族自治州 ꆃꎭꆈꌠꊨꏦꏱꅉꍏ"
+    }
+  },
+  "国家公园 中国": {
+    "query": "国家公园 中国",
+    "provider": "nominatim",
+    "latitude": 27.9128041,
+    "longitude": 99.9030771,
+    "displayName": "普达措国家公园, 香格里拉市, 迪庆藏族自治州, 云南省, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "普达措国家公园, 香格里拉市, 迪庆藏族自治州, 云南省, 中国"
+    }
+  },
+  "乌斯怀亚 中国": {
+    "query": "乌斯怀亚 中国",
+    "provider": "arcgis",
+    "latitude": -54.81084,
+    "longitude": -68.31591,
+    "displayName": "乌斯怀亚, Ushuaia, Gobernación de la Tierra del Fuego",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "乌斯怀亚, Ushuaia, Gobernación de la Tierra del Fuego"
+    }
+  },
+  "游船 新疆 中国": {
+    "query": "游船 新疆 中国",
+    "provider": "photon",
+    "latitude": 29.4064259,
+    "longitude": 104.8218428,
+    "displayName": "游船   团结镇 大安区 四川省 中国",
+    "level": "poi",
+    "locality": "团结镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "游船   团结镇 大安区 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "city": "团结镇",
+      "district": "大安区"
+    }
+  },
+  "翡翠湖 青甘 中国": {
+    "query": "翡翠湖 青甘 中国",
+    "provider": "photon",
+    "latitude": 40.7501998,
+    "longitude": 114.9535905,
+    "displayName": "翡翠湖  姚家庄镇 张家口市  河北省 中国",
+    "level": "poi",
+    "locality": "张家口市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "翡翠湖  姚家庄镇 张家口市  河北省 中国",
+      "country": "中国",
+      "province": "河北省",
+      "city": "张家口市",
+      "district": "姚家庄镇",
+      "postalCode": "075000"
+    }
+  },
+  "西街 福建 中国": {
+    "query": "西街 福建 中国",
+    "provider": "photon",
+    "latitude": 24.9193446,
+    "longitude": 118.5762621,
+    "displayName": "西街  开元街道 开元街道 鲤城区 福建省 中国",
+    "level": "poi",
+    "locality": "开元街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "西街  开元街道 开元街道 鲤城区 福建省 中国",
+      "country": "中国",
+      "province": "福建省",
+      "city": "开元街道",
+      "district": "开元街道",
+      "postalCode": "362000"
+    }
+  },
+  "界河 中国": {
+    "query": "界河 中国",
+    "provider": "photon",
+    "latitude": 35.205459,
+    "longitude": 117.0670355,
+    "displayName": "界河  界河镇 枣庄市  山东省 中国",
+    "level": "poi",
+    "locality": "枣庄市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "界河  界河镇 枣庄市  山东省 中国",
+      "country": "中国",
+      "province": "山东省",
+      "city": "枣庄市",
+      "district": "界河镇",
+      "postalCode": "277531"
+    }
+  },
+  "沙坡头 内蒙古 中国": {
+    "query": "沙坡头 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 37.4656263,
+    "longitude": 104.9965306,
+    "displayName": "沙坡头  沙坡头区  沙坡头区 宁夏回族自治区 中国",
+    "level": "poi",
+    "locality": "沙坡头区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "沙坡头  沙坡头区  沙坡头区 宁夏回族自治区 中国",
+      "country": "中国",
+      "province": "宁夏回族自治区",
+      "district": "沙坡头区"
+    }
+  },
+  "仙女湖 江西 中国": {
+    "query": "仙女湖 江西 中国",
+    "provider": "arcgis",
+    "latitude": 27.781809466667,
+    "longitude": 114.6986389,
+    "displayName": "仙女湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "仙女湖"
+    }
+  },
+  "银川 广东 中国": {
+    "query": "银川 广东 中国",
+    "provider": "photon",
+    "latitude": 38.4916812,
+    "longitude": 106.1686188,
+    "displayName": "银川 地下通道 西花园街道 银川市  宁夏回族自治区 中国",
+    "level": "poi",
+    "locality": "银川市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "银川 地下通道 西花园街道 银川市  宁夏回族自治区 中国",
+      "country": "中国",
+      "province": "宁夏回族自治区",
+      "city": "银川市",
+      "district": "西花园街道",
+      "street": "地下通道",
+      "postalCode": "750021"
+    }
+  },
+  "响沙湾 内蒙古 中国": {
+    "query": "响沙湾 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 40.160044,
+    "longitude": 109.9233887,
+    "displayName": "响沙湾  树林召镇 达拉特旗 ᠳᠠᠯᠠᠳ 达拉特旗 ᠳᠠᠯᠠᠳ ᠬᠣᠰᠢᠭᠤ 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+    "level": "poi",
+    "locality": "达拉特旗 ᠳᠠᠯᠠᠳ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "响沙湾  树林召镇 达拉特旗 ᠳᠠᠯᠠᠳ 达拉特旗 ᠳᠠᠯᠠᠳ ᠬᠣᠰᠢᠭᠤ 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+      "country": "中国",
+      "province": "内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ",
+      "city": "达拉特旗 ᠳᠠᠯᠠᠳ",
+      "district": "树林召镇",
+      "postalCode": "014300"
+    }
+  },
+  "坛子岭 湖北 中国": {
+    "query": "坛子岭 湖北 中国",
+    "provider": "arcgis",
+    "latitude": 30.8346135,
+    "longitude": 111.0192825,
+    "displayName": "坛子岭",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "坛子岭",
+      "country": "中国",
+      "province": "湖北省",
+      "city": "宜昌市"
+    }
+  },
+  "南泥湾 中国": {
+    "query": "南泥湾 中国",
+    "provider": "photon",
+    "latitude": 36.3224663,
+    "longitude": 109.6574691,
+    "displayName": "南泥湾镇   延安市  陕西省 中国",
+    "level": "town",
+    "locality": "延安市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "南泥湾镇   延安市  陕西省 中国",
+      "country": "中国",
+      "province": "陕西省",
+      "city": "延安市"
+    }
+  },
+  "祭坛 湖北 中国": {
+    "query": "祭坛 湖北 中国",
+    "provider": "photon",
+    "latitude": 39.9097979,
+    "longitude": 116.3885743,
+    "displayName": "祭坛 故宫西门外 东城区 北京市   中国",
+    "level": "poi",
+    "locality": "智德社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "祭坛 故宫西门外 东城区 北京市   中国",
+      "country": "中国",
+      "city": "北京市",
+      "district": "东城区",
+      "locality": "智德社区",
+      "street": "故宫西门外",
+      "postalCode": "100010"
+    }
+  },
+  "总佛寺 云南 中国": {
+    "query": "总佛寺 云南 中国",
+    "provider": "arcgis",
+    "latitude": 21.991931921266,
+    "longitude": 100.804999844294,
+    "displayName": "总佛寺",
+    "level": "poi",
+    "locality": "曼龙匡 ᦢᦱᧃᧉ ᦷᦟᧂ ᦃᦸᧂ",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "总佛寺",
+      "country": "中国",
+      "province": "云南省",
+      "city": "景洪市 ᦵᦋᧂ ᦣᦳᧂᧈ ᦉᦹᧈ",
+      "district": "允景洪街道 ᦵᦞᧂ ᦵᦋᧂ ᦣᦳᧂᧈ",
+      "locality": "曼龙匡 ᦢᦱᧃᧉ ᦷᦟᧂ ᦃᦸᧂ",
+      "street": "坝吉路",
+      "postalCode": "666100"
+    }
+  },
+  "野象谷 云南 中国": {
+    "query": "野象谷 云南 中国",
+    "provider": "photon",
+    "latitude": 22.1145509,
+    "longitude": 100.853781,
+    "displayName": "野象谷 勐大路 ᦑᦱᧂ ᦷᦜᧂ ᦵᦙᦲᧂ 勐养镇 ᦵᦈᦲᧃᧈᦵᦙᦲᧂᦍᦱᧂ 景洪市 ᦵᦋᧂ ᦣᦳᧂᧈ ᦉᦹᧈ 西双版纳州 云南省 中国",
+    "level": "poi",
+    "locality": "景洪市 ᦵᦋᧂ ᦣᦳᧂᧈ ᦉᦹᧈ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "野象谷 勐大路 ᦑᦱᧂ ᦷᦜᧂ ᦵᦙᦲᧂ 勐养镇 ᦵᦈᦲᧃᧈᦵᦙᦲᧂᦍᦱᧂ 景洪市 ᦵᦋᧂ ᦣᦳᧂᧈ ᦉᦹᧈ 西双版纳州 云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "景洪市 ᦵᦋᧂ ᦣᦳᧂᧈ ᦉᦹᧈ",
+      "district": "勐养镇 ᦵᦈᦲᧃᧈᦵᦙᦲᧂᦍᦱᧂ",
+      "street": "勐大路 ᦑᦱᧂ ᦷᦜᧂ ᦵᦙᦲᧂ",
+      "postalCode": "666100"
+    }
+  },
+  "洞庭湖 湖北 中国": {
+    "query": "洞庭湖 湖北 中国",
+    "provider": "arcgis",
+    "latitude": 29.515022833,
+    "longitude": 112.818179866667,
+    "displayName": "洞庭湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "洞庭湖"
+    }
+  },
+  "晋祠 中国": {
+    "query": "晋祠 中国",
+    "provider": "photon",
+    "latitude": 37.7081513,
+    "longitude": 112.4351337,
+    "displayName": "晋祠 金人台 晋源区 太原市  山西省 中国",
+    "level": "poi",
+    "locality": "太原市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "晋祠 金人台 晋源区 太原市  山西省 中国",
+      "country": "中国",
+      "province": "山西省",
+      "city": "太原市",
+      "district": "晋源区",
+      "street": "金人台"
+    }
+  },
+  "伏羲庙 中国": {
+    "query": "伏羲庙 中国",
+    "provider": "arcgis",
+    "latitude": 34.5798998,
+    "longitude": 105.7074639,
+    "displayName": "伏羲庙",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "伏羲庙"
+    }
+  },
+  "汴河街 湖北 中国": {
+    "query": "汴河街 湖北 中国",
+    "provider": "photon",
+    "latitude": 29.3788046,
+    "longitude": 113.0884382,
+    "displayName": "汴河街  岳阳楼街道 岳阳楼区 岳阳楼区 湖南省 中国",
+    "level": "poi",
+    "locality": "岳阳楼区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "汴河街  岳阳楼街道 岳阳楼区 岳阳楼区 湖南省 中国",
+      "country": "中国",
+      "province": "湖南省",
+      "city": "岳阳楼区",
+      "district": "岳阳楼街道",
+      "postalCode": "414000"
+    }
+  },
+  "栈桥 山东 中国": {
+    "query": "栈桥 山东 中国",
+    "provider": "photon",
+    "latitude": 36.0619734,
+    "longitude": 120.3143809,
+    "displayName": "栈桥  中山路街道 青岛市  山东省 中国",
+    "level": "poi",
+    "locality": "青岛市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "栈桥  中山路街道 青岛市  山东省 中国",
+      "country": "中国",
+      "province": "山东省",
+      "city": "青岛市",
+      "district": "中山路街道",
+      "postalCode": "266001"
+    }
+  },
+  "水洞沟 中国": {
+    "query": "水洞沟 中国",
+    "provider": "photon",
+    "latitude": 34.6156344,
+    "longitude": 113.2149267,
+    "displayName": "水洞沟   郑州市  河南省 中国",
+    "level": "poi",
+    "locality": "郑州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "水洞沟   郑州市  河南省 中国",
+      "country": "中国",
+      "province": "河南省",
+      "city": "郑州市"
+    }
+  },
+  "解放碑 内蒙古 中国": {
+    "query": "解放碑 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 29.5601078,
+    "longitude": 106.5733671,
+    "displayName": "解放碑  解放碑街道 渝中区  重庆市 中国",
+    "level": "poi",
+    "locality": "渝中区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "解放碑  解放碑街道 渝中区  重庆市 中国",
+      "country": "中国",
+      "province": "重庆市",
+      "city": "渝中区",
+      "district": "解放碑街道",
+      "postalCode": "400010"
+    }
+  },
+  "般若寺 云南 中国": {
+    "query": "般若寺 云南 中国",
+    "provider": "photon",
+    "latitude": 25.5050166,
+    "longitude": 100.5511527,
+    "displayName": "般若寺 红土坡公路 红土坡村 祥云县 大理白族自治州 云南省 中国",
+    "level": "poi",
+    "locality": "梨头",
+    "providerScore": 80,
+    "address": {
+      "formatted": "般若寺 红土坡公路 红土坡村 祥云县 大理白族自治州 云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "祥云县",
+      "district": "红土坡村",
+      "locality": "梨头",
+      "street": "红土坡公路"
+    }
+  },
+  "浩坤湖 广西 中国": {
+    "query": "浩坤湖 广西 中国",
+    "provider": "arcgis",
+    "latitude": 24.252238667,
+    "longitude": 106.723901366667,
+    "displayName": "浩坤湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "浩坤湖",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "百色市",
+      "district": "凌云县"
+    }
+  },
+  "烤全羊 内蒙古 中国": {
+    "query": "烤全羊 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 27.8471394,
+    "longitude": 112.8988138,
+    "displayName": "烤全羊 东坪路 东坪街道 岳塘区 湘潭市 湖南省 中国",
+    "level": "poi",
+    "locality": "万福社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "烤全羊 东坪路 东坪街道 岳塘区 湘潭市 湖南省 中国",
+      "country": "中国",
+      "province": "湖南省",
+      "city": "岳塘区",
+      "district": "东坪街道",
+      "locality": "万福社区",
+      "street": "东坪路",
+      "postalCode": "411104"
+    }
+  },
+  "悬空寺 广东 中国": {
+    "query": "悬空寺 广东 中国",
+    "provider": "arcgis",
+    "latitude": 38.6815295,
+    "longitude": 105.7998124,
+    "displayName": "悬空寺",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "悬空寺"
+    }
+  },
+  "白沙湖 新疆 中国": {
+    "query": "白沙湖 新疆 中国",
+    "provider": "arcgis",
+    "latitude": 48.351906628312,
+    "longitude": 85.749921806274,
+    "displayName": "白沙湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "白沙湖",
+      "country": "中国",
+      "province": "新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی",
+      "city": "185团三连 185-تۋان 3-ليان",
+      "district": "兵团一八五团 185-تۋان الاڭىنداعى"
+    }
+  },
+  "罗定学宫 广东 中国": {
+    "query": "罗定学宫 广东 中国",
+    "provider": "arcgis",
+    "latitude": 22.776515344294,
+    "longitude": 111.558628705611,
+    "displayName": "罗定学宫",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "罗定学宫",
+      "country": "中国",
+      "province": "广东省",
+      "city": "罗城街道",
+      "district": "罗定市",
+      "street": "北角路",
+      "postalCode": "527200"
+    }
+  },
+  "勐仑镇 云南 中国": {
+    "query": "勐仑镇 云南 中国",
+    "provider": "nominatim",
+    "latitude": 21.937657,
+    "longitude": 101.2475309,
+    "displayName": "勐仑镇, 勐腊县, 西双版纳傣族自治州, 云南省, 666300, 中国",
+    "level": "town",
+    "locality": "勐仑镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "勐仑镇, 勐腊县, 西双版纳傣族自治州, 云南省, 666300, 中国"
+    }
+  },
+  "集合地点 内蒙古 中国": {
+    "query": "集合地点 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 27.9521675,
+    "longitude": 109.6028404,
+    "displayName": "集合地点 回龙阁  凤凰县 凤凰县 湖南省 中国",
+    "level": "poi",
+    "locality": "凤凰县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "集合地点 回龙阁  凤凰县 凤凰县 湖南省 中国",
+      "country": "中国",
+      "province": "湖南省",
+      "city": "凤凰县",
+      "district": "凤凰县",
+      "street": "回龙阁",
+      "postalCode": "416200"
+    }
+  },
+  "锦绣古镇 广西 中国": {
+    "query": "锦绣古镇 广西 中国",
+    "provider": "arcgis",
+    "latitude": 23.126543672491,
+    "longitude": 106.424937495439,
+    "displayName": "锦绣古镇",
+    "level": "town",
+    "locality": "果靠村",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "锦绣古镇",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "百色市",
+      "district": "新靖镇",
+      "locality": "果靠村",
+      "street": "绣球大道",
+      "postalCode": "533800"
+    }
+  },
+  "耦园 华东 中国": {
+    "query": "耦园 华东 中国",
+    "provider": "photon",
+    "latitude": 31.3183646,
+    "longitude": 120.6341018,
+    "displayName": "耦园  平江街道 苏州市  江苏省 中国",
+    "level": "poi",
+    "locality": "历史街区社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "耦园  平江街道 苏州市  江苏省 中国",
+      "country": "中国",
+      "province": "江苏省",
+      "city": "苏州市",
+      "district": "平江街道",
+      "locality": "历史街区社区"
+    }
+  },
+  "餐饮 华东 中国": {
+    "query": "餐饮 华东 中国",
+    "provider": "photon",
+    "latitude": 29.0248813,
+    "longitude": 104.2622072,
+    "displayName": "餐饮 观音镇到泥溪镇 王家咀 箭杆村 叙州区 四川省 中国",
+    "level": "poi",
+    "locality": "箭杆村",
+    "providerScore": 80,
+    "address": {
+      "formatted": "餐饮 观音镇到泥溪镇 王家咀 箭杆村 叙州区 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "city": "箭杆村",
+      "district": "王家咀",
+      "street": "观音镇到泥溪镇"
+    }
+  },
+  "虎跳峡 云南 中国": {
+    "query": "虎跳峡 云南 中国",
+    "provider": "photon",
+    "latitude": 27.2044019,
+    "longitude": 100.1206446,
+    "displayName": "虎跳峡 东环线 坟坪子 虎跳峡镇 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ་གྲོང་ཁྱེར། 云南省 中国",
+    "level": "poi",
+    "locality": "虎跳峡镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "虎跳峡 东环线 坟坪子 虎跳峡镇 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ་གྲོང་ཁྱེར། 云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "虎跳峡镇",
+      "district": "坟坪子",
+      "street": "东环线"
+    }
+  },
+  "周城 云南 中国": {
+    "query": "周城 云南 中国",
+    "provider": "photon",
+    "latitude": 25.8988198,
+    "longitude": 100.1047611,
+    "displayName": "周城   大理市 大理白族自治州 云南省 中国",
+    "level": "poi",
+    "locality": "大理市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "周城   大理市 大理白族自治州 云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "大理市",
+      "district": "大理白族自治州"
+    }
+  },
+  "曼掌 云南 中国": {
+    "query": "曼掌 云南 中国",
+    "provider": "photon",
+    "latitude": 21.6784643,
+    "longitude": 100.0410214,
+    "displayName": "曼掌   勐海县 ᦵᦙᦲᧂ ᦣᦻ ᦶᦉᧃᧈ 西双版纳州 云南省 中国",
+    "level": "poi",
+    "locality": "勐海县 ᦵᦙᦲᧂ ᦣᦻ ᦶᦉᧃᧈ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "曼掌   勐海县 ᦵᦙᦲᧂ ᦣᦻ ᦶᦉᧃᧈ 西双版纳州 云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "勐海县 ᦵᦙᦲᧂ ᦣᦻ ᦶᦉᧃᧈ",
+      "district": "西双版纳州"
+    }
+  },
+  "新都桥 云南 中国": {
+    "query": "新都桥 云南 中国",
+    "provider": "photon",
+    "latitude": 30.481524,
+    "longitude": 120.1884511,
+    "displayName": "新都桥  塘栖镇 杭州市  浙江省 中国",
+    "level": "poi",
+    "locality": "杭州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "新都桥  塘栖镇 杭州市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "杭州市",
+      "district": "塘栖镇"
+    }
+  },
+  "花湖 青甘 中国": {
+    "query": "花湖 青甘 中国",
+    "provider": "photon",
+    "latitude": 30.2635373,
+    "longitude": 115.0169351,
+    "displayName": "花湖 滨港路 花湖镇 鄂州市  湖北省 中国",
+    "level": "poi",
+    "locality": "鄂州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "花湖 滨港路 花湖镇 鄂州市  湖北省 中国",
+      "country": "中国",
+      "province": "湖北省",
+      "city": "鄂州市",
+      "district": "花湖镇",
+      "street": "滨港路"
+    }
+  },
+  "洪崖洞 四川 中国": {
+    "query": "洪崖洞 四川 中国",
+    "provider": "arcgis",
+    "latitude": 29.564987151365,
+    "longitude": 106.575097582164,
+    "displayName": "洪崖洞",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "洪崖洞",
+      "country": "中国",
+      "province": "重庆市",
+      "city": "渝中区",
+      "district": "朝天门街道"
+    }
+  },
+  "坛城 四川 中国": {
+    "query": "坛城 四川 中国",
+    "provider": "photon",
+    "latitude": 40.1168968,
+    "longitude": 115.9137003,
+    "displayName": "坛城 （非成熟路线） 雁翅镇 北京市   中国",
+    "level": "poi",
+    "locality": "北京市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "坛城 （非成熟路线） 雁翅镇 北京市   中国",
+      "country": "中国",
+      "city": "北京市",
+      "district": "雁翅镇",
+      "street": "（非成熟路线）"
+    }
+  },
+  "西樵山 中国": {
+    "query": "西樵山 中国",
+    "provider": "arcgis",
+    "latitude": 22.95421,
+    "longitude": 112.96993,
+    "displayName": "西樵山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "西樵山"
+    }
+  },
+  "瑶家 中国": {
+    "query": "瑶家 中国",
+    "provider": "arcgis",
+    "latitude": 25.2313,
+    "longitude": 108.016,
+    "displayName": "贵州黔南瑶家",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "贵州黔南瑶家"
+    }
+  },
+  "餐饮 贵州 中国": {
+    "query": "餐饮 贵州 中国",
+    "provider": "photon",
+    "latitude": 29.0248813,
+    "longitude": 104.2622072,
+    "displayName": "餐饮 观音镇到泥溪镇 王家咀 箭杆村 叙州区 四川省 中国",
+    "level": "poi",
+    "locality": "箭杆村",
+    "providerScore": 80,
+    "address": {
+      "formatted": "餐饮 观音镇到泥溪镇 王家咀 箭杆村 叙州区 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "city": "箭杆村",
+      "district": "王家咀",
+      "street": "观音镇到泥溪镇"
+    }
+  },
+  "青岩古镇 贵州 中国": {
+    "query": "青岩古镇 贵州 中国",
+    "provider": "photon",
+    "latitude": 26.3339284,
+    "longitude": 106.6833473,
+    "displayName": "青岩古镇 北明清街 北街村 贵阳市  贵州省 中国",
+    "level": "town",
+    "locality": "贵阳市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "青岩古镇 北明清街 北街村 贵阳市  贵州省 中国",
+      "country": "中国",
+      "province": "贵州省",
+      "city": "贵阳市",
+      "district": "北街村",
+      "street": "北明清街"
+    }
+  },
+  "福寿山 新疆 中国": {
+    "query": "福寿山 新疆 中国",
+    "provider": "arcgis",
+    "latitude": 28.5169,
+    "longitude": 113.703,
+    "displayName": "湖南省岳阳市平江县福寿山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 87.69,
+    "address": {
+      "formatted": "湖南省岳阳市平江县福寿山"
+    }
+  },
+  "伊昭公路 新疆 中国": {
+    "query": "伊昭公路 新疆 中国",
+    "provider": "photon",
+    "latitude": 43.4109946,
+    "longitude": 81.0329495,
+    "displayName": "伊昭公路   琼博拉镇 چوڭ بۇغرا بازىرى ᠠᠮᠪᠠ ᠪᠣᠷᠣ ᡪᡝᠨ 察布查尔锡伯自治县 新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی 中国",
+    "level": "poi",
+    "locality": "琼博拉镇 چوڭ بۇغرا بازىرى ᠠᠮᠪᠠ ᠪᠣᠷᠣ ᡪᡝᠨ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "伊昭公路   琼博拉镇 چوڭ بۇغرا بازىرى ᠠᠮᠪᠠ ᠪᠣᠷᠣ ᡪᡝᠨ 察布查尔锡伯自治县 新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی 中国",
+      "country": "中国",
+      "province": "新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی",
+      "city": "琼博拉镇 چوڭ بۇغرا بازىرى ᠠᠮᠪᠠ ᠪᠣᠷᠣ ᡪᡝᠨ",
+      "district": "察布查尔锡伯自治县"
+    }
+  },
+  "观鱼台 新疆 中国": {
+    "query": "观鱼台 新疆 中国",
+    "provider": "arcgis",
+    "latitude": 48.719010399,
+    "longitude": 86.9913985,
+    "displayName": "观鱼台",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "观鱼台",
+      "country": "中国",
+      "province": "新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی",
+      "city": "禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ",
+      "district": "喀纳斯",
+      "street": "喀东线"
+    }
+  },
+  "凤凰岛 广东 中国": {
+    "query": "凤凰岛 广东 中国",
+    "provider": "arcgis",
+    "latitude": 23.134201825234,
+    "longitude": 113.571148081588,
+    "displayName": "凤凰岛",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "凤凰岛",
+      "country": "中国",
+      "province": "广东省",
+      "city": "广州市",
+      "postalCode": "120000"
+    }
+  },
+  "大东江 广东 中国": {
+    "query": "大东江 广东 中国",
+    "provider": "photon",
+    "latitude": 29.8866296,
+    "longitude": 121.6289815,
+    "displayName": "大东江  高新区 宁波市  浙江省 中国",
+    "level": "poi",
+    "locality": "宁波市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "大东江  高新区 宁波市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "宁波市",
+      "district": "高新区"
+    }
+  },
+  "洪崖洞 内蒙古 中国": {
+    "query": "洪崖洞 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 29.5650738,
+    "longitude": 106.5753425,
+    "displayName": "洪崖洞  朝天门街道 渝中区  重庆市 中国",
+    "level": "poi",
+    "locality": "渝中区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "洪崖洞  朝天门街道 渝中区  重庆市 中国",
+      "country": "中国",
+      "province": "重庆市",
+      "city": "渝中区",
+      "district": "朝天门街道"
+    }
+  },
+  "黄鹤楼 广东 中国": {
+    "query": "黄鹤楼 广东 中国",
+    "provider": "photon",
+    "latitude": 30.547081,
+    "longitude": 114.2970471,
+    "displayName": "黄鹤楼 黃鶴樓隧道 中华路街道 武汉市  湖北省 中国",
+    "level": "poi",
+    "locality": "武汉市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "黄鹤楼 黃鶴樓隧道 中华路街道 武汉市  湖北省 中国",
+      "country": "中国",
+      "province": "湖北省",
+      "city": "武汉市",
+      "district": "中华路街道",
+      "street": "黃鶴樓隧道",
+      "postalCode": "230060"
+    }
+  },
+  "奇达村 广东 中国": {
+    "query": "奇达村 广东 中国",
+    "provider": "photon",
+    "latitude": 26.3730813,
+    "longitude": 119.8693727,
+    "displayName": "奇达村   福州市  福建省 中国",
+    "level": "town",
+    "locality": "福州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "奇达村   福州市  福建省 中国",
+      "country": "中国",
+      "province": "福建省",
+      "city": "福州市",
+      "postalCode": "350516"
+    }
+  },
+  "甲米 广东 中国": {
+    "query": "甲米 广东 中国",
+    "provider": "photon",
+    "latitude": 27.4398024,
+    "longitude": 101.0648739,
+    "displayName": "甲米    盐源县 ꋂꂿꑤ 四川省 中国",
+    "level": "poi",
+    "locality": "盐源县 ꋂꂿꑤ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "甲米    盐源县 ꋂꂿꑤ 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "district": "盐源县 ꋂꂿꑤ",
+      "postalCode": "615700"
+    }
+  },
+  "普济寺 中国": {
+    "query": "普济寺 中国",
+    "provider": "photon",
+    "latitude": 29.9877688,
+    "longitude": 122.3824314,
+    "displayName": "普济寺 香华街 普陀区 舟山市  浙江省 中国",
+    "level": "poi",
+    "locality": "龙沙社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "普济寺 香华街 普陀区 舟山市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "舟山市",
+      "district": "普陀区",
+      "locality": "龙沙社区",
+      "street": "香华街"
+    }
+  },
+  "普济寺 华东 中国": {
+    "query": "普济寺 华东 中国",
+    "provider": "photon",
+    "latitude": 29.9877688,
+    "longitude": 122.3824314,
+    "displayName": "普济寺 香华街 普陀区 舟山市  浙江省 中国",
+    "level": "poi",
+    "locality": "龙沙社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "普济寺 香华街 普陀区 舟山市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "舟山市",
+      "district": "普陀区",
+      "locality": "龙沙社区",
+      "street": "香华街"
+    }
+  },
+  "西湖 杭州 浙江 中国": {
+    "query": "西湖 杭州 浙江 中国",
+    "provider": "photon",
+    "latitude": 30.2459837,
+    "longitude": 120.1431317,
+    "displayName": "西湖 苏堤 西湖区 杭州市  ZJ 中国",
+    "level": "poi",
+    "locality": "杭州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "西湖 苏堤 西湖区 杭州市  ZJ 中国",
+      "country": "中国",
+      "province": "ZJ",
+      "city": "杭州市",
+      "district": "西湖区",
+      "street": "苏堤"
+    }
+  },
+  "个园 华东 中国": {
+    "query": "个园 华东 中国",
+    "provider": "photon",
+    "latitude": 39.8669484,
+    "longitude": 116.5098254,
+    "displayName": "个园  垡头街道 北京市   中国",
+    "level": "poi",
+    "locality": "陶庄",
+    "providerScore": 80,
+    "address": {
+      "formatted": "个园  垡头街道 北京市   中国",
+      "country": "中国",
+      "city": "北京市",
+      "district": "垡头街道",
+      "locality": "陶庄"
+    }
+  },
+  "界河 西藏 中国": {
+    "query": "界河 西藏 中国",
+    "provider": "photon",
+    "latitude": 35.205459,
+    "longitude": 117.0670355,
+    "displayName": "界河  界河镇 枣庄市  山东省 中国",
+    "level": "poi",
+    "locality": "枣庄市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "界河  界河镇 枣庄市  山东省 中国",
+      "country": "中国",
+      "province": "山东省",
+      "city": "枣庄市",
+      "district": "界河镇",
+      "postalCode": "277531"
+    }
+  },
+  "与狼共舞 西藏 中国": {
+    "query": "与狼共舞 西藏 中国",
+    "provider": "photon",
+    "latitude": 32.0345265,
+    "longitude": 118.7314899,
+    "displayName": "与狼共舞 福园路 兴隆街道 南京市  江苏省 中国",
+    "level": "poi",
+    "locality": "万达西地",
+    "providerScore": 80,
+    "address": {
+      "formatted": "与狼共舞 福园路 兴隆街道 南京市  江苏省 中国",
+      "country": "中国",
+      "province": "江苏省",
+      "city": "南京市",
+      "district": "兴隆街道",
+      "locality": "万达西地",
+      "street": "福园路",
+      "postalCode": "210017"
+    }
+  },
+  "独家 内蒙古 中国": {
+    "query": "独家 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 23.8285399,
+    "longitude": 102.4602459,
+    "displayName": "独家   石屏县 红河州 云南省 中国",
+    "level": "poi",
+    "locality": "石屏县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "独家   石屏县 红河州 云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "石屏县",
+      "district": "红河州"
+    }
+  },
+  "海天一色 内蒙古 中国": {
+    "query": "海天一色 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 22.5575285,
+    "longitude": 114.2385472,
+    "displayName": "海天一色  海山街道 深圳市  广东省 中国",
+    "level": "poi",
+    "locality": "深圳市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "海天一色  海山街道 深圳市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "深圳市",
+      "district": "海山街道",
+      "postalCode": "518000"
+    }
+  },
+  "独家 中国": {
+    "query": "独家 中国",
+    "provider": "photon",
+    "latitude": 23.8285399,
+    "longitude": 102.4602459,
+    "displayName": "独家   石屏县 红河州 云南省 中国",
+    "level": "poi",
+    "locality": "石屏县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "独家   石屏县 红河州 云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "石屏县",
+      "district": "红河州"
+    }
+  },
+  "万佛阁 广东 中国": {
+    "query": "万佛阁 广东 中国",
+    "provider": "arcgis",
+    "latitude": 39.007018174955,
+    "longitude": 113.590246556536,
+    "displayName": "万佛阁",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "万佛阁"
+    }
+  },
+  "不冻泉 青甘 中国": {
+    "query": "不冻泉 青甘 中国",
+    "provider": "photon",
+    "latitude": 35.5188806,
+    "longitude": 93.9123295,
+    "displayName": "不冻泉    曲麻莱县། 青海省 中国",
+    "level": "poi",
+    "locality": "曲麻莱县།",
+    "providerScore": 80,
+    "address": {
+      "formatted": "不冻泉    曲麻莱县། 青海省 中国",
+      "country": "中国",
+      "province": "青海省",
+      "district": "曲麻莱县།"
+    }
+  },
+  "沙湖 中国": {
+    "query": "沙湖 中国",
+    "provider": "photon",
+    "latitude": 39.7848657,
+    "longitude": 115.7683253,
+    "displayName": "沙湖  霞云岭乡 北京市   中国",
+    "level": "poi",
+    "locality": "北京市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "沙湖  霞云岭乡 北京市   中国",
+      "country": "中国",
+      "city": "北京市",
+      "district": "霞云岭乡"
+    }
+  },
+  "乌兰湖 中国": {
+    "query": "乌兰湖 中国",
+    "provider": "photon",
+    "latitude": 38.5929495,
+    "longitude": 105.2048719,
+    "displayName": "乌兰湖   巴彦浩特镇 ᠪᠠᠶᠠᠨᠬᠣᠲᠠ ᠪᠠᠯᠭᠠᠰᠤ 阿拉善左旗 ᠠᠯᠠᠱᠠ ᠵᠡᠭᠦᠨ ᠬᠣᠰᠢᠭᠤ 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+    "level": "poi",
+    "locality": "巴彦浩特镇 ᠪᠠᠶᠠᠨᠬᠣᠲᠠ ᠪᠠᠯᠭᠠᠰᠤ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "乌兰湖   巴彦浩特镇 ᠪᠠᠶᠠᠨᠬᠣᠲᠠ ᠪᠠᠯᠭᠠᠰᠤ 阿拉善左旗 ᠠᠯᠠᠱᠠ ᠵᠡᠭᠦᠨ ᠬᠣᠰᠢᠭᠤ 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+      "country": "中国",
+      "province": "内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ",
+      "city": "巴彦浩特镇 ᠪᠠᠶᠠᠨᠬᠣᠲᠠ ᠪᠠᠯᠭᠠᠰᠤ",
+      "district": "阿拉善左旗 ᠠᠯᠠᠱᠠ ᠵᠡᠭᠦᠨ ᠬᠣᠰᠢᠭᠤ"
+    }
+  },
+  "骆驼湖 中国": {
+    "query": "骆驼湖 中国",
+    "provider": "arcgis",
+    "latitude": 34.440892788083,
+    "longitude": 81.942548439442,
+    "displayName": "骆驼湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "骆驼湖"
+    }
+  },
+  "沙坡头 新疆 中国": {
+    "query": "沙坡头 新疆 中国",
+    "provider": "photon",
+    "latitude": 37.4656263,
+    "longitude": 104.9965306,
+    "displayName": "沙坡头  沙坡头区  沙坡头区 宁夏回族自治区 中国",
+    "level": "poi",
+    "locality": "沙坡头区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "沙坡头  沙坡头区  沙坡头区 宁夏回族自治区 中国",
+      "country": "中国",
+      "province": "宁夏回族自治区",
+      "district": "沙坡头区"
+    }
+  },
+  "大召寺 云南 中国": {
+    "query": "大召寺 云南 中国",
+    "provider": "arcgis",
+    "latitude": 40.798781156664,
+    "longitude": 111.647033179108,
+    "displayName": "大召寺",
+    "level": "poi",
+    "locality": "大南街街道",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "大召寺",
+      "country": "中国",
+      "province": "内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ",
+      "city": "呼和浩特市 ᠬᠥᠬᠡᠬᠣᠲᠠ",
+      "district": "长和廊街道",
+      "locality": "大南街街道",
+      "street": "大召西夹道",
+      "postalCode": "010030"
+    }
+  },
+  "中街 内蒙古 中国": {
+    "query": "中街 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 41.7989685,
+    "longitude": 123.4543812,
+    "displayName": "中街 中街 皇城街道 沈阳市  辽宁省 中国",
+    "level": "poi",
+    "locality": "沈阳市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "中街 中街 皇城街道 沈阳市  辽宁省 中国",
+      "country": "中国",
+      "province": "辽宁省",
+      "city": "沈阳市",
+      "district": "皇城街道",
+      "street": "中街",
+      "postalCode": "110042"
+    }
+  },
+  "圆明新园 广东 中国": {
+    "query": "圆明新园 广东 中国",
+    "provider": "arcgis",
+    "latitude": 22.245423455784,
+    "longitude": 113.533975904536,
+    "displayName": "圆明新园",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "圆明新园",
+      "country": "中国",
+      "province": "广东省",
+      "city": "珠海市",
+      "district": "前山街道",
+      "postalCode": "519000"
+    }
+  },
+  "港珠澳大桥 广东 中国": {
+    "query": "港珠澳大桥 广东 中国",
+    "provider": "photon",
+    "latitude": 22.2832398,
+    "longitude": 113.7787707,
+    "displayName": "港珠澳大桥  南山区 深圳市  广东省 中国",
+    "level": "poi",
+    "locality": "深圳市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "港珠澳大桥  南山区 深圳市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "深圳市",
+      "district": "南山区",
+      "postalCode": "518000"
+    }
+  },
+  "餐饮 中国": {
+    "query": "餐饮 中国",
+    "provider": "arcgis",
+    "latitude": 29.0248813,
+    "longitude": 104.2622072,
+    "displayName": "餐饮",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "餐饮",
+      "country": "中国",
+      "province": "四川省",
+      "city": "箭杆村",
+      "district": "王家咀",
+      "street": "观音镇到泥溪镇"
+    }
+  },
+  "浅水湾 广东 中国": {
+    "query": "浅水湾 广东 中国",
+    "provider": "arcgis",
+    "latitude": 22.23655,
+    "longitude": 114.19954,
+    "displayName": "浅水湾",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 87.69,
+    "address": {
+      "formatted": "浅水湾"
+    }
+  },
+  "奥特莱斯 港澳 中国": {
+    "query": "奥特莱斯 港澳 中国",
+    "provider": "arcgis",
+    "latitude": 37.50194675,
+    "longitude": 122.09297365,
+    "displayName": "奥特莱斯",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.19,
+    "address": {
+      "formatted": "奥特莱斯"
+    }
+  },
+  "大溪地 中国": {
+    "query": "大溪地 中国",
+    "provider": "arcgis",
+    "latitude": 39.803287608443,
+    "longitude": 116.283446396742,
+    "displayName": "大溪地",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "大溪地"
+    }
+  },
+  "景福宫 广东 中国": {
+    "query": "景福宫 广东 中国",
+    "provider": "arcgis",
+    "latitude": 39.920439725095,
+    "longitude": 116.394555984571,
+    "displayName": "景福宫",
+    "level": "poi",
+    "locality": "智德社区",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "景福宫",
+      "country": "中国",
+      "city": "北京市",
+      "district": "东城区",
+      "locality": "智德社区",
+      "street": "故宫东门外",
+      "postalCode": "100010"
+    }
+  },
+  "明洞 广东 中国": {
+    "query": "明洞 广东 中国",
+    "provider": "photon",
+    "latitude": 40.3949489,
+    "longitude": 116.1755688,
+    "displayName": "明洞  大庄科乡 北京市   中国",
+    "level": "poi",
+    "locality": "北京市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "明洞  大庄科乡 北京市   中国",
+      "country": "中国",
+      "city": "北京市",
+      "district": "大庄科乡"
+    }
+  },
+  "玉佛寺 广东 中国": {
+    "query": "玉佛寺 广东 中国",
+    "provider": "arcgis",
+    "latitude": 26.545710286599,
+    "longitude": 101.741905730627,
+    "displayName": "玉佛寺",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 91.31,
+    "address": {
+      "formatted": "玉佛寺"
+    }
+  },
+  "土耳其 中国": {
+    "query": "土耳其 中国",
+    "provider": "arcgis",
+    "latitude": 39.066250645,
+    "longitude": 35.142286272,
+    "displayName": "土耳其",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.16,
+    "address": {
+      "formatted": "土耳其"
+    }
+  },
+  "黑山 中国": {
+    "query": "黑山 中国",
+    "provider": "photon",
+    "latitude": 41.6977659,
+    "longitude": 122.0976381,
+    "displayName": "黑山 西外环路  西关村 黑山县 辽宁省 中国",
+    "level": "poi",
+    "locality": "西关村",
+    "providerScore": 80,
+    "address": {
+      "formatted": "黑山 西外环路  西关村 黑山县 辽宁省 中国",
+      "country": "中国",
+      "province": "辽宁省",
+      "city": "西关村",
+      "district": "黑山县",
+      "street": "西外环路",
+      "postalCode": "121000"
+    }
+  },
+  "法国 中国": {
+    "query": "法国 中国",
+    "provider": "arcgis",
+    "latitude": 46.559417044,
+    "longitude": 2.550539953,
+    "displayName": "法国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 79.2,
+    "address": {
+      "formatted": "法国"
+    }
+  },
+  "赞比亚 广东 中国": {
+    "query": "赞比亚 广东 中国",
+    "provider": "arcgis",
+    "latitude": -14.468803663,
+    "longitude": 28.767972881,
+    "displayName": "赞比亚",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 76.37,
+    "address": {
+      "formatted": "赞比亚"
+    }
+  },
+  "桌山 港澳 中国": {
+    "query": "桌山 港澳 中国",
+    "provider": "photon",
+    "latitude": 28.8562439,
+    "longitude": 115.9848417,
+    "displayName": "桌山   樵舍镇 新建区 江西省 中国",
+    "level": "poi",
+    "locality": "樵舍镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "桌山   樵舍镇 新建区 江西省 中国",
+      "country": "中国",
+      "province": "江西省",
+      "city": "樵舍镇",
+      "district": "新建区"
+    }
+  },
+  "信号山 广东 中国": {
+    "query": "信号山 广东 中国",
+    "provider": "arcgis",
+    "latitude": 36.06611,
+    "longitude": 120.32667,
+    "displayName": "信号山",
+    "level": "poi",
+    "locality": "江苏路社区",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "信号山",
+      "country": "中国",
+      "province": "山东省",
+      "city": "青岛市",
+      "district": "江苏路街道",
+      "locality": "江苏路社区",
+      "street": "江苏路",
+      "postalCode": "266001"
+    }
+  },
+  "古城 中国": {
+    "query": "古城 中国",
+    "provider": "photon",
+    "latitude": 39.9061423,
+    "longitude": 116.1844475,
+    "displayName": "古城 石景山路 八角街道 北京市   中国",
+    "level": "poi",
+    "locality": "北京市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "古城 石景山路 八角街道 北京市   中国",
+      "country": "中国",
+      "city": "北京市",
+      "district": "八角街道",
+      "street": "石景山路",
+      "postalCode": "100043"
+    }
+  },
+  "新桥 中国": {
+    "query": "新桥 中国",
+    "provider": "photon",
+    "latitude": 30.7192253,
+    "longitude": 104.0415293,
+    "displayName": "新桥 中环路金府路段 沙河源街道 成都市  四川省 中国",
+    "level": "poi",
+    "locality": "成都市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "新桥 中环路金府路段 沙河源街道 成都市  四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "city": "成都市",
+      "district": "沙河源街道",
+      "street": "中环路金府路段",
+      "postalCode": "610031"
+    }
+  },
+  "丹麦 广东 中国": {
+    "query": "丹麦 广东 中国",
+    "provider": "photon",
+    "latitude": 28.6654577,
+    "longitude": 99.2150074,
+    "displayName": "丹麦    得荣县 སྡེ་རོང་རྫོང། 四川省 中国",
+    "level": "poi",
+    "locality": "得荣县 སྡེ་རོང་རྫོང།",
+    "providerScore": 80,
+    "address": {
+      "formatted": "丹麦    得荣县 སྡེ་རོང་རྫོང། 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "district": "得荣县 སྡེ་རོང་རྫོང།",
+      "postalCode": "627900"
+    }
+  },
+  "城墙 广东 中国": {
+    "query": "城墙 广东 中国",
+    "provider": "photon",
+    "latitude": 39.2641794,
+    "longitude": 114.9643922,
+    "displayName": "城墙   保定市  河北省 中国",
+    "level": "poi",
+    "locality": "保定市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "城墙   保定市  河北省 中国",
+      "country": "中国",
+      "province": "河北省",
+      "city": "保定市"
+    }
+  },
+  "老城 广西 中国": {
+    "query": "老城 广西 中国",
+    "provider": "photon",
+    "latitude": 35.3097322,
+    "longitude": 104.6819186,
+    "displayName": "老城    陇西县 甘肃省 中国",
+    "level": "poi",
+    "locality": "陇西县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "老城    陇西县 甘肃省 中国",
+      "country": "中国",
+      "province": "甘肃省",
+      "district": "陇西县"
+    }
+  },
+  "瑞士 中国": {
+    "query": "瑞士 中国",
+    "provider": "arcgis",
+    "latitude": 29.15402,
+    "longitude": 109.46692,
+    "displayName": "湖南湘西瑞士",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "湖南湘西瑞士"
+    }
+  },
+  "波兰 广东 中国": {
+    "query": "波兰 广东 中国",
+    "provider": "arcgis",
+    "latitude": 25.80134,
+    "longitude": 119.29934,
+    "displayName": "福建三山波兰",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "福建三山波兰"
+    }
+  },
+  "王宫 中国": {
+    "query": "王宫 中国",
+    "provider": "arcgis",
+    "latitude": 37.9026,
+    "longitude": 114.767,
+    "displayName": "河北石家庄王宫",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "河北石家庄王宫"
+    }
+  },
+  "芬兰 中国": {
+    "query": "芬兰 中国",
+    "provider": "arcgis",
+    "latitude": 64.522512801,
+    "longitude": 26.158834376,
+    "displayName": "芬兰",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 79.2,
+    "address": {
+      "formatted": "芬兰"
+    }
+  },
+  "灯塔 中国": {
+    "query": "灯塔 中国",
+    "provider": "photon",
+    "latitude": 26.9060121,
+    "longitude": 102.8810191,
+    "displayName": "灯塔   宁南县 ꆀꆆꑤ 凉山彝族自治州 ꆃꎭꆈꌠꊨꏦꏱꅉꍏ 四川省 中国",
+    "level": "poi",
+    "locality": "宁南县 ꆀꆆꑤ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "灯塔   宁南县 ꆀꆆꑤ 凉山彝族自治州 ꆃꎭꆈꌠꊨꏦꏱꅉꍏ 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "city": "宁南县 ꆀꆆꑤ",
+      "district": "凉山彝族自治州 ꆃꎭꆈꌠꊨꏦꏱꅉꍏ",
+      "postalCode": "615400"
+    }
+  },
+  "老城 中国": {
+    "query": "老城 中国",
+    "provider": "photon",
+    "latitude": 35.3097322,
+    "longitude": 104.6819186,
+    "displayName": "老城    陇西县 甘肃省 中国",
+    "level": "poi",
+    "locality": "陇西县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "老城    陇西县 甘肃省 中国",
+      "country": "中国",
+      "province": "甘肃省",
+      "district": "陇西县"
+    }
+  },
+  "捷克 中国": {
+    "query": "捷克 中国",
+    "provider": "arcgis",
+    "latitude": 49.738854038,
+    "longitude": 15.33177028,
+    "displayName": "捷克",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 79.2,
+    "address": {
+      "formatted": "捷克"
+    }
+  },
+  "旧城区 中国": {
+    "query": "旧城区 中国",
+    "provider": "photon",
+    "latitude": 22.7004391,
+    "longitude": 112.2240527,
+    "displayName": "旧城区   新城镇 新兴县 广东省 中国",
+    "level": "poi",
+    "locality": "新城镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "旧城区   新城镇 新兴县 广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "新城镇",
+      "district": "新兴县"
+    }
+  },
+  "冰岛 广东 中国": {
+    "query": "冰岛 广东 中国",
+    "provider": "arcgis",
+    "latitude": 23.7844,
+    "longitude": 99.9022,
+    "displayName": "云南临沧冰岛",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "云南临沧冰岛"
+    }
+  },
+  "皇宫 广东 中国": {
+    "query": "皇宫 广东 中国",
+    "provider": "arcgis",
+    "latitude": 42.74227,
+    "longitude": 94.55536,
+    "displayName": "新疆哈密皇宫",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "新疆哈密皇宫"
+    }
+  },
+  "冰岛 中国": {
+    "query": "冰岛 中国",
+    "provider": "arcgis",
+    "latitude": 23.7844,
+    "longitude": 99.9022,
+    "displayName": "云南临沧冰岛",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "云南临沧冰岛"
+    }
+  },
+  "虹桥 中国": {
+    "query": "虹桥 中国",
+    "provider": "photon",
+    "latitude": 25.0390875,
+    "longitude": 102.7716838,
+    "displayName": "虹桥 虹桥路 青云街道 昆明市  云南省 中国",
+    "level": "poi",
+    "locality": "昆明市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "虹桥 虹桥路 青云街道 昆明市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "昆明市",
+      "district": "青云街道",
+      "street": "虹桥路",
+      "postalCode": "650223"
+    }
+  },
+  "虹桥 广东 中国": {
+    "query": "虹桥 广东 中国",
+    "provider": "photon",
+    "latitude": 22.74769,
+    "longitude": 113.9605785,
+    "displayName": "虹桥  光明街道 深圳市  广东省 中国",
+    "level": "poi",
+    "locality": "碧眼旧村",
+    "providerScore": 80,
+    "address": {
+      "formatted": "虹桥  光明街道 深圳市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "深圳市",
+      "district": "光明街道",
+      "locality": "碧眼旧村",
+      "postalCode": "518107"
+    }
+  },
+  "马蹄湾 广东 中国": {
+    "query": "马蹄湾 广东 中国",
+    "provider": "photon",
+    "latitude": 30.199,
+    "longitude": 104.702,
+    "displayName": "马蹄湾    雁江区 四川省 中国",
+    "level": "poi",
+    "locality": "雁江区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "马蹄湾    雁江区 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "district": "雁江区"
+    }
+  },
+  "老城 广东 中国": {
+    "query": "老城 广东 中国",
+    "provider": "photon",
+    "latitude": 35.3097322,
+    "longitude": 104.6819186,
+    "displayName": "老城    陇西县 甘肃省 中国",
+    "level": "poi",
+    "locality": "陇西县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "老城    陇西县 甘肃省 中国",
+      "country": "中国",
+      "province": "甘肃省",
+      "district": "陇西县"
+    }
+  },
+  "华尔街 港澳 中国": {
+    "query": "华尔街 港澳 中国",
+    "provider": "arcgis",
+    "latitude": 45.749328421478,
+    "longitude": 126.688023995632,
+    "displayName": "华尔街",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.07,
+    "address": {
+      "formatted": "华尔街",
+      "country": "中国",
+      "province": "黑龙江省",
+      "city": "哈尔滨市",
+      "district": "先锋路街道",
+      "postalCode": "150000"
+    }
+  },
+  "马蹄湾 中国": {
+    "query": "马蹄湾 中国",
+    "provider": "photon",
+    "latitude": 30.199,
+    "longitude": 104.702,
+    "displayName": "马蹄湾    雁江区 四川省 中国",
+    "level": "poi",
+    "locality": "雁江区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "马蹄湾    雁江区 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "district": "雁江区"
+    }
+  },
+  "输油管道 广东 中国": {
+    "query": "输油管道 广东 中国",
+    "provider": "photon",
+    "latitude": 25.152652,
+    "longitude": 102.6632546,
+    "displayName": "输油管道  西翥街道 昆明市  云南省 中国",
+    "level": "poi",
+    "locality": "昆明市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "输油管道  西翥街道 昆明市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "昆明市",
+      "district": "西翥街道"
+    }
+  },
+  "市政厅 中国": {
+    "query": "市政厅 中国",
+    "provider": "photon",
+    "latitude": 30.7923838,
+    "longitude": 120.9853505,
+    "displayName": "市政厅 歌斐颂大道  嘉兴市  浙江省 中国",
+    "level": "poi",
+    "locality": "嘉兴市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "市政厅 歌斐颂大道  嘉兴市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "嘉兴市",
+      "street": "歌斐颂大道"
+    }
+  },
+  "遗址镇 广州 广东 中国": {
+    "query": "遗址镇 广州 广东 中国",
+    "provider": "nominatim",
+    "latitude": 23.0722892,
+    "longitude": 113.2581339,
+    "displayName": "清代镇南炮台遗址, 兴隆大街, 南石西, 南石头街道, 海珠区, 广州市, 广东省, 510280, 中国",
+    "level": "poi",
+    "locality": "清代镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "清代镇南炮台遗址, 兴隆大街, 南石西, 南石头街道, 海珠区, 广州市, 广东省, 510280, 中国"
+    },
+    "precision": "approximate"
+  },
+  "美国 中国": {
+    "query": "美国 中国",
+    "provider": "arcgis",
+    "latitude": 39.398703156,
+    "longitude": -99.41461919,
+    "displayName": "美国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 79.2,
+    "address": {
+      "formatted": "美国"
+    }
+  },
+  "中国城 广东 中国": {
+    "query": "中国城 广东 中国",
+    "provider": "photon",
+    "latitude": 42.8916367,
+    "longitude": 130.3546199,
+    "displayName": "中国城  海东街道 해동가두 珲春市 훈춘시 珲春市 훈춘시 吉林省 中国",
+    "level": "poi",
+    "locality": "珲春市 훈춘시",
+    "providerScore": 80,
+    "address": {
+      "formatted": "中国城  海东街道 해동가두 珲春市 훈춘시 珲春市 훈춘시 吉林省 中国",
+      "country": "中国",
+      "province": "吉林省",
+      "city": "珲春市 훈춘시",
+      "district": "海东街道 해동가두"
+    }
+  },
+  "总统府 广东 中国": {
+    "query": "总统府 广东 中国",
+    "provider": "arcgis",
+    "latitude": 32.044818699,
+    "longitude": 118.7911118,
+    "displayName": "总统府",
+    "level": "poi",
+    "locality": "梅园新村街道",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "总统府",
+      "country": "中国",
+      "province": "江苏省",
+      "city": "南京市",
+      "district": "梅园新村街道",
+      "locality": "梅园新村街道",
+      "street": "东箭道",
+      "postalCode": "210018"
+    }
+  },
+  "墨西哥 中国": {
+    "query": "墨西哥 中国",
+    "provider": "arcgis",
+    "latitude": 23.95282499,
+    "longitude": -102.548353419,
+    "displayName": "墨西哥",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.16,
+    "address": {
+      "formatted": "墨西哥"
+    }
+  },
+  "鸟园 中国": {
+    "query": "鸟园 中国",
+    "provider": "photon",
+    "latitude": 25.056049,
+    "longitude": 102.7067747,
+    "displayName": "鸟园 北仓坡 华山街道 昆明市  云南省 中国",
+    "level": "poi",
+    "locality": "昆明市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "鸟园 北仓坡 华山街道 昆明市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "昆明市",
+      "district": "华山街道",
+      "street": "北仓坡",
+      "postalCode": "650031"
+    }
+  },
+  "东方街 中国": {
+    "query": "东方街 中国",
+    "provider": "photon",
+    "latitude": 22.2137869,
+    "longitude": 113.2921487,
+    "displayName": "东方街  井岸镇 珠海市  广东省 中国",
+    "level": "poi",
+    "locality": "珠海市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "东方街  井岸镇 珠海市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "珠海市",
+      "district": "井岸镇",
+      "postalCode": "519125"
+    }
+  },
+  "地派镇 龙门 广东 中国": {
+    "query": "地派镇 龙门 广东 中国",
+    "provider": "arcgis",
+    "latitude": 23.842248,
+    "longitude": 114.074151,
+    "displayName": "广东省惠州市龙门地派镇",
+    "level": "town",
+    "locality": "龙门地派镇",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "广东省惠州市龙门地派镇",
+      "country": "中国",
+      "province": "广东省",
+      "city": "惠州市"
+    },
+    "precision": "approximate"
+  },
+  "安远三百山 江西 中国": {
+    "query": "安远三百山 江西 中国",
+    "provider": "arcgis",
+    "latitude": 24.950788,
+    "longitude": 115.371887,
+    "displayName": "江西省赣州市安远三百山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "江西省赣州市安远三百山"
+    }
+  },
+  "龙山镇 翔顺 新兴 广东 中国": {
+    "query": "龙山镇 翔顺 新兴 广东 中国",
+    "provider": "arcgis",
+    "latitude": 23.7397976,
+    "longitude": 113.4054868,
+    "displayName": "广东省清远市佛冈县龙山镇",
+    "level": "town",
+    "locality": "龙山镇",
+    "providerScore": 84.6,
+    "address": {
+      "formatted": "广东省清远市佛冈县龙山镇"
+    },
+    "precision": "approximate"
+  },
+  "三英镇 增城 广东 中国": {
+    "query": "三英镇 增城 广东 中国",
+    "provider": "photon",
+    "latitude": 23.5678689,
+    "longitude": 116.6436494,
+    "displayName": "三英村   潮州市  广东省 中国",
+    "level": "town",
+    "locality": "潮州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "三英村   潮州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "潮州市"
+    },
+    "precision": "approximate"
+  },
+  "林丰镇 龙门 广东 中国": {
+    "query": "林丰镇 龙门 广东 中国",
+    "provider": "photon",
+    "latitude": 21.83112,
+    "longitude": 110.98874,
+    "displayName": "林丰村   茂名市  广东省 中国",
+    "level": "town",
+    "locality": "茂名市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "林丰村   茂名市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "茂名市"
+    },
+    "precision": "approximate"
+  },
+  "古兜镇 新会 广东 中国": {
+    "query": "古兜镇 新会 广东 中国",
+    "provider": "photon",
+    "latitude": 22.1455536,
+    "longitude": 113.0214128,
+    "displayName": "古兜村  崖门镇 江门市  广东省 中国",
+    "level": "town",
+    "locality": "江门市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "古兜村  崖门镇 江门市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "江门市",
+      "district": "崖门镇"
+    },
+    "precision": "approximate"
+  },
+  "温泉镇 三水 广东 中国": {
+    "query": "温泉镇 三水 广东 中国",
+    "provider": "arcgis",
+    "latitude": 23.649167001,
+    "longitude": 113.65,
+    "displayName": "广东省广州市从化区温泉镇",
+    "level": "town",
+    "locality": "温泉镇",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "广东省广州市从化区温泉镇",
+      "country": "中国",
+      "province": "广东省",
+      "city": "广州市"
+    },
+    "precision": "approximate"
+  },
+  "蓝钟镇 肇庆 广东 中国": {
+    "query": "蓝钟镇 肇庆 广东 中国",
+    "provider": "arcgis",
+    "latitude": 24.0776019,
+    "longitude": 111.9556435,
+    "displayName": "广东省肇庆怀集县蓝钟镇",
+    "level": "town",
+    "locality": "蓝钟镇",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "广东省肇庆怀集县蓝钟镇",
+      "country": "中国",
+      "province": "广东省",
+      "city": "肇庆市"
+    },
+    "precision": "approximate"
+  },
+  "禾木镇 禾木村 新疆 中国": {
+    "query": "禾木镇 禾木村 新疆 中国",
+    "provider": "photon",
+    "latitude": 48.5692063,
+    "longitude": 87.4303716,
+    "displayName": "禾木村 قوم ᠬᠣᠮ   禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ 布尔津县 新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی 中国",
+    "level": "poi",
+    "locality": "禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "禾木村 قوم ᠬᠣᠮ   禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ 布尔津县 新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی 中国",
+      "country": "中国",
+      "province": "新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی",
+      "city": "禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ",
+      "district": "布尔津县"
+    },
+    "precision": "approximate"
+  },
+  "玉龙雪山镇 丽江 云南 中国": {
+    "query": "玉龙雪山镇 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "肇庆蓝钟 怀集 广东 中国": {
+    "query": "肇庆蓝钟 怀集 广东 中国",
+    "provider": "arcgis",
+    "latitude": 24.0776019,
+    "longitude": 111.9556435,
+    "displayName": "广东省肇庆怀集蓝钟",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "广东省肇庆怀集蓝钟"
+    }
+  },
+  "玉龙雪山镇 、双飞双动6天＊ 丽江 云南 中国": {
+    "query": "玉龙雪山镇 、双飞双动6天＊ 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "温泉镇 腾冲 云南 中国": {
+    "query": "温泉镇 腾冲 云南 中国",
+    "provider": "arcgis",
+    "latitude": 24.698529401,
+    "longitude": 99.6962994,
+    "displayName": "云南省保山市昌宁县温泉镇",
+    "level": "town",
+    "locality": "温泉镇",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "云南省保山市昌宁县温泉镇",
+      "country": "中国",
+      "province": "云南省",
+      "city": "保山市"
+    },
+    "precision": "approximate"
+  },
+  "茶卡盐湖茶卡 青海 中国": {
+    "query": "茶卡盐湖茶卡 青海 中国",
+    "provider": "nominatim",
+    "latitude": 36.7435927,
+    "longitude": 99.0803174,
+    "displayName": "茶卡盐湖景区, 茶卡镇, 乌兰县, 海西蒙古族藏族自治州, 青海省, 817100, 中国",
+    "level": "poi",
+    "locality": "茶卡镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "茶卡盐湖景区, 茶卡镇, 乌兰县, 海西蒙古族藏族自治州, 青海省, 817100, 中国"
+    }
+  },
+  "南昆山镇 龙门 广东 中国": {
+    "query": "南昆山镇 龙门 广东 中国",
+    "provider": "photon",
+    "latitude": 23.6370664,
+    "longitude": 113.880751,
+    "displayName": "南昆山  龙门县 惠州市  广东省 中国",
+    "level": "poi",
+    "locality": "惠州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "南昆山  龙门县 惠州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "惠州市",
+      "district": "龙门县"
+    },
+    "precision": "approximate"
+  },
+  "林丰村 怡景 龙门 广东 中国": {
+    "query": "林丰村 怡景 龙门 广东 中国",
+    "provider": "arcgis",
+    "latitude": 21.831120001,
+    "longitude": 110.98874,
+    "displayName": "广东省茂名市高州市林丰村",
+    "level": "town",
+    "locality": "",
+    "providerScore": 84.6,
+    "address": {
+      "formatted": "广东省茂名市高州市林丰村"
+    },
+    "precision": "approximate"
+  },
+  "香格里拉酒店 云南 中国": {
+    "query": "香格里拉酒店 云南 中国",
+    "provider": "arcgis",
+    "latitude": 31.881343599,
+    "longitude": 117.2631342,
+    "displayName": "香格里拉酒店",
+    "level": "poi",
+    "locality": "滨南社区",
+    "providerScore": 88.2,
+    "address": {
+      "formatted": "香格里拉酒店",
+      "country": "中国",
+      "province": "安徽省",
+      "city": "合肥市",
+      "district": "亳州路街道",
+      "locality": "滨南社区",
+      "street": "北一环路",
+      "postalCode": "230061"
+    }
   }
 }
