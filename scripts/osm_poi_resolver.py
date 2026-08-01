@@ -12,7 +12,7 @@ from pathlib import Path
 
 DEFAULT_INDEX_PATH = Path(__file__).resolve().parent.parent / "public" / "data" / "osm-poi-index.json"
 GENERIC_NAMES = {"酒店", "宾馆", "客栈", "当地酒店", "参考酒店", "豪华酒店", "度假村", "温泉酒店"}
-MAX_UNVERIFIED_CITY_DISTANCE_KM = 100
+MAX_UNVERIFIED_CITY_DISTANCE_KM = 30
 
 
 def normalize_name(value: object) -> str:
@@ -93,6 +93,8 @@ def resolve_poi(
         if province and province_context and province not in province_context:
             continue
         if not city_confirmed:
+            if not province or not province_context or province not in province_context:
+                continue
             distance = _distance_km(expected_latitude, expected_longitude, poi.get("latitude"), poi.get("longitude"))
             if distance is None or distance > MAX_UNVERIFIED_CITY_DISTANCE_KM:
                 continue

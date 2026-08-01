@@ -129,6 +129,15 @@ def test_resolver_uses_existing_city_fallback_when_osm_address_omits_city():
         expected_longitude=120.0,
         pois=[nearby],
     ) is None
+    unverified_region = dict(nearby, address={"country": "中国"})
+    assert resolve_poi(
+        "肇庆星湖大酒店",
+        expected_city="肇庆",
+        expected_province="广东",
+        expected_latitude=23.0472,
+        expected_longitude=112.4651,
+        pois=[unverified_region],
+    ) is None
 
 
 def test_enrichment_replaces_catalog_centroid_but_preserves_verified_geocoder():

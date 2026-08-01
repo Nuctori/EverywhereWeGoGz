@@ -60,6 +60,12 @@ def _apply_coordinate_fallback(tour: dict, fields: dict) -> None:
 def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int]:
     before = sum(1 for tour in tours if tour.get("destinationLatitude") is not None)
     for tour in tours:
+        # OSM fields are derived from a previous index snapshot. Rebuild them
+        # from scratch so a rejected candidate cannot retain a stale address.
+        quality = tour.get("meta", {}).get("dataQuality", {}) if isinstance(tour.get("meta"), dict) else {}
+        field_sources = quality.get("fieldSources", {}) if isinstance(quality, dict) else {}
+        if tour.get("destinationCoordinateSource") == "osm" or field_sources.get("destinationAddress") == "source":
+            tour.pop("destinationAddress", None)
         fields, field_sources = normalize_tour_geo(
             tour,
             str(tour.get("title") or ""),
@@ -84,9 +90,13 @@ def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int]:
         quality.setdefault("syntheticFields", [])
         quality.setdefault("riskFlags", [])
 
-    osm_candidates, osm_resolved = enrich_tours_from_osm(tours)
     for tour in tours:
         _apply_coordinate_fallback(tour, tour)
+
+    # A city fallback gives OSM matching a spatial consistency check when an
+    # otherwise valid OSM object has no city address tags.
+    osm_candidates, osm_resolved = enrich_tours_from_osm(tours)
+    for tour in tours:
         tour["routeRegion"] = classify_route(tour)
 
     candidates, resolved = enrich_tours(tours, allow_network=allow_network)

@@ -48,7 +48,27 @@ def test_rebuild_preserves_coarse_coordinate_as_non_map_fallback():
     assert tour["geoConfidence"] == "low"
 
 
+def test_rebuild_discards_stale_osm_address_before_reapplying_index():
+    tour = {
+        "id": "tour_stale_osm",
+        "title": "\u65b0\u4e30\u96c5\u81f4\u9152\u5e973\u5929",
+        "destination": "\u5176\u4ed6",
+        "destinationCoordinateSource": "fallback",
+        "destinationLatitude": 23.0571,
+        "destinationLongitude": 112.4669,
+        "destinationAddress": {"province": "\u6e56\u5357\u7701", "formatted": "stale OSM address"},
+        "meta": {"dataQuality": {"fieldSources": {"destinationAddress": "source"}}},
+    }
+
+    rebuild([tour])
+
+    assert tour["destinationCoordinateSource"] == "fallback"
+    assert tour["destinationLatitude"] == 24.0592
+    assert "destinationAddress" not in tour
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_preserves_coarse_coordinate_as_non_map_fallback()
+    test_rebuild_discards_stale_osm_address_before_reapplying_index()
     print("geo rebuild tests passed")
