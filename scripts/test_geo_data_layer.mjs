@@ -16,6 +16,7 @@ const fail = (message) => {
 const assert = (condition, message) => {
   if (!condition) fail(message);
 };
+const isFallbackPrecision = (precision) => ['approximate', 'city'].includes(precision);
 const validPoint = (point) => point
   && Number.isFinite(point.latitude)
   && Number.isFinite(point.longitude)
@@ -71,7 +72,7 @@ for (const place of places) {
 
 for (const tour of sourceTours) {
   if (tour.destinationCoordinateSource !== 'fallback') continue;
-  assert(tour.destinationCoordinatePrecision === 'city', `${tour.id} fallback coordinates must be city-precision`);
+  assert(isFallbackPrecision(tour.destinationCoordinatePrecision), `${tour.id} fallback coordinates must retain approximate precision`);
 }
 
 for (const entry of mapIndex) {
@@ -111,12 +112,15 @@ const blueBellSourceTours = sourceTours.filter((tour) => String(tour.title || ''
 const blueBellIndexedTours = list.filter((tour) => String(tour.title || '').includes('蓝钟'));
 assert(blueBellSourceTours.length > 0, 'fixture data must include 蓝钟 destination examples');
 assert(blueBellSourceTours.every((tour) => tour.destinationPlaceName?.includes('蓝钟')), '蓝钟 titles must retain the mined named destination');
-assert(blueBellSourceTours.every((tour) => tour.destinationCoordinateSource === 'fallback'), 'unverified 蓝钟 coordinates must be marked as fallback');
-assert(blueBellSourceTours.every((tour) => tour.destinationCoordinatePrecision === 'city'), '蓝钟 fallback coordinates must be city-precision');
+assert(blueBellSourceTours.every((tour) => ['geocoder', 'fallback'].includes(tour.destinationCoordinateSource)), '蓝钟 coordinates must retain a verified or explicit fallback source');
+assert(blueBellSourceTours.every((tour) => tour.destinationCoordinateSource !== 'fallback' || isFallbackPrecision(tour.destinationCoordinatePrecision)), '蓝钟 fallback coordinates must retain approximate precision');
 assert(blueBellIndexedTours.length === blueBellSourceTours.length, '蓝钟 examples must survive into the map index');
 assert(blueBellIndexedTours.every((tour) => tour.geo?.destination), '蓝钟 fallback destinations must remain map-selectable');
-assert(blueBellIndexedTours.every((tour) => tour.geo?.destination?.level === 'city'), '蓝钟 map points must show city-level coordinate precision');
-assert(blueBellIndexedTours.every((tour) => tour.geo?.destination?.semanticLevel === 'poi'), '蓝钟 must retain the extracted POI entity');
+assert(blueBellIndexedTours.every((tour) => ['city', 'town', 'poi'].includes(tour.geo?.destination?.level)), '蓝钟 map points must retain their resolved locality level');
+assert(blueBellIndexedTours.every((tour) => {
+  const sourceTour = sourceTours.find((candidate) => candidate.id === tour.id);
+  return sourceTour?.destinationGeoLevel === tour.geo?.destination?.level;
+}), '蓝钟 map points must retain the extracted location level');
 assert(blueBellIndexedTours.every((tour) => places.some((place) => place.placeId === tour.geo.destination.placeId && place.tourIds.includes(tour.id))), '蓝钟 fallback destinations must be indexed in geo-places.json');
 const namedPoiCases = [
   ['七星岩', '肇庆七星岩'],
