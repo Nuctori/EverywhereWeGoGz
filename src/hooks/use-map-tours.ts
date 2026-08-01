@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getDataUrl } from '@/lib/utils';
 import { inflateTourSummaryFromIndexEntry } from '@/lib/tour-deeplink';
-import { toursIndexSchema } from '@/lib/runtime-schemas';
-import type { GeoAddress, TourSummary } from '@/types/tour';
+import { geoPlacesSchema, toursIndexSchema } from '@/lib/runtime-schemas';
+import type { GeoAddress, GeoPlaceIndexEntry, TourSummary } from '@/types/tour';
 
 export type MapTourLocation = {
   placeId: string;
@@ -27,15 +27,21 @@ export type MapTourLocation = {
 };
 
 type MapToursState = {
+  places: MapTourLocation[];
   tours: TourSummary[];
+  placesLoading: boolean;
   loading: boolean;
-  error: string | null;
+  placesError: string | null;
+  toursError: string | null;
 };
 
 const initialState: MapToursState = {
+  places: [],
   tours: [],
+  placesLoading: true,
   loading: true,
-  error: null,
+  placesError: null,
+  toursError: null,
 };
 
 type DestinationMapPoint = NonNullable<NonNullable<TourSummary['geo']>['destination']>;
@@ -62,6 +68,40 @@ function isApproximateMapPoint(point: DestinationMapPoint | undefined) {
   ));
 }
 
+function mapGeoPlaces(entries: GeoPlaceIndexEntry[]): MapTourLocation[] {
+  return entries
+    .filter((place) => place.roles.includes('destination'))
+    .map((place) => ({
+      ...place,
+      roles: ['destination'] as ['destination'],
+    }))
+    .sort((left, right) => right.tourCount - left.tourCount || left.name.localeCompare(right.name));
+}
+
+function mapPlacesFromTours(tours: TourSummary[]): MapTourLocation[] {
+  const locations = new Map<string, MapTourLocation>();
+  for (const tour of tours) {
+    const point = tour.geo?.destination;
+    // A city or fallback point is still useful when no better coordinate is
+    // available. Its precision is shown in the map UI instead of dropping
+    // the related tours from the destination picker.
+    if (!hasMapPoint(point)) continue;
+    const existing = locations.get(point.placeId);
+    if (existing) {
+      existing.tourIds.push(tour.id);
+      existing.tourCount += 1;
+      continue;
+    }
+    locations.set(point.placeId, {
+      ...point,
+      tourIds: [tour.id],
+      tourCount: 1,
+      roles: ['destination'],
+    });
+  }
+  return [...locations.values()].sort((left, right) => right.tourCount - left.tourCount || left.name.localeCompare(right.name));
+}
+
 export function useMapTours() {
   const [state, setState] = useState<MapToursState>(initialState);
   const abortRef = useRef<AbortController | null>(null);
@@ -70,25 +110,56 @@ export function useMapTours() {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    setState((current) => ({ ...current, loading: true, error: null }));
+    setState((current) => ({
+      ...current,
+      placesLoading: true,
+      loading: true,
+      placesError: null,
+      toursError: null,
+    }));
 
     try {
-      const response = await fetch(getDataUrl('tours-index.json'), { signal: controller.signal });
-      if (!response.ok) throw new Error(`Failed to load map tours: ${response.status}`);
-      const entries = toursIndexSchema.parse(await response.json());
+      // The map only needs coordinates and tour ids to become interactive. Keep
+      // this small request independent from the much larger tour summary index.
+      const placesResponse = await fetch(getDataUrl('geo-places.json'), { signal: controller.signal });
+      if (!placesResponse.ok) throw new Error(`Failed to load map places: ${placesResponse.status}`);
+      const places = mapGeoPlaces(geoPlacesSchema.parse(await placesResponse.json()));
       if (controller.signal.aborted) return;
-      setState({
-        tours: entries.map(inflateTourSummaryFromIndexEntry),
-        loading: false,
-        error: null,
-      });
+      setState((current) => ({ ...current, places, placesLoading: false, placesError: null }));
     } catch (error) {
       if (controller.signal.aborted) return;
-      setState({
-        tours: [],
+      setState((current) => ({
+        ...current,
+        places: [],
+        placesLoading: false,
         loading: false,
-        error: error instanceof Error ? error.message : 'Failed to load map tours.',
-      });
+        placesError: error instanceof Error ? error.message : 'Failed to load map places.',
+      }));
+      return;
+    }
+
+    try {
+      // Tour summaries are only needed for the place panel. They can finish in
+      // the background after the point layer is already visible.
+      const toursResponse = await fetch(getDataUrl('tours-index.json'), { signal: controller.signal });
+      if (!toursResponse.ok) throw new Error(`Failed to load map tours: ${toursResponse.status}`);
+      const entries = toursIndexSchema.parse(await toursResponse.json());
+      if (controller.signal.aborted) return;
+      const tours = entries.map(inflateTourSummaryFromIndexEntry);
+      setState((current) => ({
+        ...current,
+        places: mapPlacesFromTours(tours),
+        tours,
+        loading: false,
+        toursError: null,
+      }));
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      setState((current) => ({
+        ...current,
+        loading: false,
+        toursError: error instanceof Error ? error.message : 'Failed to load map tours.',
+      }));
     }
   }, []);
 
@@ -98,33 +169,9 @@ export function useMapTours() {
   }, [fetchTours]);
 
   const toursById = useMemo(() => new Map(state.tours.map((tour) => [tour.id, tour])), [state.tours]);
-  const places = useMemo<MapTourLocation[]>(() => {
-    const locations = new Map<string, MapTourLocation>();
-    for (const tour of state.tours) {
-      const point = tour.geo?.destination;
-      // A city or fallback point is still useful when no better coordinate is
-      // available. Its precision is shown in the map UI instead of dropping
-      // the related tours from the destination picker.
-      if (!hasMapPoint(point)) continue;
-      const existing = locations.get(point.placeId);
-      if (existing) {
-        existing.tourIds.push(tour.id);
-        existing.tourCount += 1;
-        continue;
-      }
-      locations.set(point.placeId, {
-        ...point,
-        tourIds: [tour.id],
-        tourCount: 1,
-        roles: ['destination'],
-      });
-    }
-    return [...locations.values()].sort((left, right) => right.tourCount - left.tourCount || left.name.localeCompare(right.name));
-  }, [state.tours]);
 
   return {
     ...state,
-    places,
     toursById,
     unmappedTours: state.tours.filter((tour) => !hasMapPoint(tour.geo?.destination)),
     approximateTours: state.tours.filter((tour) => isApproximateMapPoint(tour.geo?.destination)),

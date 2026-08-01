@@ -231,10 +231,9 @@ function PlaceClusterPanel({
 }
 
 export function MapView({ expanded, onExpandedChange, embedded = false }: MapViewProps) {
-  const { places, unmappedTours, approximateTours, loading: placesLoading, error: placesError, toursById, fetchTours } = useMapTours();
+  const { places, unmappedTours, approximateTours, placesLoading, loading: toursLoading, placesError, toursError, toursById, fetchTours } = useMapTours();
   const { selectedSummaryTour, resolvedTour, detailStatus, detailError, detailLoading, selectTour, clearSelectedTour } = useTourDetail();
   const [providerIndex, setProviderIndex] = useState(0);
-  const [tileError, setTileError] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<MapTourLocation | null>(null);
   const [clusterPlaces, setClusterPlaces] = useState<MapTourLocation[]>([]);
   const mapElementRef = useRef<HTMLDivElement | null>(null);
@@ -242,6 +241,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const tileLoadCountRef = useRef(0);
   const tileErrorCountRef = useRef(0);
+  const tileError = providerIndex >= MAP_TILE_PROVIDERS.length;
   const visiblePlaces = useMemo(() => places.filter((place) => place.tourCount > 0), [places]);
   const selectedTours = useMemo(() => {
     if (!selectedPlace) return [];
@@ -282,14 +282,12 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     tileLayerRef.current?.remove();
     tileLayerRef.current = null;
     if (providerIndex >= MAP_TILE_PROVIDERS.length) {
-      setTileError(true);
       return;
     }
 
     const provider = MAP_TILE_PROVIDERS[providerIndex];
     tileLoadCountRef.current = 0;
     tileErrorCountRef.current = 0;
-    setTileError(false);
     const tileLayer = L.tileLayer(provider.url, { attribution: provider.attribution, maxZoom: MAP_MAX_ZOOM, subdomains: provider.subdomains });
     let active = true;
     let switched = false;
@@ -406,7 +404,6 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
 
   const openExpandedMap = () => {
     setProviderIndex(0);
-    setTileError(false);
     onExpandedChange(true);
   };
 
@@ -436,7 +433,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         </div>
       )}
       <PlaceClusterPanel places={clusterPlaces} expanded={expanded} onSelect={(place) => { setClusterPlaces([]); setSelectedPlace(place); }} onClose={() => setClusterPlaces([])} />
-      <PlaceToursPanel place={selectedPlace} tours={selectedTours} loading={placesLoading} error={placesError} onTourClick={openTourDetail} onClose={() => setSelectedPlace(null)} onRetry={() => void fetchTours()} expanded={expanded} />
+      <PlaceToursPanel place={selectedPlace} tours={selectedTours} loading={toursLoading} error={toursError} onTourClick={openTourDetail} onClose={() => setSelectedPlace(null)} onRetry={() => void fetchTours()} expanded={expanded} />
     </div>
   );
 
