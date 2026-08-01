@@ -19,6 +19,7 @@
     "report:destination-mining": "python scripts/report_destination_mining.py",
     "data:rebuild-geo": "python scripts/rebuild_geo_data.py",
     "audit:geocode-destinations": "python scripts/test_geocode_destinations.py",
+    "audit:geo-coverage": "node scripts/test_geo_coverage.mjs",
     "audit:deploy-workflow": "node scripts/test_deploy_workflow.mjs",
     "test:static-asset-fallback": "node scripts/test_static_asset_fallback.mjs",
     "test:cdn-pool": "node scripts/test_cdn_pool.mjs",

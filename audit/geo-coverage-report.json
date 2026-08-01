@@ -1,0 +1,20 @@
+{
+  "before": {
+    "tours": 3961,
+    "withDestination": 2868,
+    "unmapped": 1093
+  },
+  "after": {
+    "tours": 3961,
+    "withDestination": 3269,
+    "unmapped": 692
+  },
+  "delta": {
+    "withDestination": 401,
+    "unmapped": -401
+  },
+  "coverageImprovementPp": 10.1232,
+  "beforeSource": "git:HEAD~1:public/data/tours.json",
+  "afterSource": "working-tree:public/data/tours.json",
+  "generatedAt": "2026-08-01"
+}
