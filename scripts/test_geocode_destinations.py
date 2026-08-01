@@ -158,6 +158,82 @@ def test_title_hotel_suffix_is_a_geocoder_candidate_without_a_static_alias():
     assert destination_queries({"title": "龙门温德姆温泉3天", **fields})[0] == "龙门温德姆温泉 广东 中国"
 
 
+def test_itinerary_named_hotel_is_a_geocoder_candidate_without_a_city_guess():
+    fields, _ = normalize_tour_geo(
+        {"destination": "广东", "title": "周末温泉3天"},
+        "周末温泉3天",
+        "广东",
+        {"itinerary": [{"description": "前往【乐天温泉度假酒店】办理入住"}]},
+    )
+
+    assert fields["destinationPlaceName"] == "乐天温泉度假酒店"
+    assert fields["destinationCity"] == ""
+    assert fields["destinationLatitude"] is None
+    assert fields["destinationCoordinateSource"] == "unknown"
+    assert destination_queries({"title": "周末温泉3天", **fields}) == ["乐天温泉度假酒店 广东 中国"]
+
+
+def test_itinerary_named_hotel_overrides_a_city_only_destination():
+    fields, _ = normalize_tour_geo(
+        {"destination": "肇庆", "title": "肇庆温泉3天"},
+        "肇庆温泉3天",
+        "肇庆",
+        {"itinerary": [{"description": "入住【肇庆星湖大酒店】"}]},
+    )
+
+    assert fields["destinationPlaceName"] == "肇庆星湖大酒店"
+    assert fields["destinationCity"] == "肇庆"
+    assert fields["destinationLatitude"] is None
+    assert destination_queries({"title": "肇庆温泉3天", **fields})[0] == "肇庆星湖大酒店 广东 中国"
+
+
+def test_structured_accommodation_is_a_geocoder_candidate_without_same_class_noise():
+    fields, _ = normalize_tour_geo(
+        {"destination": "江西", "title": "江西高铁5天"},
+        "江西高铁5天",
+        "江西",
+        {"itinerary": [{"accommodation": "仙女湖沁庐度假酒店或其他同级酒店；"}]},
+    )
+
+    assert fields["destinationPlaceName"] == "仙女湖沁庐度假酒店"
+    assert fields["destinationLatitude"] is None
+    assert fields["destinationCoordinateSource"] == "unknown"
+    assert destination_queries({"title": "江西高铁5天", **fields}) == ["仙女湖沁庐度假酒店 江西 中国"]
+
+
+def test_cityless_cached_poi_requires_an_exact_name(tmp_path: Path):
+    tour = {
+        "title": "周末温泉3天",
+        "destinationPlaceName": "乐天温泉度假酒店",
+        "destinationCity": "",
+        "destinationProvince": "广东",
+        "destinationCoordinateSource": "unknown",
+        "meta": {"dataQuality": {"fieldSources": {}}},
+    }
+    cache_path = tmp_path / "geo-cache.json"
+    cache_path.write_text(
+        '{"乐天温泉度假酒店 广东 中国": {"provider": "nominatim", "latitude": 21.7, "longitude": 110.9, "level": "poi", "displayName": "乐天温泉度假酒店, 高州市, 广东省, 中国"}}',
+        encoding="utf-8",
+    )
+
+    candidates, resolved = enrich_tours([tour], cache_path=cache_path)
+
+    assert candidates == 1
+    assert resolved == 1
+    assert tour["destinationCoordinateSource"] == "geocoder"
+
+    cache_path.write_text(
+        '{"乐天温泉度假酒店 广东 中国": {"provider": "nominatim", "latitude": 21.7, "longitude": 110.9, "level": "poi", "displayName": "乐天温泉度假酒店（高州店）, 高州市, 广东省, 中国"}}',
+        encoding="utf-8",
+    )
+    rejected_tour = {**tour, "destinationLatitude": None, "destinationLongitude": None, "destinationCoordinateSource": "unknown"}
+    candidates, resolved = enrich_tours([rejected_tour], cache_path=cache_path)
+
+    assert candidates == 1
+    assert resolved == 0
+    assert rejected_tour["destinationLatitude"] is None
+
+
 def test_short_city_substrings_and_flight_cities_do_not_become_destinations():
     fields, _ = normalize_tour_geo(
         {"destination": "其他", "title": "山西双飞6天丨五台山丨平遥古城"},
@@ -420,6 +496,10 @@ if __name__ == "__main__":
     test_named_title_destination_does_not_inherit_city_centroid()
     test_named_destination_from_title_is_geocoder_candidate()
     test_title_hotel_suffix_is_a_geocoder_candidate_without_a_static_alias()
+    test_itinerary_named_hotel_is_a_geocoder_candidate_without_a_city_guess()
+    test_itinerary_named_hotel_overrides_a_city_only_destination()
+    test_structured_accommodation_is_a_geocoder_candidate_without_same_class_noise()
+    test_cityless_cached_poi_requires_an_exact_name(Path("."))
     test_short_city_substrings_and_flight_cities_do_not_become_destinations()
     test_named_poi_aliases_become_geocoder_candidates()
     test_geocoder_requires_poi_name_and_expected_city()

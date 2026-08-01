@@ -48,6 +48,7 @@ GENERIC_NAME_PARTS = {
     "中国", "广东", "广西", "湖南", "江西", "福建", "海南", "肇庆", "温泉", "酒店", "森林", "旅游",
 }
 POI_DESCRIPTIVE_SUFFIXES = ("景区", "风景区", "旅游区", "度假区", "风景名胜区", "公园")
+EXACT_NAME_SUFFIXES = POI_DESCRIPTIVE_SUFFIXES + ("省", "市", "县", "区", "旗", "镇", "街道", "乡")
 ADDRESS_FIELDS = (
     "formatted", "country", "province", "city", "district", "locality",
     "street", "houseNumber", "postalCode",
@@ -103,8 +104,10 @@ def destination_queries(tour: dict) -> list[str]:
     label = str(tour.get("destinationPlaceName") or "").strip()
     city = str(tour.get("destinationCity") or "").strip()
     province = str(tour.get("destinationProvince") or "").strip()
-    if not label or not city or label == city:
+    if not label or label == city:
         return []
+    if not city:
+        return [normalize_query(" ".join(part for part in (label, province, "中国") if part))]
 
     title = str(tour.get("title") or "")
     context = list(dict.fromkeys(_title_inserted_context(title, label, city) + _context_terms(title)))
@@ -193,6 +196,30 @@ def _has_named_evidence(label: str, text: str, expected_city: str = "") -> bool:
         _contains_named_variant(normalized_text, variant)
         or _contains_named_variant(normalized_text_without_admin_suffixes, variant)
         for variant in variants
+    )
+
+
+def _has_exact_name_evidence(label: str, text: str) -> bool:
+    """Match a cityless POI only when the result's leading name is exact.
+
+    A cityless query has no administrative evidence to disambiguate a similarly
+    named branch. Restrict allowed expansion to canonical POI/admin suffixes.
+    """
+    normalized_label = re.sub(r"\s+", "", str(label or ""))
+    if not normalized_label:
+        return False
+    leading_name = re.split(r"[,，;；/]", str(text or ""), maxsplit=1)[0]
+    normalized_name = re.sub(r"\s+", "", leading_name)
+    return normalized_name == normalized_label or normalized_name in {
+        normalized_label + suffix for suffix in EXACT_NAME_SUFFIXES
+    }
+
+
+def _has_acceptable_name_evidence(label: str, text: str, expected_city: str = "") -> bool:
+    return (
+        _has_named_evidence(label, text, expected_city)
+        if expected_city
+        else _has_exact_name_evidence(label, text)
     )
 
 
@@ -332,8 +359,8 @@ def _valid_cached_result(label: str, expected_city: str, result: object) -> bool
         provider in GEOCODER_PROVIDERS
         and isinstance(latitude, (int, float)) and not isinstance(latitude, bool) and -90 <= latitude <= 90
         and isinstance(longitude, (int, float)) and not isinstance(longitude, bool) and -180 <= longitude <= 180
-        and _has_named_evidence(label, display_name, expected_city)
-        and _has_admin_evidence(expected_city, display_name)
+        and _has_acceptable_name_evidence(label, display_name, expected_city)
+        and (not expected_city or _has_admin_evidence(expected_city, display_name))
         and result.get("level") in {"town", "poi"}
         and (address is None or isinstance(address, dict))
     )
@@ -347,7 +374,7 @@ def _arcgis_result(label: str, payload: dict | list | None, expected_city: str =
         address = str(item.get("address") or "")
         attributes = item.get("attributes") if isinstance(item.get("attributes"), dict) else {}
         score = float(item.get("score") or 0)
-        if score < 70 or not _has_named_evidence(label, address, expected_city):
+        if score < 70 or not _has_acceptable_name_evidence(label, address, expected_city):
             continue
         if expected_city and not _has_admin_evidence(expected_city, address):
             continue
@@ -385,7 +412,8 @@ def _nominatim_result(label: str, payload: dict | list | None, expected_city: st
         address = item.get("address") if isinstance(item.get("address"), dict) else {}
         address_text = " ".join(str(value) for value in address.values())
         name_quality = _named_result_quality(label, item.get("name") or "", expected_city)
-        if name_quality == 0 and not _has_named_evidence(label, display_name, expected_city):
+        result_name = str(item.get("name") or display_name)
+        if not _has_acceptable_name_evidence(label, result_name, expected_city):
             continue
         if expected_city and not _has_admin_evidence(expected_city, f"{display_name} {address_text}"):
             continue
@@ -422,7 +450,9 @@ def _photon_result(label: str, payload: dict | list | None, expected_city: str =
             for key in ("name", "street", "district", "city", "county", "state", "country")
         ).strip()
         name_quality = _named_result_quality(label, properties.get("name") or "", expected_city)
-        if name_quality == 0:
+        if name_quality == 0 or not _has_acceptable_name_evidence(
+            label, properties.get("name") or display_name, expected_city
+        ):
             continue
         if expected_city and not _has_admin_evidence(expected_city, display_name):
             continue

@@ -220,12 +220,22 @@ PLACES = [
 KNOWN_PROVINCE_PREFIXES = {place["province"] for place in PLACES if place.get("province")}
 REGION_ROWS = [
     ("中国", None, ("中国",)),
+    ("北京", "北京", ("北京",)), ("天津", "天津", ("天津",)),
+    ("河北", "河北", ("河北",)), ("山西", "山西", ("山西",)),
+    ("内蒙古", "内蒙古", ("内蒙古", "内蒙")), ("辽宁", "辽宁", ("辽宁",)),
+    ("吉林", "吉林", ("吉林",)), ("黑龙江", "黑龙江", ("黑龙江",)),
+    ("上海", "上海", ("上海",)), ("江苏", "江苏", ("江苏",)),
+    ("浙江", "浙江", ("浙江",)), ("安徽", "安徽", ("安徽",)),
+    ("福建", "福建", ("福建",)), ("江西", "江西", ("江西",)),
+    ("山东", "山东", ("山东",)), ("河南", "河南", ("河南",)),
+    ("湖北", "湖北", ("湖北",)), ("湖南", "湖南", ("湖南",)),
     ("广东", "广东", ("广东",)), ("广西", "广西", ("广西",)),
-    ("湖南", "湖南", ("湖南",)), ("福建", "福建", ("福建",)),
-    ("海南", "海南", ("海南",)), ("云南", "云南", ("云南",)),
-    ("四川", "四川", ("四川",)), ("陕西", "陕西", ("陕西",)),
-    ("新疆", "新疆", ("新疆",)), ("西藏", "西藏", ("西藏",)),
-    ("内蒙古", "内蒙古", ("内蒙古", "内蒙")), ("黑龙江", "黑龙江", ("黑龙江",)),
+    ("海南", "海南", ("海南",)), ("重庆", "重庆", ("重庆",)),
+    ("四川", "四川", ("四川",)), ("贵州", "贵州", ("贵州",)),
+    ("云南", "云南", ("云南",)), ("西藏", "西藏", ("西藏",)),
+    ("陕西", "陕西", ("陕西",)), ("甘肃", "甘肃", ("甘肃",)),
+    ("青海", "青海", ("青海",)), ("宁夏", "宁夏", ("宁夏",)),
+    ("新疆", "新疆", ("新疆",)),
     ("越南", None, ("越南",)), ("泰国", None, ("泰国",)),
     ("日本", None, ("日本",)), ("韩国", None, ("韩国",)),
     ("新加坡", None, ("新加坡",)), ("马来西亚", None, ("马来西亚",)),
@@ -275,6 +285,11 @@ PLACE_LABEL_SUFFIXES = re.compile(
 )
 TITLE_POI_SUFFIXES = ("温泉", "酒店", "度假村", "度假区", "景区", "风景区", "古镇", "古村", "庄园", "乐园", "森林公园")
 TITLE_POI_GENERIC_PARTS = ("当地", "参考", "豪华", "特色", "品牌", "网评", "标准", "升级", "五钻", "四钻", "三钻")
+DETAIL_POI_SUFFIXES = TITLE_POI_SUFFIXES + ("观景台", "摄影点", "服务区", "博物馆", "纪念馆", "城堡", "海岛")
+DETAIL_POI_GENERIC_PARTS = TITLE_POI_GENERIC_PARTS + (
+    "自由活动", "指定时间", "当地美食", "自费项目", "赠送宵夜", "同级", "标间", "住宿",
+    "飞机上", "航班上", "宿机上", "温馨的家", "早餐", "午餐", "晚餐", "安排为",
+)
 ADMINISTRATIVE_ALIAS_SUFFIXES = ("省", "市", "县", "区", "旗")
 EXPLICIT_POI_NAMES = {
     "仙本那", "普者黑", "三门海", "喀纳斯", "黄果树", "神农架", "庐山", "三清山", "婺源",
@@ -474,7 +489,12 @@ def _is_embedded_short_city_alias(text, mention):
     # of a longer noun, not an administrative destination.
     if before.endswith(("从", "由", "到", "至", "去", "赴", "游", "入", "住", "经", "往返", "起止", "起程", "出发")):
         return False
-    if find_region(before) or any(before.endswith(province) for province in KNOWN_PROVINCE_PREFIXES):
+    preceding_region = find_region(before)
+    if preceding_region:
+        # "广东台山" is a normal province + city expression, whereas the
+        # "台山" inside "山西…五台山" must not inherit a different province.
+        return preceding_region.get("province") != place.get("province")
+    if any(before.endswith(province) for province in KNOWN_PROVINCE_PREFIXES):
         return False
     return True
 
@@ -624,6 +644,29 @@ def _place_label(text, mention):
     return canonical_name
 
 
+def _detail_poi_label(texts):
+    """Return a clearly named POI from itinerary evidence, never a free-form route phrase."""
+    candidates = []
+    for text_index, text in enumerate(texts):
+        value = str(text or "")
+        for match in re.finditer(r"[【《]([^】》]{2,32})[】》]", value):
+            label = re.sub(r"\s+", "", match.group(1)).strip("：:，,。.;；")
+            if (
+                len(label) >= 3
+                and label.endswith(DETAIL_POI_SUFFIXES)
+                and not any(part in label for part in DETAIL_POI_GENERIC_PARTS)
+            ):
+                candidates.append((text_index, match.start(), label))
+        for match in re.finditer(r"(?:入住|下榻)[：:\s]*([\u4e00-\u9fffA-Za-z·]{3,32}?(?:酒店|宾馆|客栈|度假村))", value):
+            label = match.group(1).strip()
+            if not any(part in label for part in DETAIL_POI_GENERIC_PARTS):
+                candidates.append((text_index, match.start(), label))
+    if not candidates:
+        return ""
+    candidates.sort(key=lambda item: (item[0], item[1], -len(item[2])))
+    return candidates[0][2]
+
+
 def mine_destination_place(raw, title, destination, detail=None):
     """Extract a named destination from title/detail text without treating departure as destination."""
     destination_text = str(destination or "").strip()
@@ -633,8 +676,6 @@ def mine_destination_place(raw, title, destination, detail=None):
         if _is_departure_mention(title, mention)
     }
     direct_place, direct_label = _find_direct_place_match(destination_text)
-    if direct_place and direct_place["name"] not in title_departure_names:
-        return _materialize_named_place(direct_place, direct_label), direct_label, "medium", "local-place-catalog"
 
     texts = [str(title or "")]
     detail = detail if isinstance(detail, dict) else {}
@@ -643,7 +684,17 @@ def mine_destination_place(raw, title, destination, detail=None):
             continue
         texts.extend(str(day.get(key) or "") for key in ("title", "description"))
         texts.extend(str(value or "") for value in day.get("activities") or [])
+        accommodation = str(day.get("accommodation") or "").strip()
+        if accommodation:
+            # Accommodation is structured by the scraper; prefix it with the
+            # itinerary verb so only its first named lodging entity is mined.
+            texts.append(f"入住：{accommodation}")
     texts.extend(str(value or "") for value in detail.get("highlights") or [])
+    texts.extend(str(value or "") for value in detail.get("importantNotes") or [])
+    detail_label = _detail_poi_label(texts[1:])
+    if direct_place and direct_place["name"] not in title_departure_names:
+        if direct_label != direct_place["name"] or not detail_label:
+            return _materialize_named_place(direct_place, direct_label), direct_label, "medium", "local-place-catalog"
 
     candidates = []
     for text_index, text in enumerate(texts):
@@ -669,6 +720,10 @@ def mine_destination_place(raw, title, destination, detail=None):
     if not title_candidates:
         candidates = [item for item in candidates if item[4]]
     if not candidates:
+        if detail_label:
+            # This POI still needs a local-index or geocoder match before it
+            # becomes a point. Do not invent a parent-city coordinate.
+            return None, detail_label, "medium", "detail-poi-miner"
         return None, "", "low", "unknown"
     region = find_region(destination_text)
     if region and region.get("province"):
@@ -696,6 +751,10 @@ def mine_destination_place(raw, title, destination, detail=None):
     named_candidates = [item for item in candidates if item[4]]
     if named_candidates:
         candidates = named_candidates
+    elif detail_label:
+        # A city or province in the title is useful context, but an explicitly
+        # named hotel or attraction in the itinerary is the more precise stop.
+        return None, detail_label, "medium", "detail-poi-miner"
     elif not candidates and destination_text not in {"", "其他", "全国"}:
         return None, "", "low", "unknown"
     candidates.sort(key=lambda item: (item[0], item[1]))
@@ -763,8 +822,8 @@ def normalize_tour_geo(raw, title, destination, detail=None):
     fields = {
         **departure,
         "destinationCity": destination_place["name"] if destination_place else "",
-        "destinationPlaceName": destination_label if destination_place else "",
-        "destinationProvince": (destination_place.get("province") or "") if destination_place else "",
+        "destinationPlaceName": destination_label,
+        "destinationProvince": (destination_place.get("province") or "") if destination_place else destination_province,
         "destinationCountry": destination_country,
         "destinationLatitude": destination_place["latitude"] if destination_place else None,
         "destinationLongitude": destination_place["longitude"] if destination_place else None,
@@ -772,9 +831,9 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         "destinationCoordinatePrecision": _destination_coordinate_precision(destination_place, destination_label) if destination_place else "",
         "destinationLocality": destination_place.get("locality", "") if destination_place else "",
         "destinationCoordinateSource": _destination_coordinate_source(destination_place, destination_label) if destination_place else "unknown",
-        "geoStatus": "complete" if departure_place and destination_place else ("destination_only" if destination_place or destination_region else "unmapped"),
-        "geoConfidence": destination_confidence if destination_place else "low",
-        "geoSource": destination_geo_source if destination_place else ("local-region-catalog" if destination_region else "unknown"),
+        "geoStatus": "complete" if departure_place and destination_place else ("destination_only" if destination_place or destination_label or destination_region else "unmapped"),
+        "geoConfidence": destination_confidence if destination_label else "low",
+        "geoSource": destination_geo_source if destination_label else ("local-region-catalog" if destination_region else "unknown"),
     }
     if departure_place:
         fields.update({
@@ -789,14 +848,14 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         "departureProvince": departure_source if departure.get("departureProvince") else "unknown",
         "departureCountry": departure_source if departure.get("departureCountry") else "unknown",
         "destinationCity": destination_source if destination_place else "unknown",
-        "destinationPlaceName": "inferred" if destination_place else "unknown",
+        "destinationPlaceName": "inferred" if destination_label else "unknown",
         "destinationProvince": "inferred" if destination_place or destination_region else "unknown",
         "destinationCountry": "inferred" if destination_place or destination_region else "unknown",
         "destinationLatitude": "inferred" if destination_place else "unknown",
         "destinationLongitude": "inferred" if destination_place else "unknown",
         "geoStatus": "inferred",
         "geoConfidence": "inferred",
-        "geoSource": "inferred" if destination_place else "unknown",
+        "geoSource": "inferred" if destination_label else "unknown",
         "routeRegion": "inferred",
     }
 

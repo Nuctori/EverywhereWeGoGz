@@ -850,6 +850,13 @@ def extract_existing_detail(item):
     }
 
 
+def needs_geo_detail(raw, existing):
+    """Fetch a detail page only when the cached tour has no destination coordinate."""
+    if not existing:
+        return True
+    return existing.get("destinationLatitude") is None or existing.get("destinationLongitude") is None
+
+
 def load_detail_results(deduped, existing_tours):
     detail_mode = os.environ.get("DETAIL_FETCH_MODE", "fetch").strip().lower()
     detail_results = {}
@@ -867,12 +874,20 @@ def load_detail_results(deduped, existing_tours):
         print("[详情] 已禁用远程详情抓取")
         return detail_results
 
+    if detail_mode in {"geo", "location", "locations"}:
+        for raw in deduped:
+            existing = existing_tours.get(make_tour_key(raw))
+            if existing:
+                detail_results[make_tour_key(raw)] = extract_existing_detail(existing)
+        targets = [raw for raw in deduped if needs_geo_detail(raw, existing_tours.get(make_tour_key(raw)))]
+    else:
+        targets = deduped
     detail_workers = max(4, min(16, int(os.environ.get("DETAIL_WORKERS", "10") or "10")))
-    print(f"[详情] 开始抓取 {len(deduped)} 条，线程数 {detail_workers}")
+    print(f"[详情] 开始抓取 {len(targets)} 条，线程数 {detail_workers}")
     with ThreadPoolExecutor(max_workers=detail_workers) as executor:
         future_map = {
             executor.submit(fetch_detail_data, raw): make_tour_key(raw)
-            for raw in deduped
+            for raw in targets
         }
         total = len(future_map)
         for idx, future in enumerate(as_completed(future_map), 1):
