@@ -22,7 +22,7 @@ const validPoint = (point) => point
   && point.latitude >= -90 && point.latitude <= 90
   && point.longitude >= -180 && point.longitude <= 180
   && point.coordinateSystem === 'wgs84'
-  && ['catalog', 'geocoder', 'fallback', 'inferred'].includes(point.coordinateSource)
+  && ['catalog', 'geocoder', 'osm', 'fallback', 'inferred'].includes(point.coordinateSource)
   && typeof point.placeId === 'string' && point.placeId.length > 0;
 
 assert(Array.isArray(list) && list.length > 0, 'tours-list.json must be a non-empty array');
@@ -106,10 +106,26 @@ const blueBellSourceTours = sourceTours.filter((tour) => String(tour.title || ''
 const blueBellIndexedTours = list.filter((tour) => String(tour.title || '').includes('蓝钟'));
 assert(blueBellSourceTours.length > 0, 'fixture data must include 蓝钟 destination examples');
 assert(blueBellSourceTours.every((tour) => tour.destinationPlaceName?.includes('蓝钟')), '蓝钟 titles must retain the mined named destination');
-assert(blueBellSourceTours.every((tour) => tour.destinationCoordinateSource === 'fallback'), 'unverified 蓝钟 coordinates must be marked as fallback');
+assert(blueBellSourceTours.every((tour) => ['geocoder', 'fallback'].includes(tour.destinationCoordinateSource)), '蓝钟 destinations must retain a searched or explicit coarse coordinate');
+assert(blueBellSourceTours.every((tour) => tour.destinationCoordinatePrecision === 'approximate'), '蓝钟 destinations must be visibly approximate until a POI match is verified');
 assert(blueBellIndexedTours.length === blueBellSourceTours.length, '蓝钟 examples must survive into the map index');
-assert(blueBellIndexedTours.every((tour) => tour.geo?.destination), '蓝钟 fallback destinations must remain map-selectable');
-assert(blueBellIndexedTours.every((tour) => places.some((place) => place.placeId === tour.geo.destination.placeId && place.tourIds.includes(tour.id))), '蓝钟 fallback destinations must be indexed in geo-places.json');
+assert(blueBellIndexedTours.every((tour) => tour.geo?.destination), '蓝钟 examples must remain map-selectable when only a coarse coordinate is available');
+assert(blueBellIndexedTours.every((tour) => {
+  const sourceTour = blueBellSourceTours.find((candidate) => candidate.id === tour.id);
+  return sourceTour && tour.geo.destination.name === sourceTour.destinationPlaceName;
+}), '蓝钟 examples must not collapse their displayed destination name');
+assert(blueBellIndexedTours.every((tour) => tour.geo.destination.precision === 'approximate'), '蓝钟 map points must preserve approximate precision');
+const regionTours = sourceTours.filter((tour) => ['广东', '云南', '中国'].includes(String(tour.destination || '').trim()) && tour.geoSource === 'local-region-catalog');
+const regionIndexedTours = list.filter((tour) => regionTours.some((candidate) => candidate.id === tour.id));
+assert(regionTours.length > 0, 'fixture data must include explicit administrative-region destinations');
+assert(regionIndexedTours.length === regionTours.length, 'explicit administrative-region destinations must survive into the map index');
+assert(regionIndexedTours.every((tour) => tour.geo.destination), 'explicit administrative-region destinations must remain map-selectable');
+assert(regionIndexedTours.every((tour) => ['region', 'country'].includes(tour.geo.destination.level)), 'administrative-region points must not be emitted as POIs');
+assert(regionIndexedTours.every((tour) => tour.geo.destination.precision === 'approximate'), 'administrative-region points must preserve approximate precision');
+const unmappedTours = sourceTours.filter((tour) => String(tour.destination || '').trim() === '其他' && tour.geoStatus === 'unmapped');
+const unmappedIndexedTours = list.filter((tour) => unmappedTours.some((candidate) => candidate.id === tour.id));
+assert(unmappedTours.length > 0, 'fixture data must include unsupported destination examples');
+assert(unmappedIndexedTours.every((tour) => tour.geo.status === 'unmapped' && !tour.geo.destination), 'unsupported destinations must remain unmapped without evidence');
 const namedPoiCases = [
   ['七星岩', '肇庆七星岩'],
   ['紫云谷', '肇庆紫云谷'],
@@ -135,7 +151,8 @@ for (const [name, latitude, longitude, locality, district] of precisePoiExpectat
   assert(place?.locality === locality, `${name} must retain its town or street locality`);
   assert(place?.address?.district === district, `${name} must retain its district address`);
 }
-assert(list.some((tour) => String(tour.title || '').includes('七星岩') && tour.geo?.destination?.name === '新兴象窝'), 'incidental 七星岩 itinerary text must not rewrite the destination');
+const incidentalSevenStarSource = sourceTours.find((tour) => String(tour.title || '').includes('七星岩') && tour.destinationPlaceName === '新兴象窝');
+assert(incidentalSevenStarSource && list.some((tour) => tour.id === incidentalSevenStarSource.id && tour.geo?.destination?.name !== '肇庆七星岩'), 'incidental 七星岩 itinerary text must not rewrite the destination');
 const minedAliasCases = [
   ['西溪', '贺州西溪'],
   ['云顶', '龙门云顶'],
