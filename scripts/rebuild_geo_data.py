@@ -63,6 +63,55 @@ def _update_geo_resolution_final(tour: dict) -> None:
         resolution["final"] = {"status": "unmapped"}
 
 
+def _preserve_geo_mining(previous: object, current: object) -> None:
+    """Keep source-mining evidence across a deterministic geo rebuild."""
+    if not isinstance(previous, dict) or not isinstance(current, dict):
+        return
+    old_mining = previous.get("mining") if isinstance(previous.get("mining"), dict) else {}
+    new_mining = current.setdefault("mining", {})
+    for key in ("sourceDetail", "resolvedCandidate"):
+        if old_mining.get(key) and not new_mining.get(key):
+            new_mining[key] = old_mining[key]
+    old_rows = old_mining.get("sourceCandidates")
+    if not isinstance(old_rows, list):
+        return
+    new_rows = new_mining.setdefault("sourceCandidates", [])
+    existing_labels = {
+        str(row.get("label") or "")
+        for row in new_rows
+        if isinstance(row, dict)
+    }
+    for row in old_rows:
+        if not isinstance(row, dict):
+            continue
+        label = str(row.get("label") or "")
+        if label and label not in existing_labels:
+            new_rows.append(row)
+            existing_labels.add(label)
+
+
+def _preserve_existing_precise_geo(previous: object, current: object) -> None:
+    """Do not erase a validated network/OSM point during catalog normalization."""
+    if not isinstance(previous, dict) or not isinstance(current, dict):
+        return
+    source = str(previous.get("destinationCoordinateSource") or "")
+    if source not in {"geocoder", "osm"}:
+        return
+    if not _valid_coordinate_pair(previous.get("destinationLatitude"), previous.get("destinationLongitude")):
+        return
+    current_source = str(current.get("destinationCoordinateSource") or "")
+    if current_source in {"catalog", "osm"} and current_source != "unknown":
+        return
+    for key in (
+        "destinationCity", "destinationPlaceName", "destinationProvince", "destinationCountry",
+        "destinationLatitude", "destinationLongitude", "destinationGeoLevel", "destinationLocality",
+        "destinationCoordinateSource", "destinationCoordinatePrecision", "destinationAddress",
+        "geoConfidence", "geoSource",
+    ):
+        if key in previous:
+            current[key] = previous[key]
+
+
 def _apply_coarse_destination_fallback(tour: dict) -> bool:
     """Keep a mined destination visible when only its parent city is trusted."""
     if _valid_coordinate_pair(tour.get("destinationLatitude"), tour.get("destinationLongitude")):
@@ -107,12 +156,15 @@ def _apply_coarse_destination_fallback(tour: dict) -> bool:
 def rebuild(tours: list[dict], allow_network: bool = False, geocode_cache_path: Path | None = None) -> tuple[int, int]:
     before = sum(1 for tour in tours if tour.get("destinationLatitude") is not None)
     for tour in tours:
+        previous_resolution = tour.get("geoResolution")
         fields, field_sources = normalize_tour_geo(
             tour,
             str(tour.get("title") or ""),
             str(tour.get("destination") or ""),
             tour,
         )
+        _preserve_geo_mining(previous_resolution, fields.get("geoResolution"))
+        _preserve_existing_precise_geo(tour, fields)
         tour.update(fields)
 
         meta = tour.get("meta")

@@ -399,7 +399,8 @@ def _valid_cached_result(label: str, expected_city: str, result: object, expecte
     longitude = result.get("longitude")
     display_name = str(result.get("displayName") or "")
     address = result.get("address")
-    strict_match = _has_named_evidence(label, display_name, expected_city) and _has_admin_evidence(expected_city, display_name)
+    admin_context = expected_city or expected_province
+    strict_match = _has_named_evidence(label, display_name, expected_city) and _has_admin_evidence(admin_context, display_name)
     fuzzy_match = (
         allow_fuzzy
         and result.get("precision") == "approximate"

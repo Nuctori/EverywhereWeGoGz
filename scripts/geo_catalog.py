@@ -220,6 +220,11 @@ PLACES = [
 REGION_ROWS = [
     ("中国", None, ("中国",)),
     ("广东", "广东", ("广东",)), ("广西", "广西", ("广西",)),
+    ("贵州", "贵州", ("贵州",)), ("山东", "山东", ("山东",)),
+    ("河南", "河南", ("河南",)), ("江西", "江西", ("江西",)),
+    ("湖北", "湖北", ("湖北",)), ("重庆", "重庆", ("重庆",)),
+    ("华东", None, ("华东", "江南")), ("青甘", None, ("青甘", "青海甘肃")),
+    ("港澳", None, ("港澳", "港澳地区")),
     ("湖南", "湖南", ("湖南",)), ("福建", "福建", ("福建",)),
     ("海南", "海南", ("海南",)), ("云南", "云南", ("云南",)),
     ("四川", "四川", ("四川",)), ("陕西", "陕西", ("陕西",)),
@@ -234,6 +239,11 @@ REGION_ROWS = [
 REGION_COORDINATES = {
     "中国": (35.8617, 104.1954),
     "广东": (23.3790, 113.7633), "广西": (23.7248, 108.8076),
+    "贵州": (26.8154, 106.8748), "山东": (36.6512, 117.1140),
+    "河南": (34.7657, 113.7536), "江西": (27.6140, 115.7221),
+    "湖北": (30.9756, 112.2707), "重庆": (29.6417, 107.8780),
+    "华东": (31.2304, 121.4737), "青甘": (36.0611, 103.8343),
+    "港澳": (22.3193, 114.1694),
     "湖南": (27.6104, 111.7088), "江西": (27.6140, 115.7221),
     "福建": (26.0789, 117.9874), "海南": (19.1959, 109.7453),
     "四川": (30.6171, 102.7103), "云南": (25.0453, 101.8652),
@@ -441,6 +451,21 @@ def _find_direct_place_match(text):
     return (place, place["name"]) if place else (None, "")
 
 
+def _raw_destination_is_explicit_departure(title, label):
+    """Reject a source destination only for an explicit departure phrase."""
+    value = str(title or "")
+    place = str(label or "")
+    if not place or place not in value:
+        return False
+    escaped = re.escape(place)
+    explicit_patterns = (
+        rf"(?:从|由|自|在|于){escaped}(?:出发|起止|起程|直飞|直航|直达|联运)",
+        rf"{escaped}(?:出发|起止|起程|直飞|直航|直达|联运)",
+        rf"(?:{escaped})(?:[A-Za-z0-9]{{0,8}})(?:出发|起止|起程|直飞|直航|直达|联运)",
+    )
+    return any(re.search(pattern, value) for pattern in explicit_patterns)
+
+
 def _iter_place_mentions(text):
     value = str(text or "")
     matches = []
@@ -644,9 +669,18 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
         if materialized.get("latitude") is None:
             _append_unique(mining.setdefault("reasons", []), "named-alias-without-trusted-coordinate")
         return materialized, direct_label, "medium", "local-place-catalog"
-    if direct_place and direct_place["name"] in title_departure_names:
+    if direct_place and direct_place["name"] in title_departure_names and _raw_destination_is_explicit_departure(
+        title,
+        direct_label,
+    ):
         _append_unique(mining.setdefault("rejectedLabels", []), direct_label)
         _append_unique(mining.setdefault("reasons", []), "destination-matches-departure")
+    elif direct_place:
+        materialized = _materialize_named_place(direct_place, direct_label)
+        mining["status"] = "resolved" if materialized.get("latitude") is not None else "no-coordinate"
+        _append_unique(mining.setdefault("candidateLabels", []), direct_label)
+        _append_unique(mining.setdefault("candidateSources", []), "destination")
+        return materialized, direct_label, "medium", "local-place-catalog"
 
     texts = [str(title or "")]
     detail = detail if isinstance(detail, dict) else {}

@@ -88,9 +88,58 @@ def test_rebuild_keeps_unproven_destination_unmapped():
     assert tour["geoResolution"]["final"]["status"] == "unmapped"
 
 
+def test_rebuild_preserves_source_mining_evidence():
+    tour = {
+        "id": "tour_mined_evidence",
+        "title": "仙女湖行程3天",
+        "destination": "其他",
+        "geoResolution": {
+            "mining": {
+                "sourceDetail": {"status": "content", "itineraryDays": 3},
+                "sourceCandidates": [{"label": "仙女湖", "source": "activity"}],
+            }
+        },
+    }
+
+    rebuild([tour])
+
+    mining = tour["geoResolution"]["mining"]
+    assert mining["sourceDetail"]["status"] == "content"
+    assert mining["sourceCandidates"][0]["label"] == "仙女湖"
+
+
+def test_rebuild_preserves_validated_geocoder_point():
+    tour = {
+        "id": "tour_preserved_geocoder",
+        "title": "意大利深度游5天",
+        "destination": "其他",
+        "destinationPlaceName": "意大利",
+        "destinationCity": "意大利",
+        "destinationProvince": "",
+        "destinationCountry": "意大利",
+        "destinationLatitude": 41.9,
+        "destinationLongitude": 12.5,
+        "destinationGeoLevel": "country",
+        "destinationCoordinateSource": "geocoder",
+        "destinationCoordinatePrecision": "approximate",
+        "destinationAddress": {"formatted": "意大利"},
+        "geoConfidence": "low",
+        "geoSource": "geocoder",
+    }
+
+    rebuild([tour])
+
+    assert tour["destinationPlaceName"] == "意大利"
+    assert tour["destinationLatitude"] == 41.9
+    assert tour["destinationLongitude"] == 12.5
+    assert tour["destinationCoordinateSource"] == "geocoder"
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback()
     test_rebuild_materializes_an_explicit_region_as_approximate()
     test_rebuild_keeps_unproven_destination_unmapped()
+    test_rebuild_preserves_source_mining_evidence()
+    test_rebuild_preserves_validated_geocoder_point()
     print("geo rebuild tests passed")
