@@ -58,5 +58,1606 @@
     "level": "poi",
     "locality": "金渡镇",
     "providerScore": 80
+  },
+  "杭州西湖 邂逅东三省 浙江 中国": {
+    "query": "杭州西湖 邂逅东三省 浙江 中国",
+    "provider": "photon",
+    "latitude": 30.2259049,
+    "longitude": 120.1195323,
+    "displayName": "杭州西湖风景名胜区   杭州市  浙江省 中国",
+    "level": "poi",
+    "locality": "杭州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "杭州西湖风景名胜区   杭州市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "杭州市"
+    }
+  },
+  "山泉湾温泉 恩平 广东 中国": {
+    "query": "山泉湾温泉 恩平 广东 中国",
+    "provider": "nominatim",
+    "latitude": 22.3331035,
+    "longitude": 112.2260634,
+    "displayName": "山泉湾温泉, 恩春东路, 大田镇, 恩平市, 江门市, 广东省, 中国",
+    "level": "poi",
+    "locality": "大田镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "山泉湾温泉, 恩春东路, 大田镇, 恩平市, 江门市, 广东省, 中国"
+    }
+  },
+  "郴州莽山 湖南 中国": {
+    "query": "郴州莽山 湖南 中国",
+    "provider": "arcgis",
+    "latitude": 24.9903003,
+    "longitude": 112.8515876,
+    "displayName": "湖南省郴州宜章县莽山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "湖南省郴州宜章县莽山"
+    }
+  },
+  "高滩温泉 增城 广东 中国": {
+    "query": "高滩温泉 增城 广东 中国",
+    "provider": "nominatim",
+    "latitude": 23.5609895,
+    "longitude": 113.7730548,
+    "displayName": "高滩温泉, X292, 派潭镇, 增城区, 广州市, 广东省, 中国",
+    "level": "poi",
+    "locality": "派潭镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "高滩温泉, X292, 派潭镇, 增城区, 广州市, 广东省, 中国"
+    }
+  },
+  "西江千户苗寨 贵州 中国": {
+    "query": "西江千户苗寨 贵州 中国",
+    "provider": "photon",
+    "latitude": 26.4955484,
+    "longitude": 108.1702247,
+    "displayName": "西江千户苗寨  西江镇 雷山县 黔东南州 贵州省 中国",
+    "level": "poi",
+    "locality": "雷山县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "西江千户苗寨  西江镇 雷山县 黔东南州 贵州省 中国",
+      "country": "中国",
+      "province": "贵州省",
+      "city": "雷山县",
+      "district": "西江镇"
+    }
+  },
+  "德天瀑布 崇左 广西 中国": {
+    "query": "德天瀑布 崇左 广西 中国",
+    "provider": "nominatim",
+    "latitude": 22.8558796,
+    "longitude": 106.7231618,
+    "displayName": "德天瀑布, 德天村, 大新县, 崇左市, 广西壮族自治区, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "德天瀑布, 德天村, 大新县, 崇左市, 广西壮族自治区, 中国"
+    }
+  },
+  "象窝酒店 新兴 广东 中国": {
+    "query": "象窝酒店 新兴 广东 中国",
+    "provider": "nominatim",
+    "latitude": 22.5633143,
+    "longitude": 112.290645,
+    "displayName": "翔顺象窝酒店, 大象路, 大塘坳, 太平镇, 新兴县, 云浮市, 广东省, 527400, 中国",
+    "level": "poi",
+    "locality": "太平镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "翔顺象窝酒店, 大象路, 大塘坳, 太平镇, 新兴县, 云浮市, 广东省, 527400, 中国"
+    }
+  },
+  "上海迪士尼乐园 上海 中国": {
+    "query": "上海迪士尼乐园 上海 中国",
+    "provider": "arcgis",
+    "latitude": 31.146765747828,
+    "longitude": 121.655979376458,
+    "displayName": "上海迪士尼乐园",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "上海迪士尼乐园",
+      "country": "中国",
+      "province": "上海市",
+      "city": "上海市",
+      "district": "川沙新镇",
+      "street": "申迪北路",
+      "houseNumber": "753",
+      "postalCode": "201205"
+    }
+  },
+  "万德大酒店 长沙 湖南 中国": {
+    "query": "万德大酒店 长沙 湖南 中国",
+    "provider": "photon",
+    "latitude": 28.1700793,
+    "longitude": 112.9341313,
+    "displayName": "万德大酒店 师南路 岳麓街道 长沙市 岳麓区 湖南省 中国",
+    "level": "poi",
+    "locality": "云麓园社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "万德大酒店 师南路 岳麓街道 长沙市 岳麓区 湖南省 中国",
+      "country": "中国",
+      "province": "湖南省",
+      "city": "长沙市",
+      "district": "岳麓街道",
+      "locality": "云麓园社区",
+      "street": "师南路",
+      "postalCode": "410083"
+    }
+  },
+  "杭州西湖 浙江 中国": {
+    "query": "杭州西湖 浙江 中国",
+    "provider": "arcgis",
+    "latitude": 30.261695799,
+    "longitude": 120.1256628,
+    "displayName": "浙江省杭州西湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "浙江省杭州西湖"
+    }
+  },
+  "华美达酒店 柳州 广西 中国": {
+    "query": "华美达酒店 柳州 广西 中国",
+    "provider": "nominatim",
+    "latitude": 24.3638694,
+    "longitude": 109.5085705,
+    "displayName": "东城华美达酒店, 安泰路, 雒容镇, 柳东新区, 鱼峰区, 柳州市, 广西壮族自治区, 545616, 中国",
+    "level": "poi",
+    "locality": "雒容镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "东城华美达酒店, 安泰路, 雒容镇, 柳东新区, 鱼峰区, 柳州市, 广西壮族自治区, 545616, 中国"
+    }
+  },
+  "南浔景区 浙江 中国": {
+    "query": "南浔景区 浙江 中国",
+    "provider": "nominatim",
+    "latitude": 30.8718979,
+    "longitude": 120.424047,
+    "displayName": "南浔古镇景区, 南浔古镇景区入口, 南浔镇, 南浔区, 湖州市, 浙江省, 313009, 中国",
+    "level": "poi",
+    "locality": "南浔镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "南浔古镇景区, 南浔古镇景区入口, 南浔镇, 南浔区, 湖州市, 浙江省, 313009, 中国"
+    }
+  },
+  "中山神湾 广东 中国": {
+    "query": "中山神湾 广东 中国",
+    "provider": "arcgis",
+    "latitude": 22.3015179,
+    "longitude": 113.3581491,
+    "displayName": "广东省中山神湾",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "广东省中山神湾"
+    }
+  },
+  "高迁古村 中国": {
+    "query": "高迁古村 中国",
+    "provider": "photon",
+    "latitude": 28.7525639,
+    "longitude": 120.613421,
+    "displayName": "高迁古村   台州市  浙江省 中国",
+    "level": "poi",
+    "locality": "台州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "高迁古村   台州市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "台州市"
+    }
+  },
+  "万仙山景区 河南 中国": {
+    "query": "万仙山景区 河南 中国",
+    "provider": "arcgis",
+    "latitude": 35.728937971298,
+    "longitude": 113.609361558486,
+    "displayName": "万仙山景区",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "万仙山景区",
+      "country": "中国",
+      "province": "河南省",
+      "city": "辉县市",
+      "district": "南马鞍"
+    }
+  },
+  "中山国际酒店 广东 中国": {
+    "query": "中山国际酒店 广东 中国",
+    "provider": "photon",
+    "latitude": 22.5231028,
+    "longitude": 113.3579104,
+    "displayName": "中山国际酒店 中山一路 西区街道 中山市  广东省 中国",
+    "level": "poi",
+    "locality": "中山市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "中山国际酒店 中山一路 西区街道 中山市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "中山市",
+      "district": "西区街道",
+      "street": "中山一路",
+      "postalCode": "528400"
+    }
+  },
+  "广州南沙 广东 中国": {
+    "query": "广州南沙 广东 中国",
+    "provider": "photon",
+    "latitude": 22.7004839,
+    "longitude": 113.5528338,
+    "displayName": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+    "level": "poi",
+    "locality": "福生社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "广州市",
+      "district": "珠江街道",
+      "locality": "福生社区",
+      "street": "同安东围路",
+      "postalCode": "511462"
+    }
+  },
+  "三岔河风景区 中国": {
+    "query": "三岔河风景区 中国",
+    "provider": "arcgis",
+    "latitude": 25.5138442,
+    "longitude": 105.6306545,
+    "displayName": "三岔河风景区",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "三岔河风景区",
+      "country": "中国",
+      "province": "贵州省",
+      "city": "双峰街道",
+      "district": "坡洋"
+    }
+  },
+  "东莞桥头 广东 中国": {
+    "query": "东莞桥头 广东 中国",
+    "provider": "arcgis",
+    "latitude": 23.024657001,
+    "longitude": 114.092272,
+    "displayName": "广东省东莞桥头",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "广东省东莞桥头"
+    }
+  },
+  "关门山国家森林公园 中国": {
+    "query": "关门山国家森林公园 中国",
+    "provider": "photon",
+    "latitude": 41.1135816,
+    "longitude": 124.1828869,
+    "displayName": "关门山国家森林公园   小市镇 本溪市 辽宁省 中国",
+    "level": "poi",
+    "locality": "小市镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "关门山国家森林公园   小市镇 本溪市 辽宁省 中国",
+      "country": "中国",
+      "province": "辽宁省",
+      "city": "小市镇",
+      "district": "本溪市"
+    }
+  },
+  "机场酒店 北京 北京 中国": {
+    "query": "机场酒店 北京 北京 中国",
+    "provider": "nominatim",
+    "latitude": 39.5122768,
+    "longitude": 116.4142033,
+    "displayName": "北京遨途机场酒店, 天兴一街, 九州镇, 广阳区, 廊坊市, 河北省, 102602, 中国",
+    "level": "poi",
+    "locality": "九州镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "北京遨途机场酒店, 天兴一街, 九州镇, 广阳区, 廊坊市, 河北省, 102602, 中国"
+    }
+  },
+  "黄金博物馆 广东 中国": {
+    "query": "黄金博物馆 广东 中国",
+    "provider": "photon",
+    "latitude": 37.4424061,
+    "longitude": 120.4757208,
+    "displayName": "黄金博物馆 罗山路 玲珑镇 烟台市  山东省 中国",
+    "level": "poi",
+    "locality": "罗山黄金生态旅游区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "黄金博物馆 罗山路 玲珑镇 烟台市  山东省 中国",
+      "country": "中国",
+      "province": "山东省",
+      "city": "烟台市",
+      "district": "玲珑镇",
+      "locality": "罗山黄金生态旅游区",
+      "street": "罗山路",
+      "postalCode": "265400"
+    }
+  },
+  "皇冠假日酒店 中国": {
+    "query": "皇冠假日酒店 中国",
+    "provider": "arcgis",
+    "latitude": 31.8428689,
+    "longitude": 117.2100855,
+    "displayName": "皇冠假日酒店",
+    "level": "poi",
+    "locality": "兴民社区",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "皇冠假日酒店",
+      "country": "中国",
+      "province": "安徽省",
+      "city": "合肥市",
+      "district": "井岗镇",
+      "locality": "兴民社区",
+      "street": "黄山路",
+      "postalCode": "230012"
+    }
+  },
+  "连州地下河 佩拉斯特小镇 广东 中国": {
+    "query": "连州地下河 佩拉斯特小镇 广东 中国",
+    "provider": "photon",
+    "latitude": 25.0073651,
+    "longitude": 112.3225839,
+    "displayName": "连州地下河  连州市 清远市  广东省 中国",
+    "level": "poi",
+    "locality": "清远市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "连州地下河  连州市 清远市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "清远市",
+      "district": "连州市"
+    }
+  },
+  "国家博物馆 北京 中国": {
+    "query": "国家博物馆 北京 中国",
+    "provider": "arcgis",
+    "latitude": 39.90365,
+    "longitude": 116.39531,
+    "displayName": "国家博物馆",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "国家博物馆"
+    }
+  },
+  "胡志明市胡志明 中国": {
+    "query": "胡志明市胡志明 中国",
+    "provider": "arcgis",
+    "latitude": 10.82327,
+    "longitude": 106.62978,
+    "displayName": "胡志明市",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 77.0,
+    "address": {
+      "formatted": "胡志明市"
+    }
+  },
+  "喀纳斯湖 禾木景区 新疆 中国": {
+    "query": "喀纳斯湖 禾木景区 新疆 中国",
+    "provider": "arcgis",
+    "latitude": 48.813525714596,
+    "longitude": 87.055551641642,
+    "displayName": "喀纳斯湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80.33,
+    "address": {
+      "formatted": "喀纳斯湖"
+    }
+  },
+  "唐山南湖足球主题酒店 中国": {
+    "query": "唐山南湖足球主题酒店 中国",
+    "provider": "arcgis",
+    "latitude": 39.595813733333,
+    "longitude": 118.1609741,
+    "displayName": "唐山南湖足球主题酒店",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "唐山南湖足球主题酒店",
+      "country": "中国",
+      "province": "河北省",
+      "city": "唐山市",
+      "district": "惠民道街道",
+      "street": "南湖大道",
+      "postalCode": "063000"
+    }
+  },
+  "那拉提草原 新疆 中国": {
+    "query": "那拉提草原 新疆 中国",
+    "provider": "arcgis",
+    "latitude": 43.317004801,
+    "longitude": 84.0238285,
+    "displayName": "那拉提草原",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "那拉提草原"
+    }
+  },
+  "宁夏博物馆 内蒙古 中国": {
+    "query": "宁夏博物馆 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 38.4844578,
+    "longitude": 106.2307292,
+    "displayName": "宁夏博物馆 人民广场东街 上海西路街道 银川市  宁夏回族自治区 中国",
+    "level": "poi",
+    "locality": "银川市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "宁夏博物馆 人民广场东街 上海西路街道 银川市  宁夏回族自治区 中国",
+      "country": "中国",
+      "province": "宁夏回族自治区",
+      "city": "银川市",
+      "district": "上海西路街道",
+      "street": "人民广场东街",
+      "postalCode": "750000"
+    }
+  },
+  "宁夏博物馆 广东 中国": {
+    "query": "宁夏博物馆 广东 中国",
+    "provider": "arcgis",
+    "latitude": 38.48445775,
+    "longitude": 106.23072915,
+    "displayName": "宁夏博物馆",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 86.89,
+    "address": {
+      "formatted": "宁夏博物馆",
+      "country": "中国",
+      "province": "宁夏回族自治区",
+      "city": "银川市",
+      "district": "上海西路街道",
+      "street": "人民广场东街",
+      "postalCode": "750000"
+    }
+  },
+  "玉龙雪山 双动6天丨丽大双古城丨 丽江 云南 中国": {
+    "query": "玉龙雪山 双动6天丨丽大双古城丨 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "玉龙雪山 篝火晚会丨喜洲古镇 丽江 云南 中国": {
+    "query": "玉龙雪山 篝火晚会丨喜洲古镇 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "原始森林公园 云南 中国": {
+    "query": "原始森林公园 云南 中国",
+    "provider": "arcgis",
+    "latitude": 22.0306077,
+    "longitude": 100.8730022,
+    "displayName": "原始森林公园",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "原始森林公园",
+      "country": "中国",
+      "province": "云南省",
+      "city": "景洪市 ᦵᦋᧂ ᦣᦳᧂᧈ ᦉᦹᧈ",
+      "district": "江北街道",
+      "street": "景打高速",
+      "postalCode": "666100"
+    }
+  },
+  "玉龙雪山 生态廊道丨喜洲古镇 丽江 云南 中国": {
+    "query": "玉龙雪山 生态廊道丨喜洲古镇 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "玉龙雪山 束河古镇 丽江 云南 中国": {
+    "query": "玉龙雪山 束河古镇 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "玉龙雪山 川大索道丨喜洲古镇 丽江 云南 中国": {
+    "query": "玉龙雪山 川大索道丨喜洲古镇 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "西双版纳版纳 云南 中国": {
+    "query": "西双版纳版纳 云南 中国",
+    "provider": "arcgis",
+    "latitude": 21.931091508244,
+    "longitude": 100.944361058177,
+    "displayName": "云南省西双版纳",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 91.9,
+    "address": {
+      "formatted": "云南省西双版纳"
+    }
+  },
+  "乌镇西栅景区 浙江 中国": {
+    "query": "乌镇西栅景区 浙江 中国",
+    "provider": "arcgis",
+    "latitude": 30.755668956625,
+    "longitude": 120.48030012886,
+    "displayName": "乌镇西栅景区",
+    "level": "town",
+    "locality": "幸福新村",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "乌镇西栅景区",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "嘉兴市",
+      "district": "乌镇镇",
+      "locality": "幸福新村",
+      "street": "云享路",
+      "postalCode": "314501"
+    }
+  },
+  "张家界森林公园 湖南 中国": {
+    "query": "张家界森林公园 湖南 中国",
+    "provider": "nominatim",
+    "latitude": 29.0502892,
+    "longitude": 110.4786156,
+    "displayName": "张家界天门山国家森林公园, 天门山国家森林公园, 永定区, 张家界市, 湖南省, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "张家界天门山国家森林公园, 天门山国家森林公园, 永定区, 张家界市, 湖南省, 中国"
+    }
+  },
+  "宁夏博物馆 中国": {
+    "query": "宁夏博物馆 中国",
+    "provider": "arcgis",
+    "latitude": 38.48445775,
+    "longitude": 106.23072915,
+    "displayName": "宁夏博物馆",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "宁夏博物馆",
+      "country": "中国",
+      "province": "宁夏回族自治区",
+      "city": "银川市",
+      "district": "上海西路街道",
+      "street": "人民广场东街",
+      "postalCode": "750000"
+    }
+  },
+  "三峡博物馆 重庆 中国": {
+    "query": "三峡博物馆 重庆 中国",
+    "provider": "arcgis",
+    "latitude": 29.564791741199,
+    "longitude": 106.546596780797,
+    "displayName": "三峡博物馆",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "三峡博物馆",
+      "country": "中国",
+      "province": "重庆市",
+      "city": "渝中区",
+      "district": "上清寺街道",
+      "street": "人民路",
+      "houseNumber": "236",
+      "postalCode": "400015"
+    }
+  },
+  "漳州土楼 夜丨红色古田丨沙县 福建 中国": {
+    "query": "漳州土楼 夜丨红色古田丨沙县 福建 中国",
+    "provider": "arcgis",
+    "latitude": 24.82083,
+    "longitude": 117.68667,
+    "displayName": "福建漳州土楼",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 79.11,
+    "address": {
+      "formatted": "福建漳州土楼"
+    }
+  },
+  "秦始皇兵马俑博物馆 中国": {
+    "query": "秦始皇兵马俑博物馆 中国",
+    "provider": "photon",
+    "latitude": 34.3873627,
+    "longitude": 109.277673,
+    "displayName": "秦始皇兵马俑博物馆  临潼区 西安市  陕西省 中国",
+    "level": "poi",
+    "locality": "西安市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "秦始皇兵马俑博物馆  临潼区 西安市  陕西省 中国",
+      "country": "中国",
+      "province": "陕西省",
+      "city": "西安市",
+      "district": "临潼区"
+    }
+  },
+  "玉龙雪山 唱游洱海丨喜洲古镇 丽江 云南 中国": {
+    "query": "玉龙雪山 唱游洱海丨喜洲古镇 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "北京环球度假区 北京 中国": {
+    "query": "北京环球度假区 北京 中国",
+    "provider": "arcgis",
+    "latitude": 39.85551090721,
+    "longitude": 116.67791763654,
+    "displayName": "北京环球度假区",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "北京环球度假区",
+      "country": "中国",
+      "province": "北京市",
+      "city": "北京市",
+      "district": "文景街道",
+      "postalCode": "100010"
+    }
+  },
+  "美泉谷 直通车】 龙门 广东 中国": {
+    "query": "美泉谷 直通车】 龙门 广东 中国",
+    "provider": "photon",
+    "latitude": 23.6643218,
+    "longitude": 113.9543503,
+    "displayName": "美泉谷  龙门县 惠州市  广东省 中国",
+    "level": "poi",
+    "locality": "惠州市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "美泉谷  龙门县 惠州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "惠州市",
+      "district": "龙门县"
+    }
+  },
+  "美林湖 清远 广东 中国": {
+    "query": "美林湖 清远 广东 中国",
+    "provider": "photon",
+    "latitude": 23.5016559,
+    "longitude": 113.0446176,
+    "displayName": "美林湖 美林湖大道 石角镇 清远市  广东省 中国",
+    "level": "poi",
+    "locality": "清远市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "美林湖 美林湖大道 石角镇 清远市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "清远市",
+      "district": "石角镇",
+      "street": "美林湖大道"
+    }
+  },
+  "赤坎古镇 江门赤坎古镇 江门 广东 中国": {
+    "query": "赤坎古镇 江门赤坎古镇 江门 广东 中国",
+    "provider": "photon",
+    "latitude": 22.3270909,
+    "longitude": 112.5866131,
+    "displayName": "赤坎古镇  赤坎镇 江门市  广东省 中国",
+    "level": "poi",
+    "locality": "江门市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "赤坎古镇  赤坎镇 江门市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "江门市",
+      "district": "赤坎镇"
+    }
+  },
+  "连州地下河 广东 中国": {
+    "query": "连州地下河 广东 中国",
+    "provider": "arcgis",
+    "latitude": 25.0038859,
+    "longitude": 112.3189042,
+    "displayName": "连州地下河",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "连州地下河",
+      "country": "中国",
+      "province": "广东省",
+      "city": "清远市",
+      "district": "连州市"
+    }
+  },
+  "天适樱花悠乐园 从化 广东 中国": {
+    "query": "天适樱花悠乐园 从化 广东 中国",
+    "provider": "nominatim",
+    "latitude": 23.6305129,
+    "longitude": 113.5877891,
+    "displayName": "天适樱花悠乐园, 城郊街道, 从化区, 广州市, 广东省, 中国",
+    "level": "poi",
+    "locality": "城郊街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "天适樱花悠乐园, 城郊街道, 从化区, 广州市, 广东省, 中国"
+    }
+  },
+  "龙门地派 广东 中国": {
+    "query": "龙门地派 广东 中国",
+    "provider": "arcgis",
+    "latitude": 23.842248,
+    "longitude": 114.074151,
+    "displayName": "广东省惠州市龙门地派",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "广东省惠州市龙门地派"
+    }
+  },
+  "芭提雅酒店 中国": {
+    "query": "芭提雅酒店 中国",
+    "provider": "photon",
+    "latitude": 35.4827124,
+    "longitude": 108.3470224,
+    "displayName": "芭提雅酒店 正宁 - 平泉  正宁县 庆阳市 甘肃省 中国",
+    "level": "poi",
+    "locality": "正宁县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "芭提雅酒店 正宁 - 平泉  正宁县 庆阳市 甘肃省 中国",
+      "country": "中国",
+      "province": "甘肃省",
+      "city": "正宁县",
+      "district": "庆阳市",
+      "street": "正宁 - 平泉"
+    }
+  },
+  "重庆武隆 >广州 重庆 中国": {
+    "query": "重庆武隆 >广州 重庆 中国",
+    "provider": "arcgis",
+    "latitude": 29.32431,
+    "longitude": 107.76056,
+    "displayName": "重庆重庆市武隆",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.16,
+    "address": {
+      "formatted": "重庆重庆市武隆"
+    }
+  },
+  "重庆武隆 重庆 中国": {
+    "query": "重庆武隆 重庆 中国",
+    "provider": "arcgis",
+    "latitude": 29.32431,
+    "longitude": 107.76056,
+    "displayName": "重庆重庆市武隆",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 89.1,
+    "address": {
+      "formatted": "重庆重庆市武隆"
+    }
+  },
+  "北洛秘境 阳江 广东 中国": {
+    "query": "北洛秘境 阳江 广东 中国",
+    "provider": "nominatim",
+    "latitude": 21.5679755,
+    "longitude": 111.8206064,
+    "displayName": "北洛秘境, 北洛湾大道, 方塘村, 莳元村, 闸坡镇, 海陵岛经济开发试验区, 江城区, 阳江市, 广东省, 中国",
+    "level": "poi",
+    "locality": "闸坡镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "北洛秘境, 北洛湾大道, 方塘村, 莳元村, 闸坡镇, 海陵岛经济开发试验区, 江城区, 阳江市, 广东省, 中国"
+    }
+  },
+  "漳州土楼 福建 中国": {
+    "query": "漳州土楼 福建 中国",
+    "provider": "arcgis",
+    "latitude": 24.82083,
+    "longitude": 117.68667,
+    "displayName": "福建漳州土楼",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "福建漳州土楼"
+    }
+  },
+  "洛伽寺 >广州 泉州 福建 中国": {
+    "query": "洛伽寺 >广州 泉州 福建 中国",
+    "provider": "photon",
+    "latitude": 24.6762788,
+    "longitude": 118.7080767,
+    "displayName": "洛伽寺 红塔湾旅游公路 永宁镇 石狮市 泉州市 福建省 中国",
+    "level": "poi",
+    "locality": "石狮市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "洛伽寺 红塔湾旅游公路 永宁镇 石狮市 泉州市 福建省 中国",
+      "country": "中国",
+      "province": "福建省",
+      "city": "石狮市",
+      "district": "永宁镇",
+      "street": "红塔湾旅游公路"
+    }
+  },
+  "安远三百山 东江源头 5a 江西 中国": {
+    "query": "安远三百山 东江源头 5a 江西 中国",
+    "provider": "arcgis",
+    "latitude": 24.950788,
+    "longitude": 115.371887,
+    "displayName": "江西省赣州市安远三百山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 79.2,
+    "address": {
+      "formatted": "江西省赣州市安远三百山"
+    }
+  },
+  "洛伽寺 >广州往返海上佛国 泉州 福建 中国": {
+    "query": "洛伽寺 >广州往返海上佛国 泉州 福建 中国",
+    "provider": "photon",
+    "latitude": 24.6762788,
+    "longitude": 118.7080767,
+    "displayName": "洛伽寺 红塔湾旅游公路 永宁镇 石狮市 泉州市 福建省 中国",
+    "level": "poi",
+    "locality": "石狮市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "洛伽寺 红塔湾旅游公路 永宁镇 石狮市 泉州市 福建省 中国",
+      "country": "中国",
+      "province": "福建省",
+      "city": "石狮市",
+      "district": "永宁镇",
+      "street": "红塔湾旅游公路"
+    }
+  },
+  "重庆仙女山 重庆 中国": {
+    "query": "重庆仙女山 重庆 中国",
+    "provider": "arcgis",
+    "latitude": 29.4303709,
+    "longitude": 107.7639419,
+    "displayName": "重庆市武隆区仙女山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "重庆市武隆区仙女山"
+    }
+  },
+  "玉龙雪山 丽江 云南 中国": {
+    "query": "玉龙雪山 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "中国国家博物馆 北京 中国": {
+    "query": "中国国家博物馆 北京 中国",
+    "provider": "arcgis",
+    "latitude": 39.903715524836,
+    "longitude": 116.395392009726,
+    "displayName": "中国国家博物馆",
+    "level": "poi",
+    "locality": "南池子社区",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "中国国家博物馆",
+      "country": "中国",
+      "city": "北京市",
+      "district": "东城区",
+      "locality": "南池子社区",
+      "street": "东长安街",
+      "houseNumber": "16",
+      "postalCode": "100006"
+    }
+  },
+  "乌镇景区 浙江 中国": {
+    "query": "乌镇景区 浙江 中国",
+    "provider": "nominatim",
+    "latitude": 30.756966,
+    "longitude": 120.4791279,
+    "displayName": "乌镇西栅景区, 慈云路, 虹桥村, 乌镇镇, 桐乡市, 嘉兴市, 浙江省, 314501, 中国",
+    "level": "poi",
+    "locality": "乌镇镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "乌镇西栅景区, 慈云路, 虹桥村, 乌镇镇, 桐乡市, 嘉兴市, 浙江省, 314501, 中国"
+    }
+  },
+  "上海艺龙酒店 上海 中国": {
+    "query": "上海艺龙酒店 上海 中国",
+    "provider": "photon",
+    "latitude": 31.236409,
+    "longitude": 121.4749291,
+    "displayName": "上海艺龙酒店 九江路 南京东路街道 黄浦区  上海市 中国",
+    "level": "poi",
+    "locality": "云南中路社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "上海艺龙酒店 九江路 南京东路街道 黄浦区  上海市 中国",
+      "country": "中国",
+      "province": "上海市",
+      "city": "黄浦区",
+      "district": "南京东路街道",
+      "locality": "云南中路社区",
+      "street": "九江路",
+      "postalCode": "200085"
+    }
+  },
+  "上海浦东温德姆酒店 上海 中国": {
+    "query": "上海浦东温德姆酒店 上海 中国",
+    "provider": "photon",
+    "latitude": 31.1790221,
+    "longitude": 121.6984308,
+    "displayName": "上海浦东温德姆酒店 川沙路 川沙新镇 浦东新区  上海市 中国",
+    "level": "poi",
+    "locality": "浦东新区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "上海浦东温德姆酒店 川沙路 川沙新镇 浦东新区  上海市 中国",
+      "country": "中国",
+      "province": "上海市",
+      "city": "浦东新区",
+      "district": "川沙新镇",
+      "street": "川沙路",
+      "postalCode": "201205"
+    }
+  },
+  "上海皇廷花园酒店 迪士尼度假区 上海 中国": {
+    "query": "上海皇廷花园酒店 迪士尼度假区 上海 中国",
+    "provider": "arcgis",
+    "latitude": 31.201657226241,
+    "longitude": 121.674935408637,
+    "displayName": "上海皇廷花园酒店",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80.28,
+    "address": {
+      "formatted": "上海皇廷花园酒店",
+      "country": "中国",
+      "province": "上海市",
+      "city": "上海市",
+      "district": "川沙新镇",
+      "street": "华夏东路",
+      "houseNumber": "1539",
+      "postalCode": "201201"
+    }
+  },
+  "上海浦东丽晶酒店 上海 中国": {
+    "query": "上海浦东丽晶酒店 上海 中国",
+    "provider": "arcgis",
+    "latitude": 31.236152126579,
+    "longitude": 121.505858692242,
+    "displayName": "上海浦东丽晶酒店",
+    "level": "poi",
+    "locality": "陆家渡",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "上海浦东丽晶酒店",
+      "country": "中国",
+      "province": "上海",
+      "city": "上海市",
+      "district": "陆家嘴街道",
+      "locality": "陆家渡",
+      "street": "世纪大道",
+      "houseNumber": "210号",
+      "postalCode": "200010"
+    }
+  },
+  "上海外滩茂悦大酒店 上海 中国": {
+    "query": "上海外滩茂悦大酒店 上海 中国",
+    "provider": "photon",
+    "latitude": 31.2473138,
+    "longitude": 121.4883861,
+    "displayName": "上海外滩茂悦大酒店 黄浦路 北外滩街道 Shanghai  上海市 中国",
+    "level": "poi",
+    "locality": "三角地",
+    "providerScore": 80,
+    "address": {
+      "formatted": "上海外滩茂悦大酒店 黄浦路 北外滩街道 Shanghai  上海市 中国",
+      "country": "中国",
+      "province": "上海市",
+      "city": "Shanghai",
+      "district": "北外滩街道",
+      "locality": "三角地",
+      "street": "黄浦路",
+      "houseNumber": "199",
+      "postalCode": "200080"
+    }
+  },
+  "玉龙雪山 、昆明双飞一动6天＊ 丽江 云南 中国": {
+    "query": "玉龙雪山 、昆明双飞一动6天＊ 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "玉龙雪山 、双飞一动6天＊ 丽江 云南 中国": {
+    "query": "玉龙雪山 、双飞一动6天＊ 丽江 云南 中国",
+    "provider": "photon",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山   丽江市  云南省 中国",
+    "level": "poi",
+    "locality": "丽江市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山   丽江市  云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "丽江市"
+    }
+  },
+  "国际大酒店 崇左 广西 中国": {
+    "query": "国际大酒店 崇左 广西 中国",
+    "provider": "nominatim",
+    "latitude": 22.4098713,
+    "longitude": 107.3355597,
+    "displayName": "凯玄国际大酒店, 城西路, 江南街道, 江州区, 江南街道, 江州区, 崇左市, 广西壮族自治区, 中国",
+    "level": "poi",
+    "locality": "江南街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "凯玄国际大酒店, 城西路, 江南街道, 江州区, 江南街道, 江州区, 崇左市, 广西壮族自治区, 中国"
+    }
+  },
+  "天门山国家森林公园 中国": {
+    "query": "天门山国家森林公园 中国",
+    "provider": "arcgis",
+    "latitude": 29.071580666667,
+    "longitude": 110.4707193,
+    "displayName": "天门山国家森林公园",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "天门山国家森林公园",
+      "country": "中国",
+      "province": "湖南省",
+      "city": "永定区",
+      "district": "张家界市"
+    }
+  },
+  "张家界国家森林公园 湖南 中国": {
+    "query": "张家界国家森林公园 湖南 中国",
+    "provider": "nominatim",
+    "latitude": 29.0502892,
+    "longitude": 110.4786156,
+    "displayName": "张家界天门山国家森林公园, 天门山国家森林公园, 永定区, 张家界市, 湖南省, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "张家界天门山国家森林公园, 天门山国家森林公园, 永定区, 张家界市, 湖南省, 中国"
+    }
+  },
+  "洛伽寺 泉州 福建 中国": {
+    "query": "洛伽寺 泉州 福建 中国",
+    "provider": "photon",
+    "latitude": 24.6762788,
+    "longitude": 118.7080767,
+    "displayName": "洛伽寺 红塔湾旅游公路 永宁镇 石狮市 泉州市 福建省 中国",
+    "level": "poi",
+    "locality": "石狮市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "洛伽寺 红塔湾旅游公路 永宁镇 石狮市 泉州市 福建省 中国",
+      "country": "中国",
+      "province": "福建省",
+      "city": "石狮市",
+      "district": "永宁镇",
+      "street": "红塔湾旅游公路"
+    }
+  },
+  "永定土楼 福建 中国": {
+    "query": "永定土楼 福建 中国",
+    "provider": "arcgis",
+    "latitude": 24.672738601,
+    "longitude": 116.9777977,
+    "displayName": "永定土楼",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "永定土楼",
+      "country": "中国",
+      "province": "福建省",
+      "city": "龙岩市",
+      "district": "永定区",
+      "street": "漳武高速"
+    }
+  },
+  "铂丽斯大酒店 夜宿尼山景区 威海 山东 中国": {
+    "query": "铂丽斯大酒店 夜宿尼山景区 威海 山东 中国",
+    "provider": "photon",
+    "latitude": 37.4209537,
+    "longitude": 122.161906,
+    "displayName": "铂丽斯大酒店 黄海路 威海经济技术开发区 威海市  山东省 中国",
+    "level": "poi",
+    "locality": "皇冠街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "铂丽斯大酒店 黄海路 威海经济技术开发区 威海市  山东省 中国",
+      "country": "中国",
+      "province": "山东省",
+      "city": "威海市",
+      "district": "威海经济技术开发区",
+      "locality": "皇冠街道",
+      "street": "黄海路",
+      "postalCode": "264200"
+    }
+  },
+  "秦始皇兵马俑博物馆 广东 中国": {
+    "query": "秦始皇兵马俑博物馆 广东 中国",
+    "provider": "photon",
+    "latitude": 34.3873627,
+    "longitude": 109.277673,
+    "displayName": "秦始皇兵马俑博物馆  临潼区 西安市  陕西省 中国",
+    "level": "poi",
+    "locality": "西安市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "秦始皇兵马俑博物馆  临潼区 西安市  陕西省 中国",
+      "country": "中国",
+      "province": "陕西省",
+      "city": "西安市",
+      "district": "临潼区"
+    }
+  },
+  "伏尔加庄园 哈尔滨 黑龙江 中国": {
+    "query": "伏尔加庄园 哈尔滨 黑龙江 中国",
+    "provider": "photon",
+    "latitude": 45.6722573,
+    "longitude": 126.8976287,
+    "displayName": "伏尔加庄园 哈成路 成高子镇 哈尔滨市 香坊区 黑龙江省 中国",
+    "level": "poi",
+    "locality": "哈尔滨市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "伏尔加庄园 哈成路 成高子镇 哈尔滨市 香坊区 黑龙江省 中国",
+      "country": "中国",
+      "province": "黑龙江省",
+      "city": "哈尔滨市",
+      "district": "成高子镇",
+      "street": "哈成路",
+      "postalCode": "150000"
+    }
+  },
+  "星星酒店 中国": {
+    "query": "星星酒店 中国",
+    "provider": "arcgis",
+    "latitude": 22.31684,
+    "longitude": 114.16949,
+    "displayName": "星星酒店",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "星星酒店"
+    }
+  },
+  "黑城弱水胡杨林景区 中国": {
+    "query": "黑城弱水胡杨林景区 中国",
+    "provider": "photon",
+    "latitude": 41.8063815,
+    "longitude": 101.017426,
+    "displayName": "黑城弱水胡杨林景区   巴彦陶来苏木 ᠪᠠᠶᠠᠨᠲᠣᠣᠷᠠᠢ 额济纳旗 ᠡᠵᠡᠨ᠎ᠡ ᠬᠣᠰᠢᠭᠤ 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+    "level": "poi",
+    "locality": "巴彦陶来苏木 ᠪᠠᠶᠠᠨᠲᠣᠣᠷᠠᠢ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "黑城弱水胡杨林景区   巴彦陶来苏木 ᠪᠠᠶᠠᠨᠲᠣᠣᠷᠠᠢ 额济纳旗 ᠡᠵᠡᠨ᠎ᠡ ᠬᠣᠰᠢᠭᠤ 内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+      "country": "中国",
+      "province": "内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ",
+      "city": "巴彦陶来苏木 ᠪᠠᠶᠠᠨᠲᠣᠣᠷᠠᠢ",
+      "district": "额济纳旗 ᠡᠵᠡᠨ᠎ᠡ ᠬᠣᠰᠢᠭᠤ"
+    }
+  },
+  "沙漠星星酒店 中国": {
+    "query": "沙漠星星酒店 中国",
+    "provider": "arcgis",
+    "latitude": 37.512,
+    "longitude": 104.965,
+    "displayName": "沙漠星星酒店",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "沙漠星星酒店",
+      "country": "中国",
+      "province": "宁夏回族自治区",
+      "district": "沙坡头区",
+      "street": "乌玛高速"
+    }
+  },
+  "香格里拉大酒店 莫尼山非遗小镇 云南 中国": {
+    "query": "香格里拉大酒店 莫尼山非遗小镇 云南 中国",
+    "provider": "photon",
+    "latitude": 27.8266346,
+    "longitude": 99.7050858,
+    "displayName": "香格里拉大酒店 池慈卡街 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ། 迪庆藏族自治州 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ་གྲོང་ཁྱེར། 云南省 中国",
+    "level": "poi",
+    "locality": "迪庆藏族自治州",
+    "providerScore": 80,
+    "address": {
+      "formatted": "香格里拉大酒店 池慈卡街 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ། 迪庆藏族自治州 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ་གྲོང་ཁྱེར། 云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "迪庆藏族自治州",
+      "district": "香格里拉市 སེམས་ཀྱི་ཉི་ཟླ།",
+      "street": "池慈卡街",
+      "houseNumber": "1号",
+      "postalCode": "674400"
+    }
+  },
+  "呼伦湖 呼伦贝尔 内蒙古 中国": {
+    "query": "呼伦湖 呼伦贝尔 内蒙古 中国",
+    "provider": "photon",
+    "latitude": 49.3236395,
+    "longitude": 117.6535159,
+    "displayName": "呼伦湖  达赉苏木 呼伦贝尔市 ᠬᠥᠯᠥᠨ ᠪᠤᠶᠢᠷ  内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+    "level": "poi",
+    "locality": "呼伦贝尔市 ᠬᠥᠯᠥᠨ ᠪᠤᠶᠢᠷ",
+    "providerScore": 80,
+    "address": {
+      "formatted": "呼伦湖  达赉苏木 呼伦贝尔市 ᠬᠥᠯᠥᠨ ᠪᠤᠶᠢᠷ  内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ 中国",
+      "country": "中国",
+      "province": "内蒙古自治区 ᠦᠪᠦᠷ ᠮᠣᠩᠭᠤᠯ ᠤᠨ ᠥᠪᠡᠷᠲᠡᠭᠡᠨ ᠵᠠᠰᠠᠬᠣ ᠣᠷᠣᠨ",
+      "city": "呼伦贝尔市 ᠬᠥᠯᠥᠨ ᠪᠤᠶᠢᠷ",
+      "district": "达赉苏木"
+    }
+  },
+  "伏尔加庄园 吉林住松花湖度假区 哈尔滨 黑龙江 中国": {
+    "query": "伏尔加庄园 吉林住松花湖度假区 哈尔滨 黑龙江 中国",
+    "provider": "photon",
+    "latitude": 45.6722573,
+    "longitude": 126.8976287,
+    "displayName": "伏尔加庄园 哈成路 成高子镇 哈尔滨市 香坊区 黑龙江省 中国",
+    "level": "poi",
+    "locality": "哈尔滨市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "伏尔加庄园 哈成路 成高子镇 哈尔滨市 香坊区 黑龙江省 中国",
+      "country": "中国",
+      "province": "黑龙江省",
+      "city": "哈尔滨市",
+      "district": "成高子镇",
+      "street": "哈成路",
+      "postalCode": "150000"
+    }
+  },
+  "尚客优快捷酒店 线跨境俄罗斯布市 洛阳市 河南省 中国": {
+    "query": "尚客优快捷酒店 线跨境俄罗斯布市 洛阳市 河南省 中国",
+    "provider": "arcgis",
+    "latitude": 34.616933699,
+    "longitude": 112.4770209,
+    "displayName": "尚客优快捷酒店(洛阳旗舰店)",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 70.52,
+    "address": {
+      "formatted": "尚客优快捷酒店(洛阳旗舰店)"
+    }
+  },
+  "广州南沙 大湾区 广东 中国": {
+    "query": "广州南沙 大湾区 广东 中国",
+    "provider": "photon",
+    "latitude": 22.7004839,
+    "longitude": 113.5528338,
+    "displayName": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+    "level": "poi",
+    "locality": "福生社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "广州市",
+      "district": "珠江街道",
+      "locality": "福生社区",
+      "street": "同安东围路",
+      "postalCode": "511462"
+    }
+  },
+  "广州南沙 小乌镇 大湾区 广东 中国": {
+    "query": "广州南沙 小乌镇 大湾区 广东 中国",
+    "provider": "arcgis",
+    "latitude": 22.804391301,
+    "longitude": 113.5198188,
+    "displayName": "广东省广州南沙",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 79.2,
+    "address": {
+      "formatted": "广东省广州南沙"
+    }
+  },
+  "御温泉 御温泉公区 珠海 广东 中国": {
+    "query": "御温泉 御温泉公区 珠海 广东 中国",
+    "provider": "photon",
+    "latitude": 22.2488525,
+    "longitude": 113.1916142,
+    "displayName": "御温泉 斗门大道 斗门镇 珠海市  广东省 中国",
+    "level": "poi",
+    "locality": "珠海市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "御温泉 斗门大道 斗门镇 珠海市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "珠海市",
+      "district": "斗门镇",
+      "street": "斗门大道"
+    }
+  },
+  "东莞观澜湖度假酒店 广东 中国": {
+    "query": "东莞观澜湖度假酒店 广东 中国",
+    "provider": "photon",
+    "latitude": 22.7831684,
+    "longitude": 114.005058,
+    "displayName": "东莞观澜湖度假酒店 明月湖路 塘厦镇 东莞市  广东省 中国",
+    "level": "poi",
+    "locality": "东莞市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "东莞观澜湖度假酒店 明月湖路 塘厦镇 东莞市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "东莞市",
+      "district": "塘厦镇",
+      "street": "明月湖路",
+      "postalCode": "523722"
+    }
+  },
+  "珠海粤财皇冠假日酒店 广东 中国": {
+    "query": "珠海粤财皇冠假日酒店 广东 中国",
+    "provider": "arcgis",
+    "latitude": 22.255477454442,
+    "longitude": 113.572152285471,
+    "displayName": "珠海粤财皇冠假日酒店",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "珠海粤财皇冠假日酒店"
+    }
+  },
+  "格力东澳大酒店 珠海 广东 中国": {
+    "query": "格力东澳大酒店 珠海 广东 中国",
+    "provider": "photon",
+    "latitude": 22.0221702,
+    "longitude": 113.698629,
+    "displayName": "格力东澳大酒店  珠海万山海洋开发试验区 珠海市  广东省 中国",
+    "level": "poi",
+    "locality": "万山镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "格力东澳大酒店  珠海万山海洋开发试验区 珠海市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "珠海市",
+      "district": "珠海万山海洋开发试验区",
+      "locality": "万山镇",
+      "postalCode": "519000"
+    }
+  },
+  "顺德美的臻品之选酒店 佛山 广东 中国": {
+    "query": "顺德美的臻品之选酒店 佛山 广东 中国",
+    "provider": "nominatim",
+    "latitude": 22.9484517,
+    "longitude": 113.2112112,
+    "displayName": "顺德美的臻品之选酒店, 6, 北滘堤岸绿道, 北滘镇, 顺德区, 佛山市, 顺德区, 广东省, 528311, 中国",
+    "level": "poi",
+    "locality": "北滘镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "顺德美的臻品之选酒店, 6, 北滘堤岸绿道, 北滘镇, 顺德区, 佛山市, 顺德区, 广东省, 528311, 中国"
+    }
+  },
+  "小径湾艾美酒店 惠州 广东 中国": {
+    "query": "小径湾艾美酒店 惠州 广东 中国",
+    "provider": "photon",
+    "latitude": 22.7920698,
+    "longitude": 114.6866051,
+    "displayName": "小径湾艾美酒店 海润南路 惠州大亚湾经济技术开发区 Huizhou  Guangdong 中国",
+    "level": "poi",
+    "locality": "霞涌街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "小径湾艾美酒店 海润南路 惠州大亚湾经济技术开发区 Huizhou  Guangdong 中国",
+      "country": "中国",
+      "province": "Guangdong",
+      "city": "Huizhou",
+      "district": "惠州大亚湾经济技术开发区",
+      "locality": "霞涌街道",
+      "street": "海润南路",
+      "postalCode": "516082"
+    }
+  },
+  "广州南沙 香港市区 广东 中国": {
+    "query": "广州南沙 香港市区 广东 中国",
+    "provider": "photon",
+    "latitude": 22.7004839,
+    "longitude": 113.5528338,
+    "displayName": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+    "level": "poi",
+    "locality": "福生社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "广州市",
+      "district": "珠江街道",
+      "locality": "福生社区",
+      "street": "同安东围路",
+      "postalCode": "511462"
+    }
+  },
+  "爱丁堡城堡 中国": {
+    "query": "爱丁堡城堡 中国",
+    "provider": "arcgis",
+    "latitude": 55.94856,
+    "longitude": -3.20019,
+    "displayName": "爱丁堡城堡",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.14,
+    "address": {
+      "formatted": "爱丁堡城堡"
+    }
+  },
+  "恒安瑞士大酒店 祖庙】佛山 佛山 广东 中国": {
+    "query": "恒安瑞士大酒店 祖庙】佛山 佛山 广东 中国",
+    "provider": "photon",
+    "latitude": 23.0296262,
+    "longitude": 113.1017242,
+    "displayName": "恒安瑞士大酒店 城门头西路 祖庙街道 佛山市 南海区 广东省 中国",
+    "level": "poi",
+    "locality": "山紫社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "恒安瑞士大酒店 城门头西路 祖庙街道 佛山市 南海区 广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "佛山市",
+      "district": "祖庙街道",
+      "locality": "山紫社区",
+      "street": "城门头西路",
+      "postalCode": "528012"
+    }
+  },
+  "橡树庄园 中国": {
+    "query": "橡树庄园 中国",
+    "provider": "photon",
+    "latitude": 38.8618723,
+    "longitude": 121.4581473,
+    "displayName": "橡树庄园  龙王塘街道 旅顺口区 甘井子区 辽宁省 中国",
+    "level": "poi",
+    "locality": "旅顺口区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "橡树庄园  龙王塘街道 旅顺口区 甘井子区 辽宁省 中国",
+      "country": "中国",
+      "province": "辽宁省",
+      "city": "旅顺口区",
+      "district": "龙王塘街道"
+    }
   }
 }
