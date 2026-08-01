@@ -6,7 +6,7 @@ import App from './App.tsx'
 async function registerStaticAssetServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
 
-  const isLocalDevelopment = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+  const isLocalDevelopment = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
   if (isLocalDevelopment) {
     const wasControlled = Boolean(navigator.serviceWorker.controller);
     const registrations = await navigator.serviceWorker.getRegistrations();
@@ -20,6 +20,9 @@ async function registerStaticAssetServiceWorker() {
       );
     }
     if (wasControlled) window.location.reload();
+  // Never route local development data through the production CDN pool. An
+  // older worker can still be registered from a previous local run, so remove
+  // it before the app starts making data requests.
     return;
   }
 

@@ -18,18 +18,21 @@ export function Header({ children, onOpenMap }: HeaderProps) {
             alt="老广去边度"
             className="h-11 w-auto max-w-[172px] object-contain sm:h-12 sm:max-w-[200px]"
           />
-          {onOpenMap && (
-            <button
-              type="button"
-              onClick={onOpenMap}
-              className="ml-auto inline-flex h-9 items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 text-sm font-medium text-stone-700 shadow-sm transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-stone-950"
-              title="打开地图"
-            >
-              <Map className="h-4 w-4 text-orange-600" />
-              地图
-            </button>
-          )}
-          {children}
+          <div className="flex items-center gap-2">
+            {onOpenMap && (
+              <button
+                type="button"
+                onClick={onOpenMap}
+                aria-label="打开目的地地图"
+                title="打开目的地地图"
+                className="inline-flex h-9 items-center gap-1.5 rounded-full border border-stone-200 bg-white/80 px-3 text-xs font-medium text-stone-700 shadow-sm transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-stone-950"
+              >
+                <Map className="h-3.5 w-3.5 text-orange-600" />
+                <span>地图</span>
+              </button>
+            )}
+            {children}
+          </div>
         </div>
       </div>
     </header>
