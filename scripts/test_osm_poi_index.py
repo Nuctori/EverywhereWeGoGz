@@ -85,6 +85,52 @@ def test_resolver_does_not_pick_an_ambiguous_suffix_match():
     assert resolve_poi("新丰温德姆花园酒店", pois=[first, second]) is None
 
 
+def test_resolver_rejects_same_name_poi_when_known_region_conflicts():
+    wrong_city = dict(
+        hotel_poi(),
+        name="岭南东方酒店",
+        aliases=[],
+        address={"country": "中国", "province": "广东省", "city": "肇庆市"},
+    )
+    wrong_province = dict(
+        hotel_poi(),
+        name="雅致酒店",
+        aliases=[],
+        address={"country": "中国", "province": "湖南省"},
+    )
+
+    assert resolve_poi("英德岭南东方酒店", expected_city="英德", expected_province="广东", pois=[wrong_city]) is None
+    assert resolve_poi("新丰雅致酒店", expected_city="新丰", expected_province="广东", pois=[wrong_province]) is None
+
+
+def test_resolver_uses_existing_city_fallback_when_osm_address_omits_city():
+    nearby = dict(
+        hotel_poi(),
+        name="星湖大酒店",
+        aliases=[],
+        latitude=23.0571,
+        longitude=112.4669,
+        address={"country": "中国", "province": "广东省"},
+    )
+    result = resolve_poi(
+        "肇庆星湖大酒店",
+        expected_city="肇庆",
+        expected_province="广东",
+        expected_latitude=23.0472,
+        expected_longitude=112.4651,
+        pois=[nearby],
+    )
+    assert result is not None
+    assert resolve_poi(
+        "肇庆星湖大酒店",
+        expected_city="肇庆",
+        expected_province="广东",
+        expected_latitude=30.0,
+        expected_longitude=120.0,
+        pois=[nearby],
+    ) is None
+
+
 def test_enrichment_replaces_catalog_centroid_but_preserves_verified_geocoder():
     poi = hotel_poi()
     index = build_index([poi], ["guangdong"])
@@ -122,5 +168,7 @@ if __name__ == "__main__":
     test_resolver_requires_specific_name_and_uses_city_context()
     test_extractor_reads_real_osm_elements_when_osmium_is_available()
     test_resolver_does_not_pick_an_ambiguous_suffix_match()
+    test_resolver_rejects_same_name_poi_when_known_region_conflicts()
+    test_resolver_uses_existing_city_fallback_when_osm_address_omits_city()
     test_enrichment_replaces_catalog_centroid_but_preserves_verified_geocoder()
     print("OSM POI index tests passed")

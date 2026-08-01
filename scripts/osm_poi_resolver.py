@@ -5,12 +5,14 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 from pathlib import Path
 
 
 DEFAULT_INDEX_PATH = Path(__file__).resolve().parent.parent / "public" / "data" / "osm-poi-index.json"
 GENERIC_NAMES = {"酒店", "宾馆", "客栈", "当地酒店", "参考酒店", "豪华酒店", "度假村", "温泉酒店"}
+MAX_UNVERIFIED_CITY_DISTANCE_KM = 100
 
 
 def normalize_name(value: object) -> str:
@@ -38,7 +40,28 @@ def _name_score(queries: set[str], candidate: str) -> int:
     return 0
 
 
-def resolve_poi(label: str, *, expected_city: str = "", expected_province: str = "", pois: list[dict]) -> dict | None:
+def _distance_km(latitude_a: object, longitude_a: object, latitude_b: object, longitude_b: object) -> float | None:
+    try:
+        lat_a, lon_a, lat_b, lon_b = (float(value) for value in (latitude_a, longitude_a, latitude_b, longitude_b))
+    except (TypeError, ValueError):
+        return None
+    if not (-90 <= lat_a <= 90 and -90 <= lat_b <= 90 and -180 <= lon_a <= 180 and -180 <= lon_b <= 180):
+        return None
+    lat_delta = math.radians(lat_b - lat_a)
+    lon_delta = math.radians(lon_b - lon_a)
+    haversine = math.sin(lat_delta / 2) ** 2 + math.cos(math.radians(lat_a)) * math.cos(math.radians(lat_b)) * math.sin(lon_delta / 2) ** 2
+    return 6371 * 2 * math.asin(math.sqrt(haversine))
+
+
+def resolve_poi(
+    label: str,
+    *,
+    expected_city: str = "",
+    expected_province: str = "",
+    expected_latitude: object = None,
+    expected_longitude: object = None,
+    pois: list[dict],
+) -> dict | None:
     query = normalize_name(label)
     if not query or query in {normalize_name(name) for name in GENERIC_NAMES}:
         return None
@@ -53,11 +76,27 @@ def resolve_poi(label: str, *, expected_city: str = "", expected_province: str =
     for poi in pois:
         if poi.get("coordinateSystem") != "wgs84" or poi.get("kind") not in {"hotel", "attraction"}:
             continue
-        score = max((_name_score(exact_queries, normalize_name(name)) for name in _candidate_names(poi)), default=0)
+        candidate_names = _candidate_names(poi)
+        normalized_candidate_names = [normalize_name(name) for name in candidate_names]
+        score = max((_name_score(exact_queries, name) for name in normalized_candidate_names), default=0)
         if score == 0:
             continue
         address = poi.get("address") if isinstance(poi.get("address"), dict) else {}
-        context = normalize_name(" ".join(str(address.get(key) or "") for key in ("city", "district", "locality", "province")))
+        city_context = normalize_name(" ".join(str(address.get(key) or "") for key in ("city", "district", "locality")))
+        province_context = normalize_name(str(address.get("province") or ""))
+        # A city-prefixed tour title is useful disambiguation, not a cosmetic
+        # prefix. Do not replace a city fallback with an equally named POI in
+        # another city when OSM supplies neither matching address nor name.
+        city_confirmed = not city or city in city_context or any(city in name for name in normalized_candidate_names)
+        # Region labels may be absent from older OSM objects, but a present and
+        # conflicting province is decisive evidence that the POI is wrong.
+        if province and province_context and province not in province_context:
+            continue
+        if not city_confirmed:
+            distance = _distance_km(expected_latitude, expected_longitude, poi.get("latitude"), poi.get("longitude"))
+            if distance is None or distance > MAX_UNVERIFIED_CITY_DISTANCE_KM:
+                continue
+        context = f"{city_context} {province_context}"
         if city and city in context:
             score += 8
         if province and province in context:
@@ -99,6 +138,8 @@ def enrich_tours_from_osm(tours: list[dict], index_path: Path = DEFAULT_INDEX_PA
             label,
             expected_city=str(tour.get("destinationCity") or ""),
             expected_province=str(tour.get("destinationProvince") or ""),
+            expected_latitude=tour.get("destinationLatitude"),
+            expected_longitude=tour.get("destinationLongitude"),
             pois=pois,
         )
         if not result:
