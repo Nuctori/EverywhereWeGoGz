@@ -25,6 +25,15 @@ TITLE_NOISE = re.compile(
     re.I,
 )
 ACCOMMODATION_SUFFIX = re.compile(r"(?:或|及|以及)?(?:其他)?同级.*$|[（(].*?[)）]$")
+TITLE_POI_MARKERS = (
+    "温泉", "酒店", "度假村", "度假酒店", "山庄", "客栈", "民宿", "宾馆", "公寓",
+    "庄园", "景区", "风景区", "乐园", "古镇", "古城", "公园", "湖", "湾", "岛",
+    "瀑布", "雪山", "寺", "营地", "农庄",
+)
+GENERIC_TITLE_POI_PHRASES = (
+    "高级酒店", "首选酒店", "附近的酒店", "机场附近的酒店", "连住酒店",
+    "当地酒店", "参考酒店", "同级酒店", "酒店住宿",
+)
 
 
 def _clean_segment(value: object) -> str:
@@ -57,6 +66,32 @@ def _append_unique(items: list[dict], value: str, source: str, priority: int) ->
     items.append({"label": value, "source": source, "priority": priority})
 
 
+def _is_title_poi(label: str, title: str, city: str = "") -> bool:
+    """Recognize a concrete title destination without trusting a city centroid."""
+    compact_label = re.sub(r"\s+", "", str(label or ""))
+    compact_title = re.sub(r"\s+", "", str(title or ""))
+    compact_city = re.sub(r"\s+", "", str(city or ""))
+    if len(compact_label) < 3 or compact_label == compact_city:
+        return False
+    if compact_label not in compact_title:
+        return False
+    if find_region(compact_label):
+        return False
+    if any(phrase in compact_label for phrase in GENERIC_TITLE_POI_PHRASES):
+        return False
+    if re.search(
+        rf"{re.escape(compact_label)}[\u4e00-\u9fffA-Za-z0-9]{{0,8}}"
+        r"(?:出发|起程|起止|直飞|直航|直达|联运|集合)",
+        compact_title,
+    ):
+        return False
+    if any(marker in compact_label for marker in TITLE_POI_MARKERS):
+        return True
+    # Catalog-backed landmarks such as 七星岩 and 紫云谷 do not need a suffix.
+    parent = find_place(compact_label)
+    return bool(parent and compact_label in compact_title and compact_label != parent.get("name"))
+
+
 def _iter_detail_strings(detail: dict) -> Iterable[tuple[str, str, int]]:
     for value in detail.get("highlights") or []:
         yield str(value), "highlight", 50
@@ -70,13 +105,22 @@ def _iter_detail_strings(detail: dict) -> Iterable[tuple[str, str, int]]:
         yield str(day.get("description") or ""), "itinerary-description", 30
 
 
-def extract_detail_candidates(title: str, detail: dict, raw_destination: str = "") -> list[dict]:
+def extract_detail_candidates(
+    title: str,
+    detail: dict,
+    raw_destination: str = "",
+    named_destination: str = "",
+    destination_city: str = "",
+) -> list[dict]:
     """Return ordered, explainable location candidates from parsed source text."""
     candidates: list[dict] = []
     for value, source, priority in _iter_detail_strings(detail if isinstance(detail, dict) else {}):
         cleaned = _clean_segment(value)
         for segment in ROUTE_SPLIT.split(cleaned):
             _append_unique(candidates, segment, source, priority)
+
+    if _is_title_poi(named_destination, title, destination_city):
+        _append_unique(candidates, named_destination, "title-poi", 140)
 
     title_text = _clean_segment(title)
     for segment in ROUTE_SPLIT.split(title_text):

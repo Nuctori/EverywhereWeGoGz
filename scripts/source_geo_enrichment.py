@@ -127,13 +127,21 @@ def detail_from_tour(tour: dict) -> dict:
     return {field: tour.get(field) for field in fields if field in tour}
 
 
-def has_location_evidence(title: str, detail: dict, raw_destination: str = "") -> bool:
-    candidates = extract_detail_candidates(title, detail, raw_destination)
-    return any(
-        candidate.get("source") != "title-route"
-        or find_place(str(candidate.get("label") or ""))
-        for candidate in candidates
+def has_location_evidence(
+    title: str,
+    detail: dict,
+    raw_destination: str = "",
+    named_destination: str = "",
+    destination_city: str = "",
+) -> bool:
+    candidates = extract_detail_candidates(
+        title,
+        detail,
+        raw_destination,
+        named_destination,
+        destination_city,
     )
+    return any(candidate.get("source") != "title-route" for candidate in candidates)
 
 
 def should_fetch_source_detail(tour: dict) -> bool:
@@ -144,7 +152,11 @@ def should_fetch_source_detail(tour: dict) -> bool:
     if not _needs_refinement(tour):
         return False
     return not has_location_evidence(
-        str(tour.get("title") or ""), detail, str(tour.get("destination") or "")
+        str(tour.get("title") or ""),
+        detail,
+        str(tour.get("destination") or ""),
+        str(tour.get("destinationPlaceName") or ""),
+        str(tour.get("destinationCity") or ""),
     )
 
 
@@ -181,6 +193,8 @@ def fetch_missing_details(
             str(tour.get("title") or ""),
             detail_from_tour(tour),
             str(tour.get("destination") or ""),
+            str(tour.get("destinationPlaceName") or ""),
+            str(tour.get("destinationCity") or ""),
         )
     }
     targets = [
@@ -202,18 +216,24 @@ def fetch_missing_details(
 
 
 def _candidate_queries(tour: dict, label: str) -> tuple[list[str], list[str], str, str]:
-    city, province = candidate_context(tour)
+    inferred_city, inferred_province = candidate_context(tour)
+    city = str(tour.get("destinationCity") or "").strip() or inferred_city
+    province = str(tour.get("destinationProvince") or "").strip() or inferred_province
     raw_destination = str(tour.get("destination") or "").strip()
     region = find_region(raw_destination)
     if region:
         province = province or str(region.get("province") or raw_destination).strip()
         if raw_destination in {"华东", "青甘", "港澳"}:
             province = raw_destination
-        city = ""
+        # Keep a city/province parsed from the title; raw destination can be a
+        # departure region and is not authoritative for the actual endpoint.
+        if not tour.get("destinationCity"):
+            city = ""
     if not city and province and find_place(label):
         city = str(find_place(label).get("name") or "")
     context = [label]
-    if city and city != label:
+    compact_label = normalize_query(label).replace(" ", "")
+    if city and city != label and not compact_label.startswith(normalize_query(city).replace(" ", "")):
         context.append(city)
     if province and province not in context:
         context.append(province)
@@ -379,7 +399,11 @@ def apply_detail_and_geo(
         "itineraryDays": len(detail.get("itinerary") or []) if isinstance(detail, dict) else 0,
     }
     candidates = extract_detail_candidates(
-        str(tour.get("title") or ""), detail, str(tour.get("destination") or "")
+        str(tour.get("title") or ""),
+        detail,
+        str(tour.get("destination") or ""),
+        str(tour.get("destinationPlaceName") or ""),
+        str(tour.get("destinationCity") or ""),
     )
     network_attempts = 0
     for candidate in candidates[:MAX_SOURCE_CANDIDATES]:
@@ -397,9 +421,8 @@ def apply_detail_and_geo(
             row for row in mining.get("sourceCandidates", [])
             if isinstance(row, dict) and row.get("label") == candidate.get("label")
         )
-        # A bare marketing title is only a discovery hint. It is not strong
-        # enough to send to a geocoder; detail activities and itinerary titles
-        # carry the evidence required for an external lookup.
+        # A bare marketing title is only a discovery hint. A concrete title POI
+        # is allowed because its name is already bounded by geo_catalog.
         network_eligible = candidate_row.get("source") != "title-route"
         probe_network = (
             allow_network
