@@ -1,19 +1,19 @@
 {
-  "generatedAt": "2026-08-01T17:50:11.020Z",
+  "generatedAt": "2026-08-01T19:04:33.656Z",
   "latestUpdatedAt": "2026-08-01T06:19:05.902940",
-  "totalRecords": 4036,
-  "listRecords": 4036,
-  "detailFiles": 4036,
+  "totalRecords": 4034,
+  "listRecords": 4034,
+  "detailFiles": 4034,
   "sourceStats": {
-    "假日通": 317,
+    "假日通": 315,
     "广东中旅": 980,
     "康辉": 819,
     "广州去旅行": 34,
     "广之旅": 1886
   },
   "destinationStats": {
-    "广东": 1387,
-    "其他": 902,
+    "广东": 1386,
+    "其他": 901,
     "湖南": 25,
     "四川": 97,
     "内蒙古": 69,
@@ -41,23 +41,23 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 46190983
+      "size": 49960397
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 20101007
+      "size": 20389656
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 27815169
+      "size": 31555137
     },
     "geoPlaces": {
       "path": "data/geo-places.json",
-      "size": 302448
+      "size": 320767
     },
     "mapIndex": {
       "path": "data/tour-map-index.json",
-      "size": 366986
+      "size": 395311
     }
   }
 }
