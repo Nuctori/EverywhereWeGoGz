@@ -30,16 +30,17 @@ function isWithinChinaCoverage(place: MapTourLocation) {
   return place.longitude >= 73 && place.longitude <= 135 && place.latitude >= 18 && place.latitude <= 54;
 }
 
-function placePrecisionLabel(place: Pick<MapTourLocation, 'level' | 'locality' | 'coordinateSource' | 'confidence'>) {
+function placePrecisionLabel(place: Pick<MapTourLocation, 'level' | 'locality' | 'coordinateSource' | 'confidence' | 'precision'>) {
   const levelLabel = place.level === 'town' ? '镇/街道' : place.level === 'poi' ? '景区/地点' : place.level === 'city' ? '城市范围' : place.level === 'region' ? '区域范围' : place.level === 'country' ? '国家范围' : '';
   const sourceLabel = place.coordinateSource === 'osm'
     ? 'OSM POI'
     : place.coordinateSource === 'fallback'
-    ? '模糊定位'
+    ? ''
     : place.coordinateSource === 'inferred' && place.confidence === 'low'
       ? '推断位置'
       : '';
-  return [place.locality, levelLabel, sourceLabel].filter(Boolean).join(' · ');
+  const precisionLabel = place.precision === 'approximate' ? '模糊定位' : '';
+  return [place.locality, levelLabel, precisionLabel, sourceLabel].filter(Boolean).join(' · ');
 }
 
 function placeAddressLabel(place: Pick<MapTourLocation, 'address'>) {

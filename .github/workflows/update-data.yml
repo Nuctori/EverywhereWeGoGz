@@ -311,6 +311,9 @@ jobs:
       - name: Merge crawled data
         run: python -u scripts/merge_data.py
 
+      - name: Mine source geo evidence
+        run: python -u scripts/source_geo_enrichment.py --network --write --workers 8
+
       - name: Split merged data
         run: npm run data:split
 

@@ -50,9 +50,10 @@ function buildGeoPoint(tour, role) {
   const name = destination ? (nonEmpty(tour.destinationPlaceName) || cityName) : cityName;
   if (!name || !cityName || !validCoordinate(latitude, longitude)) return undefined;
   const semanticLevel = nonEmpty(tour[destination ? 'destinationGeoLevel' : 'departureGeoLevel']);
-  const level = nonEmpty(tour[destination ? 'destinationCoordinatePrecision' : 'departureCoordinatePrecision'])
-    || semanticLevel
-    || (name !== cityName ? 'poi' : 'city');
+  const precision = nonEmpty(tour[destination ? 'destinationCoordinatePrecision' : 'departureCoordinatePrecision']);
+  const level = ['country', 'region', 'city', 'town', 'poi'].includes(semanticLevel)
+    ? semanticLevel
+    : (name !== cityName ? 'poi' : 'city');
   const locality = nonEmpty(tour[destination ? 'destinationLocality' : 'departureLocality']);
   const address = destination && tour.destinationAddress && typeof tour.destinationAddress === 'object'
     ? Object.fromEntries(Object.entries(tour.destinationAddress).filter(([, value]) => nonEmpty(value)))
@@ -74,6 +75,7 @@ function buildGeoPoint(tour, role) {
     ...(locality ? { locality } : {}),
     ...(address && Object.keys(address).length > 0 ? { address } : {}),
     coordinateSource,
+    ...(precision ? { precision } : {}),
     source: tour.geoSource === 'local-place-catalog' ? 'catalog' : tour.geoSource === 'geocoder' ? 'geocoder' : tour.geoSource === 'osm' ? 'osm' : 'inferred',
     confidence: ['low', 'medium', 'high'].includes(tour.geoConfidence) ? tour.geoConfidence : 'low',
   };

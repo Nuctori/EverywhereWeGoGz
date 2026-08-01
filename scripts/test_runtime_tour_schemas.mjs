@@ -9,6 +9,24 @@ assert.equal(parsed.mealCounts, undefined, 'normalized empty mealCounts should b
 const legacyParsed = tourDetailSchema.parse({ ...sample, mealCounts: null });
 assert.equal(legacyParsed.mealCounts, null, 'legacy null mealCounts must remain readable');
 
+const provenanceParsed = tourDetailSchema.parse({
+  ...sample,
+  geoResolution: {
+    input: { destination: '广东', hasTitle: true, itineraryDays: 3, accommodationDays: 2, highlightCount: 1 },
+    mining: {
+      status: 'resolved',
+      candidateLabels: ['肇庆蓝钟温泉'],
+      candidateSources: ['title'],
+      rejectedLabels: ['广州'],
+      reasons: ['departure-mention'],
+    },
+    osm: { status: 'ambiguous', reason: 'same-name-candidates', label: '肇庆蓝钟温泉' },
+    geocoder: { status: 'no-match', queries: ['肇庆蓝钟温泉 广东 中国'], reason: 'cache-miss' },
+    final: { status: 'unmapped' },
+  },
+});
+assert.equal(provenanceParsed.geoResolution?.mining.candidateLabels[0], '肇庆蓝钟温泉');
+
 const firstPage = JSON.parse(fs.readFileSync('public/data/tours-page-0.json', 'utf8'));
 const pageParsed = toursPageSchema.parse(firstPage);
 assert.ok(pageParsed.items.length > 0, 'the initial tour page must remain runtime-readable');

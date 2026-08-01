@@ -52,6 +52,7 @@ export interface TourGeoPoint {
   /** The recognized entity may be a POI even when only a city fallback coordinate exists. */
   semanticLevel?: GeoLevel;
   coordinateSource: 'catalog' | 'geocoder' | 'osm' | 'fallback' | 'inferred';
+  precision?: 'exact' | 'approximate';
   source: GeoSource;
   confidence: GeoConfidence;
 }
@@ -68,6 +69,27 @@ export interface TourGeo {
   stops: TourGeoPoint[];
   status: GeoStatus;
   routeRegion?: 'local' | 'nearby-province' | 'national' | 'international' | 'unknown';
+}
+
+export interface GeoResolution {
+  input: {
+    destination: string;
+    hasTitle: boolean;
+    itineraryDays: number;
+    accommodationDays: number;
+    highlightCount: number;
+  };
+  mining: {
+    status: string;
+    candidateLabels: string[];
+    candidateSources: string[];
+    rejectedLabels: string[];
+    reasons: string[];
+  };
+  osm: { status: string; reason?: string; label?: string };
+  geocoder: { status: string; queries: string[]; reason?: string };
+  final: { status: string; source?: string; precision?: 'exact' | 'approximate'; reason?: string };
+  fallback?: { status: string; reason?: string; level?: GeoLevel };
 }
 
 export type ServiceAvailability = 'included' | 'excluded' | 'unknown';
@@ -194,6 +216,7 @@ export interface TourDetail {
   sourceId?: string;
   createdAt: string;
   updatedAt: string;
+  geoResolution?: GeoResolution;
 }
 
 export type ResolvedTour = TourSummary & TourDetail;

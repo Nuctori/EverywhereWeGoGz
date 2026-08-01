@@ -36,42 +36,135 @@ def _valid_coordinate_pair(latitude, longitude) -> bool:
     )
 
 
-def _apply_coordinate_fallback(tour: dict, fields: dict) -> None:
-    """Keep a coarse parent-city point available without treating it as a map point."""
-    if fields.get("destinationLatitude") is not None or fields.get("destinationLongitude") is not None:
+def _update_geo_resolution_final(tour: dict) -> None:
+    resolution = tour.get("geoResolution")
+    if not isinstance(resolution, dict):
         return
-    destination_city = str(fields.get("destinationCity") or "").strip()
-    destination_place = str(fields.get("destinationPlaceName") or "").strip()
-    if not destination_city or not destination_place or destination_city == destination_place:
-        return
-    parent = find_place(destination_city)
-    if not parent or not _valid_coordinate_pair(parent.get("latitude"), parent.get("longitude")):
-        return
-    fields["destinationLatitude"] = parent["latitude"]
-    fields["destinationLongitude"] = parent["longitude"]
-    # Keep the extracted POI entity, but expose the actual coordinate
-    # precision to the map. A city centroid must never render as a POI point.
-    fields["destinationCoordinatePrecision"] = "city"
-    fields["destinationCoordinateSource"] = "fallback"
-    fields["geoConfidence"] = "low"
-    fields["geoSource"] = "title-place-miner"
+    destination_ready = _valid_coordinate_pair(
+        tour.get("destinationLatitude"), tour.get("destinationLongitude")
+    )
+    departure_ready = _valid_coordinate_pair(
+        tour.get("departureLatitude"), tour.get("departureLongitude")
+    )
+    if destination_ready:
+        status = "complete" if departure_ready else "destination-only"
+        final = {"status": status}
+        source = str(tour.get("destinationCoordinateSource") or "").strip()
+        if source:
+            final["source"] = source
+        precision = str(tour.get("destinationCoordinatePrecision") or "").strip()
+        if precision:
+            final["precision"] = precision
+        if source == "fallback":
+            reason = "region-catalog-fallback" if tour.get("geoSource") == "local-region-catalog" else "coarse-parent-city-fallback"
+            final["reason"] = reason
+        resolution["final"] = final
+    else:
+        resolution["final"] = {"status": "unmapped"}
 
 
-def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int]:
+def _preserve_geo_mining(previous: object, current: object) -> None:
+    """Keep source-mining evidence across a deterministic geo rebuild."""
+    if not isinstance(previous, dict) or not isinstance(current, dict):
+        return
+    old_mining = previous.get("mining") if isinstance(previous.get("mining"), dict) else {}
+    new_mining = current.setdefault("mining", {})
+    for key in ("sourceDetail", "resolvedCandidate"):
+        if old_mining.get(key) and not new_mining.get(key):
+            new_mining[key] = old_mining[key]
+    old_rows = old_mining.get("sourceCandidates")
+    if not isinstance(old_rows, list):
+        return
+    new_rows = new_mining.setdefault("sourceCandidates", [])
+    existing_labels = {
+        str(row.get("label") or "")
+        for row in new_rows
+        if isinstance(row, dict)
+    }
+    for row in old_rows:
+        if not isinstance(row, dict):
+            continue
+        label = str(row.get("label") or "")
+        if label and label not in existing_labels:
+            new_rows.append(row)
+            existing_labels.add(label)
+
+
+def _preserve_existing_precise_geo(previous: object, current: object) -> None:
+    """Do not erase a validated network/OSM point during catalog normalization."""
+    if not isinstance(previous, dict) or not isinstance(current, dict):
+        return
+    source = str(previous.get("destinationCoordinateSource") or "")
+    if source not in {"geocoder", "osm"}:
+        return
+    if not _valid_coordinate_pair(previous.get("destinationLatitude"), previous.get("destinationLongitude")):
+        return
+    current_source = str(current.get("destinationCoordinateSource") or "")
+    if current_source in {"catalog", "osm"} and current_source != "unknown":
+        return
+    for key in (
+        "destinationCity", "destinationPlaceName", "destinationProvince", "destinationCountry",
+        "destinationLatitude", "destinationLongitude", "destinationGeoLevel", "destinationLocality",
+        "destinationCoordinateSource", "destinationCoordinatePrecision", "destinationAddress",
+        "geoConfidence", "geoSource",
+    ):
+        if key in previous:
+            current[key] = previous[key]
+
+
+def _apply_coarse_destination_fallback(tour: dict) -> bool:
+    """Keep a mined destination visible when only its parent city is trusted."""
+    if _valid_coordinate_pair(tour.get("destinationLatitude"), tour.get("destinationLongitude")):
+        return False
+    label = str(tour.get("destinationPlaceName") or "").strip()
+    city = str(tour.get("destinationCity") or "").strip()
+    if not label or not city or label == city:
+        return False
+    parent = find_place(city)
+    if not isinstance(parent, dict) or not _valid_coordinate_pair(parent.get("latitude"), parent.get("longitude")):
+        return False
+
+    tour["destinationLatitude"] = parent["latitude"]
+    tour["destinationLongitude"] = parent["longitude"]
+    tour["destinationGeoLevel"] = "city"
+    tour["destinationCoordinateSource"] = "fallback"
+    tour["destinationCoordinatePrecision"] = "approximate"
+    tour["destinationLocality"] = f"{city}范围"
+    tour["geoConfidence"] = "low"
+    tour["geoSource"] = "coarse-parent-city-fallback"
+    tour["destinationAddress"] = {
+        "formatted": f"{city}范围（模糊定位）",
+        "country": parent.get("country", ""),
+        "province": parent.get("province", ""),
+        "city": city,
+    }
+    meta = tour.setdefault("meta", {})
+    quality = meta.setdefault("dataQuality", {})
+    field_sources = quality.setdefault("fieldSources", {})
+    for field in ("destinationLatitude", "destinationLongitude", "destinationLocality", "destinationAddress"):
+        field_sources[field] = "inferred"
+    resolution = tour.get("geoResolution")
+    if isinstance(resolution, dict):
+        resolution["fallback"] = {
+            "status": "applied",
+            "reason": "coarse-parent-city-fallback",
+            "level": "city",
+        }
+    return True
+
+
+def rebuild(tours: list[dict], allow_network: bool = False, geocode_cache_path: Path | None = None) -> tuple[int, int]:
     before = sum(1 for tour in tours if tour.get("destinationLatitude") is not None)
     for tour in tours:
-        # OSM fields are derived from a previous index snapshot. Rebuild them
-        # from scratch so a rejected candidate cannot retain a stale address.
-        quality = tour.get("meta", {}).get("dataQuality", {}) if isinstance(tour.get("meta"), dict) else {}
-        field_sources = quality.get("fieldSources", {}) if isinstance(quality, dict) else {}
-        if tour.get("destinationCoordinateSource") == "osm" or field_sources.get("destinationAddress") == "source":
-            tour.pop("destinationAddress", None)
+        previous_resolution = tour.get("geoResolution")
         fields, field_sources = normalize_tour_geo(
             tour,
             str(tour.get("title") or ""),
             str(tour.get("destination") or ""),
             tour,
         )
+        _preserve_geo_mining(previous_resolution, fields.get("geoResolution"))
+        _preserve_existing_precise_geo(tour, fields)
         tour.update(fields)
 
         meta = tour.get("meta")
@@ -90,18 +183,20 @@ def rebuild(tours: list[dict], allow_network: bool = False) -> tuple[int, int]:
         quality.setdefault("syntheticFields", [])
         quality.setdefault("riskFlags", [])
 
-    for tour in tours:
-        _apply_coordinate_fallback(tour, tour)
-
-    # A city fallback gives OSM matching a spatial consistency check when an
-    # otherwise valid OSM object has no city address tags.
     osm_candidates, osm_resolved = enrich_tours_from_osm(tours)
     for tour in tours:
         tour["routeRegion"] = classify_route(tour)
 
-    candidates, resolved = enrich_tours(tours, allow_network=allow_network)
+    if geocode_cache_path is None:
+        candidates, resolved = enrich_tours(tours, allow_network=allow_network)
+    else:
+        candidates, resolved = enrich_tours(tours, allow_network=allow_network, cache_path=geocode_cache_path)
+    fallback_resolved = sum(1 for tour in tours if _apply_coarse_destination_fallback(tour))
+    for tour in tours:
+        _update_geo_resolution_final(tour)
     after = sum(1 for tour in tours if tour.get("destinationLatitude") is not None)
     print(f"OSM POI resolution: candidates {osm_candidates}; resolved {osm_resolved}")
+    print(f"Coarse destination fallback: resolved {fallback_resolved}")
     return before, after
 
 

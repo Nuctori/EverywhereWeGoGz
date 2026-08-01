@@ -33,6 +33,7 @@ const geoPointSchema = z.object({
   level: z.enum(['country', 'region', 'city', 'town', 'poi']),
   semanticLevel: z.enum(['country', 'region', 'city', 'town', 'poi']).optional(),
   coordinateSource: z.enum(['catalog', 'geocoder', 'osm', 'fallback', 'inferred']),
+  precision: z.enum(['exact', 'approximate']).optional(),
   source: z.enum(['source', 'catalog', 'geocoder', 'osm', 'inferred', 'unknown']),
   confidence: z.enum(['low', 'medium', 'high']),
 });
@@ -51,6 +52,36 @@ const tourGeoSchema = z.object({
   stops: z.array(geoPointSchema).default([]),
   status: z.enum(['complete', 'destination_only', 'unmapped']),
   routeRegion: z.enum(['local', 'nearby-province', 'national', 'international', 'unknown']).optional(),
+});
+
+const geoResolutionSchema = z.object({
+  input: z.object({
+    destination: z.string(),
+    hasTitle: z.boolean(),
+    itineraryDays: z.coerce.number().int().nonnegative(),
+    accommodationDays: z.coerce.number().int().nonnegative(),
+    highlightCount: z.coerce.number().int().nonnegative(),
+  }),
+  mining: z.object({
+    status: z.string(),
+    candidateLabels: z.array(z.string()),
+    candidateSources: z.array(z.string()),
+    rejectedLabels: z.array(z.string()),
+    reasons: z.array(z.string()),
+  }),
+  osm: z.object({ status: z.string(), reason: z.string().optional(), label: z.string().optional() }),
+  geocoder: z.object({ status: z.string(), queries: z.array(z.string()), reason: z.string().optional() }),
+  final: z.object({
+    status: z.string(),
+    source: z.string().optional(),
+    precision: z.enum(['exact', 'approximate']).optional(),
+    reason: z.string().optional(),
+  }),
+  fallback: z.object({
+    status: z.string(),
+    reason: z.string().optional(),
+    level: z.enum(['country', 'region', 'city', 'town', 'poi']).optional(),
+  }).optional(),
 });
 
 export const dataQualitySchema = z.object({
@@ -175,6 +206,7 @@ export const tourDetailSchema = z.object({
   sourceId: z.string().optional(),
   createdAt: z.string().optional().default(''),
   updatedAt: z.string().optional().default(''),
+  geoResolution: geoResolutionSchema.optional(),
 });
 
 // 由 tourSummarySchema.and(tourDetailSchema) 组合而成，对应 ResolvedTour。

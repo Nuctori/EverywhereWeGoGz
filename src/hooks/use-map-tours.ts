@@ -20,6 +20,7 @@ export type MapTourLocation = {
   level: 'country' | 'region' | 'city' | 'town' | 'poi';
   semanticLevel?: 'country' | 'region' | 'city' | 'town' | 'poi';
   coordinateSource: 'catalog' | 'geocoder' | 'osm' | 'fallback' | 'inferred';
+  precision?: 'exact' | 'approximate';
   source: 'source' | 'catalog' | 'geocoder' | 'osm' | 'inferred' | 'unknown';
   confidence: 'low' | 'medium' | 'high';
   tourIds: string[];
@@ -55,10 +56,8 @@ function hasMapPoint(point: DestinationMapPoint | undefined): point is Destinati
 
 function isApproximateMapPoint(point: DestinationMapPoint | undefined) {
   return Boolean(point && (
-    point.coordinateSource === 'fallback'
-    || point.level === 'city'
-    || point.level === 'region'
-    || point.level === 'country'
+    point.precision === 'approximate'
+    || point.coordinateSource === 'fallback'
     || (point.coordinateSource === 'inferred' && point.confidence === 'low')
   ));
 }
