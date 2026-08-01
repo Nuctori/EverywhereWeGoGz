@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-import { tourDetailSchema, toursPageSchema } from '../src/lib/runtime-schemas.ts';
+import { geoPlacesSchema, tourDetailSchema, toursPageSchema } from '../src/lib/runtime-schemas.ts';
 
 const sample = JSON.parse(fs.readFileSync('public/data/tour-details/tour_1.json', 'utf8'));
 const parsed = tourDetailSchema.parse(sample);
@@ -26,6 +26,26 @@ const provenanceParsed = tourDetailSchema.parse({
   },
 });
 assert.equal(provenanceParsed.geoResolution?.mining.candidateLabels[0], '肇庆蓝钟温泉');
+
+const legacyGeoPlace = geoPlacesSchema.parse([{
+  placeId: 'legacy-city',
+  name: '肇庆',
+  normalizedName: '肇庆',
+  province: '广东',
+  city: '肇庆',
+  latitude: 23.05,
+  longitude: 112.46,
+  coordinateSystem: 'wgs84',
+  level: 'city',
+  coordinateSource: 'catalog',
+  precision: 'city',
+  source: 'catalog',
+  confidence: 'medium',
+  tourIds: ['tour_legacy'],
+  tourCount: 1,
+  roles: ['destination'],
+}]);
+assert.equal(legacyGeoPlace[0].precision, 'approximate', 'legacy semantic precision must remain readable');
 
 const firstPage = JSON.parse(fs.readFileSync('public/data/tours-page-0.json', 'utf8'));
 const pageParsed = toursPageSchema.parse(firstPage);

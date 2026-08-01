@@ -22,6 +22,15 @@ function nonEmpty(value) {
   return text || undefined;
 }
 
+function normalizeGeoPrecision(value) {
+  const precision = nonEmpty(value);
+  if (!precision) return undefined;
+  if (precision === 'exact' || precision === 'approximate') return precision;
+  if (precision === 'poi') return 'exact';
+  if (['country', 'region', 'city', 'town'].includes(precision)) return 'approximate';
+  return undefined;
+}
+
 function validCoordinate(latitude, longitude) {
   const missing = (value) => value === null || value === undefined || (typeof value === 'string' && value.trim() === '');
   if (missing(latitude) || missing(longitude)) return false;
@@ -50,7 +59,7 @@ function buildGeoPoint(tour, role) {
   const name = destination ? (nonEmpty(tour.destinationPlaceName) || cityName) : cityName;
   if (!name || !cityName || !validCoordinate(latitude, longitude)) return undefined;
   const semanticLevel = nonEmpty(tour[destination ? 'destinationGeoLevel' : 'departureGeoLevel']);
-  const precision = nonEmpty(tour[destination ? 'destinationCoordinatePrecision' : 'departureCoordinatePrecision']);
+  const precision = normalizeGeoPrecision(tour[destination ? 'destinationCoordinatePrecision' : 'departureCoordinatePrecision']);
   const level = ['country', 'region', 'city', 'town', 'poi'].includes(semanticLevel)
     ? semanticLevel
     : (name !== cityName ? 'poi' : 'city');

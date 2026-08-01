@@ -39,7 +39,7 @@ assert(source.includes('点地点，直接看对应旅行团'), 'expanded map mu
 assert(mapTours.includes("tours-index.json"), 'map tours must use the lightweight tours index');
 assert(serviceWorker.includes("self.location.hostname === 'localhost'"), 'local development must bypass the CDN service worker data path');
 assert(main.includes('navigator.serviceWorker.getRegistrations()'), 'local development must remove stale service worker registrations');
-assert(main.includes("['localhost', '127.0.0.1']"), 'local service worker bypass must cover both local hostnames');
+assert(main.includes("['localhost', '127.0.0.1', '::1']"), 'local service worker bypass must cover local hostnames');
 assert(source.includes('map.remove()'), 'MapView must clean up the Leaflet instance');
 assert(source.includes('wgs84ToGcj02'), 'MapView must convert coordinates for GCJ-02 tiles');
 assert(source.includes('isWithinChinaCoverage'), 'MapView must keep the domestic provider at a usable China viewport');

@@ -63,6 +63,7 @@ function hasMapPoint(point: DestinationMapPoint | undefined): point is Destinati
 function isApproximateMapPoint(point: DestinationMapPoint | undefined) {
   return Boolean(point && (
     point.precision === 'approximate'
+    || point.level === 'city'
     || point.coordinateSource === 'fallback'
     || (point.coordinateSource === 'inferred' && point.confidence === 'low')
   ));

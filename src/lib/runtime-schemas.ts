@@ -5,6 +5,19 @@ const nonNegativeNumber = z.coerce.number().finite().nonnegative();
 const booleanDefaultFalse = z.boolean().optional().default(false);
 const stringArrayDefaultEmpty = z.array(z.string()).optional().default([]);
 const serviceAvailability = z.enum(['included', 'excluded', 'unknown']);
+const geoPrecisionSchema = z.preprocess(
+  (value) => {
+    if (value === 'exact' || value === 'approximate') return value;
+    // Older generated data stored the semantic location level here. Keep it
+    // readable while preserving the current exact/approximate contract.
+    if (value === 'poi') return 'exact';
+    if (value === 'country' || value === 'region' || value === 'city' || value === 'town') {
+      return 'approximate';
+    }
+    return value;
+  },
+  z.enum(['exact', 'approximate']).optional(),
+);
 const geoAddressSchema = z.object({
   formatted: z.string().optional(),
   country: z.string().optional(),
@@ -33,7 +46,7 @@ const geoPointSchema = z.object({
   level: z.enum(['country', 'region', 'city', 'town', 'poi']),
   semanticLevel: z.enum(['country', 'region', 'city', 'town', 'poi']).optional(),
   coordinateSource: z.enum(['catalog', 'geocoder', 'osm', 'fallback', 'inferred']),
-  precision: z.enum(['exact', 'approximate']).optional(),
+  precision: geoPrecisionSchema,
   source: z.enum(['source', 'catalog', 'geocoder', 'osm', 'inferred', 'unknown']),
   confidence: z.enum(['low', 'medium', 'high']),
 });
@@ -74,7 +87,7 @@ const geoResolutionSchema = z.object({
   final: z.object({
     status: z.string(),
     source: z.string().optional(),
-    precision: z.enum(['exact', 'approximate']).optional(),
+    precision: geoPrecisionSchema,
     reason: z.string().optional(),
   }),
   fallback: z.object({
