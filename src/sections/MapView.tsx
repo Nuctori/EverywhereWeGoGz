@@ -131,6 +131,8 @@ function PlaceToursPanel({
   onTourClick,
   onClose,
   onRetry,
+  onLoadMore,
+  hasMore,
   expanded,
 }: {
   place: MapTourLocation | null;
@@ -140,6 +142,8 @@ function PlaceToursPanel({
   onTourClick: (tour: TourSummary) => void;
   onClose: () => void;
   onRetry: () => void;
+  onLoadMore: () => void;
+  hasMore: boolean;
   expanded: boolean;
 }) {
   if (!place) return null;
@@ -164,9 +168,9 @@ function PlaceToursPanel({
         </button>
       </div>
 
-      {loading ? (
+      {loading && tours.length === 0 ? (
         <p className="px-1 py-5 text-sm text-stone-500">正在加载地点线路...</p>
-      ) : error ? (
+      ) : error && tours.length === 0 ? (
         <div className="px-1 py-4 text-sm text-stone-500">
           <p>线路数据暂时不可用。</p>
           <button type="button" onClick={onRetry} className="mt-2 inline-flex items-center gap-1 text-orange-700 hover:text-orange-800"><RefreshCw className="h-3.5 w-3.5" /> 重试</button>
@@ -175,8 +179,9 @@ function PlaceToursPanel({
         <p className="px-1 py-5 text-sm text-stone-500">这个地点暂时没有可展示的旅行团。</p>
       ) : (
         <div className="space-y-2">
+          {error && <div className="rounded-xl bg-orange-50 px-3 py-2 text-xs text-orange-800">已显示前 {tours.length} 条线路，剩余线路加载失败。<button type="button" onClick={onRetry} className="ml-1 font-medium underline underline-offset-2">重试</button></div>}
           {tours.map((tour) => <MapTourCard key={tour.id} tour={tour} onClick={() => onTourClick(tour)} />)}
-          {place.tourCount > tours.length && <p className="px-1 pt-1 text-xs text-stone-400">还有 {place.tourCount - tours.length} 条线路，点击卡片可查看详情。</p>}
+          {hasMore && <button type="button" onClick={onLoadMore} disabled={loading} className="flex w-full items-center justify-center rounded-xl border border-stone-200 px-3 py-2 text-xs font-medium text-stone-600 transition hover:border-orange-300 hover:text-orange-700 disabled:cursor-wait disabled:opacity-60">{loading ? '正在加载更多线路...' : `加载更多线路（剩余 ${Math.max(0, place.tourCount - tours.length)} 条）`}</button>}
         </div>
       )}
     </aside>
@@ -243,6 +248,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     approximateTourCount,
     placeToursLoading,
     placeToursLoaded,
+    placeToursComplete,
     placeToursError,
     fetchTours,
     fetchToursForPlace,
@@ -269,6 +275,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     !selectedPlaceError
     && (placeToursLoading === selectedPlace.placeId || !placeToursLoaded.has(selectedPlace.placeId))
   ));
+  const selectedPlaceHasMore = Boolean(selectedPlace && !placeToursComplete.has(selectedPlace.placeId) && selectedTours.length < selectedPlace.tourCount);
 
   useEffect(() => {
     if (selectedPlace) void fetchToursForPlace(selectedPlace.placeId);
@@ -476,6 +483,8 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         onTourClick={openTourDetail}
         onClose={() => setSelectedPlace(null)}
         onRetry={() => selectedPlace ? void fetchToursForPlace(selectedPlace.placeId, true) : void fetchTours()}
+        onLoadMore={() => selectedPlace && void fetchToursForPlace(selectedPlace.placeId)}
+        hasMore={selectedPlaceHasMore}
         expanded={expanded}
       />
     </div>

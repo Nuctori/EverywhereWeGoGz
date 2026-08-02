@@ -37,6 +37,10 @@ assert(source.includes("'正在加载已定位地点…'"), 'homepage map must n
 assert(source.includes('放大地图'), 'home map must provide an expand control');
 assert(source.includes('点地点，直接看对应旅行团'), 'expanded map must keep place-first interaction');
 assert(mapTours.includes('tour-map-place-cards/'), 'map tours must load compact cards per selected place');
+assert(mapTours.includes('PLACE_TOUR_CHUNK_SIZE'), 'map tours must bound each place card request');
+assert(mapTours.includes('${chunkIndex}.json'), 'map tours must request the next place card chunk');
+assert(source.includes('加载更多线路'), 'place panels must expose incremental loading for large destinations');
+assert(source.includes('placeToursComplete'), 'place panels must know when all destination cards are loaded');
 assert(!mapTours.includes("getDataUrl('tour-map-cards.json')"), 'map tours must not block on the all-tour card index');
 assert(serviceWorker.includes("self.location.hostname === 'localhost'"), 'local development must bypass the CDN service worker data path');
 assert(main.includes('navigator.serviceWorker.getRegistrations()'), 'local development must remove stale service worker registrations');
