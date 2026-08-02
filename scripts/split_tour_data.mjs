@@ -395,8 +395,6 @@ const mapCardFields = [
   'departureDate',
   'bookingUrl',
   'transportType',
-  'departureDates',
-  'hotDepartureDates',
 ];
 const tourMapCards = listTours.map((tour) => Object.fromEntries(
   mapCardFields.filter((field) => field in tour).map((field) => [field, tour[field]]),

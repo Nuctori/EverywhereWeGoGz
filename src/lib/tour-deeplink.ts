@@ -100,8 +100,6 @@ export function inflateTourSummaryFromMapCard(entry: TourMapCardEntry): TourSumm
     leisureLevel: 'easy',
     suitableFor: [],
     season: '',
-    departureDates: entry.departureDates,
-    hotDepartureDates: entry.hotDepartureDates,
   };
 }
 

@@ -236,8 +236,6 @@ export const tourMapCardSchema = z.object({
   departureDate: z.string().optional().default(''),
   bookingUrl: z.string().optional().default(''),
   transportType: z.string().optional().default(''),
-  departureDates: z.array(z.string()).optional(),
-  hotDepartureDates: z.array(z.string()).optional(),
 });
 export const tourMapCardsSchema = z.array(tourMapCardSchema);
 
