@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-02T13:26:11.786Z",
+  "generatedAt": "2026-08-02T16:00:13.916Z",
   "latestUpdatedAt": "2026-08-01T06:19:05.902940",
   "totalRecords": 4034,
   "listRecords": 4034,
@@ -62,6 +62,10 @@
     "mapCards": {
       "path": "data/tour-map-cards.json",
       "size": 1685332
+    },
+    "mapPlaceCards": {
+      "path": "data/tour-map-place-cards/",
+      "files": 649
     }
   }
 }
