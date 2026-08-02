@@ -298,6 +298,19 @@ AIRLINE_NAMES = "南航|南方航空|国航|海航|东航|厦航|深航|川航|�
 PLACE_LABEL_SUFFIXES = re.compile(
     "|".join(sorted(("海泉湾", "红海湾", "云顶", "森林公园", "度假区", "古镇", "古村", "庄园", "乐园", "景区", "酒店", "温泉", "草原", "湾", "岛", "湖"), key=len, reverse=True))
 )
+
+
+def _valid_coordinate_pair(latitude, longitude):
+    return (
+        isinstance(latitude, (int, float))
+        and not isinstance(latitude, bool)
+        and isinstance(longitude, (int, float))
+        and not isinstance(longitude, bool)
+        and -90 <= latitude <= 90
+        and -180 <= longitude <= 180
+    )
+
+
 ADMINISTRATIVE_ALIAS_SUFFIXES = ("省", "市", "县", "区", "旗")
 EXPLICIT_POI_NAMES = {
     "仙本那", "普者黑", "三门海", "喀纳斯", "黄果树", "神农架", "庐山", "三清山", "婺源",
@@ -398,6 +411,31 @@ def _destination_coordinate_source(place, label):
     if place.get("coordinateSource"):
         return place["coordinateSource"]
     return "inferred" if _destination_level(place, label) == "poi" else "catalog"
+
+
+def _existing_destination_context(raw, title):
+    """Keep an evidence-backed city context across idempotent geo rebuilds."""
+    if not isinstance(raw, dict) or not find_region(str(raw.get("destination") or "")):
+        return None
+    city = str(raw.get("destinationCity") or "").strip()
+    place = str(raw.get("destinationPlaceName") or "").strip()
+    province = str(raw.get("destinationProvince") or "").strip()
+    if not city or city == str(raw.get("destination") or "").strip():
+        return None
+    labels = []
+    resolution = raw.get("geoResolution") if isinstance(raw.get("geoResolution"), dict) else {}
+    mining = resolution.get("mining") if isinstance(resolution.get("mining"), dict) else {}
+    candidate_labels = mining.get("candidateLabels")
+    if isinstance(candidate_labels, list):
+        labels = [str(label).strip() for label in candidate_labels if str(label).strip()]
+    title_text = str(title or "")
+    has_evidence = (
+        place != city and place in title_text
+        or any(label != city and city in label for label in labels)
+    )
+    if not has_evidence:
+        return None
+    return {"city": city, "place": place or city, "province": province}
 
 
 def find_place(text):
@@ -771,6 +809,29 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
     return materialized, final_label, "low", "title-place-miner"
 
 
+def _prefer_existing_city_candidate(raw, resolution, current_place, current_label):
+    """Prefer a named candidate anchored to the existing destination city."""
+    if not isinstance(raw, dict) or not isinstance(resolution, dict):
+        return current_place, current_label
+    city = str(raw.get("destinationCity") or "").strip()
+    if not city or city == str(raw.get("destination") or "").strip():
+        return current_place, current_label
+    country = str(raw.get("destinationCountry") or "").strip().lower()
+    if country and country not in {"中国", "china", "cn"}:
+        return current_place, current_label
+    mining = resolution.get("mining") if isinstance(resolution.get("mining"), dict) else {}
+    labels = mining.get("candidateLabels") if isinstance(mining.get("candidateLabels"), list) else []
+    for label in labels:
+        label = str(label or "").strip()
+        if not label or label == city or not label.startswith(city):
+            continue
+        place = find_place(label)
+        if not place:
+            continue
+        return _materialize_named_place(place, label), label
+    return current_place, current_label
+
+
 def _raw_departure(raw):
     for key in ("departureCity", "departureProvince", "departureCountry"):
         if str(raw.get(key) or "").strip():
@@ -825,6 +886,17 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         detail,
         resolution,
     )
+    preferred_place, preferred_label = _prefer_existing_city_candidate(
+        raw,
+        resolution,
+        destination_place,
+        destination_label,
+    )
+    if preferred_place is not destination_place:
+        destination_place = preferred_place
+        destination_label = preferred_label
+        destination_confidence = "low"
+        destination_geo_source = "title-place-miner"
     destination_region = find_region(destination_text)
     region_place = materialize_region(destination_region) if not destination_place else None
     resolved_destination = destination_place or region_place
@@ -849,12 +921,50 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         "destinationGeoLevel": _destination_level(destination_place, destination_label) if destination_place else region_place.get("level", "") if region_place else "",
         "destinationLocality": resolved_destination.get("locality", "") if resolved_destination else "",
         "destinationCoordinateSource": _destination_coordinate_source(destination_place, destination_label) if destination_place else "fallback" if region_place else "unknown",
-        "destinationCoordinatePrecision": "approximate" if region_place else "exact" if destination_place and destination_place.get("latitude") is not None else None,
+        "destinationCoordinatePrecision": (
+            "approximate"
+            if region_place or (
+                destination_place
+                and _destination_level(destination_place, destination_label) in {"city", "country"}
+            )
+            else "exact"
+            if destination_place and destination_place.get("latitude") is not None
+            else None
+        ),
         "geoStatus": "complete" if departure_place and resolved_destination else ("destination_only" if resolved_destination else "unmapped"),
         "geoConfidence": destination_confidence if destination_place else "low",
         "geoSource": destination_geo_source if destination_place else ("local-region-catalog" if region_place else "unknown"),
         "geoResolution": resolution,
     }
+    existing_context = _existing_destination_context(raw, title)
+    existing_source = str(raw.get("destinationCoordinateSource") or "") if isinstance(raw, dict) else ""
+    if existing_context and not _valid_coordinate_pair(
+        fields.get("destinationLatitude"), fields.get("destinationLongitude")
+    ):
+        fields["destinationCity"] = existing_context["city"]
+        fields["destinationProvince"] = existing_context["province"] or fields["destinationProvince"]
+        current_place = str(fields.get("destinationPlaceName") or "").strip()
+        if not current_place or current_place == existing_context["city"]:
+            fields["destinationPlaceName"] = existing_context["place"]
+            current_place = existing_context["place"]
+        fields["destinationGeoLevel"] = "poi" if current_place != existing_context["city"] else "city"
+        if existing_source in {"catalog", "fallback"} and _valid_coordinate_pair(
+            raw.get("destinationLatitude"), raw.get("destinationLongitude")
+        ):
+            for key in (
+                "destinationLatitude", "destinationLongitude", "destinationLocality",
+                "destinationCoordinateSource", "destinationCoordinatePrecision",
+                "destinationAddress", "geoConfidence", "geoSource",
+            ):
+                if key in raw:
+                    fields[key] = raw[key]
+        else:
+            fields["destinationLatitude"] = None
+            fields["destinationLongitude"] = None
+            fields["destinationCoordinateSource"] = "inferred"
+            fields["destinationCoordinatePrecision"] = None
+            fields["geoConfidence"] = "low"
+            fields["geoSource"] = "existing-destination-context"
     if fields["destinationCoordinatePrecision"] is None:
         fields.pop("destinationCoordinatePrecision")
     if departure_place:

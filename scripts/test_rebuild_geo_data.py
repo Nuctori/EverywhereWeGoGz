@@ -73,6 +73,20 @@ def test_rebuild_materializes_an_explicit_region_as_approximate():
     assert tour["geoResolution"]["final"]["reason"] == "region-catalog-fallback"
 
 
+def test_rebuild_does_not_call_city_catalog_coordinates_exact():
+    tour = {
+        "id": "tour_city_catalog",
+        "title": "龙门温德姆温泉2天",
+        "destination": "广东",
+    }
+
+    rebuild([tour])
+
+    assert tour["destinationGeoLevel"] == "city"
+    assert tour["destinationCoordinateSource"] == "catalog"
+    assert tour["destinationCoordinatePrecision"] == "approximate"
+
+
 def test_rebuild_keeps_unproven_destination_unmapped():
     tour = {
         "id": "tour_unknown_destination",
@@ -135,6 +149,147 @@ def test_rebuild_preserves_validated_geocoder_point():
     assert tour["destinationCoordinateSource"] == "geocoder"
 
 
+def test_rebuild_discards_historical_cross_city_geocoder_point():
+    tour = {
+        "id": "tour_wrong_city",
+        "title": "增城三英温泉3天",
+        "destination": "广东",
+        "destinationPlaceName": "增城三英温泉",
+        "destinationCity": "增城",
+        "destinationProvince": "广东",
+        "destinationLatitude": 23.5678689,
+        "destinationLongitude": 116.6436494,
+        "destinationGeoLevel": "town",
+        "destinationCoordinateSource": "geocoder",
+        "destinationCoordinatePrecision": "approximate",
+        "destinationAddress": {
+            "formatted": "三英村，潮州市，广东省，中国",
+            "city": "潮州市",
+            "province": "广东省",
+        },
+        "geoConfidence": "low",
+        "geoSource": "geocoder",
+    }
+
+    _, after = rebuild([tour], geocode_cache_path=Path("tmp-nonexistent-geo-cache.json"))
+
+    assert after == 1
+    assert tour["destinationCoordinateSource"] == "fallback"
+    assert tour["destinationCoordinatePrecision"] == "approximate"
+    assert tour["destinationLatitude"] == 23.2904
+    assert tour["destinationLongitude"] == 113.8108
+    assert tour["destinationAddress"]["city"] == "增城"
+
+
+def test_rebuild_drops_historical_foreign_city_as_domestic_hotel():
+    tour = {
+        "id": "tour_foreign_collision",
+        "title": "<\u4e1c\u6b27>\u5965\u6377\u5308\u6df1\u5ea6\u6e38\u4e2d\u5305\u542b\u7ef4\u4e5f\u7eb3",
+        "destination": "\u5e7f\u4e1c",
+        "destinationCity": "\u5e7f\u4e1c",
+        "destinationPlaceName": "\u7ef4\u4e5f\u7eb3",
+        "destinationProvince": "\u5e7f\u4e1c",
+        "destinationCountry": "\u4e2d\u56fd",
+        "destinationLatitude": 23.1067077,
+        "destinationLongitude": 113.5408031,
+        "destinationGeoLevel": "poi",
+        "destinationCoordinateSource": "osm",
+        "destinationCoordinatePrecision": "exact",
+        "destinationAddress": {"formatted": "\u7ef4\u4e5f\u7eb3\u56fd\u9645\u9152\u5e97, \u5e7f\u4e1c\u7701, \u4e2d\u56fd"},
+        "geoConfidence": "high",
+        "geoSource": "osm",
+    }
+
+    rebuild([tour])
+
+    assert tour["destinationCoordinateSource"] == "fallback"
+    assert tour["destinationCoordinatePrecision"] == "approximate"
+    assert tour["destinationLatitude"] == 23.379
+    assert tour["destinationLongitude"] == 113.7633
+
+
+def test_rebuild_drops_stale_generic_resolved_candidate():
+    tour = {
+        "id": "tour_generic_evidence",
+        "title": "广东温泉宾馆2天",
+        "destination": "广东",
+        "geoResolution": {"mining": {"resolvedCandidate": "建设"}},
+    }
+
+    rebuild([tour])
+
+    assert tour["geoResolution"]["mining"].get("resolvedCandidate") is None
+
+
+def test_rebuild_keeps_evidence_backed_city_context_for_poi_refinement():
+    tour = {
+        "id": "tour_context_replay",
+        "title": "新兴翔顺龙山温泉3天",
+        "destination": "广东",
+        "destinationCity": "新兴",
+        "destinationPlaceName": "新兴龙山温泉",
+        "destinationProvince": "广东",
+        "destinationLatitude": 22.695,
+        "destinationLongitude": 112.225,
+        "destinationCoordinateSource": "fallback",
+        "destinationCoordinatePrecision": "approximate",
+        "geoResolution": {"mining": {"candidateLabels": ["新兴翔顺龙山温泉"]}},
+    }
+
+    rebuild([tour])
+
+    assert tour["destinationCity"] == "新兴"
+    assert tour["destinationCoordinateSource"] == "osm"
+    assert tour["destinationPlaceName"] == "新兴翔顺龙山温泉"
+
+
+def test_rebuild_drops_previous_poi_not_supported_by_current_title_candidates():
+    tour = {
+        "id": "tour_incidental_poi",
+        "title": "云浮肇庆3天象窝禅山徒步七星岩",
+        "destination": "广东",
+        "destinationCity": "新兴",
+        "destinationPlaceName": "国恩寺",
+        "destinationProvince": "广东",
+        "destinationLatitude": 22.5917178,
+        "destinationLongitude": 112.2234103,
+        "destinationGeoLevel": "poi",
+        "destinationCoordinateSource": "osm",
+        "destinationCoordinatePrecision": "exact",
+        "destinationAddress": {"city": "云浮", "district": "新兴", "province": "广东"},
+        "geoResolution": {"mining": {"candidateLabels": ["新兴象窝", "肇庆七星岩"]}},
+    }
+
+    rebuild([tour])
+
+    assert tour["destinationPlaceName"] == "新兴象窝"
+    assert tour["destinationCoordinateSource"] == "fallback"
+    assert tour["destinationLatitude"] == 22.695
+
+
+def test_rebuild_prefers_city_anchored_destination_over_incidental_itinerary_poi():
+    tour = {
+        "id": "tour_incidental_title_poi",
+        "title": "云浮、肇庆3天象窝禅山徒步七星岩",
+        "destination": "广东",
+        "destinationCity": "新兴",
+        "destinationPlaceName": "国恩寺",
+        "destinationProvince": "广东",
+        "destinationLatitude": 22.5917178,
+        "destinationLongitude": 112.2234103,
+        "destinationCoordinateSource": "osm",
+        "destinationGeoLevel": "poi",
+        "destinationCoordinatePrecision": "exact",
+        "destinationAddress": {"city": "云浮", "district": "新兴", "province": "广东"},
+        "geoResolution": {"mining": {"candidateLabels": ["新兴象窝", "肇庆七星岩"]}},
+    }
+
+    rebuild([tour])
+
+    assert tour["destinationPlaceName"] == "新兴象窝"
+    assert tour["destinationCoordinateSource"] == "fallback"
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback()
@@ -142,4 +297,5 @@ if __name__ == "__main__":
     test_rebuild_keeps_unproven_destination_unmapped()
     test_rebuild_preserves_source_mining_evidence()
     test_rebuild_preserves_validated_geocoder_point()
+    test_rebuild_drops_historical_foreign_city_as_domestic_hotel()
     print("geo rebuild tests passed")

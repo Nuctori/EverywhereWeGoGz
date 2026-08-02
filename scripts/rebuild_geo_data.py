@@ -10,8 +10,13 @@ import argparse
 from pathlib import Path
 
 from geo_catalog import classify_route, find_place, normalize_tour_geo
-from geocode_destinations import enrich_tours
-from osm_poi_resolver import enrich_tours_from_osm
+from geocode_destinations import (
+    _has_conflicting_admin_context,
+    _has_named_evidence,
+    enrich_tours,
+)
+from osm_poi_resolver import enrich_tours_from_osm, is_international_route_title, normalize_name
+from source_geo_mining import is_generic_candidate
 
 
 def atomic_write_json(path: Path, value) -> None:
@@ -69,13 +74,20 @@ def _preserve_geo_mining(previous: object, current: object) -> None:
         return
     old_mining = previous.get("mining") if isinstance(previous.get("mining"), dict) else {}
     new_mining = current.setdefault("mining", {})
-    for key in ("sourceDetail", "resolvedCandidate"):
-        if old_mining.get(key) and not new_mining.get(key):
-            new_mining[key] = old_mining[key]
+    if old_mining.get("sourceDetail") and not new_mining.get("sourceDetail"):
+        new_mining["sourceDetail"] = old_mining["sourceDetail"]
+    old_resolved = old_mining.get("resolvedCandidate")
+    if old_resolved and not is_generic_candidate(old_resolved) and not new_mining.get("resolvedCandidate"):
+        new_mining["resolvedCandidate"] = old_resolved
     old_rows = old_mining.get("sourceCandidates")
     if not isinstance(old_rows, list):
         return
     new_rows = new_mining.setdefault("sourceCandidates", [])
+    current_labels = {
+        normalize_name(label)
+        for label in new_mining.get("candidateLabels", [])
+        if str(label).strip()
+    }
     existing_labels = {
         str(row.get("label") or "")
         for row in new_rows
@@ -85,23 +97,107 @@ def _preserve_geo_mining(previous: object, current: object) -> None:
         if not isinstance(row, dict):
             continue
         label = str(row.get("label") or "")
+        if current_labels and normalize_name(label) not in current_labels:
+            continue
         if label and label not in existing_labels:
             new_rows.append(row)
             existing_labels.add(label)
 
 
-def _preserve_existing_precise_geo(previous: object, current: object) -> None:
+def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
     """Do not erase a validated network/OSM point during catalog normalization."""
     if not isinstance(previous, dict) or not isinstance(current, dict):
-        return
+        return False
     source = str(previous.get("destinationCoordinateSource") or "")
     if source not in {"geocoder", "osm"}:
-        return
+        return False
     if not _valid_coordinate_pair(previous.get("destinationLatitude"), previous.get("destinationLongitude")):
-        return
+        return False
+    previous_address = previous.get("destinationAddress")
+    previous_display = (
+        previous_address.get("formatted")
+        if isinstance(previous_address, dict)
+        else ""
+    ) or str(previous.get("destinationPlaceName") or "")
+    expected_city = str(current.get("destinationCity") or "")
+    expected_province = str(current.get("destinationProvince") or "")
+    current_resolution = current.get("geoResolution") if isinstance(current.get("geoResolution"), dict) else {}
+    current_mining = current_resolution.get("mining") if isinstance(current_resolution.get("mining"), dict) else {}
+    current_labels = [
+        normalize_name(label)
+        for label in current_mining.get("candidateLabels", [])
+        if str(label).strip()
+    ]
+    current_labels.extend(
+        normalize_name(row.get("label"))
+        for row in current_mining.get("sourceCandidates", [])
+        if isinstance(row, dict) and str(row.get("label") or "").strip()
+    )
+    previous_place = normalize_name(previous.get("destinationPlaceName"))
+    previous_city = normalize_name(previous.get("destinationCity"))
+    title = normalize_name(previous.get("title"))
+    previous_tail = previous_place[len(previous_city):] if previous_city and previous_place.startswith(previous_city) else previous_place
+    supported_by_current_evidence = bool(
+        previous_place
+        and (
+            previous_place in title
+            or len(previous_tail) >= 3 and previous_tail in title
+            or any(previous_place in label or label in previous_place for label in current_labels)
+        )
+    )
+    if previous_place and previous_place != previous_city and not supported_by_current_evidence:
+        current_mining.pop("resolvedCandidate", None)
+        for key in (
+            "destinationLatitude", "destinationLongitude", "destinationGeoLevel",
+            "destinationLocality", "destinationCoordinateSource",
+            "destinationCoordinatePrecision", "destinationAddress",
+            "geoConfidence", "geoSource",
+        ):
+            previous.pop(key, None)
+        return False
+    # An international route with only a province-level destination cannot
+    # safely inherit any domestic OSM POI from a shared itinerary token.
+    if (
+        source == "osm"
+        and is_international_route_title(previous.get("title"))
+        and normalize_name(expected_city)
+        and normalize_name(expected_city) in {normalize_name(expected_province), ""}
+    ):
+        current_mining.pop("resolvedCandidate", None)
+        for key in (
+            "destinationLatitude", "destinationLongitude", "destinationGeoLevel",
+            "destinationLocality", "destinationCoordinateSource",
+            "destinationCoordinatePrecision", "destinationAddress",
+            "geoConfidence", "geoSource",
+        ):
+            previous.pop(key, None)
+        return False
+    if source == "osm" and previous_place == previous_city and previous.get("destinationGeoLevel") == "poi":
+        for key in (
+            "destinationLatitude", "destinationLongitude", "destinationGeoLevel",
+            "destinationLocality", "destinationCoordinateSource",
+            "destinationCoordinatePrecision", "destinationAddress",
+            "geoConfidence", "geoSource",
+        ):
+            previous.pop(key, None)
+        return False
+    if _has_conflicting_admin_context(
+        expected_city,
+        expected_province,
+        previous_display,
+        previous_address if isinstance(previous_address, dict) else {},
+    ):
+        for key in (
+            "destinationLatitude", "destinationLongitude", "destinationGeoLevel",
+            "destinationLocality", "destinationCoordinateSource",
+            "destinationCoordinatePrecision", "destinationAddress",
+            "geoConfidence", "geoSource",
+        ):
+            previous.pop(key, None)
+        return False
     current_source = str(current.get("destinationCoordinateSource") or "")
     if current_source in {"catalog", "osm"} and current_source != "unknown":
-        return
+        return False
     for key in (
         "destinationCity", "destinationPlaceName", "destinationProvince", "destinationCountry",
         "destinationLatitude", "destinationLongitude", "destinationGeoLevel", "destinationLocality",
@@ -110,6 +206,7 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> None:
     ):
         if key in previous:
             current[key] = previous[key]
+    return True
 
 
 def _apply_coarse_destination_fallback(tour: dict) -> bool:
