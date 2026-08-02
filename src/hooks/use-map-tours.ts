@@ -155,6 +155,7 @@ export function useMapTours() {
       controller.abort();
     }, PLACE_TOUR_REQUEST_TIMEOUT_MS);
     setPlaceToursLoading(placeId);
+    setPlaceToursError((current) => current?.placeId === placeId ? null : current);
     setState((current) => ({ ...current, toursError: null }));
 
     try {
@@ -169,6 +170,7 @@ export function useMapTours() {
       const tours = [...allToursById.values()];
       placeToursCacheRef.current.set(placeId, tours);
       placeToursNextChunkRef.current.set(placeId, chunkIndex + 1);
+      setPlaceToursError((current) => current?.placeId === placeId ? null : current);
       setPlaceToursLoaded((current) => new Set(current).add(placeId));
       if (chunkTours.length < PLACE_TOUR_CHUNK_SIZE || tours.length >= expectedTourCount) {
         placeToursCompleteRef.current.add(placeId);

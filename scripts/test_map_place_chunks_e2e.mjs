@@ -90,6 +90,7 @@ try {
   assert((await secondChunkResponse).ok(), 'retry must load the next Guangzhou card chunk');
   assert(await cards.count() === 48, 'retry must append the second chunk without dropping the first 24 cards');
   assert((await cards.nth(0).innerText()) === firstCardBeforeFailure, 'the first card must remain after retry');
+  assert(await panel.getByText('已显示前 24 条线路，剩余线路加载失败。', { exact: false }).count() === 0, 'a successful retry must clear the stale error message');
 
   console.log(JSON.stringify({ checked: 'map-place-chunks-e2e', placeId: guangzhou.placeId, firstChunk: 24, afterRetry: 48 }));
 } finally {
