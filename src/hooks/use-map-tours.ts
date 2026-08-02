@@ -46,6 +46,9 @@ const initialState: MapToursState = {
   toursError: null,
 };
 
+const PLACE_TOUR_REQUEST_TIMEOUT_MS = 15000;
+type PlaceToursError = { placeId: string; message: string };
+
 type DestinationMapPoint = NonNullable<NonNullable<TourSummary['geo']>['destination']>;
 
 function isApproximateMapPoint(point: DestinationMapPoint | undefined) {
@@ -67,29 +70,24 @@ function mapGeoPlaces(entries: GeoPlaceIndexEntry[]): MapTourLocation[] {
     .sort((left, right) => right.tourCount - left.tourCount || left.name.localeCompare(right.name));
 }
 
-function mergeGeoPlacesWithTours(places: MapTourLocation[], tours: TourSummary[]): MapTourLocation[] {
-  // geo-places.json is generated from the complete destination evidence and
-  // can contain several destination places for one multi-stop tour. Tour
-  // summaries only provide the cards, so they must not replace this index with
-  // a single, potentially coarse geo.destination point.
-  const currentTourIds = new Set(tours.map((tour) => tour.id));
-  return places
-    .map((place) => {
-      const tourIds = place.tourIds.filter((tourId) => currentTourIds.has(tourId));
-      return { ...place, tourIds, tourCount: tourIds.length };
-    })
-    .filter((place) => place.tourCount > 0)
-    .sort((left, right) => right.tourCount - left.tourCount || left.name.localeCompare(right.name));
-}
-
 export function useMapTours() {
   const [state, setState] = useState<MapToursState>(initialState);
+  const [placeToursLoading, setPlaceToursLoading] = useState<string | null>(null);
+  const [placeToursLoaded, setPlaceToursLoaded] = useState<Set<string>>(new Set());
+  const [placeToursError, setPlaceToursError] = useState<PlaceToursError | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const placeToursAbortRef = useRef<AbortController | null>(null);
+  const placeToursCacheRef = useRef(new Map<string, TourSummary[]>());
 
   const fetchTours = useCallback(async () => {
     abortRef.current?.abort();
+    placeToursAbortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
+    placeToursCacheRef.current.clear();
+    setPlaceToursLoading(null);
+    setPlaceToursLoaded(new Set());
+    setPlaceToursError(null);
     setState((current) => ({
       ...current,
       placesLoading: true,
@@ -106,7 +104,15 @@ export function useMapTours() {
       if (!placesResponse.ok) throw new Error(`Failed to load map places: ${placesResponse.status}`);
       generatedPlaces = mapGeoPlaces(geoPlacesSchema.parse(await placesResponse.json()));
       if (controller.signal.aborted) return;
-      setState((current) => ({ ...current, places: generatedPlaces, placesLoading: false, placesError: null }));
+      setState((current) => ({
+        ...current,
+        places: generatedPlaces,
+        placesLoading: false,
+        loading: false,
+        placesError: null,
+        toursError: null,
+        tours: [],
+      }));
     } catch (error) {
       if (controller.signal.aborted) return;
       setState((current) => ({
@@ -119,50 +125,80 @@ export function useMapTours() {
       return;
     }
 
+  }, []);
+
+  const fetchToursForPlace = useCallback(async (placeId: string, force = false) => {
+    const cachedTours = placeToursCacheRef.current.get(placeId);
+    if (!force && cachedTours) {
+      setPlaceToursLoaded((current) => new Set(current).add(placeId));
+      setPlaceToursError(null);
+      return;
+    }
+
+    placeToursAbortRef.current?.abort();
+    const controller = new AbortController();
+    placeToursAbortRef.current = controller;
+    let timedOut = false;
+    const timeoutId = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, PLACE_TOUR_REQUEST_TIMEOUT_MS);
+    setPlaceToursLoading(placeId);
+    setState((current) => ({ ...current, toursError: null }));
+
     try {
-      // Tour summaries are only needed for the place panel. They can finish in
-      // the background after the point layer is already visible.
-      const toursResponse = await fetch(getDataUrl('tour-map-cards.json'), { signal: controller.signal });
-      if (!toursResponse.ok) throw new Error(`Failed to load map tours: ${toursResponse.status}`);
-      const entries = tourMapCardsSchema.parse(await toursResponse.json());
+      const response = await fetch(getDataUrl(`tour-map-place-cards/${encodeURIComponent(placeId)}.json`), { signal: controller.signal });
+      if (!response.ok) throw new Error(`Failed to load map tours for ${placeId}: ${response.status}`);
+      const tours = tourMapCardsSchema.parse(await response.json()).map(inflateTourSummaryFromMapCard);
       if (controller.signal.aborted) return;
-      const tours = entries.map(inflateTourSummaryFromMapCard);
-      setState((current) => ({
-        ...current,
-        places: mergeGeoPlacesWithTours(generatedPlaces, tours),
-        tours,
-        loading: false,
-        toursError: null,
-      }));
+      placeToursCacheRef.current.set(placeId, tours);
+      setPlaceToursLoaded((current) => new Set(current).add(placeId));
+      setState((current) => {
+        const toursById = new Map(current.tours.map((tour) => [tour.id, tour]));
+        tours.forEach((tour) => toursById.set(tour.id, tour));
+        return { ...current, tours: [...toursById.values()], toursError: null };
+      });
     } catch (error) {
-      if (controller.signal.aborted) return;
+      if (controller.signal.aborted && !timedOut) return;
+      const message = error instanceof Error ? error.message : 'Failed to load map tours.';
+      setPlaceToursError({ placeId, message });
       setState((current) => ({
         ...current,
-        loading: false,
         toursError: error instanceof Error ? error.message : 'Failed to load map tours.',
       }));
+    } finally {
+      window.clearTimeout(timeoutId);
+      if (placeToursAbortRef.current === controller) {
+        placeToursAbortRef.current = null;
+        setPlaceToursLoading(null);
+      }
     }
   }, []);
 
   useEffect(() => {
     void fetchTours();
-    return () => abortRef.current?.abort();
+    return () => {
+      abortRef.current?.abort();
+      placeToursAbortRef.current?.abort();
+    };
   }, [fetchTours]);
 
   const toursById = useMemo(() => new Map(state.tours.map((tour) => [tour.id, tour])), [state.tours]);
-  const placesByTourId = useMemo(() => {
-    const result = new Map<string, MapTourLocation>();
-    for (const place of state.places) {
-      for (const tourId of place.tourIds) result.set(tourId, place);
-    }
-    return result;
-  }, [state.places]);
+
+  const approximateTourCount = useMemo(() => new Set(
+    state.places
+      .filter((place) => isApproximateMapPoint(place))
+      .flatMap((place) => place.tourIds),
+  ).size, [state.places]);
 
   return {
     ...state,
     toursById,
-    unmappedTours: state.tours.filter((tour) => !placesByTourId.has(tour.id)),
-    approximateTours: state.tours.filter((tour) => isApproximateMapPoint(placesByTourId.get(tour.id))),
+    approximateTourCount,
+    placeToursLoading,
+    placeToursLoaded,
+    placeToursError,
     fetchTours,
+    fetchToursForPlace,
   };
 }

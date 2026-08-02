@@ -235,7 +235,18 @@ function PlaceClusterPanel({
 }
 
 export function MapView({ expanded, onExpandedChange, embedded = false }: MapViewProps) {
-  const { places, unmappedTours, approximateTours, placesLoading, loading: toursLoading, placesError, toursError, toursById, fetchTours } = useMapTours();
+  const {
+    places,
+    placesLoading,
+    placesError,
+    toursById,
+    approximateTourCount,
+    placeToursLoading,
+    placeToursLoaded,
+    placeToursError,
+    fetchTours,
+    fetchToursForPlace,
+  } = useMapTours();
   const { selectedSummaryTour, resolvedTour, detailStatus, detailError, detailLoading, selectTour, clearSelectedTour } = useTourDetail();
   const [providerIndex, setProviderIndex] = useState(0);
   const [selectedPlace, setSelectedPlace] = useState<MapTourLocation | null>(null);
@@ -251,6 +262,17 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     if (!selectedPlace) return [];
     return selectedPlace.tourIds.map((id) => toursById.get(id)).filter((tour): tour is TourSummary => Boolean(tour));
   }, [selectedPlace, toursById]);
+  const selectedPlaceError = selectedPlace && placeToursError?.placeId === selectedPlace.placeId
+    ? placeToursError.message
+    : null;
+  const selectedPlaceLoading = Boolean(selectedPlace && (
+    !selectedPlaceError
+    && (placeToursLoading === selectedPlace.placeId || !placeToursLoaded.has(selectedPlace.placeId))
+  ));
+
+  useEffect(() => {
+    if (selectedPlace) void fetchToursForPlace(selectedPlace.placeId);
+  }, [fetchToursForPlace, selectedPlace]);
 
   const openTourDetail = (tour: TourSummary) => {
     // The detail dialog is the next step in the same flow; do not leave the place panel competing with it.
@@ -446,7 +468,16 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         </div>
       )}
       <PlaceClusterPanel places={clusterPlaces} expanded={expanded} onSelect={(place) => { setClusterPlaces([]); setSelectedPlace(place); }} onClose={() => setClusterPlaces([])} />
-      <PlaceToursPanel place={selectedPlace} tours={selectedTours} loading={toursLoading} error={toursError} onTourClick={openTourDetail} onClose={() => setSelectedPlace(null)} onRetry={() => void fetchTours()} expanded={expanded} />
+      <PlaceToursPanel
+        place={selectedPlace}
+        tours={selectedTours}
+        loading={selectedPlaceLoading}
+        error={selectedPlaceError}
+        onTourClick={openTourDetail}
+        onClose={() => setSelectedPlace(null)}
+        onRetry={() => selectedPlace ? void fetchToursForPlace(selectedPlace.placeId, true) : void fetchTours()}
+        expanded={expanded}
+      />
     </div>
   );
 
@@ -483,8 +514,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             ) : (
               <>
                 已定位 {visiblePlaces.length} 个地点
-                {approximateTours.length > 0 && ` · ${approximateTours.length} 条线路使用模糊坐标`}
-                {unmappedTours.length > 0 && ` · ${unmappedTours.length} 条线路待补全`}
+                {approximateTourCount > 0 && ` · ${approximateTourCount} 条线路使用模糊坐标`}
               </>
             )}
           </p>
@@ -503,8 +533,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             </div>
             <p className="mb-2 px-1 text-xs text-stone-400">
               已定位 {visiblePlaces.length} 个目的地
-              {approximateTours.length > 0 && `，其中 ${approximateTours.length} 条线路使用模糊坐标`}
-              {unmappedTours.length > 0 && `，另有 ${unmappedTours.length} 条线路待补全地点`}。
+              {approximateTourCount > 0 && `，其中 ${approximateTourCount} 条线路使用模糊坐标`}。
             </p>
             {mapSurface}
           </div>
