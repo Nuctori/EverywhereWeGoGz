@@ -47,6 +47,7 @@ const initialState: MapToursState = {
 };
 
 const PLACE_TOUR_REQUEST_TIMEOUT_MS = 15000;
+const PLACE_TOUR_CHUNK_SIZE = 24;
 type PlaceToursError = { placeId: string; message: string };
 
 type DestinationMapPoint = NonNullable<NonNullable<TourSummary['geo']>['destination']>;
@@ -74,10 +75,14 @@ export function useMapTours() {
   const [state, setState] = useState<MapToursState>(initialState);
   const [placeToursLoading, setPlaceToursLoading] = useState<string | null>(null);
   const [placeToursLoaded, setPlaceToursLoaded] = useState<Set<string>>(new Set());
+  const [placeToursComplete, setPlaceToursComplete] = useState<Set<string>>(new Set());
   const [placeToursError, setPlaceToursError] = useState<PlaceToursError | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const placeToursAbortRef = useRef<AbortController | null>(null);
   const placeToursCacheRef = useRef(new Map<string, TourSummary[]>());
+  const placeToursNextChunkRef = useRef(new Map<string, number>());
+  const placeToursCompleteRef = useRef(new Set<string>());
+  const placeTourCountRef = useRef(new Map<string, number>());
 
   const fetchTours = useCallback(async () => {
     abortRef.current?.abort();
@@ -85,8 +90,12 @@ export function useMapTours() {
     const controller = new AbortController();
     abortRef.current = controller;
     placeToursCacheRef.current.clear();
+    placeToursNextChunkRef.current.clear();
+    placeToursCompleteRef.current.clear();
+    placeTourCountRef.current.clear();
     setPlaceToursLoading(null);
     setPlaceToursLoaded(new Set());
+    setPlaceToursComplete(new Set());
     setPlaceToursError(null);
     setState((current) => ({
       ...current,
@@ -103,6 +112,7 @@ export function useMapTours() {
       const placesResponse = await fetch(getDataUrl('geo-places.json'), { signal: controller.signal });
       if (!placesResponse.ok) throw new Error(`Failed to load map places: ${placesResponse.status}`);
       generatedPlaces = mapGeoPlaces(geoPlacesSchema.parse(await placesResponse.json()));
+      generatedPlaces.forEach((place) => placeTourCountRef.current.set(place.placeId, place.tourCount));
       if (controller.signal.aborted) return;
       setState((current) => ({
         ...current,
@@ -129,7 +139,8 @@ export function useMapTours() {
 
   const fetchToursForPlace = useCallback(async (placeId: string, force = false) => {
     const cachedTours = placeToursCacheRef.current.get(placeId);
-    if (!force && cachedTours) {
+    const expectedTourCount = placeTourCountRef.current.get(placeId) ?? Number.POSITIVE_INFINITY;
+    if (!force && cachedTours && (placeToursCompleteRef.current.has(placeId) || cachedTours.length >= expectedTourCount)) {
       setPlaceToursLoaded((current) => new Set(current).add(placeId));
       setPlaceToursError(null);
       return;
@@ -147,12 +158,22 @@ export function useMapTours() {
     setState((current) => ({ ...current, toursError: null }));
 
     try {
-      const response = await fetch(getDataUrl(`tour-map-place-cards/${encodeURIComponent(placeId)}.json`), { signal: controller.signal });
+      const chunkIndex = placeToursNextChunkRef.current.get(placeId) ?? 0;
+      const response = await fetch(getDataUrl(`tour-map-place-cards/${encodeURIComponent(placeId)}/${chunkIndex}.json`), { signal: controller.signal });
       if (!response.ok) throw new Error(`Failed to load map tours for ${placeId}: ${response.status}`);
-      const tours = tourMapCardsSchema.parse(await response.json()).map(inflateTourSummaryFromMapCard);
+      const chunkTours = tourMapCardsSchema.parse(await response.json()).map(inflateTourSummaryFromMapCard);
       if (controller.signal.aborted) return;
+      const existingTours = placeToursCacheRef.current.get(placeId) ?? [];
+      const allToursById = new Map(existingTours.map((tour) => [tour.id, tour]));
+      chunkTours.forEach((tour) => allToursById.set(tour.id, tour));
+      const tours = [...allToursById.values()];
       placeToursCacheRef.current.set(placeId, tours);
+      placeToursNextChunkRef.current.set(placeId, chunkIndex + 1);
       setPlaceToursLoaded((current) => new Set(current).add(placeId));
+      if (chunkTours.length < PLACE_TOUR_CHUNK_SIZE || tours.length >= expectedTourCount) {
+        placeToursCompleteRef.current.add(placeId);
+        setPlaceToursComplete((current) => new Set(current).add(placeId));
+      }
       setState((current) => {
         const toursById = new Map(current.tours.map((tour) => [tour.id, tour]));
         tours.forEach((tour) => toursById.set(tour.id, tour));
@@ -197,6 +218,7 @@ export function useMapTours() {
     approximateTourCount,
     placeToursLoading,
     placeToursLoaded,
+    placeToursComplete,
     placeToursError,
     fetchTours,
     fetchToursForPlace,

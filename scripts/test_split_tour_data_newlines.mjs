@@ -12,8 +12,9 @@ const files = [
   'public/data/tours-meta.json',
   'public/data/tour-details/tour_1.json',
 ];
-const placeCardFile = fs.readdirSync(path.join(root, 'public/data/tour-map-place-cards')).find((file) => file.endsWith('.json'));
-if (placeCardFile) files.push(`public/data/tour-map-place-cards/${placeCardFile}`);
+const placeCardDir = fs.readdirSync(path.join(root, 'public/data/tour-map-place-cards'), { withFileTypes: true }).find((entry) => entry.isDirectory());
+const placeCardFile = placeCardDir && fs.readdirSync(path.join(root, 'public/data/tour-map-place-cards', placeCardDir.name)).find((file) => file.endsWith('.json'));
+if (placeCardDir && placeCardFile) files.push(`public/data/tour-map-place-cards/${placeCardDir.name}/${placeCardFile}`);
 
 for (const file of files) {
   const filePath = path.join(root, file);
