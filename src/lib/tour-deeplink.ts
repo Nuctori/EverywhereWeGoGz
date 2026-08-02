@@ -1,4 +1,4 @@
-import type { TourIndexEntry, TourSummary } from '@/types/tour';
+import type { TourIndexEntry, TourMapCardEntry, TourSummary } from '@/types/tour';
 
 export interface TourDeepLinkTarget {
   tourId: string;
@@ -69,6 +69,39 @@ export function inflateTourSummaryFromIndexEntry(entry: TourIndexEntry): TourSum
     departureDates: entry.departureDates,
     hotDepartureDates: entry.hotDepartureDates,
     geo: entry.geo,
+  };
+}
+
+export function inflateTourSummaryFromMapCard(entry: TourMapCardEntry): TourSummary {
+  return {
+    id: entry.id,
+    sourceId: entry.sourceId,
+    title: entry.title,
+    source: entry.source,
+    destination: entry.destination,
+    duration: entry.duration,
+    price: entry.price,
+    priceUnit: '人',
+    departureDate: entry.departureDate,
+    transportType: entry.transportType,
+    accommodationLevel: '',
+    meals: '',
+    singleSupplementNote: '',
+    highlights: [],
+    rating: 0,
+    bookingUrl: entry.bookingUrl,
+    images: [],
+    tags: [],
+    isHot: false,
+    isNew: false,
+    isFlashSale: false,
+    groupSize: '',
+    theme: '',
+    leisureLevel: 'easy',
+    suitableFor: [],
+    season: '',
+    departureDates: entry.departureDates,
+    hotDepartureDates: entry.hotDepartureDates,
   };
 }
 

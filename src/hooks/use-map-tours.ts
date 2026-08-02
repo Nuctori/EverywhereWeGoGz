@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getDataUrl } from '@/lib/utils';
-import { inflateTourSummaryFromIndexEntry } from '@/lib/tour-deeplink';
-import { geoPlacesSchema, toursIndexSchema } from '@/lib/runtime-schemas';
+import { inflateTourSummaryFromMapCard } from '@/lib/tour-deeplink';
+import { geoPlacesSchema, tourMapCardsSchema } from '@/lib/runtime-schemas';
 import type { GeoAddress, GeoPlaceIndexEntry, TourSummary } from '@/types/tour';
 
 export type MapTourLocation = {
@@ -47,18 +47,6 @@ const initialState: MapToursState = {
 };
 
 type DestinationMapPoint = NonNullable<NonNullable<TourSummary['geo']>['destination']>;
-
-function hasMapPoint(point: DestinationMapPoint | undefined): point is DestinationMapPoint {
-  return Boolean(
-    point
-    && Number.isFinite(point.latitude)
-    && Number.isFinite(point.longitude)
-    && point.latitude >= -90
-    && point.latitude <= 90
-    && point.longitude >= -180
-    && point.longitude <= 180,
-  );
-}
 
 function isApproximateMapPoint(point: DestinationMapPoint | undefined) {
   return Boolean(point && (
@@ -134,11 +122,11 @@ export function useMapTours() {
     try {
       // Tour summaries are only needed for the place panel. They can finish in
       // the background after the point layer is already visible.
-      const toursResponse = await fetch(getDataUrl('tours-index.json'), { signal: controller.signal });
+      const toursResponse = await fetch(getDataUrl('tour-map-cards.json'), { signal: controller.signal });
       if (!toursResponse.ok) throw new Error(`Failed to load map tours: ${toursResponse.status}`);
-      const entries = toursIndexSchema.parse(await toursResponse.json());
+      const entries = tourMapCardsSchema.parse(await toursResponse.json());
       if (controller.signal.aborted) return;
-      const tours = entries.map(inflateTourSummaryFromIndexEntry);
+      const tours = entries.map(inflateTourSummaryFromMapCard);
       setState((current) => ({
         ...current,
         places: mergeGeoPlacesWithTours(generatedPlaces, tours),
@@ -162,12 +150,19 @@ export function useMapTours() {
   }, [fetchTours]);
 
   const toursById = useMemo(() => new Map(state.tours.map((tour) => [tour.id, tour])), [state.tours]);
+  const placesByTourId = useMemo(() => {
+    const result = new Map<string, MapTourLocation>();
+    for (const place of state.places) {
+      for (const tourId of place.tourIds) result.set(tourId, place);
+    }
+    return result;
+  }, [state.places]);
 
   return {
     ...state,
     toursById,
-    unmappedTours: state.tours.filter((tour) => !hasMapPoint(tour.geo?.destination)),
-    approximateTours: state.tours.filter((tour) => isApproximateMapPoint(tour.geo?.destination)),
+    unmappedTours: state.tours.filter((tour) => !placesByTourId.has(tour.id)),
+    approximateTours: state.tours.filter((tour) => isApproximateMapPoint(placesByTourId.get(tour.id))),
     fetchTours,
   };
 }

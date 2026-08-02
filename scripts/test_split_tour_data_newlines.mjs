@@ -7,6 +7,7 @@ const files = [
   'public/data/tours.json',
   'public/data/tours-list.json',
   'public/data/tours-index.json',
+  'public/data/tour-map-cards.json',
   'public/data/tours-page-0.json',
   'public/data/tours-meta.json',
   'public/data/tour-details/tour_1.json',
