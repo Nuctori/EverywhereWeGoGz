@@ -53,6 +53,8 @@ assert(source.includes('markerCollisionRadius'), 'marker collision distance must
 assert(source.includes('maxIndependentMarkers'), 'independent marker capacity must respond to zoom level');
 assert(source.includes('const zoom = map.getZoom()'), 'marker rendering must read the current map zoom');
 assert(source.includes('const maximumZoom = map.getMaxZoom()'), 'marker rendering must know the tile layer maximum zoom');
+assert(source.includes("data-map-zoom"), 'MapView must expose its current zoom for runtime verification');
+assert(source.includes("data-map-max-zoom"), 'MapView must expose its configured maximum zoom for runtime verification');
 assert(source.includes('atMaximumZoom'), 'maximum zoom must disable destination clustering');
 assert(source.includes('FULL_DETAIL_ZOOM'), 'detail zoom must disable clustering before the absolute tile maximum');
 assert(source.includes('Number.POSITIVE_INFINITY'), 'maximum zoom must allow every nearby destination marker');
