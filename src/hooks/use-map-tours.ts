@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getDataUrl } from '@/lib/utils';
-import { inflateTourSummaryFromIndexEntry } from '@/lib/tour-deeplink';
-import { geoPlacesSchema, toursIndexSchema } from '@/lib/runtime-schemas';
+import { inflateTourSummaryFromMapCard } from '@/lib/tour-deeplink';
+import { geoPlacesSchema, tourMapCardsSchema } from '@/lib/runtime-schemas';
 import type { GeoAddress, GeoPlaceIndexEntry, TourSummary } from '@/types/tour';
 
 export type MapTourLocation = {
@@ -134,11 +134,11 @@ export function useMapTours() {
     try {
       // Tour summaries are only needed for the place panel. They can finish in
       // the background after the point layer is already visible.
-      const toursResponse = await fetch(getDataUrl('tours-index.json'), { signal: controller.signal });
+      const toursResponse = await fetch(getDataUrl('tour-map-cards.json'), { signal: controller.signal });
       if (!toursResponse.ok) throw new Error(`Failed to load map tours: ${toursResponse.status}`);
-      const entries = toursIndexSchema.parse(await toursResponse.json());
+      const entries = tourMapCardsSchema.parse(await toursResponse.json());
       if (controller.signal.aborted) return;
-      const tours = entries.map(inflateTourSummaryFromIndexEntry);
+      const tours = entries.map(inflateTourSummaryFromMapCard);
       setState((current) => ({
         ...current,
         places: mergeGeoPlacesWithTours(generatedPlaces, tours),

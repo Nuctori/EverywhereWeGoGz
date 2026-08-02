@@ -12,6 +12,7 @@ const detailsDir = path.join(dataDir, 'tour-details');
 const imageCacheDir = path.join(dataDir, 'image-cache', 'placeholders');
 const geoPlacesPath = path.join(dataDir, 'geo-places.json');
 const tourMapIndexPath = path.join(dataDir, 'tour-map-index.json');
+const tourMapCardsPath = path.join(dataDir, 'tour-map-cards.json');
 // ?? token ?????????????????????????
 const invalidImageTokens = ['lazyimg', '{{', '}}'];
 const writeRetries = 5;
@@ -383,6 +384,25 @@ for (const staleFile of existingDetailFiles) {
 
 writeTextFileWithRetry(listPath, compactJson(listTours));
 
+const mapCardFields = [
+  'id',
+  'sourceId',
+  'title',
+  'source',
+  'destination',
+  'duration',
+  'price',
+  'departureDate',
+  'bookingUrl',
+  'transportType',
+  'departureDates',
+  'hotDepartureDates',
+];
+const tourMapCards = listTours.map((tour) => Object.fromEntries(
+  mapCardFields.filter((field) => field in tour).map((field) => [field, tour[field]]),
+));
+writeTextFileWithRetry(tourMapCardsPath, compactJson(tourMapCards));
+
 const placeMap = new Map();
 const tourMapIndex = listTours.map((tour) => {
   for (const role of ['departure', 'destination']) {
@@ -463,6 +483,7 @@ for (let page = 0; page < totalPages; page++) {
   writeTextFileWithRetry(path.join(pageDir, `tours-page-${page}.json`), compactJson(pageData));
 }
 console.log(`tours-index.json ${Buffer.byteLength(JSON.stringify(indexTours), 'utf8')} bytes`);
+console.log(`tour-map-cards.json ${fs.statSync(tourMapCardsPath).size} bytes`);
 console.log(`tour-deeplink-index.json ${fs.statSync(path.join(dataDir, 'tour-deeplink-index.json')).size} bytes`);
 console.log(`Generated ${totalPages} page chunks (tours-page-0.json ~ tours-page-${totalPages - 1}.json)`);
 
@@ -520,6 +541,10 @@ const meta = {
     mapIndex: {
       path: 'data/tour-map-index.json',
       size: fs.statSync(tourMapIndexPath).size,
+    },
+    mapCards: {
+      path: 'data/tour-map-cards.json',
+      size: fs.statSync(tourMapCardsPath).size,
     },
   },
 };

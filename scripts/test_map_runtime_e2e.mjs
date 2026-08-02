@@ -18,9 +18,9 @@ const assert = (condition, message) => {
 try {
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   const geoPlacesResponse = await fetch(new URL('data/geo-places.json', url));
-  const toursIndexResponse = await fetch(new URL('data/tours-index.json', url));
+  const toursIndexResponse = await fetch(new URL('data/tour-map-cards.json', url));
   assert(geoPlacesResponse.ok, `geo place baseline must be readable: ${geoPlacesResponse.status}`);
-  assert(toursIndexResponse.ok, `tour index baseline must be readable: ${toursIndexResponse.status}`);
+  assert(toursIndexResponse.ok, `map card baseline must be readable: ${toursIndexResponse.status}`);
   const geoPlaces = await geoPlacesResponse.json();
   const toursIndex = await toursIndexResponse.json();
   const currentTourIds = new Set(toursIndex.map((tour) => tour.id));

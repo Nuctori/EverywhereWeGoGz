@@ -187,6 +187,21 @@ export interface TourIndexEntry {
   geo?: TourGeo;
 }
 
+export interface TourMapCardEntry {
+  id: string;
+  sourceId?: string;
+  title: string;
+  source: string;
+  destination: string;
+  duration: number;
+  price: number;
+  departureDate: string;
+  bookingUrl: string;
+  transportType: string;
+  departureDates?: string[];
+  hotDepartureDates?: string[];
+}
+
 export interface TourDetail {
   sourceLogo: string;
   returnDate: string;

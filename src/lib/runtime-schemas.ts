@@ -225,6 +225,21 @@ export const tourDetailSchema = z.object({
 // 由 tourSummarySchema.and(tourDetailSchema) 组合而成，对应 ResolvedTour。
 export const resolvedTourSchema = tourSummarySchema.and(tourDetailSchema);
 export const toursListSchema = z.array(tourSummarySchema);
+export const tourMapCardSchema = z.object({
+  id: z.string().min(1),
+  sourceId: z.string().optional(),
+  title: z.string().min(1),
+  source: z.string().min(1),
+  destination: z.string().min(1),
+  duration: z.coerce.number().int().positive(),
+  price: nonNegativeNumber,
+  departureDate: z.string().optional().default(''),
+  bookingUrl: z.string().optional().default(''),
+  transportType: z.string().optional().default(''),
+  departureDates: z.array(z.string()).optional(),
+  hotDepartureDates: z.array(z.string()).optional(),
+});
+export const tourMapCardsSchema = z.array(tourMapCardSchema);
 
 export const tourIndexEntrySchema = z.object({
   id: z.string().min(1),

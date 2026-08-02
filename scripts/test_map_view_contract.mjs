@@ -36,7 +36,7 @@ assert(source.includes('!expanded && embedded'), 'embedded MapView must render t
 assert(source.includes("'正在加载已定位地点…'"), 'homepage map must not label an in-flight location load as zero places');
 assert(source.includes('放大地图'), 'home map must provide an expand control');
 assert(source.includes('点地点，直接看对应旅行团'), 'expanded map must keep place-first interaction');
-assert(mapTours.includes("tours-index.json"), 'map tours must use the lightweight tours index');
+assert(mapTours.includes("tour-map-cards.json"), 'map tours must use the compact map card index');
 assert(serviceWorker.includes("self.location.hostname === 'localhost'"), 'local development must bypass the CDN service worker data path');
 assert(main.includes('navigator.serviceWorker.getRegistrations()'), 'local development must remove stale service worker registrations');
 assert(main.includes("['localhost', '127.0.0.1', '::1']"), 'local service worker bypass must cover local hostnames');
