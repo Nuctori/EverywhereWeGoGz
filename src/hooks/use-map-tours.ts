@@ -48,18 +48,6 @@ const initialState: MapToursState = {
 
 type DestinationMapPoint = NonNullable<NonNullable<TourSummary['geo']>['destination']>;
 
-function hasMapPoint(point: DestinationMapPoint | undefined): point is DestinationMapPoint {
-  return Boolean(
-    point
-    && Number.isFinite(point.latitude)
-    && Number.isFinite(point.longitude)
-    && point.latitude >= -90
-    && point.latitude <= 90
-    && point.longitude >= -180
-    && point.longitude <= 180,
-  );
-}
-
 function isApproximateMapPoint(point: DestinationMapPoint | undefined) {
   return Boolean(point && (
     point.precision === 'approximate'
@@ -162,12 +150,19 @@ export function useMapTours() {
   }, [fetchTours]);
 
   const toursById = useMemo(() => new Map(state.tours.map((tour) => [tour.id, tour])), [state.tours]);
+  const placesByTourId = useMemo(() => {
+    const result = new Map<string, MapTourLocation>();
+    for (const place of state.places) {
+      for (const tourId of place.tourIds) result.set(tourId, place);
+    }
+    return result;
+  }, [state.places]);
 
   return {
     ...state,
     toursById,
-    unmappedTours: state.tours.filter((tour) => !hasMapPoint(tour.geo?.destination)),
-    approximateTours: state.tours.filter((tour) => isApproximateMapPoint(tour.geo?.destination)),
+    unmappedTours: state.tours.filter((tour) => !placesByTourId.has(tour.id)),
+    approximateTours: state.tours.filter((tour) => isApproximateMapPoint(placesByTourId.get(tour.id))),
     fetchTours,
   };
 }

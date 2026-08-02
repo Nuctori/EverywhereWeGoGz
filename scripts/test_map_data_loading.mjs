@@ -28,6 +28,10 @@ assert(fs.statSync('public/data/tour-map-cards.json').size < fs.statSync('public
 const currentTourIds = new Set(mapCards.map((tour) => tour.id));
 const activeDestinationPlaces = destinationPlaces.filter((place) => place.tourIds.some((tourId) => currentTourIds.has(tourId)));
 assert(activeDestinationPlaces.length === destinationPlaces.length, 'every generated destination place must retain at least one current tour card');
+const mappedTourIds = new Set(destinationPlaces.flatMap((place) => place.tourIds));
+const expectedUnmappedTours = toursIndex.filter((tour) => !mappedTourIds.has(tour.id)).length;
+assert(hook.includes('placesByTourId'), 'map tour status must be derived from the authoritative place associations');
+assert(mapCards.filter((tour) => !mappedTourIds.has(tour.id)).length === expectedUnmappedTours, 'map card slimming must preserve unmapped tour counts');
 
 console.log(JSON.stringify({
   checked: 'map-data-loading',
