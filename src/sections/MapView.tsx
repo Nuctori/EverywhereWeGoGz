@@ -84,14 +84,17 @@ function fanOutMarkerPixels(candidates: MarkerCandidate[]) {
 }
 
 function markerCollisionRadius(zoom: number) {
-  if (zoom < 6) return 44;
-  if (zoom < 8) return 34;
-  return 24;
+  // Keep the overview readable without collapsing an entire destination area
+  // into one marker. Clusters remain selectable and full detail still unfolds
+  // at FULL_DETAIL_ZOOM.
+  if (zoom < 6) return 24;
+  if (zoom < 8) return 22;
+  return 14;
 }
 
 function maxIndependentMarkers(zoom: number) {
   if (zoom >= FULL_DETAIL_ZOOM) return Number.POSITIVE_INFINITY;
-  return zoom >= 8 ? 6 : 3;
+  return zoom >= 8 ? 12 : 8;
 }
 
 function MapTourCard({ tour, onClick }: { tour: TourSummary; onClick: () => void }) {
@@ -386,9 +389,9 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         const clusterMarker = L.marker(clusterPoint, {
           icon: L.divIcon({
             className: 'destination-cluster-icon',
-            html: `<div style="display:flex;height:38px;width:38px;align-items:center;justify-content:center;border:3px solid white;border-radius:9999px;background:#ea580c;color:white;font-size:12px;font-weight:700;box-shadow:0 3px 10px rgba(28,25,23,.28)">${clusterPlaces.length}</div>`,
-            iconSize: [38, 38],
-            iconAnchor: [19, 19],
+            html: `<div style="display:flex;height:30px;width:30px;align-items:center;justify-content:center;border:2px solid white;border-radius:9999px;background:#ea580c;color:white;font-size:11px;font-weight:700;box-shadow:0 3px 10px rgba(28,25,23,.28)">${clusterPlaces.length}</div>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
           }),
         });
         clusterMarker.options.title = `${clusterPlaces.length}个相近地点`;
