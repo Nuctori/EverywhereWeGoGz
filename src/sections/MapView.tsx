@@ -333,6 +333,8 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       const maximumZoom = map.getMaxZoom();
       const atMaximumZoom = Number.isFinite(maximumZoom) && zoom >= maximumZoom;
       const atFullDetailZoom = atMaximumZoom || zoom >= FULL_DETAIL_ZOOM;
+      mapElementRef.current?.setAttribute('data-map-zoom', String(zoom));
+      mapElementRef.current?.setAttribute('data-map-max-zoom', String(maximumZoom));
       const collisionRadius = markerCollisionRadius(zoom);
       const independentMarkerLimit = atFullDetailZoom ? Number.POSITIVE_INFINITY : maxIndependentMarkers(zoom);
       if (atFullDetailZoom) setClusterPlaces((current) => current.length > 0 ? [] : current);

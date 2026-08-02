@@ -13,14 +13,21 @@ assert(hook.includes('geoPlacesSchema.parse'), 'place data must use the runtime 
 assert(hook.includes('placesLoading: false'), 'place loading must finish before the tour index');
 assert(hook.includes('placesError') && hook.includes('toursError'), 'place and tour errors must remain independent');
 assert(hook.includes("getDataUrl('tours-index.json')"), 'tour summaries must remain available for the place panel');
-assert(hook.includes('mapPlacesFromTours(tours)'), 'tour summaries must rebuild destination-only tour associations');
+assert(hook.includes('mergeGeoPlacesWithTours(generatedPlaces, tours)'), 'tour summaries must enrich the generated place index without replacing it');
+assert(hook.includes('currentTourIds'), 'map place associations must be reconciled against the loaded tour cards');
+assert(!hook.includes('locations.set(point.placeId'), 'tour summary geo points must not replace generated destination places');
 assert(view.includes('placesLoading'), 'MapView must expose the place loading state');
 assert(view.includes('loading={toursLoading}'), 'place panels must wait for tour summaries, not map coordinates');
 assert(geoPlaces.length > 0 && geoPlaces.length < 1000, 'geo place index must stay compact');
 assert(geoPlaces.some((place) => place.roles.includes('destination')), 'geo place index must contain destinations');
+const destinationPlaces = geoPlaces.filter((place) => place.roles.includes('destination'));
+const currentTourIds = new Set(JSON.parse(fs.readFileSync('public/data/tours-index.json', 'utf8')).map((tour) => tour.id));
+const activeDestinationPlaces = destinationPlaces.filter((place) => place.tourIds.some((tourId) => currentTourIds.has(tourId)));
+assert(activeDestinationPlaces.length === destinationPlaces.length, 'every generated destination place must retain at least one current tour card');
 
 console.log(JSON.stringify({
   checked: 'map-data-loading',
   places: geoPlaces.length,
-  destinationPlaces: geoPlaces.filter((place) => place.roles.includes('destination')).length,
+  destinationPlaces: destinationPlaces.length,
+  activeDestinationPlaces: activeDestinationPlaces.length,
 }));
