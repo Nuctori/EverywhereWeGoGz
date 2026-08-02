@@ -32,6 +32,24 @@ def test_detail_candidates_prioritize_activities_and_strip_route_noise():
     assert all(item["source"] for item in candidates)
 
 
+def test_detail_candidates_reject_description_words_as_places():
+    candidates = extract_detail_candidates(
+        "广东温泉宾馆2天",
+        {
+            "itinerary": [{
+                "title": "所在地：广州市",
+                "activities": ["广东温泉宾馆"],
+                "accommodation": "建设后入住酒店",
+                "description": "开发温泉设施，无色无味的泉水",
+            }]
+        },
+        "广东",
+    )
+    labels = {item["label"] for item in candidates}
+    assert "广东温泉宾馆" in labels
+    assert not {"建设", "开发", "无色", "无味"}.intersection(labels)
+
+
 def test_detail_candidates_keep_foreign_route_names():
     candidates = extract_detail_candidates(
         "（穆龙达瓦）香草四国16天",

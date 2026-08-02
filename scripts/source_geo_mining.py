@@ -14,6 +14,7 @@ GENERIC_SEGMENTS = {
     "早餐", "午餐", "晚餐", "酒店", "住宿", "飞机", "高铁", "动车", "汽车", "大巴",
     "机场", "车站", "码头", "自由活动", "当天", "集合", "出发", "往返", "返回",
     "景点", "景区", "费用", "自理", "同级", "游轮上", "飞机上", "中国",
+    "建设", "开发", "无色", "无味", "早餐后", "晚餐后", "入住后",
 }
 ROUTE_SPLIT = re.compile(r"[\s|｜丨/／+&＆,，、;；·•＊*]+|\s*[-—－→至到]\s*")
 DAY_PREFIX = re.compile(r"^(?:D\s*\d+|第\s*\d+\s*天|第\d+天)[：:：\s-]*", re.I)
@@ -54,6 +55,11 @@ def _valid_candidate(value: str) -> bool:
     if re.fullmatch(r"[\d\W]+", value):
         return False
     return any("\u4e00" <= char <= "\u9fff" for char in value)
+
+
+def is_generic_candidate(value: object) -> bool:
+    """Identify mined text that cannot safely represent a destination."""
+    return not _valid_candidate(_clean_segment(str(value or "")))
 
 
 def _append_unique(items: list[dict], value: str, source: str, priority: int) -> None:

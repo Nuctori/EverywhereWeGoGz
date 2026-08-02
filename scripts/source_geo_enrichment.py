@@ -75,6 +75,30 @@ def _valid_coordinate_pair(latitude: Any, longitude: Any) -> bool:
 def _needs_refinement(tour: dict) -> bool:
     if not _valid_coordinate_pair(tour.get("destinationLatitude"), tour.get("destinationLongitude")):
         return True
+    if (
+        str(tour.get("destinationCoordinateSource") or "") == "catalog"
+        and str(tour.get("destinationGeoLevel") or "") == "city"
+    ):
+        resolution = tour.get("geoResolution") if isinstance(tour.get("geoResolution"), dict) else {}
+        mining = resolution.get("mining") if isinstance(resolution.get("mining"), dict) else {}
+        city = str(tour.get("destinationCity") or "").strip()
+        generic = {"建设", "开发", "无色", "无味", "早餐后", "晚餐后", "入住后"}
+        source_labels = [
+            str(row.get("label") or "").strip()
+            for row in mining.get("sourceCandidates", [])
+            if isinstance(row, dict)
+        ]
+        candidate_labels = mining.get("candidateLabels")
+        source_labels.extend(
+            str(label).strip()
+            for label in (candidate_labels if isinstance(candidate_labels, list) else [])
+            if str(label).strip()
+        )
+        if any(
+            label and label != city and label not in generic
+            for label in source_labels
+        ):
+            return True
     return (
         str(tour.get("destinationCoordinatePrecision") or "") == "approximate"
         or str(tour.get("destinationCoordinateSource") or "") == "fallback"
