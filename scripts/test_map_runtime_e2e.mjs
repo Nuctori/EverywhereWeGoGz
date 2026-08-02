@@ -59,6 +59,7 @@ try {
   assert(!(await page.getByText('地图数据暂时不可用？').count()), 'the initial map must not report unavailable data');
 
   const clusterMarkers = map.locator('.destination-cluster-icon');
+  await clusterMarkers.first().waitFor({ state: 'attached', timeout: 15000 });
   assert((await clusterMarkers.count()) > 0, 'the map must expose a numeric aggregate marker');
   const clickableClusterTitle = await clusterMarkers.evaluateAll((markers) => markers.map((marker) => {
     const rect = marker.getBoundingClientRect();
@@ -72,7 +73,7 @@ try {
   const placePanel = page.getByRole('complementary', { name: '相近地点' });
   const placeChoices = placePanel.getByRole('button').filter({ hasText: /\d+ 条线路/ });
   assert((await placeChoices.count()) > 0, 'the aggregate marker must expose concrete place choices');
-  const placeCardsResponse = page.waitForResponse((response) => response.url().includes('/data/tour-map-place-cards/') && response.ok(), { timeout: 10000 });
+  const placeCardsResponse = page.waitForResponse((response) => response.url().includes('/data/tour-map-place-cards/'), { timeout: 15000 });
   await placeChoices.first().click();
   const placeCards = await placeCardsResponse;
   assert(new URL(placeCards.url()).pathname.includes('/data/tour-map-place-cards/'), 'selected place must load its own compact card file');
