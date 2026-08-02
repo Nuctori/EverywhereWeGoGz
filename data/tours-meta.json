@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-02T16:07:37.078Z",
+  "generatedAt": "2026-08-02T17:32:48.811Z",
   "latestUpdatedAt": "2026-08-01T06:19:05.902940",
   "totalRecords": 4034,
   "listRecords": 4034,
@@ -65,7 +65,8 @@
     },
     "mapPlaceCards": {
       "path": "data/tour-map-place-cards/",
-      "files": 649
+      "files": 649,
+      "chunks": 752
     }
   }
 }
