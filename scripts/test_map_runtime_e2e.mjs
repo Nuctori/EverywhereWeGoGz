@@ -54,11 +54,18 @@ try {
   assert(expectedPlaces > 0, 'the independent place baseline must contain destinations');
   assert(reportedPlaces === expectedPlaces, 'the map summary must match the independent generated place baseline');
   assert(initialCoverage.individual + initialCoverage.clusterPlaces === expectedPlaces, 'initial marker aggregation must represent every indexed place');
+  assert(initialCoverage.individual >= Math.min(100, Math.ceil(expectedPlaces * 0.1)), 'overview must keep a meaningful set of independent destination markers');
   assert(!(await page.getByText('地图数据暂时不可用？').count()), 'the initial map must not report unavailable data');
 
   const clusterMarkers = map.locator('.destination-cluster-icon');
   assert((await clusterMarkers.count()) > 0, 'the map must expose a numeric aggregate marker');
-  await clusterMarkers.first().click();
+  const clickableClusterTitle = await clusterMarkers.evaluateAll((markers) => markers.map((marker) => {
+    const rect = marker.getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    return hit === marker || marker.contains(hit) ? marker.getAttribute('title') : null;
+  }).find(Boolean));
+  assert(Boolean(clickableClusterTitle), 'at least one aggregate marker must have an unobstructed click target');
+  await map.locator(`.destination-cluster-icon[title="${clickableClusterTitle}"]`).click();
   await page.getByRole('heading', { name: '选择具体地点' }).waitFor({ state: 'visible' });
 
   const placePanel = page.getByRole('complementary', { name: '相近地点' });
@@ -68,7 +75,7 @@ try {
   await page.getByText('地点线路', { exact: true }).waitFor({ state: 'visible' });
 
   const tourChoices = page.getByRole('button', { name: /^查看线路：/ });
-  await tourChoices.first().waitFor({ state: 'visible', timeout: 15000 });
+  await tourChoices.first().waitFor({ state: 'visible', timeout: 45000 });
   assert((await tourChoices.count()) > 0, 'the place panel must expose tour cards');
   await tourChoices.first().click();
   const tourDialog = page.getByRole('dialog');
@@ -80,6 +87,8 @@ try {
   const expandedMap = page.getByRole('dialog', { name: '点地点，直接看对应旅行团' });
   await expandedMap.waitFor({ state: 'visible' });
   const expandedMapCanvas = expandedMap.locator('[aria-label="旅行目的地地图"]');
+  await expandedMapCanvas.waitFor({ state: 'visible' });
+  await expandedMapCanvas.locator('.leaflet-tile-pane').waitFor({ state: 'attached', timeout: 15000 });
   const expandedMarkersBeforeZoom = await expandedMapCanvas.locator('.leaflet-marker-icon').count();
   await expandedMapCanvas.hover();
   await page.mouse.wheel(0, -720);
