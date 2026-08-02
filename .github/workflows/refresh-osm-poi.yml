@@ -44,7 +44,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/data/osm-poi-index.json public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/geo-places.json public/data/tour-map-index.json public/data/tour-map-cards.json
+          git add public/data/osm-poi-index.json public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/geo-places.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards
           if git diff --cached --quiet; then
             echo "OSM POI index unchanged"
             exit 0

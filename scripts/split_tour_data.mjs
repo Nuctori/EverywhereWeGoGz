@@ -13,6 +13,7 @@ const imageCacheDir = path.join(dataDir, 'image-cache', 'placeholders');
 const geoPlacesPath = path.join(dataDir, 'geo-places.json');
 const tourMapIndexPath = path.join(dataDir, 'tour-map-index.json');
 const tourMapCardsPath = path.join(dataDir, 'tour-map-cards.json');
+const tourMapPlaceCardsDir = path.join(dataDir, 'tour-map-place-cards');
 // ?? token ?????????????????????????
 const invalidImageTokens = ['lazyimg', '{{', '}}'];
 const writeRetries = 5;
@@ -429,6 +430,22 @@ const geoPlaces = [...placeMap.values()]
 writeTextFileWithRetry(geoPlacesPath, compactJson(geoPlaces));
 writeTextFileWithRetry(tourMapIndexPath, compactJson(tourMapIndex));
 
+// Keep the first click independent from the 1.69MB all-tour card index. Each
+// destination gets only the cards linked from its authoritative place index.
+fs.mkdirSync(tourMapPlaceCardsDir, { recursive: true });
+const mapCardsById = new Map(tourMapCards.map((card) => [card.id, card]));
+const existingPlaceCardFiles = new Set(fs.readdirSync(tourMapPlaceCardsDir).filter((file) => file.endsWith('.json')));
+const destinationPlaces = geoPlaces.filter((place) => place.roles.includes('destination'));
+for (const place of destinationPlaces) {
+  const fileName = `${place.placeId}.json`;
+  const cards = place.tourIds.map((tourId) => mapCardsById.get(tourId)).filter(Boolean);
+  writeTextFileWithRetry(path.join(tourMapPlaceCardsDir, fileName), compactJson(cards));
+  existingPlaceCardFiles.delete(fileName);
+}
+for (const staleFile of existingPlaceCardFiles) {
+  fs.unlinkSync(path.join(tourMapPlaceCardsDir, staleFile));
+}
+
 // ====== Generate tours-index.json + tours-page-*.json chunks ======
 const PAGE_SIZE = 24;
 const indexFields = [
@@ -482,6 +499,7 @@ for (let page = 0; page < totalPages; page++) {
 }
 console.log(`tours-index.json ${Buffer.byteLength(JSON.stringify(indexTours), 'utf8')} bytes`);
 console.log(`tour-map-cards.json ${fs.statSync(tourMapCardsPath).size} bytes`);
+console.log(`tour-map-place-cards ${destinationPlaces.length} files`);
 console.log(`tour-deeplink-index.json ${fs.statSync(path.join(dataDir, 'tour-deeplink-index.json')).size} bytes`);
 console.log(`Generated ${totalPages} page chunks (tours-page-0.json ~ tours-page-${totalPages - 1}.json)`);
 
@@ -543,6 +561,10 @@ const meta = {
     mapCards: {
       path: 'data/tour-map-cards.json',
       size: fs.statSync(tourMapCardsPath).size,
+    },
+    mapPlaceCards: {
+      path: 'data/tour-map-place-cards/',
+      files: destinationPlaces.length,
     },
   },
 };

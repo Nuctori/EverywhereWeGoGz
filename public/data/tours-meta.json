@@ -62,6 +62,10 @@
     "mapCards": {
       "path": "data/tour-map-cards.json",
       "size": 1685332
+    },
+    "mapPlaceCards": {
+      "path": "data/tour-map-place-cards/",
+      "files": 649
     }
   }
 }

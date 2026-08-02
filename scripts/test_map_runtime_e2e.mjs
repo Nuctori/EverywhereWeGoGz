@@ -4,6 +4,10 @@ const url = process.env.MAP_E2E_URL?.trim() || 'http://127.0.0.1:4173/';
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const consoleErrors = [];
+const fullMapCardRequests = [];
+page.on('request', (request) => {
+  if (request.url().includes('/data/tour-map-cards.json')) fullMapCardRequests.push(request.url());
+});
 page.on('console', (message) => {
   if (message.type() === 'error' || message.type() === 'warning') {
     consoleErrors.push(message.text());
@@ -18,15 +22,11 @@ const assert = (condition, message) => {
 try {
   await page.goto(url, { waitUntil: 'domcontentloaded' });
   const geoPlacesResponse = await fetch(new URL('data/geo-places.json', url));
-  const toursIndexResponse = await fetch(new URL('data/tour-map-cards.json', url));
   assert(geoPlacesResponse.ok, `geo place baseline must be readable: ${geoPlacesResponse.status}`);
-  assert(toursIndexResponse.ok, `map card baseline must be readable: ${toursIndexResponse.status}`);
   const geoPlaces = await geoPlacesResponse.json();
-  const toursIndex = await toursIndexResponse.json();
-  const currentTourIds = new Set(toursIndex.map((tour) => tour.id));
   const expectedPlaces = geoPlaces
     .filter((place) => place.roles?.includes('destination'))
-    .filter((place) => place.tourIds?.some((tourId) => currentTourIds.has(tourId)))
+    .filter((place) => place.tourIds?.length > 0)
     .length;
   const map = page.locator('[aria-label="旅行目的地地图"]');
   await map.waitFor({ state: 'visible' });
@@ -53,6 +53,7 @@ try {
   assert(initialMarkers > 0, 'the initial map must render non-zero destination markers');
   assert(expectedPlaces > 0, 'the independent place baseline must contain destinations');
   assert(reportedPlaces === expectedPlaces, 'the map summary must match the independent generated place baseline');
+  assert(fullMapCardRequests.length === 0, 'map interaction must not block on the all-tour card payload');
   assert(initialCoverage.individual + initialCoverage.clusterPlaces === expectedPlaces, 'initial marker aggregation must represent every indexed place');
   assert(initialCoverage.individual >= Math.min(100, Math.ceil(expectedPlaces * 0.1)), 'overview must keep a meaningful set of independent destination markers');
   assert(!(await page.getByText('地图数据暂时不可用？').count()), 'the initial map must not report unavailable data');
@@ -71,11 +72,14 @@ try {
   const placePanel = page.getByRole('complementary', { name: '相近地点' });
   const placeChoices = placePanel.getByRole('button').filter({ hasText: /\d+ 条线路/ });
   assert((await placeChoices.count()) > 0, 'the aggregate marker must expose concrete place choices');
+  const placeCardsResponse = page.waitForResponse((response) => response.url().includes('/data/tour-map-place-cards/') && response.ok(), { timeout: 10000 });
   await placeChoices.first().click();
+  const placeCards = await placeCardsResponse;
+  assert(new URL(placeCards.url()).pathname.includes('/data/tour-map-place-cards/'), 'selected place must load its own compact card file');
   await page.getByText('地点线路', { exact: true }).waitFor({ state: 'visible' });
 
   const tourChoices = page.getByRole('button', { name: /^查看线路：/ });
-  await tourChoices.first().waitFor({ state: 'visible', timeout: 45000 });
+  await tourChoices.first().waitFor({ state: 'visible', timeout: 10000 });
   assert((await tourChoices.count()) > 0, 'the place panel must expose tour cards');
   await tourChoices.first().click();
   const tourDialog = page.getByRole('dialog');
