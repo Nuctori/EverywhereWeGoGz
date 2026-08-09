@@ -36,7 +36,12 @@ assert(source.includes('!expanded && embedded'), 'embedded MapView must render t
 assert(source.includes("'正在加载已定位地点…'"), 'homepage map must not label an in-flight location load as zero places');
 assert(source.includes('放大地图'), 'home map must provide an expand control');
 assert(source.includes('点地点，直接看对应旅行团'), 'expanded map must keep place-first interaction');
-assert(mapTours.includes("tour-map-cards.json"), 'map tours must use the compact map card index');
+assert(mapTours.includes('tour-map-place-cards/'), 'map tours must load compact cards per selected place');
+assert(mapTours.includes('PLACE_TOUR_CHUNK_SIZE'), 'map tours must bound each place card request');
+assert(mapTours.includes('${chunkIndex}.json'), 'map tours must request the next place card chunk');
+assert(source.includes('加载更多线路'), 'place panels must expose incremental loading for large destinations');
+assert(source.includes('placeToursComplete'), 'place panels must know when all destination cards are loaded');
+assert(!mapTours.includes("getDataUrl('tour-map-cards.json')"), 'map tours must not block on the all-tour card index');
 assert(serviceWorker.includes("self.location.hostname === 'localhost'"), 'local development must bypass the CDN service worker data path');
 assert(main.includes('navigator.serviceWorker.getRegistrations()'), 'local development must remove stale service worker registrations');
 assert(main.includes("['localhost', '127.0.0.1', '::1']"), 'local service worker bypass must cover local hostnames');
@@ -67,7 +72,7 @@ assert(mapTours.includes('function isApproximateMapPoint'), 'map tours must clas
 assert(mapTours.includes("point.coordinateSource === 'fallback'"), 'map tours must identify coarse fallback points');
 assert(mapTours.includes("point.level === 'city'"), 'map tours must identify city-level points');
 assert(mapTours.includes("point.coordinateSource === 'inferred' && point.confidence === 'low'"), 'map tours must identify low-confidence inferred points');
-assert(mapTours.includes('approximateTours:'), 'map tours must expose approximate tours without hiding them');
+assert(mapTours.includes('approximateTourCount'), 'map tours must expose approximate route count without hiding locations');
 assert(source.includes('min(280px,calc(100%_-_1.5rem))'), 'compact map panels must keep a readable width on narrow maps');
 assert(!source.includes('min(330px,42%)'), 'compact map panels must not use percentage width that causes character wrapping');
 assert(tilePool.includes("id: 'amap-direct'"), 'tile pool must prefer the domestic AMap tile source');

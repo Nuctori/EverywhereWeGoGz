@@ -13,6 +13,8 @@ const imageCacheDir = path.join(dataDir, 'image-cache', 'placeholders');
 const geoPlacesPath = path.join(dataDir, 'geo-places.json');
 const tourMapIndexPath = path.join(dataDir, 'tour-map-index.json');
 const tourMapCardsPath = path.join(dataDir, 'tour-map-cards.json');
+const tourMapPlaceCardsDir = path.join(dataDir, 'tour-map-place-cards');
+const PLACE_MAP_CARD_CHUNK_SIZE = 24;
 // ?? token ?????????????????????????
 const invalidImageTokens = ['lazyimg', '{{', '}}'];
 const writeRetries = 5;
@@ -448,6 +450,38 @@ const geoPlaces = [...placeMap.values()]
 writeTextFileWithRetry(geoPlacesPath, compactJson(geoPlaces));
 writeTextFileWithRetry(tourMapIndexPath, compactJson(tourMapIndex));
 
+// Keep the first click independent from the 1.69MB all-tour card index. Each
+// destination gets only the cards linked from its authoritative place index.
+fs.mkdirSync(tourMapPlaceCardsDir, { recursive: true });
+const mapCardsById = new Map(tourMapCards.map((card) => [card.id, card]));
+const destinationPlaces = geoPlaces.filter((place) => place.roles.includes('destination'));
+const existingPlaceCardDirs = new Set(fs.readdirSync(tourMapPlaceCardsDir, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name));
+for (const legacyFile of fs.readdirSync(tourMapPlaceCardsDir).filter((file) => file.endsWith('.json'))) {
+  fs.unlinkSync(path.join(tourMapPlaceCardsDir, legacyFile));
+}
+let placeCardChunkCount = 0;
+for (const place of destinationPlaces) {
+  const cards = place.tourIds.map((tourId) => mapCardsById.get(tourId)).filter(Boolean);
+  const placeDir = path.join(tourMapPlaceCardsDir, place.placeId);
+  fs.mkdirSync(placeDir, { recursive: true });
+  const expectedFiles = new Set();
+  for (let start = 0; start < cards.length; start += PLACE_MAP_CARD_CHUNK_SIZE) {
+    const fileName = `${Math.floor(start / PLACE_MAP_CARD_CHUNK_SIZE)}.json`;
+    expectedFiles.add(fileName);
+    writeTextFileWithRetry(path.join(placeDir, fileName), compactJson(cards.slice(start, start + PLACE_MAP_CARD_CHUNK_SIZE)));
+    placeCardChunkCount += 1;
+  }
+  for (const staleFile of fs.readdirSync(placeDir).filter((file) => file.endsWith('.json') && !expectedFiles.has(file))) {
+    fs.unlinkSync(path.join(placeDir, staleFile));
+  }
+  existingPlaceCardDirs.delete(place.placeId);
+}
+for (const staleDir of existingPlaceCardDirs) {
+  fs.rmSync(path.join(tourMapPlaceCardsDir, staleDir), { recursive: true, force: true });
+}
+
 // ====== Generate tours-index.json + tours-page-*.json chunks ======
 const PAGE_SIZE = 24;
 const indexFields = [
@@ -501,6 +535,7 @@ for (let page = 0; page < totalPages; page++) {
 }
 console.log(`tours-index.json ${Buffer.byteLength(JSON.stringify(indexTours), 'utf8')} bytes`);
 console.log(`tour-map-cards.json ${fs.statSync(tourMapCardsPath).size} bytes`);
+console.log(`tour-map-place-cards ${destinationPlaces.length} places, ${placeCardChunkCount} chunks`);
 console.log(`tour-deeplink-index.json ${fs.statSync(path.join(dataDir, 'tour-deeplink-index.json')).size} bytes`);
 console.log(`Generated ${totalPages} page chunks (tours-page-0.json ~ tours-page-${totalPages - 1}.json)`);
 
@@ -562,6 +597,11 @@ const meta = {
     mapCards: {
       path: 'data/tour-map-cards.json',
       size: fs.statSync(tourMapCardsPath).size,
+    },
+    mapPlaceCards: {
+      path: 'data/tour-map-place-cards/',
+      files: destinationPlaces.length,
+      chunks: placeCardChunkCount,
     },
   },
 };

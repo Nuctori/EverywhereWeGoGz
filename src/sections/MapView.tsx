@@ -84,14 +84,17 @@ function fanOutMarkerPixels(candidates: MarkerCandidate[]) {
 }
 
 function markerCollisionRadius(zoom: number) {
-  if (zoom < 6) return 44;
-  if (zoom < 8) return 34;
-  return 24;
+  // Keep the overview readable without collapsing an entire destination area
+  // into one marker. Clusters remain selectable and full detail still unfolds
+  // at FULL_DETAIL_ZOOM.
+  if (zoom < 6) return 24;
+  if (zoom < 8) return 22;
+  return 14;
 }
 
 function maxIndependentMarkers(zoom: number) {
   if (zoom >= FULL_DETAIL_ZOOM) return Number.POSITIVE_INFINITY;
-  return zoom >= 8 ? 6 : 3;
+  return zoom >= 8 ? 12 : 8;
 }
 
 function MapTourCard({ tour, onClick }: { tour: TourSummary; onClick: () => void }) {
@@ -128,6 +131,8 @@ function PlaceToursPanel({
   onTourClick,
   onClose,
   onRetry,
+  onLoadMore,
+  hasMore,
   expanded,
 }: {
   place: MapTourLocation | null;
@@ -137,6 +142,8 @@ function PlaceToursPanel({
   onTourClick: (tour: TourSummary) => void;
   onClose: () => void;
   onRetry: () => void;
+  onLoadMore: () => void;
+  hasMore: boolean;
   expanded: boolean;
 }) {
   if (!place) return null;
@@ -161,9 +168,9 @@ function PlaceToursPanel({
         </button>
       </div>
 
-      {loading ? (
+      {loading && tours.length === 0 ? (
         <p className="px-1 py-5 text-sm text-stone-500">正在加载地点线路...</p>
-      ) : error ? (
+      ) : error && tours.length === 0 ? (
         <div className="px-1 py-4 text-sm text-stone-500">
           <p>线路数据暂时不可用。</p>
           <button type="button" onClick={onRetry} className="mt-2 inline-flex items-center gap-1 text-orange-700 hover:text-orange-800"><RefreshCw className="h-3.5 w-3.5" /> 重试</button>
@@ -172,8 +179,9 @@ function PlaceToursPanel({
         <p className="px-1 py-5 text-sm text-stone-500">这个地点暂时没有可展示的旅行团。</p>
       ) : (
         <div className="space-y-2">
+          {error && <div className="rounded-xl bg-orange-50 px-3 py-2 text-xs text-orange-800">已显示前 {tours.length} 条线路，剩余线路加载失败。<button type="button" onClick={onRetry} className="ml-1 font-medium underline underline-offset-2">重试</button></div>}
           {tours.map((tour) => <MapTourCard key={tour.id} tour={tour} onClick={() => onTourClick(tour)} />)}
-          {place.tourCount > tours.length && <p className="px-1 pt-1 text-xs text-stone-400">还有 {place.tourCount - tours.length} 条线路，点击卡片可查看详情。</p>}
+          {hasMore && <button type="button" onClick={onLoadMore} disabled={loading} className="flex w-full items-center justify-center rounded-xl border border-stone-200 px-3 py-2 text-xs font-medium text-stone-600 transition hover:border-orange-300 hover:text-orange-700 disabled:cursor-wait disabled:opacity-60">{loading ? '正在加载更多线路...' : `加载更多线路（剩余 ${Math.max(0, place.tourCount - tours.length)} 条）`}</button>}
         </div>
       )}
     </aside>
@@ -232,7 +240,19 @@ function PlaceClusterPanel({
 }
 
 export function MapView({ expanded, onExpandedChange, embedded = false }: MapViewProps) {
-  const { places, unmappedTours, approximateTours, placesLoading, loading: toursLoading, placesError, toursError, toursById, fetchTours } = useMapTours();
+  const {
+    places,
+    placesLoading,
+    placesError,
+    toursById,
+    approximateTourCount,
+    placeToursLoading,
+    placeToursLoaded,
+    placeToursComplete,
+    placeToursError,
+    fetchTours,
+    fetchToursForPlace,
+  } = useMapTours();
   const { selectedSummaryTour, resolvedTour, detailStatus, detailError, detailLoading, selectTour, clearSelectedTour } = useTourDetail();
   const [providerIndex, setProviderIndex] = useState(0);
   const [selectedPlace, setSelectedPlace] = useState<MapTourLocation | null>(null);
@@ -248,6 +268,18 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     if (!selectedPlace) return [];
     return selectedPlace.tourIds.map((id) => toursById.get(id)).filter((tour): tour is TourSummary => Boolean(tour));
   }, [selectedPlace, toursById]);
+  const selectedPlaceError = selectedPlace && placeToursError?.placeId === selectedPlace.placeId
+    ? placeToursError.message
+    : null;
+  const selectedPlaceLoading = Boolean(selectedPlace && (
+    !selectedPlaceError
+    && (placeToursLoading === selectedPlace.placeId || !placeToursLoaded.has(selectedPlace.placeId))
+  ));
+  const selectedPlaceHasMore = Boolean(selectedPlace && !placeToursComplete.has(selectedPlace.placeId) && selectedTours.length < selectedPlace.tourCount);
+
+  useEffect(() => {
+    if (selectedPlace) void fetchToursForPlace(selectedPlace.placeId);
+  }, [fetchToursForPlace, selectedPlace]);
 
   const openTourDetail = (tour: TourSummary) => {
     // The detail dialog is the next step in the same flow; do not leave the place panel competing with it.
@@ -386,9 +418,9 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         const clusterMarker = L.marker(clusterPoint, {
           icon: L.divIcon({
             className: 'destination-cluster-icon',
-            html: `<div style="display:flex;height:38px;width:38px;align-items:center;justify-content:center;border:3px solid white;border-radius:9999px;background:#ea580c;color:white;font-size:12px;font-weight:700;box-shadow:0 3px 10px rgba(28,25,23,.28)">${clusterPlaces.length}</div>`,
-            iconSize: [38, 38],
-            iconAnchor: [19, 19],
+            html: `<div style="display:flex;height:30px;width:30px;align-items:center;justify-content:center;border:2px solid white;border-radius:9999px;background:#ea580c;color:white;font-size:11px;font-weight:700;box-shadow:0 3px 10px rgba(28,25,23,.28)">${clusterPlaces.length}</div>`,
+            iconSize: [30, 30],
+            iconAnchor: [15, 15],
           }),
         });
         clusterMarker.options.title = `${clusterPlaces.length}个相近地点`;
@@ -443,7 +475,18 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         </div>
       )}
       <PlaceClusterPanel places={clusterPlaces} expanded={expanded} onSelect={(place) => { setClusterPlaces([]); setSelectedPlace(place); }} onClose={() => setClusterPlaces([])} />
-      <PlaceToursPanel place={selectedPlace} tours={selectedTours} loading={toursLoading} error={toursError} onTourClick={openTourDetail} onClose={() => setSelectedPlace(null)} onRetry={() => void fetchTours()} expanded={expanded} />
+      <PlaceToursPanel
+        place={selectedPlace}
+        tours={selectedTours}
+        loading={selectedPlaceLoading}
+        error={selectedPlaceError}
+        onTourClick={openTourDetail}
+        onClose={() => setSelectedPlace(null)}
+        onRetry={() => selectedPlace ? void fetchToursForPlace(selectedPlace.placeId, true) : void fetchTours()}
+        onLoadMore={() => selectedPlace && void fetchToursForPlace(selectedPlace.placeId)}
+        hasMore={selectedPlaceHasMore}
+        expanded={expanded}
+      />
     </div>
   );
 
@@ -480,8 +523,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             ) : (
               <>
                 已定位 {visiblePlaces.length} 个地点
-                {approximateTours.length > 0 && ` · ${approximateTours.length} 条线路使用模糊坐标`}
-                {unmappedTours.length > 0 && ` · ${unmappedTours.length} 条线路待补全`}
+                {approximateTourCount > 0 && ` · ${approximateTourCount} 条线路使用模糊坐标`}
               </>
             )}
           </p>
@@ -500,8 +542,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             </div>
             <p className="mb-2 px-1 text-xs text-stone-400">
               已定位 {visiblePlaces.length} 个目的地
-              {approximateTours.length > 0 && `，其中 ${approximateTours.length} 条线路使用模糊坐标`}
-              {unmappedTours.length > 0 && `，另有 ${unmappedTours.length} 条线路待补全地点`}。
+              {approximateTourCount > 0 && `，其中 ${approximateTourCount} 条线路使用模糊坐标`}。
             </p>
             {mapSurface}
           </div>
