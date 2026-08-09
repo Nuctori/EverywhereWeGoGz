@@ -12,6 +12,7 @@ const detailsDir = path.join(dataDir, 'tour-details');
 const imageCacheDir = path.join(dataDir, 'image-cache', 'placeholders');
 const geoPlacesPath = path.join(dataDir, 'geo-places.json');
 const tourMapIndexPath = path.join(dataDir, 'tour-map-index.json');
+const tourMapCardsPath = path.join(dataDir, 'tour-map-cards.json');
 // ?? token ?????????????????????????
 const invalidImageTokens = ['lazyimg', '{{', '}}'];
 const writeRetries = 5;
@@ -20,6 +21,15 @@ const placeholderLabel = '老广精选线路';
 function nonEmpty(value) {
   const text = String(value ?? '').trim();
   return text || undefined;
+}
+
+function normalizeGeoPrecision(value) {
+  const precision = nonEmpty(value);
+  if (!precision) return undefined;
+  if (precision === 'exact' || precision === 'approximate') return precision;
+  if (precision === 'poi') return 'exact';
+  if (['country', 'region', 'city', 'town'].includes(precision)) return 'approximate';
+  return undefined;
 }
 
 function validCoordinate(latitude, longitude) {
@@ -49,8 +59,11 @@ function buildGeoPoint(tour, role) {
   const cityName = nonEmpty(tour[destination ? 'destinationCity' : 'departureCity']);
   const name = destination ? (nonEmpty(tour.destinationPlaceName) || cityName) : cityName;
   if (!name || !cityName || !validCoordinate(latitude, longitude)) return undefined;
-  const level = nonEmpty(tour[destination ? 'destinationGeoLevel' : 'departureGeoLevel'])
-    || (name !== cityName ? 'poi' : 'city');
+  const semanticLevel = nonEmpty(tour[destination ? 'destinationGeoLevel' : 'departureGeoLevel']);
+  const precision = normalizeGeoPrecision(tour[destination ? 'destinationCoordinatePrecision' : 'departureCoordinatePrecision']);
+  const level = ['country', 'region', 'city', 'town', 'poi'].includes(semanticLevel)
+    ? semanticLevel
+    : (name !== cityName ? 'poi' : 'city');
   const locality = nonEmpty(tour[destination ? 'destinationLocality' : 'departureLocality']);
   const address = destination && tour.destinationAddress && typeof tour.destinationAddress === 'object'
     ? Object.fromEntries(Object.entries(tour.destinationAddress).filter(([, value]) => nonEmpty(value)))
@@ -68,9 +81,11 @@ function buildGeoPoint(tour, role) {
     longitude: Number(longitude),
     coordinateSystem: 'wgs84',
     level,
+    ...(semanticLevel && semanticLevel !== level ? { semanticLevel } : {}),
     ...(locality ? { locality } : {}),
     ...(address && Object.keys(address).length > 0 ? { address } : {}),
     coordinateSource,
+    ...(precision ? { precision } : {}),
     source: tour.geoSource === 'local-place-catalog' ? 'catalog' : tour.geoSource === 'geocoder' ? 'geocoder' : tour.geoSource === 'osm' ? 'osm' : 'inferred',
     confidence: ['low', 'medium', 'high'].includes(tour.geoConfidence) ? tour.geoConfidence : 'low',
   };
@@ -258,14 +273,24 @@ function prettyJson(value) {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
-function normalizeDetailPayload(detail) {
-  if (detail.mealCounts === null) {
-    delete detail.mealCounts;
+function isEmptyObject(value) {
+  return value !== null
+    && typeof value === 'object'
+    && !Array.isArray(value)
+    && Object.keys(value).length === 0;
+}
+
+function normalizeTourPayload(payload) {
+  if (payload.mealCounts === null || isEmptyObject(payload.mealCounts)) {
+    delete payload.mealCounts;
   }
-  if (detail.meta?.structuredDetails?.mealCounts === null) {
-    delete detail.meta.structuredDetails.mealCounts;
+  if (
+    payload.meta?.structuredDetails?.mealCounts === null ||
+    isEmptyObject(payload.meta?.structuredDetails?.mealCounts)
+  ) {
+    delete payload.meta.structuredDetails.mealCounts;
   }
-  return detail;
+  return payload;
 }
 
 // ??????????/??/?????????????????
@@ -341,7 +366,8 @@ const listTours = tours.map((tour) => {
     }
   }
   listTour.geo = buildGeo(tour);
-  normalizeDetailPayload(detailTour);
+  normalizeTourPayload(listTour);
+  normalizeTourPayload(detailTour);
 
   const detailFile = `${tour.id}.json`;
   writeTextFileWithRetry(path.join(detailsDir, detailFile), compactJson(detailTour));
@@ -357,6 +383,23 @@ for (const staleFile of existingDetailFiles) {
 }
 
 writeTextFileWithRetry(listPath, compactJson(listTours));
+
+const mapCardFields = [
+  'id',
+  'sourceId',
+  'title',
+  'source',
+  'destination',
+  'duration',
+  'price',
+  'departureDate',
+  'bookingUrl',
+  'transportType',
+];
+const tourMapCards = listTours.map((tour) => Object.fromEntries(
+  mapCardFields.filter((field) => field in tour).map((field) => [field, tour[field]]),
+));
+writeTextFileWithRetry(tourMapCardsPath, compactJson(tourMapCards));
 
 const placeMap = new Map();
 const tourMapIndex = listTours.map((tour) => {
@@ -421,6 +464,10 @@ const indexTours = listTours.map((tour, index) => {
   return idx;
 });
 writeTextFileWithRetry(path.join(dataDir, 'tours-index.json'), compactJson(indexTours));
+writeTextFileWithRetry(
+  path.join(dataDir, 'tour-deeplink-index.json'),
+  compactJson(indexTours.map(({ id, sourceId, page }) => ({ id, sourceId, page }))),
+);
 
 const totalPages = Math.ceil(listTours.length / PAGE_SIZE);
 const pageDir = path.join(dataDir);
@@ -434,6 +481,8 @@ for (let page = 0; page < totalPages; page++) {
   writeTextFileWithRetry(path.join(pageDir, `tours-page-${page}.json`), compactJson(pageData));
 }
 console.log(`tours-index.json ${Buffer.byteLength(JSON.stringify(indexTours), 'utf8')} bytes`);
+console.log(`tour-map-cards.json ${fs.statSync(tourMapCardsPath).size} bytes`);
+console.log(`tour-deeplink-index.json ${fs.statSync(path.join(dataDir, 'tour-deeplink-index.json')).size} bytes`);
 console.log(`Generated ${totalPages} page chunks (tours-page-0.json ~ tours-page-${totalPages - 1}.json)`);
 
 
@@ -490,6 +539,10 @@ const meta = {
     mapIndex: {
       path: 'data/tour-map-index.json',
       size: fs.statSync(tourMapIndexPath).size,
+    },
+    mapCards: {
+      path: 'data/tour-map-cards.json',
+      size: fs.statSync(tourMapCardsPath).size,
     },
   },
 };

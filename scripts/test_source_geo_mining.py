@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 
 from source_geo_mining import extract_detail_candidates
-from source_geo_enrichment import _candidate_queries, _country_result_matches, has_location_evidence, merge_detail_payload
+from source_geo_enrichment import (
+    _candidate_queries,
+    _country_result_matches,
+    apply_detail_and_geo,
+    has_location_evidence,
+    merge_detail_payload,
+)
 
 
 def test_detail_candidates_prioritize_activities_and_strip_route_noise():
@@ -24,6 +30,24 @@ def test_detail_candidates_prioritize_activities_and_strip_route_noise():
     assert labels[:2] == ["仙女湖", "温汤古镇"]
     assert "早餐后前往景区" not in labels
     assert all(item["source"] for item in candidates)
+
+
+def test_detail_candidates_reject_description_words_as_places():
+    candidates = extract_detail_candidates(
+        "广东温泉宾馆2天",
+        {
+            "itinerary": [{
+                "title": "所在地：广州市",
+                "activities": ["广东温泉宾馆"],
+                "accommodation": "建设后入住酒店",
+                "description": "开发温泉设施，无色无味的泉水",
+            }]
+        },
+        "广东",
+    )
+    labels = {item["label"] for item in candidates}
+    assert "广东温泉宾馆" in labels
+    assert not {"建设", "开发", "无色", "无味"}.intersection(labels)
 
 
 def test_detail_candidates_keep_foreign_route_names():
@@ -58,6 +82,62 @@ def test_marketing_title_alone_is_not_location_evidence():
     )
 
 
+def test_named_title_poi_is_network_eligible_without_detail_text():
+    candidates = extract_detail_candidates(
+        "广州出发贺州姑婆山伴山温泉3天",
+        {},
+        "广东",
+        "贺州姑婆山伴山温泉",
+        "贺州",
+    )
+    assert candidates[0]["label"] == "贺州姑婆山伴山温泉"
+    assert candidates[0]["source"] == "title-poi"
+    assert has_location_evidence(
+        "广州出发贺州姑婆山伴山温泉3天",
+        {},
+        "广东",
+        "贺州姑婆山伴山温泉",
+        "贺州",
+    )
+
+
+def test_departure_city_is_not_title_poi_destination():
+    candidates = extract_detail_candidates(
+        "广州出发云南5天",
+        {},
+        "云南",
+        "广州",
+        "广州",
+    )
+    assert not any(item["source"] == "title-poi" for item in candidates)
+
+    candidates = extract_detail_candidates(
+        "珠海高级酒店2天",
+        {},
+        "广东",
+        "珠海高级酒店",
+        "珠海",
+    )
+    assert not any(item["source"] == "title-poi" for item in candidates)
+
+    candidates = extract_detail_candidates(
+        "十星茂名花涧乐天温泉3天",
+        {},
+        "广东",
+        "茂名温泉度假酒店",
+        "茂名",
+    )
+    assert not any(item["source"] == "title-poi" for item in candidates)
+    candidates = extract_detail_candidates(
+        "广州白云机场出发云南5天",
+        {},
+        "云南",
+        "广州白云机场",
+        "广州",
+    )
+    assert not any(item["source"] == "title-poi" for item in candidates)
+
+
 def test_country_candidate_rejects_same_named_domestic_poi():
     assert not _country_result_matches(
         "意大利",
@@ -77,6 +157,89 @@ def test_candidate_queries_keep_city_and_province_context_separate():
         "意大利",
         {"address": {"country": "Italia"}, "displayName": "Italia"},
     )
+
+    queries, _, city, province = _candidate_queries(
+        {
+            "destination": "广东",
+            "destinationPlaceName": "贺州姑婆山伴山温泉",
+            "destinationCity": "贺州",
+            "destinationProvince": "广西",
+        },
+        "贺州姑婆山伴山温泉",
+    )
+    assert city == "贺州"
+    assert province == "广西"
+    assert queries[0] == "贺州姑婆山伴山温泉 广西 中国"
+
+
+def test_title_poi_cache_upgrades_city_fallback_without_source_detail():
+    tour = {
+        "title": "广州出发肇庆七星岩3天",
+        "destination": "广东",
+        "destinationPlaceName": "肇庆七星岩",
+        "destinationCity": "肇庆",
+        "destinationProvince": "广东",
+        "destinationLatitude": 23.0472,
+        "destinationLongitude": 112.4651,
+        "destinationGeoLevel": "poi",
+        "destinationCoordinateSource": "fallback",
+        "destinationCoordinatePrecision": "city",
+        "geoSource": "title-place-miner",
+        "meta": {"dataQuality": {"fieldSources": {}}},
+    }
+    cache = {
+        "肇庆七星岩 广东 中国": {
+            "provider": "nominatim",
+            "latitude": 23.0805699,
+            "longitude": 112.4727006,
+            "displayName": "七星岩景区, 端州区, 肇庆市, 广东省, 中国",
+            "level": "poi",
+            "locality": "城东街道",
+            "address": {"district": "端州区", "locality": "城东街道"},
+        }
+    }
+
+    assert apply_detail_and_geo(
+        tour,
+        {},
+        "existing",
+        cache=cache,
+        allow_network=False,
+    )
+    assert tour["destinationCoordinateSource"] == "geocoder"
+    assert tour["destinationLatitude"] == 23.0805699
+    assert tour["destinationLocality"] == "城东街道"
+    assert tour["destinationAddress"]["district"] == "端州区"
+    assert tour["geoResolution"]["mining"]["resolvedCandidate"] == "肇庆七星岩"
+
+
+def test_title_poi_cache_miss_keeps_city_fallback_and_records_reason():
+    tour = {
+        "title": "广州出发肇庆蓝钟温泉3天",
+        "destination": "广东",
+        "destinationPlaceName": "肇庆蓝钟温泉",
+        "destinationCity": "肇庆",
+        "destinationProvince": "广东",
+        "destinationLatitude": 23.0472,
+        "destinationLongitude": 112.4651,
+        "destinationGeoLevel": "poi",
+        "destinationCoordinateSource": "fallback",
+        "destinationCoordinatePrecision": "city",
+        "geoSource": "title-place-miner",
+        "meta": {"dataQuality": {"fieldSources": {}}},
+    }
+
+    assert not apply_detail_and_geo(
+        tour,
+        {},
+        "existing",
+        cache={},
+        allow_network=False,
+    )
+    assert tour["destinationCoordinateSource"] == "fallback"
+    assert tour["destinationCoordinatePrecision"] == "city"
+    assert tour["geoResolution"]["mining"]["status"] == "no-validated-candidate"
+    assert tour["geoResolution"]["mining"]["sourceCandidates"][0]["resolution"] == "no-match"
 
 
 if __name__ == "__main__":

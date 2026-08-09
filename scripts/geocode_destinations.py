@@ -59,6 +59,7 @@ OVERPASS_POOL = (
 GEOCODER_PROVIDERS.add("overpass")
 
 ADMIN_CONTEXT_PATTERN = re.compile(r"([\u4e00-\u9fff]{2,8}(?:省|市|县|区|镇|街道))")
+ADMIN_RESULT_PATTERN = re.compile(r"([\u4e00-\u9fff]{2,12}(?:自治州|地区|盟|市|县|区|旗))")
 GENERIC_NAME_PARTS = {
     "中国", "广东", "广西", "湖南", "江西", "福建", "海南", "肇庆", "温泉", "酒店", "森林", "旅游",
 }
@@ -197,6 +198,54 @@ def _has_admin_evidence(expected_city: str, text: str) -> bool:
 
 def _has_province_evidence(expected_province: str, text: str) -> bool:
     return _has_admin_evidence(expected_province, text)
+
+
+def _result_context_text(display_name: str, address: dict | None) -> str:
+    values = [str(display_name or "")]
+    if isinstance(address, dict):
+        values.extend(str(address.get(key) or "") for key in ADDRESS_FIELDS)
+    return " ".join(values)
+
+
+def _has_conflicting_admin_context(
+    expected_city: str,
+    expected_province: str,
+    display_name: str,
+    address: dict | None,
+) -> bool:
+    """Reject a result whose explicit administrative context contradicts the tour."""
+    display = re.sub(r"\s+", "", str(display_name or ""))
+    display_tokens = ADMIN_RESULT_PATTERN.findall(display)
+    expected_province_variants = _admin_variants(expected_province)
+    if expected_province:
+        province_tokens = [token for token in display_tokens if token.endswith("省")]
+        if province_tokens and not any(
+            any(variant and variant in token for variant in expected_province_variants)
+            for token in province_tokens
+        ):
+            return True
+        if not province_tokens and not _has_province_evidence(
+            expected_province,
+            _result_context_text(display_name, address),
+        ):
+            return True
+    if not expected_city:
+        return False
+    expected_city_variants = _admin_variants(expected_city)
+    city_tokens = [token for token in display_tokens if not token.endswith("省")]
+    if any(
+        any(variant and variant in token for variant in expected_city_variants)
+        for token in city_tokens
+    ):
+        return False
+    if city_tokens:
+        return True
+    # Providers sometimes return a bare POI name with no administrative suffix.
+    # In that case a structured address can still prove the expected city.
+    address_text = _result_context_text("", address)
+    if _has_admin_evidence(expected_city, address_text):
+        return False
+    return False
 
 
 def _named_variants(label: str, expected_city: str = "") -> list[str]:
@@ -400,18 +449,25 @@ def _valid_cached_result(label: str, expected_city: str, result: object, expecte
     display_name = str(result.get("displayName") or "")
     address = result.get("address")
     admin_context = expected_city or expected_province
+    context_conflict = _has_conflicting_admin_context(
+        expected_city,
+        expected_province,
+        display_name,
+        address if isinstance(address, dict) else {},
+    )
     strict_match = _has_named_evidence(label, display_name, expected_city) and _has_admin_evidence(admin_context, display_name)
     fuzzy_match = (
         allow_fuzzy
         and result.get("precision") == "approximate"
         and _fuzzy_name_quality(label, result.get("name") or display_name, expected_city) > 0
-        and _has_province_evidence(expected_province, display_name)
+        and not context_conflict
         and result.get("level") == "town"
     )
     return (
         provider in GEOCODER_PROVIDERS
         and isinstance(latitude, (int, float)) and not isinstance(latitude, bool) and -90 <= latitude <= 90
         and isinstance(longitude, (int, float)) and not isinstance(longitude, bool) and -180 <= longitude <= 180
+        and not context_conflict
         and (strict_match or fuzzy_match)
         and result.get("level") in {"town", "poi"}
         and (address is None or isinstance(address, dict))
@@ -446,6 +502,8 @@ def _arcgis_result(label: str, payload: dict | list | None, expected_city: str =
             "house_number": attributes.get("HouseNumber"),
             "postcode": attributes.get("PostalCode") or attributes.get("Postal"),
         }, address)
+        if _has_conflicting_admin_context(expected_city, expected_province, address, normalized_address):
+            continue
         return {
             "latitude": float(location["y"]),
             "longitude": float(location["x"]),
@@ -469,6 +527,7 @@ def _nominatim_result(label: str, payload: dict | list | None, expected_city: st
         display_name = str(item.get("display_name") or "")
         address = item.get("address") if isinstance(item.get("address"), dict) else {}
         address_text = " ".join(str(value) for value in address.values())
+        normalized_address = _address_from_mapping(address, display_name)
         name_quality = _named_result_quality(label, item.get("name") or "", expected_city)
         fuzzy_quality = _fuzzy_name_quality(label, item.get("name") or "", expected_city)
         named_evidence = name_quality > 0 or _has_named_evidence(label, display_name, expected_city)
@@ -479,6 +538,8 @@ def _nominatim_result(label: str, payload: dict | list | None, expected_city: st
             and _is_fuzzy_admin_name(item.get("name") or "")
         ):
             continue
+        if _has_conflicting_admin_context(expected_city, expected_province, display_name, normalized_address):
+            continue
         locality = _result_locality(address, display_name, expected_city)
         result = {
             "latitude": float(item["lat"]),
@@ -487,7 +548,7 @@ def _nominatim_result(label: str, payload: dict | list | None, expected_city: st
             "level": "town" if address.get("town") or address.get("village") or _is_fuzzy_admin_name(item.get("name") or "") else "poi",
             "locality": locality,
             "providerScore": 80,
-            "address": _address_from_mapping(address, display_name),
+            "address": normalized_address,
             "matchQuality": name_quality or fuzzy_quality or 70,
             **({"precision": "approximate"} if allow_fuzzy and not name_quality else {}),
         }
@@ -521,6 +582,22 @@ def _photon_result(label: str, payload: dict | list | None, expected_city: str =
             and _is_fuzzy_admin_name(properties.get("name") or "")
         ):
             continue
+        normalized_address = _address_from_mapping({
+            "name": properties.get("name"),
+            "country": properties.get("country"),
+            "state": properties.get("state"),
+            "city": properties.get("city"),
+            "district": properties.get("district"),
+            "county": properties.get("county"),
+            "town": properties.get("town"),
+            "village": properties.get("village"),
+            "locality": properties.get("locality"),
+            "street": properties.get("street"),
+            "housenumber": properties.get("housenumber"),
+            "postcode": properties.get("postcode"),
+        }, display_name)
+        if _has_conflicting_admin_context(expected_city, expected_province, display_name, normalized_address):
+            continue
         locality = str(
             properties.get("town") or properties.get("village") or properties.get("city")
             or properties.get("municipality") or properties.get("county") or properties.get("district") or ""
@@ -532,20 +609,7 @@ def _photon_result(label: str, payload: dict | list | None, expected_city: str =
             "level": "town" if properties.get("town") or properties.get("village") or _is_fuzzy_admin_name(properties.get("name") or "") else "poi",
             "locality": locality,
             "providerScore": 80,
-            "address": _address_from_mapping({
-                "name": properties.get("name"),
-                "country": properties.get("country"),
-                "state": properties.get("state"),
-                "city": properties.get("city"),
-                "district": properties.get("district"),
-                "county": properties.get("county"),
-                "town": properties.get("town"),
-                "village": properties.get("village"),
-                "locality": properties.get("locality"),
-                "street": properties.get("street"),
-                "housenumber": properties.get("housenumber"),
-                "postcode": properties.get("postcode"),
-            }, display_name),
+            "address": normalized_address,
             "matchQuality": name_quality or fuzzy_quality or 70,
             **({"precision": "approximate"} if allow_fuzzy and not name_quality else {}),
         }
@@ -623,6 +687,8 @@ def _overpass_result(label: str, payload: dict | list | None, expected_city: str
             address.get("province"),
             address.get("country"),
         ) if value)
+        if _has_conflicting_admin_context(expected_city, expected_province, display_name, address):
+            continue
         result = {
             "latitude": float(coordinates[0]),
             "longitude": float(coordinates[1]),

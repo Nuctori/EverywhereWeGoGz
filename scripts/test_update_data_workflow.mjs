@@ -3,14 +3,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const workflowPath = path.join(process.cwd(), '.github', 'workflows', 'update-data.yml');
-const workflow = fs.readFileSync(workflowPath, 'utf8');
+const workflow = fs.readFileSync(workflowPath, 'utf8').replace(/\r\n/g, '\n');
 const availabilityWorkflowPath = path.join(
   process.cwd(),
   '.github',
   'workflows',
   'refresh-availability-cache.yml',
 );
-const availabilityWorkflow = fs.readFileSync(availabilityWorkflowPath, 'utf8');
+const availabilityWorkflow = fs.readFileSync(availabilityWorkflowPath, 'utf8').replace(/\r\n/g, '\n');
 const packageJsonPath = path.join(process.cwd(), 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
@@ -20,6 +20,7 @@ function mustInclude(snippet, message) {
 
 mustInclude("- cron: '0 3 * * 1'", 'expected scheduled update-data workflow to run weekly on Monday UTC');
 mustInclude('skip_crawls:', 'expected workflow_dispatch skip_crawls input to exist for fast manual verification');
+mustInclude('DETAIL_FETCH_MODE: geo', 'expected weekly refresh to enrich details only for tours without destination coordinates');
 
 const sharedWriteLock = 'concurrency:\n  group: tour-data-writes\n  cancel-in-progress: false';
 assert.ok(workflow.includes(sharedWriteLock), 'expected update-data workflow to serialize data writes');
@@ -145,6 +146,7 @@ assert.ok(gitAddMatch, 'expected Check if data changed to stage generated data f
 const gitAddCommand = gitAddMatch[1];
 for (const requiredPath of [
   'public/data/tours-index.json',
+  'public/data/tour-deeplink-index.json',
   'public/data/tours-page-*.json',
   'public/data/tour-details',
   'public/data/image-cache',
@@ -157,6 +159,15 @@ for (const requiredPath of [
 assert.ok(
   !gitAddCommand.includes('src/data/tour-availability-cache.json'),
   'expected update-data workflow to leave availability cache ownership to the refresh workflow',
+);
+const splitScript = fs.readFileSync(
+  path.join(process.cwd(), 'scripts', 'split_tour_data.mjs'),
+  'utf8',
+);
+assert.ok(
+  splitScript.includes("path.join(dataDir, 'tour-deeplink-index.json')") &&
+    splitScript.includes('indexTours.map(({ id, sourceId, page }) => ({ id, sourceId, page }))'),
+  'expected split step to rebuild the deeplink index from current tours',
 );
 assert.ok(
   workflow.includes('git restore src/data/tour-availability-cache.json'),

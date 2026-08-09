@@ -25,11 +25,6 @@ export const sources = [
     "name": "康辉",
     "logo": "/icons/康辉.png",
     "color": "#1A535C"
-  },
-  {
-    "name": "暴走村",
-    "logo": "/icons/暴走村.png",
-    "color": "#B8860B"
   }
 ];
 
@@ -45,7 +40,6 @@ export const destinations = [
   "新疆",
   "桂林",
   "西安",
-  "西昌",
   "西藏",
   "贵州"
 ];

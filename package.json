@@ -46,6 +46,7 @@
     "test:map-data-loading": "node scripts/test_map_data_loading.mjs",
     "test:osm-poi-workflow": "node scripts/test_osm_poi_workflow.mjs",
     "test:map-view-contract": "node scripts/test_map_view_contract.mjs",
+    "test:map-runtime": "node scripts/test_map_runtime_e2e.mjs",
     "audit:availability:refresh": "python scripts/validate_tour_availability.py --cache-ttl-hours 0 --sample-failures 0",
     "generate:weekly-wechat-article": "node scripts/generate_weekly_wechat_article.mjs",
     "prepare:wechat-publish-bundle": "node scripts/prepare_wechat_publish_bundle.mjs",

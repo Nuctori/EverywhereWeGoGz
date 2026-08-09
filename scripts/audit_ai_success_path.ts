@@ -8,6 +8,7 @@ const {
   auditAiRecommendationsStrict,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
+  keepAiItemsForCompoundExperience,
 } = __aiRecommendationTestHooks;
 
 function candidate(
@@ -176,7 +177,7 @@ const shortCopyCandidate = candidate({
   highlights: ['海边温泉', '沙滩散步'],
   theme: '海岛度假',
 });
-const expandedShortCopy = rewriteRecommendationCopy({
+const preservedShortCopy = rewriteRecommendationCopy({
   items: [
     { tourId: 'short-copy', score: 90, reason: '海边温泉。', matchedSignals: ['温泉'] },
   ],
@@ -193,13 +194,13 @@ const expandedShortCopy = rewriteRecommendationCopy({
   userText: '想找海边温泉，文案说人话一点',
   allowPublicInterest: false,
 });
-assert.ok((expandedShortCopy[0]?.reason?.length ?? 0) > '海边温泉。'.length);
+assert.equal(preservedShortCopy[0]?.reason, '海边温泉。');
 
 const semanticFitAfterFormulaicReason = rewriteRecommendationCopy({
   items: [{
     tourId: 'semantic-copy',
     score: 96,
-    reason: '如果你是冲着温泉和海边去的，这条线会更有针对性',
+    reason: '盐洲岛的海边氛围很松，泡完温泉还能把傍晚留给海风和散步。',
     semanticFit: '盐洲岛把海边的慢节奏和温泉放在同一趟里，适合想带孩子玩水又不想把行程排满的家庭。',
     semanticBoundary: '共享电动车是否方便需要出发前确认。',
     matchedSignals: ['海边', '温泉'],
@@ -225,9 +226,64 @@ const semanticFitAfterFormulaicReason = rewriteRecommendationCopy({
   userText: '适合带孩子的海边温泉，附近最好能骑电动车逛逛',
   allowPublicInterest: false,
 });
-assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('盐洲岛'));
-assert.ok(!semanticFitAfterFormulaicReason[0]?.reason?.startsWith('如果你是冲着'));
-assert.ok(semanticFitAfterFormulaicReason[0]?.reason?.includes('共享电动车'));
+assert.equal(
+  semanticFitAfterFormulaicReason[0]?.reason,
+  '盐洲岛的海边氛围很松，泡完温泉还能把傍晚留给海风和散步。',
+);
+
+const invalidSemanticCopy = rewriteRecommendationCopy({
+  items: [{
+    tourId: 'semantic-copy',
+    score: 95,
+    reason: '从标题和标签看，匹配度较高。',
+    semanticFit: '从候选原语 atoms 看，这条线适合放松。',
+    matchedSignals: ['温泉'],
+  }],
+  candidateTours: [candidate({
+    id: 'semantic-copy',
+    title: '惠州双湾盐洲岛温泉联游3天',
+    destination: '广东',
+    price: 799,
+    tags: ['温泉', '海边'],
+    highlights: ['盐洲岛', '温泉'],
+  })],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: { destination: '惠州', travelDate: '2026-06-12', forecastSummary: '', seasonAdvice: [], source: 'seasonal-rule' },
+  userText: '海边温泉',
+  allowPublicInterest: false,
+});
+assert.ok(!/标题和标签|候选原语|匹配度/.test(invalidSemanticCopy[0]?.reason || ''));
+
+const localSupplementCopy = rewriteRecommendationCopy({
+  items: [{
+    tourId: 'semantic-copy',
+    score: 40,
+    reason: '这条线更适合把时间留给温泉，节奏偏轻松。',
+    matchedSignals: ['本地补位'],
+    recommendationTier: 'local-supplement',
+  }],
+  candidateTours: [candidate({
+    id: 'semantic-copy',
+    title: '惠州双湾盐洲岛温泉联游3天',
+    destination: '广东',
+    price: 799,
+    tags: ['温泉'],
+    highlights: ['盐洲岛', '温泉'],
+  })],
+  destinationWeatherInsights: [],
+  intent: { weatherSensitivity: [], departureWeekdays: [] },
+  weatherContext: {
+    destination: '惠州',
+    travelDate: '2026-06-12',
+    forecastSummary: '',
+    seasonAdvice: [],
+    source: 'seasonal-rule',
+  },
+  userText: '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  allowPublicInterest: false,
+});
+assert.equal(localSupplementCopy[0]?.reason, undefined);
 
 const weakCompoundCandidate = candidate({
   id: 'weak-compound',
@@ -237,16 +293,32 @@ const weakCompoundCandidate = candidate({
   tags: ['温泉'],
   highlights: ['泡汤'],
 });
-const weakCompoundItems = auditAiRecommendationsStrict(
-  [{ tourId: 'weak-compound', score: 99, reason: '温泉价格合适。', matchedSignals: ['温泉'] }],
-  [],
-  [weakCompoundCandidate],
-  { semanticFocus: ['玩水', '周边小镇'], weatherSensitivity: [], departureWeekdays: [] },
-);
 assert.deepEqual(
-  weakCompoundItems.map((item) => item.tourId),
+  keepAiItemsForCompoundExperience(
+    [{ tourId: 'weak-compound', score: 99, reason: '温泉价格合适。', matchedSignals: ['温泉'] }],
+    [weakCompoundCandidate],
+    '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  ),
+  [{ tourId: 'weak-compound', score: 99, reason: '温泉价格合适。', matchedSignals: ['温泉'] }],
+  'when no strong compound candidate exists, retain the AI-selected nearest alternative',
+);
+
+const unselectedStrongCandidate = candidate({
+  id: 'unselected-strong',
+  title: '海边温泉嬉水3天',
+  destination: '广东',
+  price: 499,
+  tags: ['温泉', '玩水'],
+  highlights: ['温泉', '嬉水'],
+});
+assert.deepEqual(
+  keepAiItemsForCompoundExperience(
+    [{ tourId: 'weak-compound', score: 60, reason: '温泉可泡。', matchedSignals: ['温泉'] }],
+    [unselectedStrongCandidate, weakCompoundCandidate],
+    '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
+  ).map((item) => item.tourId),
   ['weak-compound'],
-  'partial compound matches remain visible as candidates instead of being hard-filtered',
+  'an AI omission must degrade to its selected alternative instead of returning an empty result',
 );
 
 const strongCompoundCandidate = candidate({
@@ -266,19 +338,16 @@ const weakMixedCandidate = candidate({
   highlights: ['温泉', '小镇漫步'],
 });
 assert.deepEqual(
-  prioritizeRecommendationItems(
+  keepAiItemsForCompoundExperience(
     [
-      { tourId: 'strong-compound', score: 99, reason: '温泉和玩水都对得上。', matchedSignals: ['温泉', '玩水'] },
+      { tourId: 'strong-compound', score: 80, reason: '温泉和玩水都对得上。', matchedSignals: ['温泉', '玩水'] },
       { tourId: 'weak-mixed', score: 99, reason: '温泉和小镇都不错。', matchedSignals: ['温泉', '小镇'] },
     ],
-    {
-      candidateTours: [strongCompoundCandidate, weakMixedCandidate],
-      intent: { semanticFocus: ['玩水', '周边小镇'], weatherSensitivity: [], departureWeekdays: [] },
-      userText: '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
-    },
+    [strongCompoundCandidate, weakMixedCandidate],
+    '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
   ).map((item) => item.tourId),
   ['strong-compound', 'weak-mixed'],
-  'strong compound matches rank first while partial matches remain visible',
+  'AI-ranked alternatives remain available alongside the strongest compound candidate',
 );
 
 console.log('AI success-path audit passed');

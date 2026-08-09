@@ -23,12 +23,14 @@ interface TourCardProps {
   onClick: () => void;
   recommendationReason?: string;
   recommendationRank?: number;
+  recommendationTier?: 'ai-detailed' | 'ai-brief' | 'local-supplement';
 }
 
 export const TourCard = memo(function TourCard({
   tour,
   onClick,
   recommendationReason,
+  recommendationTier,
 }: TourCardProps) {
   const hasImage = tour.images && tour.images.length > 0;
   // 图片不可用时（含模板占位图或加载失败），用 getFallbackImage 生成来源占位图冒底。
@@ -88,6 +90,10 @@ export const TourCard = memo(function TourCard({
         <p className="mt-2 line-clamp-2 text-sm text-stone-500">
           {titleSummary}
         </p>
+
+        {recommendationTier === 'local-supplement' && (
+          <div className="mt-2 text-xs text-stone-400">比较备选</div>
+        )}
 
         {/* AI 推荐理由，来自 AiRecommendPanel 结果 */}
         {recommendationReason && (

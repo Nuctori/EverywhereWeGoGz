@@ -308,9 +308,9 @@ self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
   if (!isCacheableRequest(event.request, requestUrl)) return;
 
-  if (requestUrl.pathname.includes('/data/')) {
-    event.respondWith(staleWhileRevalidate(event.request));
-  } else {
-    event.respondWith(cacheFirst(event.request));
-  }
+  // Data indexes are rebuilt on every release. CDN mirrors can keep an old
+  // cdn-assets branch response after a force-push, so data must stay same-origin.
+  if (relativePublicPath(requestUrl)?.startsWith('data/')) return;
+
+  event.respondWith(cacheFirst(event.request));
 });

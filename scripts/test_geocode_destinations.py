@@ -126,7 +126,7 @@ def test_fuzzy_cached_town_result_keeps_named_tour_on_the_map(tmp_path: Path):
             "provider": "photon",
             "latitude": 24.0776019,
             "longitude": 111.9556435,
-            "displayName": "蓝钟镇 怀集县 广东省 中国",
+            "displayName": "蓝钟镇 怀集县 肇庆市 广东省 中国",
             "level": "town",
             "precision": "approximate",
         },
@@ -349,13 +349,36 @@ def test_fuzzy_geocoder_accepts_matching_town_with_province_context_only():
     payload = {
         "features": [{
             "geometry": {"coordinates": [111.9556435, 24.0776019]},
-            "properties": {"name": "蓝钟镇", "city": "怀集县", "state": "广东省", "country": "中国"},
+            "properties": {"name": "蓝钟镇", "district": "怀集县", "city": "肇庆市", "state": "广东省", "country": "中国"},
         }]
     }
     result = _photon_result("肇庆蓝钟温泉", payload, "肇庆", "广东", True)
     assert result["level"] == "town"
     assert result["precision"] == "approximate"
     assert _photon_result("肇庆蓝钟温泉", payload, "肇庆", "广西", True) is None
+
+
+def test_fuzzy_geocoder_rejects_same_province_wrong_city():
+    for name, city, district in (("三英村", "潮州市", ""), ("龙山镇", "清远市", "佛冈县")):
+        payload = {
+            "features": [{
+                "geometry": {"coordinates": [116.6, 23.5]},
+                "properties": {
+                    "name": name,
+                    "city": city,
+                    "district": district,
+                    "state": "广东省",
+                    "country": "中国",
+                },
+            }]
+        }
+        assert _photon_result(
+            "增城三英温泉" if name == "三英村" else "新兴龙山温泉",
+            payload,
+            "增城" if name == "三英村" else "新兴",
+            "广东",
+            True,
+        ) is None
 
 
 def test_overpass_result_accepts_exact_named_poi_with_bounded_city_context():

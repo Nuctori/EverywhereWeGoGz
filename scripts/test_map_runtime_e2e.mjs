@@ -1,0 +1,130 @@
+import { chromium } from 'playwright';
+
+const url = process.env.MAP_E2E_URL?.trim() || 'http://127.0.0.1:4173/';
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+const consoleErrors = [];
+page.on('console', (message) => {
+  if (message.type() === 'error' || message.type() === 'warning') {
+    consoleErrors.push(message.text());
+  }
+});
+page.on('pageerror', (error) => consoleErrors.push(error.message));
+
+const assert = (condition, message) => {
+  if (!condition) throw new Error(`[map-runtime] ${message}`);
+};
+
+try {
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  const geoPlacesResponse = await fetch(new URL('data/geo-places.json', url));
+  const toursIndexResponse = await fetch(new URL('data/tour-map-cards.json', url));
+  assert(geoPlacesResponse.ok, `geo place baseline must be readable: ${geoPlacesResponse.status}`);
+  assert(toursIndexResponse.ok, `map card baseline must be readable: ${toursIndexResponse.status}`);
+  const geoPlaces = await geoPlacesResponse.json();
+  const toursIndex = await toursIndexResponse.json();
+  const currentTourIds = new Set(toursIndex.map((tour) => tour.id));
+  const expectedPlaces = geoPlaces
+    .filter((place) => place.roles?.includes('destination'))
+    .filter((place) => place.tourIds?.some((tourId) => currentTourIds.has(tourId)))
+    .length;
+  const map = page.locator('[aria-label="旅行目的地地图"]');
+  await map.waitFor({ state: 'visible' });
+  await page.getByText(/已定位 \d+ 个地点/).waitFor({ state: 'visible' });
+  await map.locator('.leaflet-tile-pane').waitFor({ state: 'attached', timeout: 15000 });
+  await page.waitForTimeout(2200);
+
+  const mapSummary = await page.getByText(/已定位 \d+ 个地点/).first().innerText();
+  const reportedPlaces = Number(mapSummary.match(/已定位 (\d+) 个地点/)?.[1] || 0);
+  const markerCoverage = async (canvas) => canvas.locator('.leaflet-marker-icon').evaluateAll((markers) => ({
+    individual: markers.filter((marker) => marker.classList.contains('destination-marker-icon')).length,
+    clusterPlaces: markers
+      .filter((marker) => marker.classList.contains('destination-cluster-icon'))
+      .reduce((sum, marker) => sum + Number(marker.textContent?.trim() || 0), 0),
+    clusters: markers.filter((marker) => marker.classList.contains('destination-cluster-icon')).length,
+  }));
+
+  const initialTiles = await map.locator('.leaflet-tile').evaluateAll((tiles) =>
+    tiles.filter((tile) => tile.complete && tile.naturalWidth > 0).length,
+  );
+  const initialMarkers = await map.locator('.leaflet-marker-icon').count();
+  const initialCoverage = await markerCoverage(map);
+  assert((await map.locator('.leaflet-tile-pane').count()) === 1, 'the initial map must initialize a Leaflet tile layer');
+  assert(initialMarkers > 0, 'the initial map must render non-zero destination markers');
+  assert(expectedPlaces > 0, 'the independent place baseline must contain destinations');
+  assert(reportedPlaces === expectedPlaces, 'the map summary must match the independent generated place baseline');
+  assert(initialCoverage.individual + initialCoverage.clusterPlaces === expectedPlaces, 'initial marker aggregation must represent every indexed place');
+  assert(!(await page.getByText('地图数据暂时不可用？').count()), 'the initial map must not report unavailable data');
+
+  const clusterMarkers = map.locator('.destination-cluster-icon');
+  assert((await clusterMarkers.count()) > 0, 'the map must expose a numeric aggregate marker');
+  await clusterMarkers.first().click();
+  await page.getByRole('heading', { name: '选择具体地点' }).waitFor({ state: 'visible' });
+
+  const placePanel = page.getByRole('complementary', { name: '相近地点' });
+  const placeChoices = placePanel.getByRole('button').filter({ hasText: /\d+ 条线路/ });
+  assert((await placeChoices.count()) > 0, 'the aggregate marker must expose concrete place choices');
+  await placeChoices.first().click();
+  await page.getByText('地点线路', { exact: true }).waitFor({ state: 'visible' });
+
+  const tourChoices = page.getByRole('button', { name: /^查看线路：/ });
+  await tourChoices.first().waitFor({ state: 'visible', timeout: 15000 });
+  assert((await tourChoices.count()) > 0, 'the place panel must expose tour cards');
+  await tourChoices.first().click();
+  const tourDialog = page.getByRole('dialog');
+  await tourDialog.waitFor({ state: 'visible' });
+  assert((await tourDialog.getByText('详细信息').count()) > 0, 'a tour card must open the tour detail dialog');
+  await tourDialog.getByRole('button', { name: 'Close' }).click();
+
+  await page.getByRole('button', { name: '放大' }).click();
+  const expandedMap = page.getByRole('dialog', { name: '点地点，直接看对应旅行团' });
+  await expandedMap.waitFor({ state: 'visible' });
+  const expandedMapCanvas = expandedMap.locator('[aria-label="旅行目的地地图"]');
+  const expandedMarkersBeforeZoom = await expandedMapCanvas.locator('.leaflet-marker-icon').count();
+  await expandedMapCanvas.hover();
+  await page.mouse.wheel(0, -720);
+  await page.waitForTimeout(2200);
+  const expandedMarkersAfterZoom = await expandedMapCanvas.locator('.leaflet-marker-icon').count();
+  const expandedCoverageAfterZoom = await markerCoverage(expandedMapCanvas);
+  const expandedTiles = await expandedMapCanvas.locator('.leaflet-tile').evaluateAll((tiles) =>
+    tiles.filter((tile) => tile.complete && tile.naturalWidth > 0).length,
+  );
+  assert((await expandedMapCanvas.locator('.leaflet-tile-pane').count()) === 1, 'the expanded map must keep its Leaflet tile layer after wheel zoom');
+  assert(expandedMarkersAfterZoom > 0, 'the expanded map must keep destination markers after wheel zoom');
+  assert(expandedMarkersAfterZoom >= expandedMarkersBeforeZoom, 'wheel zoom must refine rather than hide destination markers');
+
+  for (let step = 0; step < 14; step += 1) {
+    await expandedMapCanvas.hover();
+    await page.mouse.wheel(0, -720);
+  }
+  await page.waitForTimeout(1200);
+  const maximumZoomCoverage = await markerCoverage(expandedMapCanvas);
+  const actualZoom = Number(await expandedMapCanvas.getAttribute('data-map-zoom'));
+  const maximumZoom = Number(await expandedMapCanvas.getAttribute('data-map-max-zoom'));
+  assert(Number.isFinite(actualZoom) && Number.isFinite(maximumZoom) && actualZoom >= maximumZoom, 'the maximum zoom assertion must observe the actual Leaflet zoom state');
+  assert(maximumZoomCoverage.clusters === 0, 'maximum zoom must show every destination as an independent marker');
+  assert(maximumZoomCoverage.individual === expectedPlaces, 'maximum zoom must retain every indexed destination marker');
+  const ignoredExternalImageErrors = consoleErrors.filter((error) =>
+    /jrttp\.jrt365\.com:8066|ERR_SSL_PROTOCOL_ERROR/.test(error),
+  );
+  const blockingConsoleErrors = consoleErrors.filter((error) => !ignoredExternalImageErrors.includes(error));
+  assert(blockingConsoleErrors.length === 0, `browser console must stay clean: ${blockingConsoleErrors.join(' | ')}`);
+
+  console.log(JSON.stringify({
+    checked: 'map-runtime',
+    initialTiles,
+    initialMarkers,
+    expectedPlaces,
+    reportedPlaces,
+    initialCoverage,
+    expandedMarkersBeforeZoom,
+    expandedMarkersAfterZoom,
+    expandedCoverageAfterZoom,
+    maximumZoomCoverage,
+    expandedTiles,
+    consoleErrors,
+    ignoredExternalImageErrors,
+  }));
+} finally {
+  await browser.close();
+}

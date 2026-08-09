@@ -542,7 +542,7 @@ export function TourDetailModal({
       {/* 移动端 Sheet - 使用 CSS 隐藏桌面端 */}
       {isMobile && (
         <Sheet open={Boolean(summaryTour)} onOpenChange={(open) => !open && onClose()}>
-          <SheetContent side="bottom" className="h-[100dvh] max-h-[100dvh] min-h-0 gap-0 overflow-hidden rounded-t-[22px] border-stone-200 p-0">
+          <SheetContent side="bottom" className="z-[80] h-[100dvh] max-h-[100dvh] min-h-0 gap-0 overflow-hidden rounded-t-[22px] border-stone-200 p-0">
             <SheetHeader className="shrink-0 border-b border-stone-200 bg-white px-4 pb-3 pt-3 text-left">
               <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-stone-300" />
               <SheetTitle className="line-clamp-2 pr-10 text-left text-sm leading-6 text-stone-950">{tour.title}</SheetTitle>
@@ -561,7 +561,7 @@ export function TourDetailModal({
       {/* 桌面端 Dialog - 使用 CSS 隐藏移动端 */}
       {!isMobile && (
         <Dialog open={Boolean(summaryTour)} onOpenChange={(open) => !open && onClose()}>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0 overflow-hidden flex min-h-0 flex-col">
+          <DialogContent className="z-[80] max-w-4xl max-h-[90vh] p-0 overflow-hidden flex min-h-0 flex-col">
             <DialogHeader className="p-6 pb-0 shrink-0">
               <DialogTitle className="text-xl leading-relaxed">{tour.title}</DialogTitle>
               <DialogDescription>{tour.title} 的详细信息</DialogDescription>

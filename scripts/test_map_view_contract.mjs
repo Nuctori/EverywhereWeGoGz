@@ -4,6 +4,7 @@ const source = fs.readFileSync('src/sections/MapView.tsx', 'utf8');
 const detailModal = fs.readFileSync('src/sections/TourDetailModal.tsx', 'utf8');
 const tilePool = fs.readFileSync('src/lib/map-tile-pool.ts', 'utf8');
 const app = fs.readFileSync('src/App.tsx', 'utf8');
+const main = fs.readFileSync('src/main.tsx', 'utf8');
 const mapTours = fs.readFileSync('src/hooks/use-map-tours.ts', 'utf8');
 const serviceWorker = fs.readFileSync('public/sw.js', 'utf8');
 
@@ -24,6 +25,7 @@ assert(source.includes('tourIds.map'), 'marker selection must resolve tours from
 assert(!source.includes('slice(0, MAP_TOUR_LIMIT)'), 'place panel must expose every tour indexed at the selected destination');
 assert(source.includes('PlaceToursPanel'), 'marker selection must open the place tour panel');
 assert(source.includes('marker.options.title = locationLabel'), 'markers must expose the specific mined location label');
+assert(source.includes("className: 'destination-marker-icon'"), 'individual destination markers must not depend on missing Leaflet image assets');
 assert(source.includes('selectTour'), 'map tour cards must open the existing tour detail flow');
 assert(source.includes('setSelectedPlace(null);'), 'opening tour details must close the place panel');
 assert(source.includes('onTourClick={openTourDetail}'), 'place panel must use the single-step tour detail handler');
@@ -31,10 +33,13 @@ assert(source.includes('z-[40]'), 'expanded map must remain below the tour detai
 assert((detailModal.match(/z-\[80\]/g) || []).length >= 2, 'desktop and mobile tour detail layers must sit above the expanded map');
 assert(source.includes('embedded?: boolean'), 'MapView must support an embedded homepage placement');
 assert(source.includes('!expanded && embedded'), 'embedded MapView must render the homepage preview');
+assert(source.includes("'正在加载已定位地点…'"), 'homepage map must not label an in-flight location load as zero places');
 assert(source.includes('放大地图'), 'home map must provide an expand control');
 assert(source.includes('点地点，直接看对应旅行团'), 'expanded map must keep place-first interaction');
-assert(mapTours.includes("tours-index.json"), 'map tours must use the lightweight tours index');
+assert(mapTours.includes("tour-map-cards.json"), 'map tours must use the compact map card index');
 assert(serviceWorker.includes("self.location.hostname === 'localhost'"), 'local development must bypass the CDN service worker data path');
+assert(main.includes('navigator.serviceWorker.getRegistrations()'), 'local development must remove stale service worker registrations');
+assert(main.includes("['localhost', '127.0.0.1', '::1']"), 'local service worker bypass must cover local hostnames');
 assert(source.includes('map.remove()'), 'MapView must clean up the Leaflet instance');
 assert(source.includes('wgs84ToGcj02'), 'MapView must convert coordinates for GCJ-02 tiles');
 assert(source.includes('isWithinChinaCoverage'), 'MapView must keep the domestic provider at a usable China viewport');
@@ -48,6 +53,8 @@ assert(source.includes('markerCollisionRadius'), 'marker collision distance must
 assert(source.includes('maxIndependentMarkers'), 'independent marker capacity must respond to zoom level');
 assert(source.includes('const zoom = map.getZoom()'), 'marker rendering must read the current map zoom');
 assert(source.includes('const maximumZoom = map.getMaxZoom()'), 'marker rendering must know the tile layer maximum zoom');
+assert(source.includes("data-map-zoom"), 'MapView must expose its current zoom for runtime verification');
+assert(source.includes("data-map-max-zoom"), 'MapView must expose its configured maximum zoom for runtime verification');
 assert(source.includes('atMaximumZoom'), 'maximum zoom must disable destination clustering');
 assert(source.includes('FULL_DETAIL_ZOOM'), 'detail zoom must disable clustering before the absolute tile maximum');
 assert(source.includes('Number.POSITIVE_INFINITY'), 'maximum zoom must allow every nearby destination marker');
@@ -56,9 +63,11 @@ assert(source.includes('containerPointToLatLng(candidate.pixel)'), 'fan-out mark
 assert(source.includes('place.placeId.localeCompare'), 'fan-out ordering must be stable by place identity');
 assert(source.includes('locality'), 'map place chooser must expose town or street locality');
 assert(source.includes('town'), 'map view must distinguish town-level destinations');
-assert(mapTours.includes("['poi', 'town'].includes(point.level)"), 'map tours must exclude city-only destination points');
-assert(mapTours.includes("point.coordinateSource !== 'fallback'"), 'map tours must exclude coarse fallback points');
-assert(mapTours.includes('point.coordinateSource !== \'inferred\' || point.confidence !== \'low\''), 'map tours must exclude unverified low-confidence inferred points');
+assert(mapTours.includes('function isApproximateMapPoint'), 'map tours must classify approximate destination points');
+assert(mapTours.includes("point.coordinateSource === 'fallback'"), 'map tours must identify coarse fallback points');
+assert(mapTours.includes("point.level === 'city'"), 'map tours must identify city-level points');
+assert(mapTours.includes("point.coordinateSource === 'inferred' && point.confidence === 'low'"), 'map tours must identify low-confidence inferred points');
+assert(mapTours.includes('approximateTours:'), 'map tours must expose approximate tours without hiding them');
 assert(source.includes('min(280px,calc(100%_-_1.5rem))'), 'compact map panels must keep a readable width on narrow maps');
 assert(!source.includes('min(330px,42%)'), 'compact map panels must not use percentage width that causes character wrapping');
 assert(tilePool.includes("id: 'amap-direct'"), 'tile pool must prefer the domestic AMap tile source');

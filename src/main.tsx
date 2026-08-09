@@ -9,13 +9,20 @@ async function registerStaticAssetServiceWorker() {
   // Never route local development data through the production CDN pool. An
   // older worker can still be registered from a previous local run, so remove
   // it before the app starts making data requests.
-  if (['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)) {
-    try {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((registration) => registration.unregister()));
-    } catch {
-      // Local data remains available even when an old worker cannot be removed.
+  const isLocalDevelopment = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+  if (isLocalDevelopment) {
+    const wasControlled = Boolean(navigator.serviceWorker.controller);
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(registrations.map((registration) => registration.unregister()));
+    if ('caches' in window) {
+      const cacheKeys = await caches.keys();
+      await Promise.all(
+        cacheKeys
+          .filter((key) => key.startsWith('everywhere-we-go-static-'))
+          .map((key) => caches.delete(key)),
+      );
     }
+    if (wasControlled) window.location.reload();
     return;
   }
 

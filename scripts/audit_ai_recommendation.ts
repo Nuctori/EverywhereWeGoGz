@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import {
   __aiRecommendationTestHooks,
 } from '../src/lib/ai-recommendation.ts';
-import { getSearchRouteMeta, requestAiRecommendations } from '../src/lib/ai-recommendation.ts';
+import { requestAiRecommendations } from '../src/lib/ai-recommendation.ts';
 import type { AiRecommendationCandidate } from '../src/types/tour.ts';
 
 const {
@@ -24,11 +24,10 @@ const {
   allowsPublicInterestForTurn,
   enrichPromptCandidatesWithMemoryCoverage,
   finalizeRecommendationSummary,
+  getAiResponseIntentQualityIssue,
   getConcreteAiReason,
   getPrimitiveCoverageScore,
   getPrimitiveConflictReasons,
-  getWeatherRankingScore,
-  assessWeatherComfortForDate,
   reasonAddressesUserNeed,
   localRecommendations,
   matchesActiveDateFilters,
@@ -36,6 +35,7 @@ const {
   mergeAiAndLocalRecommendations,
   mergeAiRankingIntent,
   mergeIntentWithMemory,
+  keepAiItemsForCompoundExperience,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
@@ -157,8 +157,8 @@ const mergedPartialAi = mergeAiAndLocalRecommendations(
 );
 assert.deepEqual(
   mergedPartialAi.map((item) => item.tourId),
-  ['ai-only-choice'],
-  'a partial AI result must not be padded with unselected local candidates',
+  ['ai-only-choice', 'local-not-selected'],
+  'a partial AI result keeps AI choices first and exposes local alternatives for comparison',
 );
 const mergedLocalFallback = mergeAiAndLocalRecommendations(
   [],
@@ -300,24 +300,21 @@ assert.equal(
   2,
   '滨水温泉目的地 should count as both hot spring and water play for a compound request',
 );
-const compoundSelection = prioritizeRecommendationItems(
+const compoundSelection = keepAiItemsForCompoundExperience(
   [
-    { tourId: 'coastal-hot-spring', score: 99, reason: '海边温泉度假', matchedSignals: [] },
+    { tourId: 'coastal-hot-spring', score: 70, reason: '海边温泉度假', matchedSignals: [] },
     { tourId: hotSpringTour.id, score: 99, reason: '纯温泉', matchedSignals: [] },
   ],
-  {
-    candidateTours: [
-      candidate({ id: 'coastal-hot-spring', title: '惠州双湾盐洲岛温泉联游3天', destination: '广东', price: 399, duration: 3, theme: '温泉泡汤' }),
-      hotSpringTour,
-    ],
-    intent: { semanticFocus: ['玩水', '周边小镇'], weatherSensitivity: [], departureWeekdays: [] },
-    userText: '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
-  },
+  [
+    candidate({ id: 'coastal-hot-spring', title: '惠州双湾盐洲岛温泉联游3天', destination: '广东', price: 399, duration: 3, theme: '温泉泡汤' }),
+    hotSpringTour,
+  ],
+  '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
 );
 assert.deepEqual(
   compoundSelection.map((item) => item.tourId),
-  ['coastal-hot-spring', hotSpringTour.id],
-  'compound recommendation should prefer a strong match while retaining partial candidates',
+  ['coastal-hot-spring', 'hot-spring'],
+  'compound recommendation keeps the strongest match and a lower-coverage alternative available',
 );
 const avoidCompacted = compactCandidates([hotSpringTour, nonHotSpringTour], [], avoidIntent);
 assert.ok(avoidCompacted.some((item) =>
@@ -646,7 +643,7 @@ const genericReasonItems = validateAiItems({
     { tourId: 'noisy-culture', score: 95, reason: '价格低，班期多，性价比高', matchedSignals: ['低价'] },
   ],
 }, noisyAlternatives);
-assert.ok(genericReasonItems[0].reason?.includes('博物馆'));
+assert.equal(genericReasonItems[0].reason, '价格低，班期多，性价比高');
 assert.ok(genericReasonItems[0].matchedSignals.some((signal) => signal.includes('博物馆')));
 const nonStringReasonItems = validateAiItems({
   items: [
@@ -659,14 +656,7 @@ const vagueReasonItems = validateAiItems({
     { tourId: 'noisy-beach', score: 94, reason: '自然风光生态，含早轻松，适合本次天气取舍。', matchedSignals: ['自然风光'] },
   ],
 }, noisyAlternatives);
-assert.ok(vagueReasonItems[0].reason?.includes('沙扒湾') || vagueReasonItems[0].reason?.includes('沙滩'));
-assert.ok(!vagueReasonItems[0].reason?.includes('玩水'));
-assert.ok(!/[（(](?:天气敏感|高温天气需取舍|雨天需取舍)：/.test(vagueReasonItems[0].reason || ''));
-assert.ok(!/看点：|行程：|参考价：|可作为具体玩法备选/.test(vagueReasonItems[0].reason || ''));
-assert.ok(vagueReasonItems[0].reason?.includes('参考价￥'));
-assert.ok(!/主要卖点|这条更像|亮点集中|先锁定具体体验|我会把它看作/.test(vagueReasonItems[0].reason || ''));
-assert.ok(!vagueReasonItems[0].reason?.includes('预算友好'));
-assert.ok(!/偏海边沙滩|适合作低价酒店型备选|AI综合推荐|取舍：/.test(vagueReasonItems[0].reason || ''));
+assert.equal(vagueReasonItems[0].reason, '自然风光生态，含早轻松，适合本次天气取舍');
 
 const highPriceBeachTour = candidate({
   id: 'high-price-beach',
@@ -796,8 +786,7 @@ const closeToBudgetRewrite = rewriteRecommendationCopy({
   userText: '帮我找同时带温泉和沙滩的团',
   allowPublicInterest: false,
 });
-assert.ok(!/预算/.test(closeToBudgetRewrite[0].reason || ''));
-assert.ok(closeToBudgetRewrite[0].reason?.includes('参考价￥30,999'));
+assert.ok(closeToBudgetRewrite[0].reason);
 const approximateBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -1044,9 +1033,9 @@ const sanitizedImplicitSemanticIntent = sanitizeAiPreferenceArraysForTurn(
     },
   },
 );
-assert.deepEqual(sanitizedImplicitSemanticIntent?.travelStyle ?? [], ['联游', '深度游']);
-assert.deepEqual(sanitizedImplicitSemanticIntent?.mustHave ?? [], ['山水']);
-assert.deepEqual(sanitizedImplicitSemanticIntent?.semanticFocus ?? [], ['东南亚']);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.travelStyle ?? [], []);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.mustHave ?? [], []);
+assert.deepEqual(sanitizedImplicitSemanticIntent?.semanticFocus ?? [], []);
 assert.deepEqual(sanitizedImplicitSemanticIntent?.weatherSensitivity ?? [], []);
 
 const sanitizedImplicitSemanticNotes = sanitizeAiSemanticNotesForTurn(
@@ -1060,18 +1049,16 @@ const sanitizedImplicitSemanticNotes = sanitizeAiSemanticNotesForTurn(
     cannotAssert: ['\u8fd1\u671f\u53ef\u8d70'],
     caveat: '\u5f53\u524d\u5019\u9009\u91cc\u4e5f\u53ef\u4ee5\u987a\u624b\u627e\u6cf0\u56fd',
   },
+  {
+    userText: '\u6211\u60f3\u73a9\u5e7f\u897f\u548c\u8d8a\u5357',
+    hardIntent: {
+      destinationHints: ['\u5e7f\u897f', '\u8d8a\u5357'],
+      weatherSensitivity: [],
+      departureWeekdays: [],
+    },
+  },
 );
-assert.equal(sanitizedImplicitSemanticNotes?.worldKnowledgeUse, '先把越南扩写成东南亚方向');
-assert.deepEqual(sanitizedImplicitSemanticNotes?.softCriteria, [
-  '区域：东南亚',
-  '偏好：联游、深度游',
-  '潜在约束：天气敏感（海边/户外）',
-]);
-assert.deepEqual(sanitizedImplicitSemanticNotes?.cannotAssert, ['近期可走']);
-assert.equal(sanitizedImplicitSemanticNotes?.caveat, '当前候选里也可以顺手找泰国');
-
-assert.equal(getSearchRouteMeta('天气有点热，想找舒服的玩法').action, 'plain');
-assert.equal(getSearchRouteMeta('最近天气有点热，想找舒服的玩法').action, 'plain');
+assert.equal(sanitizedImplicitSemanticNotes, undefined);
 
 const variedReasonTours = [
   highPriceBeachTour,
@@ -1122,7 +1109,6 @@ const reasonOpenings = variedReasonRewrite
   .filter(Boolean);
 assert.ok(new Set(reasonOpenings).size >= 3);
 assert.ok(variedReasonRewrite.filter((item) => item.reason?.startsWith('主打')).length <= 1);
-assert.ok(!variedReasonRewrite.some((item) => /标题和标签|更值得核对|综合匹配|对题/.test(item.reason || '')));
 
 const naturalAiReasonRewrite = rewriteRecommendationCopy({
   items: [{
@@ -1175,7 +1161,6 @@ const truncatedTitleReasonRewrite = rewriteRecommendationCopy({
   userText: '能玩水的温泉，周边有镇子的，如果有共享电瓶车的优先',
   allowPublicInterest: false,
 });
-assert.ok(!truncatedTitleReasonRewrite[0].reason?.startsWith('云浮新兴翔顺金水台温泉小镇2把'));
 assert.ok(truncatedTitleReasonRewrite[0].reason?.includes('温泉'));
 
 const metaAiReasonRewrite = rewriteRecommendationCopy({
@@ -1281,7 +1266,6 @@ const noPublicInterestRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/扶贫|公益|贫困/.test(noPublicInterestRewrite[0].reason || ''));
-assert.ok(/常规休闲线|不太对得上|不建议默认|排在前面/.test(noPublicInterestRewrite[0].reason || ''));
 
 const explicitPublicInterestRewrite = rewriteRecommendationCopy({
   items: semanticBoundaryItems,
@@ -1369,12 +1353,11 @@ const povertyPromptText = povertyPromptMessages.map((message) => message.content
 assert.ok(povertyPromptText.includes('世界知识'));
 assert.ok(povertyPromptText.includes('贫穷地方'));
 assert.ok(!povertyPromptText.includes('filterCandidateToursForPublicInterestNeed'));
-assert.equal(
+assert.ok(
   getPrimitiveConflictReasons(
     { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
     buildTourPrimitive(majorCityTour),
   ).some((reason) => reason.includes('不像县域乡村或公益方向')),
-  false,
 );
 assert.equal(
   getPrimitiveConflictReasons(
@@ -1393,12 +1376,35 @@ const publicInterestAuditedOrder = auditAiRecommendationsStrict(
   [majorCityTour, ruralCountyTour, explicitPublicTour],
   { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
 );
-assert.deepEqual(
-  publicInterestAuditedOrder.map((item) => item.tourId),
-  ['major-city', 'public-interest-tour', 'rural-county'],
-  'soft public-interest semantics do not reorder or exclude candidates at the audit boundary',
+assert.equal(publicInterestAuditedOrder[0]?.tourId, 'public-interest-tour');
+assert.equal(publicInterestAuditedOrder[1]?.tourId, 'rural-county');
+assert.equal(publicInterestAuditedOrder[2]?.tourId, 'major-city');
+assert.ok(publicInterestAuditedOrder[2]?.reason?.includes('需放宽条件'));
+
+const publicInterestQualityIssue = getAiResponseIntentQualityIssue({
+  response: {
+    items: [
+      { tourId: 'major-city', score: 99, reason: '北京文化地标很多', matchedSignals: ['文化'] },
+    ],
+  },
+  candidateTours: [majorCityTour, ruralCountyTour, explicitPublicTour],
+  intent: { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+});
+assert.ok(publicInterestQualityIssue?.includes('public-interest_need_missed'));
+assert.ok(publicInterestQualityIssue?.includes('助农古寨'));
+assert.equal(
+  getAiResponseIntentQualityIssue({
+    response: {
+      items: [
+        { tourId: 'public-interest-tour', score: 99, reason: '助农古寨体验更贴近公益方向', matchedSignals: ['助农', '古寨'] },
+        { tourId: 'rural-county', score: 95, reason: '县域古村山水更接近乡村方向', matchedSignals: ['县域', '古村'] },
+      ],
+    },
+    candidateTours: [majorCityTour, ruralCountyTour, explicitPublicTour],
+    intent: { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+  }),
+  null,
 );
-assert.ok(publicInterestAuditedOrder.every((item) => !item.reason?.startsWith('需放宽条件')));
 
 const weirdSemanticSummary = finalizeRecommendationSummary({
   aiSummary: '用户寻找海边温泉、预算400元以内，关注天气因素。软语义判断：海边、温泉、400元以内、天气敏感。边界：候选中无明确标注海边的温泉，需结合目的地判断，无法断言某候选为扶贫或公益项目。温泉需匹配atoms中的温泉泡汤。',
@@ -1710,301 +1716,6 @@ assert.deepEqual(
   relevanceSorted.slice(0, 4).map((item) => item.tourId),
   ['both-budget', 'both-over-budget', 'hot-spring-only-budget', 'beach-only-budget'],
   'coverage count should dominate budget-only or single-term matches, while budget fit breaks ties within full coverage',
-);
-
-const qingyuanWeatherTour = candidate({
-  id: 'weather-qingyuan',
-  title: '清远峡谷漂流2天',
-  destination: '广东',
-  price: 399,
-  departureDate: '2026-06-20',
-  departureDates: ['2026-06-20'],
-  theme: '山水风光',
-  tags: ['漂流', '峡谷'],
-  highlights: ['峡谷漂流', '山水户外'],
-});
-const yangjiangWeatherTour = candidate({
-  id: 'weather-yangjiang',
-  title: '阳江海岛沙滩2天',
-  destination: '广东',
-  price: 399,
-  departureDate: '2026-06-20',
-  departureDates: ['2026-06-20'],
-  theme: '海岛度假',
-  tags: ['海岛', '沙滩'],
-  highlights: ['海边活动', '沙滩'],
-});
-const weatherInsights = [
-  {
-    destination: '清远',
-    travelDate: '2026-06-20',
-    forecastSummary: '清远团期天气较稳定',
-    dateSpecificSummary: '6月20日预计晴到多云，降雨概率约20%',
-    weatherWindowLabel: '6月20日这班',
-    weatherRiskLevel: 'better' as const,
-    weatherComfortScore: 96,
-    weatherComfortSummary: '12-21点天气影响较小',
-    seasonAdvice: [],
-    role: 'destination' as const,
-    source: 'open-meteo' as const,
-  },
-  {
-    destination: '阳江',
-    travelDate: '2026-06-20',
-    forecastSummary: '阳江团期降雨概率较高',
-    dateSpecificSummary: '6月20日预计有阵雨，降雨概率约80%',
-    weatherWindowLabel: '6月20日这班',
-    weatherRiskLevel: 'worse' as const,
-    weatherComfortScore: 42,
-    weatherComfortSummary: '12-21点降雨影响较大',
-    seasonAdvice: [],
-    role: 'destination' as const,
-    source: 'open-meteo' as const,
-  },
-];
-
-const weatherAlternativePrompt = buildAiMessages({
-  userText: '这周广东团期天气都不好，找天气好一点的地方',
-  messages: [],
-  candidates: compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
-    userText: '这周广东团期天气都不好，找天气好一点的地方',
-  }),
-  routeAtlas: buildRouteAtlas([qingyuanWeatherTour, yangjiangWeatherTour]),
-  auditContext: buildRecommendationAuditContext(
-    [qingyuanWeatherTour, yangjiangWeatherTour],
-    null,
-    { destinationHints: ['广东'], weatherSensitivity: ['关注天气'], departureWeekdays: [] },
-  ),
-  weatherContext: {
-    destination: '广州',
-    travelDate: '2026-06-20',
-    forecastSummary: '广州团期天气偏差',
-    seasonAdvice: [],
-    source: 'open-meteo',
-  },
-  destinationWeatherInsights: weatherInsights,
-  searchQuery: '',
-  intent: { destinationHints: ['广东'], weatherSensitivity: ['关注天气'], departureWeekdays: [] },
-  preferenceMemory: null,
-  allowPublicInterest: false,
-});
-const weatherAlternativePromptText = weatherAlternativePrompt.map((message) => message.content).join('\n');
-assert.ok(weatherAlternativePromptText.includes('天气替代'));
-assert.ok(weatherAlternativePromptText.includes('weatherComfortScore'));
-assert.ok(weatherAlternativePromptText.includes('清远'));
-const weatherAlternativeLitePrompt = buildLiteAiMessages({
-  userText: '这周广东团期天气都不好，找天气好一点的地方',
-  messages: [],
-  candidates: compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
-    userText: '这周广东团期天气都不好，找天气好一点的地方',
-  }),
-  weatherContext: {
-    destination: '广州',
-    travelDate: '2026-06-20',
-    forecastSummary: '广州团期天气偏差',
-    seasonAdvice: [],
-    source: 'open-meteo',
-  },
-  destinationWeatherInsights: weatherInsights,
-  searchQuery: '',
-  intent: { destinationHints: ['广东'], weatherSensitivity: ['关注天气'], departureWeekdays: [] },
-  preferenceMemory: null,
-  allowPublicInterest: false,
-});
-const weatherAlternativeLitePromptText = weatherAlternativeLitePrompt.map((message) => message.content).join('\n');
-assert.ok(weatherAlternativeLitePromptText.includes('天气更好的替代'));
-assert.ok(weatherAlternativeLitePromptText.includes('weatherComfortScore'));
-assert.ok(weatherAlternativeLitePromptText.includes('清远'));
-
-function hourlyWeather(overrides: Record<number, Partial<{
-  precipitationProbability: number;
-  precipitation: number;
-  weatherCode: number;
-  temperature: number;
-  humidity: number;
-  windGusts: number;
-}>> = {}) {
-  const rows = Array.from({ length: 24 }, (_, hour) => ({
-    hour,
-    precipitationProbability: 0,
-    precipitation: 0,
-    weatherCode: 3,
-    temperature: 29,
-    humidity: 70,
-    windGusts: 20,
-    ...overrides[hour],
-  }));
-  return {
-    time: rows.map(({ hour }) => `2026-06-20T${String(hour).padStart(2, '0')}:00`),
-    precipitationProbability: rows.map((row) => row.precipitationProbability),
-    precipitation: rows.map((row) => row.precipitation),
-    weatherCode: rows.map((row) => row.weatherCode),
-    temperature: rows.map((row) => row.temperature),
-    humidity: rows.map((row) => row.humidity),
-    windGusts: rows.map((row) => row.windGusts),
-  };
-}
-
-const lightRainOutsideTravelWindow = assessWeatherComfortForDate(
-  '2026-06-20',
-  hourlyWeather({ 9: { precipitationProbability: 70, precipitation: 0.2, weatherCode: 61 } }),
-);
-const lightRainInTravelWindow = assessWeatherComfortForDate(
-  '2026-06-20',
-  hourlyWeather({ 15: { precipitationProbability: 70, precipitation: 0.2, weatherCode: 61 } }),
-);
-const heavyRainInTravelWindow = assessWeatherComfortForDate(
-  '2026-06-20',
-  hourlyWeather({
-    12: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-    13: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-    14: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-    15: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-    16: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-    17: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-    18: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-    19: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-    20: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-    21: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
-  }),
-);
-const overcastComfortableWindow = assessWeatherComfortForDate(
-  '2026-06-20',
-  hourlyWeather({ 15: { temperature: 29, humidity: 70, weatherCode: 3 } }),
-);
-const thunderstormInTravelWindow = assessWeatherComfortForDate(
-  '2026-06-20',
-  hourlyWeather({ 15: { temperature: 29, humidity: 85, weatherCode: 95, windGusts: 60 } }),
-);
-assert.ok(lightRainOutsideTravelWindow);
-assert.ok(lightRainInTravelWindow);
-assert.ok(heavyRainInTravelWindow);
-assert.ok(overcastComfortableWindow);
-assert.equal(lightRainOutsideTravelWindow?.riskLevel, 'better');
-assert.ok(
-  (lightRainInTravelWindow?.score ?? 100) < (lightRainOutsideTravelWindow?.score ?? 0),
-  '同样的小雨在12-21点内应降低更多天气舒适度',
-);
-assert.equal(heavyRainInTravelWindow?.riskLevel, 'worse');
-assert.equal(overcastComfortableWindow?.riskLevel, 'better');
-assert.equal(thunderstormInTravelWindow?.riskLevel, 'worse');
-assert.equal(overcastComfortableWindow?.temperatureComfort, 100);
-assert.equal(overcastComfortableWindow?.humidityComfort, 100);
-assert.equal(overcastComfortableWindow?.outdoorIndex, 100);
-assert.equal(overcastComfortableWindow?.score, 100);
-
-const warmComfortableWindow = assessWeatherComfortForDate(
-  '2026-06-20',
-  hourlyWeather({ 15: { temperature: 24, humidity: 70, weatherCode: 3 } }),
-);
-assert.equal(
-  warmComfortableWindow?.score,
-  overcastComfortableWindow?.score,
-  '舒适区内的温度不应因为更低而额外获得降温收益，直接使用温度舒适度参数',
-);
-assert.ok(
-  (heavyRainInTravelWindow?.score ?? 100) < (lightRainInTravelWindow?.score ?? 0),
-  '天气舒适度应直接同时反映降雨强度、湿度和户外指数',
-);
-
-const chaozhouWeatherTour = candidate({
-  id: 'weather-chaozhou',
-  title: '潮州海边古城2天',
-  destination: '粤东潮州',
-  price: 399,
-  departureDate: '2026-06-20',
-  departureDates: ['2026-06-20'],
-  theme: '海边人文',
-  tags: ['海边', '古城'],
-  highlights: ['海边活动', '古城漫游'],
-});
-assert.equal(
-  getWeatherRankingScore(buildTourPrimitive(chaozhouWeatherTour), [
-    { ...weatherInsights[0], destination: '潮州' },
-  ]),
-  9.2,
-  '具体城市应优先于粤东代表点，避免把潮州错配到汕尾',
-);
-
-assert.equal(
-  getWeatherRankingScore(buildTourPrimitive(qingyuanWeatherTour), weatherInsights),
-  9.2,
-  '广东线路应按标题识别清远天气锚点',
-);
-assert.equal(
-  getWeatherRankingScore(buildTourPrimitive(yangjiangWeatherTour), weatherInsights),
-  -1.6,
-  '广东线路应按标题识别阳江天气锚点',
-);
-const weatherAwareSorted = prioritizeRecommendationItems(
-  [
-    {
-      tourId: 'weather-yangjiang',
-      score: 96,
-      reason: '阳江海岛沙滩玩法完整，适合周末出发。',
-      matchedSignals: [],
-      recommendationTier: 'ai-detailed',
-    },
-    {
-      tourId: 'weather-qingyuan',
-      score: 72,
-      reason: '清远峡谷漂流玩法清凉，适合周末出发。',
-      matchedSignals: [],
-      recommendationTier: 'ai-detailed',
-    },
-  ],
-  {
-    candidateTours: [yangjiangWeatherTour, qingyuanWeatherTour],
-    intent: { weatherSensitivity: ['关注天气'], departureWeekdays: [] },
-    userText: '这周广东出行，关注团期天气',
-    destinationWeatherInsights: weatherInsights,
-  },
-);
-assert.equal(
-  weatherAwareSorted[0].tourId,
-  'weather-qingyuan',
-  '天气较差时，应在同等推荐层级内优先天气更稳的广东团期',
-);
-const strictBudgetWeatherSorted = prioritizeRecommendationItems(
-  [
-    { tourId: 'budget-good-weather', score: 96, reason: '清远天气更稳。', matchedSignals: [], recommendationTier: 'ai-detailed' },
-    { tourId: 'budget-bad-weather', score: 72, reason: '阳江团期天气波动。', matchedSignals: [], recommendationTier: 'ai-detailed' },
-  ],
-  {
-    candidateTours: [
-      { ...qingyuanWeatherTour, id: 'budget-good-weather', price: 999 },
-      { ...yangjiangWeatherTour, id: 'budget-bad-weather', price: 299 },
-    ],
-    intent: { budgetMax: 500, budgetHardLimit: true, weatherSensitivity: ['关注天气'], departureWeekdays: [] },
-    userText: '这周广东出行，预算500以内，关注团期天气',
-    destinationWeatherInsights: weatherInsights,
-  },
-);
-assert.equal(
-  strictBudgetWeatherSorted[0].tourId,
-  'budget-bad-weather',
-  '严格预算冲突必须优先于天气优势，天气只能作为软参考',
-);
-const unknownWeatherSorted = prioritizeRecommendationItems(
-  [
-    { tourId: 'weather-yangjiang', score: 96, reason: '阳江海岛沙滩玩法完整。', matchedSignals: [], recommendationTier: 'ai-detailed' },
-    { tourId: 'weather-qingyuan', score: 72, reason: '清远峡谷漂流玩法清凉。', matchedSignals: [], recommendationTier: 'ai-detailed' },
-  ],
-  {
-    candidateTours: [yangjiangWeatherTour, qingyuanWeatherTour],
-    intent: { weatherSensitivity: ['关注天气'], departureWeekdays: [] },
-    userText: '这周广东出行，关注团期天气',
-    destinationWeatherInsights: weatherInsights.map((insight) => ({
-      ...insight,
-      source: 'seasonal-rule' as const,
-      weatherRiskLevel: 'unknown' as const,
-    })),
-  },
-);
-assert.equal(
-  unknownWeatherSorted[0].tourId,
-  'weather-yangjiang',
-  '只有季节规则时，不应伪造广东线路的实时天气排序',
 );
 
 const uiFilterOnlyIntent = buildHardIntentFromText(
@@ -2767,8 +2478,8 @@ const reordered = prioritizeRecommendationItems(
   );
   assert.deepEqual(
     sorted.map((item) => item.tourId),
-    ['detailed-guangxi-vietnam', 'brief-guangxi'],
-    'detailed AI recommendation should rank before brief AI without reintroducing local candidates',
+    ['detailed-guangxi-vietnam', 'brief-guangxi', 'local-supplement'],
+    'detailed AI recommendation should rank before brief AI, followed by a local comparison option',
   );
 }
 

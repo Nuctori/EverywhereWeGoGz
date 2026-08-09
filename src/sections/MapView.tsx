@@ -30,16 +30,17 @@ function isWithinChinaCoverage(place: MapTourLocation) {
   return place.longitude >= 73 && place.longitude <= 135 && place.latitude >= 18 && place.latitude <= 54;
 }
 
-function placePrecisionLabel(place: Pick<MapTourLocation, 'level' | 'locality' | 'coordinateSource' | 'confidence'>) {
+function placePrecisionLabel(place: Pick<MapTourLocation, 'level' | 'locality' | 'coordinateSource' | 'confidence' | 'precision'>) {
   const levelLabel = place.level === 'town' ? '镇/街道' : place.level === 'poi' ? '景区/地点' : place.level === 'city' ? '城市范围' : place.level === 'region' ? '区域范围' : place.level === 'country' ? '国家范围' : '';
   const sourceLabel = place.coordinateSource === 'osm'
     ? 'OSM POI'
     : place.coordinateSource === 'fallback'
-    ? '模糊定位'
+    ? ''
     : place.coordinateSource === 'inferred' && place.confidence === 'low'
       ? '推断位置'
       : '';
-  return [place.locality, levelLabel, sourceLabel].filter(Boolean).join(' · ');
+  const precisionLabel = place.precision === 'approximate' ? '模糊定位' : '';
+  return [place.locality, levelLabel, precisionLabel, sourceLabel].filter(Boolean).join(' · ');
 }
 
 function placeAddressLabel(place: Pick<MapTourLocation, 'address'>) {
@@ -332,6 +333,8 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       const maximumZoom = map.getMaxZoom();
       const atMaximumZoom = Number.isFinite(maximumZoom) && zoom >= maximumZoom;
       const atFullDetailZoom = atMaximumZoom || zoom >= FULL_DETAIL_ZOOM;
+      mapElementRef.current?.setAttribute('data-map-zoom', String(zoom));
+      mapElementRef.current?.setAttribute('data-map-max-zoom', String(maximumZoom));
       const collisionRadius = markerCollisionRadius(zoom);
       const independentMarkerLimit = atFullDetailZoom ? Number.POSITIVE_INFINITY : maxIndependentMarkers(zoom);
       if (atFullDetailZoom) setClusterPlaces((current) => current.length > 0 ? [] : current);
@@ -357,7 +360,14 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             const markerPoint = group.candidates.length === 1
               ? candidate.point
               : map.containerPointToLatLng(candidate.pixel);
-            const marker = L.marker(markerPoint);
+            const marker = L.marker(markerPoint, {
+              icon: L.divIcon({
+                className: 'destination-marker-icon',
+                html: '<div style="height:20px;width:20px;border:3px solid white;border-radius:9999px;background:#ea580c;box-shadow:0 2px 8px rgba(28,25,23,.3)"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10],
+              }),
+            });
             marker.options.title = locationLabel;
             marker.options.alt = `旅行团目的地：${locationLabel}`;
             marker.bindTooltip(`${locationLabel} · ${placePrecisionLabel(place)} · ${place.tourCount}条线路`, { direction: 'top', offset: [0, -8] });
@@ -465,9 +475,15 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             <button type="button" onClick={openExpandedMap} className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full border border-stone-200 bg-white px-2.5 text-xs font-medium text-stone-700 shadow-sm transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-stone-950"><Map className="h-3.5 w-3.5 text-orange-600" /> 放大</button>
           </div>
           <p className="mb-2 px-1 text-[11px] text-stone-400">
-            已定位 {visiblePlaces.length} 个地点
-            {approximateTours.length > 0 && ` · ${approximateTours.length} 条线路使用模糊坐标`}
-            {unmappedTours.length > 0 && ` · ${unmappedTours.length} 条线路待补全`}
+            {placesLoading ? (
+              '正在加载已定位地点…'
+            ) : (
+              <>
+                已定位 {visiblePlaces.length} 个地点
+                {approximateTours.length > 0 && ` · ${approximateTours.length} 条线路使用模糊坐标`}
+                {unmappedTours.length > 0 && ` · ${unmappedTours.length} 条线路待补全`}
+              </>
+            )}
           </p>
           {mapSurface}
         </section>

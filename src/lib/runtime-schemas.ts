@@ -5,6 +5,19 @@ const nonNegativeNumber = z.coerce.number().finite().nonnegative();
 const booleanDefaultFalse = z.boolean().optional().default(false);
 const stringArrayDefaultEmpty = z.array(z.string()).optional().default([]);
 const serviceAvailability = z.enum(['included', 'excluded', 'unknown']);
+const geoPrecisionSchema = z.preprocess(
+  (value) => {
+    if (value === 'exact' || value === 'approximate') return value;
+    // Older generated data stored the semantic location level here. Keep it
+    // readable while preserving the current exact/approximate contract.
+    if (value === 'poi') return 'exact';
+    if (value === 'country' || value === 'region' || value === 'city' || value === 'town') {
+      return 'approximate';
+    }
+    return value;
+  },
+  z.enum(['exact', 'approximate']).optional(),
+);
 const geoAddressSchema = z.object({
   formatted: z.string().optional(),
   country: z.string().optional(),
@@ -31,7 +44,9 @@ const geoPointSchema = z.object({
   longitude: z.coerce.number().finite().gte(-180).lte(180),
   coordinateSystem: z.literal('wgs84'),
   level: z.enum(['country', 'region', 'city', 'town', 'poi']),
+  semanticLevel: z.enum(['country', 'region', 'city', 'town', 'poi']).optional(),
   coordinateSource: z.enum(['catalog', 'geocoder', 'osm', 'fallback', 'inferred']),
+  precision: geoPrecisionSchema,
   source: z.enum(['source', 'catalog', 'geocoder', 'osm', 'inferred', 'unknown']),
   confidence: z.enum(['low', 'medium', 'high']),
 });
@@ -52,6 +67,36 @@ const tourGeoSchema = z.object({
   routeRegion: z.enum(['local', 'nearby-province', 'national', 'international', 'unknown']).optional(),
 });
 
+const geoResolutionSchema = z.object({
+  input: z.object({
+    destination: z.string(),
+    hasTitle: z.boolean(),
+    itineraryDays: z.coerce.number().int().nonnegative(),
+    accommodationDays: z.coerce.number().int().nonnegative(),
+    highlightCount: z.coerce.number().int().nonnegative(),
+  }),
+  mining: z.object({
+    status: z.string(),
+    candidateLabels: z.array(z.string()),
+    candidateSources: z.array(z.string()),
+    rejectedLabels: z.array(z.string()),
+    reasons: z.array(z.string()),
+  }),
+  osm: z.object({ status: z.string(), reason: z.string().optional(), label: z.string().optional() }),
+  geocoder: z.object({ status: z.string(), queries: z.array(z.string()), reason: z.string().optional() }),
+  final: z.object({
+    status: z.string(),
+    source: z.string().optional(),
+    precision: geoPrecisionSchema,
+    reason: z.string().optional(),
+  }),
+  fallback: z.object({
+    status: z.string(),
+    reason: z.string().optional(),
+    level: z.enum(['country', 'region', 'city', 'town', 'poi']).optional(),
+  }).optional(),
+});
+
 export const dataQualitySchema = z.object({
   hasStructuredDepartureDates: z.boolean().optional(),
   isDepartureDateReliable: z.boolean().optional(),
@@ -66,6 +111,20 @@ const mealCountsSchema = z.object({
   lunch: z.coerce.number().int().nonnegative(),
   dinner: z.coerce.number().int().nonnegative(),
 });
+const optionalMealCountsSchema = z.preprocess(
+  (value) => {
+    if (
+      value &&
+      typeof value === 'object' &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === 0
+    ) {
+      return undefined;
+    }
+    return value;
+  },
+  mealCountsSchema.nullable().optional(),
+);
 
 const serviceStatusSchema = z.object({
   visaRequirements: serviceAvailability,
@@ -88,7 +147,7 @@ const tourMetaSchema = z.object({
   sourceAttributes: z.record(z.string(), z.unknown()).optional().default({}),
   structuredDetails: z.object({
     accommodationDetails: stringArrayDefaultEmpty,
-    mealCounts: mealCountsSchema.nullable().optional(),
+    mealCounts: optionalMealCountsSchema,
     serviceStatus: serviceStatusSchema,
   }).optional(),
   dataQuality: dataQualitySchema.optional(),
@@ -136,7 +195,7 @@ export const tourDetailSchema = z.object({
   returnDate: z.string().optional().default(''),
   accommodationStars: nonNegativeNumber.optional().default(0),
   accommodationDetails: stringArrayDefaultEmpty,
-  mealCounts: mealCountsSchema.nullable().optional(),
+  mealCounts: optionalMealCountsSchema,
   serviceStatus: serviceStatusSchema.optional(),
   singleSupplement: nonNegativeNumber.optional().default(0),
   availableSeats: nonNegativeNumber.optional().default(0),
@@ -160,11 +219,25 @@ export const tourDetailSchema = z.object({
   sourceId: z.string().optional(),
   createdAt: z.string().optional().default(''),
   updatedAt: z.string().optional().default(''),
+  geoResolution: geoResolutionSchema.optional(),
 });
 
 // 由 tourSummarySchema.and(tourDetailSchema) 组合而成，对应 ResolvedTour。
 export const resolvedTourSchema = tourSummarySchema.and(tourDetailSchema);
 export const toursListSchema = z.array(tourSummarySchema);
+export const tourMapCardSchema = z.object({
+  id: z.string().min(1),
+  sourceId: z.string().optional(),
+  title: z.string().min(1),
+  source: z.string().min(1),
+  destination: z.string().min(1),
+  duration: z.coerce.number().int().positive(),
+  price: nonNegativeNumber,
+  departureDate: z.string().optional().default(''),
+  bookingUrl: z.string().optional().default(''),
+  transportType: z.string().optional().default(''),
+});
+export const tourMapCardsSchema = z.array(tourMapCardSchema);
 
 export const tourIndexEntrySchema = z.object({
   id: z.string().min(1),
