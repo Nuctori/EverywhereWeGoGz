@@ -11,6 +11,8 @@ import {
   getDefaultAuthor,
   ensureWeeklyArticleQrAssets,
   renderWeeklyArticle,
+  enrichWeeklyArticleMedia,
+  getDefaultWebsiteUrl,
   validateGeneratedArticle,
 } from './lib/weekly_wechat_article.mjs';
 
@@ -106,7 +108,6 @@ const metadataOnlyContext = buildWeeklyArticleContext([
   windowDays: 14,
   maxCandidates: 1,
   maxArticleItems: 1,
-  weatherWindow,
 });
 assert.equal(metadataOnlyContext.selectedTours.length, 1);
 const metadataOnlyArticle = renderWeeklyArticle(metadataOnlyContext, {
@@ -307,6 +308,7 @@ assert.ok(prompt.includes('tour-summer-nearby'));
 assert.ok(prompt.includes('二维码文件'));
 assert.ok(prompt.includes('线路家族'));
 assert.ok(prompt.includes('体验关键词'));
+assert.ok(prompt.includes('正文配图'));
 
 const qrOutDir = path.join(process.cwd(), 'tmp', 'weekly-wechat-article-qr-test');
 fs.mkdirSync(qrOutDir, { recursive: true });
@@ -523,6 +525,12 @@ const cliValidation = JSON.parse(fs.readFileSync(path.join(cliOutDir, 'validatio
 assert.equal(cliValidation.ok, true);
 fs.rmSync(qrOutDir, { recursive: true, force: true });
 fs.rmSync(cliRootDir, { recursive: true, force: true });
+
+const enriched = enrichWeeklyArticleMedia(article, context, {
+  websiteUrl: getDefaultWebsiteUrl(),
+});
+assert.ok(enriched.includes('![清远峡谷漂流2天](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/qingyuan.webp)'));
+assert.ok(enriched.includes('![贵州山水避暑4天](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/guizhou.webp)'));
 
 console.log('weekly wechat article tests passed');
 

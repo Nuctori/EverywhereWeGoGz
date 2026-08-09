@@ -7,7 +7,9 @@ import {
   defaultOutputDir,
   ensureDir,
   fetchDepartureWeatherWindow,
+  enrichWeeklyArticleMedia,
   generateWeeklyArticle,
+  getDefaultWebsiteUrl,
   loadEnvFiles,
   readToursData,
   rebuildWeeklyArticleFromStructured,
@@ -74,7 +76,10 @@ async function main() {
       ...generated.structured,
       weatherLead: buildDetailedWeatherLead(context, generated.structured?.weatherLead || '', weatherWindow),
     });
-    const validation = validateGeneratedArticle(article, context);
+    const articleWithMedia = enrichWeeklyArticleMedia(article, context, {
+      websiteUrl: getDefaultWebsiteUrl(),
+    });
+    const validation = validateGeneratedArticle(articleWithMedia, context);
     writeJson(path.join(outDir, 'validation.json'), validation);
     writeJson(path.join(outDir, 'generation-meta.json'), {
       runDate,
@@ -85,7 +90,7 @@ async function main() {
       weatherSource: weatherWindow?.source || 'fallback',
     });
     fs.writeFileSync(path.join(outDir, 'prompt.md'), `${generated.prompt.trim()}\n`, 'utf8');
-    fs.writeFileSync(path.join(outDir, 'article.md'), `${article.trim()}\n`, 'utf8');
+    fs.writeFileSync(path.join(outDir, 'article.md'), `${articleWithMedia.trim()}\n`, 'utf8');
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     writeJson(path.join(outDir, 'validation.json'), {

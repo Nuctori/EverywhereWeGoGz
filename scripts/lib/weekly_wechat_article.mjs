@@ -9,7 +9,7 @@ const DEFAULT_MAX_ARTICLE_ITEMS = 25;
 const DEFAULT_JSON_MAX_TOKENS = 8192;
 const DEFAULT_AUTHOR = '老广去边度';
 const DEFAULT_COVER = '/brand/laoguang-logo-full.jpg';
-
+const DEFAULT_WEBSITE_URL = 'https://nuctori.github.io/EverywhereWeGoGz/';
 const FORBIDDEN_PHRASES = [
   '最低价',
   '全网最低',
@@ -776,6 +776,16 @@ function rebalanceSelectedTours(candidateTours, maxArticleItems) {
   ]);
 }
 
+export function resolveArticleAssetUrl(assetPath, websiteUrl = DEFAULT_WEBSITE_URL) {
+  if (!assetPath || typeof assetPath !== 'string') return '';
+  if (/^https?:\/\//i.test(assetPath)) return assetPath;
+  const normalizedWebsiteUrl = websiteUrl.replace(/\/$/, '');
+  if (assetPath.startsWith('/')) {
+    return `${normalizedWebsiteUrl}${assetPath}`;
+  }
+  return `${normalizedWebsiteUrl}/${assetPath.replace(/^\.\//, '')}`;
+}
+
 function formatTourForPrompt(tour) {
   const primaryImage = normalizeArticleImageUrl(chooseTourImage(tour));
   return {
@@ -801,6 +811,9 @@ function formatTourForPrompt(tour) {
     bucket: tour.bucket || classifyTourBucket(tour),
     routeFamily: tour.routeFamily || inferRouteFamily(tour.title),
     experienceSignals: Array.isArray(tour.experienceSignals) ? tour.experienceSignals : inferExperienceSignals(tour),
+
+    images: tour.images || [],
+    articleImages: (tour.images || []).slice(0, 3).map((assetPath) => resolveArticleAssetUrl(assetPath)),
     dataQuality: {
       availabilityConfidence: tour.availabilityConfidence,
       riskFlags: tour.dataQuality?.riskFlags || tour.meta?.dataQuality?.riskFlags || [],
@@ -917,6 +930,9 @@ export function buildWeeklyArticlePrompt(context) {
         `二维码文件：${tour.qrPath}`,
         `分组：${tour.bucket}`,
         `公众号分大类：${getArticleBucketMeta(tour.bucket).title}`,
+
+        `正文配图：${(tour.articleImages || []).join('、') || '未标注'}`,
+        `预订链接：${tour.bookingUrl}`,
       ];
       return lines.join('\n');
     })
@@ -943,8 +959,7 @@ export function buildWeeklyArticlePrompt(context) {
     '- recommendationTitle 可以比原产品名更像公众号小标题，但不能改错事实',
     '- reminder 用一句自然提醒补班期、节奏、适合人群或出发前注意点',
     '- 不要重复同一个 destination 的同一套说法，不要把多条线路写成一个模子',
-    '- 能写真山水、亲水、森林、海风、泳池、水世界，就不要硬把所有“带池”都写成温泉放松',
-    '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达',
+    '- 能写真山水、亲水、森林、海风、泳池、水世界，就不要硬把所有“带池”都写成温泉放松',    '- 不要使用“最佳、第一、最低价、必去、百分百成团、错过再等一年”等绝对化表达',
     '- 不要编造出发城市、库存、优惠、成团率、景区政策',
     '- 不要输出 Markdown 代码块，不要输出解释，只输出 JSON',
     '',
@@ -971,8 +986,50 @@ export function buildWeeklyArticlePrompt(context) {
     '      "reminder": "..."',
     '    }',
     '  ]',
-    '}',
-  ].join('\n');
+    '}',  ].join('\n');
+}
+
+function hasMarkdownImage(lines, startIndex, endIndex) {
+  for (let index = startIndex; index < endIndex; index += 1) {
+    if (/!\[[^\]]*]\(([^)]+)\)/.test(lines[index])) return true;
+  }
+  return false;
+}
+
+export function enrichWeeklyArticleMedia(article, context, options = {}) {
+  const websiteUrl = options.websiteUrl || DEFAULT_WEBSITE_URL;
+  const lines = article.replace(/\r\n/g, '\n').split('\n');
+  const h1Index = lines.findIndex((line) => /^#\s+/.test(line.trim()));
+  const firstSectionIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()));
+  const heroTour = context.selectedTours[0];
+  const heroImageUrl = resolveArticleAssetUrl(heroTour?.images?.[0] || '', websiteUrl);
+  let heroInserted = false;
+
+  if (heroImageUrl && h1Index >= 0) {
+    const heroRegionEnd = firstSectionIndex >= 0 ? firstSectionIndex : lines.length;
+    if (!hasMarkdownImage(lines, h1Index + 1, heroRegionEnd)) {
+      lines.splice(h1Index + 1, 0, '', `![${heroTour?.title || '线路配图'}](${heroImageUrl})`, '');
+      heroInserted = true;
+    }
+  }
+
+  context.selectedTours.forEach((tour, tourIndex) => {
+    const sectionIndex = lines.findIndex((line) => /^##\s+/.test(line.trim()) && line.includes(tour.title));
+    if (sectionIndex < 0) return;
+
+    const nextSectionIndex = lines.findIndex(
+      (line, index) => index > sectionIndex && /^##\s+/.test(line.trim()),
+    );
+    const sectionEnd = nextSectionIndex >= 0 ? nextSectionIndex : lines.length;
+    if (hasMarkdownImage(lines, sectionIndex + 1, sectionEnd)) return;
+    if (heroInserted && tourIndex === 0) return;
+
+    const imageUrl = resolveArticleAssetUrl(tour.images?.[0] || '', websiteUrl);
+    if (!imageUrl) return;
+    lines.splice(sectionIndex + 1, 0, '', `![${tour.title}](${imageUrl})`, '');
+  });
+
+  return lines.join('\n').replace(/\n{4,}/g, '\n\n\n');
 }
 
 function normalizeBaseUrl(baseUrl) {
@@ -1456,4 +1513,8 @@ export function getDefaultAuthor() {
 
 export function rebuildWeeklyArticleFromStructured(context, structured) {
   return renderWeeklyArticle(context, structured);
+}
+
+export function getDefaultWebsiteUrl() {
+  return DEFAULT_WEBSITE_URL;
 }

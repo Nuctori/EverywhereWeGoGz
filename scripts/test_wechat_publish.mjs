@@ -40,6 +40,8 @@ cover: "/data/image-cache/cover.webp"
 
 # 本周适合出发的线路
 
+![导语配图](https://nuctori.github.io/EverywhereWeGoGz/data/image-cache/cover.webp)
+
 ## 清远峡谷漂流2天
 
 这条线路适合想找清凉感的人。
