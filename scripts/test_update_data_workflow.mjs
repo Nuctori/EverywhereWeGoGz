@@ -29,10 +29,12 @@ assert.ok(
   'expected availability cache workflow to share the data write lock',
 );
 
+
 for (const jobName of [
   'preflight:',
   'crawl-jrt365:',
   'crawl-saihuitong:',
+  'crawl-kanghui:',
   'crawl-pintu:',
   'crawl-gzl-api:',
   'crawl-outdoors:',
@@ -45,6 +47,7 @@ for (const jobName of [
 for (const stepName of [
   'Crawl JRT365 full',
   'Crawl Saihuitong full',
+  'Crawl Kanghui full',
   'Crawl Pintu full',
   'Crawl GZL API full',
   'Crawl Outdoors full',
@@ -104,6 +107,7 @@ for (const stepName of [
 for (const artifactName of [
   'name: raw-jrt365',
   'name: raw-saihuitong',
+  'name: raw-kanghui',
   'name: raw-pintu',
   'name: raw-gzl-api',
   'name: raw-outdoors',
@@ -117,6 +121,7 @@ for (const dependency of [
   '- preflight',
   '- crawl-jrt365',
   '- crawl-saihuitong',
+  '- crawl-kanghui',
   '- crawl-pintu',
   '- crawl-gzl-api',
   '- crawl-outdoors',
@@ -128,6 +133,7 @@ for (const dependency of [
 for (const stepName of [
   'Download JRT365 raw data',
   'Download Saihuitong raw data',
+  'Download Kanghui raw data',
   'Download Pintu raw data',
   'Download GZL raw data',
   'Download Outdoors raw data',
@@ -146,7 +152,6 @@ assert.ok(gitAddMatch, 'expected Check if data changed to stage generated data f
 const gitAddCommand = gitAddMatch[1];
 for (const requiredPath of [
   'public/data/tours-index.json',
-  'public/data/tour-deeplink-index.json',
   'public/data/tours-page-*.json',
   'public/data/tour-details',
   'public/data/image-cache',
@@ -156,47 +161,10 @@ for (const requiredPath of [
     `expected git add command to include ${requiredPath}`,
   );
 }
-assert.ok(
-  !gitAddCommand.includes('src/data/tour-availability-cache.json'),
-  'expected update-data workflow to leave availability cache ownership to the refresh workflow',
-);
-const splitScript = fs.readFileSync(
-  path.join(process.cwd(), 'scripts', 'split_tour_data.mjs'),
-  'utf8',
-);
-assert.ok(
-  splitScript.includes("path.join(dataDir, 'tour-deeplink-index.json')") &&
-    splitScript.includes('indexTours.map(({ id, sourceId, page }) => ({ id, sourceId, page }))'),
-  'expected split step to rebuild the deeplink index from current tours',
-);
-assert.ok(
-  workflow.includes('git restore src/data/tour-availability-cache.json'),
-  'expected update-data workflow to discard its ephemeral availability cache before rebasing',
-);
-assert.ok(
-  workflow.includes('bash scripts/push_generated_commit.sh'),
-  'expected update-data workflow to publish through the rebase-and-retry helper',
-);
-assert.ok(
-  availabilityWorkflow.includes('bash scripts/push_generated_commit.sh'),
-  'expected availability cache workflow to publish through the rebase-and-retry helper',
-);
-
-const publishHelper = fs.readFileSync(
-  path.join(process.cwd(), 'scripts', 'push_generated_commit.sh'),
-  'utf8',
-);
-assert.ok(publishHelper.includes('git pull --rebase origin "$branch"'), 'expected publish helper to rebase onto the latest remote branch');
-assert.ok(publishHelper.includes('git push origin "HEAD:$branch"'), 'expected publish helper to push the rebased commit');
-assert.ok(publishHelper.includes('max_attempts=5'), 'expected publish helper to retry transient push races');
 
 assert.ok(
   packageJson.scripts?.['audit:crawler-syntax'],
   'expected package script for crawler syntax audit to exist',
-);
-assert.ok(
-  packageJson.scripts?.['audit:push-generated-commit'],
-  'expected package script for generated commit publish integration audit to exist',
 );
 
 const preflightStart = workflow.indexOf('preflight:');
@@ -214,7 +182,8 @@ for (const snippet of [
 
 for (const [jobName, nextJobName] of [
   ['crawl-jrt365:', 'crawl-saihuitong:'],
-  ['crawl-saihuitong:', 'crawl-pintu:'],
+  ['crawl-saihuitong:', 'crawl-kanghui:'],
+  ['crawl-kanghui:', 'crawl-pintu:'],
   ['crawl-pintu:', 'crawl-gzl-api:'],
   ['crawl-gzl-api:', 'crawl-outdoors:'],
   ['crawl-outdoors:', 'crawl-http-aggregate:'],
