@@ -7,6 +7,7 @@
 import requests
 import json
 import os
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
@@ -22,6 +23,8 @@ HEADERS = {
 BASE_URL = "http://nn.gzl.cn"
 MIN_DEPARTURE_YEAR = 2000
 MAX_DEPARTURE_YEAR_OFFSET = 3
+DEFAULT_GZL_SCHEDULE_WORKERS = 16
+_THREAD_LOCAL = threading.local()
 
 # 目的地列表
 DESTINATIONS = [
@@ -38,16 +41,13 @@ DESTINATIONS = [
 ]
 
 # 产品类型
+# GZL 的多个 searchtype 会重复返回同一批产品。
+# 保留经抽样验证仍可能提供增量数据的类型，避免在 CI 中为重复结果重复分页和补 schedule。
 SEARCH_TYPES = [
     ("ALL", "全部"),
     ("PRODUCTGROUP", "跟团游"),
     ("FREETRAVEL", "自由行"),
     ("YJYT", "一家一团"),
-    ("LOCAL", "当地玩乐"),
-    ("HOTEL", "酒店"),
-    ("TICKET", "门票"),
-    ("VISA", "签证"),
-    ("CRUISE", "邮轮"),
 ]
 
 
@@ -138,9 +138,9 @@ def parse_schedule_value(value):
     return {"sellable": price > 0, "price": price}
 
 
-def fetch_schedule_snapshot(session, pd_id, ptype, url):
+def resolve_schedule_request(pd_id, ptype, url):
     if not pd_id or not url:
-        return {}
+        return None, None
 
     lower_url = str(url).lower()
     if ptype == "PRODUCTGROUP" or any(token in lower_url for token in ("/domestic/", "/abroad/", "/around/")):
@@ -150,6 +150,17 @@ def fetch_schedule_snapshot(session, pd_id, ptype, url):
         endpoint = f"{BASE_URL}/freetour/scheduleDateMap.json"
         payload = {"pdId": pd_id, "ctripPdSn": "", "activityId": ""}
     else:
+        return None, None
+    return endpoint, payload
+
+
+def schedule_cache_key(pd_id, ptype, url):
+    return f"{ptype}|{pd_id}|{url}"
+
+
+def fetch_schedule_snapshot(session, pd_id, ptype, url):
+    endpoint, payload = resolve_schedule_request(pd_id, ptype, url)
+    if not endpoint:
         return {}
 
     try:
@@ -206,6 +217,14 @@ def get_session():
     return session
 
 
+def get_thread_session():
+    session = getattr(_THREAD_LOCAL, "session", None)
+    if session is None:
+        session = get_session()
+        _THREAD_LOCAL.session = session
+    return session
+
+
 def fetch_products(session, dest_name, search_type, page=1):
     """获取产品列表"""
     url = f"{BASE_URL}/search/getAllProductList.json"
@@ -247,8 +266,8 @@ def fetch_products(session, dest_name, search_type, page=1):
         return []
 
 
-def parse_product(session, product, schedule_cache):
-    """解析产品数据"""
+def build_base_item(product):
+    """从列表接口构建基础产品数据，schedule 信息后补。"""
     title = product.get("title", "")
     list_price = coerce_price(product.get("b2cMinPrice", 0))
     days = product.get("travelDays", 0)
@@ -276,21 +295,6 @@ def parse_product(session, product, schedule_cache):
     # 图片
     images = product.get("defaultImage", {})
     img_url = images.get("imageStr", "") if images else ""
-
-    schedule_key = f"{ptype}|{pd_id}|{url}"
-    schedule_snapshot = schedule_cache.get(schedule_key)
-    if schedule_snapshot is None:
-        schedule_snapshot = fetch_schedule_snapshot(session, pd_id, ptype, url)
-        schedule_cache[schedule_key] = schedule_snapshot
-
-    schedule_dates = schedule_snapshot.get("departure_dates") or []
-    schedule_price = coerce_price(schedule_snapshot.get("price"))
-    schedule_departure_date = schedule_snapshot.get("departure_date") or ""
-
-    if schedule_dates:
-        departure_dates = schedule_dates
-    departure_date = schedule_departure_date or first_upcoming_date(departure_dates)
-    price = schedule_price or list_price
     ai_tags = []
     for raw_tag in product.get("pdTagNames") or []:
         tag = str(raw_tag or "").strip()
@@ -302,16 +306,16 @@ def parse_product(session, product, schedule_cache):
         "sourceId": pd_id,
         "productType": ptype,
         "title": title,
-        "price": price,
+        "price": list_price,
         "startingPrice": list_price,
-        "priceSource": "scheduleDateMap" if schedule_price else "b2cMinPrice",
+        "priceSource": "b2cMinPrice",
         "url": url,
         "days": days or extract_days(title),
         "departureDates": departure_dates,
-        "departureDate": departure_date,
+        "departureDate": first_upcoming_date(departure_dates),
         "meta": {
             "supplierName": str(product.get("pdCompanyName") or "").strip(),
-            "priceSource": "scheduleDateMap" if schedule_price else "b2cMinPrice",
+            "priceSource": "b2cMinPrice",
             "productType": ptype,
             "aiTags": ai_tags,
             "sourceFeatures": [
@@ -333,12 +337,79 @@ def parse_product(session, product, schedule_cache):
     return item
 
 
+def apply_schedule_snapshot(item, schedule_snapshot):
+    enriched = dict(item)
+    meta = dict(enriched.get("meta") or {})
+
+    schedule_dates = schedule_snapshot.get("departure_dates") or []
+    schedule_price = coerce_price(schedule_snapshot.get("price"))
+    schedule_departure_date = schedule_snapshot.get("departure_date") or ""
+
+    if schedule_dates:
+        enriched["departureDates"] = schedule_dates
+    if schedule_departure_date:
+        enriched["departureDate"] = schedule_departure_date
+    elif enriched.get("departureDates"):
+        enriched["departureDate"] = first_upcoming_date(enriched.get("departureDates") or [])
+
+    if schedule_price > 0:
+        enriched["price"] = schedule_price
+        enriched["priceSource"] = "scheduleDateMap"
+        meta["priceSource"] = "scheduleDateMap"
+    else:
+        enriched["priceSource"] = enriched.get("priceSource") or "b2cMinPrice"
+        meta["priceSource"] = enriched["priceSource"]
+
+    enriched["meta"] = meta
+    return enriched
+
+
+def fetch_schedule_snapshots(items):
+    unique_requests = {}
+    for item in items:
+        pd_id = str(item.get("sourceId") or "").strip()
+        ptype = str(item.get("productType") or "").strip()
+        url = str(item.get("url") or "").strip()
+        endpoint, _ = resolve_schedule_request(pd_id, ptype, url)
+        if not endpoint:
+            continue
+
+        key = schedule_cache_key(pd_id, ptype, url)
+        unique_requests.setdefault(key, (pd_id, ptype, url))
+
+    if not unique_requests:
+        return {}
+
+    workers = max(
+        4,
+        min(32, int(os.environ.get("GZL_SCHEDULE_WORKERS", str(DEFAULT_GZL_SCHEDULE_WORKERS)) or str(DEFAULT_GZL_SCHEDULE_WORKERS))),
+    )
+    print(f"[广之旅] 并发补全 schedule: {len(unique_requests)} 条, workers={workers}")
+
+    def fetch_one(entry):
+        key, (pd_id, ptype, url) = entry
+        session = get_thread_session()
+        return key, fetch_schedule_snapshot(session, pd_id, ptype, url)
+
+    snapshots = {}
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        future_map = {
+            executor.submit(fetch_one, entry): entry[0]
+            for entry in unique_requests.items()
+        }
+        for completed, future in enumerate(as_completed(future_map), start=1):
+            key, snapshot = future.result()
+            snapshots[key] = snapshot
+            if completed % 100 == 0 or completed == len(unique_requests):
+                print(f"[广之旅] 已补全 schedule {completed}/{len(unique_requests)}")
+
+    return snapshots
+
+
 def fetch():
     print("[广之旅] API全量抓取中...")
     session = get_session()
-    all_items = []
-    seen = set()
-    schedule_cache = {}
+    candidate_items = []
     
     for dest in DESTINATIONS:
         for search_type, type_name in SEARCH_TYPES:
@@ -357,16 +428,11 @@ def fetch():
                 
                 page_items = 0
                 for product in products:
-                    item = parse_product(session, product, schedule_cache)
-                    if not item["title"] or item["price"] <= 0:
+                    item = build_base_item(product)
+                    if not item["title"]:
                         continue
-                    
-                    key = item["title"] + "|" + str(item["price"])
-                    if key in seen:
-                        continue
-                    seen.add(key)
-                    
-                    all_items.append(item)
+
+                    candidate_items.append(item)
                     page_items += 1
                 
                 print(f"  [广之旅-{dest}-{type_name}] 第{page}页: {page_items}条")
@@ -375,7 +441,29 @@ def fetch():
                     break
                 
                 page += 1
-    
+
+    schedule_snapshots = fetch_schedule_snapshots(candidate_items)
+    all_items = []
+    seen = set()
+    for item in candidate_items:
+        snapshot = schedule_snapshots.get(
+            schedule_cache_key(
+                str(item.get("sourceId") or "").strip(),
+                str(item.get("productType") or "").strip(),
+                str(item.get("url") or "").strip(),
+            ),
+            {},
+        )
+        enriched = apply_schedule_snapshot(item, snapshot)
+        if enriched["price"] <= 0:
+            continue
+
+        key = enriched["title"] + "|" + str(enriched["price"])
+        if key in seen:
+            continue
+        seen.add(key)
+        all_items.append(enriched)
+
     print(f"[广之旅] 抓取完成: {len(all_items)} 条")
     return all_items
 
