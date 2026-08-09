@@ -349,6 +349,12 @@ jobs:
       - name: Optimize cached images
         run: npm run data:images:webp
 
+      - name: Split merged data
+        run: npm run data:split
+
+      - name: Optimize cached images
+        run: npm run data:images:webp
+
       - name: Audit merged data
         run: npm run audit:data-integrity
 
