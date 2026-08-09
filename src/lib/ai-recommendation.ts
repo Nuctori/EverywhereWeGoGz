@@ -245,8 +245,210 @@ const weatherSnapshotCache = new Map<string, Promise<{
   dateSpecificSummary?: string;
   weatherWindowLabel?: string;
   weatherRiskLevel?: AiWeatherContext['weatherRiskLevel'];
+  weatherComfortScore?: number;
+  weatherComfortSummary?: string;
+  weatherTemperatureComfort?: number;
+  weatherHumidityComfort?: number;
+  weatherOutdoorIndex?: number;
   source: 'open-meteo' | 'seasonal-rule';
 }>>();
+
+const GUANGDONG_WEATHER_CITIES = new Set([
+  '广州', '韶关', '清远', '河源', '肇庆', '惠州', '汕尾', '汕头', '潮州', '揭阳', '梅州',
+  '阳江', '湛江', '茂名', '云浮', '江门', '珠海', '深圳', '佛山', '东莞', '中山',
+]);
+const GUANGDONG_WEATHER_REGION_REPRESENTATIVES: Record<string, string> = {
+  粤北: '韶关',
+  粤东: '汕尾',
+  粤西: '阳江',
+};
+
+function resolveGuangdongWeatherCity(destination: string, corpus = '') {
+  const normalizedDestination = String(destination || '').trim();
+  if (GUANGDONG_WEATHER_CITIES.has(normalizedDestination)) return normalizedDestination;
+  if (!/(?:广东|粤东|粤西|粤北)/.test(normalizedDestination)) return '';
+
+  const matchedCity = [...GUANGDONG_WEATHER_CITIES]
+    .find((city) => `${normalizedDestination} ${corpus}`.includes(city));
+  if (matchedCity) return matchedCity;
+
+  const regionRepresentative = Object.entries(GUANGDONG_WEATHER_REGION_REPRESENTATIVES)
+    .find(([region]) => normalizedDestination.includes(region))?.[1];
+  if (regionRepresentative) return regionRepresentative;
+  return matchedCity || '广州';
+}
+
+const ACTIVE_TRAVEL_HOUR_WEIGHTS = new Map([
+  [12, 0.65], [13, 0.85], [14, 1], [15, 1], [16, 1.05],
+  [17, 1.1], [18, 1.1], [19, 1], [20, 0.85], [21, 0.6],
+]);
+
+type WeatherHourlyInput = {
+  time: string[];
+  precipitationProbability: number[];
+  precipitation: number[];
+  weatherCode: number[];
+  temperature: number[];
+  humidity: number[];
+  windGusts: number[];
+};
+
+type WeatherComfortAssessment = {
+  score: number;
+  riskLevel: NonNullable<AiWeatherContext['weatherRiskLevel']>;
+  summary: string;
+  temperatureComfort: number;
+  humidityComfort: number;
+  outdoorIndex: number;
+};
+
+function clampWeatherValue(value: number, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getFiniteWeatherNumber(values: number[], index: number, fallback: number) {
+  const value = Number(values[index]);
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function getWeatherHour(time: string) {
+  const match = String(time || '').match(/T(\d{2}):/);
+  return match ? Number(match[1]) : null;
+}
+
+function isSevereWeatherCode(code: number) {
+  return code >= 95;
+}
+
+function getPrecipitationIntensity(precipitation: number, weatherCode: number) {
+  if (isSevereWeatherCode(weatherCode)) return 1;
+  if (precipitation <= 0.1) return 0.08;
+  if (precipitation <= 1) return 0.22;
+  if (precipitation <= 3) return 0.55;
+  return 0.95;
+}
+
+function getTemperatureComfort(temperature: number) {
+  if (temperature >= 20 && temperature <= 30) return 100;
+  if (temperature > 30 && temperature <= 33) return 100 - (temperature - 30) / 3 * 25;
+  if (temperature > 33 && temperature <= 35) return 75 - (temperature - 33) / 2 * 35;
+  if (temperature > 35) return Math.max(0, 40 - (temperature - 35) / 8 * 40);
+  if (temperature >= 16) return 100 - (20 - temperature) / 4 * 25;
+  if (temperature >= 10) return 75 - (16 - temperature) / 6 * 45;
+  return Math.max(0, 30 - (10 - temperature) / 20 * 30);
+}
+
+function getHumidityComfort(humidity: number) {
+  if (humidity >= 40 && humidity <= 75) return 100;
+  if (humidity > 75 && humidity <= 85) return 100 - (humidity - 75) / 10 * 30;
+  if (humidity > 85) return Math.max(0, 70 - (humidity - 85) / 15 * 70);
+  if (humidity >= 25) return 100 - (40 - humidity) / 15 * 25;
+  return Math.max(0, 75 - (25 - humidity) / 25 * 75);
+}
+
+function assessWeatherHour(sample: {
+  precipitationProbability: number;
+  precipitation: number;
+  weatherCode: number;
+  temperature: number;
+  humidity: number;
+  windGusts: number;
+}) {
+  const rainProbability = clampWeatherValue(sample.precipitationProbability / 100);
+  const intensity = getPrecipitationIntensity(sample.precipitation, sample.weatherCode);
+  const isRainy = rainProbability >= 0.35 || sample.precipitation > 0.1 || sample.weatherCode >= 51;
+  const rainRisk = rainProbability * intensity * (isSevereWeatherCode(sample.weatherCode) ? 1.35 : 1);
+  const windRisk = clampWeatherValue((sample.windGusts - 30) / 35) * 0.25;
+  const severeRisk = isSevereWeatherCode(sample.weatherCode) ? 0.45 : 0;
+  const outdoorIndex = Math.round((1 - clampWeatherValue(rainRisk + windRisk + severeRisk)) * 100);
+  const temperatureComfort = getTemperatureComfort(sample.temperature);
+  const humidityComfort = getHumidityComfort(sample.humidity);
+
+  return {
+    comfortScore: temperatureComfort * 0.3 + humidityComfort * 0.2 + outdoorIndex * 0.5,
+    temperatureComfort,
+    humidityComfort,
+    outdoorIndex,
+    isRainy,
+    isSevere: isSevereWeatherCode(sample.weatherCode) || sample.windGusts >= 50,
+  };
+}
+
+function formatWeatherHourRange(hours: number[]) {
+  if (hours.length === 0) return '';
+  const ranges: string[] = [];
+  let start = hours[0];
+  let end = hours[0];
+  for (const hour of hours.slice(1)) {
+    if (hour === end + 1) {
+      end = hour;
+      continue;
+    }
+    ranges.push(start === end ? `${start}点` : `${start}-${end}点`);
+    start = hour;
+    end = hour;
+  }
+  ranges.push(start === end ? `${start}点` : `${start}-${end}点`);
+  return ranges.join('、');
+}
+
+function assessWeatherComfortForDate(targetDate: string, hourly: WeatherHourlyInput): WeatherComfortAssessment | null {
+  const samples = hourly.time.map((time, index) => {
+    const hour = getWeatherHour(time);
+    if (hour === null || !String(time).startsWith(targetDate)) return null;
+    return {
+      hour,
+      weight: ACTIVE_TRAVEL_HOUR_WEIGHTS.get(hour) || 0.05,
+      ...assessWeatherHour({
+        precipitationProbability: getFiniteWeatherNumber(hourly.precipitationProbability, index, 0),
+        precipitation: getFiniteWeatherNumber(hourly.precipitation, index, 0),
+        weatherCode: getFiniteWeatherNumber(hourly.weatherCode, index, 0),
+        temperature: getFiniteWeatherNumber(hourly.temperature, index, 28),
+        humidity: getFiniteWeatherNumber(hourly.humidity, index, 70),
+        windGusts: getFiniteWeatherNumber(hourly.windGusts, index, 0),
+      }),
+    };
+  }).filter(Boolean) as Array<{
+    hour: number;
+    weight: number;
+    comfortScore: number;
+    temperatureComfort: number;
+    humidityComfort: number;
+    outdoorIndex: number;
+    isRainy: boolean;
+    isSevere: boolean;
+  }>;
+
+  const activeSamples = samples.filter((sample) => ACTIVE_TRAVEL_HOUR_WEIGHTS.has(sample.hour));
+  if (activeSamples.length === 0) return null;
+
+  const activeWeight = activeSamples.reduce((sum, sample) => sum + sample.weight, 0);
+  const temperatureComfort = Math.round(activeSamples.reduce((sum, sample) => sum + sample.temperatureComfort * sample.weight, 0) / activeWeight);
+  const humidityComfort = Math.round(activeSamples.reduce((sum, sample) => sum + sample.humidityComfort * sample.weight, 0) / activeWeight);
+  const outdoorIndex = Math.round(activeSamples.reduce((sum, sample) => sum + sample.outdoorIndex * sample.weight, 0) / activeWeight);
+  const outsideRain = samples.some((sample) => !ACTIVE_TRAVEL_HOUR_WEIGHTS.has(sample.hour) && sample.isRainy);
+  const activeRainHours = activeSamples.filter((sample) => sample.isRainy).map((sample) => sample.hour);
+  const activeSevere = activeSamples.some((sample) => sample.isSevere);
+  const score = Number((temperatureComfort * 0.3 + humidityComfort * 0.2 + outdoorIndex * 0.5).toFixed(1));
+  const riskLevel: WeatherComfortAssessment['riskLevel'] = activeSevere || score <= 60
+    ? 'worse'
+    : score <= 82
+      ? 'mixed'
+      : 'better';
+
+  let summary = `${formatMonthDay(targetDate)}12-21点天气影响较小`;
+  if (activeRainHours.length > 0) {
+    const rainRange = formatWeatherHourRange(activeRainHours);
+    summary = score > 82
+      ? `${formatMonthDay(targetDate)}${rainRange}以阴天或小雨为主，户外指数仍较好，出行影响较小`
+      : `${formatMonthDay(targetDate)}${rainRange}有降雨，12-21点出行影响${riskLevel === 'worse' ? '较大' : '中等'}`;
+  } else if (outsideRain) {
+    summary = `${formatMonthDay(targetDate)}降雨主要不在12-21点，出行时段影响较小`;
+  }
+  if (activeSevere) summary += '，需额外留意雷暴或强风';
+
+  return { score, riskLevel, summary, temperatureComfort, humidityComfort, outdoorIndex };
+}
 
 function percentile(sortedValues: number[], ratio: number) {
   if (sortedValues.length === 0) return null;
@@ -2342,6 +2544,7 @@ function prioritizeRecommendationItems(
     candidateTours?: AiRecommendationCandidate[];
     intent?: AiTravelIntent | null;
     userText?: string;
+    destinationWeatherInsights?: DestinationWeatherInsight[];
   },
 ) {
   const prioritized = limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
@@ -2406,6 +2609,9 @@ function prioritizeRecommendationItems(
         reasonLength,
         hasReason: Boolean(item.reason),
         localRank,
+        weatherScore: primitive && context.destinationWeatherInsights
+          ? getWeatherRankingScore(primitive, context.destinationWeatherInsights)
+          : 0,
         matchedDestinationHints: primitive ? getMatchedDestinationHints(intent, primitive) : [],
         ...relevance,
       };
@@ -2419,10 +2625,6 @@ function prioritizeRecommendationItems(
       const aiSelectionGap = Number(Boolean(right.item.recommendationTier?.startsWith('ai'))) -
         Number(Boolean(left.item.recommendationTier?.startsWith('ai')));
       if (aiSelectionGap !== 0) return aiSelectionGap;
-      if (left.item.recommendationTier?.startsWith('ai') && right.item.recommendationTier?.startsWith('ai')) {
-        const aiScoreGap = right.aiScore - left.aiScore;
-        if (aiScoreGap !== 0) return aiScoreGap;
-      }
 
       const destinationCoverageGap = right.matchedDestinationHints.length - left.matchedDestinationHints.length;
       if (destinationCoverageGap !== 0) return destinationCoverageGap;
@@ -2449,6 +2651,15 @@ function prioritizeRecommendationItems(
 
       const conflictGap = left.totalConflictCount - right.totalConflictCount;
       if (conflictGap !== 0) return conflictGap;
+
+      // Weather is a soft tie-breaker. Hard intent conflicts, schedule, budget and
+      // coverage must be settled before a weather advantage can change the order.
+      if (right.weatherScore !== left.weatherScore) return right.weatherScore - left.weatherScore;
+
+      if (left.item.recommendationTier?.startsWith('ai') && right.item.recommendationTier?.startsWith('ai')) {
+        const aiScoreGap = right.aiScore - left.aiScore;
+        if (aiScoreGap !== 0) return aiScoreGap;
+      }
 
       // 尚未打上 recommendationTier 的 AI 结果仍要保留模型分数顺序；
       // 多目的地请求先让目的地覆盖和解释质量完成组合判断，再用分数打破平手。
@@ -3116,7 +3327,6 @@ function rankPrimitive(
     (primitive.rating || 0) * 2
   );
 }
-
 
 function getPrimitiveExperienceAtoms(primitive: RecommendationPrimitive, limit = 2) {
   const broadTerms = new Set([
@@ -4659,12 +4869,36 @@ function findWeatherInsightForPrimitive(
   insights: DestinationWeatherInsight[],
 ) {
   const travelDate = getEarliestDate(primitive.schedule.departureDates);
-  const sameDestination = insights.filter((insight) => insight.destination === primitive.destination);
+  const corpus = [
+    primitive.destination,
+    primitive.title,
+    primitive.theme,
+    ...primitive.tags,
+    ...primitive.highlights,
+    ...primitive.semanticAtoms,
+    ...primitive.experienceCategories,
+  ].join(' ');
+  const weatherDestination = resolveGuangdongWeatherCity(primitive.destination, corpus) || primitive.destination;
+  const sameDestination = insights.filter((insight) => insight.destination === weatherDestination);
   if (travelDate) {
     const exact = sameDestination.find((insight) => insight.travelDate === travelDate);
     if (exact) return exact;
   }
   return sameDestination[0];
+}
+
+function getWeatherRankingScore(
+  primitive: RecommendationPrimitive,
+  insights: DestinationWeatherInsight[],
+) {
+  const insight = findWeatherInsightForPrimitive(primitive, insights);
+  if (!insight || insight.source !== 'open-meteo' || !isWeatherSensitivePrimitive(primitive)) return 0;
+  if (Number.isFinite(insight.weatherComfortScore)) {
+    return Math.max(-10, Math.min(10, (Number(insight.weatherComfortScore) - 50) / 5));
+  }
+  if (insight.weatherRiskLevel === 'better') return 10;
+  if (insight.weatherRiskLevel === 'worse') return -10;
+  return 0;
 }
 
 function buildWeatherReasonSuffix(
@@ -5306,6 +5540,7 @@ async function fetchDestinationWeatherInsight(params: {
           latitude: String(coords.latitude),
           longitude: String(coords.longitude),
           daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code',
+          hourly: 'temperature_2m,relative_humidity_2m,precipitation_probability,precipitation,weather_code,wind_gusts_10m',
           timezone: 'auto',
           forecast_days: '7',
         });
@@ -5322,6 +5557,16 @@ async function fetchDestinationWeatherInsight(params: {
         const maxTemps: number[] = daily?.temperature_2m_max ?? [];
         const minTemps: number[] = daily?.temperature_2m_min ?? [];
         const rainProbs: number[] = daily?.precipitation_probability_max ?? [];
+        const hourly = data.hourly;
+        const hourlyInput: WeatherHourlyInput = {
+          time: hourly?.time ?? [],
+          precipitationProbability: hourly?.precipitation_probability ?? [],
+          precipitation: hourly?.precipitation ?? [],
+          weatherCode: hourly?.weather_code ?? [],
+          temperature: hourly?.temperature_2m ?? [],
+          humidity: hourly?.relative_humidity_2m ?? [],
+          windGusts: hourly?.wind_gusts_10m ?? [],
+        };
         const maxTemp = Math.round(Math.max(...maxTemps));
         const minTemp = Math.round(Math.min(...minTemps));
         const maxRain = Math.round(Math.max(...rainProbs));
@@ -5329,22 +5574,30 @@ async function fetchDestinationWeatherInsight(params: {
         const dayMaxTemp = targetIndex >= 0 ? Math.round(maxTemps[targetIndex] ?? maxTemp) : undefined;
         const dayMinTemp = targetIndex >= 0 ? Math.round(minTemps[targetIndex] ?? minTemp) : undefined;
         const dayRain = targetIndex >= 0 ? Math.round(rainProbs[targetIndex] ?? maxRain) : undefined;
+        const weatherComfort = params.travelDate
+          ? assessWeatherComfortForDate(params.travelDate, hourlyInput)
+          : null;
         const weatherRiskLevel: AiWeatherContext['weatherRiskLevel'] =
-          typeof dayRain === 'number' || typeof dayMaxTemp === 'number'
+          weatherComfort?.riskLevel || (typeof dayRain === 'number' || typeof dayMaxTemp === 'number'
             ? (Number(dayRain ?? 0) >= 70 || Number(dayMaxTemp ?? 0) >= 35
                 ? 'worse'
                 : Number(dayRain ?? 0) >= 40 || Number(dayMaxTemp ?? 0) >= 32
                   ? 'mixed'
                   : 'better')
-            : 'unknown';
+            : 'unknown');
 
         return {
           forecastSummary: `${params.destination}未来7天约 ${minTemp}-${maxTemp}℃，最高降水概率约 ${maxRain}%。`,
           dateSpecificSummary: params.travelDate && targetIndex >= 0
-            ? `${formatMonthDay(params.travelDate)}预计 ${dayMinTemp}-${dayMaxTemp}℃，降雨概率约 ${dayRain}%`
+            ? `${formatMonthDay(params.travelDate)}预计 ${dayMinTemp}-${dayMaxTemp}℃，降雨概率约 ${dayRain}%${weatherComfort ? `；${weatherComfort.summary}` : ''}`
             : undefined,
           weatherWindowLabel: params.travelDate ? `${formatMonthDay(params.travelDate)}这班` : undefined,
           weatherRiskLevel,
+          weatherComfortScore: weatherComfort?.score,
+          weatherComfortSummary: weatherComfort?.summary,
+          weatherTemperatureComfort: weatherComfort?.temperatureComfort,
+          weatherHumidityComfort: weatherComfort?.humidityComfort,
+          weatherOutdoorIndex: weatherComfort?.outdoorIndex,
           source: 'open-meteo' as const,
         };
       })().catch((error) => {
@@ -5364,6 +5617,11 @@ async function fetchDestinationWeatherInsight(params: {
       dateSpecificSummary: weatherSnapshot.dateSpecificSummary,
       weatherWindowLabel: weatherSnapshot.weatherWindowLabel,
       weatherRiskLevel: weatherSnapshot.weatherRiskLevel,
+      weatherComfortScore: weatherSnapshot.weatherComfortScore,
+      weatherComfortSummary: weatherSnapshot.weatherComfortSummary,
+      weatherTemperatureComfort: weatherSnapshot.weatherTemperatureComfort,
+      weatherHumidityComfort: weatherSnapshot.weatherHumidityComfort,
+      weatherOutdoorIndex: weatherSnapshot.weatherOutdoorIndex,
       seasonAdvice,
       inferredFrom: params.inferredFrom,
       queryReason: params.queryReason,
@@ -5859,6 +6117,8 @@ export const __aiRecommendationTestHooks = {
   finalizeRecommendationSummary,
   getConcreteAiReason,
   getPrimitiveCoverageScore,
+  getWeatherRankingScore,
+  assessWeatherComfortForDate,
   getAiResponseIntentQualityIssue,
   getPrimitiveConflictReasons,
   reasonAddressesUserNeed,
@@ -7166,6 +7426,7 @@ export async function requestAiRecommendations({
         candidateTours: mergedCandidateTours,
         intent: finalIntent,
         userText: finalEffectiveUserText,
+        destinationWeatherInsights,
       },
     ).slice(0, aiItems.length > 0 ? MAX_AI_SELECTED_ITEMS : MAX_AI_RANKED_ITEMS);
     emitProgress(onProgress, {

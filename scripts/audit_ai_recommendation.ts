@@ -24,6 +24,8 @@ const {
   allowsPublicInterestForTurn,
   enrichPromptCandidatesWithMemoryCoverage,
   finalizeRecommendationSummary,
+  getWeatherRankingScore,
+  assessWeatherComfortForDate,
   getAiResponseIntentQualityIssue,
   getConcreteAiReason,
   getPrimitiveCoverageScore,
@@ -1716,6 +1718,298 @@ assert.deepEqual(
   relevanceSorted.slice(0, 4).map((item) => item.tourId),
   ['both-budget', 'both-over-budget', 'hot-spring-only-budget', 'beach-only-budget'],
   'coverage count should dominate budget-only or single-term matches, while budget fit breaks ties within full coverage',
+);
+
+const qingyuanWeatherTour = candidate({
+  id: 'weather-qingyuan',
+  title: '清远峡谷漂流2天',
+  destination: '广东',
+  price: 399,
+  departureDate: '2026-06-20',
+  departureDates: ['2026-06-20'],
+  theme: '山水风光',
+  tags: ['漂流', '峡谷'],
+  highlights: ['峡谷漂流', '山水户外'],
+});
+const yangjiangWeatherTour = candidate({
+  id: 'weather-yangjiang',
+  title: '阳江海岛沙滩2天',
+  destination: '广东',
+  price: 399,
+  departureDate: '2026-06-20',
+  departureDates: ['2026-06-20'],
+  theme: '海岛度假',
+  tags: ['海岛', '沙滩'],
+  highlights: ['海边活动', '沙滩'],
+});
+const weatherInsights = [
+  {
+    destination: '清远',
+    travelDate: '2026-06-20',
+    forecastSummary: '清远团期天气较稳定',
+    dateSpecificSummary: '6月20日预计晴到多云，降雨概率约20%',
+    weatherWindowLabel: '6月20日这班',
+    weatherRiskLevel: 'better' as const,
+    weatherComfortScore: 96,
+    weatherComfortSummary: '12-21点天气影响较小',
+    seasonAdvice: [],
+    role: 'destination' as const,
+    source: 'open-meteo' as const,
+  },
+  {
+    destination: '阳江',
+    travelDate: '2026-06-20',
+    forecastSummary: '阳江团期降雨概率较高',
+    dateSpecificSummary: '6月20日预计有阵雨，降雨概率约80%',
+    weatherWindowLabel: '6月20日这班',
+    weatherRiskLevel: 'worse' as const,
+    weatherComfortScore: 42,
+    weatherComfortSummary: '12-21点降雨影响较大',
+    seasonAdvice: [],
+    role: 'destination' as const,
+    source: 'open-meteo' as const,
+  },
+];
+
+const weatherAlternativePrompt = buildAiMessages({
+  userText: '这周广东团期天气都不好，找天气好一点的地方',
+  messages: [],
+  candidates: compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
+    userText: '这周广东团期天气都不好，找天气好一点的地方',
+  }),
+  routeAtlas: buildRouteAtlas([qingyuanWeatherTour, yangjiangWeatherTour]),
+  auditContext: buildRecommendationAuditContext(
+    [qingyuanWeatherTour, yangjiangWeatherTour],
+    null,
+    { destinationHints: ['广东'], weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+  ),
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-20',
+    forecastSummary: '广州团期天气偏差',
+    seasonAdvice: [],
+    source: 'open-meteo',
+  },
+  destinationWeatherInsights: weatherInsights,
+  searchQuery: '',
+  intent: { destinationHints: ['广东'], weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+  preferenceMemory: null,
+  allowPublicInterest: false,
+});
+const weatherAlternativePromptText = weatherAlternativePrompt.map((message) => message.content).join('\n');
+assert.ok(weatherAlternativePromptText.includes('清远'));
+assert.ok(weatherAlternativePromptText.includes('rl'));
+const weatherAlternativeLitePrompt = buildLiteAiMessages({
+  userText: '这周广东团期天气都不好，找天气好一点的地方',
+  messages: [],
+  candidates: compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
+    userText: '这周广东团期天气都不好，找天气好一点的地方',
+  }),
+  weatherContext: {
+    destination: '广州',
+    travelDate: '2026-06-20',
+    forecastSummary: '广州团期天气偏差',
+    seasonAdvice: [],
+    source: 'open-meteo',
+  },
+  destinationWeatherInsights: weatherInsights,
+  searchQuery: '',
+  intent: { destinationHints: ['广东'], weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+  preferenceMemory: null,
+  allowPublicInterest: false,
+});
+const weatherAlternativeLitePromptText = weatherAlternativeLitePrompt.map((message) => message.content).join('\n');
+assert.ok(weatherAlternativeLitePromptText.includes('清远'));
+
+function hourlyWeather(overrides: Record<number, Partial<{
+  precipitationProbability: number;
+  precipitation: number;
+  weatherCode: number;
+  temperature: number;
+  humidity: number;
+  windGusts: number;
+}>> = {}) {
+  const rows = Array.from({ length: 24 }, (_, hour) => ({
+    hour,
+    precipitationProbability: 0,
+    precipitation: 0,
+    weatherCode: 3,
+    temperature: 29,
+    humidity: 70,
+    windGusts: 20,
+    ...overrides[hour],
+  }));
+  return {
+    time: rows.map(({ hour }) => `2026-06-20T${String(hour).padStart(2, '0')}:00`),
+    precipitationProbability: rows.map((row) => row.precipitationProbability),
+    precipitation: rows.map((row) => row.precipitation),
+    weatherCode: rows.map((row) => row.weatherCode),
+    temperature: rows.map((row) => row.temperature),
+    humidity: rows.map((row) => row.humidity),
+    windGusts: rows.map((row) => row.windGusts),
+  };
+}
+
+const lightRainOutsideTravelWindow = assessWeatherComfortForDate(
+  '2026-06-20',
+  hourlyWeather({ 9: { precipitationProbability: 70, precipitation: 0.2, weatherCode: 61 } }),
+);
+const lightRainInTravelWindow = assessWeatherComfortForDate(
+  '2026-06-20',
+  hourlyWeather({ 15: { precipitationProbability: 70, precipitation: 0.2, weatherCode: 61 } }),
+);
+const heavyRainInTravelWindow = assessWeatherComfortForDate(
+  '2026-06-20',
+  hourlyWeather({
+    12: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+    13: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+    14: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+    15: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+    16: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+    17: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+    18: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+    19: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+    20: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+    21: { precipitationProbability: 90, precipitation: 8, weatherCode: 65, humidity: 85 },
+  }),
+);
+const overcastComfortableWindow = assessWeatherComfortForDate(
+  '2026-06-20',
+  hourlyWeather({ 15: { temperature: 29, humidity: 70, weatherCode: 3 } }),
+);
+const thunderstormInTravelWindow = assessWeatherComfortForDate(
+  '2026-06-20',
+  hourlyWeather({ 15: { temperature: 29, humidity: 85, weatherCode: 95, windGusts: 60 } }),
+);
+assert.ok(lightRainOutsideTravelWindow);
+assert.ok(lightRainInTravelWindow);
+assert.ok(heavyRainInTravelWindow);
+assert.ok(overcastComfortableWindow);
+assert.equal(lightRainOutsideTravelWindow?.riskLevel, 'better');
+assert.ok(
+  (lightRainInTravelWindow?.score ?? 100) < (lightRainOutsideTravelWindow?.score ?? 0),
+  '同样的小雨在12-21点内应降低更多天气舒适度',
+);
+assert.equal(heavyRainInTravelWindow?.riskLevel, 'worse');
+assert.equal(overcastComfortableWindow?.riskLevel, 'better');
+assert.equal(thunderstormInTravelWindow?.riskLevel, 'worse');
+assert.equal(overcastComfortableWindow?.temperatureComfort, 100);
+assert.equal(overcastComfortableWindow?.humidityComfort, 100);
+assert.equal(overcastComfortableWindow?.outdoorIndex, 100);
+assert.equal(overcastComfortableWindow?.score, 100);
+
+const warmComfortableWindow = assessWeatherComfortForDate(
+  '2026-06-20',
+  hourlyWeather({ 15: { temperature: 24, humidity: 70, weatherCode: 3 } }),
+);
+assert.equal(
+  warmComfortableWindow?.score,
+  overcastComfortableWindow?.score,
+  '舒适区内的温度不应因为更低而额外获得降温收益，直接使用温度舒适度参数',
+);
+assert.ok(
+  (heavyRainInTravelWindow?.score ?? 100) < (lightRainInTravelWindow?.score ?? 0),
+  '天气舒适度应直接同时反映降雨强度、湿度和户外指数',
+);
+
+const chaozhouWeatherTour = candidate({
+  id: 'weather-chaozhou',
+  title: '潮州海边古城2天',
+  destination: '粤东潮州',
+  price: 399,
+  departureDate: '2026-06-20',
+  departureDates: ['2026-06-20'],
+  theme: '海边人文',
+  tags: ['海边', '古城'],
+  highlights: ['海边活动', '古城漫游'],
+});
+assert.equal(
+  getWeatherRankingScore(buildTourPrimitive(chaozhouWeatherTour), [
+    { ...weatherInsights[0], destination: '潮州' },
+  ]),
+  9.2,
+  '具体城市应优先于粤东代表点，避免把潮州错配到汕尾',
+);
+
+assert.equal(
+  getWeatherRankingScore(buildTourPrimitive(qingyuanWeatherTour), weatherInsights),
+  9.2,
+  '广东线路应按标题识别清远天气锚点',
+);
+assert.equal(
+  getWeatherRankingScore(buildTourPrimitive(yangjiangWeatherTour), weatherInsights),
+  -1.6,
+  '广东线路应按标题识别阳江天气锚点',
+);
+const weatherAwareSorted = prioritizeRecommendationItems(
+  [
+    {
+      tourId: 'weather-yangjiang',
+      score: 96,
+      reason: '阳江海岛沙滩玩法完整，适合周末出发。',
+      matchedSignals: [],
+      recommendationTier: 'ai-detailed',
+    },
+    {
+      tourId: 'weather-qingyuan',
+      score: 72,
+      reason: '清远峡谷漂流玩法清凉，适合周末出发。',
+      matchedSignals: [],
+      recommendationTier: 'ai-detailed',
+    },
+  ],
+  {
+    candidateTours: [yangjiangWeatherTour, qingyuanWeatherTour],
+    intent: { weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+    userText: '这周广东出行，关注团期天气',
+    destinationWeatherInsights: weatherInsights,
+  },
+);
+assert.equal(
+  weatherAwareSorted[0].tourId,
+  'weather-qingyuan',
+  '天气较差时，应在同等推荐层级内优先天气更稳的广东团期',
+);
+const strictBudgetWeatherSorted = prioritizeRecommendationItems(
+  [
+    { tourId: 'budget-good-weather', score: 96, reason: '清远天气更稳。', matchedSignals: [], recommendationTier: 'ai-detailed' },
+    { tourId: 'budget-bad-weather', score: 72, reason: '阳江团期天气波动。', matchedSignals: [], recommendationTier: 'ai-detailed' },
+  ],
+  {
+    candidateTours: [
+      { ...qingyuanWeatherTour, id: 'budget-good-weather', price: 999 },
+      { ...yangjiangWeatherTour, id: 'budget-bad-weather', price: 299 },
+    ],
+    intent: { budgetMax: 500, budgetHardLimit: true, weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+    userText: '这周广东出行，预算500以内，关注团期天气',
+    destinationWeatherInsights: weatherInsights,
+  },
+);
+assert.equal(
+  strictBudgetWeatherSorted[0].tourId,
+  'budget-bad-weather',
+  '严格预算冲突必须优先于天气优势，天气只能作为软参考',
+);
+const unknownWeatherSorted = prioritizeRecommendationItems(
+  [
+    { tourId: 'weather-yangjiang', score: 96, reason: '阳江海岛沙滩玩法完整。', matchedSignals: [], recommendationTier: 'ai-detailed' },
+    { tourId: 'weather-qingyuan', score: 72, reason: '清远峡谷漂流玩法清凉。', matchedSignals: [], recommendationTier: 'ai-detailed' },
+  ],
+  {
+    candidateTours: [yangjiangWeatherTour, qingyuanWeatherTour],
+    intent: { weatherSensitivity: ['关注天气'], departureWeekdays: [] },
+    userText: '这周广东出行，关注团期天气',
+    destinationWeatherInsights: weatherInsights.map((insight) => ({
+      ...insight,
+      source: 'seasonal-rule' as const,
+      weatherRiskLevel: 'unknown' as const,
+    })),
+  },
+);
+assert.equal(
+  unknownWeatherSorted[0].tourId,
+  'weather-yangjiang',
+  '只有季节规则时，不应伪造广东线路的实时天气排序',
 );
 
 const uiFilterOnlyIntent = buildHardIntentFromText(
