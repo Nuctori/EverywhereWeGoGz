@@ -1,6 +1,7 @@
 import type { AiPreferenceMemory } from '@/types/tour';
 
 // AI 语义策略：识别公益、扶贫、助农等敏感语义，并决定本轮是否允许进入推荐链路。
+// 这里处理的是“这一轮能不能带着这类语义继续往下走”，不是最终推荐结果本身。
 interface SemanticIntent {
   semanticFocus?: string[];
   travelStyle?: string[];
@@ -50,6 +51,8 @@ export function allowsPublicInterestForTurn(
   userText: string,
   inheritedMemory: AiPreferenceMemory | null | undefined,
 ) {
+  // 本轮是否放行，只有两个入口：用户当前输入和继承下来的偏好记忆。
+  // 这样既能延续上一轮的续写语义，又不会把无关历史误带进新搜索。
   return hasPublicInterestLanguage(userText) || hasPublicInterestMemory(inheritedMemory);
 }
 
@@ -59,6 +62,7 @@ export function sanitizeAiIntentForTurn<TIntent extends SemanticIntent>(
 ): TIntent | null {
   if (!intent || options.allowPublicInterest) return intent;
 
+  // 禁止时只清掉容易把推荐方向带偏的软语义字段，硬条件保留给后续排序继续使用。
   return {
     ...intent,
     semanticFocus: stripPublicInterestTerms(intent.semanticFocus),
@@ -83,7 +87,7 @@ export function buildPublicInterestPromptPolicy(
       requestRules: [],
       // 轻量模型只允许基于预算、天气、玩法等客观条件推荐，
       // 避免凭空假设用户存在公益、扶贫、助农等特殊偏好。
-  liteRules: [
+      liteRules: [
         joinCopy([
           'sf 写本轮需求与候选事实的贴合点，如预算、天气、玩法、',
           '节奏、住宿或目的地；sb 只写候选证据不足的边界。',
@@ -99,7 +103,7 @@ export function buildPublicInterestPromptPolicy(
     systemRules: [],
     requestRules: [],
     // 已允许公益语义时，不再额外施加轻量模型的保守限制。
-  liteRules: [],
+    liteRules: [],
     softCriteriaDescription: 'string[]，本轮软语义标准，保留用户表达或你的语义理解',
     cannotAssertDescription: 'string[]，候选无证据时不能断言的事实',
     semanticFocusDescription:
