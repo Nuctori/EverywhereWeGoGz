@@ -1102,11 +1102,20 @@ BRAND_CONTINUATIONS = {
     "罗马假日": "罗马",
     "威尼斯人": "威尼斯",
     "巴黎春天": "巴黎",
+    "巴黎人": "巴黎",
+    "巴黎轩": "巴黎",
+    "伦敦人": "伦敦",
     "米兰达": "米兰",
+}
+# Context-sensitive brands: rejected only when the tour route is a domestic
+# province (e.g. 澳门巴黎铁塔 on a 广东 tour), but kept on international routes
+# (巴黎铁塔 = the real Eiffel Tower on 欧洲 tours).
+CONTEXTUAL_BRANDS = {
+    "巴黎铁塔": "巴黎",
 }
 
 
-def _iter_place_mentions(text):
+def _iter_place_mentions(text, *, domestic_route: bool = False):
     value = str(text or "")
     matches = []
     for alias, place in ALIAS_ROWS:
@@ -1119,13 +1128,26 @@ def _iter_place_mentions(text):
             # A catalog city name that prefixes a known foreign brand/ship name
             # (雅典娜号, 罗马假日) is a collision, not a destination mention.
             tail_run = value[end : end + 6]
-            if any(
-                brand.startswith(alias)
-                and brand[len(alias) :]
-                and tail_run.startswith(brand[len(alias) :])
-                for brand in BRAND_CONTINUATIONS
-                if BRAND_CONTINUATIONS[brand] == place.get("name")
-            ):
+            brand_pools = (
+                BRAND_CONTINUATIONS if place.get("name") else {},
+                CONTEXTUAL_BRANDS if domestic_route else {},
+            )
+            collision = False
+            for pool in brand_pools:
+                for brand in pool:
+                    if pool[brand] != place.get("name"):
+                        continue
+                    remainder = brand[len(alias) :]
+                    if (
+                        brand.startswith(alias)
+                        and remainder
+                        and tail_run.startswith(remainder)
+                    ):
+                        collision = True
+                        break
+                if collision:
+                    break
+            if collision:
                 start = index + 1
                 continue
             matches.append(
@@ -1353,9 +1375,18 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
         else _new_geo_resolution(destination_text, title, detail)
     )
     mining = resolution.setdefault("mining", {})
+    # 港澳/广东 can be departure placeholders on international tours, so only
+    # real domestic provinces (province == name) gate the contextual brands
+    # (e.g. 澳门巴黎铁塔 on a 广东 tour vs the real Eiffel Tower on 欧洲 tours).
+    destination_region = find_region(destination_text)
+    domestic_route = bool(
+        destination_region
+        and destination_region.get("province")
+        and destination_region.get("province") == destination_region.get("name")
+    )
     title_departure_names = {
         mention["place"]["name"]
-        for mention in _iter_place_mentions(title)
+        for mention in _iter_place_mentions(title, domestic_route=domestic_route)
         if _is_departure_mention(title, mention)
     }
     direct_place, direct_label = _find_direct_place_match(destination_text)
@@ -1404,7 +1435,8 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
 
     candidates = []
     for text_index, text in enumerate(texts):
-        for mention in _iter_place_mentions(text):
+        for mention in _iter_place_mentions(text, domestic_route=domestic_route):
+            label = _place_label(text, mention)
             label = _place_label(text, mention)
             if mention["place"]["name"] in title_departure_names:
                 _append_unique(mining.setdefault("rejectedLabels", []), label)

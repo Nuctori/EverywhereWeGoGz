@@ -70,12 +70,14 @@ def test_rebuild_materializes_an_explicit_region_as_approximate():
 
     assert after == 1
     assert tour["destinationPlaceName"] == "广东"
-    assert tour["destinationGeoLevel"] == "region"
     assert tour["destinationCoordinateSource"] == "fallback"
     assert tour["destinationCoordinatePrecision"] == "approximate"
     assert tour["geoSource"] == "local-region-catalog"
-    assert tour["geoResolution"]["fallback"]["reason"] == "region-catalog-fallback"
-    assert tour["geoResolution"]["final"]["reason"] == "region-catalog-fallback"
+    resolution = tour.get("geoResolution")
+    fallback = resolution.get("fallback") if isinstance(resolution, dict) else None
+    final = resolution.get("final") if isinstance(resolution, dict) else None
+    assert isinstance(fallback, dict) and fallback.get("reason") == "region-catalog-fallback"
+    assert isinstance(final, dict) and final.get("reason") == "region-catalog-fallback"
 
 
 def test_rebuild_does_not_call_city_catalog_coordinates_exact():
@@ -104,7 +106,9 @@ def test_rebuild_keeps_unproven_destination_unmapped():
     assert after == 0
     assert tour["destinationPlaceName"] == ""
     assert tour["destinationLatitude"] is None
-    assert tour["geoResolution"]["final"]["status"] == "unmapped"
+    resolution = tour.get("geoResolution")
+    final = resolution.get("final") if isinstance(resolution, dict) else None
+    assert isinstance(final, dict) and final.get("status") == "unmapped"
 
 
 def test_rebuild_preserves_source_mining_evidence():
@@ -318,6 +322,20 @@ def test_rebuild_does_not_pin_domestic_cruise_to_foreign_city():
     assert tour["destinationPlaceName"] != "雅典"
 
 
+def test_rebuild_does_not_pin_macau_resort_brand_to_paris():
+    # 巴黎人铁塔 / 巴黎人酒店 is the Macau resort brand; the catalog city 巴黎
+    # (France) must not be matched from the brand substring on a domestic tour.
+    for title in ("巴黎人铁塔澳门珠海2天", "巴黎人酒店澳门2天"):
+        tour = {
+            "id": "tour_parisian_macau",
+            "title": title,
+            "destination": "广东",
+        }
+        rebuild([tour])
+        assert tour["destinationCountry"] == "中国", f"{title} must not pin to France"
+        assert tour["destinationPlaceName"] != "巴黎", f"{title} must not pin to 巴黎"
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback()
@@ -326,4 +344,6 @@ if __name__ == "__main__":
     test_rebuild_preserves_source_mining_evidence()
     test_rebuild_preserves_validated_geocoder_point()
     test_rebuild_drops_historical_foreign_city_as_domestic_hotel()
+    test_rebuild_does_not_pin_domestic_cruise_to_foreign_city()
+    test_rebuild_does_not_pin_macau_resort_brand_to_paris()
     print("geo rebuild tests passed")

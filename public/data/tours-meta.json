@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-10T21:45:29.892Z",
+  "generatedAt": "2026-08-10T22:10:32.534Z",
   "latestUpdatedAt": "2026-08-01T06:19:05.902940",
   "totalRecords": 4034,
   "listRecords": 4034,
@@ -41,19 +41,19 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 49393695
+      "size": 49392619
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 20430798
+      "size": 20430916
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 30974412
+      "size": 30973362
     },
     "geoPlaces": {
       "path": "data/geo-places.json",
-      "size": 374290
+      "size": 373733
     },
     "mapIndex": {
       "path": "data/tour-map-index.json",
@@ -65,8 +65,8 @@
     },
     "mapPlaceCards": {
       "path": "data/tour-map-place-cards/",
-      "files": 657,
-      "chunks": 759
+      "files": 656,
+      "chunks": 758
     }
   }
 }
