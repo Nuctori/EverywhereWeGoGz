@@ -528,18 +528,43 @@ def _same_place_area(left: dict, right: dict) -> bool:
     return latitude_delta <= 0.08 and longitude_delta <= 0.08
 
 
+def _try_float(value: object) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _try_int(value: object) -> int | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, str):
+        try:
+            return int(float(value))
+        except (TypeError, ValueError):
+            return None
+    if isinstance(value, (int, float)):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
 def _merge_geocoder_results(results: list[dict]) -> dict | None:
     if not results:
         return None
     ranked = sorted(
         results,
         key=lambda result: (
-            int(result.get("matchQuality") or 0),
-            float(result.get("providerScore") or 0),
+            _try_int(result.get("matchQuality")) or 0,
+            _try_float(result.get("providerScore")) or 0,
             len(result.get("address") or {}),
         ),
-        reverse=True,
     )
+    winner = dict(ranked[0])
     winner = dict(ranked[0])
     merged_address = {}
     for candidate in ranked:
@@ -620,7 +645,7 @@ def _arcgis_result(
         attributes = (
             item.get("attributes") if isinstance(item.get("attributes"), dict) else {}
         )
-        score = float(item.get("score") or 0)
+        score = _try_float(item.get("score")) or 0
         named_evidence = _has_named_evidence(label, address, expected_city)
         fuzzy_quality = _fuzzy_name_quality(
             label, attributes.get("PlaceName") or address, expected_city
@@ -658,14 +683,20 @@ def _arcgis_result(
             expected_city, expected_province, address, normalized_address
         ):
             continue
+        latitude = _try_float(location.get("y"))
+        longitude = _try_float(location.get("x"))
+        if latitude is None or longitude is None:
+            continue
         return {
-            "latitude": float(location["y"]),
-            "longitude": float(location["x"]),
+            "latitude": latitude,
+            "longitude": longitude,
             "displayName": address,
-            "level": "town"
-            if any(token in address for token in FUZZY_ADMIN_SUFFIXES)
-            or _is_fuzzy_admin_name(attributes.get("PlaceName") or "")
-            else "poi",
+            "level": (
+                "town"
+                if any(token in address for token in FUZZY_ADMIN_SUFFIXES)
+                or _is_fuzzy_admin_name(attributes.get("PlaceName") or "")
+                else "poi"
+            ),
             "locality": normalized_address.get("locality")
             or _result_locality(attributes, address, expected_city),
             "providerScore": score,
@@ -728,9 +759,13 @@ def _nominatim_result(
         ):
             continue
         locality = _result_locality(address, display_name, expected_city)
+        lat = _try_float(item.get("lat"))
+        lon = _try_float(item.get("lon"))
+        if lat is None or lon is None:
+            continue
         result = {
-            "latitude": float(item["lat"]),
-            "longitude": float(item["lon"]),
+            "latitude": lat,
+            "longitude": lon,
             "displayName": display_name,
             "level": "town"
             if address.get("town")
@@ -745,7 +780,7 @@ def _nominatim_result(
                 {"precision": "approximate"} if allow_fuzzy and not name_quality else {}
             ),
         }
-        ranking = (name_quality, float(item.get("importance") or 0))
+        ranking = (name_quality, _try_float(item.get("importance")) or 0)
         if best is None or ranking > best[0]:
             best = (ranking, result)
     return best[1] if best else None
@@ -836,9 +871,13 @@ def _photon_result(
             or properties.get("district")
             or ""
         )
+        lat = _try_float(coordinates[1])
+        lon = _try_float(coordinates[0])
+        if lat is None or lon is None:
+            continue
         result = {
-            "latitude": float(coordinates[1]),
-            "longitude": float(coordinates[0]),
+            "latitude": lat,
+            "longitude": lon,
             "displayName": display_name,
             "level": "town"
             if properties.get("town")
@@ -853,7 +892,7 @@ def _photon_result(
                 {"precision": "approximate"} if allow_fuzzy and not name_quality else {}
             ),
         }
-        ranking = (name_quality, float(properties.get("importance") or 0))
+        ranking = (name_quality, _try_float(properties.get("importance")) or 0)
         if best is None or ranking > best[0]:
             best = (ranking, result)
     return best[1] if best else None
@@ -955,8 +994,8 @@ def _overpass_result(
         ):
             continue
         result = {
-            "latitude": float(coordinates[0]),
-            "longitude": float(coordinates[1]),
+            "latitude": coordinates[0],
+            "longitude": coordinates[1],
             "displayName": display_name,
             "level": level,
             "locality": locality,
