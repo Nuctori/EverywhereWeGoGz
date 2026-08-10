@@ -1106,7 +1106,6 @@ BRAND_CONTINUATIONS = {
 }
 
 
-
 def _iter_place_mentions(text):
     value = str(text or "")
     matches = []
@@ -1122,8 +1121,8 @@ def _iter_place_mentions(text):
             tail_run = value[end : end + 6]
             if any(
                 brand.startswith(alias)
-                and brand[len(alias):]
-                and tail_run.startswith(brand[len(alias):])
+                and brand[len(alias) :]
+                and tail_run.startswith(brand[len(alias) :])
                 for brand in BRAND_CONTINUATIONS
                 if BRAND_CONTINUATIONS[brand] == place.get("name")
             ):
