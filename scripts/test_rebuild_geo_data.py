@@ -76,7 +76,10 @@ def test_rebuild_materializes_an_explicit_region_as_approximate():
     resolution = tour.get("geoResolution")
     fallback = resolution.get("fallback") if isinstance(resolution, dict) else None
     final = resolution.get("final") if isinstance(resolution, dict) else None
-    assert isinstance(fallback, dict) and fallback.get("reason") == "region-catalog-fallback"
+    assert (
+        isinstance(fallback, dict)
+        and fallback.get("reason") == "region-catalog-fallback"
+    )
     assert isinstance(final, dict) and final.get("reason") == "region-catalog-fallback"
 
 
