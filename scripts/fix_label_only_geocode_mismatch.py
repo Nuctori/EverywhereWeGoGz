@@ -55,11 +55,31 @@ INTERNATIONAL_MARKERS = frozenset(_INTERNATIONAL_MARKERS_TEXT.split())
 SUBDIVISION_SUFFIXES = ("镇", "村", "街道", "乡")
 
 # Destination labels that are generic venue/marketing words, never real places.
-GENERIC_LABELS = frozenset((
-    "餐饮", "住宿", "早餐", "午餐", "晚餐", "购物", "娱乐", "自理",
-    "参考酒店", "当地酒店", "豪华酒店", "度假村", "温泉酒店", "酒店",
-    "早餐后", "晚餐后", "入住后", "自由活动", "当地", "参考", "同级",
-))
+GENERIC_LABELS = frozenset(
+    (
+        "餐饮",
+        "住宿",
+        "早餐",
+        "午餐",
+        "晚餐",
+        "购物",
+        "娱乐",
+        "自理",
+        "参考酒店",
+        "当地酒店",
+        "豪华酒店",
+        "度假村",
+        "温泉酒店",
+        "酒店",
+        "早餐后",
+        "晚餐后",
+        "入住后",
+        "自由活动",
+        "当地",
+        "参考",
+        "同级",
+    )
+)
 
 # Province detection for the domestic province-conflict rule.
 # Single-char abbreviations are only included when they are unambiguous in
