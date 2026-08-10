@@ -144,6 +144,11 @@ def destination_queries(tour: dict) -> list[str]:
             f"{province}省" if province and not province.endswith("省") else province,
             country_part,
         ) if part))
+    # Last resort: the bare POI name. Photon/Nominatim index many Chinese resorts
+    # under their full brand name (e.g. 新丰云天海温泉度假村); adding admin
+    # context terms makes the fuzzy search miss them. Validation still requires
+    # admin evidence in the result's own address, so this stays bounded.
+    queries.append(label)
     return list(dict.fromkeys(normalize_query(query) for query in queries if query))
 
 

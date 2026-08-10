@@ -401,6 +401,12 @@ NAMED_PLACE_COORDINATES = {
     "珠海桂山岛": {"latitude": 22.1373976, "longitude": 113.824204, "level": "poi", "locality": "桂山岛", "coordinateSource": "catalog"},
     "珠海外伶仃岛": {"latitude": 22.1010538, "longitude": 114.0365034, "level": "poi", "locality": "外伶仃岛", "coordinateSource": "catalog"},
     "汕尾红海湾": {"latitude": 22.6895253, "longitude": 115.1885302, "level": "poi", "locality": "遮浪街道", "coordinateSource": "catalog"},
+    # Photon-verified resort/hotel centroids (bare-name lookups, 2026-08).
+    # Photon-verified resort/hotel centroids (bare-name lookups, 2026-08).
+    "新丰云天海": {"latitude": 23.973643, "longitude": 114.1190575, "level": "poi", "locality": "梅坑镇", "coordinateSource": "catalog"},
+    "新丰云天海温泉": {"latitude": 23.973643, "longitude": 114.1190575, "level": "poi", "locality": "梅坑镇", "coordinateSource": "catalog"},
+    "三水温泉": {"latitude": 23.3703983, "longitude": 112.9668712, "level": "poi", "locality": "南山镇", "coordinateSource": "catalog"},
+    "东莞观澜湖度假酒店": {"latitude": 22.7831684, "longitude": 114.005058, "level": "poi", "locality": "塘厦镇", "coordinateSource": "catalog"},
 }
 TEXT_SEPARATORS = "|｜丨/／+&＆()（）[]【】,，。；;、"
 
@@ -465,8 +471,10 @@ def _existing_destination_context(raw, title):
     if not city or city == str(raw.get("destination") or "").strip():
         return None
     labels = []
-    resolution = raw.get("geoResolution") if isinstance(raw.get("geoResolution"), dict) else {}
-    mining = resolution.get("mining") if isinstance(resolution.get("mining"), dict) else {}
+    resolution_value = raw.get("geoResolution")
+    resolution = resolution_value if isinstance(resolution_value, dict) else {}
+    mining_value = resolution.get("mining")
+    mining = mining_value if isinstance(mining_value, dict) else {}
     candidate_labels = mining.get("candidateLabels")
     if isinstance(candidate_labels, list):
         labels = [str(label).strip() for label in candidate_labels if str(label).strip()]
@@ -499,7 +507,10 @@ def find_region(text):
 def materialize_region(region):
     if not isinstance(region, dict):
         return None
-    coordinates = REGION_COORDINATES.get(region.get("name"))
+    region_name = region.get("name")
+    coordinates = REGION_COORDINATES.get(region_name) if isinstance(region_name, str) else None
+    if not coordinates:
+        return None
     if not coordinates:
         return None
     return {
@@ -698,8 +709,10 @@ def _place_label(text, mention):
 
 def _new_geo_resolution(destination, title, detail):
     detail = detail if isinstance(detail, dict) else {}
-    itinerary = detail.get("itinerary") if isinstance(detail.get("itinerary"), list) else []
-    highlights = detail.get("highlights") if isinstance(detail.get("highlights"), list) else []
+    itinerary_value = detail.get("itinerary")
+    itinerary = itinerary_value if isinstance(itinerary_value, list) else []
+    highlights_value = detail.get("highlights")
+    highlights = highlights_value if isinstance(highlights_value, list) else []
     return {
         "input": {
             "destination": str(destination or "").strip(),
@@ -861,9 +874,12 @@ def _prefer_existing_city_candidate(raw, resolution, current_place, current_labe
     country = str(raw.get("destinationCountry") or "").strip().lower()
     if country and country not in {"中国", "china", "cn"}:
         return current_place, current_label
-    mining = resolution.get("mining") if isinstance(resolution.get("mining"), dict) else {}
-    labels = mining.get("candidateLabels") if isinstance(mining.get("candidateLabels"), list) else []
+    mining_value = resolution.get("mining")
+    mining = mining_value if isinstance(mining_value, dict) else {}
+    candidate_labels = mining.get("candidateLabels")
+    labels = candidate_labels if isinstance(candidate_labels, list) else []
     for label in labels:
+        label = str(label or "").strip()
         label = str(label or "").strip()
         if not label or label == city or not label.startswith(city):
             continue

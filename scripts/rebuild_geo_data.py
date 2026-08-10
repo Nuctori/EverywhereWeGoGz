@@ -72,7 +72,8 @@ def _preserve_geo_mining(previous: object, current: object) -> None:
     """Keep source-mining evidence across a deterministic geo rebuild."""
     if not isinstance(previous, dict) or not isinstance(current, dict):
         return
-    old_mining = previous.get("mining") if isinstance(previous.get("mining"), dict) else {}
+    old_mining_value = previous.get("mining")
+    old_mining = old_mining_value if isinstance(old_mining_value, dict) else {}
     new_mining = current.setdefault("mining", {})
     if old_mining.get("sourceDetail") and not new_mining.get("sourceDetail"):
         new_mining["sourceDetail"] = old_mining["sourceDetail"]
@@ -121,8 +122,10 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
     ) or str(previous.get("destinationPlaceName") or "")
     expected_city = str(current.get("destinationCity") or "")
     expected_province = str(current.get("destinationProvince") or "")
-    current_resolution = current.get("geoResolution") if isinstance(current.get("geoResolution"), dict) else {}
-    current_mining = current_resolution.get("mining") if isinstance(current_resolution.get("mining"), dict) else {}
+    current_resolution_value = current.get("geoResolution")
+    current_resolution = current_resolution_value if isinstance(current_resolution_value, dict) else {}
+    current_mining_value = current_resolution.get("mining")
+    current_mining = current_mining_value if isinstance(current_mining_value, dict) else {}
     current_labels = [
         normalize_name(label)
         for label in current_mining.get("candidateLabels", [])
@@ -305,8 +308,11 @@ def main() -> None:
     tours_path = root / "public" / "data" / "tours.json"
     split_script = Path(__file__).resolve().parent / "split_tour_data.mjs"
 
-    with tours_path.open("r", encoding="utf-8-sig") as handle:
-        tours = json.load(handle)
+    try:
+        with tours_path.open("r", encoding="utf-8-sig") as handle:
+            tours = json.load(handle)
+    except (OSError, json.JSONDecodeError) as error:
+        raise SystemExit(f"failed to load tours.json: {error}") from error
     if not isinstance(tours, list) or not all(isinstance(tour, dict) for tour in tours):
         raise ValueError("public/data/tours.json must contain a list of tour objects")
 
