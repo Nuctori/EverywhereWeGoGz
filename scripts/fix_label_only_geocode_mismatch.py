@@ -12,7 +12,9 @@ OSM index, or leave the tour unmapped instead of mis-pinned.
 """
 
 import json
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -79,13 +81,66 @@ INTERNATIONAL_MARKERS = (
     "葡萄牙",
     "希腊",
     "俄罗斯",
-    "圣彼得堡",
     "莫斯科",
     "马尔代夫",
     "沙巴",
     "济州岛",
     "巴厘岛",
 )
+# 维也纳 excluded: 维也纳国际酒店 is a domestic hotel chain brand; including it
+# would wrongly clear correct subdivision pins on domestic 维也纳-branded tours.
+SUBDIVISION_SUFFIXES = ("镇", "村", "街道", "乡")
+
+# Destination labels that are generic venue/marketing words, never real places.
+GENERIC_LABELS = {
+    "餐饮", "住宿", "早餐", "午餐", "晚餐", "购物", "娱乐", "自理",
+    "参考酒店", "当地酒店", "豪华酒店", "度假村", "温泉酒店", "酒店",
+    "早餐后", "晚餐后", "入住后", "自由活动", "当地", "参考", "同级",
+}
+
+# Province detection for the domestic province-conflict rule.
+PROVINCE_ALIASES = {
+    "浙江": ("浙江", "浙"),
+    "江西": ("江西", "赣"),
+    "广东": ("广东", "粤"),
+    "广西": ("广西", "桂"),
+    "湖南": ("湖南", "湘"),
+    "福建": ("福建", "闽"),
+    "海南": ("海南", "琼"),
+    "云南": ("云南", "滇"),
+    "四川": ("四川", "川", "蜀"),
+    "贵州": ("贵州", "黔"),
+    "重庆": ("重庆", "渝"),
+    "江苏": ("江苏", "苏"),
+    "安徽": ("安徽", "皖"),
+    "湖北": ("湖北", "鄂"),
+    "河南": ("河南", "豫"),
+    "河北": ("河北", "冀"),
+    "山东": ("山东", "鲁"),
+    "山西": ("山西", "晋"),
+    "陕西": ("陕西", "陕"),
+    "甘肃": ("甘肃", "甘"),
+    "青海": ("青海", "青"),
+    "新疆": ("新疆", "新"),
+    "西藏": ("西藏", "藏"),
+    "内蒙古": ("内蒙古", "蒙"),
+    "黑龙江": ("黑龙江", "黑"),
+    "吉林": ("吉林", "吉"),
+    "辽宁": ("辽宁", "辽"),
+}
+
+
+def title_provinces(title: str) -> set[str]:
+    """Full province names mentioned in the title (via full names + abbreviations)."""
+    found = set()
+    for province, aliases in PROVINCE_ALIASES.items():
+        if any(alias in title for alias in aliases):
+            found.add(province)
+    return found
+
+
+def province_base(value: str) -> str:
+    return str(value or "").removesuffix("省").removesuffix("市").strip()
 SUBDIVISION_SUFFIXES = ("镇", "村", "街道", "乡")
 
 
@@ -137,18 +192,57 @@ def main() -> int:
             and city.endswith(SUBDIVISION_SUFFIXES)
             and source in {"geocoder", "osm"}
         )
-        if not (label_only_mismatch or intl_subdivision):
+        # Domestic: a generic marketing word is never a real destination.
+        generic_label = place in GENERIC_LABELS
+        # Domestic: city is an admin subdivision whose province contradicts the
+        # route (title names a different province, e.g. 应星楼→唐江镇(江西) on a
+        # 浙东南 route). Excluded when the label is anchored to the city
+        # (e.g. 乌镇西栅景区 in 乌镇: the label contains the city → correct).
+        domestic_province_conflict = False
+        if (
+            city.endswith(SUBDIVISION_SUFFIXES)
+            and source in {"geocoder", "osm"}
+            and place != city
+            and city not in place
+        ):
+            city_province = province_base(str(tour.get("destinationProvince") or ""))
+            title_provs = title_provinces(title)
+            if city_province and title_provs and city_province not in title_provs:
+                domestic_province_conflict = True
+        if not (
+            label_only_mismatch
+            or intl_subdivision
+            or generic_label
+            or domestic_province_conflict
+        ):
             continue
-        reason = "label-only" if label_only_mismatch else "intl-subdivision"
+        reason = (
+            "label-only"
+            if label_only_mismatch
+            else "intl-subdivision"
+            if intl_subdivision
+            else "generic-label"
+            if generic_label
+            else "domestic-province-conflict"
+        )
         clear_geo_fields(tour)
         strip_mined_label(tour, place)
         reasons.append(f"{tour.get('id')}:{place}->{city}({reason})")
         cleared += 1
 
     if cleared:
-        with TOURS_PATH.open("w", encoding="utf-8", newline="\n") as handle:
-            json.dump(tours, handle, ensure_ascii=False, separators=(",", ":"))
-            handle.write("\n")
+        TOURS_PATH.parent.mkdir(parents=True, exist_ok=True)
+        fd, temp_name = tempfile.mkstemp(
+            prefix=f".{TOURS_PATH.name}.", suffix=".tmp", dir=TOURS_PATH.parent
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
+                json.dump(tours, handle, ensure_ascii=False, separators=(",", ":"))
+                handle.write("\n")
+            os.replace(temp_name, TOURS_PATH)
+        finally:
+            if os.path.exists(temp_name):
+                os.unlink(temp_name)
     print(f"cleared wrong geocoder pins on {cleared} tours")
     for reason in reasons:
         print(reason)
