@@ -4,6 +4,7 @@
 Each rule must fire on its own case and NOT fire on similar-but-correct cases
 (the false-positive guards matter most: 乌镇西栅, 邛海, 勐仑镇, 维也纳-branded).
 """
+
 import json
 import sys
 import tempfile
@@ -28,7 +29,9 @@ def make_tour(**overrides):
         "destinationLongitude": 113.0,
         "destinationGeoLevel": "poi",
         "destinationCoordinateSource": "geocoder",
-        "geoResolution": {"mining": {"resolvedCandidate": "测试地点", "sourceCandidates": []}},
+        "geoResolution": {
+            "mining": {"resolvedCandidate": "测试地点", "sourceCandidates": []}
+        },
     }
     tour.update(overrides)
     return tour
@@ -52,46 +55,70 @@ def cleared(tour):
 
 
 def test_label_only_mismatch():
-    tour = make_tour(title="【品质4钻 活力美西】美国西部三城10日",
-                     destinationPlaceName="硅谷", destinationCity="长春市")
+    tour = make_tour(
+        title="【品质4钻 活力美西】美国西部三城10日",
+        destinationPlaceName="硅谷",
+        destinationCity="长春市",
+    )
     out = run_fix([tour])[0]
     assert cleared(out), "硅谷->长春市 must be cleared"
 
 
 def test_intl_subdivision_fires():
-    tour = make_tour(title="【东欧】奥捷匈深度游",
-                     destinationPlaceName="柏林", destinationCity="何埂镇", destinationProvince="重庆市")
+    tour = make_tour(
+        title="【东欧】奥捷匈深度游",
+        destinationPlaceName="柏林",
+        destinationCity="何埂镇",
+        destinationProvince="重庆市",
+    )
     out = run_fix([tour])[0]
     assert cleared(out), "柏林->重庆柏林镇 must be cleared"
 
 
 def test_intl_subdivision_ignores_domestic_hotel_brand():
     # 维也纳国际酒店 is a domestic chain; title must not trip the intl rule.
-    tour = make_tour(title="维也纳国际酒店2天", destinationPlaceName="维也纳国际酒店",
-                     destinationCity="麻章区", destinationProvince="广东省")
+    tour = make_tour(
+        title="维也纳国际酒店2天",
+        destinationPlaceName="维也纳国际酒店",
+        destinationCity="麻章区",
+        destinationProvince="广东省",
+    )
     out = run_fix([tour])[0]
     assert not cleared(out), "domestic 维也纳国际酒店 pin must be kept"
 
 
 def test_generic_label_fires():
-    tour = make_tour(title="潮汕拼团3天", destinationPlaceName="餐饮",
-                     destinationCity="箭杆村", destinationProvince="四川省")
+    tour = make_tour(
+        title="潮汕拼团3天",
+        destinationPlaceName="餐饮",
+        destinationCity="箭杆村",
+        destinationProvince="四川省",
+    )
     out = run_fix([tour])[0]
     assert cleared(out), "generic label 餐饮 must be cleared"
 
 
 def test_domestic_province_conflict_fires():
-    tour = make_tour(title="直飞浙东南双飞5天", destinationPlaceName="应星楼",
-                     destinationCity="唐江镇", destinationProvince="江西省")
+    tour = make_tour(
+        title="直飞浙东南双飞5天",
+        destinationPlaceName="应星楼",
+        destinationCity="唐江镇",
+        destinationProvince="江西省",
+    )
     out = run_fix([tour])[0]
     assert cleared(out), "应星楼->江西唐江镇 on 浙东南 route must be cleared"
 
 
 def test_domestic_keeps_city_anchored_label():
     # 乌镇西栅景区 in 乌镇: label contains the city -> keep.
-    tour = make_tour(title="华东五市纯玩双飞6天", destinationPlaceName="乌镇西栅景区",
-                     destinationCity="乌镇", destinationProvince="浙江省",
-                     destinationLatitude=30.755668956625, destinationLongitude=120.48030012886)
+    tour = make_tour(
+        title="华东五市纯玩双飞6天",
+        destinationPlaceName="乌镇西栅景区",
+        destinationCity="乌镇",
+        destinationProvince="浙江省",
+        destinationLatitude=30.755668956625,
+        destinationLongitude=120.48030012886,
+    )
     out = run_fix([tour])[0]
     assert not cleared(out), "乌镇西栅景区 in 乌镇 must be kept"
 
@@ -99,17 +126,33 @@ def test_domestic_keeps_city_anchored_label():
 def test_domestic_keeps_correct_subdivision():
     # 勐仑镇 (中科院植物园) and 罗定学宫->罗城街道 are correct.
     for tour in (
-        make_tour(title="奇趣版纳7天", destinationPlaceName="勐仑镇", destinationCity="勐仑镇",
-                  destinationProvince="云南省", destinationLatitude=21.937657, destinationLongitude=101.2475309),
-        make_tour(title="罗定桂花梨2天", destinationPlaceName="罗定学宫", destinationCity="罗城街道",
-                  destinationProvince="广东省", destinationLatitude=22.776515344294, destinationLongitude=111.558628705611),
+        make_tour(
+            title="奇趣版纳7天",
+            destinationPlaceName="勐仑镇",
+            destinationCity="勐仑镇",
+            destinationProvince="云南省",
+            destinationLatitude=21.937657,
+            destinationLongitude=101.2475309,
+        ),
+        make_tour(
+            title="罗定桂花梨2天",
+            destinationPlaceName="罗定学宫",
+            destinationCity="罗城街道",
+            destinationProvince="广东省",
+            destinationLatitude=22.776515344294,
+            destinationLongitude=111.558628705611,
+        ),
     ):
         out = run_fix([tour])[0]
-        assert not cleared(out), f"{tour['destinationPlaceName']} correct pin must be kept"
+        assert not cleared(out), (
+            f"{tour['destinationPlaceName']} correct pin must be kept"
+        )
 
 
 def test_no_wiener_marker():
-    assert "维也纳" not in fix.INTERNATIONAL_MARKERS, "维也纳 must not be an international marker"
+    assert "维也纳" not in fix.INTERNATIONAL_MARKERS, (
+        "维也纳 must not be an international marker"
+    )
 
 
 def main() -> None:
