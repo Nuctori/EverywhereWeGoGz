@@ -1660,26 +1660,6 @@
       "district": "龙王塘街道"
     }
   },
-  "应星楼 中国": {
-    "query": "应星楼 中国",
-    "provider": "photon",
-    "latitude": 25.8004667,
-    "longitude": 114.7643885,
-    "displayName": "应星楼 章田路 章良村 唐江镇 南康区 江西省 中国",
-    "level": "poi",
-    "locality": "紫竂下",
-    "providerScore": 80,
-    "address": {
-      "formatted": "应星楼 章田路 章良村 唐江镇 南康区 江西省 中国",
-      "country": "中国",
-      "province": "江西省",
-      "city": "唐江镇",
-      "district": "章良村",
-      "locality": "紫竂下",
-      "street": "章田路",
-      "postalCode": "341411"
-    }
-  },
   "来福士 四川 中国": {
     "query": "来福士 四川 中国",
     "provider": "photon",
@@ -1823,19 +1803,6 @@
       "city": "里洞镇",
       "district": "庄谷坪",
       "locality": "梅溪小镇"
-    }
-  },
-  "餐饮 广东 中国": {
-    "query": "餐饮 广东 中国",
-    "provider": "arcgis",
-    "latitude": 29.0248813,
-    "longitude": 104.2622072,
-    "displayName": "餐饮",
-    "level": "poi",
-    "locality": "",
-    "providerScore": 80.0,
-    "address": {
-      "formatted": "餐饮"
     }
   },
   "娱乐 中国": {
@@ -2205,23 +2172,6 @@
       "province": "广西壮族自治区",
       "city": "大新县",
       "district": "堪圩乡"
-    }
-  },
-  "陈皮村 中国": {
-    "query": "陈皮村 中国",
-    "provider": "photon",
-    "latitude": 22.80208,
-    "longitude": 111.6235,
-    "displayName": "陈皮村   双东街道 罗定市 广东省 中国",
-    "level": "town",
-    "locality": "双东街道",
-    "providerScore": 80,
-    "address": {
-      "formatted": "陈皮村   双东街道 罗定市 广东省 中国",
-      "country": "中国",
-      "province": "广东省",
-      "city": "双东街道",
-      "district": "罗定市"
     }
   },
   "那西 中国": {
@@ -2736,24 +2686,6 @@
       "district": "南阳街道"
     }
   },
-  "硅谷 中国": {
-    "query": "硅谷 中国",
-    "provider": "photon",
-    "latitude": 43.799913,
-    "longitude": 125.2292142,
-    "displayName": "硅谷街道  长春高新技术产业开发区 长春市  吉林省 中国",
-    "level": "town",
-    "locality": "长春市",
-    "providerScore": 80,
-    "address": {
-      "formatted": "硅谷街道  长春高新技术产业开发区 长春市  吉林省 中国",
-      "country": "中国",
-      "province": "吉林省",
-      "city": "长春市",
-      "district": "长春高新技术产业开发区",
-      "postalCode": "130000"
-    }
-  },
   "珍珠港 中国": {
     "query": "珍珠港 中国",
     "provider": "photon",
@@ -3053,23 +2985,6 @@
     "providerScore": 80,
     "address": {
       "formatted": "茶炊星期日, 中央街, 西兴街道, 幸福乡, 爱辉区, 黑河市, 黑龙江省, 164300, 中国"
-    }
-  },
-  "柏林 中国": {
-    "query": "柏林 中国",
-    "provider": "photon",
-    "latitude": 29.167844,
-    "longitude": 105.943906,
-    "displayName": "柏林  柏林 何埂镇 永川区 重庆市 中国",
-    "level": "poi",
-    "locality": "何埂镇",
-    "providerScore": 80,
-    "address": {
-      "formatted": "柏林  柏林 何埂镇 永川区 重庆市 中国",
-      "country": "中国",
-      "province": "重庆市",
-      "city": "何埂镇",
-      "district": "柏林"
     }
   },
   "奥本 中国": {
@@ -3739,24 +3654,6 @@
       "locality": "历史街区社区"
     }
   },
-  "餐饮 华东 中国": {
-    "query": "餐饮 华东 中国",
-    "provider": "photon",
-    "latitude": 29.0248813,
-    "longitude": 104.2622072,
-    "displayName": "餐饮 观音镇到泥溪镇 王家咀 箭杆村 叙州区 四川省 中国",
-    "level": "poi",
-    "locality": "箭杆村",
-    "providerScore": 80,
-    "address": {
-      "formatted": "餐饮 观音镇到泥溪镇 王家咀 箭杆村 叙州区 四川省 中国",
-      "country": "中国",
-      "province": "四川省",
-      "city": "箭杆村",
-      "district": "王家咀",
-      "street": "观音镇到泥溪镇"
-    }
-  },
   "虎跳峡 云南 中国": {
     "query": "虎跳峡 云南 中国",
     "provider": "photon",
@@ -3902,24 +3799,6 @@
     "providerScore": 100.0,
     "address": {
       "formatted": "贵州黔南瑶家"
-    }
-  },
-  "餐饮 贵州 中国": {
-    "query": "餐饮 贵州 中国",
-    "provider": "photon",
-    "latitude": 29.0248813,
-    "longitude": 104.2622072,
-    "displayName": "餐饮 观音镇到泥溪镇 王家咀 箭杆村 叙州区 四川省 中国",
-    "level": "poi",
-    "locality": "箭杆村",
-    "providerScore": 80,
-    "address": {
-      "formatted": "餐饮 观音镇到泥溪镇 王家咀 箭杆村 叙州区 四川省 中国",
-      "country": "中国",
-      "province": "四川省",
-      "city": "箭杆村",
-      "district": "王家咀",
-      "street": "观音镇到泥溪镇"
     }
   },
   "青岩古镇 贵州 中国": {
@@ -4419,24 +4298,6 @@
       "city": "深圳市",
       "district": "南山区",
       "postalCode": "518000"
-    }
-  },
-  "餐饮 中国": {
-    "query": "餐饮 中国",
-    "provider": "arcgis",
-    "latitude": 29.0248813,
-    "longitude": 104.2622072,
-    "displayName": "餐饮",
-    "level": "poi",
-    "locality": "",
-    "providerScore": 100.0,
-    "address": {
-      "formatted": "餐饮",
-      "country": "中国",
-      "province": "四川省",
-      "city": "箭杆村",
-      "district": "王家咀",
-      "street": "观音镇到泥溪镇"
     }
   },
   "浅水湾 广东 中国": {

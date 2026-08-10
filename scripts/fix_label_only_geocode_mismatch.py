@@ -21,6 +21,44 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TOURS_PATH = ROOT / "public" / "data" / "tours.json"
+GEOCODE_CACHE_PATH = ROOT / "scripts" / "geo-geocode-cache.json"
+
+
+def purge_poisoned_cache(cleared_labels: set[str]) -> int:
+    """Drop geocode-cache entries that produced wrong pins (e.g. 硅谷 中国).
+
+    Without this, a later rebuild can re-apply the poisoned cached result and
+    the wrong pin reappears ("clear -> reproduce" loop).
+    """
+    if not GEOCODE_CACHE_PATH.exists():
+        return 0
+    try:
+        with GEOCODE_CACHE_PATH.open(encoding="utf-8") as handle:
+            cache = json.load(handle)
+    except (OSError, json.JSONDecodeError):
+        return 0
+    if not isinstance(cache, dict):
+        return 0
+    removed = 0
+    kept = {}
+    for key, value in cache.items():
+        if any(label and label in str(key) for label in cleared_labels):
+            removed += 1
+            continue
+        kept[key] = value
+    if removed:
+        fd, temp_name = tempfile.mkstemp(
+            prefix=f".{GEOCODE_CACHE_PATH.name}.", suffix=".tmp", dir=GEOCODE_CACHE_PATH.parent
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                json.dump(kept, handle, ensure_ascii=False, indent=2)
+                handle.write("\n")
+            os.replace(temp_name, GEOCODE_CACHE_PATH)
+        finally:
+            if os.path.exists(temp_name):
+                os.unlink(temp_name)
+    return removed
 
 GEO_FIELDS = (
     "destinationCity",
@@ -171,6 +209,7 @@ def main() -> int:
 
     cleared = 0
     reasons = []
+    cleared_labels: set[str] = set()
     for tour in tours:
         place = str(tour.get("destinationPlaceName") or "")
         city = str(tour.get("destinationCity") or "")
@@ -218,6 +257,8 @@ def main() -> int:
         )
         clear_geo_fields(tour)
         strip_mined_label(tour, place)
+        if place:
+            cleared_labels.add(place)
         reasons.append(f"{tour.get('id')}:{place}->{city}({reason})")
         cleared += 1
 
@@ -234,11 +275,12 @@ def main() -> int:
         finally:
             if os.path.exists(temp_name):
                 os.unlink(temp_name)
+    cache_removed = purge_poisoned_cache(cleared_labels)
     print(f"cleared wrong geocoder pins on {cleared} tours")
     for reason in reasons:
         print(reason)
+    if cache_removed:
+        print(f"purged {cache_removed} poisoned geocode-cache entries")
     return 0
-
-
 if __name__ == "__main__":
     raise SystemExit(main())
