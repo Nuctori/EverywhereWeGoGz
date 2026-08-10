@@ -41,10 +41,19 @@ def load_json(path: Path) -> list | None:
 
 
 def main() -> int:
-    places = load_json(PLACES_PATH)
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--base", type=Path, default=ROOT / "public" / "data",
+                        help="data dir (default public/data); use with git-extracted snapshots")
+    args = parser.parse_args()
+    reconfigure = getattr(sys.stdout, "reconfigure", None)
+    if callable(reconfigure):
+        reconfigure(encoding="utf-8")
+    places = load_json(args.base / "geo-places.json")
     if places is None:
         return 1
-    tours = load_json(TOURS_PATH) or []
+    tours = load_json(args.base / "tours.json") or []
 
     by_level: dict[str, int] = {}
     by_source: dict[str, int] = {}

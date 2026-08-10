@@ -23,8 +23,6 @@ permissions:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   WECHAT_PROCESSED_ARTICLE_VARIABLE: WECHAT_PROCESSED_ARTICLE_IDS
-  CHECK_RESULT_PATH: ${{ runner.temp }}/wechat-article-check.json
-  SUP_RESULT_PATH: ${{ runner.temp }}/wechat-sup-result.json
   SUP_API_BASE_URL: https://sup.yileyuns.com
 
 jobs:
@@ -46,6 +44,7 @@ jobs:
           WECHAT_APP_SECRET: ${{ secrets.WECHAT_APP_SECRET }}
           PREVIOUS_ARTICLE_IDS: ${{ vars.WECHAT_PROCESSED_ARTICLE_IDS }}
           LEGACY_ARTICLE_ID: ${{ vars.WECHAT_LAST_ARTICLE_ID }}
+          CHECK_RESULT_PATH: ${{ runner.temp }}/wechat-article-check.json
         run: |
           node scripts/check_wechat_published_article.mjs \
             --count 20 \
@@ -89,6 +88,8 @@ jobs:
       - name: Preflight or create SUP orders through publish server
         id: sup_orders
         env:
+          CHECK_RESULT_PATH: ${{ runner.temp }}/wechat-article-check.json
+          SUP_RESULT_PATH: ${{ runner.temp }}/wechat-sup-result.json
           SUP_APP_ID: ${{ secrets.SUP_APP_ID }}
           SUP_APP_SECRET: ${{ secrets.SUP_APP_SECRET }}
           SUP_PURCHASE_ENABLED: ${{ vars.SUP_PURCHASE_ENABLED }}

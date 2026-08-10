@@ -349,10 +349,6 @@ jobs:
       - name: Clear wrong geocoder pins (label-only mismatches)
         run: python -u scripts/fix_label_only_geocode_mismatch.py
 
-      - name: Optimize cached images
-        run: npm run data:images:webp
-        run: npm run data:images:webp
-
       - name: Split merged data
         run: npm run data:split
 
