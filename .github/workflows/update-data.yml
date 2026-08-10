@@ -51,6 +51,7 @@ jobs:
           npm run audit:update-data-workflow
           npm run test:osm-poi-workflow
           python scripts/test_osm_poi_index.py
+          python scripts/test_fix_label_only_geocode_mismatch.py
 
   crawl-jrt365:
     runs-on: ubuntu-latest
@@ -343,11 +344,11 @@ jobs:
       - name: Split merged data
         run: npm run data:split
 
-      - name: Resolve mined destination coordinates
-        run: python -u scripts/rebuild_geo_data.py --network
-
       - name: Clear wrong geocoder pins (label-only mismatches)
         run: python -u scripts/fix_label_only_geocode_mismatch.py
+
+      - name: Resolve mined destination coordinates
+        run: python -u scripts/rebuild_geo_data.py --network
 
       - name: Split merged data
         run: npm run data:split

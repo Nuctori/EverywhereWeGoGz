@@ -121,7 +121,7 @@ PROVINCE_ALIASES = {
     "浙江": ("浙江", "浙"),
     "江西": ("江西", "赣"),
     "广东": ("广东", "粤"),
-    "广西": ("广西", "桂"),
+    "广西": ("广西",),
     "湖南": ("湖南", "湘"),
     "福建": ("福建", "闽"),
     "海南": ("海南", "琼"),
@@ -159,9 +159,6 @@ def title_provinces(title: str) -> set[str]:
 
 def province_base(value: str) -> str:
     return str(value or "").removesuffix("省").removesuffix("市").strip()
-
-
-SUBDIVISION_SUFFIXES = ("镇", "村", "街道", "乡")
 
 
 def is_international_route(title: str) -> bool:

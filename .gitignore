@@ -39,5 +39,16 @@ output/
 post-to-wechat/
 audit/data-integrity-report.json
 
+# Geo/test artifacts
+geo-cache.json
+.preview_tmp/
+.review_tmp/
+.pi-tmp-*
+
+# pi-pair / subagent infra
+.pi/
+.pi-subagents/
+.playwright-cli/
+
 weekly-wechat-posts/
 *.osm.pbf
