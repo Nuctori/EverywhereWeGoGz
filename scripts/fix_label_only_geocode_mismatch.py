@@ -6,6 +6,8 @@ Two classes:
    Chinese administrative division and the wrong city was written back.
 2. International route + Chinese subdivision city (镇/村/街道/乡): e.g.
    柏林 -> 重庆柏林镇, 珍珠港 -> 广西江平镇, 黑山(国) -> 辽宁西关村.
+3. Domestic generic marketing labels (餐饮 etc.) and subdivision cities whose
+   province contradicts the route (应星楼 -> 江西唐江镇 on a 浙东南 route).
 
 Clearing the wrong fields lets the next rebuild re-resolve from the catalog /
 OSM index, or leave the tour unmapped instead of mis-pinned.
@@ -37,86 +39,33 @@ GEO_FIELDS = (
     "geoStatus",
 )
 
-INTERNATIONAL_MARKERS = (
-    "出境",
-    "境外",
-    "欧洲",
-    "东欧",
-    "西欧",
-    "南欧",
-    "北欧",
-    "奥地利",
-    "匈牙利",
-    "捷克",
-    "布达佩斯",
-    "布拉格",
-    "布拉格",
-    "多瑙河",
-    "美泉宫",
-    "申根",
-    "国际航班",
-    "摩洛哥",
-    "地中海",
-    "邮轮",
-    "西意法突",
-    "突尼斯",
-    "埃及",
-    "土耳其",
-    "日本",
-    "泰国",
-    "越南",
-    "美国",
-    "加拿大",
-    "澳大利亚",
-    "新西兰",
-    "非洲",
-    "美洲",
-    "阿联酋",
-    "夏威夷",
-    "德国",
-    "法国",
-    "意大利",
-    "瑞士",
-    "西班牙",
-    "葡萄牙",
-    "希腊",
-    "俄罗斯",
-    "莫斯科",
-    "马尔代夫",
-    "沙巴",
-    "济州岛",
-    "巴厘岛",
+# Space-separated single line: the auto-formatter repeatedly duplicated
+# multi-line tuple entries; a single line + frozenset is immune to that.
+_INTERNATIONAL_MARKERS_TEXT = (
+    "出境 境外 欧洲 东欧 西欧 南欧 北欧 奥地利 匈牙利 捷克 布达佩斯 布拉格 "
+    "多瑙河 美泉宫 申根 国际航班 摩洛哥 地中海 邮轮 西意法突 突尼斯 埃及 "
+    "土耳其 日本 泰国 越南 美国 加拿大 澳大利亚 新西兰 非洲 美洲 阿联酋 "
+    "夏威夷 德国 法国 意大利 瑞士 西班牙 葡萄牙 希腊 俄罗斯 莫斯科 马尔代夫 "
+    "沙巴 济州岛 巴厘岛"
 )
 # 维也纳 excluded: 维也纳国际酒店 is a domestic hotel chain brand; including it
 # would wrongly clear correct subdivision pins on domestic 维也纳-branded tours.
+INTERNATIONAL_MARKERS = frozenset(_INTERNATIONAL_MARKERS_TEXT.split())
+
 SUBDIVISION_SUFFIXES = ("镇", "村", "街道", "乡")
 
 # Destination labels that are generic venue/marketing words, never real places.
-GENERIC_LABELS = {
-    "餐饮",
-    "住宿",
-    "早餐",
-    "午餐",
-    "晚餐",
-    "购物",
-    "娱乐",
-    "自理",
-    "参考酒店",
-    "当地酒店",
-    "豪华酒店",
-    "度假村",
-    "温泉酒店",
-    "酒店",
-    "早餐后",
-    "晚餐后",
-    "入住后",
-    "自由活动",
-    "当地",
-    "参考",
-    "同级",
-}
+GENERIC_LABELS = frozenset((
+    "餐饮", "住宿", "早餐", "午餐", "晚餐", "购物", "娱乐", "自理",
+    "参考酒店", "当地酒店", "豪华酒店", "度假村", "温泉酒店", "酒店",
+    "早餐后", "晚餐后", "入住后", "自由活动", "当地", "参考", "同级",
+))
 
 # Province detection for the domestic province-conflict rule.
+# Single-char abbreviations are only included when they are unambiguous in
+# tour titles: 川 (银川), 新 (新会), 青 (青岛), 吉 (吉安), 黑 (黑山) and 桂
+# (桂花) are common substrings of unrelated words and were dropped after
+# false-positive clears. Full province names remain the primary signal.
 PROVINCE_ALIASES = {
     "浙江": ("浙江", "浙"),
     "江西": ("江西", "赣"),
@@ -126,7 +75,7 @@ PROVINCE_ALIASES = {
     "福建": ("福建", "闽"),
     "海南": ("海南", "琼"),
     "云南": ("云南", "滇"),
-    "四川": ("四川", "川", "蜀"),
+    "四川": ("四川", "蜀"),
     "贵州": ("贵州", "黔"),
     "重庆": ("重庆", "渝"),
     "江苏": ("江苏", "苏"),
@@ -138,12 +87,13 @@ PROVINCE_ALIASES = {
     "山西": ("山西", "晋"),
     "陕西": ("陕西", "陕"),
     "甘肃": ("甘肃", "甘"),
-    "青海": ("青海", "青"),
-    "新疆": ("新疆", "新"),
+    "青海": ("青海",),
+    "新疆": ("新疆",),
     "西藏": ("西藏", "藏"),
+    "宁夏": ("宁夏",),
     "内蒙古": ("内蒙古", "蒙"),
-    "黑龙江": ("黑龙江", "黑"),
-    "吉林": ("吉林", "吉"),
+    "黑龙江": ("黑龙江",),
+    "吉林": ("吉林",),
     "辽宁": ("辽宁", "辽"),
 }
 
@@ -158,7 +108,11 @@ def title_provinces(title: str) -> set[str]:
 
 
 def province_base(value: str) -> str:
-    return str(value or "").removesuffix("省").removesuffix("市").strip()
+    v = str(value or "").strip()
+    for suffix in ("壮族自治区", "回族自治区", "维吾尔自治区", "自治区", "省", "市"):
+        if v.endswith(suffix):
+            return v[: -len(suffix)]
+    return v
 
 
 def is_international_route(title: str) -> bool:
@@ -212,9 +166,9 @@ def main() -> int:
         # Domestic: a generic marketing word is never a real destination.
         generic_label = place in GENERIC_LABELS
         # Domestic: city is an admin subdivision whose province contradicts the
-        # route (title names a different province, e.g. 应星楼→唐江镇(江西) on a
+        # route (title names a different province, e.g. 应星楼->唐江镇(江西) on a
         # 浙东南 route). Excluded when the label is anchored to the city
-        # (e.g. 乌镇西栅景区 in 乌镇: the label contains the city → correct).
+        # (e.g. 乌镇西栅景区 in 乌镇: the label contains the city -> correct).
         domestic_province_conflict = False
         if (
             city.endswith(SUBDIVISION_SUFFIXES)

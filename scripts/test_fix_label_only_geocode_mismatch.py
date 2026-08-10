@@ -109,6 +109,21 @@ def test_domestic_province_conflict_fires():
     assert cleared(out), "应星楼->江西唐江镇 on 浙东南 route must be cleared"
 
 
+def test_abbreviation_false_positives_kept():
+    # Single-char abbreviations like 川(银川) / 新(新会) / 青(青岛) must not
+    # trip the province-conflict rule for unrelated provinces.
+    for tour in (
+        make_tour(title="银川西夏王陵 宁夏双飞", destinationPlaceName="西夏王陵",
+                  destinationCity="镇北堡镇", destinationProvince="宁夏回族自治区"),
+        make_tour(title="新会陈皮文化之旅 江门出发", destinationPlaceName="陈皮村",
+                  destinationCity="双水镇", destinationProvince="广东省"),
+        make_tour(title="青岛栈桥海滨双飞", destinationPlaceName="栈桥",
+                  destinationCity="湛山街道", destinationProvince="山东省"),
+    ):
+        out = run_fix([tour])[0]
+        assert not cleared(out), f"{tour['title']} correct pin must be kept"
+
+
 def test_domestic_keeps_city_anchored_label():
     # 乌镇西栅景区 in 乌镇: label contains the city -> keep.
     tour = make_tour(
@@ -155,6 +170,12 @@ def test_no_wiener_marker():
     )
 
 
+def test_no_duplicate_markers():
+    assert len(fix.INTERNATIONAL_MARKERS) == len(set(fix.INTERNATIONAL_MARKERS)), (
+        "INTERNATIONAL_MARKERS must not contain duplicates"
+    )
+
+
 def main() -> None:
     tests = [
         test_label_only_mismatch,
@@ -162,9 +183,11 @@ def main() -> None:
         test_intl_subdivision_ignores_domestic_hotel_brand,
         test_generic_label_fires,
         test_domestic_province_conflict_fires,
+        test_abbreviation_false_positives_kept,
         test_domestic_keeps_city_anchored_label,
         test_domestic_keeps_correct_subdivision,
         test_no_wiener_marker,
+        test_no_duplicate_markers,
     ]
     for test in tests:
         test()
