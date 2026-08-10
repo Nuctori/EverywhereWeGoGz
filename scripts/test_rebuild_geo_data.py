@@ -24,7 +24,10 @@ def test_rebuild_updates_geo_fields_without_replacing_tour_content():
     assert tour["itinerary"] == [{"title": "乌镇"}]
     assert tour["destinationPlaceName"] == "乌镇"
     assert tour["destinationLatitude"] == 30.7539
-    assert tour["meta"]["dataQuality"]["fieldSources"]["destinationPlaceName"] == "inferred"
+    assert (
+        tour["meta"]["dataQuality"]["fieldSources"]["destinationPlaceName"]
+        == "inferred"
+    )
     assert tour["geoResolution"]["final"]["status"] == "destination-only"
 
 
@@ -38,7 +41,9 @@ def test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback():
         "destinationLongitude": 112.4651,
     }
 
-    before, after = rebuild([tour], geocode_cache_path=Path("tmp-nonexistent-geo-cache.json"))
+    before, after = rebuild(
+        [tour], geocode_cache_path=Path("tmp-nonexistent-geo-cache.json")
+    )
 
     assert before == 1
     assert after == 1
@@ -171,7 +176,9 @@ def test_rebuild_discards_historical_cross_city_geocoder_point():
         "geoSource": "geocoder",
     }
 
-    _, after = rebuild([tour], geocode_cache_path=Path("tmp-nonexistent-geo-cache.json"))
+    _, after = rebuild(
+        [tour], geocode_cache_path=Path("tmp-nonexistent-geo-cache.json")
+    )
 
     assert after == 1
     assert tour["destinationCoordinateSource"] == "fallback"
@@ -195,7 +202,9 @@ def test_rebuild_drops_historical_foreign_city_as_domestic_hotel():
         "destinationGeoLevel": "poi",
         "destinationCoordinateSource": "osm",
         "destinationCoordinatePrecision": "exact",
-        "destinationAddress": {"formatted": "\u7ef4\u4e5f\u7eb3\u56fd\u9645\u9152\u5e97, \u5e7f\u4e1c\u7701, \u4e2d\u56fd"},
+        "destinationAddress": {
+            "formatted": "\u7ef4\u4e5f\u7eb3\u56fd\u9645\u9152\u5e97, \u5e7f\u4e1c\u7701, \u4e2d\u56fd"
+        },
         "geoConfidence": "high",
         "geoSource": "osm",
     }
@@ -288,6 +297,25 @@ def test_rebuild_prefers_city_anchored_destination_over_incidental_itinerary_poi
 
     assert tour["destinationPlaceName"] == "新兴象窝"
     assert tour["destinationCoordinateSource"] == "fallback"
+
+
+def test_rebuild_does_not_pin_domestic_cruise_to_foreign_city():
+    # 雅典娜号 is a domestic Yangtze cruise ship; the catalog city 雅典
+    # (Greece) must not be matched from the ship name substring.
+    tour = {
+        "id": "tour_athena_cruise",
+        "title": "精选雅典娜号·长江三峡+小三峡+宜昌·双飞5天",
+        "destination": "广东",
+    }
+
+    rebuild([tour])
+
+    assert tour["destinationCountry"] == "中国"
+    assert (
+        tour["destinationLatitude"] != 37.9838
+        or tour["destinationLongitude"] != 23.7275
+    )
+    assert tour["destinationPlaceName"] != "雅典"
 
 
 if __name__ == "__main__":

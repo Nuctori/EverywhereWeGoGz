@@ -1091,6 +1091,22 @@ def _raw_destination_is_explicit_departure(title, label):
     return any(re.search(pattern, value) for pattern in explicit_patterns)
 
 
+# Foreign brand/ship/company names that collide with catalog city names as
+# substrings (雅典娜号 ship, 罗马假日 brand, 威尼斯人 resort, 巴黎春天 mall).
+# When a city alias is followed by one of these, the mention is a brand name,
+# not a destination. Mirrors the D-007 维也纳 decision: curated exclusion set,
+# zero collateral (a broad CJK-tail guard mis-pinned 91 legit international
+# tours like 新加坡环球影城 / 加拿大落基山).
+BRAND_CONTINUATIONS = {
+    "雅典娜": "雅典",
+    "罗马假日": "罗马",
+    "威尼斯人": "威尼斯",
+    "巴黎春天": "巴黎",
+    "米兰达": "米兰",
+}
+
+
+
 def _iter_place_mentions(text):
     value = str(text or "")
     matches = []
@@ -1100,12 +1116,25 @@ def _iter_place_mentions(text):
             index = value.find(alias, start)
             if index < 0:
                 break
+            end = index + len(alias)
+            # A catalog city name that prefixes a known foreign brand/ship name
+            # (雅典娜号, 罗马假日) is a collision, not a destination mention.
+            tail_run = value[end : end + 6]
+            if any(
+                brand.startswith(alias)
+                and brand[len(alias):]
+                and tail_run.startswith(brand[len(alias):])
+                for brand in BRAND_CONTINUATIONS
+                if BRAND_CONTINUATIONS[brand] == place.get("name")
+            ):
+                start = index + 1
+                continue
             matches.append(
                 {
                     "place": place,
                     "alias": alias,
                     "start": index,
-                    "end": index + len(alias),
+                    "end": end,
                 }
             )
             start = index + 1
