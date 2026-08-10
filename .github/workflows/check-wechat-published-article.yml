@@ -3,11 +3,11 @@ name: Check WeChat Articles And SUP Orders
 on:
   schedule:
     # 10:00 Asia/Shanghai = 02:00 UTC.
-    - cron: '0 2 * * *'
+    - cron: "0 2 * * *"
   workflow_dispatch:
     inputs:
       execute_orders:
-        description: 'Create real SUP orders for newly detected articles'
+        description: "Create real SUP orders for newly detected articles"
         required: true
         default: false
         type: boolean

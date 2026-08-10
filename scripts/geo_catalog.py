@@ -10,46 +10,207 @@ PLACE_ROWS = [
     ("中山", "中国", "广东", 22.5176, 113.3926, ("中山", "中山市", "神湾")),
     ("梅州", "中国", "广东", 24.2886, 116.122, ("梅州", "梅州市", "五华热矿泥")),
     ("深圳", "中国", "广东", 22.5431, 114.0579, ("深圳", "深圳市")),
-    ("珠海", "中国", "广东", 22.271, 113.5767, ("珠海", "珠海市", "海泉湾", "东澳岛", "桂山岛", "外伶仃岛")),
-    ("惠州", "中国", "广东", 23.1115, 114.4152, ("惠州", "惠州市", "巽寮湾", "双月湾", "罗浮山")),
-    ("清远", "中国", "广东", 23.6818, 113.056, ("清远", "清远市", "美林湖", "古龙峡", "清泉湾")),
+    (
+        "珠海",
+        "中国",
+        "广东",
+        22.271,
+        113.5767,
+        ("珠海", "珠海市", "海泉湾", "东澳岛", "桂山岛", "外伶仃岛"),
+    ),
+    (
+        "惠州",
+        "中国",
+        "广东",
+        23.1115,
+        114.4152,
+        ("惠州", "惠州市", "巽寮湾", "双月湾", "罗浮山"),
+    ),
+    (
+        "清远",
+        "中国",
+        "广东",
+        23.6818,
+        113.056,
+        ("清远", "清远市", "美林湖", "古龙峡", "清泉湾"),
+    ),
     ("韶关", "中国", "广东", 24.8104, 113.5972, ("韶关", "韶关市", "南华寺", "丹霞山")),
-    ("肇庆", "中国", "广东", 23.0472, 112.4651, ("肇庆", "肇庆市", "蓝钟", "七星岩", "紫云谷")),
+    (
+        "肇庆",
+        "中国",
+        "广东",
+        23.0472,
+        112.4651,
+        ("肇庆", "肇庆市", "蓝钟", "七星岩", "紫云谷"),
+    ),
     ("佛山", "中国", "广东", 23.0218, 113.1219, ("佛山", "佛山市")),
     ("江门", "中国", "广东", 22.5787, 113.0815, ("江门", "江门市")),
-    ("阳江", "中国", "广东", 21.8579, 111.9822, ("阳江", "阳江市", "海陵岛", "闸坡", "北洛秘境", "大角湾", "瓦晒湾")),
-    ("汕头", "中国", "广东", 23.3541, 116.6819, ("汕头", "汕头市", "南澳岛", "青澳湾", "贝沙湾")),
+    (
+        "阳江",
+        "中国",
+        "广东",
+        21.8579,
+        111.9822,
+        ("阳江", "阳江市", "海陵岛", "闸坡", "北洛秘境", "大角湾", "瓦晒湾"),
+    ),
+    (
+        "汕头",
+        "中国",
+        "广东",
+        23.3541,
+        116.6819,
+        ("汕头", "汕头市", "南澳岛", "青澳湾", "贝沙湾"),
+    ),
     ("汕尾", "中国", "广东", 22.7869, 115.3753, ("汕尾", "汕尾市", "红海湾")),
     ("潮州", "中国", "广东", 23.6567, 116.6226, ("潮州", "潮州市")),
     ("湛江", "中国", "广东", 21.2707, 110.3594, ("湛江", "湛江市")),
     ("茂名", "中国", "广东", 21.6627, 110.9255, ("茂名", "茂名市")),
     ("贺州", "中国", "广西", 24.4036, 111.5668, ("贺州", "贺州市", "姑婆山", "西溪")),
-    ("龙门", "中国", "广东", 23.723, 114.25, ("龙门", "龙门县", "南昆山", "云顶", "地派", "竹溪山境", "美泉谷", "玥泉庄", "逸泉庄", "尚天然", "林丰", "温泉大观园", "庄上庄", "颐和温泉", "康桥温泉", "南昆山居")),
-    ("河源", "中国", "广东", 23.7463, 114.7007, ("河源", "河源市", "万绿湖", "叶园温泉")),
+    (
+        "龙门",
+        "中国",
+        "广东",
+        23.723,
+        114.25,
+        (
+            "龙门",
+            "龙门县",
+            "南昆山",
+            "云顶",
+            "地派",
+            "竹溪山境",
+            "美泉谷",
+            "玥泉庄",
+            "逸泉庄",
+            "尚天然",
+            "林丰",
+            "温泉大观园",
+            "庄上庄",
+            "颐和温泉",
+            "康桥温泉",
+            "南昆山居",
+        ),
+    ),
+    (
+        "河源",
+        "中国",
+        "广东",
+        23.7463,
+        114.7007,
+        ("河源", "河源市", "万绿湖", "叶园温泉"),
+    ),
     ("连平", "中国", "广东", 24.3696, 114.4887, ("连平", "连平县", "鹰嘴桃")),
     ("德庆", "中国", "广东", 23.1456, 111.7859, ("德庆", "德庆县", "悦城龙母祖庙")),
-    ("翁源", "中国", "广东", 24.3506, 114.1301, ("翁源", "翁源县", "翁山源温泉", "龙泰翁山源温泉")),
+    (
+        "翁源",
+        "中国",
+        "广东",
+        24.3506,
+        114.1301,
+        ("翁源", "翁源县", "翁山源温泉", "龙泰翁山源温泉"),
+    ),
     ("开平", "中国", "广东", 22.376, 112.6985, ("开平", "开平市", "赤坎古镇")),
     ("鹤山", "中国", "广东", 22.7659, 112.9643, ("鹤山", "鹤山市")),
     ("三水", "中国", "广东", 23.1557, 112.8966, ("三水", "三水区", "三水温泉")),
-    ("阳西", "中国", "广东", 21.7529, 111.6177, ("阳西", "阳西县", "沙扒湾", "咸水矿温泉")),
-    ("新丰", "中国", "广东", 24.0592, 114.207, ("新丰", "新丰县", "雅致酒店", "云天海", "江源温泉", "温德姆花园酒店")),
+    (
+        "阳西",
+        "中国",
+        "广东",
+        21.7529,
+        111.6177,
+        ("阳西", "阳西县", "沙扒湾", "咸水矿温泉"),
+    ),
+    (
+        "新丰",
+        "中国",
+        "广东",
+        24.0592,
+        114.207,
+        ("新丰", "新丰县", "雅致酒店", "云天海", "江源温泉", "温德姆花园酒店"),
+    ),
     ("英德", "中国", "广东", 24.1861, 113.401, ("英德", "英德市", "海螺国际大酒店")),
     ("安远", "中国", "江西", 25.1346, 115.3939, ("安远", "安远县", "三百山", "热泉河")),
     ("阳山", "中国", "广东", 24.4706, 112.641, ("阳山", "阳山县", "阳山第一峰")),
-    ("新兴", "中国", "广东", 22.695, 112.225, ("新兴", "新兴县", "象窝", "龙山温泉", "禅域小镇", "悦天下", "三页温泉", "天露山")),
-    ("台山", "中国", "广东", 22.2514, 112.7938, ("台山", "台山市", "泽汇温泉", "金水台", "富丽湾")),
-    ("恩平", "中国", "广东", 22.1833, 112.3051, ("恩平", "恩平市", "山泉湾", "喜运来温泉", "温泉国际酒店")),
+    (
+        "新兴",
+        "中国",
+        "广东",
+        22.695,
+        112.225,
+        (
+            "新兴",
+            "新兴县",
+            "象窝",
+            "龙山温泉",
+            "禅域小镇",
+            "悦天下",
+            "三页温泉",
+            "天露山",
+        ),
+    ),
+    (
+        "台山",
+        "中国",
+        "广东",
+        22.2514,
+        112.7938,
+        ("台山", "台山市", "泽汇温泉", "金水台", "富丽湾"),
+    ),
+    (
+        "恩平",
+        "中国",
+        "广东",
+        22.1833,
+        112.3051,
+        ("恩平", "恩平市", "山泉湾", "喜运来温泉", "温泉国际酒店"),
+    ),
     ("佛冈", "中国", "广东", 23.879, 113.532, ("佛冈", "佛冈县", "聚龙湾", "森波拉")),
-    ("增城", "中国", "广东", 23.2904, 113.8108, ("增城", "增城区", "三英温泉", "高滩温泉", "合汇温泉")),
-    ("从化", "中国", "广东", 23.5483, 113.5867, ("从化", "从化区", "圣托利温泉庄园", "壹泉湾", "卓思道", "望谷温泉", "大丰门", "流溪河国家森林公园")),
+    (
+        "增城",
+        "中国",
+        "广东",
+        23.2904,
+        113.8108,
+        ("增城", "增城区", "三英温泉", "高滩温泉", "合汇温泉"),
+    ),
+    (
+        "从化",
+        "中国",
+        "广东",
+        23.5483,
+        113.5867,
+        (
+            "从化",
+            "从化区",
+            "圣托利温泉庄园",
+            "壹泉湾",
+            "卓思道",
+            "望谷温泉",
+            "大丰门",
+            "流溪河国家森林公园",
+        ),
+    ),
     ("新会", "中国", "广东", 22.4583, 113.034, ("新会", "新会区", "古兜温泉")),
     ("连州", "中国", "广东", 24.7814, 112.377, ("连州", "连州市", "地下河", "水晶梨")),
     ("玉林", "中国", "广西", 22.6364, 110.1648, ("玉林", "玉林市", "璟象九龙温泉")),
     ("郴州", "中国", "湖南", 25.7705, 113.0149, ("郴州", "郴州市", "莽山")),
     ("龙南", "中国", "江西", 24.8647, 114.789, ("龙南", "龙南县", "汉仙温泉")),
-    ("汝城", "中国", "湖南", 25.5327, 113.6858, ("汝城", "汝城县", "官溪温泉", "热水河")),
-    ("泉州", "中国", "福建", 24.8741, 118.6757, ("泉州", "泉州市", "洛伽寺", "蟳蜅渔村")),
+    (
+        "汝城",
+        "中国",
+        "湖南",
+        25.5327,
+        113.6858,
+        ("汝城", "汝城县", "官溪温泉", "热水河"),
+    ),
+    (
+        "泉州",
+        "中国",
+        "福建",
+        24.8741,
+        118.6757,
+        ("泉州", "泉州市", "洛伽寺", "蟳蜅渔村"),
+    ),
     ("平潭", "中国", "福建", 25.5037, 119.791, ("平潭", "平潭县", "猴研岛", "长江澳")),
     ("漳州", "中国", "福建", 24.5129, 117.6471, ("漳州", "漳州市", "土楼")),
     ("永定", "中国", "福建", 24.723, 116.732, ("永定", "永定土楼")),
@@ -261,46 +422,83 @@ PLACES = [
 ]
 REGION_ROWS = [
     ("中国", None, ("中国",)),
-    ("广东", "广东", ("广东",)), ("广西", "广西", ("广西",)),
-    ("贵州", "贵州", ("贵州",)), ("山东", "山东", ("山东",)),
-    ("河南", "河南", ("河南",)), ("江西", "江西", ("江西",)),
-    ("湖北", "湖北", ("湖北",)), ("重庆", "重庆", ("重庆",)),
-    ("华东", None, ("华东", "江南")), ("青甘", None, ("青甘", "青海甘肃")),
+    ("广东", "广东", ("广东",)),
+    ("广西", "广西", ("广西",)),
+    ("贵州", "贵州", ("贵州",)),
+    ("山东", "山东", ("山东",)),
+    ("河南", "河南", ("河南",)),
+    ("江西", "江西", ("江西",)),
+    ("湖北", "湖北", ("湖北",)),
+    ("重庆", "重庆", ("重庆",)),
+    ("华东", None, ("华东", "江南")),
+    ("青甘", None, ("青甘", "青海甘肃")),
     ("港澳", None, ("港澳", "港澳地区")),
-    ("湖南", "湖南", ("湖南",)), ("福建", "福建", ("福建",)),
-    ("海南", "海南", ("海南",)), ("云南", "云南", ("云南",)),
-    ("四川", "四川", ("四川",)), ("陕西", "陕西", ("陕西",)),
-    ("新疆", "新疆", ("新疆",)), ("西藏", "西藏", ("西藏",)),
-    ("内蒙古", "内蒙古", ("内蒙古", "内蒙")), ("黑龙江", "黑龙江", ("黑龙江",)),
-    ("越南", None, ("越南",)), ("泰国", None, ("泰国",)),
-    ("日本", None, ("日本",)), ("韩国", None, ("韩国",)),
-    ("新加坡", None, ("新加坡",)), ("马来西亚", None, ("马来西亚",)),
-    ("印度尼西亚", None, ("印度尼西亚", "印尼")), ("澳大利亚", None, ("澳大利亚",)),
-    ("法国", None, ("法国",)), ("英国", None, ("英国",)), ("美国", None, ("美国",)),
+    ("湖南", "湖南", ("湖南",)),
+    ("福建", "福建", ("福建",)),
+    ("海南", "海南", ("海南",)),
+    ("云南", "云南", ("云南",)),
+    ("四川", "四川", ("四川",)),
+    ("陕西", "陕西", ("陕西",)),
+    ("新疆", "新疆", ("新疆",)),
+    ("西藏", "西藏", ("西藏",)),
+    ("内蒙古", "内蒙古", ("内蒙古", "内蒙")),
+    ("黑龙江", "黑龙江", ("黑龙江",)),
+    ("越南", None, ("越南",)),
+    ("泰国", None, ("泰国",)),
+    ("日本", None, ("日本",)),
+    ("韩国", None, ("韩国",)),
+    ("新加坡", None, ("新加坡",)),
+    ("马来西亚", None, ("马来西亚",)),
+    ("印度尼西亚", None, ("印度尼西亚", "印尼")),
+    ("澳大利亚", None, ("澳大利亚",)),
+    ("法国", None, ("法国",)),
+    ("英国", None, ("英国",)),
+    ("美国", None, ("美国",)),
 ]
 REGION_COORDINATES = {
     "中国": (35.8617, 104.1954),
-    "广东": (23.3790, 113.7633), "广西": (23.7248, 108.8076),
-    "贵州": (26.8154, 106.8748), "山东": (36.6512, 117.1140),
-    "河南": (34.7657, 113.7536), "江西": (27.6140, 115.7221),
-    "湖北": (30.9756, 112.2707), "重庆": (29.6417, 107.8780),
-    "华东": (31.2304, 121.4737), "青甘": (36.0611, 103.8343),
-    "港澳": (22.3193, 114.1694),
-    "湖南": (27.6104, 111.7088), "江西": (27.6140, 115.7221),
-    "福建": (26.0789, 117.9874), "海南": (19.1959, 109.7453),
-    "四川": (30.6171, 102.7103), "云南": (25.0453, 101.8652),
-    "新疆": (41.7483, 85.6177), "西藏": (31.6500, 88.0924),
-    "内蒙古": (44.0935, 113.9448), "湖北": (30.9756, 112.2707),
-    "山东": (36.6512, 117.1140), "河南": (34.7657, 113.7536),
+    "广东": (23.3790, 113.7633),
+    "广西": (23.7248, 108.8076),
+    "贵州": (26.8154, 106.8748),
+    "山东": (36.6512, 117.1140),
+    "河南": (34.7657, 113.7536),
+    "江西": (27.6140, 115.7221),
+    "湖北": (30.9756, 112.2707),
     "重庆": (29.6417, 107.8780),
-    "越南": (16.0471, 108.2068), "泰国": (15.8700, 100.9925),
-    "日本": (36.2048, 138.2529), "韩国": (35.9078, 127.7669),
-    "新西兰": (-40.9006, 174.8860), "澳大利亚": (-25.2744, 133.7751),
-    "印度": (20.5937, 78.9629), "印度尼西亚": (-0.7893, 113.9213),
-    "英国": (55.3781, -3.4360), "法国": (46.2276, 2.2137),
+    "华东": (31.2304, 121.4737),
+    "青甘": (36.0611, 103.8343),
+    "港澳": (22.3193, 114.1694),
+    "湖南": (27.6104, 111.7088),
+    "江西": (27.6140, 115.7221),
+    "福建": (26.0789, 117.9874),
+    "海南": (19.1959, 109.7453),
+    "四川": (30.6171, 102.7103),
+    "云南": (25.0453, 101.8652),
+    "新疆": (41.7483, 85.6177),
+    "西藏": (31.6500, 88.0924),
+    "内蒙古": (44.0935, 113.9448),
+    "湖北": (30.9756, 112.2707),
+    "山东": (36.6512, 117.1140),
+    "河南": (34.7657, 113.7536),
+    "重庆": (29.6417, 107.8780),
+    "越南": (16.0471, 108.2068),
+    "泰国": (15.8700, 100.9925),
+    "日本": (36.2048, 138.2529),
+    "韩国": (35.9078, 127.7669),
+    "新西兰": (-40.9006, 174.8860),
+    "澳大利亚": (-25.2744, 133.7751),
+    "印度": (20.5937, 78.9629),
+    "印度尼西亚": (-0.7893, 113.9213),
+    "英国": (55.3781, -3.4360),
+    "法国": (46.2276, 2.2137),
 }
 REGIONS = [
-    {"name": name, "country": "中国" if province else name, "province": province, "aliases": aliases}
+    {
+        "name": name,
+        "country": "中国" if province else name,
+        "province": province,
+        "aliases": aliases,
+    }
     for name, province, aliases in REGION_ROWS
 ]
 ALIAS_ROWS = sorted(
@@ -309,7 +507,13 @@ ALIAS_ROWS = sorted(
     reverse=True,
 )
 ALIAS_PARENT_COUNTS = {
-    alias: len({place["name"] for candidate_alias, place in ALIAS_ROWS if candidate_alias == alias})
+    alias: len(
+        {
+            place["name"]
+            for candidate_alias, place in ALIAS_ROWS
+            if candidate_alias == alias
+        }
+    )
     for alias, _ in ALIAS_ROWS
 }
 REGION_ALIAS_ROWS = sorted(
@@ -325,20 +529,65 @@ NEARBY_PROVINCES_BY_DEPARTURE = {
     "江苏": {"上海", "浙江", "安徽", "山东"},
 }
 DEPARTURE_PATTERNS = (
-    re.compile(r"(?:从|由|自|在|于)(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)出发"),
-    re.compile(r"(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)(?:往返|集合|起程|出发|直通车|高铁|动车|飞机)"),
-    re.compile(r"(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)(?:[/／](?:广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)){0,2}(?:[A-Za-z]{0,4})(?:起止|起程|出发|直飞(?:往返)?|往返|联运)"),
-    re.compile(r"(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)[-—至到]"),
+    re.compile(
+        r"(?:从|由|自|在|于)(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)出发"
+    ),
+    re.compile(
+        r"(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)(?:往返|集合|起程|出发|直通车|高铁|动车|飞机)"
+    ),
+    re.compile(
+        r"(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)(?:[/／](?:广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)){0,2}(?:[A-Za-z]{0,4})(?:起止|起程|出发|直飞(?:往返)?|往返|联运)"
+    ),
+    re.compile(
+        r"(广州|深圳|珠海|佛山|东莞|惠州|清远|江门|中山|肇庆|汕头|北京|上海)[-—至到]"
+    ),
 )
-DEPARTURE_MARKERS = re.compile(r"(?:起止|起程|出发|往返|直飞|直航|直达|集合|起飞|返程|回程|联运|双飞)")
+DEPARTURE_MARKERS = re.compile(
+    r"(?:起止|起程|出发|往返|直飞|直航|直达|集合|起飞|返程|回程|联运|双飞)"
+)
 DEPARTURE_CITY_NAMES = (
-    "广州", "深圳", "珠海", "佛山", "东莞", "惠州", "清远", "江门", "中山", "肇庆", "汕头", "北京", "上海",
+    "广州",
+    "深圳",
+    "珠海",
+    "佛山",
+    "东莞",
+    "惠州",
+    "清远",
+    "江门",
+    "中山",
+    "肇庆",
+    "汕头",
+    "北京",
+    "上海",
 )
 DEPARTURE_CITY_PATTERN = "|".join(map(re.escape, DEPARTURE_CITY_NAMES))
 AIRLINE_CODES = "AK|TK|CZ|MS|KQ|EK|SV|CA|HU|MU|MF|HO|9C|3U|FM|ZH|春秋|吉祥"
 AIRLINE_NAMES = "南航|南方航空|国航|海航|东航|厦航|深航|川航|春秋|吉祥|海南航空|中国南方航空|埃及航空|斯航"
 PLACE_LABEL_SUFFIXES = re.compile(
-    "|".join(sorted(("海泉湾", "红海湾", "云顶", "森林公园", "度假区", "古镇", "古村", "庄园", "乐园", "景区", "酒店", "温泉", "草原", "湾", "岛", "湖"), key=len, reverse=True))
+    "|".join(
+        sorted(
+            (
+                "海泉湾",
+                "红海湾",
+                "云顶",
+                "森林公园",
+                "度假区",
+                "古镇",
+                "古村",
+                "庄园",
+                "乐园",
+                "景区",
+                "酒店",
+                "温泉",
+                "草原",
+                "湾",
+                "岛",
+                "湖",
+            ),
+            key=len,
+            reverse=True,
+        )
+    )
 )
 
 
@@ -355,65 +604,336 @@ def _valid_coordinate_pair(latitude, longitude):
 
 ADMINISTRATIVE_ALIAS_SUFFIXES = ("省", "市", "县", "区", "旗")
 EXPLICIT_POI_NAMES = {
-    "仙本那", "普者黑", "三门海", "喀纳斯", "黄果树", "神农架", "庐山", "三清山", "婺源",
-    "普吉岛", "巴厘岛",
-    "古龙峡", "清泉湾", "望谷温泉", "大丰门", "流溪河国家森林公园", "北洛秘境", "大角湾", "瓦晒湾",
-    "七星岩", "紫云谷",
-    "盐洲岛", "亚婆角", "香港迪士尼", "乌镇", "周庄", "南浔", "拈花湾", "牛首山", "东山岛", "南门湾",
-    "九寨沟", "黄龙", "都江堰", "西岭雪山", "稻城亚丁", "海螺沟", "四姑娘山", "峨眉山",
-    "泸沽湖", "禾木村", "赛里木湖", "那拉提", "独库公路", "青海湖", "茶卡盐湖", "泰山", "武夷山",
-    "济州岛", "沙巴", "下龙湾", "美奈", "棉花堡", "卡帕多奇亚", "费特希耶", "吴哥窟",
+    "仙本那",
+    "普者黑",
+    "三门海",
+    "喀纳斯",
+    "黄果树",
+    "神农架",
+    "庐山",
+    "三清山",
+    "婺源",
+    "普吉岛",
+    "巴厘岛",
+    "古龙峡",
+    "清泉湾",
+    "望谷温泉",
+    "大丰门",
+    "流溪河国家森林公园",
+    "北洛秘境",
+    "大角湾",
+    "瓦晒湾",
+    "七星岩",
+    "紫云谷",
+    "盐洲岛",
+    "亚婆角",
+    "香港迪士尼",
+    "乌镇",
+    "周庄",
+    "南浔",
+    "拈花湾",
+    "牛首山",
+    "东山岛",
+    "南门湾",
+    "九寨沟",
+    "黄龙",
+    "都江堰",
+    "西岭雪山",
+    "稻城亚丁",
+    "海螺沟",
+    "四姑娘山",
+    "峨眉山",
+    "泸沽湖",
+    "禾木村",
+    "赛里木湖",
+    "那拉提",
+    "独库公路",
+    "青海湖",
+    "茶卡盐湖",
+    "泰山",
+    "武夷山",
+    "济州岛",
+    "沙巴",
+    "下龙湾",
+    "美奈",
+    "棉花堡",
+    "卡帕多奇亚",
+    "费特希耶",
+    "吴哥窟",
 }
 EXPLICIT_NAMED_ALIASES = {"海陵岛", "闸坡", "南昆山"}
 EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
-    "马拉喀什", "巴黎", "伦敦", "纽约", "悉尼", "墨尔本", "布里斯班", "凯恩斯", "奥克兰", "基督城", "皇后镇",
-    "清迈", "胡志明市", "芽庄", "马尔代夫", "莫斯科", "圣彼得堡", "香格里拉", "腾冲", "芒市", "瑞丽", "普洱", "弥勒", "吐鲁番", "林芝",
-    "芭提雅", "清莱", "岘港", "迪拜", "阿布扎比", "伊斯坦布尔", "加德满都", "万象", "万荣", "琅勃拉邦", "金边",
+    "马拉喀什",
+    "巴黎",
+    "伦敦",
+    "纽约",
+    "悉尼",
+    "墨尔本",
+    "布里斯班",
+    "凯恩斯",
+    "奥克兰",
+    "基督城",
+    "皇后镇",
+    "清迈",
+    "胡志明市",
+    "芽庄",
+    "马尔代夫",
+    "莫斯科",
+    "圣彼得堡",
+    "香格里拉",
+    "腾冲",
+    "芒市",
+    "瑞丽",
+    "普洱",
+    "弥勒",
+    "吐鲁番",
+    "林芝",
+    "芭提雅",
+    "清莱",
+    "岘港",
+    "迪拜",
+    "阿布扎比",
+    "伊斯坦布尔",
+    "加德满都",
+    "万象",
+    "万荣",
+    "琅勃拉邦",
+    "金边",
 }
 
 # Public place centroids curated from OpenStreetMap/Nominatim results. These
 # overrides keep a named destination from inheriting the parent city's center.
 NAMED_PLACE_COORDINATES = {
-    "惠州双月湾": {"latitude": 22.6002691, "longitude": 114.9023659, "level": "poi", "locality": "平海镇", "coordinateSource": "catalog"},
-    "惠州巽寮湾": {"latitude": 22.6919016, "longitude": 114.7432732, "level": "poi", "locality": "平海镇", "coordinateSource": "catalog"},
-    "汕头南澳岛": {"latitude": 23.4401058, "longitude": 117.0762086, "level": "poi", "locality": "南澳县", "coordinateSource": "catalog"},
-    "阳江海陵岛": {"latitude": 21.572282, "longitude": 111.831507, "level": "poi", "locality": "闸坡镇", "coordinateSource": "catalog"},
-    "阳江闸坡": {"latitude": 21.572282, "longitude": 111.831507, "level": "town", "locality": "闸坡镇", "coordinateSource": "catalog"},
-    "阳江大角湾": {"latitude": 21.5703427, "longitude": 111.8379394, "level": "poi", "locality": "闸坡镇", "coordinateSource": "catalog"},
-    "阳西沙扒湾": {"latitude": 21.5094051, "longitude": 111.4606822, "level": "poi", "locality": "沙扒镇", "coordinateSource": "catalog"},
-    "北海涠洲岛": {"latitude": 21.0402578, "longitude": 109.1104199, "level": "poi", "locality": "涠洲镇", "coordinateSource": "catalog"},
-    "龙门南昆山": {"latitude": 23.6656177, "longitude": 113.8759987, "level": "poi", "locality": "南昆山生态旅游区", "coordinateSource": "catalog"},
-    "龙门云顶": {"latitude": 23.577073, "longitude": 113.9987374, "level": "poi", "locality": "永汉镇", "coordinateSource": "catalog"},
-    "龙门云顶温泉": {"latitude": 23.577073, "longitude": 113.9987374, "level": "poi", "locality": "永汉镇", "coordinateSource": "catalog"},
-    "惠州罗浮山": {"latitude": 23.197315, "longitude": 114.0648348, "level": "poi", "locality": "长宁镇", "coordinateSource": "catalog"},
-    "清远美林湖温泉": {"latitude": 23.5016559, "longitude": 113.0446176, "level": "poi", "locality": "石角镇", "coordinateSource": "catalog"},
-    "清远古龙峡": {"latitude": 23.7826343, "longitude": 112.953104, "level": "poi", "locality": "笔架林场", "coordinateSource": "catalog"},
-    "清远清泉湾": {"latitude": 23.7826343, "longitude": 112.953104, "level": "poi", "locality": "笔架林场", "coordinateSource": "catalog"},
-    "新兴禅域小镇": {"latitude": 22.6457588, "longitude": 112.2243061, "level": "poi", "locality": "太平镇", "coordinateSource": "catalog"},
-    "从化望谷温泉": {"latitude": 23.6317048, "longitude": 113.6354098, "level": "poi", "locality": "温泉镇", "coordinateSource": "catalog"},
-    "平潭猴研岛": {"latitude": 25.4599309, "longitude": 119.8545787, "level": "poi", "locality": "海坛街道", "coordinateSource": "catalog"},
-    "韶关丹霞山": {"latitude": 24.9577249, "longitude": 113.7999644, "level": "poi", "locality": "周田镇", "coordinateSource": "catalog"},
-    "开平赤坎古镇": {"latitude": 22.3270909, "longitude": 112.5866131, "level": "poi", "locality": "赤坎镇", "coordinateSource": "catalog"},
-    "大理洱海": {"latitude": 25.7830826, "longitude": 100.181115, "level": "poi", "locality": "大理市", "coordinateSource": "catalog"},
-    "敦煌莫高窟": {"latitude": 40.0373163, "longitude": 94.8042114, "level": "poi", "locality": "敦煌市", "coordinateSource": "catalog"},
-    "珠海海泉湾": {"latitude": 22.0722469, "longitude": 113.1109757, "level": "poi", "locality": "平沙镇", "coordinateSource": "catalog"},
-    "珠海东澳岛": {"latitude": 22.0217607, "longitude": 113.7014202, "level": "poi", "locality": "东澳岛", "coordinateSource": "catalog"},
-    "珠海桂山岛": {"latitude": 22.1373976, "longitude": 113.824204, "level": "poi", "locality": "桂山岛", "coordinateSource": "catalog"},
-    "珠海外伶仃岛": {"latitude": 22.1010538, "longitude": 114.0365034, "level": "poi", "locality": "外伶仃岛", "coordinateSource": "catalog"},
-    "汕尾红海湾": {"latitude": 22.6895253, "longitude": 115.1885302, "level": "poi", "locality": "遮浪街道", "coordinateSource": "catalog"},
+    "惠州双月湾": {
+        "latitude": 22.6002691,
+        "longitude": 114.9023659,
+        "level": "poi",
+        "locality": "平海镇",
+        "coordinateSource": "catalog",
+    },
+    "惠州巽寮湾": {
+        "latitude": 22.6919016,
+        "longitude": 114.7432732,
+        "level": "poi",
+        "locality": "平海镇",
+        "coordinateSource": "catalog",
+    },
+    "汕头南澳岛": {
+        "latitude": 23.4401058,
+        "longitude": 117.0762086,
+        "level": "poi",
+        "locality": "南澳县",
+        "coordinateSource": "catalog",
+    },
+    "阳江海陵岛": {
+        "latitude": 21.572282,
+        "longitude": 111.831507,
+        "level": "poi",
+        "locality": "闸坡镇",
+        "coordinateSource": "catalog",
+    },
+    "阳江闸坡": {
+        "latitude": 21.572282,
+        "longitude": 111.831507,
+        "level": "town",
+        "locality": "闸坡镇",
+        "coordinateSource": "catalog",
+    },
+    "阳江大角湾": {
+        "latitude": 21.5703427,
+        "longitude": 111.8379394,
+        "level": "poi",
+        "locality": "闸坡镇",
+        "coordinateSource": "catalog",
+    },
+    "阳西沙扒湾": {
+        "latitude": 21.5094051,
+        "longitude": 111.4606822,
+        "level": "poi",
+        "locality": "沙扒镇",
+        "coordinateSource": "catalog",
+    },
+    "北海涠洲岛": {
+        "latitude": 21.0402578,
+        "longitude": 109.1104199,
+        "level": "poi",
+        "locality": "涠洲镇",
+        "coordinateSource": "catalog",
+    },
+    "龙门南昆山": {
+        "latitude": 23.6656177,
+        "longitude": 113.8759987,
+        "level": "poi",
+        "locality": "南昆山生态旅游区",
+        "coordinateSource": "catalog",
+    },
+    "龙门云顶": {
+        "latitude": 23.577073,
+        "longitude": 113.9987374,
+        "level": "poi",
+        "locality": "永汉镇",
+        "coordinateSource": "catalog",
+    },
+    "龙门云顶温泉": {
+        "latitude": 23.577073,
+        "longitude": 113.9987374,
+        "level": "poi",
+        "locality": "永汉镇",
+        "coordinateSource": "catalog",
+    },
+    "惠州罗浮山": {
+        "latitude": 23.197315,
+        "longitude": 114.0648348,
+        "level": "poi",
+        "locality": "长宁镇",
+        "coordinateSource": "catalog",
+    },
+    "清远美林湖温泉": {
+        "latitude": 23.5016559,
+        "longitude": 113.0446176,
+        "level": "poi",
+        "locality": "石角镇",
+        "coordinateSource": "catalog",
+    },
+    "清远古龙峡": {
+        "latitude": 23.7826343,
+        "longitude": 112.953104,
+        "level": "poi",
+        "locality": "笔架林场",
+        "coordinateSource": "catalog",
+    },
+    "清远清泉湾": {
+        "latitude": 23.7826343,
+        "longitude": 112.953104,
+        "level": "poi",
+        "locality": "笔架林场",
+        "coordinateSource": "catalog",
+    },
+    "新兴禅域小镇": {
+        "latitude": 22.6457588,
+        "longitude": 112.2243061,
+        "level": "poi",
+        "locality": "太平镇",
+        "coordinateSource": "catalog",
+    },
+    "从化望谷温泉": {
+        "latitude": 23.6317048,
+        "longitude": 113.6354098,
+        "level": "poi",
+        "locality": "温泉镇",
+        "coordinateSource": "catalog",
+    },
+    "平潭猴研岛": {
+        "latitude": 25.4599309,
+        "longitude": 119.8545787,
+        "level": "poi",
+        "locality": "海坛街道",
+        "coordinateSource": "catalog",
+    },
+    "韶关丹霞山": {
+        "latitude": 24.9577249,
+        "longitude": 113.7999644,
+        "level": "poi",
+        "locality": "周田镇",
+        "coordinateSource": "catalog",
+    },
+    "开平赤坎古镇": {
+        "latitude": 22.3270909,
+        "longitude": 112.5866131,
+        "level": "poi",
+        "locality": "赤坎镇",
+        "coordinateSource": "catalog",
+    },
+    "大理洱海": {
+        "latitude": 25.7830826,
+        "longitude": 100.181115,
+        "level": "poi",
+        "locality": "大理市",
+        "coordinateSource": "catalog",
+    },
+    "敦煌莫高窟": {
+        "latitude": 40.0373163,
+        "longitude": 94.8042114,
+        "level": "poi",
+        "locality": "敦煌市",
+        "coordinateSource": "catalog",
+    },
+    "珠海海泉湾": {
+        "latitude": 22.0722469,
+        "longitude": 113.1109757,
+        "level": "poi",
+        "locality": "平沙镇",
+        "coordinateSource": "catalog",
+    },
+    "珠海东澳岛": {
+        "latitude": 22.0217607,
+        "longitude": 113.7014202,
+        "level": "poi",
+        "locality": "东澳岛",
+        "coordinateSource": "catalog",
+    },
+    "珠海桂山岛": {
+        "latitude": 22.1373976,
+        "longitude": 113.824204,
+        "level": "poi",
+        "locality": "桂山岛",
+        "coordinateSource": "catalog",
+    },
+    "珠海外伶仃岛": {
+        "latitude": 22.1010538,
+        "longitude": 114.0365034,
+        "level": "poi",
+        "locality": "外伶仃岛",
+        "coordinateSource": "catalog",
+    },
+    "汕尾红海湾": {
+        "latitude": 22.6895253,
+        "longitude": 115.1885302,
+        "level": "poi",
+        "locality": "遮浪街道",
+        "coordinateSource": "catalog",
+    },
     # Photon-verified resort/hotel centroids (bare-name lookups, 2026-08).
     # Photon-verified resort/hotel centroids (bare-name lookups, 2026-08).
-    "新丰云天海": {"latitude": 23.973643, "longitude": 114.1190575, "level": "poi", "locality": "梅坑镇", "coordinateSource": "catalog"},
-    "新丰云天海温泉": {"latitude": 23.973643, "longitude": 114.1190575, "level": "poi", "locality": "梅坑镇", "coordinateSource": "catalog"},
-    "三水温泉": {"latitude": 23.3703983, "longitude": 112.9668712, "level": "poi", "locality": "南山镇", "coordinateSource": "catalog"},
-    "东莞观澜湖度假酒店": {"latitude": 22.7831684, "longitude": 114.005058, "level": "poi", "locality": "塘厦镇", "coordinateSource": "catalog"},
+    "新丰云天海": {
+        "latitude": 23.973643,
+        "longitude": 114.1190575,
+        "level": "poi",
+        "locality": "梅坑镇",
+        "coordinateSource": "catalog",
+    },
+    "新丰云天海温泉": {
+        "latitude": 23.973643,
+        "longitude": 114.1190575,
+        "level": "poi",
+        "locality": "梅坑镇",
+        "coordinateSource": "catalog",
+    },
+    "三水温泉": {
+        "latitude": 23.3703983,
+        "longitude": 112.9668712,
+        "level": "poi",
+        "locality": "南山镇",
+        "coordinateSource": "catalog",
+    },
+    "东莞观澜湖度假酒店": {
+        "latitude": 22.7831684,
+        "longitude": 114.005058,
+        "level": "poi",
+        "locality": "塘厦镇",
+        "coordinateSource": "catalog",
+    },
 }
 TEXT_SEPARATORS = "|｜丨/／+&＆()（）[]【】,，。；;、"
 
 
 def _is_named_alias(alias, canonical_name):
     """Treat catalog aliases as POIs unless they are administrative spellings."""
-    return bool(alias) and alias != canonical_name and not alias.endswith(ADMINISTRATIVE_ALIAS_SUFFIXES)
+    return (
+        bool(alias)
+        and alias != canonical_name
+        and not alias.endswith(ADMINISTRATIVE_ALIAS_SUFFIXES)
+    )
 
 
 def _is_inline_named_alias(text, mention):
@@ -429,7 +949,7 @@ def _is_inline_named_alias(text, mention):
     # inserts a city nickname, county, or marketing text before the alias.
     if ALIAS_PARENT_COUNTS.get(alias) == 1:
         return True
-    prefix = str(text or "")[:mention["start"]].rstrip()
+    prefix = str(text or "")[: mention["start"]].rstrip()
     # A catalog alias appearing after its canonical city is a named place,
     # even when the source inserts an unregistered county or town in between.
     return canonical_name in prefix
@@ -443,7 +963,12 @@ def _materialize_named_place(place, label):
         # A named alias is more specific than its catalog parent. Until a
         # trusted geometry is available, keep the semantic place but do not
         # inherit the parent's city-centre coordinate.
-        return {**place, "latitude": None, "longitude": None, "coordinateSource": "inferred"}
+        return {
+            **place,
+            "latitude": None,
+            "longitude": None,
+            "coordinateSource": "inferred",
+        }
     return place
 
 
@@ -452,7 +977,11 @@ def _destination_level(place, label):
         return "country"
     if place.get("level"):
         return place["level"]
-    return "poi" if label != place["name"] or place["name"] in EXPLICIT_POI_NAMES else "city"
+    return (
+        "poi"
+        if label != place["name"] or place["name"] in EXPLICIT_POI_NAMES
+        else "city"
+    )
 
 
 def _destination_coordinate_source(place, label):
@@ -477,10 +1006,13 @@ def _existing_destination_context(raw, title):
     mining = mining_value if isinstance(mining_value, dict) else {}
     candidate_labels = mining.get("candidateLabels")
     if isinstance(candidate_labels, list):
-        labels = [str(label).strip() for label in candidate_labels if str(label).strip()]
+        labels = [
+            str(label).strip() for label in candidate_labels if str(label).strip()
+        ]
     title_text = str(title or "")
     has_evidence = (
-        place != city and place in title_text
+        place != city
+        and place in title_text
         or any(label != city and city in label for label in labels)
     )
     if not has_evidence:
@@ -508,7 +1040,9 @@ def materialize_region(region):
     if not isinstance(region, dict):
         return None
     region_name = region.get("name")
-    coordinates = REGION_COORDINATES.get(region_name) if isinstance(region_name, str) else None
+    coordinates = (
+        REGION_COORDINATES.get(region_name) if isinstance(region_name, str) else None
+    )
     if not coordinates:
         return None
     if not coordinates:
@@ -566,12 +1100,14 @@ def _iter_place_mentions(text):
             index = value.find(alias, start)
             if index < 0:
                 break
-            matches.append({
-                "place": place,
-                "alias": alias,
-                "start": index,
-                "end": index + len(alias),
-            })
+            matches.append(
+                {
+                    "place": place,
+                    "alias": alias,
+                    "start": index,
+                    "end": index + len(alias),
+                }
+            )
             start = index + 1
     matches.sort(key=lambda item: (item["start"], -len(item["alias"])))
     selected = []
@@ -594,13 +1130,14 @@ def _is_departure_mention(text, mention):
     value = str(text or "")
     start = mention["start"]
     end = mention["end"]
-    after = value[end:min(len(value), end + 16)]
+    after = value[end : min(len(value), end + 16)]
     after_text = after.lstrip()
     if after_text.startswith("往返") and mention["place"]["country"] != "中国":
         return False
-    before_text = value[max(0, start - 16):start].rstrip()
+    before_text = value[max(0, start - 16) : start].rstrip()
     if re.search(rf"(?:{DEPARTURE_CITY_PATTERN})$", before_text) and re.match(
-        r"(?:往返|起止|起程|出发|直飞|直航|直达)", after_text,
+        r"(?:往返|起止|起程|出发|直飞|直航|直达)",
+        after_text,
     ):
         return False
     if DEPARTURE_MARKERS.match(after_text) or re.match(
@@ -610,9 +1147,13 @@ def _is_departure_mention(text, mention):
         return True
     if re.match(r"(?:站|机场|港口)?(?:往返|起止|起程|出发)", after_text):
         return True
-    if re.match(r"(?:市区|市内|机场|码头|车站|高铁站)(?:往返|接送|接驳|交通)", after_text):
+    if re.match(
+        r"(?:市区|市内|机场|码头|车站|高铁站)(?:往返|接送|接驳|交通)", after_text
+    ):
         return True
-    if mention["alias"].endswith("市") and re.match(r"(?:区|内)(?:往返|接送|接驳|交通)", after_text):
+    if mention["alias"].endswith("市") and re.match(
+        r"(?:区|内)(?:往返|接送|接驳|交通)", after_text
+    ):
         return True
     if re.match(r"(?:南|北|东|西)?(?:起止|往返|起程|出发)", after_text):
         return True
@@ -622,38 +1163,60 @@ def _is_departure_mention(text, mention):
         re.IGNORECASE,
     ):
         return True
-    if mention["place"]["name"] in DEPARTURE_CITY_NAMES and re.match(rf"(?:{AIRLINE_NAMES})(?:直飞|联运|航班|往返)?", after_text):
+    if mention["place"]["name"] in DEPARTURE_CITY_NAMES and re.match(
+        rf"(?:{AIRLINE_NAMES})(?:直飞|联运|航班|往返)?", after_text
+    ):
         return True
     if re.match(
         rf"(?:[/／或和及、,，]?\s*(?:{DEPARTURE_CITY_PATTERN}))+\s*(?:多地)?(?:起止|起程|出发|往返|直飞|联运|双飞)",
         after_text,
     ):
         return True
-    if re.search(rf"(?:{DEPARTURE_CITY_PATTERN})\s*[/／或和及、,，]\s*$", before_text) and re.match(
-        r"(?:起止|起程|出发|往返|直飞|联运|双飞)", after_text,
+    if re.search(
+        rf"(?:{DEPARTURE_CITY_PATTERN})\s*[/／或和及、,，]\s*$", before_text
+    ) and re.match(
+        r"(?:起止|起程|出发|往返|直飞|联运|双飞)",
+        after_text,
     ):
         return True
-    if mention["place"]["name"] in DEPARTURE_CITY_NAMES and re.search(rf"(?:{AIRLINE_NAMES}|{AIRLINE_CODES})[^\u4e00-\u9fff]{{0,12}}$", before_text, re.IGNORECASE):
+    if mention["place"]["name"] in DEPARTURE_CITY_NAMES and re.search(
+        rf"(?:{AIRLINE_NAMES}|{AIRLINE_CODES})[^\u4e00-\u9fff]{{0,12}}$",
+        before_text,
+        re.IGNORECASE,
+    ):
         return True
-    if mention["place"]["name"] in DEPARTURE_CITY_NAMES and re.search(rf"(?:{AIRLINE_NAMES}|{AIRLINE_CODES})\s*$", before_text, re.IGNORECASE) and re.match(
-        r"(?:[-—－]?\s*(?:大兴|浦东|白云|萧山|马德里|法兰克福|赫尔辛基|直飞|直航|双直航))", after_text,
+    if (
+        mention["place"]["name"] in DEPARTURE_CITY_NAMES
+        and re.search(
+            rf"(?:{AIRLINE_NAMES}|{AIRLINE_CODES})\s*$", before_text, re.IGNORECASE
+        )
+        and re.match(
+            r"(?:[-—－]?\s*(?:大兴|浦东|白云|萧山|马德里|法兰克福|赫尔辛基|直飞|直航|双直航))",
+            after_text,
+        )
     ):
         return True
     if re.match(r"(?:阪东|东阪|多地)", after_text):
         return True
     if re.match(r"(?:[-—－]\s*)", after) and re.search(
-        rf"(?:{AIRLINE_CODES})\s*$", before_text, re.IGNORECASE,
+        rf"(?:{AIRLINE_CODES})\s*$",
+        before_text,
+        re.IGNORECASE,
     ):
         return True
     next_catalog_mention = next(
         (
-            candidate for candidate in _iter_place_mentions(value)
-            if candidate["start"] >= end and candidate["start"] - end <= 8
+            candidate
+            for candidate in _iter_place_mentions(value)
+            if candidate["start"] >= end
+            and candidate["start"] - end <= 8
             and candidate["place"]["name"] != mention["place"]["name"]
         ),
         None,
     )
-    next_catalog_gap = value[end:next_catalog_mention["start"]] if next_catalog_mention else ""
+    next_catalog_gap = (
+        value[end : next_catalog_mention["start"]] if next_catalog_mention else ""
+    )
     if (
         mention["place"]["name"] in DEPARTURE_CITY_NAMES
         and next_catalog_mention
@@ -667,17 +1230,20 @@ def _is_departure_mention(text, mention):
         return True
     dash_match = re.match(r"\s*[-—－]\s*", after)
     if dash_match:
-        dash_tail = after[dash_match.end():]
+        dash_tail = after[dash_match.end() :]
         immediate_match = re.match(r"[\u4e00-\u9fff]+", dash_tail)
         immediate = immediate_match.group(0) if immediate_match else ""
-        inline_alias = mention["alias"] != mention["place"]["name"] and value[:start].rstrip().endswith(mention["place"]["name"])
+        inline_alias = mention["alias"] != mention["place"]["name"] and value[
+            :start
+        ].rstrip().endswith(mention["place"]["name"])
         if mention["place"]["name"] in DEPARTURE_CITY_NAMES and (
-            any(alias and immediate.startswith(alias) for alias, _ in ALIAS_ROWS) or inline_alias
+            any(alias and immediate.startswith(alias) for alias, _ in ALIAS_ROWS)
+            or inline_alias
         ):
             return True
         if mention["place"]["name"] in DEPARTURE_CITY_NAMES and find_region(dash_tail):
             return True
-    before = value[max(0, start - 8):start]
+    before = value[max(0, start - 8) : start]
     if re.search(r"(?:从|由|自|在|于)\s*$", before):
         return True
     return False
@@ -688,12 +1254,16 @@ def _place_label(text, mention):
     alias = mention["alias"]
     canonical_name = mention["place"]["name"]
     if _is_named_alias(alias, canonical_name):
-        prefix = f"{canonical_name}{alias}" if not alias.startswith(canonical_name) else alias
-        tail_match = re.match(r"[\u4e00-\u9fff]{0,18}", value[mention["end"]:])
+        prefix = (
+            f"{canonical_name}{alias}"
+            if not alias.startswith(canonical_name)
+            else alias
+        )
+        tail_match = re.match(r"[\u4e00-\u9fff]{0,18}", value[mention["end"] :])
         tail = tail_match.group(0) if tail_match else ""
         suffix_matches = list(PLACE_LABEL_SUFFIXES.finditer(tail))
         if suffix_matches and suffix_matches[0].start() == 0:
-            return f"{prefix}{tail[:suffix_matches[0].end()]}".strip()
+            return f"{prefix}{tail[: suffix_matches[0].end()]}".strip()
         return prefix
     end = mention["end"]
     tail_match = re.match(r"[\u4e00-\u9fff]{0,18}", value[end:])
@@ -703,7 +1273,7 @@ def _place_label(text, mention):
     if tail.startswith(("回", "返", "去", "住", "入住", "返回")):
         return mention["place"]["name"]
     if suffix_match:
-        return f"{canonical_name}{tail[:suffix_match.end()]}".strip()
+        return f"{canonical_name}{tail[: suffix_match.end()]}".strip()
     return canonical_name
 
 
@@ -719,10 +1289,13 @@ def _new_geo_resolution(destination, title, detail):
             "hasTitle": bool(str(title or "").strip()),
             "itineraryDays": len(itinerary),
             "accommodationDays": sum(
-                1 for day in itinerary
+                1
+                for day in itinerary
                 if isinstance(day, dict) and str(day.get("accommodation") or "").strip()
             ),
-            "highlightCount": sum(1 for value in highlights if str(value or "").strip()),
+            "highlightCount": sum(
+                1 for value in highlights if str(value or "").strip()
+            ),
         },
         "mining": {
             "status": "not-run",
@@ -746,7 +1319,11 @@ def _append_unique(values, value):
 def mine_destination_place(raw, title, destination, detail=None, resolution=None):
     """Extract a named destination from title/detail text without treating departure as destination."""
     destination_text = str(destination or "").strip()
-    resolution = resolution if isinstance(resolution, dict) else _new_geo_resolution(destination_text, title, detail)
+    resolution = (
+        resolution
+        if isinstance(resolution, dict)
+        else _new_geo_resolution(destination_text, title, detail)
+    )
     mining = resolution.setdefault("mining", {})
     title_departure_names = {
         mention["place"]["name"]
@@ -756,21 +1333,34 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
     direct_place, direct_label = _find_direct_place_match(destination_text)
     if direct_place and direct_place["name"] not in title_departure_names:
         materialized = _materialize_named_place(direct_place, direct_label)
-        mining["status"] = "resolved" if materialized.get("latitude") is not None else "no-coordinate"
+        mining["status"] = (
+            "resolved" if materialized.get("latitude") is not None else "no-coordinate"
+        )
         _append_unique(mining.setdefault("candidateLabels", []), direct_label)
         _append_unique(mining.setdefault("candidateSources", []), "destination")
         if materialized.get("latitude") is None:
-            _append_unique(mining.setdefault("reasons", []), "named-alias-without-trusted-coordinate")
+            _append_unique(
+                mining.setdefault("reasons", []),
+                "named-alias-without-trusted-coordinate",
+            )
         return materialized, direct_label, "medium", "local-place-catalog"
-    if direct_place and direct_place["name"] in title_departure_names and _raw_destination_is_explicit_departure(
-        title,
-        direct_label,
+    if (
+        direct_place
+        and direct_place["name"] in title_departure_names
+        and _raw_destination_is_explicit_departure(
+            title,
+            direct_label,
+        )
     ):
         _append_unique(mining.setdefault("rejectedLabels", []), direct_label)
-        _append_unique(mining.setdefault("reasons", []), "destination-matches-departure")
+        _append_unique(
+            mining.setdefault("reasons", []), "destination-matches-departure"
+        )
     elif direct_place:
         materialized = _materialize_named_place(direct_place, direct_label)
-        mining["status"] = "resolved" if materialized.get("latitude") is not None else "no-coordinate"
+        mining["status"] = (
+            "resolved" if materialized.get("latitude") is not None else "no-coordinate"
+        )
         _append_unique(mining.setdefault("candidateLabels", []), direct_label)
         _append_unique(mining.setdefault("candidateSources", []), "destination")
         return materialized, direct_label, "medium", "local-place-catalog"
@@ -800,13 +1390,15 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
                 mention["alias"] == mention["place"]["name"]
                 and mention["place"]["name"] in EXPLICIT_TITLE_DESTINATION_NAMES
             )
-            candidates.append((
-                text_index,
-                mention["start"],
-                mention["place"],
-                label,
-                is_named_place,
-            ))
+            candidates.append(
+                (
+                    text_index,
+                    mention["start"],
+                    mention["place"],
+                    label,
+                    is_named_place,
+                )
+            )
 
     raw_candidate_count = len(candidates)
     title_candidates = [item for item in candidates if item[0] == 0]
@@ -827,7 +1419,8 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
     region = find_region(destination_text)
     if region and region.get("province"):
         in_region = [
-            item for item in candidates
+            item
+            for item in candidates
             if item[2].get("province") == region["province"]
             and item[2].get("country") == region.get("country")
         ]
@@ -852,15 +1445,21 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
         candidates = named_candidates
     elif not candidates and destination_text not in {"", "其他", "全国"}:
         mining["status"] = "rejected"
-        _append_unique(mining.setdefault("reasons", []), "no-region-compatible-candidate")
+        _append_unique(
+            mining.setdefault("reasons", []), "no-region-compatible-candidate"
+        )
         return None, "", "low", "unknown"
     candidates.sort(key=lambda item: (item[0], item[1]))
     _, _, place, label, _ = candidates[0]
     final_label = label if named_candidates else place["name"]
     materialized = _materialize_named_place(place, final_label)
-    mining["status"] = "resolved" if materialized.get("latitude") is not None else "no-coordinate"
+    mining["status"] = (
+        "resolved" if materialized.get("latitude") is not None else "no-coordinate"
+    )
     if materialized.get("latitude") is None:
-        _append_unique(mining.setdefault("reasons", []), "named-alias-without-trusted-coordinate")
+        _append_unique(
+            mining.setdefault("reasons", []), "named-alias-without-trusted-coordinate"
+        )
     return materialized, final_label, "low", "title-place-miner"
 
 
@@ -893,12 +1492,24 @@ def _prefer_existing_city_candidate(raw, resolution, current_place, current_labe
 def _raw_departure(raw):
     for key in ("departureCity", "departureProvince", "departureCountry"):
         if str(raw.get(key) or "").strip():
-            return {key: str(raw[key]).strip() for key in ("departureCity", "departureProvince", "departureCountry") if str(raw.get(key) or "").strip()}, "source"
+            return {
+                key: str(raw[key]).strip()
+                for key in ("departureCity", "departureProvince", "departureCountry")
+                if str(raw.get(key) or "").strip()
+            }, "source"
     nested = raw.get("departure") if isinstance(raw.get("departure"), dict) else {}
     if nested:
-        values = {key: str(nested.get(key) or "").strip() for key in ("city", "province", "country") if str(nested.get(key) or "").strip()}
+        values = {
+            key: str(nested.get(key) or "").strip()
+            for key in ("city", "province", "country")
+            if str(nested.get(key) or "").strip()
+        }
         if values:
-            return {"departureCity": values.get("city", ""), "departureProvince": values.get("province", ""), "departureCountry": values.get("country", "")}, "source"
+            return {
+                "departureCity": values.get("city", ""),
+                "departureProvince": values.get("province", ""),
+                "departureCountry": values.get("country", ""),
+            }, "source"
     return {}, "unknown"
 
 
@@ -937,7 +1548,12 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         departure.setdefault("departureCountry", departure_place["country"])
 
     destination_text = str(destination or "").strip()
-    destination_place, destination_label, destination_confidence, destination_geo_source = mine_destination_place(
+    (
+        destination_place,
+        destination_label,
+        destination_confidence,
+        destination_geo_source,
+    ) = mine_destination_place(
         raw,
         title,
         destination_text,
@@ -956,63 +1572,115 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         destination_confidence = "low"
         destination_geo_source = "title-place-miner"
     destination_region = find_region(destination_text)
-    region_place = materialize_region(destination_region) if not destination_place else None
+    region_place = (
+        materialize_region(destination_region) if not destination_place else None
+    )
     resolved_destination = destination_place or region_place
-    resolved_label = destination_label if destination_place else region_place.get("name", "") if region_place else ""
-    destination_country = resolved_destination["country"] if resolved_destination else ""
-    destination_province = (resolved_destination.get("province") or "") if resolved_destination else ""
-    destination_source = "source" if str(raw.get("destination") or "").strip() else "inferred"
+    resolved_label = (
+        destination_label
+        if destination_place
+        else region_place.get("name", "")
+        if region_place
+        else ""
+    )
+    destination_country = (
+        resolved_destination["country"] if resolved_destination else ""
+    )
+    destination_province = (
+        (resolved_destination.get("province") or "") if resolved_destination else ""
+    )
+    destination_source = (
+        "source" if str(raw.get("destination") or "").strip() else "inferred"
+    )
     if region_place:
-        resolution.setdefault("fallback", {
-            "status": "applied",
-            "reason": "region-catalog-fallback",
-            "level": region_place["level"],
-        })
+        resolution.setdefault(
+            "fallback",
+            {
+                "status": "applied",
+                "reason": "region-catalog-fallback",
+                "level": region_place["level"],
+            },
+        )
     fields = {
         **departure,
         "destinationCity": resolved_destination["name"] if resolved_destination else "",
         "destinationPlaceName": resolved_label,
         "destinationProvince": destination_province,
         "destinationCountry": destination_country,
-        "destinationLatitude": resolved_destination["latitude"] if resolved_destination else None,
-        "destinationLongitude": resolved_destination["longitude"] if resolved_destination else None,
-        "destinationGeoLevel": _destination_level(destination_place, destination_label) if destination_place else region_place.get("level", "") if region_place else "",
-        "destinationLocality": resolved_destination.get("locality", "") if resolved_destination else "",
-        "destinationCoordinateSource": _destination_coordinate_source(destination_place, destination_label) if destination_place else "fallback" if region_place else "unknown",
+        "destinationLatitude": resolved_destination["latitude"]
+        if resolved_destination
+        else None,
+        "destinationLongitude": resolved_destination["longitude"]
+        if resolved_destination
+        else None,
+        "destinationGeoLevel": _destination_level(destination_place, destination_label)
+        if destination_place
+        else region_place.get("level", "")
+        if region_place
+        else "",
+        "destinationLocality": resolved_destination.get("locality", "")
+        if resolved_destination
+        else "",
+        "destinationCoordinateSource": _destination_coordinate_source(
+            destination_place, destination_label
+        )
+        if destination_place
+        else "fallback"
+        if region_place
+        else "unknown",
         "destinationCoordinatePrecision": (
             "approximate"
-            if region_place or (
+            if region_place
+            or (
                 destination_place
-                and _destination_level(destination_place, destination_label) in {"city", "country"}
+                and _destination_level(destination_place, destination_label)
+                in {"city", "country"}
             )
             else "exact"
             if destination_place and destination_place.get("latitude") is not None
             else None
         ),
-        "geoStatus": "complete" if departure_place and resolved_destination else ("destination_only" if resolved_destination else "unmapped"),
+        "geoStatus": "complete"
+        if departure_place and resolved_destination
+        else ("destination_only" if resolved_destination else "unmapped"),
         "geoConfidence": destination_confidence if destination_place else "low",
-        "geoSource": destination_geo_source if destination_place else ("local-region-catalog" if region_place else "unknown"),
+        "geoSource": destination_geo_source
+        if destination_place
+        else ("local-region-catalog" if region_place else "unknown"),
         "geoResolution": resolution,
     }
     existing_context = _existing_destination_context(raw, title)
-    existing_source = str(raw.get("destinationCoordinateSource") or "") if isinstance(raw, dict) else ""
+    existing_source = (
+        str(raw.get("destinationCoordinateSource") or "")
+        if isinstance(raw, dict)
+        else ""
+    )
     if existing_context and not _valid_coordinate_pair(
         fields.get("destinationLatitude"), fields.get("destinationLongitude")
     ):
         fields["destinationCity"] = existing_context["city"]
-        fields["destinationProvince"] = existing_context["province"] or fields["destinationProvince"]
+        fields["destinationProvince"] = (
+            existing_context["province"] or fields["destinationProvince"]
+        )
         current_place = str(fields.get("destinationPlaceName") or "").strip()
         if not current_place or current_place == existing_context["city"]:
             fields["destinationPlaceName"] = existing_context["place"]
             current_place = existing_context["place"]
-        fields["destinationGeoLevel"] = "poi" if current_place != existing_context["city"] else "city"
+        fields["destinationGeoLevel"] = (
+            "poi" if current_place != existing_context["city"] else "city"
+        )
         if existing_source in {"catalog", "fallback"} and _valid_coordinate_pair(
             raw.get("destinationLatitude"), raw.get("destinationLongitude")
         ):
             for key in (
-                "destinationLatitude", "destinationLongitude", "destinationLocality",
-                "destinationCoordinateSource", "destinationCoordinatePrecision",
-                "destinationAddress", "geoConfidence", "geoSource",
+                "destinationLatitude",
+                "destinationLongitude",
+                "destinationLocality",
+                "destinationCoordinateSource",
+                "destinationCoordinatePrecision",
+                "destinationAddress",
+                "geoConfidence",
+                "geoSource",
             ):
                 if key in raw:
                     fields[key] = raw[key]
@@ -1026,17 +1694,25 @@ def normalize_tour_geo(raw, title, destination, detail=None):
     if fields["destinationCoordinatePrecision"] is None:
         fields.pop("destinationCoordinatePrecision")
     if departure_place:
-        fields.update({
-            "departureLatitude": departure_place["latitude"],
-            "departureLongitude": departure_place["longitude"],
-            "departureGeoLevel": "city",
-            "departureLocality": "",
-            "departureCoordinateSource": "catalog",
-        })
+        fields.update(
+            {
+                "departureLatitude": departure_place["latitude"],
+                "departureLongitude": departure_place["longitude"],
+                "departureGeoLevel": "city",
+                "departureLocality": "",
+                "departureCoordinateSource": "catalog",
+            }
+        )
     return fields, {
-        "departureCity": departure_source if departure.get("departureCity") else "unknown",
-        "departureProvince": departure_source if departure.get("departureProvince") else "unknown",
-        "departureCountry": departure_source if departure.get("departureCountry") else "unknown",
+        "departureCity": departure_source
+        if departure.get("departureCity")
+        else "unknown",
+        "departureProvince": departure_source
+        if departure.get("departureProvince")
+        else "unknown",
+        "departureCountry": departure_source
+        if departure.get("departureCountry")
+        else "unknown",
         "destinationCity": destination_source if resolved_destination else "unknown",
         "destinationPlaceName": "inferred" if resolved_destination else "unknown",
         "destinationProvince": "inferred" if resolved_destination else "unknown",

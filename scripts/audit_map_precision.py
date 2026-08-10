@@ -44,8 +44,12 @@ def main() -> int:
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base", type=Path, default=ROOT / "public" / "data",
-                        help="data dir (default public/data); use with git-extracted snapshots")
+    parser.add_argument(
+        "--base",
+        type=Path,
+        default=ROOT / "public" / "data",
+        help="data dir (default public/data); use with git-extracted snapshots",
+    )
     args = parser.parse_args()
     reconfigure = getattr(sys.stdout, "reconfigure", None)
     if callable(reconfigure):

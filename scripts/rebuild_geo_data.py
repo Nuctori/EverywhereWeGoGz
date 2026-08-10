@@ -15,13 +15,19 @@ from geocode_destinations import (
     _has_named_evidence,
     enrich_tours,
 )
-from osm_poi_resolver import enrich_tours_from_osm, is_international_route_title, normalize_name
+from osm_poi_resolver import (
+    enrich_tours_from_osm,
+    is_international_route_title,
+    normalize_name,
+)
 from source_geo_mining import is_generic_candidate
 
 
 def atomic_write_json(path: Path, value) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    fd, temp_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+    )
     try:
         with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
             json.dump(value, handle, ensure_ascii=False, separators=(",", ":"))
@@ -61,7 +67,11 @@ def _update_geo_resolution_final(tour: dict) -> None:
         if precision:
             final["precision"] = precision
         if source == "fallback":
-            reason = "region-catalog-fallback" if tour.get("geoSource") == "local-region-catalog" else "coarse-parent-city-fallback"
+            reason = (
+                "region-catalog-fallback"
+                if tour.get("geoSource") == "local-region-catalog"
+                else "coarse-parent-city-fallback"
+            )
             final["reason"] = reason
         resolution["final"] = final
     else:
@@ -78,7 +88,11 @@ def _preserve_geo_mining(previous: object, current: object) -> None:
     if old_mining.get("sourceDetail") and not new_mining.get("sourceDetail"):
         new_mining["sourceDetail"] = old_mining["sourceDetail"]
     old_resolved = old_mining.get("resolvedCandidate")
-    if old_resolved and not is_generic_candidate(old_resolved) and not new_mining.get("resolvedCandidate"):
+    if (
+        old_resolved
+        and not is_generic_candidate(old_resolved)
+        and not new_mining.get("resolvedCandidate")
+    ):
         new_mining["resolvedCandidate"] = old_resolved
     old_rows = old_mining.get("sourceCandidates")
     if not isinstance(old_rows, list):
@@ -90,9 +104,7 @@ def _preserve_geo_mining(previous: object, current: object) -> None:
         if str(label).strip()
     }
     existing_labels = {
-        str(row.get("label") or "")
-        for row in new_rows
-        if isinstance(row, dict)
+        str(row.get("label") or "") for row in new_rows if isinstance(row, dict)
     }
     for row in old_rows:
         if not isinstance(row, dict):
@@ -112,20 +124,24 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
     source = str(previous.get("destinationCoordinateSource") or "")
     if source not in {"geocoder", "osm"}:
         return False
-    if not _valid_coordinate_pair(previous.get("destinationLatitude"), previous.get("destinationLongitude")):
+    if not _valid_coordinate_pair(
+        previous.get("destinationLatitude"), previous.get("destinationLongitude")
+    ):
         return False
     previous_address = previous.get("destinationAddress")
     previous_display = (
-        previous_address.get("formatted")
-        if isinstance(previous_address, dict)
-        else ""
+        previous_address.get("formatted") if isinstance(previous_address, dict) else ""
     ) or str(previous.get("destinationPlaceName") or "")
     expected_city = str(current.get("destinationCity") or "")
     expected_province = str(current.get("destinationProvince") or "")
     current_resolution_value = current.get("geoResolution")
-    current_resolution = current_resolution_value if isinstance(current_resolution_value, dict) else {}
+    current_resolution = (
+        current_resolution_value if isinstance(current_resolution_value, dict) else {}
+    )
     current_mining_value = current_resolution.get("mining")
-    current_mining = current_mining_value if isinstance(current_mining_value, dict) else {}
+    current_mining = (
+        current_mining_value if isinstance(current_mining_value, dict) else {}
+    )
     current_labels = [
         normalize_name(label)
         for label in current_mining.get("candidateLabels", [])
@@ -139,22 +155,39 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
     previous_place = normalize_name(previous.get("destinationPlaceName"))
     previous_city = normalize_name(previous.get("destinationCity"))
     title = normalize_name(previous.get("title"))
-    previous_tail = previous_place[len(previous_city):] if previous_city and previous_place.startswith(previous_city) else previous_place
+    previous_tail = (
+        previous_place[len(previous_city) :]
+        if previous_city and previous_place.startswith(previous_city)
+        else previous_place
+    )
     supported_by_current_evidence = bool(
         previous_place
         and (
             previous_place in title
-            or len(previous_tail) >= 3 and previous_tail in title
-            or any(previous_place in label or label in previous_place for label in current_labels)
+            or len(previous_tail) >= 3
+            and previous_tail in title
+            or any(
+                previous_place in label or label in previous_place
+                for label in current_labels
+            )
         )
     )
-    if previous_place and previous_place != previous_city and not supported_by_current_evidence:
+    if (
+        previous_place
+        and previous_place != previous_city
+        and not supported_by_current_evidence
+    ):
         current_mining.pop("resolvedCandidate", None)
         for key in (
-            "destinationLatitude", "destinationLongitude", "destinationGeoLevel",
-            "destinationLocality", "destinationCoordinateSource",
-            "destinationCoordinatePrecision", "destinationAddress",
-            "geoConfidence", "geoSource",
+            "destinationLatitude",
+            "destinationLongitude",
+            "destinationGeoLevel",
+            "destinationLocality",
+            "destinationCoordinateSource",
+            "destinationCoordinatePrecision",
+            "destinationAddress",
+            "geoConfidence",
+            "geoSource",
         ):
             previous.pop(key, None)
         return False
@@ -168,19 +201,33 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
     ):
         current_mining.pop("resolvedCandidate", None)
         for key in (
-            "destinationLatitude", "destinationLongitude", "destinationGeoLevel",
-            "destinationLocality", "destinationCoordinateSource",
-            "destinationCoordinatePrecision", "destinationAddress",
-            "geoConfidence", "geoSource",
+            "destinationLatitude",
+            "destinationLongitude",
+            "destinationGeoLevel",
+            "destinationLocality",
+            "destinationCoordinateSource",
+            "destinationCoordinatePrecision",
+            "destinationAddress",
+            "geoConfidence",
+            "geoSource",
         ):
             previous.pop(key, None)
         return False
-    if source == "osm" and previous_place == previous_city and previous.get("destinationGeoLevel") == "poi":
+    if (
+        source == "osm"
+        and previous_place == previous_city
+        and previous.get("destinationGeoLevel") == "poi"
+    ):
         for key in (
-            "destinationLatitude", "destinationLongitude", "destinationGeoLevel",
-            "destinationLocality", "destinationCoordinateSource",
-            "destinationCoordinatePrecision", "destinationAddress",
-            "geoConfidence", "geoSource",
+            "destinationLatitude",
+            "destinationLongitude",
+            "destinationGeoLevel",
+            "destinationLocality",
+            "destinationCoordinateSource",
+            "destinationCoordinatePrecision",
+            "destinationAddress",
+            "geoConfidence",
+            "geoSource",
         ):
             previous.pop(key, None)
         return False
@@ -191,10 +238,15 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
         previous_address if isinstance(previous_address, dict) else {},
     ):
         for key in (
-            "destinationLatitude", "destinationLongitude", "destinationGeoLevel",
-            "destinationLocality", "destinationCoordinateSource",
-            "destinationCoordinatePrecision", "destinationAddress",
-            "geoConfidence", "geoSource",
+            "destinationLatitude",
+            "destinationLongitude",
+            "destinationGeoLevel",
+            "destinationLocality",
+            "destinationCoordinateSource",
+            "destinationCoordinatePrecision",
+            "destinationAddress",
+            "geoConfidence",
+            "geoSource",
         ):
             previous.pop(key, None)
         return False
@@ -202,10 +254,19 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
     if current_source in {"catalog", "osm"} and current_source != "unknown":
         return False
     for key in (
-        "destinationCity", "destinationPlaceName", "destinationProvince", "destinationCountry",
-        "destinationLatitude", "destinationLongitude", "destinationGeoLevel", "destinationLocality",
-        "destinationCoordinateSource", "destinationCoordinatePrecision", "destinationAddress",
-        "geoConfidence", "geoSource",
+        "destinationCity",
+        "destinationPlaceName",
+        "destinationProvince",
+        "destinationCountry",
+        "destinationLatitude",
+        "destinationLongitude",
+        "destinationGeoLevel",
+        "destinationLocality",
+        "destinationCoordinateSource",
+        "destinationCoordinatePrecision",
+        "destinationAddress",
+        "geoConfidence",
+        "geoSource",
     ):
         if key in previous:
             current[key] = previous[key]
@@ -214,14 +275,18 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
 
 def _apply_coarse_destination_fallback(tour: dict) -> bool:
     """Keep a mined destination visible when only its parent city is trusted."""
-    if _valid_coordinate_pair(tour.get("destinationLatitude"), tour.get("destinationLongitude")):
+    if _valid_coordinate_pair(
+        tour.get("destinationLatitude"), tour.get("destinationLongitude")
+    ):
         return False
     label = str(tour.get("destinationPlaceName") or "").strip()
     city = str(tour.get("destinationCity") or "").strip()
     if not label or not city or label == city:
         return False
     parent = find_place(city)
-    if not isinstance(parent, dict) or not _valid_coordinate_pair(parent.get("latitude"), parent.get("longitude")):
+    if not isinstance(parent, dict) or not _valid_coordinate_pair(
+        parent.get("latitude"), parent.get("longitude")
+    ):
         return False
 
     tour["destinationLatitude"] = parent["latitude"]
@@ -241,7 +306,12 @@ def _apply_coarse_destination_fallback(tour: dict) -> bool:
     meta = tour.setdefault("meta", {})
     quality = meta.setdefault("dataQuality", {})
     field_sources = quality.setdefault("fieldSources", {})
-    for field in ("destinationLatitude", "destinationLongitude", "destinationLocality", "destinationAddress"):
+    for field in (
+        "destinationLatitude",
+        "destinationLongitude",
+        "destinationLocality",
+        "destinationAddress",
+    ):
         field_sources[field] = "inferred"
     resolution = tour.get("geoResolution")
     if isinstance(resolution, dict):
@@ -253,7 +323,11 @@ def _apply_coarse_destination_fallback(tour: dict) -> bool:
     return True
 
 
-def rebuild(tours: list[dict], allow_network: bool = False, geocode_cache_path: Path | None = None) -> tuple[int, int]:
+def rebuild(
+    tours: list[dict],
+    allow_network: bool = False,
+    geocode_cache_path: Path | None = None,
+) -> tuple[int, int]:
     before = sum(1 for tour in tours if tour.get("destinationLatitude") is not None)
     for tour in tours:
         previous_resolution = tour.get("geoResolution")
@@ -290,8 +364,12 @@ def rebuild(tours: list[dict], allow_network: bool = False, geocode_cache_path: 
     if geocode_cache_path is None:
         candidates, resolved = enrich_tours(tours, allow_network=allow_network)
     else:
-        candidates, resolved = enrich_tours(tours, allow_network=allow_network, cache_path=geocode_cache_path)
-    fallback_resolved = sum(1 for tour in tours if _apply_coarse_destination_fallback(tour))
+        candidates, resolved = enrich_tours(
+            tours, allow_network=allow_network, cache_path=geocode_cache_path
+        )
+    fallback_resolved = sum(
+        1 for tour in tours if _apply_coarse_destination_fallback(tour)
+    )
     for tour in tours:
         _update_geo_resolution_final(tour)
     after = sum(1 for tour in tours if tour.get("destinationLatitude") is not None)
@@ -302,7 +380,9 @@ def rebuild(tours: list[dict], allow_network: bool = False, geocode_cache_path: 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--network", action="store_true", help="query public geocoders for cache misses")
+    parser.add_argument(
+        "--network", action="store_true", help="query public geocoders for cache misses"
+    )
     args = parser.parse_args()
     root = Path(__file__).resolve().parent.parent
     tours_path = root / "public" / "data" / "tours.json"
@@ -319,7 +399,9 @@ def main() -> None:
     before, after = rebuild(tours, allow_network=args.network)
     atomic_write_json(tours_path, tours)
     subprocess.run(["node", str(split_script)], cwd=root, check=True)
-    print(f"Geo data rebuilt: destination points {before} -> {after}; tours {len(tours)}")
+    print(
+        f"Geo data rebuilt: destination points {before} -> {after}; tours {len(tours)}"
+    )
 
 
 if __name__ == "__main__":

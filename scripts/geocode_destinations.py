@@ -59,18 +59,47 @@ OVERPASS_POOL = (
 GEOCODER_PROVIDERS.add("overpass")
 
 ADMIN_CONTEXT_PATTERN = re.compile(r"([\u4e00-\u9fff]{2,8}(?:省|市|县|区|镇|街道))")
-ADMIN_RESULT_PATTERN = re.compile(r"([\u4e00-\u9fff]{2,12}(?:自治州|地区|盟|市|县|区|旗))")
+ADMIN_RESULT_PATTERN = re.compile(
+    r"([\u4e00-\u9fff]{2,12}(?:自治州|地区|盟|市|县|区|旗))"
+)
 GENERIC_NAME_PARTS = {
-    "中国", "广东", "广西", "湖南", "江西", "福建", "海南", "肇庆", "温泉", "酒店", "森林", "旅游",
+    "中国",
+    "广东",
+    "广西",
+    "湖南",
+    "江西",
+    "福建",
+    "海南",
+    "肇庆",
+    "温泉",
+    "酒店",
+    "森林",
+    "旅游",
 }
 POI_DESCRIPTIVE_SUFFIXES = ("景区", "风景区", "旅游区", "度假区", "风景名胜区", "公园")
 ADDRESS_FIELDS = (
-    "formatted", "country", "province", "city", "district", "locality",
-    "street", "houseNumber", "postalCode",
+    "formatted",
+    "country",
+    "province",
+    "city",
+    "district",
+    "locality",
+    "street",
+    "houseNumber",
+    "postalCode",
 )
 FUZZY_PLACE_SUFFIXES = (
-    "风景名胜区", "旅游度假区", "森林公园", "风景区", "旅游区", "度假区", "湿地公园",
-    "温泉", "古镇", "古城", "公园",
+    "风景名胜区",
+    "旅游度假区",
+    "森林公园",
+    "风景区",
+    "旅游区",
+    "度假区",
+    "湿地公园",
+    "温泉",
+    "古镇",
+    "古城",
+    "公园",
 )
 FUZZY_ADMIN_SUFFIXES = ("镇", "街道", "乡", "村")
 
@@ -90,7 +119,9 @@ def _load_cache(path: Path = CACHE_PATH) -> dict:
 
 
 def _write_cache(cache: dict, path: Path = CACHE_PATH) -> None:
-    path.write_text(json.dumps(cache, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(cache, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def _context_terms(title: str) -> list[str]:
@@ -105,7 +136,7 @@ def _context_terms(title: str) -> list[str]:
 def _title_inserted_context(title: str, label: str, city: str) -> list[str]:
     if not city or not label.startswith(city):
         return []
-    label_tail = label[len(city):]
+    label_tail = label[len(city) :]
     if not label_tail:
         return []
     city_index = str(title or "").find(city)
@@ -115,7 +146,7 @@ def _title_inserted_context(title: str, label: str, city: str) -> list[str]:
     tail_index = str(title or "").find(anchor, city_index + len(city))
     if tail_index <= city_index + len(city):
         return []
-    inserted = str(title or "")[city_index + len(city):tail_index]
+    inserted = str(title or "")[city_index + len(city) : tail_index]
     inserted = re.sub(r"^[\s\-—至到往返]+|[\s\-—至到往返]+$", "", inserted)
     return [inserted] if inserted and len(inserted) <= 12 else []
 
@@ -130,20 +161,40 @@ def destination_queries(tour: dict) -> list[str]:
     title = str(tour.get("title") or "")
     country = str(tour.get("destinationCountry") or "").strip()
     country_part = country if country and country != "中国" else "中国"
-    context = list(dict.fromkeys(_title_inserted_context(title, label, city) + _context_terms(title)))
+    context = list(
+        dict.fromkeys(
+            _title_inserted_context(title, label, city) + _context_terms(title)
+        )
+    )
     parts = [label, *context, province, country_part]
     queries = [" ".join(part for part in parts if part)]
     queries.append(" ".join(part for part in (label, province, country_part) if part))
-    place_label = label[len(city):].strip() if city and label.startswith(city) else label
+    place_label = (
+        label[len(city) :].strip() if city and label.startswith(city) else label
+    )
     if place_label and place_label != label:
-        queries.append(" ".join(part for part in (place_label, *context, city, province, country_part) if part))
-        queries.append(" ".join(part for part in (
-            place_label,
-            *context,
-            f"{city}市" if not city.endswith(("市", "县", "区")) else city,
-            f"{province}省" if province and not province.endswith("省") else province,
-            country_part,
-        ) if part))
+        queries.append(
+            " ".join(
+                part
+                for part in (place_label, *context, city, province, country_part)
+                if part
+            )
+        )
+        queries.append(
+            " ".join(
+                part
+                for part in (
+                    place_label,
+                    *context,
+                    f"{city}市" if not city.endswith(("市", "县", "区")) else city,
+                    f"{province}省"
+                    if province and not province.endswith("省")
+                    else province,
+                    country_part,
+                )
+                if part
+            )
+        )
     # Last resort: the bare POI name. Photon/Nominatim index many Chinese resorts
     # under their full brand name (e.g. 新丰云天海温泉度假村); adding admin
     # context terms makes the fuzzy search miss them. Validation still requires
@@ -162,16 +213,28 @@ def destination_fuzzy_queries(tour: dict) -> list[str]:
     base = _fuzzy_name_base(label, city)
     if len(base) < 2:
         return []
-    context = list(dict.fromkeys(_title_inserted_context(str(tour.get("title") or ""), label, city)))
+    context = list(
+        dict.fromkeys(
+            _title_inserted_context(str(tour.get("title") or ""), label, city)
+        )
+    )
     queries = [
-        " ".join(part for part in (f"{base}{suffix}", *context, city, province, "中国") if part)
+        " ".join(
+            part
+            for part in (f"{base}{suffix}", *context, city, province, "中国")
+            if part
+        )
         for suffix in FUZZY_ADMIN_SUFFIXES
     ]
-    queries.append(" ".join(part for part in (base, *context, city, province, "中国") if part))
+    queries.append(
+        " ".join(part for part in (base, *context, city, province, "中国") if part)
+    )
     return list(dict.fromkeys(normalize_query(query) for query in queries if query))
 
 
-def _request_json(endpoint: str, params: dict, timeout: int = REQUEST_TIMEOUT_SECONDS) -> dict | list | None:
+def _request_json(
+    endpoint: str, params: dict, timeout: int = REQUEST_TIMEOUT_SECONDS
+) -> dict | list | None:
     global _last_request_at
     elapsed = time.monotonic() - _last_request_at
     if elapsed < MIN_REQUEST_INTERVAL_SECONDS:
@@ -258,11 +321,18 @@ def _has_conflicting_admin_context(
 def _named_variants(label: str, expected_city: str = "") -> list[str]:
     normalized_label = re.sub(r"\s+", "", str(label or ""))
     city = re.sub(r"\s+", "", str(expected_city or ""))
-    place_label = normalized_label[len(city):] if city and normalized_label.startswith(city) else normalized_label
-    return list(dict.fromkeys(
-        token for token in (normalized_label, place_label)
-        if len(token) >= 2 and token not in GENERIC_NAME_PARTS and token != city
-    ))
+    place_label = (
+        normalized_label[len(city) :]
+        if city and normalized_label.startswith(city)
+        else normalized_label
+    )
+    return list(
+        dict.fromkeys(
+            token
+            for token in (normalized_label, place_label)
+            if len(token) >= 2 and token not in GENERIC_NAME_PARTS and token != city
+        )
+    )
 
 
 def _strip_admin_suffixes(value: str) -> str:
@@ -276,7 +346,7 @@ def _contains_named_variant(text: str, variant: str) -> bool:
         index = text.find(variant, start)
         if index < 0:
             return False
-        tail = text[index + len(variant):]
+        tail = text[index + len(variant) :]
         if not tail or tail[0] in "，。；;、, /／()（）[]【】|-—至到":
             return True
         if any(tail.startswith(suffix) for suffix in POI_DESCRIPTIVE_SUFFIXES):
@@ -307,7 +377,9 @@ def _named_result_quality(label: str, name: str, expected_city: str = "") -> int
         # Admin-suffix equality (e.g. 硅谷 ↔ 硅谷街道) is only acceptable when
         # the query carried a city context. Without one, a bare POI label must
         # not silently match an administrative division in some other city.
-        if expected_city and _strip_admin_suffixes(normalized_name) == _strip_admin_suffixes(variant):
+        if expected_city and _strip_admin_suffixes(
+            normalized_name
+        ) == _strip_admin_suffixes(variant):
             return 85
     return 0
 
@@ -316,10 +388,10 @@ def _fuzzy_name_base(label: str, expected_city: str = "") -> str:
     normalized = re.sub(r"\s+", "", str(label or ""))
     city = re.sub(r"\s+", "", str(expected_city or ""))
     if city and normalized.startswith(city):
-        normalized = normalized[len(city):]
+        normalized = normalized[len(city) :]
     for suffix in sorted(FUZZY_PLACE_SUFFIXES, key=len, reverse=True):
         if normalized.endswith(suffix) and len(normalized) > len(suffix):
-            normalized = normalized[:-len(suffix)]
+            normalized = normalized[: -len(suffix)]
             break
     return normalized
 
@@ -332,7 +404,9 @@ def _fuzzy_name_quality(label: str, name: str, expected_city: str = "") -> int:
     stripped_name = re.sub(r"(?:镇|街道|乡|村)$", "", normalized_name)
     if stripped_name == base:
         return 55
-    return 55 if re.search(rf"{re.escape(base)}(?:镇|街道|乡|村)", normalized_name) else 0
+    return (
+        55 if re.search(rf"{re.escape(base)}(?:镇|街道|乡|村)", normalized_name) else 0
+    )
 
 
 def _is_fuzzy_admin_name(name: str) -> bool:
@@ -362,19 +436,41 @@ def _address_from_mapping(values: dict, display_name: str = "") -> dict:
     address = {
         "formatted": str(display_name or "").strip(),
         "country": str(values.get("country") or "").strip(),
-        "province": str(values.get("province") or values.get("state") or values.get("region") or "").strip(),
-        "city": str(values.get("city") or values.get("municipality_city") or "").strip(),
+        "province": str(
+            values.get("province") or values.get("state") or values.get("region") or ""
+        ).strip(),
+        "city": str(
+            values.get("city") or values.get("municipality_city") or ""
+        ).strip(),
         "district": str(
-            values.get("district") or values.get("county") or values.get("city_district")
-            or values.get("subregion") or ""
+            values.get("district")
+            or values.get("county")
+            or values.get("city_district")
+            or values.get("subregion")
+            or ""
         ).strip(),
         "locality": str(
-            values.get("town") or values.get("village") or values.get("locality")
-            or values.get("suburb") or values.get("neighbourhood") or values.get("municipality") or ""
+            values.get("town")
+            or values.get("village")
+            or values.get("locality")
+            or values.get("suburb")
+            or values.get("neighbourhood")
+            or values.get("municipality")
+            or ""
         ).strip(),
         "street": str(values.get("road") or values.get("street") or "").strip(),
-        "houseNumber": str(values.get("house_number") or values.get("housenumber") or values.get("houseNumber") or "").strip(),
-        "postalCode": str(values.get("postcode") or values.get("postal_code") or values.get("postalCode") or "").strip(),
+        "houseNumber": str(
+            values.get("house_number")
+            or values.get("housenumber")
+            or values.get("houseNumber")
+            or ""
+        ).strip(),
+        "postalCode": str(
+            values.get("postcode")
+            or values.get("postal_code")
+            or values.get("postalCode")
+            or ""
+        ).strip(),
     }
     return {key: value for key, value in address.items() if value}
 
@@ -383,13 +479,17 @@ def _address_from_display_name(display_name: str) -> dict:
     """Recover administrative levels from a provider's formatted address."""
     formatted = str(display_name or "").strip()
     address = {"formatted": formatted} if formatted else {}
-    parts = [part.strip() for part in re.split(r"[,，;；/]+", formatted) if part.strip()]
+    parts = [
+        part.strip() for part in re.split(r"[,，;；/]+", formatted) if part.strip()
+    ]
     for index, part in enumerate(parts):
         value = part.strip()
         if index == 0 and not (
             value in {"中国", "China"}
             or (
-                value.endswith(("省", "市", "自治州", "区", "县", "旗", "镇", "街道", "乡"))
+                value.endswith(
+                    ("省", "市", "自治州", "区", "县", "旗", "镇", "街道", "乡")
+                )
                 and not value.endswith(POI_DESCRIPTIVE_SUFFIXES)
             )
         ):
@@ -402,7 +502,9 @@ def _address_from_display_name(display_name: str) -> dict:
             address.setdefault("province", value)
         elif value.endswith(("市", "自治州")):
             address.setdefault("city", value)
-        elif value.endswith(("区", "县", "旗")) and not value.endswith(POI_DESCRIPTIVE_SUFFIXES):
+        elif value.endswith(("区", "县", "旗")) and not value.endswith(
+            POI_DESCRIPTIVE_SUFFIXES
+        ):
             address.setdefault("district", value)
         elif value.endswith(("镇", "街道", "乡")):
             address.setdefault("locality", value)
@@ -442,15 +544,25 @@ def _merge_geocoder_results(results: list[dict]) -> dict | None:
     merged_address = {}
     for candidate in ranked:
         if _same_place_area(winner, candidate):
-            merged_address = _merge_address_values(merged_address, candidate.get("address") or {})
+            merged_address = _merge_address_values(
+                merged_address, candidate.get("address") or {}
+            )
     if merged_address:
         winner["address"] = merged_address
-        winner["locality"] = merged_address.get("locality") or winner.get("locality", "")
+        winner["locality"] = merged_address.get("locality") or winner.get(
+            "locality", ""
+        )
     winner.pop("matchQuality", None)
     return winner
 
 
-def _valid_cached_result(label: str, expected_city: str, result: object, expected_province: str = "", allow_fuzzy: bool = False) -> bool:
+def _valid_cached_result(
+    label: str,
+    expected_city: str,
+    result: object,
+    expected_province: str = "",
+    allow_fuzzy: bool = False,
+) -> bool:
     if not isinstance(result, dict):
         return False
     provider = result.get("provider")
@@ -465,18 +577,27 @@ def _valid_cached_result(label: str, expected_city: str, result: object, expecte
         display_name,
         address if isinstance(address, dict) else {},
     )
-    strict_match = _has_named_evidence(label, display_name, expected_city) and _has_admin_evidence(admin_context, display_name)
+    strict_match = _has_named_evidence(
+        label, display_name, expected_city
+    ) and _has_admin_evidence(admin_context, display_name)
     fuzzy_match = (
         allow_fuzzy
         and result.get("precision") == "approximate"
-        and _fuzzy_name_quality(label, result.get("name") or display_name, expected_city) > 0
+        and _fuzzy_name_quality(
+            label, result.get("name") or display_name, expected_city
+        )
+        > 0
         and not context_conflict
         and result.get("level") == "town"
     )
     return (
         provider in GEOCODER_PROVIDERS
-        and isinstance(latitude, (int, float)) and not isinstance(latitude, bool) and -90 <= latitude <= 90
-        and isinstance(longitude, (int, float)) and not isinstance(longitude, bool) and -180 <= longitude <= 180
+        and isinstance(latitude, (int, float))
+        and not isinstance(latitude, bool)
+        and -90 <= latitude <= 90
+        and isinstance(longitude, (int, float))
+        and not isinstance(longitude, bool)
+        and -180 <= longitude <= 180
         and not context_conflict
         and (strict_match or fuzzy_match)
         and result.get("level") in {"town", "poi"}
@@ -484,51 +605,92 @@ def _valid_cached_result(label: str, expected_city: str, result: object, expecte
     )
 
 
-def _arcgis_result(label: str, payload: dict | list | None, expected_city: str = "", expected_province: str = "", allow_fuzzy: bool = False) -> dict | None:
+def _arcgis_result(
+    label: str,
+    payload: dict | list | None,
+    expected_city: str = "",
+    expected_province: str = "",
+    allow_fuzzy: bool = False,
+) -> dict | None:
     candidates = payload.get("candidates", []) if isinstance(payload, dict) else []
     for item in candidates:
         if not isinstance(item, dict) or not isinstance(item.get("location"), dict):
             continue
         address = str(item.get("address") or "")
-        attributes = item.get("attributes") if isinstance(item.get("attributes"), dict) else {}
+        attributes = (
+            item.get("attributes") if isinstance(item.get("attributes"), dict) else {}
+        )
         score = float(item.get("score") or 0)
         named_evidence = _has_named_evidence(label, address, expected_city)
-        fuzzy_quality = _fuzzy_name_quality(label, attributes.get("PlaceName") or address, expected_city)
+        fuzzy_quality = _fuzzy_name_quality(
+            label, attributes.get("PlaceName") or address, expected_city
+        )
         if score < 70 or (not named_evidence and not (allow_fuzzy and fuzzy_quality)):
             continue
-        if expected_city and not _has_admin_evidence(expected_city, address) and not (
-            allow_fuzzy and _has_province_evidence(expected_province, address)
-            and _is_fuzzy_admin_name(attributes.get("PlaceName") or address)
+        if (
+            expected_city
+            and not _has_admin_evidence(expected_city, address)
+            and not (
+                allow_fuzzy
+                and _has_province_evidence(expected_province, address)
+                and _is_fuzzy_admin_name(attributes.get("PlaceName") or address)
+            )
         ):
             continue
         location = item["location"]
-        normalized_address = _address_from_mapping({
-            "country": attributes.get("Country") or attributes.get("CountryCode"),
-            "province": attributes.get("Region") or attributes.get("State") or attributes.get("RegionAbbr"),
-            "city": attributes.get("City") or attributes.get("PlaceName"),
-            "district": attributes.get("District") or attributes.get("Subregion"),
-            "locality": attributes.get("Neighborhood") or attributes.get("Locality"),
-            "street": attributes.get("Address") or attributes.get("Street"),
-            "house_number": attributes.get("HouseNumber"),
-            "postcode": attributes.get("PostalCode") or attributes.get("Postal"),
-        }, address)
-        if _has_conflicting_admin_context(expected_city, expected_province, address, normalized_address):
+        normalized_address = _address_from_mapping(
+            {
+                "country": attributes.get("Country") or attributes.get("CountryCode"),
+                "province": attributes.get("Region")
+                or attributes.get("State")
+                or attributes.get("RegionAbbr"),
+                "city": attributes.get("City") or attributes.get("PlaceName"),
+                "district": attributes.get("District") or attributes.get("Subregion"),
+                "locality": attributes.get("Neighborhood")
+                or attributes.get("Locality"),
+                "street": attributes.get("Address") or attributes.get("Street"),
+                "house_number": attributes.get("HouseNumber"),
+                "postcode": attributes.get("PostalCode") or attributes.get("Postal"),
+            },
+            address,
+        )
+        if _has_conflicting_admin_context(
+            expected_city, expected_province, address, normalized_address
+        ):
             continue
         return {
             "latitude": float(location["y"]),
             "longitude": float(location["x"]),
             "displayName": address,
-            "level": "town" if any(token in address for token in FUZZY_ADMIN_SUFFIXES) or _is_fuzzy_admin_name(attributes.get("PlaceName") or "") else "poi",
-            "locality": normalized_address.get("locality") or _result_locality(attributes, address, expected_city),
+            "level": "town"
+            if any(token in address for token in FUZZY_ADMIN_SUFFIXES)
+            or _is_fuzzy_admin_name(attributes.get("PlaceName") or "")
+            else "poi",
+            "locality": normalized_address.get("locality")
+            or _result_locality(attributes, address, expected_city),
             "providerScore": score,
             "address": normalized_address,
-            "matchQuality": _named_result_quality(label, attributes.get("PlaceName") or address, expected_city) or fuzzy_quality or 70,
-            **({"precision": "approximate"} if allow_fuzzy and not named_evidence else {}),
+            "matchQuality": _named_result_quality(
+                label, attributes.get("PlaceName") or address, expected_city
+            )
+            or fuzzy_quality
+            or 70,
+            **(
+                {"precision": "approximate"}
+                if allow_fuzzy and not named_evidence
+                else {}
+            ),
         }
     return None
 
 
-def _nominatim_result(label: str, payload: dict | list | None, expected_city: str = "", expected_province: str = "", allow_fuzzy: bool = False) -> dict | None:
+def _nominatim_result(
+    label: str,
+    payload: dict | list | None,
+    expected_city: str = "",
+    expected_province: str = "",
+    allow_fuzzy: bool = False,
+) -> dict | None:
     candidates = payload if isinstance(payload, list) else []
     best = None
     for item in candidates:
@@ -538,29 +700,50 @@ def _nominatim_result(label: str, payload: dict | list | None, expected_city: st
         address = item.get("address") if isinstance(item.get("address"), dict) else {}
         address_text = " ".join(str(value) for value in address.values())
         normalized_address = _address_from_mapping(address, display_name)
-        name_quality = _named_result_quality(label, item.get("name") or "", expected_city)
-        fuzzy_quality = _fuzzy_name_quality(label, item.get("name") or "", expected_city)
-        named_evidence = name_quality > 0 or _has_named_evidence(label, display_name, expected_city)
+        name_quality = _named_result_quality(
+            label, item.get("name") or "", expected_city
+        )
+        fuzzy_quality = _fuzzy_name_quality(
+            label, item.get("name") or "", expected_city
+        )
+        named_evidence = name_quality > 0 or _has_named_evidence(
+            label, display_name, expected_city
+        )
         if not named_evidence and not (allow_fuzzy and fuzzy_quality):
             continue
-        if expected_city and not _has_admin_evidence(expected_city, f"{display_name} {address_text}") and not (
-            allow_fuzzy and _has_province_evidence(expected_province, f"{display_name} {address_text}")
-            and _is_fuzzy_admin_name(item.get("name") or "")
+        if (
+            expected_city
+            and not _has_admin_evidence(expected_city, f"{display_name} {address_text}")
+            and not (
+                allow_fuzzy
+                and _has_province_evidence(
+                    expected_province, f"{display_name} {address_text}"
+                )
+                and _is_fuzzy_admin_name(item.get("name") or "")
+            )
         ):
             continue
-        if _has_conflicting_admin_context(expected_city, expected_province, display_name, normalized_address):
+        if _has_conflicting_admin_context(
+            expected_city, expected_province, display_name, normalized_address
+        ):
             continue
         locality = _result_locality(address, display_name, expected_city)
         result = {
             "latitude": float(item["lat"]),
             "longitude": float(item["lon"]),
             "displayName": display_name,
-            "level": "town" if address.get("town") or address.get("village") or _is_fuzzy_admin_name(item.get("name") or "") else "poi",
+            "level": "town"
+            if address.get("town")
+            or address.get("village")
+            or _is_fuzzy_admin_name(item.get("name") or "")
+            else "poi",
             "locality": locality,
             "providerScore": 80,
             "address": normalized_address,
             "matchQuality": name_quality or fuzzy_quality or 70,
-            **({"precision": "approximate"} if allow_fuzzy and not name_quality else {}),
+            **(
+                {"precision": "approximate"} if allow_fuzzy and not name_quality else {}
+            ),
         }
         ranking = (name_quality, float(item.get("importance") or 0))
         if best is None or ranking > best[0]:
@@ -568,60 +751,107 @@ def _nominatim_result(label: str, payload: dict | list | None, expected_city: st
     return best[1] if best else None
 
 
-def _photon_result(label: str, payload: dict | list | None, expected_city: str = "", expected_province: str = "", allow_fuzzy: bool = False) -> dict | None:
+def _photon_result(
+    label: str,
+    payload: dict | list | None,
+    expected_city: str = "",
+    expected_province: str = "",
+    allow_fuzzy: bool = False,
+) -> dict | None:
     features = payload.get("features", []) if isinstance(payload, dict) else []
     best = None
     for item in features:
         if not isinstance(item, dict):
             continue
-        geometry = item.get("geometry") if isinstance(item.get("geometry"), dict) else {}
-        coordinates = geometry.get("coordinates") if isinstance(geometry.get("coordinates"), list) else []
+        geometry = (
+            item.get("geometry") if isinstance(item.get("geometry"), dict) else {}
+        )
+        coordinates = (
+            geometry.get("coordinates")
+            if isinstance(geometry.get("coordinates"), list)
+            else []
+        )
         if len(coordinates) < 2:
             continue
-        properties = item.get("properties") if isinstance(item.get("properties"), dict) else {}
+        properties = (
+            item.get("properties") if isinstance(item.get("properties"), dict) else {}
+        )
         display_name = " ".join(
             str(properties.get(key) or "")
-            for key in ("name", "street", "district", "city", "county", "state", "country")
+            for key in (
+                "name",
+                "street",
+                "district",
+                "city",
+                "county",
+                "state",
+                "country",
+            )
         ).strip()
-        name_quality = _named_result_quality(label, properties.get("name") or "", expected_city)
-        fuzzy_quality = _fuzzy_name_quality(label, properties.get("name") or "", expected_city)
+        name_quality = _named_result_quality(
+            label, properties.get("name") or "", expected_city
+        )
+        fuzzy_quality = _fuzzy_name_quality(
+            label, properties.get("name") or "", expected_city
+        )
         if name_quality == 0 and not (allow_fuzzy and fuzzy_quality):
             continue
-        if expected_city and not _has_admin_evidence(expected_city, display_name) and not (
-            allow_fuzzy and _has_province_evidence(expected_province, display_name)
-            and _is_fuzzy_admin_name(properties.get("name") or "")
+        if (
+            expected_city
+            and not _has_admin_evidence(expected_city, display_name)
+            and not (
+                allow_fuzzy
+                and _has_province_evidence(expected_province, display_name)
+                and _is_fuzzy_admin_name(properties.get("name") or "")
+            )
         ):
             continue
-        normalized_address = _address_from_mapping({
-            "name": properties.get("name"),
-            "country": properties.get("country"),
-            "state": properties.get("state"),
-            "city": properties.get("city"),
-            "district": properties.get("district"),
-            "county": properties.get("county"),
-            "town": properties.get("town"),
-            "village": properties.get("village"),
-            "locality": properties.get("locality"),
-            "street": properties.get("street"),
-            "housenumber": properties.get("housenumber"),
-            "postcode": properties.get("postcode"),
-        }, display_name)
-        if _has_conflicting_admin_context(expected_city, expected_province, display_name, normalized_address):
+        normalized_address = _address_from_mapping(
+            {
+                "name": properties.get("name"),
+                "country": properties.get("country"),
+                "state": properties.get("state"),
+                "city": properties.get("city"),
+                "district": properties.get("district"),
+                "county": properties.get("county"),
+                "town": properties.get("town"),
+                "village": properties.get("village"),
+                "locality": properties.get("locality"),
+                "street": properties.get("street"),
+                "housenumber": properties.get("housenumber"),
+                "postcode": properties.get("postcode"),
+            },
+            display_name,
+        )
+        if _has_conflicting_admin_context(
+            expected_city, expected_province, display_name, normalized_address
+        ):
             continue
         locality = str(
-            properties.get("town") or properties.get("village") or properties.get("city")
-            or properties.get("municipality") or properties.get("county") or properties.get("district") or ""
+            properties.get("town")
+            or properties.get("village")
+            or properties.get("city")
+            or properties.get("municipality")
+            or properties.get("county")
+            or properties.get("district")
+            or ""
         )
         result = {
             "latitude": float(coordinates[1]),
             "longitude": float(coordinates[0]),
             "displayName": display_name,
-            "level": "town" if properties.get("town") or properties.get("village") or _is_fuzzy_admin_name(properties.get("name") or "") else "poi",
+            "level": "town"
+            if properties.get("town")
+            or properties.get("village")
+            or _is_fuzzy_admin_name(properties.get("name") or "")
+            else "poi",
             "locality": locality,
             "providerScore": 80,
             "address": normalized_address,
             "matchQuality": name_quality or fuzzy_quality or 70,
-            **({"precision": "approximate"} if allow_fuzzy and not name_quality else {}),
+            **(
+                {"precision": "approximate"} if allow_fuzzy and not name_quality else {}
+            ),
         }
         ranking = (name_quality, float(properties.get("importance") or 0))
         if best is None or ranking > best[0]:
@@ -656,7 +886,13 @@ def _overpass_query(label: str, expected_city: str) -> str | None:
     )
 
 
-def _overpass_result(label: str, payload: dict | list | None, expected_city: str = "", expected_province: str = "", allow_fuzzy: bool = False) -> dict | None:
+def _overpass_result(
+    label: str,
+    payload: dict | list | None,
+    expected_city: str = "",
+    expected_province: str = "",
+    allow_fuzzy: bool = False,
+) -> dict | None:
     elements = payload.get("elements", []) if isinstance(payload, dict) else []
     best = None
     for item in elements:
@@ -668,36 +904,55 @@ def _overpass_result(label: str, payload: dict | list | None, expected_city: str
             continue
         name_quality = _named_result_quality(label, name, expected_city)
         fuzzy_quality = _fuzzy_name_quality(label, name, expected_city)
-        named_evidence = name_quality > 0 or _has_named_evidence(label, name, expected_city)
+        named_evidence = name_quality > 0 or _has_named_evidence(
+            label, name, expected_city
+        )
         if not named_evidence and not (allow_fuzzy and fuzzy_quality):
             continue
         coordinates = item.get("lat"), item.get("lon")
-        if not isinstance(coordinates[0], (int, float)) or not isinstance(coordinates[1], (int, float)):
+        if not isinstance(coordinates[0], (int, float)) or not isinstance(
+            coordinates[1], (int, float)
+        ):
             center = item.get("center") if isinstance(item.get("center"), dict) else {}
             coordinates = center.get("lat"), center.get("lon")
-        if not isinstance(coordinates[0], (int, float)) or not isinstance(coordinates[1], (int, float)):
+        if not isinstance(coordinates[0], (int, float)) or not isinstance(
+            coordinates[1], (int, float)
+        ):
             continue
-        address = _address_from_mapping({
-            "country": tags.get("addr:country") or "中国",
-            "province": tags.get("addr:province") or tags.get("addr:state") or expected_province,
-            "city": tags.get("addr:city") or expected_city,
-            "district": tags.get("addr:district") or tags.get("addr:county"),
-            "town": tags.get("addr:town") or tags.get("addr:village") or tags.get("addr:suburb"),
-            "street": tags.get("addr:street"),
-            "house_number": tags.get("addr:housenumber"),
-            "postcode": tags.get("addr:postcode"),
-        }, name)
+        address = _address_from_mapping(
+            {
+                "country": tags.get("addr:country") or "中国",
+                "province": tags.get("addr:province")
+                or tags.get("addr:state")
+                or expected_province,
+                "city": tags.get("addr:city") or expected_city,
+                "district": tags.get("addr:district") or tags.get("addr:county"),
+                "town": tags.get("addr:town")
+                or tags.get("addr:village")
+                or tags.get("addr:suburb"),
+                "street": tags.get("addr:street"),
+                "house_number": tags.get("addr:housenumber"),
+                "postcode": tags.get("addr:postcode"),
+            },
+            name,
+        )
         locality = address.get("locality", "")
         level = "town" if tags.get("place") in {"town", "village"} else "poi"
-        display_name = ", ".join(value for value in (
-            name,
-            address.get("locality"),
-            address.get("district"),
-            address.get("city"),
-            address.get("province"),
-            address.get("country"),
-        ) if value)
-        if _has_conflicting_admin_context(expected_city, expected_province, display_name, address):
+        display_name = ", ".join(
+            value
+            for value in (
+                name,
+                address.get("locality"),
+                address.get("district"),
+                address.get("city"),
+                address.get("province"),
+                address.get("country"),
+            )
+            if value
+        )
+        if _has_conflicting_admin_context(
+            expected_city, expected_province, display_name, address
+        ):
             continue
         result = {
             "latitude": float(coordinates[0]),
@@ -708,9 +963,14 @@ def _overpass_result(label: str, payload: dict | list | None, expected_city: str
             "providerScore": 86,
             "address": address,
             "matchQuality": name_quality or fuzzy_quality or 70,
-            **({"precision": "approximate"} if allow_fuzzy and not name_quality else {}),
+            **(
+                {"precision": "approximate"} if allow_fuzzy and not name_quality else {}
+            ),
         }
-        ranking = (name_quality, 1 if address.get("district") or address.get("locality") else 0)
+        ranking = (
+            name_quality,
+            1 if address.get("district") or address.get("locality") else 0,
+        )
         if best is None or ranking > best[0]:
             best = (ranking, result)
     return best[1] if best else None
@@ -733,7 +993,13 @@ def reset_geocoder_pool_health() -> None:
     _overpass_endpoint_index = 0
 
 
-def geocode_query(label: str, query: str, expected_city: str = "", expected_province: str = "", allow_fuzzy: bool = False) -> dict | None:
+def geocode_query(
+    label: str,
+    query: str,
+    expected_city: str = "",
+    expected_province: str = "",
+    allow_fuzzy: bool = False,
+) -> dict | None:
     results = []
     for config in GEOCODER_POOL:
         provider = config["provider"]
@@ -741,7 +1007,11 @@ def geocode_query(label: str, query: str, expected_city: str = "", expected_prov
         if _provider_failures.get(provider, 0) >= GEOCODER_POOL_FAILURE_LIMIT:
             continue
         if provider == "arcgis":
-            payload = _request_json(endpoint, {"SingleLine": query, "f": "json", "maxLocations": 5}, config["timeout"])
+            payload = _request_json(
+                endpoint,
+                {"SingleLine": query, "f": "json", "maxLocations": 5},
+                config["timeout"],
+            )
             result = _arcgis_result(
                 label,
                 payload,
@@ -750,26 +1020,41 @@ def geocode_query(label: str, query: str, expected_city: str = "", expected_prov
                 allow_fuzzy,
             )
         elif provider == "nominatim":
-            payload = _request_json(endpoint, {
-                "q": query,
-                "format": "jsonv2",
-                "limit": 5,
-                "accept-language": "zh-CN",
-            }, config["timeout"])
-            result = _nominatim_result(label, payload, expected_city, expected_province, allow_fuzzy)
+            payload = _request_json(
+                endpoint,
+                {
+                    "q": query,
+                    "format": "jsonv2",
+                    "limit": 5,
+                    "accept-language": "zh-CN",
+                },
+                config["timeout"],
+            )
+            result = _nominatim_result(
+                label, payload, expected_city, expected_province, allow_fuzzy
+            )
         else:
-            payload = _request_json(endpoint, {
-                "q": query,
-                "limit": 5,
-            }, config["timeout"])
-            result = _photon_result(label, payload, expected_city, expected_province, allow_fuzzy)
+            payload = _request_json(
+                endpoint,
+                {
+                    "q": query,
+                    "limit": 5,
+                },
+                config["timeout"],
+            )
+            result = _photon_result(
+                label, payload, expected_city, expected_province, allow_fuzzy
+            )
         if payload is None:
             _provider_failures[provider] = _provider_failures.get(provider, 0) + 1
             continue
         _provider_failures[provider] = 0
         if result:
             results.append({"provider": provider, **result})
-    if not results and _provider_failures.get("overpass", 0) < GEOCODER_POOL_FAILURE_LIMIT:
+    if (
+        not results
+        and _provider_failures.get("overpass", 0) < GEOCODER_POOL_FAILURE_LIMIT
+    ):
         overpass_query = _overpass_query(label, expected_city)
         if overpass_query:
             result = _overpass_result(
@@ -783,7 +1068,9 @@ def geocode_query(label: str, query: str, expected_city: str = "", expected_prov
                 _provider_failures["overpass"] = 0
                 results.append({"provider": "overpass", **result})
             else:
-                _provider_failures["overpass"] = _provider_failures.get("overpass", 0) + 1
+                _provider_failures["overpass"] = (
+                    _provider_failures.get("overpass", 0) + 1
+                )
     merged = _merge_geocoder_results(results)
     return {"query": query, **merged} if merged else None
 
@@ -826,7 +1113,9 @@ def _apply_result(tour: dict, result: dict) -> None:
     quality["fieldSources"]["destinationAddress"] = "inferred"
 
 
-def enrich_tours(tours: list[dict], allow_network: bool = False, cache_path: Path = CACHE_PATH) -> tuple[int, int]:
+def enrich_tours(
+    tours: list[dict], allow_network: bool = False, cache_path: Path = CACHE_PATH
+) -> tuple[int, int]:
     cache = _load_cache(cache_path)
     network_results: dict[tuple[str, str, str, bool], dict | None] = {}
     resolved = 0
@@ -836,12 +1125,22 @@ def enrich_tours(tours: list[dict], allow_network: bool = False, cache_path: Pat
         if tour.get("destinationCoordinateSource") in {"catalog", "osm"}:
             resolution = tour.get("geoResolution")
             if isinstance(resolution, dict):
-                resolution["geocoder"] = {"status": "not-needed", "queries": [], "reason": "already-resolved"}
+                resolution["geocoder"] = {
+                    "status": "not-needed",
+                    "queries": [],
+                    "reason": "already-resolved",
+                }
             continue
-        if tour.get("destinationCoordinateSource") == "geocoder" and tour.get("destinationAddress"):
+        if tour.get("destinationCoordinateSource") == "geocoder" and tour.get(
+            "destinationAddress"
+        ):
             resolution = tour.get("geoResolution")
             if isinstance(resolution, dict):
-                resolution["geocoder"] = {"status": "not-needed", "queries": [], "reason": "already-resolved"}
+                resolution["geocoder"] = {
+                    "status": "not-needed",
+                    "queries": [],
+                    "reason": "already-resolved",
+                }
             continue
         queries = destination_queries(tour)
         fuzzy_queries = destination_fuzzy_queries(tour)
@@ -876,7 +1175,13 @@ def enrich_tours(tours: list[dict], allow_network: bool = False, cache_path: Pat
         if result is None:
             for query in fuzzy_queries:
                 cached_result = cache.get(normalize_query(query))
-                if _valid_cached_result(label, expected_city, cached_result, expected_province, allow_fuzzy=True):
+                if _valid_cached_result(
+                    label,
+                    expected_city,
+                    cached_result,
+                    expected_province,
+                    allow_fuzzy=True,
+                ):
                     result = cached_result
                     if isinstance(resolution, dict):
                         resolution["geocoder"] = {
@@ -887,11 +1192,18 @@ def enrich_tours(tours: list[dict], allow_network: bool = False, cache_path: Pat
                     break
         if result is None and allow_network:
             for query in queries:
-                result_key = (normalize_query(query), expected_city, expected_province, False)
+                result_key = (
+                    normalize_query(query),
+                    expected_city,
+                    expected_province,
+                    False,
+                )
                 if result_key in network_results:
                     result = network_results[result_key]
                 else:
-                    result = geocode_query(label, query, expected_city, expected_province)
+                    result = geocode_query(
+                        label, query, expected_city, expected_province
+                    )
                     network_results[result_key] = result
                 if result:
                     cache[normalize_query(query)] = result
@@ -905,11 +1217,18 @@ def enrich_tours(tours: list[dict], allow_network: bool = False, cache_path: Pat
                     break
         if result is None and allow_network:
             for query in fuzzy_queries:
-                result_key = (normalize_query(query), expected_city, expected_province, True)
+                result_key = (
+                    normalize_query(query),
+                    expected_city,
+                    expected_province,
+                    True,
+                )
                 if result_key in network_results:
                     result = network_results[result_key]
                 else:
-                    result = geocode_query(label, query, expected_city, expected_province, allow_fuzzy=True)
+                    result = geocode_query(
+                        label, query, expected_city, expected_province, allow_fuzzy=True
+                    )
                     network_results[result_key] = result
                 if result:
                     cache[normalize_query(query)] = result
@@ -925,7 +1244,9 @@ def enrich_tours(tours: list[dict], allow_network: bool = False, cache_path: Pat
             resolution["geocoder"] = {
                 "status": "no-match",
                 "queries": all_queries,
-                "reason": "no-validated-provider-result" if allow_network else "cache-miss",
+                "reason": "no-validated-provider-result"
+                if allow_network
+                else "cache-miss",
             }
         if isinstance(result, dict) and result.get("latitude") is not None:
             _apply_result(tour, result)

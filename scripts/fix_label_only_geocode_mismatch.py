@@ -93,9 +93,27 @@ SUBDIVISION_SUFFIXES = ("镇", "村", "街道", "乡")
 
 # Destination labels that are generic venue/marketing words, never real places.
 GENERIC_LABELS = {
-    "餐饮", "住宿", "早餐", "午餐", "晚餐", "购物", "娱乐", "自理",
-    "参考酒店", "当地酒店", "豪华酒店", "度假村", "温泉酒店", "酒店",
-    "早餐后", "晚餐后", "入住后", "自由活动", "当地", "参考", "同级",
+    "餐饮",
+    "住宿",
+    "早餐",
+    "午餐",
+    "晚餐",
+    "购物",
+    "娱乐",
+    "自理",
+    "参考酒店",
+    "当地酒店",
+    "豪华酒店",
+    "度假村",
+    "温泉酒店",
+    "酒店",
+    "早餐后",
+    "晚餐后",
+    "入住后",
+    "自由活动",
+    "当地",
+    "参考",
+    "同级",
 }
 
 # Province detection for the domestic province-conflict rule.
@@ -141,6 +159,8 @@ def title_provinces(title: str) -> set[str]:
 
 def province_base(value: str) -> str:
     return str(value or "").removesuffix("省").removesuffix("市").strip()
+
+
 SUBDIVISION_SUFFIXES = ("镇", "村", "街道", "乡")
 
 
