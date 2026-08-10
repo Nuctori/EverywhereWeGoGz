@@ -48,7 +48,9 @@ def purge_poisoned_cache(cleared_labels: set[str]) -> int:
         kept[key] = value
     if removed:
         fd, temp_name = tempfile.mkstemp(
-            prefix=f".{GEOCODE_CACHE_PATH.name}.", suffix=".tmp", dir=GEOCODE_CACHE_PATH.parent
+            prefix=f".{GEOCODE_CACHE_PATH.name}.",
+            suffix=".tmp",
+            dir=GEOCODE_CACHE_PATH.parent,
         )
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
@@ -59,6 +61,7 @@ def purge_poisoned_cache(cleared_labels: set[str]) -> int:
             if os.path.exists(temp_name):
                 os.unlink(temp_name)
     return removed
+
 
 GEO_FIELDS = (
     "destinationCity",
@@ -282,5 +285,7 @@ def main() -> int:
     if cache_removed:
         print(f"purged {cache_removed} poisoned geocode-cache entries")
     return 0
+
+
 if __name__ == "__main__":
     raise SystemExit(main())
