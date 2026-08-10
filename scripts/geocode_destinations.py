@@ -128,19 +128,21 @@ def destination_queries(tour: dict) -> list[str]:
         return []
 
     title = str(tour.get("title") or "")
+    country = str(tour.get("destinationCountry") or "").strip()
+    country_part = country if country and country != "中国" else "中国"
     context = list(dict.fromkeys(_title_inserted_context(title, label, city) + _context_terms(title)))
-    parts = [label, *context, province, "中国"]
+    parts = [label, *context, province, country_part]
     queries = [" ".join(part for part in parts if part)]
-    queries.append(" ".join(part for part in (label, province, "中国") if part))
+    queries.append(" ".join(part for part in (label, province, country_part) if part))
     place_label = label[len(city):].strip() if city and label.startswith(city) else label
     if place_label and place_label != label:
-        queries.append(" ".join(part for part in (place_label, *context, city, province, "中国") if part))
+        queries.append(" ".join(part for part in (place_label, *context, city, province, country_part) if part))
         queries.append(" ".join(part for part in (
             place_label,
             *context,
             f"{city}市" if not city.endswith(("市", "县", "区")) else city,
             f"{province}省" if province and not province.endswith("省") else province,
-            "中国",
+            country_part,
         ) if part))
     return list(dict.fromkeys(normalize_query(query) for query in queries if query))
 
@@ -297,7 +299,10 @@ def _named_result_quality(label: str, name: str, expected_city: str = "") -> int
             return 100
         if normalized_name in {variant + suffix for suffix in POI_DESCRIPTIVE_SUFFIXES}:
             return 90
-        if _strip_admin_suffixes(normalized_name) == _strip_admin_suffixes(variant):
+        # Admin-suffix equality (e.g. 硅谷 ↔ 硅谷街道) is only acceptable when
+        # the query carried a city context. Without one, a bare POI label must
+        # not silently match an administrative division in some other city.
+        if expected_city and _strip_admin_suffixes(normalized_name) == _strip_admin_suffixes(variant):
             return 85
     return 0
 

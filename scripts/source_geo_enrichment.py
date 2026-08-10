@@ -29,6 +29,7 @@ from geocode_destinations import (
     geocode_query,
     normalize_query,
 )
+from osm_poi_resolver import is_international_route_title
 from source_geo_mining import candidate_context, extract_detail_candidates
 
 
@@ -255,13 +256,22 @@ def _candidate_queries(tour: dict, label: str) -> tuple[list[str], list[str], st
             city = ""
     if not city and province and find_place(label):
         city = str(find_place(label).get("name") or "")
+    # A bare label query without any administrative context is ambiguous: it
+    # tends to match a same-named Chinese administrative division (e.g. 硅谷 →
+    # 长春市硅谷街道) and the wrong city then gets written back as destination.
+    if not city and not province and is_international_route_title(str(tour.get("title") or "")):
+        return [], [], city, province
     context = [label]
     compact_label = normalize_query(label).replace(" ", "")
     if city and city != label and not compact_label.startswith(normalize_query(city).replace(" ", "")):
         context.append(city)
     if province and province not in context:
         context.append(province)
-    context.append("中国")
+    country = str(tour.get("destinationCountry") or "").strip()
+    if country and country != "中国" and country not in context:
+        context.append(country)
+    else:
+        context.append("中国")
     strict = [" ".join(context)]
     if province:
         strict.append(" ".join(part for part in (label, province, "中国") if part))
@@ -369,9 +379,13 @@ def _try_candidate(
 
     address = result.get("address") if isinstance(result.get("address"), dict) else {}
     tour["destinationPlaceName"] = label
-    tour["destinationCity"] = str(address.get("city") or city or label).strip()
-    tour["destinationProvince"] = str(address.get("province") or province or tour.get("destinationProvince") or "").strip()
-    tour["destinationCountry"] = str(address.get("country") or tour.get("destinationCountry") or "中国").strip()
+    if city or province:
+        # Only adopt the result's administrative fields when the query itself
+        # carried an admin context. A label-only match (e.g. 硅谷 → 硅谷街道 in
+        # 长春) must not overwrite destination city/province with the wrong one.
+        tour["destinationCity"] = str(address.get("city") or city or label).strip()
+        tour["destinationProvince"] = str(address.get("province") or province or tour.get("destinationProvince") or "").strip()
+        tour["destinationCountry"] = str(address.get("country") or tour.get("destinationCountry") or "中国").strip()
     _apply_result(tour, result)
     if label in COUNTRY_ALIASES:
         tour["destinationCity"] = label
