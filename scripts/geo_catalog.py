@@ -1722,16 +1722,7 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             mining.setdefault("reasons", []), "no-region-compatible-candidate"
         )
         return None, "", "low", "unknown"
-    # A label carrying a place suffix (新兴温德姆酒店 vs bare 新兴) is the more
-    # specific destination when the same city is mentioned multiple times
-    # (【新兴.直通车】新兴温德姆酒店): pick the suffix-bearing mention first.
-    candidates.sort(
-        key=lambda item: (
-            -int(bool(PLACE_LABEL_SUFFIXES.search(item[3]))),
-            item[0],
-            item[1],
-        )
-    )
+    candidates.sort(key=lambda item: (item[0], item[1]))
     _, _, place, label, _ = candidates[0]
     final_label = label if named_candidates else place["name"]
     materialized = _materialize_named_place(place, final_label)
