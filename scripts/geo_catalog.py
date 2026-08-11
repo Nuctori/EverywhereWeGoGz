@@ -1437,7 +1437,6 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
     for text_index, text in enumerate(texts):
         for mention in _iter_place_mentions(text, domestic_route=domestic_route):
             label = _place_label(text, mention)
-            label = _place_label(text, mention)
             if mention["place"]["name"] in title_departure_names:
                 _append_unique(mining.setdefault("rejectedLabels", []), label)
                 _append_unique(mining.setdefault("reasons", []), "departure-mention")

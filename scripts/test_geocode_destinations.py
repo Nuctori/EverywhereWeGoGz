@@ -473,6 +473,42 @@ def test_geocoder_pool_merges_address_fields_from_all_matching_providers():
     assert merged["address"]["street"] == "紫云谷路"
 
 
+def test_geocoder_pool_prefers_highest_scoring_provider():
+    # Regression: a lost reverse=True in _merge_geocoder_results flipped the
+    # sort to ascending, making the LOWEST-scoring provider win (which re-pins
+    # 柏林 -> 柏林镇-class wrong POIs). Highest score must win.
+    results = [
+        {
+            "provider": "photon",
+            "latitude": 52.5200,
+            "longitude": 13.4050,
+            "displayName": "Berlin, Germany",
+            "level": "city",
+            "locality": "Berlin",
+            "providerScore": 90,
+            "matchQuality": 100,
+            "address": {"formatted": "Berlin, Germany", "locality": "Berlin"},
+        },
+        {
+            "provider": "arcgis",
+            "latitude": 30.4060,
+            "longitude": 105.5460,
+            "displayName": "柏林镇, 重庆, 中国",
+            "level": "town",
+            "locality": "柏林镇",
+            "providerScore": 40,
+            "matchQuality": 70,
+            "address": {"formatted": "柏林镇, 重庆, 中国", "locality": "柏林镇"},
+        },
+    ]
+
+    merged = _merge_geocoder_results(results)
+
+    assert isinstance(merged, dict)
+    assert merged["provider"] == "photon"
+    assert merged["latitude"] == 52.5200
+
+
 def test_formatted_poi_name_is_not_treated_as_district():
     for formatted, locality, district in (
         ("紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国", "金渡镇", "高要区"),

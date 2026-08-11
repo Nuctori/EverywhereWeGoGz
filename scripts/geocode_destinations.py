@@ -9,6 +9,8 @@ pipeline and keeps the network result in a small, reviewable cache.
 from __future__ import annotations
 
 import json
+import math
+import os
 import re
 import time
 from pathlib import Path
@@ -119,9 +121,13 @@ def _load_cache(path: Path = CACHE_PATH) -> dict:
 
 
 def _write_cache(cache: dict, path: Path = CACHE_PATH) -> None:
-    path.write_text(
+    # Atomic replace: a crash mid-write leaves the previous cache intact instead
+    # of a truncated JSON file that _load_cache silently treats as empty.
+    temp_path = path.with_suffix(path.suffix + ".tmp")
+    temp_path.write_text(
         json.dumps(cache, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    os.replace(temp_path, path)
 
 
 def _context_terms(title: str) -> list[str]:
@@ -532,9 +538,12 @@ def _try_float(value: object) -> float | None:
     if isinstance(value, bool) or not isinstance(value, (int, float, str)):
         return None
     try:
-        return float(value)
+        number = float(value)
     except (TypeError, ValueError):
         return None
+    if not math.isfinite(number):
+        return None
+    return number
 
 
 def _try_int(value: object) -> int | None:
@@ -543,12 +552,12 @@ def _try_int(value: object) -> int | None:
     if isinstance(value, str):
         try:
             return int(float(value))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return None
     if isinstance(value, (int, float)):
         try:
             return int(value)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             return None
     return None
 
@@ -563,8 +572,8 @@ def _merge_geocoder_results(results: list[dict]) -> dict | None:
             _try_float(result.get("providerScore")) or 0,
             len(result.get("address") or {}),
         ),
+        reverse=True,
     )
-    winner = dict(ranked[0])
     winner = dict(ranked[0])
     merged_address = {}
     for candidate in ranked:
