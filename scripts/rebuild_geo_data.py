@@ -147,11 +147,11 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
         for label in current_mining.get("candidateLabels", [])
         if str(label).strip()
     ]
-    current_labels.extend(
-        normalize_name(row.get("label"))
-        for row in current_mining.get("sourceCandidates", [])
-        if isinstance(row, dict) and str(row.get("label") or "").strip()
-    )
+    # NOTE: sourceCandidates are deliberately NOT used as evidence here — they
+    # are preserved from the previous rebuild (_preserve_geo_mining), so relying
+    # on them would create a self-justifying loop: a stale wrong pin (e.g.
+    # tour_14 东北 -> 杭州西湖) would keep its preserved label as "evidence"
+    # and never be cleared.
     previous_place = normalize_name(previous.get("destinationPlaceName"))
     previous_city = normalize_name(previous.get("destinationCity"))
     title = normalize_name(previous.get("title"))

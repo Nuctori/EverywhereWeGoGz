@@ -733,6 +733,19 @@ DOMESTIC_POI_INDEX = {
     "广东温泉宾馆": ("广东", "从化"),
     "龙母祖庙": ("广东", "德庆"),
 }
+# Explicit international countries: when a title's region resolves to one of
+# these, a DOMESTIC China detail mention (新丰温德姆花园酒店 on a 加拿大 tour)
+# is itinerary-template pollution. Provinces/macro-regions (青甘/华东/广东)
+# are deliberately NOT here so real domestic trips are never rejected.
+INTERNATIONAL_COUNTRIES = {
+    "美国", "加拿大", "墨西哥", "日本", "韩国", "泰国", "新加坡", "马来西亚",
+    "澳大利亚", "新西兰", "俄罗斯", "英国", "法国", "德国", "意大利", "西班牙",
+    "葡萄牙", "土耳其", "埃及", "摩洛哥", "肯尼亚", "阿联酋", "印度", "印尼",
+    "越南", "柬埔寨", "老挝", "缅甸", "马尔代夫", "迪拜", "冰岛", "挪威",
+    "瑞典", "丹麦", "芬兰", "瑞士", "奥地利", "捷克", "匈牙利", "波兰",
+    "希腊", "塞尔维亚", "黑山", "巴西", "秘鲁", "智利", "阿根廷", "南非",
+    "毛里求斯", "欧洲", "非洲", "大洋洲", "北欧", "东欧", "西欧", "南欧",
+}
 # Scenic POIs that outrank their parent city when both appear in a title.
 # Decided by geometry at selection time (same province + within 130km of a
 # city candidate), so this set is a fast path only; see _poi_beats_city.
@@ -951,6 +964,13 @@ NAMED_PLACE_COORDINATES = {
         "level": "poi",
         "locality": "派潭镇",
         "coordinateSource": "osm",
+    },
+    "纽约的自由女神及米高梅酒店": {
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "level": "poi",
+        "locality": "纽约",
+        "coordinateSource": "catalog",
     },
     "北海涠洲岛": {
         "latitude": 21.0402578,
@@ -1329,6 +1349,13 @@ def _iter_place_mentions(
             if index < 0:
                 break
             end = index + len(alias)
+            # Rhetorical mention in marketing copy: "不是巴黎卢浮宫去不起"
+            # (not-Paris Louvre) is a comparison, not a destination (D-019
+            # family). (A bare "X的西湖" check was dropped — it also rejects
+            # real destinations like 愉快的重庆之行.)
+            if value[max(0, index - 2) : index] == "不是":
+                start = index + 1
+                continue
             # A catalog city name that prefixes a known foreign brand/ship name
             # (雅典娜号, 罗马假日) is a collision, not a destination mention.
             tail_run = value[end : end + 6]
@@ -1711,6 +1738,35 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
                 _append_unique(mining.setdefault("rejectedLabels", []), label)
                 _append_unique(mining.setdefault("reasons", []), "departure-mention")
                 continue
+            # Template pollution guard: an INTERNATIONAL title (加拿大/美国…)
+            # whose detail mentions a DOMESTIC China place (新丰温德姆花园酒店)
+            # is itinerary-template text, not a destination. The reverse
+            # direction (国内 title + 国外 detail mention) stays legal
+            # (D-007 pattern: 广东出发国际线). With NO region anchor at all
+            # (title 东三省, dest=其他), detail mentions are unverifiable —
+            # reject them too rather than pinning a 120km-away metaphor city.
+            title_country = title_region.get("country") if title_region else None
+            mention_country = mention["place"].get("country")
+            # Only an EXPLICIT international country name in the title guards
+            # against domestic template pollution (加拿大 tour + 新丰酒店).
+            # China provinces/macro-regions and their shorthand (青甘/华东…)
+            # must NOT trigger it — 青甘 tour + 敦煌莫高窟 is a real trip.
+            title_country_is_international = title_country in INTERNATIONAL_COUNTRIES
+            if text_index > 0 and (
+                (
+                    title_country_is_international
+                    and mention_country == "中国"
+                )
+                or (
+                    not title_region
+                    and not destination_region
+                )
+            ):
+                _append_unique(mining.setdefault("rejectedLabels", []), label)
+                _append_unique(
+                    mining.setdefault("reasons", []), "title-region-conflict"
+                )
+                continue
             is_named_place = _is_inline_named_alias(text, mention) or (
                 mention["alias"] == mention["place"]["name"]
                 and mention["place"]["name"] in EXPLICIT_TITLE_DESTINATION_NAMES
@@ -1784,25 +1840,43 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             mining.setdefault("reasons", []), "no-region-compatible-candidate"
         )
         return None, "", "low", "unknown"
-    candidates.sort(
-        key=lambda item: (
-            -int(bool(POI_CLASS_SUFFIXES.search(item[3]))),
-            item[0],
-            item[1],
-        )
-    )
+    candidates.sort(key=lambda item: (item[0], item[1]))
     _, _, place, label, _ = candidates[0]
     final_label = (
-        label
-        if named_candidates
-        else (
-            label
-            if label in NAMED_PLACE_COORDINATES
-            or POI_CLASS_SUFFIXES.search(label)
-            else place["name"]
-        )
+        label if named_candidates or label in NAMED_PLACE_COORDINATES
+        else place["name"]
     )
-    materialized = _materialize_named_place(place, final_label)
+    # NAMED_PLACE_COORDINATES candidates win (D-024 curation precedent): the
+    # curated label has a trusted coordinate (姑婆山/白水寨). Otherwise pick the
+    # first candidate that materializes — a POI-class label with no trusted
+    # geometry (XX酒店 not in NAMED) must not degrade a poi tour to city.
+    ordered = [
+        candidate for candidate in candidates
+        if candidate[3] in NAMED_PLACE_COORDINATES
+    ] or candidates
+    chosen_place = None
+    chosen_label = ""
+    for candidate in ordered:
+        _, _, cand_place, cand_label, _ = candidate
+        cand_final = (
+            cand_label
+            if named_candidates
+            else (
+                cand_label
+                if cand_label in NAMED_PLACE_COORDINATES
+                else cand_place["name"]
+            )
+        )
+        cand_materialized = _materialize_named_place(cand_place, cand_final)
+        if cand_materialized.get("latitude") is not None:
+            chosen_place = cand_materialized
+            chosen_label = cand_final
+            break
+    if chosen_place is None:
+        chosen_place = _materialize_named_place(place, final_label)
+        chosen_label = final_label
+    materialized = chosen_place
+    final_label = chosen_label
     mining["status"] = (
         "resolved" if materialized.get("latitude") is not None else "no-coordinate"
     )

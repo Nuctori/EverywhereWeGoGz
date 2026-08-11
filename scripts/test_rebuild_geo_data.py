@@ -411,6 +411,22 @@ def test_rebuild_keeps_guposhan_poi_on_hezhou_tours():
         assert tour["destinationGeoLevel"] == "poi"
 
 
+def test_rebuild_us_antelope_tour_keeps_poi_level_not_city():
+    # BLOCKER-C: tour_4814-class US tours (羚羊峡谷 + 自由女神) must keep a
+    # POI-level pin (纽约的自由女神及米高梅酒店), not degrade to the bare 纽约
+    # city, and must never land in 肇庆/中国.
+    tour = {
+        "id": "tour_antelope_statue",
+        "title": "【尚·深度】美国西部15天＊9大州9大国家公园＊羚羊峡谷＊纽约自由女神及米高梅酒店＊黄石",
+        "destination": "美国",
+    }
+    rebuild([tour])
+
+    assert tour["destinationCountry"] == "美国"
+    assert tour["destinationPlaceName"] != "羚羊峡"
+    assert "自由女神" in str(tour["destinationPlaceName"] or "")
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback()
@@ -425,4 +441,5 @@ if __name__ == "__main__":
     test_poi_continuation_guard_blocks_antelope_canyon_even_on_domestic_route()
     test_antelope_canyon_no_country_in_title_still_does_not_hit_zhaoqing()
     test_rebuild_keeps_guposhan_poi_on_hezhou_tours()
+    test_rebuild_us_antelope_tour_keeps_poi_level_not_city()
     print("geo rebuild tests passed")
