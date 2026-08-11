@@ -78,7 +78,23 @@ GENERIC_NAME_PARTS = {
     "森林",
     "旅游",
 }
-POI_DESCRIPTIVE_SUFFIXES = ("景区", "风景区", "旅游区", "度假区", "风景名胜区", "公园")
+POI_DESCRIPTIVE_SUFFIXES = (
+    "景区",
+    "风景区",
+    "旅游区",
+    "旅游度假区",
+    "度假区",
+    "风景名胜区",
+    "公园",
+    "酒店",
+    "度假酒店",
+    "度假村",
+    "温泉酒店",
+    "山庄",
+    "生态园",
+    "古村",
+    "民宿",
+)
 ADDRESS_FIELDS = (
     "formatted",
     "country",

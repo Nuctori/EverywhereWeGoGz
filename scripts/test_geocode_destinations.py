@@ -128,8 +128,8 @@ def test_cached_overpass_result_is_published_as_osm_source(tmp_path: Path):
 
 
 def test_fuzzy_cached_town_result_keeps_named_tour_on_the_map(tmp_path: Path):
-    # 蓝钟 is now a catalog POI (24.0776/111.9556 from a verified ArcGIS
-    # result), so a named title resolves directly without a geocoder hit.
+    # 蓝钟温泉 has no curated coordinate; the mined POI flows to the geocoder
+    # pipeline. A cached town result (蓝钟镇, ArcGIS-verified) resolves it.
     fields, _ = normalize_tour_geo(
         {"destination": "广东", "title": "肇庆蓝钟温泉3天"},
         "肇庆蓝钟温泉3天",
@@ -143,19 +143,28 @@ def test_fuzzy_cached_town_result_keeps_named_tour_on_the_map(tmp_path: Path):
     }
     cache_path = tmp_path / "geo-cache.json"
     cache_path.write_text(
-        __import__("json").dumps({}, ensure_ascii=False),
+        __import__("json").dumps(
+            {
+                "蓝钟温泉 广东 中国": {
+                    "provider": "arcgis",
+                    "latitude": 24.0776019,
+                    "longitude": 111.9556435,
+                    "displayName": "蓝钟温泉, 蓝钟镇, 怀集县, 肇庆市, 广东省, 中国",
+                    "level": "poi",
+                },
+            },
+            ensure_ascii=False,
+        ),
         encoding="utf-8",
     )
 
     candidates, resolved = enrich_tours([tour], cache_path=cache_path)
 
-    # Catalog-resolved: enrich_tours does not re-queue it (no geocoder call).
-    assert candidates == 0
-    assert resolved == 0
+    assert candidates == 1
+    assert resolved == 1
     assert tour["destinationLatitude"] == 24.0776019
     assert tour["destinationLongitude"] == 111.9556435
     assert tour["destinationGeoLevel"] == "poi"
-    assert tour["destinationCoordinateSource"] == "catalog"
 
 
 def test_invalid_cached_result_does_not_upgrade_the_wrong_poi(tmp_path: Path):
@@ -232,12 +241,14 @@ def test_named_title_destination_does_not_inherit_city_centroid():
     )
 
     assert fields["destinationPlaceName"] == "蓝钟森林温泉酒店"
-    assert fields["destinationCity"] == "蓝钟"
-    assert fields["destinationLatitude"] == 24.0776019
-    assert fields["destinationLongitude"] == 111.9556435
-    assert fields["destinationCoordinateSource"] == "catalog"
+    assert fields["destinationCity"] == "怀集"
+    # No curated coordinate: the mined POI stays coordinate-less so the
+    # geocoder pipeline (destination_queries -> cache/network) resolves it.
+    assert fields["destinationLatitude"] is None
+    assert fields["destinationLongitude"] is None
+    assert fields["destinationCoordinateSource"] == "inferred"
     assert fields["geoResolution"]["input"]["hasTitle"] is True
-    assert fields["geoResolution"]["mining"]["status"] == "resolved"
+    assert fields["geoResolution"]["mining"]["status"] == "no-coordinate"
     assert "departure-mention" in fields["geoResolution"]["mining"]["reasons"]
 
 
@@ -258,10 +269,10 @@ def test_geo_resolution_records_detail_coverage_for_unmapped_tours():
     assert resolution["input"]["itineraryDays"] == 1
     assert resolution["input"]["accommodationDays"] == 1
     assert any("蓝钟" in label for label in resolution["mining"]["candidateLabels"])
-    assert resolution["mining"]["status"] == "resolved"
+    assert resolution["mining"]["status"] == "no-coordinate"
 
 
-def test_named_destination_from_title_resolves_from_catalog_poi():
+def test_named_destination_from_title_flows_to_geocoder():
     fields, _ = normalize_tour_geo(
         {"destination": "广东", "title": "肇庆蓝钟温泉3天"},
         "肇庆蓝钟温泉3天",
@@ -274,15 +285,18 @@ def test_named_destination_from_title_resolves_from_catalog_poi():
         "meta": {"dataQuality": {"fieldSources": {}}},
     }
 
+    # 蓝钟温泉 is a metadata-index POI (no hard-coded coordinate): the mined
+    # label carries the parent city so destination_queries resolves it via the
+    # verified geocoder cache (蓝钟镇 24.0776).
     assert fields["destinationPlaceName"] == "蓝钟温泉"
-    assert fields["destinationCity"] == "蓝钟"
-    assert fields["destinationCoordinateSource"] == "catalog"
-    assert fields["destinationLatitude"] == 24.0776019
+    assert fields["destinationCity"] == "怀集"
+    assert fields["destinationCoordinateSource"] == "inferred"
+    assert fields["destinationLatitude"] is None
     assert destination_queries(tour)[0] == "蓝钟温泉 广东 中国"
 
 
-def test_named_poi_aliases_resolve_from_catalog_poi():
-    for poi, expected_lat in (("七星岩", 23.0805699), ("紫云谷", 23.1267137)):
+def test_named_poi_aliases_flow_to_geocoder():
+    for poi, expected_city in (("七星岩", "肇庆"), ("紫云谷", "肇庆")):
         fields, _ = normalize_tour_geo(
             {"destination": "广东", "title": f"广州出发{poi}3天"},
             f"广州出发{poi}3天",
@@ -295,12 +309,12 @@ def test_named_poi_aliases_resolve_from_catalog_poi():
             "meta": {"dataQuality": {"fieldSources": {}}},
         }
         assert fields["destinationPlaceName"] == poi
-        assert fields["destinationCity"] == poi
+        assert fields["destinationCity"] == expected_city
         assert fields["destinationCoordinateSource"] == "inferred"
-        assert fields["destinationLatitude"] == expected_lat
-        # label == place.name: the POI already carries a trusted coordinate,
-        # so no geocoder query is generated for it.
-        assert destination_queries(tour) == []
+        assert fields["destinationLatitude"] is None
+        # The POI label generates a geocoder query anchored to its parent city
+        # (七星岩 广东 中国 -> cached Nominatim 23.0806).
+        assert any(f"{poi} 广东 中国" in query for query in destination_queries(tour))
 
 
 def test_geocoder_requires_poi_name_and_expected_city():
@@ -796,11 +810,12 @@ def test_unique_alias_without_canonical_city_does_not_inherit_city_centroid():
         {},
     )
 
-    # 蓝钟 is its own catalog POI (怀集县蓝钟镇), so it keeps its own
-    # coordinate instead of inheriting the 肇庆 city centroid.
+    # 蓝钟 is a metadata-index POI (怀集县蓝钟镇): the mined label keeps its
+    # own parent city and stays coordinate-less for the geocoder pipeline,
+    # instead of inheriting the 肇庆 city centroid.
     assert fields["destinationPlaceName"] == "蓝钟"
-    assert fields["destinationLatitude"] == 24.0776019
-    assert fields["destinationLongitude"] == 111.9556435
+    assert fields["destinationCity"] == "怀集"
+    assert fields["destinationLatitude"] is None
     assert fields["destinationCoordinateSource"] == "inferred"
 
 

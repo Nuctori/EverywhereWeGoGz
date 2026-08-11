@@ -5249,5 +5249,166 @@
       "street": "北一环路",
       "postalCode": "230061"
     }
+  },
+  "黄金沟 肇庆 广东 中国": {
+    "provider": "nominatim",
+    "query": "黄金沟 肇庆 广东 中国",
+    "latitude": 23.2579354,
+    "longitude": 112.5583891,
+    "displayName": "黄金沟景区, 鼎湖区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "matchQuality": null
+  },
+  "龙母祖庙 德庆 广东 中国": {
+    "provider": "nominatim",
+    "query": "龙母祖庙 德庆 广东 中国",
+    "latitude": 23.092044,
+    "longitude": 112.1280253,
+    "displayName": "龙母祖庙, 程溪路, 东岸咀, 德庆县, 肇庆市, 广东省, 527324, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "matchQuality": null
+  },
+  "庆云寺 肇庆 广东 中国": {
+    "provider": "photon",
+    "query": "庆云寺 肇庆 广东 中国",
+    "latitude": 23.1714727,
+    "longitude": 112.5412911,
+    "displayName": "庆云寺 问鼎路 坑口街道 肇庆市  广东省 中国",
+    "level": "poi",
+    "locality": "迪村社区",
+    "providerScore": 80,
+    "matchQuality": null
+  },
+  "宝鼎园 肇庆 广东 中国": {
+    "provider": "photon",
+    "query": "宝鼎园 肇庆 广东 中国",
+    "latitude": 23.1796612,
+    "longitude": 112.5367713,
+    "displayName": "宝鼎园 问鼎路 坑口街道 肇庆市  广东省 中国",
+    "level": "poi",
+    "locality": "迪村社区",
+    "providerScore": 80,
+    "matchQuality": null
+  },
+  "蓝钟 怀集 广东 中国": {
+    "provider": "nominatim",
+    "query": "蓝钟 怀集 广东 中国",
+    "latitude": 24.0776019,
+    "longitude": 111.9556435,
+    "displayName": "蓝钟镇, 怀集县, 肇庆市, 广东省, 中国",
+    "level": "town",
+    "locality": "蓝钟镇",
+    "providerScore": 80,
+    "matchQuality": null
+  },
+  "星湖湿地 肇庆 广东 中国": {
+    "provider": "nominatim",
+    "query": "星湖湿地 肇庆 广东 中国",
+    "latitude": 23.0805699,
+    "longitude": 112.4727006,
+    "displayName": "七星岩景区, 城东街道, 端州区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "城东街道",
+    "providerScore": 80
+  },
+  "星湖绿道 肇庆 广东 中国": {
+    "provider": "nominatim",
+    "query": "星湖绿道 肇庆 广东 中国",
+    "latitude": 23.0805699,
+    "longitude": 112.4727006,
+    "displayName": "七星岩景区, 城东街道, 端州区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "城东街道",
+    "providerScore": 80
+  },
+  "天露山 新兴 广东 中国": {
+    "query": "天露山 新兴 广东 中国",
+    "provider": "photon",
+    "latitude": 22.4889055,
+    "longitude": 112.2244895,
+    "displayName": "天露山旅游度假区  庄谷坪 里洞镇 新兴县 广东省 中国",
+    "level": "poi",
+    "locality": "梅溪小镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "天露山旅游度假区  庄谷坪 里洞镇 新兴县 广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "里洞镇",
+      "district": "庄谷坪",
+      "locality": "梅溪小镇"
+    }
+  },
+  "象窝 新兴 广东 中国": {
+    "query": "象窝 新兴 广东 中国",
+    "provider": "nominatim",
+    "latitude": 22.5633143,
+    "longitude": 112.290645,
+    "displayName": "翔顺象窝酒店, 大象路, 大塘坳, 太平镇, 新兴县, 云浮市, 广东省, 527400, 中国",
+    "level": "poi",
+    "locality": "太平镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "翔顺象窝酒店, 大象路, 大塘坳, 太平镇, 新兴县, 云浮市, 广东省, 527400, 中国"
+    }
+  },
+  "象窝生态园 新兴 广东 中国": {
+    "query": "象窝生态园 新兴 广东 中国",
+    "provider": "nominatim",
+    "latitude": 22.5633143,
+    "longitude": 112.290645,
+    "displayName": "翔顺象窝酒店, 大象路, 大塘坳, 太平镇, 新兴县, 云浮市, 广东省, 527400, 中国",
+    "level": "poi",
+    "locality": "太平镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "翔顺象窝酒店, 大象路, 大塘坳, 太平镇, 新兴县, 云浮市, 广东省, 527400, 中国"
+    }
+  },
+  "星湖湿地 广东 中国": {
+    "provider": "nominatim",
+    "query": "星湖湿地 广东 中国",
+    "latitude": 23.0805699,
+    "longitude": 112.4727006,
+    "displayName": "星湖湿地（七星岩景区）, 城东街道, 端州区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "城东街道",
+    "providerScore": 80
+  },
+  "星湖绿道 广东 中国": {
+    "provider": "nominatim",
+    "query": "星湖绿道 广东 中国",
+    "latitude": 23.0805699,
+    "longitude": 112.4727006,
+    "displayName": "星湖绿道（七星岩景区）, 城东街道, 端州区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "城东街道",
+    "providerScore": 80
+  },
+  "鼎湖山 肇庆 广东 中国": {
+    "provider": "photon",
+    "query": "鼎湖山 肇庆 广东 中国",
+    "latitude": 23.1766514,
+    "longitude": 112.5819817,
+    "displayName": "鼎湖山, 鼎湖大道, 桂城街道, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "桂城街道",
+    "providerScore": 90,
+    "matchQuality": 90
+  },
+  "鼎湖山 广东 中国": {
+    "provider": "photon",
+    "query": "鼎湖山 广东 中国",
+    "latitude": 23.1766514,
+    "longitude": 112.5819817,
+    "displayName": "鼎湖山, 鼎湖大道, 桂城街道, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "桂城街道",
+    "providerScore": 90,
+    "matchQuality": 90
   }
 }

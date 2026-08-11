@@ -73,7 +73,6 @@ function App() {
             onSearch={handleSearch}
             onAiSearch={handleAiSearch}
             quickDestinations={QUICK_DESTINATIONS}
-            map={<MapView embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} />}
           />
           <MapView expanded={mapExpanded} onExpandedChange={setMapExpanded} />
           <div id="tour-list" className="scroll-mt-24">

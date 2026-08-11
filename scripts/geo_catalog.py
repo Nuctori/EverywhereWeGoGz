@@ -36,12 +36,6 @@ PLACE_ROWS = [
     ),
     ("韶关", "中国", "广东", 24.8104, 113.5972, ("韶关", "韶关市", "南华寺", "丹霞山")),
     ("肇庆", "中国", "广东", 23.0472, 112.4651, ("肇庆", "肇庆市")),
-    # 肇庆景区 POI 独立行（坐标来自缓存验证的 Nominatim/ArcGIS 结果）。
-    # 星湖 alias 只用复合词：裸「星湖」会误匹配内蒙古「七星湖」等异地湖名。
-    ("七星岩", "中国", "广东", 23.0805699, 112.4727006, ("七星岩", "星湖湿地", "星湖绿道", "星湖大酒店")),
-    ("紫云谷", "中国", "广东", 23.1267137, 112.585637, ("紫云谷",)),
-    ("蓝钟", "中国", "广东", 24.0776019, 111.9556435, ("蓝钟", "蓝钟温泉")),
-    ("鼎湖山", "中国", "广东", 23.1836, 112.5455, ("鼎湖山", "庆云寺", "宝鼎园")),
     ("佛山", "中国", "广东", 23.0218, 113.1219, ("佛山", "佛山市")),
     ("江门", "中国", "广东", 22.5787, 113.0815, ("江门", "江门市")),
     (
@@ -623,9 +617,23 @@ EXPLICIT_POI_NAMES = {
     "大角湾",
     "瓦晒湾",
     "七星岩",
+    "星湖湿地",
+    "星湖绿道",
+    "星湖大酒店",
     "紫云谷",
     "蓝钟",
+    "蓝钟温泉",
     "鼎湖山",
+    "庆云寺",
+    "宝鼎园",
+    "羚羊峡",
+    "黄金沟",
+    "天露山",
+    "象窝",
+    "象窝酒店",
+    "象窝生态园",
+    "三页温泉",
+    "龙母祖庙",
     "盐洲岛",
     "亚婆角",
     "香港迪士尼",
@@ -663,12 +671,36 @@ EXPLICIT_POI_NAMES = {
     "吴哥窟",
 }
 EXPLICIT_NAMED_ALIASES = {"海陵岛", "闸坡", "南昆山"}
+# Scenic POI index: name -> (province, parent_city). METADATA ONLY — which
+# province/city the POI sits in. Coordinates are NOT hard-coded here: they
+# come from the verified geocoder cache (Nominatim/ArcGIS/photon/OSM) when
+# the mined POI label flows through destination_queries -> geocode_query.
+# A POI in this index is treated as a named title destination even without an
+# ALIAS_ROWS row, so 肇庆2天＊鼎湖山 resolves to the mountain, not the city.
+DOMESTIC_POI_INDEX = {
+    "七星岩": ("广东", "肇庆"),
+    "星湖湿地": ("广东", "肇庆"),
+    "星湖绿道": ("广东", "肇庆"),
+    "星湖大酒店": ("广东", "肇庆"),
+    "紫云谷": ("广东", "肇庆"),
+    "蓝钟": ("广东", "怀集"),
+    "蓝钟温泉": ("广东", "怀集"),
+    "鼎湖山": ("广东", "肇庆"),
+    "庆云寺": ("广东", "肇庆"),
+    "宝鼎园": ("广东", "肇庆"),
+    "羚羊峡": ("广东", "肇庆"),
+    "黄金沟": ("广东", "肇庆"),
+    "天露山": ("广东", "新兴"),
+    "象窝": ("广东", "新兴"),
+    "象窝酒店": ("广东", "新兴"),
+    "象窝生态园": ("广东", "新兴"),
+    "三页温泉": ("广东", "新兴"),
+    "龙母祖庙": ("广东", "德庆"),
+}
 # Scenic POIs that outrank their parent city when both appear in a title.
-# Kept deliberately small: each entry is a catalog POI row whose coordinate
-# was verified (Nominatim/ArcGIS cache or OSM), so the POI is provably inside
-# the parent city. The broad EXPLICIT_POI_NAMES set is NOT used here because
-# it also contains independent destinations (沙巴/美奈/棉花堡/卡帕多奇亚).
-POI_OVER_CITY_PRIORITY = {"七星岩", "星湖", "紫云谷", "蓝钟", "鼎湖山"}
+# Decided by geometry at selection time (same province + within 130km of a
+# city candidate), so this set is a fast path only; see _poi_beats_city.
+POI_OVER_CITY_PRIORITY = frozenset(DOMESTIC_POI_INDEX)
 EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "马拉喀什",
     "巴黎",
@@ -760,43 +792,6 @@ NAMED_PLACE_COORDINATES = {
         "level": "poi",
         "locality": "沙扒镇",
         "coordinateSource": "catalog",
-    },
-    # 肇庆景区 POI：label 提取为「POI+后缀」形态时（蓝钟温泉/七星岩星湖）补
-    # 精确坐标，避免 materialize 因 label != place.name 把坐标置 None。
-    "蓝钟温泉": {
-        "latitude": 24.0776019,
-        "longitude": 111.9556435,
-        "level": "poi",
-        "locality": "蓝钟镇",
-        "coordinateSource": "catalog",
-    },
-    "肇庆怀集蓝钟森林温泉酒店": {
-        "latitude": 24.0776019,
-        "longitude": 111.9556435,
-        "level": "poi",
-        "locality": "蓝钟镇",
-        "coordinateSource": "catalog",
-    },
-    "蓝钟森林温泉酒店": {
-        "latitude": 24.0776019,
-        "longitude": 111.9556435,
-        "level": "poi",
-        "locality": "蓝钟镇",
-        "coordinateSource": "catalog",
-    },
-    "七星岩星湖": {
-        "latitude": 23.0805699,
-        "longitude": 112.4727006,
-        "level": "poi",
-        "locality": "星湖",
-        "coordinateSource": "catalog",
-    },
-    "肇庆星湖大酒店": {
-        "latitude": 23.0571359,
-        "longitude": 112.4668559,
-        "level": "poi",
-        "locality": "星湖",
-        "coordinateSource": "osm",
     },
     "北海涠洲岛": {
         "latitude": 21.0402578,
@@ -1199,6 +1194,32 @@ def _iter_place_mentions(text, *, domestic_route: bool = False):
                 {
                     "place": place,
                     "alias": alias,
+                    "start": index,
+                    "end": end,
+                }
+            )
+            start = index + 1
+    # Scenic POIs from the metadata index (no ALIAS_ROWS row, no hard-coded
+    # coordinate): mention them so the mined label flows to the geocoder.
+    for poi_name, (province, city) in DOMESTIC_POI_INDEX.items():
+        start = 0
+        while poi_name:
+            index = value.find(poi_name, start)
+            if index < 0:
+                break
+            end = index + len(poi_name)
+            matches.append(
+                {
+                    "place": {
+                        "name": poi_name,
+                        "country": "中国",
+                        "province": province,
+                        "city": city,
+                        "latitude": None,
+                        "longitude": None,
+                        "level": "poi",
+                    },
+                    "alias": poi_name,
                     "start": index,
                     "end": end,
                 }
@@ -1717,7 +1738,14 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         )
     fields = {
         **departure,
-        "destinationCity": resolved_destination["name"] if resolved_destination else "",
+        # POI places carry their parent city in the metadata index (七星岩 ->
+        # 肇庆), so destinationCity is the parent city, not the POI name —
+        # otherwise destination_queries sees label == city and never geocodes.
+        "destinationCity": (
+            resolved_destination.get("city") or resolved_destination["name"]
+        )
+        if resolved_destination
+        else "",
         "destinationPlaceName": resolved_label,
         "destinationProvince": destination_province,
         "destinationCountry": destination_country,

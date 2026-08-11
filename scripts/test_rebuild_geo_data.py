@@ -45,18 +45,15 @@ def test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback():
         [tour], geocode_cache_path=Path("tmp-nonexistent-geo-cache.json")
     )
 
+    # 蓝钟温泉 is a metadata-index POI; its parent city 怀集 has no catalog
+    # row and the geocode cache is empty, so the rebuild leaves it unmapped
+    # rather than pinning an arbitrary coarse point. With the git-tracked
+    # geocode cache (蓝钟温泉 广东 中国 -> 24.0776) it resolves exactly.
     assert before == 1
-    assert after == 1
-    # 蓝钟温泉 is now a catalog POI (24.0776/111.9556 from a verified ArcGIS
-    # result); the rebuilt tour resolves to it instead of the coarse 肇庆 city
-    # centroid carried in the source fields.
+    assert after == 0
+    assert tour["destinationLatitude"] is None
     assert tour["destinationPlaceName"] == "蓝钟温泉"
-    assert tour["destinationCoordinateSource"] == "catalog"
-    assert tour["destinationGeoLevel"] == "poi"
-    assert tour["destinationLatitude"] == 24.0776019
-    assert tour["destinationLongitude"] == 111.9556435
-    assert tour["geoConfidence"] == "low"
-    assert tour["geoResolution"]["final"]["status"] == "complete"
+    assert tour["geoResolution"]["final"]["status"] == "unmapped"
 
 
 def test_rebuild_materializes_an_explicit_region_as_approximate():
@@ -279,8 +276,10 @@ def test_rebuild_drops_previous_poi_not_supported_by_current_title_candidates():
     rebuild([tour])
 
     assert tour["destinationPlaceName"] == "新兴象窝"
-    assert tour["destinationCoordinateSource"] == "fallback"
-    assert tour["destinationLatitude"] == 22.695
+    # 象窝 is a metadata-index POI resolved via the geocode cache
+    # (翔顺象窝酒店, 太平镇 22.5633) — more precise than the 新兴 county fallback.
+    assert tour["destinationCoordinateSource"] == "geocoder"
+    assert tour["destinationLatitude"] == 22.5633143
 
 
 def test_rebuild_prefers_city_anchored_destination_over_incidental_itinerary_poi():
@@ -303,7 +302,7 @@ def test_rebuild_prefers_city_anchored_destination_over_incidental_itinerary_poi
     rebuild([tour])
 
     assert tour["destinationPlaceName"] == "新兴象窝"
-    assert tour["destinationCoordinateSource"] == "fallback"
+    assert tour["destinationCoordinateSource"] == "geocoder"
 
 
 def test_rebuild_does_not_pin_domestic_cruise_to_foreign_city():
