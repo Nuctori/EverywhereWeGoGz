@@ -375,6 +375,22 @@ def test_poi_continuation_guard_blocks_antelope_canyon_even_on_domestic_route():
     assert any(m["place"]["name"] == "羚羊峡" for m in real)
 
 
+def test_antelope_canyon_no_country_in_title_still_does_not_hit_zhaoqing():
+    # Auditor-requested form: dest=其他 + a title with NO recognizable country
+    # (黄石公园/羚羊峡谷 are scenic names, not a country) must still not
+    # produce a 羚羊峡 mention nor land in 肇庆 — the POI_CONTINUATIONS guard
+    # fires on its own, independent of the international-route gate.
+    tour = {
+        "id": "tour_antelope_no_country",
+        "title": "黄石公园羚羊峡谷光影之旅大峡谷5天",
+        "destination": "其他",
+    }
+    rebuild([tour])
+
+    assert tour["destinationPlaceName"] != "羚羊峡"
+    assert tour["destinationCountry"] != "中国"
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback()
@@ -387,4 +403,5 @@ if __name__ == "__main__":
     test_rebuild_does_not_pin_macau_resort_brand_to_paris()
     test_rebuild_does_not_pin_us_antelope_canyon_to_zhaoqing()
     test_poi_continuation_guard_blocks_antelope_canyon_even_on_domestic_route()
+    test_antelope_canyon_no_country_in_title_still_does_not_hit_zhaoqing()
     print("geo rebuild tests passed")
