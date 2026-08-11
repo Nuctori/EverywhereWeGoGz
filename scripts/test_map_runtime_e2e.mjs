@@ -32,19 +32,20 @@ try {
 		.filter((place) => place.roles?.includes("destination"))
 		.filter((place) => place.tourIds?.length > 0).length;
 	const map = page.locator('[aria-label="旅行目的地地图"]').first();
+	await map.scrollIntoViewIfNeeded();
 	await map.waitFor({ state: "visible" });
-	await page.getByText(/已定位 \d+ 个地点/).waitFor({ state: "visible" });
+	await page.getByText(/已定位 \d+ 个(?:地点|目的地)/).waitFor({ state: "visible" });
 	await map
 		.locator(".leaflet-tile-pane")
 		.waitFor({ state: "attached", timeout: 15000 });
 	await page.waitForTimeout(2200);
 
 	const mapSummary = await page
-		.getByText(/已定位 \d+ 个地点/)
+		.getByText(/已定位 \d+ 个(?:地点|目的地)/)
 		.first()
 		.innerText();
 	const reportedPlaces = Number(
-		mapSummary.match(/已定位 (\d+) 个地点/)?.[1] || 0,
+		mapSummary.match(/已定位 (\d+) 个(?:地点|目的地)/)?.[1] || 0,
 	);
 	const markerCoverage = async (canvas) =>
 		canvas.locator(".leaflet-marker-icon").evaluateAll((markers) => ({
@@ -175,7 +176,7 @@ try {
 	);
 	await tourDialog.getByRole("button", { name: "Close" }).click();
 
-	await page.getByRole("button", { name: "放大", exact: true }).click();
+	await page.getByRole("button", { name: "放大地图", exact: true }).click();
 	const expandedMap = page
 		.getByRole("dialog", { name: "点地点，直接看对应旅行团" })
 		.first();
