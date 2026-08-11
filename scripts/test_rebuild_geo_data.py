@@ -338,6 +338,21 @@ def test_rebuild_does_not_pin_macau_resort_brand_to_paris():
         assert tour["destinationPlaceName"] != "巴黎", f"{title} must not pin to 巴黎"
 
 
+def test_rebuild_does_not_pin_us_antelope_canyon_to_zhaoqing():
+    # 羚羊峡谷 (Antelope Canyon, Arizona) contains the 羚羊峡 substring; the
+    # domestic POI index must NOT match it (POI_CONTINUATIONS guard) — a US
+    # tour must keep its foreign pin, not land in 肇庆.
+    tour = {
+        "id": "tour_antelope_us",
+        "title": "【金秋纯享黄石】美国东西岸七大名城+黄石六大公园+羚羊峡谷+大瀑布13天",
+        "destination": "美国",
+    }
+    rebuild([tour])
+
+    assert tour["destinationPlaceName"] != "羚羊峡"
+    assert tour["destinationCountry"] != "中国"
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback()
@@ -348,4 +363,5 @@ if __name__ == "__main__":
     test_rebuild_drops_historical_foreign_city_as_domestic_hotel()
     test_rebuild_does_not_pin_domestic_cruise_to_foreign_city()
     test_rebuild_does_not_pin_macau_resort_brand_to_paris()
+    test_rebuild_does_not_pin_us_antelope_canyon_to_zhaoqing()
     print("geo rebuild tests passed")

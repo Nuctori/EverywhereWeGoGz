@@ -701,6 +701,12 @@ DOMESTIC_POI_INDEX = {
 # Decided by geometry at selection time (same province + within 130km of a
 # city candidate), so this set is a fast path only; see _poi_beats_city.
 POI_OVER_CITY_PRIORITY = frozenset(DOMESTIC_POI_INDEX)
+# POI names that are substrings of unrelated words (D-019 pattern): the indexed
+# POI must not match when followed by one of these continuations.
+# 羚羊峡 + 谷 = 羚羊峡谷 (Antelope Canyon, Arizona) — a US tour, not 肇庆.
+POI_CONTINUATIONS = {
+    "羚羊峡": ("谷",),
+}
 EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "马拉喀什",
     "巴黎",
@@ -1201,30 +1207,40 @@ def _iter_place_mentions(text, *, domestic_route: bool = False):
             start = index + 1
     # Scenic POIs from the metadata index (no ALIAS_ROWS row, no hard-coded
     # coordinate): mention them so the mined label flows to the geocoder.
-    for poi_name, (province, city) in DOMESTIC_POI_INDEX.items():
-        start = 0
-        while poi_name:
-            index = value.find(poi_name, start)
-            if index < 0:
-                break
-            end = index + len(poi_name)
-            matches.append(
-                {
-                    "place": {
-                        "name": poi_name,
-                        "country": "中国",
-                        "province": province,
-                        "city": city,
-                        "latitude": None,
-                        "longitude": None,
-                        "level": "poi",
-                    },
-                    "alias": poi_name,
-                    "start": index,
-                    "end": end,
-                }
-            )
-            start = index + 1
+    # Only on domestic routes: a Chinese scenic name inside an international
+    # tour title is a shorthand collision (羚羊峡 = Antelope Canyon on US
+    # tours), not the 肇庆 gorge.
+    if domestic_route:
+        for poi_name, (province, city) in DOMESTIC_POI_INDEX.items():
+            start = 0
+            while poi_name:
+                index = value.find(poi_name, start)
+                if index < 0:
+                    break
+                end = index + len(poi_name)
+                # POI name is a substring of an unrelated word (羚羊峡 in
+                # 羚羊峡谷, Antelope Canyon): reject the mention (D-019 pattern).
+                tail = value[end : end + 1]
+                if tail and tail in POI_CONTINUATIONS.get(poi_name, ()):
+                    start = index + 1
+                    continue
+                matches.append(
+                    {
+                        "place": {
+                            "name": poi_name,
+                            "country": "中国",
+                            "province": province,
+                            "city": city,
+                            "latitude": None,
+                            "longitude": None,
+                            "level": "poi",
+                        },
+                        "alias": poi_name,
+                        "start": index,
+                        "end": end,
+                    }
+                )
+                start = index + 1
     matches.sort(key=lambda item: (item["start"], -len(item["alias"])))
     selected = []
     occupied_until = -1
@@ -1444,12 +1460,22 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
     # 港澳/广东 can be departure placeholders on international tours, so only
     # real domestic provinces (province == name) gate the contextual brands
     # (e.g. 澳门巴黎铁塔 on a 广东 tour vs the real Eiffel Tower on 欧洲 tours).
+    # The scenic-POI index (DOMESTIC_POI_INDEX) is disabled only on explicitly
+    # international routes (country != 中国): dest=其他/全国/空 defaults to
+    # domestic so 蓝钟/天露山 still resolve on tours without a province.
     destination_region = find_region(destination_text)
-    domestic_route = bool(
+    title_region = find_region(str(title or ""))
+    destination_international = bool(
         destination_region
-        and destination_region.get("province")
-        and destination_region.get("province") == destination_region.get("name")
+        and destination_region.get("country")
+        and str(destination_region.get("country")) != "中国"
     )
+    title_international = bool(
+        title_region
+        and title_region.get("country")
+        and str(title_region.get("country")) != "中国"
+    )
+    domestic_route = not (destination_international or title_international)
     title_departure_names = {
         mention["place"]["name"]
         for mention in _iter_place_mentions(title, domestic_route=domestic_route)
