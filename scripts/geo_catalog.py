@@ -582,6 +582,38 @@ PLACE_LABEL_SUFFIXES = re.compile(
         )
     )
 )
+# Explicit POI-class suffixes for candidate sorting: a label ending in one of
+# these (增城白水寨风景区, 新兴温德姆酒店) is a concrete POI that outranks the
+# bare parent city. Deliberately EXCLUDES natural-landform suffixes (湖/湾/岛/
+# 草原) — 仙本那斗湖 (斗湖 is a same-level town name) must not outrank 仙本那.
+POI_CLASS_SUFFIXES = re.compile(
+    "|".join(
+        sorted(
+            (
+                "景区",
+                "风景区",
+                "旅游区",
+                "旅游度假区",
+                "度假区",
+                "风景名胜区",
+                "公园",
+                "酒店",
+                "度假酒店",
+                "度假村",
+                "温泉酒店",
+                "温泉",
+                "山庄",
+                "生态园",
+                "古镇",
+                "古村",
+                "庄园",
+                "乐园",
+            ),
+            key=len,
+            reverse=True,
+        )
+    )
+)
 
 
 def _valid_coordinate_pair(latitude, longitude):
@@ -889,6 +921,36 @@ NAMED_PLACE_COORDINATES = {
         "level": "poi",
         "locality": "从化区温泉镇",
         "coordinateSource": "catalog",
+    },
+    # 贺州姑婆山：OSM 验证坐标（D-023 不变量——tour_1/254/2978 曾因 label
+    # 提取「贺州姑婆山伴山温泉」导致 OSM 全名查询 miss 而回退贺州 city）。
+    "贺州姑婆山": {
+        "latitude": 24.5878842,
+        "longitude": 111.5651391,
+        "level": "poi",
+        "locality": "姑婆山",
+        "coordinateSource": "osm",
+    },
+    "贺州姑婆山伴山温泉": {
+        "latitude": 24.5878842,
+        "longitude": 111.5651391,
+        "level": "poi",
+        "locality": "姑婆山",
+        "coordinateSource": "osm",
+    },
+    "姑婆山": {
+        "latitude": 24.5878842,
+        "longitude": 111.5651391,
+        "level": "poi",
+        "locality": "姑婆山",
+        "coordinateSource": "osm",
+    },
+    "增城白水寨风景区": {
+        "latitude": 23.5975367,
+        "longitude": 113.7711936,
+        "level": "poi",
+        "locality": "派潭镇",
+        "coordinateSource": "osm",
     },
     "北海涠洲岛": {
         "latitude": 21.0402578,
@@ -1722,9 +1784,24 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             mining.setdefault("reasons", []), "no-region-compatible-candidate"
         )
         return None, "", "low", "unknown"
-    candidates.sort(key=lambda item: (item[0], item[1]))
+    candidates.sort(
+        key=lambda item: (
+            -int(bool(POI_CLASS_SUFFIXES.search(item[3]))),
+            item[0],
+            item[1],
+        )
+    )
     _, _, place, label, _ = candidates[0]
-    final_label = label if named_candidates else place["name"]
+    final_label = (
+        label
+        if named_candidates
+        else (
+            label
+            if label in NAMED_PLACE_COORDINATES
+            or POI_CLASS_SUFFIXES.search(label)
+            else place["name"]
+        )
+    )
     materialized = _materialize_named_place(place, final_label)
     mining["status"] = (
         "resolved" if materialized.get("latitude") is not None else "no-coordinate"

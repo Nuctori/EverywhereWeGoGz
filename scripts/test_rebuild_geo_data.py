@@ -90,7 +90,10 @@ def test_rebuild_does_not_call_city_catalog_coordinates_exact():
     rebuild([tour])
 
     assert tour["destinationGeoLevel"] == "city"
-    assert tour["destinationCoordinateSource"] == "catalog"
+    # 龙门温德姆温泉 is a hotel name without a geocoder/OSM POI; the mined
+    # suffix label stays coordinate-less and the rebuild falls back to the
+    # 龙门 city centroid. Precision stays approximate (never exact).
+    assert tour["destinationCoordinateSource"] in {"catalog", "fallback"}
     assert tour["destinationCoordinatePrecision"] == "approximate"
 
 
@@ -391,6 +394,23 @@ def test_antelope_canyon_no_country_in_title_still_does_not_hit_zhaoqing():
     assert tour["destinationCountry"] != "中国"
 
 
+def test_rebuild_keeps_guposhan_poi_on_hezhou_tours():
+    # D-023 invariant: 贺州姑婆山 must resolve to the OSM POI
+    # (24.5878842/111.5651391), not the 贺州 city centroid (24.4036) — the
+    # label 贺州姑婆山伴山温泉 goes through NAMED_PLACE_COORDINATES even when
+    # the candidate is not a "named" title mention.
+    for title in ("贺州姑婆山伴山温泉3天", "贺州2-3天＊姑婆山国家森林公园"):
+        tour = {
+            "id": "tour_guposhan",
+            "title": title,
+            "destination": "广东",
+        }
+        rebuild([tour])
+        assert tour["destinationLatitude"] == 24.5878842, f"{title} must pin 姑婆山 POI"
+        assert tour["destinationLongitude"] == 111.5651391
+        assert tour["destinationGeoLevel"] == "poi"
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback()
@@ -404,4 +424,5 @@ if __name__ == "__main__":
     test_rebuild_does_not_pin_us_antelope_canyon_to_zhaoqing()
     test_poi_continuation_guard_blocks_antelope_canyon_even_on_domestic_route()
     test_antelope_canyon_no_country_in_title_still_does_not_hit_zhaoqing()
+    test_rebuild_keeps_guposhan_poi_on_hezhou_tours()
     print("geo rebuild tests passed")
