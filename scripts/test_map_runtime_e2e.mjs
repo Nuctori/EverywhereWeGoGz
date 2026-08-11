@@ -176,7 +176,7 @@ try {
 	);
 	await tourDialog.getByRole("button", { name: "Close" }).click();
 
-	await page.getByRole("button", { name: "放大地图", exact: true }).click();
+	await page.getByRole("button", { name: "放大", exact: true }).click();
 	const expandedMap = page
 		.getByRole("dialog", { name: "点地点，直接看对应旅行团" })
 		.first();
