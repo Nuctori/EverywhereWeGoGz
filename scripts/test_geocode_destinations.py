@@ -71,13 +71,18 @@ def test_cached_geocoder_result_overrides_city_fallback(tmp_path: Path):
     assert tour["destinationLatitude"] == 24.2
     assert tour["destinationLongitude"] == 112.2
     assert tour["destinationLocality"] == "蓝钟镇"
-    assert tour["destinationAddress"]["formatted"] == "蓝钟温泉, 蓝钟镇, 肇庆市, 广东省, 中国"
+    assert (
+        tour["destinationAddress"]["formatted"]
+        == "蓝钟温泉, 蓝钟镇, 肇庆市, 广东省, 中国"
+    )
     assert tour["destinationAddress"]["city"] == "肇庆市"
     assert tour["destinationAddress"]["locality"] == "蓝钟镇"
     assert tour["destinationAddress"]["province"] == "广东省"
     assert tour["destinationCoordinateSource"] == "geocoder"
     assert tour["geoSource"] == "geocoder"
-    assert normalize_query(" 肇庆蓝钟温泉 广东 中国 ") in __import__("json").loads(cache_path.read_text(encoding="utf-8"))
+    assert normalize_query(" 肇庆蓝钟温泉 广东 中国 ") in __import__("json").loads(
+        cache_path.read_text(encoding="utf-8")
+    )
 
 
 def test_cached_overpass_result_is_published_as_osm_source(tmp_path: Path):
@@ -93,16 +98,26 @@ def test_cached_overpass_result_is_published_as_osm_source(tmp_path: Path):
         "meta": {"dataQuality": {"fieldSources": {}}},
     }
     cache_path = tmp_path / "geo-cache.json"
-    cache_path.write_text(__import__("json").dumps({
-        "七星岩 肇庆市 广东省 中国": {
-            "provider": "overpass",
-            "latitude": 23.0805699,
-            "longitude": 112.4727006,
-            "level": "poi",
-            "displayName": "七星岩景区, 端州区, 肇庆市, 广东省, 中国",
-            "address": {"city": "肇庆市", "district": "端州区", "province": "广东省"},
-        },
-    }, ensure_ascii=False), encoding="utf-8")
+    cache_path.write_text(
+        __import__("json").dumps(
+            {
+                "七星岩 肇庆市 广东省 中国": {
+                    "provider": "overpass",
+                    "latitude": 23.0805699,
+                    "longitude": 112.4727006,
+                    "level": "poi",
+                    "displayName": "七星岩景区, 端州区, 肇庆市, 广东省, 中国",
+                    "address": {
+                        "city": "肇庆市",
+                        "district": "端州区",
+                        "province": "广东省",
+                    },
+                },
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
 
     candidates, resolved = enrich_tours([tour], cache_path=cache_path)
 
@@ -113,35 +128,34 @@ def test_cached_overpass_result_is_published_as_osm_source(tmp_path: Path):
 
 
 def test_fuzzy_cached_town_result_keeps_named_tour_on_the_map(tmp_path: Path):
+    # 蓝钟 is now a catalog POI (24.0776/111.9556 from a verified ArcGIS
+    # result), so a named title resolves directly without a geocoder hit.
     fields, _ = normalize_tour_geo(
         {"destination": "广东", "title": "肇庆蓝钟温泉3天"},
         "肇庆蓝钟温泉3天",
         "广东",
         {},
     )
-    tour = {"title": "肇庆蓝钟温泉3天", **fields, "meta": {"dataQuality": {"fieldSources": {}}}}
+    tour = {
+        "title": "肇庆蓝钟温泉3天",
+        **fields,
+        "meta": {"dataQuality": {"fieldSources": {}}},
+    }
     cache_path = tmp_path / "geo-cache.json"
-    cache_path.write_text(__import__("json").dumps({
-        "蓝钟镇 肇庆 广东 中国": {
-            "provider": "photon",
-            "latitude": 24.0776019,
-            "longitude": 111.9556435,
-            "displayName": "蓝钟镇 怀集县 肇庆市 广东省 中国",
-            "level": "town",
-            "precision": "approximate",
-        },
-    }, ensure_ascii=False), encoding="utf-8")
+    cache_path.write_text(
+        __import__("json").dumps({}, ensure_ascii=False),
+        encoding="utf-8",
+    )
 
     candidates, resolved = enrich_tours([tour], cache_path=cache_path)
 
-    assert candidates == 1
-    assert resolved == 1
+    # Catalog-resolved: enrich_tours does not re-queue it (no geocoder call).
+    assert candidates == 0
+    assert resolved == 0
     assert tour["destinationLatitude"] == 24.0776019
     assert tour["destinationLongitude"] == 111.9556435
-    assert tour["destinationGeoLevel"] == "town"
-    assert tour["destinationCoordinatePrecision"] == "approximate"
-    assert tour["geoConfidence"] == "low"
-    assert tour["geoResolution"]["geocoder"]["status"] == "resolved-cache-approximate"
+    assert tour["destinationGeoLevel"] == "poi"
+    assert tour["destinationCoordinateSource"] == "catalog"
 
 
 def test_invalid_cached_result_does_not_upgrade_the_wrong_poi(tmp_path: Path):
@@ -186,13 +200,17 @@ def test_catalog_coordinates_are_not_sent_to_external_geocoder(tmp_path: Path):
 
 
 def test_geocoder_records_cache_miss_for_a_mined_place(tmp_path: Path):
+    # 蓝钟森林温泉酒店 resolves from the curated NAMED_PLACE_COORDINATES
+    # entry; use the 七星岩 hotel title whose label is not curated, so the
+    # tour stays coordinate-less and must go through the geocoder.
+    title = "<潇洒行>广州往返--肇庆七星岩温德姆至尊酒店 纯玩2天"
     fields, _ = normalize_tour_geo(
-        {"destination": "广东", "title": "肇庆蓝钟温泉3天"},
-        "肇庆蓝钟温泉3天",
+        {"destination": "广东", "title": title},
+        title,
         "广东",
         {},
     )
-    tour = {"title": "肇庆蓝钟温泉3天", **fields}
+    tour = {"title": title, **fields}
 
     candidates, resolved = enrich_tours([tour], cache_path=tmp_path / "geo-cache.json")
 
@@ -213,14 +231,14 @@ def test_named_title_destination_does_not_inherit_city_centroid():
         {},
     )
 
-    assert fields["destinationPlaceName"] == "肇庆蓝钟"
-    assert fields["destinationCity"] == "肇庆"
-    assert fields["destinationLatitude"] is None
-    assert fields["destinationLongitude"] is None
-    assert fields["destinationCoordinateSource"] == "inferred"
+    assert fields["destinationPlaceName"] == "蓝钟森林温泉酒店"
+    assert fields["destinationCity"] == "蓝钟"
+    assert fields["destinationLatitude"] == 24.0776019
+    assert fields["destinationLongitude"] == 111.9556435
+    assert fields["destinationCoordinateSource"] == "catalog"
     assert fields["geoResolution"]["input"]["hasTitle"] is True
-    assert fields["geoResolution"]["mining"]["status"] == "no-coordinate"
-    assert "named-alias-without-trusted-coordinate" in fields["geoResolution"]["mining"]["reasons"]
+    assert fields["geoResolution"]["mining"]["status"] == "resolved"
+    assert "departure-mention" in fields["geoResolution"]["mining"]["reasons"]
 
 
 def test_geo_resolution_records_detail_coverage_for_unmapped_tours():
@@ -229,7 +247,9 @@ def test_geo_resolution_records_detail_coverage_for_unmapped_tours():
         "广州往返肇庆蓝钟温泉3天",
         "广东",
         {
-            "itinerary": [{"title": "肇庆", "description": "温泉", "accommodation": "蓝钟酒店"}],
+            "itinerary": [
+                {"title": "肇庆", "description": "温泉", "accommodation": "蓝钟酒店"}
+            ],
             "highlights": [],
         },
     )
@@ -237,11 +257,11 @@ def test_geo_resolution_records_detail_coverage_for_unmapped_tours():
     resolution = fields["geoResolution"]
     assert resolution["input"]["itineraryDays"] == 1
     assert resolution["input"]["accommodationDays"] == 1
-    assert "肇庆蓝钟温泉" in resolution["mining"]["candidateLabels"]
-    assert "detail" in resolution["mining"]["candidateSources"]
+    assert any("蓝钟" in label for label in resolution["mining"]["candidateLabels"])
+    assert resolution["mining"]["status"] == "resolved"
 
 
-def test_named_destination_from_title_is_geocoder_candidate():
+def test_named_destination_from_title_resolves_from_catalog_poi():
     fields, _ = normalize_tour_geo(
         {"destination": "广东", "title": "肇庆蓝钟温泉3天"},
         "肇庆蓝钟温泉3天",
@@ -254,13 +274,15 @@ def test_named_destination_from_title_is_geocoder_candidate():
         "meta": {"dataQuality": {"fieldSources": {}}},
     }
 
-    queries = destination_queries(tour)
-    assert queries[0] == "肇庆蓝钟温泉 广东 中国"
-    assert tour["destinationCoordinateSource"] == "inferred"
+    assert fields["destinationPlaceName"] == "蓝钟温泉"
+    assert fields["destinationCity"] == "蓝钟"
+    assert fields["destinationCoordinateSource"] == "catalog"
+    assert fields["destinationLatitude"] == 24.0776019
+    assert destination_queries(tour)[0] == "蓝钟温泉 广东 中国"
 
 
-def test_named_poi_aliases_become_geocoder_candidates():
-    for poi in ("肇庆七星岩", "肇庆紫云谷"):
+def test_named_poi_aliases_resolve_from_catalog_poi():
+    for poi, expected_lat in (("七星岩", 23.0805699), ("紫云谷", 23.1267137)):
         fields, _ = normalize_tour_geo(
             {"destination": "广东", "title": f"广州出发{poi}3天"},
             f"广州出发{poi}3天",
@@ -273,84 +295,191 @@ def test_named_poi_aliases_become_geocoder_candidates():
             "meta": {"dataQuality": {"fieldSources": {}}},
         }
         assert fields["destinationPlaceName"] == poi
-        assert fields["destinationCity"] == "肇庆"
+        assert fields["destinationCity"] == poi
         assert fields["destinationCoordinateSource"] == "inferred"
-        assert destination_queries(tour)[0].startswith(f"{poi} 广东 中国")
-        assert any(f"{poi[2:]} 肇庆市 广东省 中国" in query for query in destination_queries(tour))
+        assert fields["destinationLatitude"] == expected_lat
+        # label == place.name: the POI already carries a trusted coordinate,
+        # so no geocoder query is generated for it.
+        assert destination_queries(tour) == []
 
 
 def test_geocoder_requires_poi_name_and_expected_city():
     arcgis = {
         "candidates": [
-            {"address": "七星岩风景区，肇庆市端州区", "score": 98, "location": {"x": 112.48, "y": 23.10}},
-            {"address": "七星岩风景区，其他市", "score": 99, "location": {"x": 113.0, "y": 24.0}},
+            {
+                "address": "七星岩风景区，肇庆市端州区",
+                "score": 98,
+                "location": {"x": 112.48, "y": 23.10},
+            },
+            {
+                "address": "七星岩风景区，其他市",
+                "score": 99,
+                "location": {"x": 113.0, "y": 24.0},
+            },
         ]
     }
     result = _arcgis_result("肇庆七星岩", arcgis, "肇庆")
     assert result["longitude"] == 112.48
-    assert _arcgis_result("肇庆七星岩", {
-        "candidates": [{"address": "七星岩风景区，其他市", "score": 99, "location": {"x": 113.0, "y": 24.0}}]
-    }, "肇庆") is None
-    assert _arcgis_result("肇庆七星岩", {
-        "candidates": [{"address": "七星公园，肇庆市", "score": 99, "location": {"x": 112.5, "y": 23.1}}]
-    }, "肇庆") is None
+    assert (
+        _arcgis_result(
+            "肇庆七星岩",
+            {
+                "candidates": [
+                    {
+                        "address": "七星岩风景区，其他市",
+                        "score": 99,
+                        "location": {"x": 113.0, "y": 24.0},
+                    }
+                ]
+            },
+            "肇庆",
+        )
+        is None
+    )
+    assert (
+        _arcgis_result(
+            "肇庆七星岩",
+            {
+                "candidates": [
+                    {
+                        "address": "七星公园，肇庆市",
+                        "score": 99,
+                        "location": {"x": 112.5, "y": 23.1},
+                    }
+                ]
+            },
+            "肇庆",
+        )
+        is None
+    )
 
-    nominatim = [{
-        "display_name": "紫云谷, 肇庆市, 广东省, 中国",
-        "lat": "23.12",
-        "lon": "112.55",
-        "address": {"tourism": "紫云谷", "city": "肇庆市", "state": "广东省"},
-    }]
+    nominatim = [
+        {
+            "display_name": "紫云谷, 肇庆市, 广东省, 中国",
+            "lat": "23.12",
+            "lon": "112.55",
+            "address": {"tourism": "紫云谷", "city": "肇庆市", "state": "广东省"},
+        }
+    ]
     result = _nominatim_result("肇庆紫云谷", nominatim, "肇庆")
     assert result["latitude"] == 23.12
     assert result["longitude"] == 112.55
     assert result["address"]["city"] == "肇庆市"
-    assert _nominatim_result("肇庆七星岩", [{
-        "display_name": "七星公园, 肇庆市, 广东省, 中国",
-        "lat": "23.12",
-        "lon": "112.55",
-        "address": {"tourism": "七星公园", "city": "肇庆市", "state": "广东省"},
-    }], "肇庆") is None
-    assert _nominatim_result("肇庆七星岩", [{
-        "name": "七星岩顶",
-        "display_name": "七星岩顶, 肇庆市, 广东省, 中国",
-        "lat": "23.53",
-        "lon": "111.96",
-        "address": {"natural": "七星岩顶", "city": "肇庆市", "state": "广东省"},
-    }], "肇庆") is None
+    assert (
+        _nominatim_result(
+            "肇庆七星岩",
+            [
+                {
+                    "display_name": "七星公园, 肇庆市, 广东省, 中国",
+                    "lat": "23.12",
+                    "lon": "112.55",
+                    "address": {
+                        "tourism": "七星公园",
+                        "city": "肇庆市",
+                        "state": "广东省",
+                    },
+                }
+            ],
+            "肇庆",
+        )
+        is None
+    )
+    assert (
+        _nominatim_result(
+            "肇庆七星岩",
+            [
+                {
+                    "name": "七星岩顶",
+                    "display_name": "七星岩顶, 肇庆市, 广东省, 中国",
+                    "lat": "23.53",
+                    "lon": "111.96",
+                    "address": {
+                        "natural": "七星岩顶",
+                        "city": "肇庆市",
+                        "state": "广东省",
+                    },
+                }
+            ],
+            "肇庆",
+        )
+        is None
+    )
 
 
 def test_photon_result_uses_geojson_longitude_then_latitude():
     photon = {
-        "features": [{
-            "geometry": {"type": "Point", "coordinates": [112.56, 23.13]},
-            "properties": {"name": "紫云谷", "city": "肇庆市", "state": "广东省", "country": "中国"},
-        }]
+        "features": [
+            {
+                "geometry": {"type": "Point", "coordinates": [112.56, 23.13]},
+                "properties": {
+                    "name": "紫云谷",
+                    "city": "肇庆市",
+                    "state": "广东省",
+                    "country": "中国",
+                },
+            }
+        ]
     }
     result = _photon_result("肇庆紫云谷", photon, "肇庆")
     assert result["latitude"] == 23.13
     assert result["longitude"] == 112.56
     assert result["address"]["city"] == "肇庆市"
-    assert _photon_result("肇庆七星岩", {
-        "features": [{
-            "geometry": {"type": "Point", "coordinates": [112.5, 23.1]},
-            "properties": {"name": "七星公园", "city": "肇庆市", "state": "广东省", "country": "中国"},
-        }]
-    }, "肇庆") is None
-    assert _photon_result("肇庆七星岩", {
-        "features": [{
-            "geometry": {"type": "Point", "coordinates": [112.47, 23.08]},
-            "properties": {"name": "七星岩景区", "city": "肇庆市", "state": "广东省", "country": "中国"},
-        }]
-    }, "肇庆")["latitude"] == 23.08
+    assert (
+        _photon_result(
+            "肇庆七星岩",
+            {
+                "features": [
+                    {
+                        "geometry": {"type": "Point", "coordinates": [112.5, 23.1]},
+                        "properties": {
+                            "name": "七星公园",
+                            "city": "肇庆市",
+                            "state": "广东省",
+                            "country": "中国",
+                        },
+                    }
+                ]
+            },
+            "肇庆",
+        )
+        is None
+    )
+    assert (
+        _photon_result(
+            "肇庆七星岩",
+            {
+                "features": [
+                    {
+                        "geometry": {"type": "Point", "coordinates": [112.47, 23.08]},
+                        "properties": {
+                            "name": "七星岩景区",
+                            "city": "肇庆市",
+                            "state": "广东省",
+                            "country": "中国",
+                        },
+                    }
+                ]
+            },
+            "肇庆",
+        )["latitude"]
+        == 23.08
+    )
 
 
 def test_fuzzy_geocoder_accepts_matching_town_with_province_context_only():
     payload = {
-        "features": [{
-            "geometry": {"coordinates": [111.9556435, 24.0776019]},
-            "properties": {"name": "蓝钟镇", "district": "怀集县", "city": "肇庆市", "state": "广东省", "country": "中国"},
-        }]
+        "features": [
+            {
+                "geometry": {"coordinates": [111.9556435, 24.0776019]},
+                "properties": {
+                    "name": "蓝钟镇",
+                    "district": "怀集县",
+                    "city": "肇庆市",
+                    "state": "广东省",
+                    "country": "中国",
+                },
+            }
+        ]
     }
     result = _photon_result("肇庆蓝钟温泉", payload, "肇庆", "广东", True)
     assert result["level"] == "town"
@@ -359,55 +488,75 @@ def test_fuzzy_geocoder_accepts_matching_town_with_province_context_only():
 
 
 def test_fuzzy_geocoder_rejects_same_province_wrong_city():
-    for name, city, district in (("三英村", "潮州市", ""), ("龙山镇", "清远市", "佛冈县")):
+    for name, city, district in (
+        ("三英村", "潮州市", ""),
+        ("龙山镇", "清远市", "佛冈县"),
+    ):
         payload = {
-            "features": [{
-                "geometry": {"coordinates": [116.6, 23.5]},
-                "properties": {
-                    "name": name,
-                    "city": city,
-                    "district": district,
-                    "state": "广东省",
-                    "country": "中国",
-                },
-            }]
+            "features": [
+                {
+                    "geometry": {"coordinates": [116.6, 23.5]},
+                    "properties": {
+                        "name": name,
+                        "city": city,
+                        "district": district,
+                        "state": "广东省",
+                        "country": "中国",
+                    },
+                }
+            ]
         }
-        assert _photon_result(
-            "增城三英温泉" if name == "三英村" else "新兴龙山温泉",
-            payload,
-            "增城" if name == "三英村" else "新兴",
-            "广东",
-            True,
-        ) is None
+        assert (
+            _photon_result(
+                "增城三英温泉" if name == "三英村" else "新兴龙山温泉",
+                payload,
+                "增城" if name == "三英村" else "新兴",
+                "广东",
+                True,
+            )
+            is None
+        )
 
 
 def test_overpass_result_accepts_exact_named_poi_with_bounded_city_context():
     payload = {
-        "elements": [{
-            "type": "way",
-            "center": {"lat": 23.0805699, "lon": 112.4727006},
-            "tags": {
-                "name": "七星岩景区",
-                "addr:city": "肇庆市",
-                "addr:district": "端州区",
-                "addr:town": "城东街道",
-                "addr:province": "广东省",
-            },
-        }],
+        "elements": [
+            {
+                "type": "way",
+                "center": {"lat": 23.0805699, "lon": 112.4727006},
+                "tags": {
+                    "name": "七星岩景区",
+                    "addr:city": "肇庆市",
+                    "addr:district": "端州区",
+                    "addr:town": "城东街道",
+                    "addr:province": "广东省",
+                },
+            }
+        ],
     }
     result = _overpass_result("肇庆七星岩", payload, "肇庆", "广东")
     assert result["latitude"] == 23.0805699
     assert result["longitude"] == 112.4727006
     assert result["level"] == "poi"
     assert result["address"]["district"] == "端州区"
-    assert _overpass_result("肇庆七星岩", {
-        "elements": [{
-            "type": "node",
-            "lat": 24.0,
-            "lon": 113.0,
-            "tags": {"name": "七星公园", "addr:city": "肇庆市"},
-        }],
-    }, "肇庆", "广东") is None
+    assert (
+        _overpass_result(
+            "肇庆七星岩",
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "lat": 24.0,
+                        "lon": 113.0,
+                        "tags": {"name": "七星公园", "addr:city": "肇庆市"},
+                    }
+                ],
+            },
+            "肇庆",
+            "广东",
+        )
+        is None
+    )
 
 
 def test_geocoder_query_uses_overpass_only_after_public_geocoders_miss():
@@ -418,18 +567,28 @@ def test_geocoder_query_uses_overpass_only_after_public_geocoders_miss():
     def provider_request(endpoint, params, timeout):
         calls.append(endpoint)
         if "overpass" in endpoint:
-            return {"elements": [{
-                "type": "node",
-                "lat": 23.0805699,
-                "lon": 112.4727006,
-                "tags": {"name": "七星岩景区", "addr:city": "肇庆市", "addr:province": "广东省"},
-            }]}
+            return {
+                "elements": [
+                    {
+                        "type": "node",
+                        "lat": 23.0805699,
+                        "lon": 112.4727006,
+                        "tags": {
+                            "name": "七星岩景区",
+                            "addr:city": "肇庆市",
+                            "addr:province": "广东省",
+                        },
+                    }
+                ]
+            }
         return None
 
     try:
         geocoder.reset_geocoder_pool_health()
         geocoder._request_json = provider_request
-        result = geocoder.geocode_query("肇庆七星岩", "七星岩 肇庆市 广东省 中国", "肇庆", "广东")
+        result = geocoder.geocode_query(
+            "肇庆七星岩", "七星岩 肇庆市 广东省 中国", "肇庆", "广东"
+        )
     finally:
         geocoder._request_json = original_request
         geocoder.OVERPASS_POOL = original_overpass_pool
@@ -451,7 +610,10 @@ def test_geocoder_pool_merges_address_fields_from_all_matching_providers():
             "locality": "金渡镇",
             "providerScore": 80,
             "matchQuality": 100,
-            "address": {"formatted": "紫云谷景区, 肇庆市, 广东省, 中国", "locality": "金渡镇"},
+            "address": {
+                "formatted": "紫云谷景区, 肇庆市, 广东省, 中国",
+                "locality": "金渡镇",
+            },
         },
         {
             "provider": "nominatim",
@@ -462,7 +624,11 @@ def test_geocoder_pool_merges_address_fields_from_all_matching_providers():
             "locality": "金渡镇",
             "providerScore": 80,
             "matchQuality": 100,
-            "address": {"formatted": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国", "district": "高要区", "street": "紫云谷路"},
+            "address": {
+                "formatted": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+                "district": "高要区",
+                "street": "紫云谷路",
+            },
         },
     ]
 
@@ -513,7 +679,11 @@ def test_formatted_poi_name_is_not_treated_as_district():
     for formatted, locality, district in (
         ("紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国", "金渡镇", "高要区"),
         ("海泉湾度假区, 平沙镇, 珠海市, 广东省, 中国", "平沙镇", None),
-        ("丹霞山风景名胜区, 丹霞街道, 仁化县, 韶关市, 广东省, 中国", "丹霞街道", "仁化县"),
+        (
+            "丹霞山风景名胜区, 丹霞街道, 仁化县, 韶关市, 广东省, 中国",
+            "丹霞街道",
+            "仁化县",
+        ),
     ):
         address = _address_from_display_name(formatted)
 
@@ -529,27 +699,55 @@ def test_geocoder_query_collects_all_provider_candidates():
     def provider_request(endpoint, params, timeout):
         calls.append(endpoint)
         if "photon" in endpoint:
-            return {"features": [{
-                "geometry": {"type": "Point", "coordinates": [112.5856, 23.1267]},
-                "properties": {"name": "紫云谷景区", "city": "肇庆市", "state": "广东省", "country": "中国"},
-            }]}
+            return {
+                "features": [
+                    {
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [112.5856, 23.1267],
+                        },
+                        "properties": {
+                            "name": "紫云谷景区",
+                            "city": "肇庆市",
+                            "state": "广东省",
+                            "country": "中国",
+                        },
+                    }
+                ]
+            }
         if "nominatim" in endpoint:
-            return [{
-                "display_name": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
-                "lat": "23.1268",
-                "lon": "112.5857",
-                "address": {"tourism": "紫云谷景区", "town": "金渡镇", "county": "高要区", "city": "肇庆市", "state": "广东省", "country": "中国", "road": "紫云谷路"},
-            }]
-        return {"candidates": [{
-            "address": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
-            "score": 98,
-            "location": {"x": 112.5858, "y": 23.1269},
-        }]}
+            return [
+                {
+                    "display_name": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+                    "lat": "23.1268",
+                    "lon": "112.5857",
+                    "address": {
+                        "tourism": "紫云谷景区",
+                        "town": "金渡镇",
+                        "county": "高要区",
+                        "city": "肇庆市",
+                        "state": "广东省",
+                        "country": "中国",
+                        "road": "紫云谷路",
+                    },
+                }
+            ]
+        return {
+            "candidates": [
+                {
+                    "address": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+                    "score": 98,
+                    "location": {"x": 112.5858, "y": 23.1269},
+                }
+            ]
+        }
 
     try:
         geocoder.reset_geocoder_pool_health()
         geocoder._request_json = provider_request
-        result = geocoder.geocode_query("肇庆紫云谷", "紫云谷 肇庆市 广东省 中国", "肇庆")
+        result = geocoder.geocode_query(
+            "肇庆紫云谷", "紫云谷 肇庆市 广东省 中国", "肇庆"
+        )
     finally:
         geocoder._request_json = original_request
         geocoder.reset_geocoder_pool_health()
@@ -570,10 +768,18 @@ def test_geocoder_pool_skips_repeatedly_unavailable_providers():
     try:
         geocoder.reset_geocoder_pool_health()
         geocoder._request_json = unavailable_request
-        assert geocoder.geocode_query("肇庆七星岩", "七星岩 肇庆市 广东省 中国", "肇庆") is None
-        assert geocoder.geocode_query("肇庆紫云谷", "紫云谷 肇庆市 广东省 中国", "肇庆") is None
+        assert (
+            geocoder.geocode_query("肇庆七星岩", "七星岩 肇庆市 广东省 中国", "肇庆")
+            is None
+        )
+        assert (
+            geocoder.geocode_query("肇庆紫云谷", "紫云谷 肇庆市 广东省 中国", "肇庆")
+            is None
+        )
         assert geocoder.geocode_query("肇庆蓝钟", "蓝钟 肇庆 广东 中国", "肇庆") is None
-        expected_public_failures = len(geocoder.GEOCODER_POOL) * geocoder.GEOCODER_POOL_FAILURE_LIMIT
+        expected_public_failures = (
+            len(geocoder.GEOCODER_POOL) * geocoder.GEOCODER_POOL_FAILURE_LIMIT
+        )
         expected_overpass_failures = geocoder.GEOCODER_POOL_FAILURE_LIMIT
         assert len(calls) == expected_public_failures + expected_overpass_failures
         assert [timeout for _, timeout in calls[:3]] == [6, 8, 4]
@@ -590,9 +796,11 @@ def test_unique_alias_without_canonical_city_does_not_inherit_city_centroid():
         {},
     )
 
-    assert fields["destinationPlaceName"] == "肇庆蓝钟"
-    assert fields["destinationLatitude"] is None
-    assert fields["destinationLongitude"] is None
+    # 蓝钟 is its own catalog POI (怀集县蓝钟镇), so it keeps its own
+    # coordinate instead of inheriting the 肇庆 city centroid.
+    assert fields["destinationPlaceName"] == "蓝钟"
+    assert fields["destinationLatitude"] == 24.0776019
+    assert fields["destinationLongitude"] == 111.9556435
     assert fields["destinationCoordinateSource"] == "inferred"
 
 

@@ -35,14 +35,13 @@ PLACE_ROWS = [
         ("清远", "清远市", "美林湖", "古龙峡", "清泉湾"),
     ),
     ("韶关", "中国", "广东", 24.8104, 113.5972, ("韶关", "韶关市", "南华寺", "丹霞山")),
-    (
-        "肇庆",
-        "中国",
-        "广东",
-        23.0472,
-        112.4651,
-        ("肇庆", "肇庆市", "蓝钟", "七星岩", "紫云谷"),
-    ),
+    ("肇庆", "中国", "广东", 23.0472, 112.4651, ("肇庆", "肇庆市")),
+    # 肇庆景区 POI 独立行（坐标来自缓存验证的 Nominatim/ArcGIS 结果）。
+    # 星湖 alias 只用复合词：裸「星湖」会误匹配内蒙古「七星湖」等异地湖名。
+    ("七星岩", "中国", "广东", 23.0805699, 112.4727006, ("七星岩", "星湖湿地", "星湖绿道", "星湖大酒店")),
+    ("紫云谷", "中国", "广东", 23.1267137, 112.585637, ("紫云谷",)),
+    ("蓝钟", "中国", "广东", 24.0776019, 111.9556435, ("蓝钟", "蓝钟温泉")),
+    ("鼎湖山", "中国", "广东", 23.1836, 112.5455, ("鼎湖山", "庆云寺", "宝鼎园")),
     ("佛山", "中国", "广东", 23.0218, 113.1219, ("佛山", "佛山市")),
     ("江门", "中国", "广东", 22.5787, 113.0815, ("江门", "江门市")),
     (
@@ -625,6 +624,8 @@ EXPLICIT_POI_NAMES = {
     "瓦晒湾",
     "七星岩",
     "紫云谷",
+    "蓝钟",
+    "鼎湖山",
     "盐洲岛",
     "亚婆角",
     "香港迪士尼",
@@ -662,6 +663,12 @@ EXPLICIT_POI_NAMES = {
     "吴哥窟",
 }
 EXPLICIT_NAMED_ALIASES = {"海陵岛", "闸坡", "南昆山"}
+# Scenic POIs that outrank their parent city when both appear in a title.
+# Kept deliberately small: each entry is a catalog POI row whose coordinate
+# was verified (Nominatim/ArcGIS cache or OSM), so the POI is provably inside
+# the parent city. The broad EXPLICIT_POI_NAMES set is NOT used here because
+# it also contains independent destinations (沙巴/美奈/棉花堡/卡帕多奇亚).
+POI_OVER_CITY_PRIORITY = {"七星岩", "星湖", "紫云谷", "蓝钟", "鼎湖山"}
 EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "马拉喀什",
     "巴黎",
@@ -692,6 +699,7 @@ EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "清莱",
     "岘港",
     "迪拜",
+    "肇庆",
     "阿布扎比",
     "伊斯坦布尔",
     "加德满都",
@@ -752,6 +760,43 @@ NAMED_PLACE_COORDINATES = {
         "level": "poi",
         "locality": "沙扒镇",
         "coordinateSource": "catalog",
+    },
+    # 肇庆景区 POI：label 提取为「POI+后缀」形态时（蓝钟温泉/七星岩星湖）补
+    # 精确坐标，避免 materialize 因 label != place.name 把坐标置 None。
+    "蓝钟温泉": {
+        "latitude": 24.0776019,
+        "longitude": 111.9556435,
+        "level": "poi",
+        "locality": "蓝钟镇",
+        "coordinateSource": "catalog",
+    },
+    "肇庆怀集蓝钟森林温泉酒店": {
+        "latitude": 24.0776019,
+        "longitude": 111.9556435,
+        "level": "poi",
+        "locality": "蓝钟镇",
+        "coordinateSource": "catalog",
+    },
+    "蓝钟森林温泉酒店": {
+        "latitude": 24.0776019,
+        "longitude": 111.9556435,
+        "level": "poi",
+        "locality": "蓝钟镇",
+        "coordinateSource": "catalog",
+    },
+    "七星岩星湖": {
+        "latitude": 23.0805699,
+        "longitude": 112.4727006,
+        "level": "poi",
+        "locality": "星湖",
+        "coordinateSource": "catalog",
+    },
+    "肇庆星湖大酒店": {
+        "latitude": 23.0571359,
+        "longitude": 112.4668559,
+        "level": "poi",
+        "locality": "星湖",
+        "coordinateSource": "osm",
     },
     "北海涠洲岛": {
         "latitude": 21.0402578,
@@ -1501,7 +1546,17 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             pass
     named_candidates = [item for item in candidates if item[4]]
     if named_candidates:
-        candidates = named_candidates
+        # A curated scenic POI (七星岩/鼎湖山/紫云谷/蓝钟) is more specific than
+        # the parent city it sits in; when both appear in the title, the POI
+        # wins even though the city textually comes first (肇庆2天＊鼎湖山).
+        # Deliberately a WHITELIST, not EXPLICIT_POI_NAMES: the broad set also
+        # contains independent destinations (沙巴/美奈/棉花堡/卡帕多奇亚) that
+        # must NOT outrank the title's first city on international tours.
+        poi_named = [
+            item for item in named_candidates
+            if item[2].get("name") in POI_OVER_CITY_PRIORITY
+        ]
+        candidates = poi_named if poi_named else named_candidates
     elif not candidates and destination_text not in {"", "其他", "全国"}:
         mining["status"] = "rejected"
         _append_unique(

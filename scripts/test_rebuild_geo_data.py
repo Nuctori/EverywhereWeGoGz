@@ -47,16 +47,16 @@ def test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback():
 
     assert before == 1
     assert after == 1
-    assert tour["destinationPlaceName"] == "肇庆蓝钟温泉"
-    assert tour["destinationCoordinateSource"] == "fallback"
-    assert tour["destinationGeoLevel"] == "city"
-    assert tour["destinationCoordinatePrecision"] == "approximate"
-    assert tour["destinationLatitude"] == 23.0472
-    assert tour["destinationLongitude"] == 112.4651
+    # 蓝钟温泉 is now a catalog POI (24.0776/111.9556 from a verified ArcGIS
+    # result); the rebuilt tour resolves to it instead of the coarse 肇庆 city
+    # centroid carried in the source fields.
+    assert tour["destinationPlaceName"] == "蓝钟温泉"
+    assert tour["destinationCoordinateSource"] == "catalog"
+    assert tour["destinationGeoLevel"] == "poi"
+    assert tour["destinationLatitude"] == 24.0776019
+    assert tour["destinationLongitude"] == 111.9556435
     assert tour["geoConfidence"] == "low"
-    assert tour["geoResolution"]["fallback"]["reason"] == "coarse-parent-city-fallback"
-    assert tour["geoResolution"]["final"]["status"] == "destination-only"
-    assert tour["geoResolution"]["final"]["precision"] == "approximate"
+    assert tour["geoResolution"]["final"]["status"] == "complete"
 
 
 def test_rebuild_materializes_an_explicit_region_as_approximate():
