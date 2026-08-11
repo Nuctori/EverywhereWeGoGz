@@ -633,6 +633,7 @@ EXPLICIT_POI_NAMES = {
     "象窝酒店",
     "象窝生态园",
     "三页温泉",
+    "禅泉",
     "龙母祖庙",
     "盐洲岛",
     "亚婆角",
@@ -695,6 +696,7 @@ DOMESTIC_POI_INDEX = {
     "象窝酒店": ("广东", "新兴"),
     "象窝生态园": ("广东", "新兴"),
     "三页温泉": ("广东", "新兴"),
+    "禅泉": ("广东", "新兴"),
     "龙母祖庙": ("广东", "德庆"),
 }
 # Scenic POIs that outrank their parent city when both appear in a title.
@@ -797,6 +799,86 @@ NAMED_PLACE_COORDINATES = {
         "longitude": 111.4606822,
         "level": "poi",
         "locality": "沙扒镇",
+        "coordinateSource": "catalog",
+    },
+    # 新兴县酒店/温泉：公开 geocoder 索引无这些县级酒店 POI，坐标取 photon
+    # 验证的行政镇中心（六祖镇/水台镇）+ web 查证的镇归属（温德姆/三页温泉
+    # 在六祖镇，悦天下/金水台在水台镇）。
+    "新兴温德姆酒店": {
+        "latitude": 22.596989,
+        "longitude": 112.2136962,
+        "level": "poi",
+        "locality": "六祖镇",
+        "coordinateSource": "catalog",
+    },
+    "尘宵蔚景温德姆酒店": {
+        "latitude": 22.596989,
+        "longitude": 112.2136962,
+        "level": "poi",
+        "locality": "六祖镇",
+        "coordinateSource": "catalog",
+    },
+    "新兴尘宵蔚景温德姆酒店": {
+        "latitude": 22.596989,
+        "longitude": 112.2136962,
+        "level": "poi",
+        "locality": "六祖镇",
+        "coordinateSource": "catalog",
+    },
+    "新兴禅泉酒店": {
+        "latitude": 22.5961188,
+        "longitude": 112.219803,
+        "level": "poi",
+        "locality": "六祖镇",
+        "coordinateSource": "osm",
+    },
+    "禅泉酒店": {
+        "latitude": 22.5961188,
+        "longitude": 112.219803,
+        "level": "poi",
+        "locality": "六祖镇",
+        "coordinateSource": "osm",
+    },
+    "新兴超豪华禅泉酒店": {
+        "latitude": 22.5961188,
+        "longitude": 112.219803,
+        "level": "poi",
+        "locality": "六祖镇",
+        "coordinateSource": "osm",
+    },
+    "新兴三页温泉": {
+        "latitude": 22.596989,
+        "longitude": 112.2136962,
+        "level": "poi",
+        "locality": "六祖镇",
+        "coordinateSource": "catalog",
+    },
+    "新兴三页温泉酒店": {
+        "latitude": 22.596989,
+        "longitude": 112.2136962,
+        "level": "poi",
+        "locality": "六祖镇",
+        "coordinateSource": "catalog",
+    },
+    "新兴悦天下温泉酒店": {
+        "latitude": 22.6140499,
+        "longitude": 112.4676546,
+        "level": "poi",
+        "locality": "水台镇",
+        "coordinateSource": "catalog",
+    },
+    "新兴悦天下森林秘境酒店": {
+        "latitude": 22.6140499,
+        "longitude": 112.4676546,
+        "level": "poi",
+        "locality": "水台镇",
+        "coordinateSource": "catalog",
+    },
+    "台山金水台温泉": {
+        "latitude": 22.6140499,
+        "longitude": 112.4676546,
+        "level": "poi",
+        "locality": "水台镇",
         "coordinateSource": "catalog",
     },
     "北海涠洲岛": {
