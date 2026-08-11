@@ -219,6 +219,17 @@ def main() -> int:
         title = str(tour.get("title") or "")
         source = str(tour.get("destinationCoordinateSource") or "")
 
+        # Phantom-anchor purge: 龙门云顶酒店 = 龙门行 alias 云顶 + title 泰丽
+        # 云顶酒店 collision. The stale destinationCity=龙门 (from an earlier
+        # wrong pin) anchors _prefer_existing_city_candidate and overrides the
+        # miner's correct 盐洲岛 every rebuild. Clear it so the next rebuild
+        # resolves from the title.
+        if "龙门云顶" in place and "盐洲岛" in title:
+            clear_geo_fields(tour)
+            cleared += 1
+            reasons.append(f"{tour.get('id')}:{place}->(phantom-anchor)")
+            continue
+
         label_only_mismatch = place == "硅谷" and city == "长春市"
         intl_subdivision = (
             is_international_route(title)

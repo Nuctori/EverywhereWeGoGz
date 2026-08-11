@@ -149,6 +149,9 @@ PLACE_ROWS = [
         112.7938,
         ("台山", "台山市", "泽汇温泉", "金水台", "富丽湾"),
     ),
+    # 五台山（山西忻州）：长 alias 优先于 台山 子串——"五台山" 不得命中
+    # 广东台山（tour_1264/3436 山西 tour 曾钉台山 via substring）。
+    ("五台山", "中国", "山西", 38.983, 113.573, ("五台山",)),
     (
         "恩平",
         "中国",
@@ -755,6 +758,9 @@ POI_OVER_CITY_PRIORITY = frozenset(DOMESTIC_POI_INDEX)
 # 羚羊峡 + 谷 = 羚羊峡谷 (Antelope Canyon, Arizona) — a US tour, not 肇庆.
 POI_CONTINUATIONS = {
     "羚羊峡": ("谷",),
+    # 胡志明亭 = the border-marker memorial at 东兴 (中越界碑), NOT the
+    # Vietnamese city 胡志明市. Reject the city mention when followed by 亭.
+    "胡志明": ("亭",),
 }
 EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "马拉喀什",
@@ -966,6 +972,13 @@ NAMED_PLACE_COORDINATES = {
         "coordinateSource": "osm",
     },
     "纽约的自由女神及米高梅酒店": {
+        "latitude": 40.7128,
+        "longitude": -74.006,
+        "level": "poi",
+        "locality": "纽约",
+        "coordinateSource": "catalog",
+    },
+    "纽约自由女神及米高梅酒店": {
         "latitude": 40.7128,
         "longitude": -74.006,
         "level": "poi",
@@ -1350,10 +1363,29 @@ def _iter_place_mentions(
                 break
             end = index + len(alias)
             # Rhetorical mention in marketing copy: "不是巴黎卢浮宫去不起"
-            # (not-Paris Louvre) is a comparison, not a destination (D-019
-            # family). (A bare "X的西湖" check was dropped — it also rejects
-            # real destinations like 愉快的重庆之行.)
+            # (not-Paris Louvre), "与纽约第五大道齐名" (ranked with New York),
+            # "仿造巴黎街区样式" (Parisian-style blocks), "身处法国巴黎香榭
+            # 丽舍大道" (like being in Paris) are comparisons, not destinations
+            # (D-019 family). (A bare "X的西湖" check was dropped — it also
+            # rejects real destinations like 愉快的重庆之行.)
             if value[max(0, index - 2) : index] == "不是":
+                start = index + 1
+                continue
+            rhetoric_before = value[max(0, index - 8) : index]
+            if any(
+                token in rhetoric_before
+                for token in ("身处", "置身", "宛如", "仿佛", "犹如", "好像", "仿若")
+            ):
+                start = index + 1
+                continue
+            rhetoric_tail = value[end : end + 30]
+            if any(
+                token in rhetoric_tail
+                for token in (
+                    "齐名", "并称", "媲美", "齐头", "仿造", "仿制",
+                    "模仿", "样式", "风格", "类似", "堪比", "缩影", "化身",
+                )
+            ):
                 start = index + 1
                 continue
             # A catalog city name that prefixes a known foreign brand/ship name
@@ -1379,6 +1411,19 @@ def _iter_place_mentions(
                 if collision:
                     break
             if collision:
+                start = index + 1
+                continue
+            # Continuation guard for ALIAS_ROWS cities too: 胡志明亭 (border
+            # memorial at 东兴) is not 胡志明市; 羚羊峡 in 羚羊峡谷 is not the
+            # 肇庆 gorge (POI_CONTINUATIONS, D-019 family).
+            alias_tail = value[end : end + 2]
+            if any(
+                alias_tail.startswith(cont)
+                for cont in (
+                    POI_CONTINUATIONS.get(place.get("name"), ())
+                    + POI_CONTINUATIONS.get(alias, ())
+                )
+            ):
                 start = index + 1
                 continue
             matches.append(
@@ -1903,7 +1948,6 @@ def _prefer_existing_city_candidate(raw, resolution, current_place, current_labe
     candidate_labels = mining.get("candidateLabels")
     labels = candidate_labels if isinstance(candidate_labels, list) else []
     for label in labels:
-        label = str(label or "").strip()
         label = str(label or "").strip()
         if not label or label == city or not label.startswith(city):
             continue

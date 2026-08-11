@@ -425,6 +425,8 @@ def test_rebuild_us_antelope_tour_keeps_poi_level_not_city():
     assert tour["destinationCountry"] == "美国"
     assert tour["destinationPlaceName"] != "羚羊峡"
     assert "自由女神" in str(tour["destinationPlaceName"] or "")
+    assert tour["destinationGeoLevel"] == "poi"
+    assert tour["destinationLatitude"] == 40.7128
 
 
 def test_rebuild_semporna_poi_not_degraded_by_hotel_label():
