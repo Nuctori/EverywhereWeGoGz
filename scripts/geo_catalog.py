@@ -634,6 +634,7 @@ EXPLICIT_POI_NAMES = {
     "象窝生态园",
     "三页温泉",
     "禅泉",
+    "广东温泉宾馆",
     "龙母祖庙",
     "盐洲岛",
     "亚婆角",
@@ -697,6 +698,7 @@ DOMESTIC_POI_INDEX = {
     "象窝生态园": ("广东", "新兴"),
     "三页温泉": ("广东", "新兴"),
     "禅泉": ("广东", "新兴"),
+    "广东温泉宾馆": ("广东", "从化"),
     "龙母祖庙": ("广东", "德庆"),
 }
 # Scenic POIs that outrank their parent city when both appear in a title.
@@ -879,6 +881,13 @@ NAMED_PLACE_COORDINATES = {
         "longitude": 112.4676546,
         "level": "poi",
         "locality": "水台镇",
+        "coordinateSource": "catalog",
+    },
+    "广东温泉宾馆": {
+        "latitude": 23.5483,
+        "longitude": 113.581,
+        "level": "poi",
+        "locality": "从化区温泉镇",
         "coordinateSource": "catalog",
     },
     "北海涠洲岛": {
