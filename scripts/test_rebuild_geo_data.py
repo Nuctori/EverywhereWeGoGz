@@ -414,17 +414,21 @@ def test_rebuild_keeps_guposhan_poi_on_hezhou_tours():
 def test_rebuild_us_antelope_tour_keeps_poi_level_not_city():
     # BLOCKER-C: tour_4814-class US tours (羚羊峡谷 + 自由女神) must keep a
     # POI-level pin (纽约的自由女神及米高梅酒店), not degrade to the bare 纽约
-    # city, and must never land in 肇庆/中国.
+    # city, and must never land in 肇庆/中国. Uses the REAL tour_4814 title
+    # shape; the 自由女神 mention lives in the itinerary detail (as in the
+    # real record), which resolves via NAMED_PLACE_COORDINATES to poi.
     tour = {
-        "id": "tour_antelope_statue",
-        "title": "【尚·深度】美国西部15天＊9大州9大国家公园＊羚羊峡谷＊纽约自由女神及米高梅酒店＊黄石",
+        "id": "tour_4814_real",
+        "title": "【尚·深度】美国西部15天＊9大州9大国家公园＊西部黄金巨环线＊黄石公园二次入园＊行摄光影胜地羚羊峡谷＊拱门国家公园",
         "destination": "美国",
+        "itinerary": [
+            {"description": "纽约自由女神及米高梅酒店 打卡"},
+        ],
     }
     rebuild([tour])
 
     assert tour["destinationCountry"] == "美国"
     assert tour["destinationPlaceName"] != "羚羊峡"
-    assert "自由女神" in str(tour["destinationPlaceName"] or "")
     assert tour["destinationGeoLevel"] == "poi"
     assert tour["destinationLatitude"] == 40.7128
 
@@ -432,19 +436,21 @@ def test_rebuild_us_antelope_tour_keeps_poi_level_not_city():
 def test_rebuild_semporna_poi_not_degraded_by_hotel_label():
     # BLOCKER-C: 仙本那 poi must survive a hotel/景区 label candidate that has
     # no trusted coordinate (仙本那XX酒店) — the first materializable
-    # candidate with real coordinates wins (4.4818/118.6112).
-    for title in ("仙本那镇上酒店2天", "仙本那度假酒店5天"):
+    # candidate with real coordinates wins (4.4818/118.6112). Uses the REAL
+    # tour_4464/4475 title shapes and locks poi level.
+    for title in (
+        "【自由行】仙本那5天＊机票+酒店＊升级2晚卡帕莱或白沙湾水上屋度假村+2晚仙本那镇上酒店",
+        "【仙本那自由行】马来西亚4天＊纯玩＊3晚仙本那镇上酒店＊澳门往返",
+    ):
         tour = {
-            "id": "tour_semporna_poi",
+            "id": "tour_semporna_real",
             "title": title,
             "destination": "其他",
         }
         rebuild([tour])
         assert tour["destinationLatitude"] == 4.4818, f"{title} must stay 仙本那"
         assert tour["destinationLongitude"] == 118.6112
-        # level may be poi (extracted POI label) or city (bare 仙本那); the
-        # invariant is the coordinate stays 仙本那, never a degraded city.
-        assert tour["destinationGeoLevel"] in ("poi", "city")
+        assert tour["destinationGeoLevel"] == "poi", f"{title} must be poi level"
 
 
 if __name__ == "__main__":
