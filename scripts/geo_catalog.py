@@ -424,7 +424,7 @@ REGION_ROWS = [
     ("湖北", "湖北", ("湖北",)),
     ("重庆", "重庆", ("重庆",)),
     ("华东", None, ("华东", "江南")),
-    ("青甘", None, ("青甘", "青海甘肃")),
+    ("青甘", None, ("青甘", "青海甘肃", "甘青")),
     ("港澳", None, ("港澳", "港澳地区")),
     ("湖南", "湖南", ("湖南",)),
     ("福建", "福建", ("福建",)),
@@ -1760,6 +1760,7 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
                 or (
                     not title_region
                     and not destination_region
+                    and mention_country == "中国"
                 )
             ):
                 _append_unique(mining.setdefault("rejectedLabels", []), label)

@@ -427,6 +427,24 @@ def test_rebuild_us_antelope_tour_keeps_poi_level_not_city():
     assert "自由女神" in str(tour["destinationPlaceName"] or "")
 
 
+def test_rebuild_semporna_poi_not_degraded_by_hotel_label():
+    # BLOCKER-C: 仙本那 poi must survive a hotel/景区 label candidate that has
+    # no trusted coordinate (仙本那XX酒店) — the first materializable
+    # candidate with real coordinates wins (4.4818/118.6112).
+    for title in ("仙本那镇上酒店2天", "仙本那度假酒店5天"):
+        tour = {
+            "id": "tour_semporna_poi",
+            "title": title,
+            "destination": "其他",
+        }
+        rebuild([tour])
+        assert tour["destinationLatitude"] == 4.4818, f"{title} must stay 仙本那"
+        assert tour["destinationLongitude"] == 118.6112
+        # level may be poi (extracted POI label) or city (bare 仙本那); the
+        # invariant is the coordinate stays 仙本那, never a degraded city.
+        assert tour["destinationGeoLevel"] in ("poi", "city")
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback()
@@ -442,4 +460,5 @@ if __name__ == "__main__":
     test_antelope_canyon_no_country_in_title_still_does_not_hit_zhaoqing()
     test_rebuild_keeps_guposhan_poi_on_hezhou_tours()
     test_rebuild_us_antelope_tour_keeps_poi_level_not_city()
+    test_rebuild_semporna_poi_not_degraded_by_hotel_label()
     print("geo rebuild tests passed")
