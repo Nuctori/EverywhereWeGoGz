@@ -1161,7 +1161,12 @@ CONTEXTUAL_BRANDS = {
 }
 
 
-def _iter_place_mentions(text, *, domestic_route: bool = False):
+def _iter_place_mentions(
+    text,
+    *,
+    domestic_route: bool = False,
+    poi_index_enabled: bool = False,
+):
     value = str(text or "")
     matches = []
     for alias, place in ALIAS_ROWS:
@@ -1207,10 +1212,10 @@ def _iter_place_mentions(text, *, domestic_route: bool = False):
             start = index + 1
     # Scenic POIs from the metadata index (no ALIAS_ROWS row, no hard-coded
     # coordinate): mention them so the mined label flows to the geocoder.
-    # Only on domestic routes: a Chinese scenic name inside an international
-    # tour title is a shorthand collision (羚羊峡 = Antelope Canyon on US
-    # tours), not the 肇庆 gorge.
-    if domestic_route:
+    # Only when poi_index_enabled: a Chinese scenic name inside an
+    # international tour title is a shorthand collision (羚羊峡 = Antelope
+    # Canyon on US tours), not the 肇庆 gorge.
+    if poi_index_enabled:
         for poi_name, (province, city) in DOMESTIC_POI_INDEX.items():
             start = 0
             while poi_name:
@@ -1244,15 +1249,12 @@ def _iter_place_mentions(text, *, domestic_route: bool = False):
     matches.sort(key=lambda item: (item["start"], -len(item["alias"])))
     selected = []
     occupied_until = -1
-    seen_mentions = set()
     for item in matches:
         if item["start"] < occupied_until:
             continue
-        name = item["place"]["name"]
-        mention_key = (name, item["alias"])
-        if mention_key in seen_mentions:
-            continue
-        seen_mentions.add(mention_key)
+        # Same name at a different position is a DIFFERENT mention with its own
+        # context (【新兴.直通车】新兴温德姆酒店): both survive so the
+        # suffix-aware sort can pick 新兴温德姆酒店 over the bare 新兴.
         selected.append(item)
         occupied_until = item["end"]
     return selected
@@ -1402,7 +1404,7 @@ def _place_label(text, mention):
     tail = tail_match.group(0) if tail_match else ""
     suffix_matches = list(PLACE_LABEL_SUFFIXES.finditer(tail))
     suffix_match = suffix_matches[-1] if suffix_matches else None
-    if tail.startswith(("回", "返", "去", "住", "入住", "返回")):
+    if tail.startswith(("回", "返", "去", "返回")):
         return mention["place"]["name"]
     if suffix_match:
         return f"{canonical_name}{tail[: suffix_match.end()]}".strip()
@@ -1476,9 +1478,24 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
         and str(title_region.get("country")) != "中国"
     )
     domestic_route = not (destination_international or title_international)
+    # Two DIFFERENT gates: the brand guard (CONTEXTUAL_BRANDS 巴黎铁塔) keeps
+    # its original "province == name" meaning so a real 巴黎铁塔 on a
+    # dest=其他 international tour (tour_4716 法瑞意) is NOT suppressed;
+    # the scenic-POI index uses the broader not-international gate so
+    # 蓝钟/天露山 still resolve on dest=其他 domestic tours.
+    brand_guard_domestic = bool(
+        destination_region
+        and destination_region.get("province")
+        and destination_region.get("province") == destination_region.get("name")
+    )
+    poi_index_enabled = domestic_route
     title_departure_names = {
         mention["place"]["name"]
-        for mention in _iter_place_mentions(title, domestic_route=domestic_route)
+        for mention in _iter_place_mentions(
+            title,
+            domestic_route=brand_guard_domestic,
+            poi_index_enabled=poi_index_enabled,
+        )
         if _is_departure_mention(title, mention)
     }
     direct_place, direct_label = _find_direct_place_match(destination_text)
@@ -1527,7 +1544,11 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
 
     candidates = []
     for text_index, text in enumerate(texts):
-        for mention in _iter_place_mentions(text, domestic_route=domestic_route):
+        for mention in _iter_place_mentions(
+            text,
+            domestic_route=brand_guard_domestic,
+            poi_index_enabled=poi_index_enabled,
+        ):
             label = _place_label(text, mention)
             if mention["place"]["name"] in title_departure_names:
                 _append_unique(mining.setdefault("rejectedLabels", []), label)
@@ -1610,7 +1631,16 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             mining.setdefault("reasons", []), "no-region-compatible-candidate"
         )
         return None, "", "low", "unknown"
-    candidates.sort(key=lambda item: (item[0], item[1]))
+    # A label carrying a place suffix (新兴温德姆酒店 vs bare 新兴) is the more
+    # specific destination when the same city is mentioned multiple times
+    # (【新兴.直通车】新兴温德姆酒店): pick the suffix-bearing mention first.
+    candidates.sort(
+        key=lambda item: (
+            -int(bool(PLACE_LABEL_SUFFIXES.search(item[3]))),
+            item[0],
+            item[1],
+        )
+    )
     _, _, place, label, _ = candidates[0]
     final_label = label if named_candidates else place["name"]
     materialized = _materialize_named_place(place, final_label)

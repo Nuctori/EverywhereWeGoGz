@@ -353,6 +353,28 @@ def test_rebuild_does_not_pin_us_antelope_canyon_to_zhaoqing():
     assert tour["destinationCountry"] != "中国"
 
 
+def test_poi_continuation_guard_blocks_antelope_canyon_even_on_domestic_route():
+    # BLOCKER-4 coverage: the POI_CONTINUATIONS guard must work on its own,
+    # not only via the international-route gate. A DOMESTIC tour (dest=广东)
+    # whose title mentions 羚羊峡谷 (Antelope Canyon) must still NOT mention
+    # the 肇庆 gorge — even though the scenic-POI index is enabled.
+    from geo_catalog import _iter_place_mentions
+
+    mentions = _iter_place_mentions(
+        "云浮黄石公园羚羊峡谷光影之旅3天",
+        domestic_route=True,
+        poi_index_enabled=True,
+    )
+    assert not any(m["place"]["name"] == "羚羊峡" for m in mentions)
+    # the real 肇庆 gorge still matches
+    real = _iter_place_mentions(
+        "肇庆2天羚羊峡轻徒步",
+        domestic_route=True,
+        poi_index_enabled=True,
+    )
+    assert any(m["place"]["name"] == "羚羊峡" for m in real)
+
+
 if __name__ == "__main__":
     test_rebuild_updates_geo_fields_without_replacing_tour_content()
     test_rebuild_keeps_a_named_place_visible_with_explicit_coarse_fallback()
@@ -364,4 +386,5 @@ if __name__ == "__main__":
     test_rebuild_does_not_pin_domestic_cruise_to_foreign_city()
     test_rebuild_does_not_pin_macau_resort_brand_to_paris()
     test_rebuild_does_not_pin_us_antelope_canyon_to_zhaoqing()
+    test_poi_continuation_guard_blocks_antelope_canyon_even_on_domestic_route()
     print("geo rebuild tests passed")
