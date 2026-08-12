@@ -356,7 +356,7 @@ PLACE_ROWS = [
     ("伊斯坦布尔", "土耳其", None, 41.0082, 28.9784, ("伊斯坦布尔",)),
     ("卡帕多奇亚", "土耳其", None, 38.64, 34.83, ("卡帕多奇亚",)),
     ("费特希耶", "土耳其", None, 36.62, 29.12, ("费特希耶",)),
-    ("加德满都", "尼泊尔", None, 27.7172, 85.324, ("加德满都",)),
+    ("加德满都", "尼泊尔", None, 27.7172, 85.324, ("加德满都", "加都")),
     ("万象", "老挝", None, 17.9757, 102.633, ("万象",)),
     ("万荣", "老挝", None, 18.923, 102.45, ("万荣",)),
     ("琅勃拉邦", "老挝", None, 19.88, 102.135, ("琅勃拉邦",)),
@@ -784,8 +784,9 @@ INTERNATIONAL_COUNTRIES = {
     "越南", "柬埔寨", "老挝", "缅甸", "马尔代夫", "迪拜", "冰岛", "挪威",
     "瑞典", "丹麦", "芬兰", "瑞士", "奥地利", "捷克", "匈牙利", "波兰",
     "希腊", "塞尔维亚", "黑山", "巴西", "秘鲁", "智利", "阿根廷", "南非",
-    "毛里求斯", "斯里兰卡", "马尔代夫", "欧洲", "非洲", "大洋洲", "北欧",
-    "东欧", "西欧", "南欧",
+    "毛里求斯", "斯里兰卡", "马尔代夫", "尼泊尔", "不丹", "蒙古",
+    "哈萨克斯坦", "菲律宾", "缅甸", "老挝", "高加索", "澳洲", "澳新",
+    "欧洲", "非洲", "大洋洲", "北欧", "东欧", "西欧", "南欧",
 }
 # Scenic POIs that outrank their parent city when both appear in a title.
 # Decided by geometry at selection time (same province + within 130km of a
@@ -800,9 +801,11 @@ POI_CONTINUATIONS = {
     # Vietnamese city 胡志明市. Reject the city mention when followed by 亭.
     "胡志明": ("亭",),
     # 龙门石窟 (洛阳) is NOT 广东龙门县; 黄龙潭 (云台山 scenic spot) is NOT
-    # 四川黄龙景区 — substring collisions on longer place names.
-    "龙门": ("石",),
+    # 四川黄龙景区; 五大连池 (黑龙江) is NOT 大连(辽宁) — substring
+    # collisions on longer place names.
+    "龙门": ("石", "大", "悬"),
     "黄龙": ("潭",),
+    "大连": ("池",),
     # 罗马尼亚/罗马大都会/古罗马 — 罗马 substring collisions (罗马尼亚
     # country, 以弗所罗马大都会, 古罗马竞技场 on 土耳其 tours).
     "罗马": ("尼", "大"),
@@ -812,6 +815,8 @@ EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "巴黎",
     "伦敦",
     "纽约",
+    "洛阳",
+    "开封",
     "悉尼",
     "墨尔本",
     "布里斯班",
@@ -1418,6 +1423,15 @@ def _iter_place_mentions(
                 start = index + 1
                 continue
             before_char = value[max(0, index - 1) : index]
+            # Quoted nickname "X的Y" inside quotes: "侗族的香格里拉" (三江侗乡
+            # nickname) is not the Yunnan city — reject when 的-preceded AND the
+            # phrase sits inside quotes. A bare 愉快的重庆之行 (no quotes) stays.
+            if before_char == "的" and any(
+                q in value[max(0, index - 24) : index]
+                for q in ("“", "”", '"', "‘", "’", "'")
+            ):
+                start = index + 1
+                continue
             if (
                 before_char in ("小", "古", "'", '"', "‘", "“")
                 or value[max(0, index - 2) : index] in ("被称", "称为", "称作")
@@ -1870,10 +1884,13 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             # Reverse direction: a DOMESTIC title (河南/华东… no international
             # signal) whose detail mentions a FOREIGN place (巴厘岛酒店 brand on
             # a 河南 tour) is brand/template text — reject it (D-019 family).
-            # International titles keep foreign mentions (新加坡 tour + 新加坡).
+            # Gated on a REAL domestic-province destination: dest=其他/无锚定
+            # keeps foreign mentions (四王群岛 tour + 巴厘岛 = real stops).
             if (
                 text_index > 0
                 and not title_has_international
+                and destination_region
+                and destination_region.get("province")
                 and mention_country
                 and mention_country != "中国"
                 and mention_country not in ("中国香港", "香港", "澳门")
