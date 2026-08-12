@@ -11,6 +11,7 @@ cctpage 2026-08) or a dead fallback must surface within a week, not rot.
 
 Usage: python scripts/check_booking_urls.py [samplePerSource=10]
 """
+
 import json
 import re
 import ssl
@@ -22,7 +23,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SAMPLE_PER_SOURCE = int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 10
+SAMPLE_PER_SOURCE = (
+    int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 10
+)
 FAIL_BELOW_PCT = 90.0
 TIMEOUT = 12
 CONCURRENCY = 8
@@ -39,7 +42,11 @@ def resolve_source_detail_url(card):
     fallback = str(card.get("bookingUrl") or "").strip()
     title = str(card.get("title") or "").strip()
     source = str(card.get("source") or "").strip()
-    if source == "康辉" and ("cctpage.com" in fallback or not re.match(r"^https?:", fallback)) and title:
+    if (
+        source == "康辉"
+        and ("cctpage.com" in fallback or not re.match(r"^https?:", fallback))
+        and title
+    ):
         return f"https://www.cct.cn/search?keyword={urllib.parse.quote(title[:20])}"
     if re.match(r"^https?:", fallback):
         return fallback
@@ -125,7 +132,9 @@ def main():
             print(f"  {f['source']} {f['id']} [{f['status']}] {f['url'][:90]}")
 
     if gated_pct < FAIL_BELOW_PCT:
-        print(f"FAIL: gated reachability {gated_pct:.1f}% < {FAIL_BELOW_PCT:.0f}% threshold")
+        print(
+            f"FAIL: gated reachability {gated_pct:.1f}% < {FAIL_BELOW_PCT:.0f}% threshold"
+        )
         sys.exit(1)
     print(f"PASS: gated reachability {gated_pct:.1f}% >= {FAIL_BELOW_PCT:.0f}%")
 
