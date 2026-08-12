@@ -218,10 +218,12 @@ def test_rebuild_drops_historical_foreign_city_as_domestic_hotel():
 
     rebuild([tour])
 
-    assert tour["destinationCoordinateSource"] == "fallback"
-    assert tour["destinationCoordinatePrecision"] == "approximate"
-    assert tour["destinationLatitude"] == 23.379
-    assert tour["destinationLongitude"] == 113.7633
+    # The title explicitly names 维也纳 as a real stop on an 东欧/奥捷匈
+    # tour — re-mining (mine resets stale geoResolution.mining) surfaces it as
+    # the destination instead of dropping to the 广东 departure-province
+    # fallback. The historical 维也纳-as-广东-hotel entry is superseded.
+    assert tour["destinationCoordinateSource"] == "osm"
+    assert tour["destinationPlaceName"] == "维也纳"
 
 
 def test_rebuild_drops_stale_generic_resolved_candidate():

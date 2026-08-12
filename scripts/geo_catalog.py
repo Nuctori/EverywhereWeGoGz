@@ -818,6 +818,18 @@ POI_CONTINUATIONS = {
     "罗马": ("尼", "大"),
     # 纽约州 (行政/地理引用 on 加拿大 tour) is not 纽约市.
     "纽约": ("州",),
+    # 南美 catalog rows need continuation guards (D-019 pattern):
+    # 利马索尔(塞浦路斯)/斯利马(马耳他) not 利马; 圣地亚哥朝圣之路(西)
+    # /圣地亚哥岛(佛得角) not 智利; 圣保罗教堂(马六甲) not 巴西; 斯米兰
+    # (泰国双岛) not 米兰; 里约奥运会宣传片(营销文案) not 里约热内卢.
+    "利马": ("索尔", "斯利马"),
+    "圣地亚哥": ("朝圣", "岛"),
+    "圣保罗": ("教堂",),
+    "米兰": ("斯米兰",),
+    "里约": ("奥运",),
+    # 威海 collides with 挪威海域 (挪+威海+域) on Norway tours — the two
+    # chars 威海 sit adjacent inside 海域.
+    "威海": ("域",),
 }
 EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "马拉喀什",
@@ -829,6 +841,8 @@ EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "大连",
     "威海",
     "烟台",
+    "霞浦",
+    "贺州姑婆山伴山温泉",
     "悉尼",
     "墨尔本",
     "布里斯班",
@@ -1224,6 +1238,17 @@ NAMED_PLACE_COORDINATES = {
         "locality": "塘厦镇",
         "coordinateSource": "catalog",
     },
+    # 霞浦县 (福建宁德): 行摄霞浦 tour 的 county-centre pin; without a
+    # curated coordinate the label is rejected (named-alias-without-trusted-
+    # coordinate) and the tour falls back to the NAMED 里约 mention in its
+    # 2016里约奥运会宣传片 marketing copy (tour_8).
+    "霞浦": {
+        "latitude": 26.8859,
+        "longitude": 120.0056,
+        "level": "poi",
+        "locality": "霞浦县",
+        "coordinateSource": "catalog",
+    },
 }
 TEXT_SEPARATORS = "|｜丨/／+&＆()（）[]【】,，。；;、"
 
@@ -1421,6 +1446,7 @@ def _iter_place_mentions(
     *,
     domestic_route: bool = False,
     poi_index_enabled: bool = False,
+    in_title: bool = False,
 ):
     value = str(text or "")
     matches = []
@@ -1467,24 +1493,35 @@ def _iter_place_mentions(
                 start = index + 1
                 continue
             rhetoric_before = value[max(0, index - 8) : index]
+            # 无需转机/无需直飞 negates the flight tokens — keep the city
+            # (仙本那「无需转机」is a real destination).
+            negative_before = "无需" in rhetoric_before or "不用" in rhetoric_before
             if any(
                 token in rhetoric_before
                 for token in (
                     "身处", "置身", "宛如", "仿佛", "犹如", "好像", "仿若",
-                    "誉为", "称之", "经停", "转机",
+                    "誉为", "称之",
                 )
             ):
                 start = index + 1
                 continue
+            # Flight-endpoint tokens (直飞/转机/经停) reject the city even in
+            # titles: 上海直飞赫尔辛基 names a transit endpoint, not a
+            # destination. Only negated by 无需/不用.
+            if not negative_before and any(
+                token in rhetoric_before
+                for token in ("经停", "转机", "直飞")
+            ):
+                start = index + 1
+                continue
             rhetoric_tail = value[end : end + 30]
-            if any(
+            if not in_title and any(
                 token in rhetoric_tail
                 for token in (
                     "齐名", "并称", "共称", "合称", "统称", "媲美", "齐头",
                     "仿造", "仿制", "模仿", "样式", "类似", "堪比",
                     "转机", "航班", "机场", "飞行", "经停", "参考航班",
-                    "总部", "世家", "大学", "相提并论", "美誉", "歌剧院",
-                    "学院",
+                    "总部", "世家", "相提并论", "美誉",
                 )
             ):
                 start = index + 1
@@ -1516,12 +1553,15 @@ def _iter_place_mentions(
                 continue
             # Continuation guard for ALIAS_ROWS cities too: 胡志明亭 (border
             # memorial at 东兴) is not 胡志明市; 羚羊峡 in 羚羊峡谷 is not the
-            # 肇庆 gorge (POI_CONTINUATIONS, D-019 family).
-            alias_tail = value[end : end + 2]
+            # 肇庆 gorge (POI_CONTINUATIONS, D-019 family). Check a window
+            # around the mention so both 利马索尔 (利马 followed by 索尔) and
+            # 斯利马 (利马 preceded by 斯) are caught.
+            alias_window = value[max(0, index - 2) : end + 3]
+            place_name = place.get("name") or ""
             if any(
-                alias_tail.startswith(cont)
+                cont in alias_window
                 for cont in (
-                    POI_CONTINUATIONS.get(place.get("name"), ())
+                    POI_CONTINUATIONS.get(place_name, ())
                     + POI_CONTINUATIONS.get(alias, ())
                 )
             ):
@@ -1785,6 +1825,14 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
         else _new_geo_resolution(destination_text, title, detail)
     )
     mining = resolution.setdefault("mining", {})
+    # Re-mine from scratch every rebuild: a stale geoResolution.mining from a
+    # previous round (e.g. 威海 candidateLabels on a 挪威 cruise) must not
+    # survive as evidence after purge — the fixed tour would re-anchor the
+    # wrong pin (D-016 fix-before-rebuild).
+    mining.pop("candidateLabels", None)
+    mining.pop("rejectedLabels", None)
+    mining.pop("reasons", None)
+    mining.pop("sourceCandidates", None)
     # 港澳/广东 can be departure placeholders on international tours, so only
     # real domestic provinces (province == name) gate the contextual brands
     # (e.g. 澳门巴黎铁塔 on a 广东 tour vs the real Eiffel Tower on 欧洲 tours).
@@ -1821,6 +1869,7 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             title,
             domestic_route=brand_guard_domestic,
             poi_index_enabled=poi_index_enabled,
+            in_title=True,
         )
         if _is_departure_mention(title, mention)
     }
@@ -1884,10 +1933,33 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
         )
         if flight_segment_title:
             continue
+        # 游览语境 hard rule (D-029 宁缺毋滥, auditor 处方③): a foreign detail
+        # mention on a day with NO sightseeing context (机上餐食/夜宿飞机/
+        # 航班段) is a transit stop, not a destination — reject it so the tour
+        # falls back to unmapped instead of pinning the transit hub. Sightseeing
+        # days (里约市区游览) and title mentions keep their cities.
+        has_sightseeing_context = any(
+            token in text
+            for token in (
+                "游览", "参观", "观光", "漫步", "游玩", "探访", "市区",
+                "景点", "游船", "逛街", "打卡",
+            )
+        )
+        if (
+            text_index > 0
+            and not has_sightseeing_context
+            and any(country in str(title or "") for country in INTERNATIONAL_COUNTRIES)
+            and not any(country in text for country in INTERNATIONAL_COUNTRIES)
+        ):
+            # A day with an international-city mention but zero sightseeing
+            # context (上海-(飞机)-伊斯坦布尔 / 伊斯坦布尔 + 夜宿飞机) is a
+            # flight segment — skip its mentions.
+            continue
         for mention in _iter_place_mentions(
             text,
             domestic_route=brand_guard_domestic,
             poi_index_enabled=poi_index_enabled,
+            in_title=(text_index == 0),
         ):
             label = _place_label(text, mention)
             if mention["place"]["name"] in title_departure_names:
@@ -1911,7 +1983,16 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             # against domestic template pollution (加拿大 tour + 新丰酒店).
             # China provinces/macro-regions and their shorthand (青甘/华东…)
             # must NOT trigger it — 青甘 tour + 敦煌莫高窟 is a real trip.
-            title_country_is_international = title_country in INTERNATIONAL_COUNTRIES
+            # Use the substring scan, not find_region: the region table maps
+            # 【庞洛邮轮船票·欧洲】 tour titles to 欧洲 (not 挪威), which would
+            # let a domestic 威海 detail mention survive on a 挪威 cruise.
+            title_country_is_international = bool(
+                title_country in INTERNATIONAL_COUNTRIES
+                or any(
+                    country in str(title or "")
+                    for country in INTERNATIONAL_COUNTRIES
+                )
+            )
             # A direct substring scan is more reliable than find_region: the
             # region table lacks some countries (新西兰/加拿大…) and "中国国航
             # -全国联运" prefixes make find_region return 中国 first, hiding the
@@ -1941,19 +2022,38 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
                 )
                 continue
             if text_index > 0 and (
-                (
-                    title_country_is_international
-                    and mention_country == "中国"
-                )
-                or (
-                    not title_region
-                    and not destination_region
-                    and mention_country == "中国"
-                )
+                title_country_is_international
+                and mention_country == "中国"
             ):
                 _append_unique(mining.setdefault("rejectedLabels", []), label)
                 _append_unique(
                     mining.setdefault("reasons", []), "title-region-conflict"
+                )
+                continue
+            # Cross-country detail mention on an international tour: a 南美 tour
+            # (title 巴西/秘鲁…) whose detail mentions 伊斯坦布尔/纽约/巴黎 is
+            # a transit hub or rhetorical reference, not a destination. ALL
+            # international countries named in the title are anchors (新马 tour
+            # keeps both 新加坡 and 马来西亚); other-country mentions rejected.
+            title_main_countries = {
+                c for c in INTERNATIONAL_COUNTRIES if c in str(title or "")
+            }
+            if (
+                text_index > 0
+                and title_main_countries
+                and mention_country
+                and mention_country != "中国"
+                and mention_country not in title_main_countries
+                and mention_country not in ("中国香港", "香港", "澳门")
+            ):
+                # Cross-country detail mentions on an international tour are
+                # transit hubs or rhetorical references (巴黎 on a 南美 tour),
+                # never destinations — reject regardless of day context
+                # (宁缺毋滥 D-029). Real multi-country routes name ALL their
+                # countries in the title.
+                _append_unique(mining.setdefault("rejectedLabels", []), label)
+                _append_unique(
+                    mining.setdefault("reasons", []), "title-country-conflict"
                 )
                 continue
             is_named_place = _is_inline_named_alias(text, mention) or (
@@ -2178,7 +2278,16 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         destination_place,
         destination_label,
     )
-    if preferred_place is not destination_place:
+    if (
+        preferred_place is not destination_place
+        and (
+            destination_place is None
+            or not destination_place.get("latitude")
+        )
+    ):
+        # Only fall back to the existing city anchor when mining produced no
+        # coordinate — a fresh NAMED/curated pin (珠海东澳岛) must not be
+        # overwritten by a stale destinationCity (广州南沙湾) from the source.
         destination_place = preferred_place
         destination_label = preferred_label
         destination_confidence = "low"
@@ -2189,9 +2298,15 @@ def normalize_tour_geo(raw, title, destination, detail=None):
     # 广东 region — D-007 占位). Leave it unmapped instead.
     title_region_here = find_region(str(title or ""))
     title_international_flag = bool(
-        title_region_here
-        and title_region_here.get("country")
-        and title_region_here.get("country") in INTERNATIONAL_COUNTRIES
+        (
+            title_region_here
+            and title_region_here.get("country")
+            and title_region_here.get("country") in INTERNATIONAL_COUNTRIES
+        )
+        or any(
+            country in str(title or "")
+            for country in INTERNATIONAL_COUNTRIES
+        )
     )
     region_place = (
         None
