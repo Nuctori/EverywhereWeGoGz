@@ -284,7 +284,7 @@ PLACE_ROWS = [
     ("皇后镇", "新西兰", None, -45.0312, 168.6626, ("皇后镇",)),
     ("悉尼", "澳大利亚", None, -33.8688, 151.2093, ("悉尼", "悉尼市")),
     ("墨尔本", "澳大利亚", None, -37.8136, 144.9631, ("墨尔本",)),
-    ("布里斯班", "澳大利亚", None, -27.4698, 153.0251, ("布里斯班",)),
+    ("布里斯班", "澳大利亚", None, -27.4698, 153.0251, ("布里斯班", "布里斯本")),
     ("凯恩斯", "澳大利亚", None, -16.9186, 145.7781, ("凯恩斯", "大堡礁")),
     ("马尔代夫", "马尔代夫", None, 4.1755, 73.5093, ("马尔代夫",)),
     ("莫斯科", "俄罗斯", None, 55.7558, 37.6173, ("莫斯科",)),
@@ -453,6 +453,38 @@ REGION_ROWS = [
     ("英国", None, ("英国",)),
     ("美国", None, ("美国",)),
     ("斯里兰卡", None, ("斯里兰卡",)),
+    ("新西兰", None, ("新西兰",)),
+    ("加拿大", None, ("加拿大",)),
+    ("澳大利亚", None, ("澳大利亚", "澳洲")),
+    ("巴西", None, ("巴西",)),
+    ("秘鲁", None, ("秘鲁",)),
+    ("智利", None, ("智利",)),
+    ("阿根廷", None, ("阿根廷",)),
+    ("乌拉圭", None, ("乌拉圭",)),
+    ("西班牙", None, ("西班牙",)),
+    ("葡萄牙", None, ("葡萄牙",)),
+    ("奥地利", None, ("奥地利",)),
+    ("捷克", None, ("捷克",)),
+    ("匈牙利", None, ("匈牙利",)),
+    ("波兰", None, ("波兰",)),
+    ("希腊", None, ("希腊",)),
+    ("冰岛", None, ("冰岛",)),
+    ("挪威", None, ("挪威",)),
+    ("瑞典", None, ("瑞典",)),
+    ("丹麦", None, ("丹麦",)),
+    ("芬兰", None, ("芬兰",)),
+    ("瑞士", None, ("瑞士",)),
+    ("肯尼亚", None, ("肯尼亚",)),
+    ("埃及", None, ("埃及",)),
+    ("摩洛哥", None, ("摩洛哥",)),
+    ("土耳其", None, ("土耳其",)),
+    ("阿联酋", None, ("阿联酋",)),
+    ("印度", None, ("印度",)),
+    ("印尼", None, ("印尼", "印度尼西亚")),
+    ("俄罗斯", None, ("俄罗斯",)),
+    ("墨西哥", None, ("墨西哥",)),
+    ("马尔代夫", None, ("马尔代夫",)),
+    ("迪拜", None, ("迪拜",)),
 ]
 REGION_COORDINATES = {
     "中国": (35.8617, 104.1954),
@@ -771,6 +803,9 @@ POI_CONTINUATIONS = {
     # 四川黄龙景区 — substring collisions on longer place names.
     "龙门": ("石",),
     "黄龙": ("潭",),
+    # 罗马尼亚/罗马大都会/古罗马 — 罗马 substring collisions (罗马尼亚
+    # country, 以弗所罗马大都会, 古罗马竞技场 on 土耳其 tours).
+    "罗马": ("尼", "大"),
 }
 EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "马拉喀什",
@@ -1384,7 +1419,7 @@ def _iter_place_mentions(
                 continue
             before_char = value[max(0, index - 1) : index]
             if (
-                before_char in ("小", "'", '"', "‘", "“")
+                before_char in ("小", "古", "'", '"', "‘", "“")
                 or value[max(0, index - 2) : index] in ("被称", "称为", "称作")
                 or (
                     before_char == "国"
@@ -1823,13 +1858,22 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             # China provinces/macro-regions and their shorthand (青甘/华东…)
             # must NOT trigger it — 青甘 tour + 敦煌莫高窟 is a real trip.
             title_country_is_international = title_country in INTERNATIONAL_COUNTRIES
+            # A direct substring scan is more reliable than find_region: the
+            # region table lacks some countries (新西兰/加拿大…) and "中国国航
+            # -全国联运" prefixes make find_region return 中国 first, hiding the
+            # real international route (美国东西海岸). Substring detection sees
+            # both and keeps foreign mentions on real international lines.
+            title_has_international = any(
+                country in str(title or "")
+                for country in INTERNATIONAL_COUNTRIES
+            )
             # Reverse direction: a DOMESTIC title (河南/华东… no international
             # signal) whose detail mentions a FOREIGN place (巴厘岛酒店 brand on
             # a 河南 tour) is brand/template text — reject it (D-019 family).
             # International titles keep foreign mentions (新加坡 tour + 新加坡).
             if (
                 text_index > 0
-                and not title_country_is_international
+                and not title_has_international
                 and mention_country
                 and mention_country != "中国"
                 and mention_country not in ("中国香港", "香港", "澳门")
