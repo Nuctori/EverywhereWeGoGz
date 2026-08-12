@@ -21,6 +21,13 @@ export function resolveSourceDetailUrl(
   tour: Pick<TourSummary, 'source' | 'title' | 'bookingUrl' | 'meta'>,
 ) {
   const fallbackUrl = String(tour.bookingUrl || '').trim();
+  // The source bookingUrl (jrt365 groupno / cctpage prodcode detail page) is
+  // the most reliable target — return it FIRST. The 假日通 print/tournameno
+  // and keyword-search fallbacks only apply when the bookingUrl is missing or
+  // not a valid http URL (map-card summaries carry no meta.sourceAttributes,
+  // so the old order silently degraded every 假日通 tour to a keyword search
+  // page: 转跳都是错的).
+  if (isHttpUrl(fallbackUrl)) return fallbackUrl;
   if (tour.source !== JRT365_SOURCE) return fallbackUrl;
 
   const printUrl = readSourceAttribute(tour, 'printUrl');

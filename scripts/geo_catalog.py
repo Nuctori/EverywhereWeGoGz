@@ -2029,11 +2029,18 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
     # Re-mine from scratch every rebuild: a stale geoResolution.mining from a
     # previous round (e.g. 威海 candidateLabels on a 挪威 cruise) must not
     # survive as evidence after purge — the fixed tour would re-anchor the
-    # wrong pin (D-016 fix-before-rebuild).
+    # wrong pin (D-016 fix-before-rebuild). Reinitialize as EMPTY LISTS so
+    # every return path (direct-place match / region fallback / unmapped)
+    # leaves mining fields as arrays — the frontend zod schema rejects null
+    # (详情加载失败 regression: 4536 tours had rejectedLabels=null).
     mining.pop("candidateLabels", None)
     mining.pop("rejectedLabels", None)
     mining.pop("reasons", None)
     mining.pop("sourceCandidates", None)
+    mining.setdefault("candidateLabels", [])
+    mining.setdefault("rejectedLabels", [])
+    mining.setdefault("reasons", [])
+    mining.setdefault("sourceCandidates", [])
     # 港澳/广东 can be departure placeholders on international tours, so only
     # real domestic provinces (province == name) gate the contextual brands
     # (e.g. 澳门巴黎铁塔 on a 广东 tour vs the real Eiffel Tower on 欧洲 tours).
