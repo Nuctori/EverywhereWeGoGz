@@ -282,6 +282,13 @@ PLACE_ROWS = [
     ("奥克兰", "新西兰", None, -36.8509, 174.7645, ("奥克兰",)),
     ("基督城", "新西兰", None, -43.5321, 172.6362, ("基督城",)),
     ("皇后镇", "新西兰", None, -45.0312, 168.6626, ("皇后镇",)),
+    ("里约热内卢", "巴西", None, -22.9068, -43.1729, ("里约", "里约热内卢")),
+    ("圣保罗", "巴西", None, -23.5505, -46.6333, ("圣保罗",)),
+    ("利马", "秘鲁", None, -12.0464, -77.0428, ("利马",)),
+    ("库斯科", "秘鲁", None, -13.5319, -71.9675, ("库斯科",)),
+    ("布宜诺斯艾利斯", "阿根廷", None, -34.6037, -58.3816, ("布宜诺斯艾利斯",)),
+    ("圣地亚哥", "智利", None, -33.4489, -70.6693, ("圣地亚哥",)),
+    ("伊瓜苏", "巴西", None, -25.6167, -54.5833, ("伊瓜苏",)),
     ("悉尼", "澳大利亚", None, -33.8688, 151.2093, ("悉尼", "悉尼市")),
     ("墨尔本", "澳大利亚", None, -37.8136, 144.9631, ("墨尔本",)),
     ("布里斯班", "澳大利亚", None, -27.4698, 153.0251, ("布里斯班", "布里斯本")),
@@ -809,6 +816,8 @@ POI_CONTINUATIONS = {
     # 罗马尼亚/罗马大都会/古罗马 — 罗马 substring collisions (罗马尼亚
     # country, 以弗所罗马大都会, 古罗马竞技场 on 土耳其 tours).
     "罗马": ("尼", "大"),
+    # 纽约州 (行政/地理引用 on 加拿大 tour) is not 纽约市.
+    "纽约": ("州",),
 }
 EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "马拉喀什",
@@ -817,6 +826,9 @@ EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "纽约",
     "洛阳",
     "开封",
+    "大连",
+    "威海",
+    "烟台",
     "悉尼",
     "墨尔本",
     "布里斯班",
@@ -1033,6 +1045,13 @@ NAMED_PLACE_COORDINATES = {
         "longitude": -74.006,
         "level": "poi",
         "locality": "纽约",
+        "coordinateSource": "catalog",
+    },
+    "里约": {
+        "latitude": -22.9068,
+        "longitude": -43.1729,
+        "level": "poi",
+        "locality": "里约热内卢",
         "coordinateSource": "catalog",
     },
     "北海涠洲岛": {
@@ -1433,7 +1452,11 @@ def _iter_place_mentions(
                 start = index + 1
                 continue
             if (
-                before_char in ("小", "古", "'", '"', "‘", "“")
+                before_char in ("小", "'", '"', "‘", "“")
+                or (
+                    before_char == "古"
+                    and place.get("country") != "中国"
+                )
                 or value[max(0, index - 2) : index] in ("被称", "称为", "称作")
                 or (
                     before_char == "国"
@@ -1448,7 +1471,7 @@ def _iter_place_mentions(
                 token in rhetoric_before
                 for token in (
                     "身处", "置身", "宛如", "仿佛", "犹如", "好像", "仿若",
-                    "誉为", "称之",
+                    "誉为", "称之", "经停", "转机",
                 )
             ):
                 start = index + 1
@@ -1459,6 +1482,9 @@ def _iter_place_mentions(
                 for token in (
                     "齐名", "并称", "共称", "合称", "统称", "媲美", "齐头",
                     "仿造", "仿制", "模仿", "样式", "类似", "堪比",
+                    "转机", "航班", "机场", "飞行", "经停", "参考航班",
+                    "总部", "世家", "大学", "相提并论", "美誉", "歌剧院",
+                    "学院",
                 )
             ):
                 start = index + 1
@@ -1838,12 +1864,26 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
     for day in detail.get("itinerary") or []:
         if not isinstance(day, dict):
             continue
-        texts.extend(str(day.get(key) or "") for key in ("title", "description"))
+        # Merge day title + description into ONE text: a bare transit-hub
+        # title (伊斯坦布尔 on the final 转机 day) then sees the flight info
+        # (机场/参考航班) in its tail and is rejected by the rhetoric guard.
+        day_title = str(day.get("title") or "")
+        day_desc = str(day.get("description") or "")
+        texts.append(f"{day_title} {day_desc}".strip() or day_title)
         texts.extend(str(value or "") for value in day.get("activities") or [])
     texts.extend(str(value or "") for value in detail.get("highlights") or [])
 
     candidates = []
     for text_index, text in enumerate(texts):
+        # Flight-segment day titles (上海-(飞机)-伊斯坦布尔) name a transit
+        # hub, not a destination — skip the whole short title.
+        flight_segment_title = (
+            text_index > 0
+            and len(text) < 24
+            and any(token in text for token in ("飞机", "航班", "转机", "机场"))
+        )
+        if flight_segment_title:
+            continue
         for mention in _iter_place_mentions(
             text,
             domestic_route=brand_guard_domestic,

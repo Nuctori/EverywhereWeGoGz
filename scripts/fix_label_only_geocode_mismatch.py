@@ -202,6 +202,24 @@ def clear_geo_fields(tour: dict) -> None:
         tour.pop(key, None)
 
 
+# A2 transit/comparison wrong-pin tours (国际 tour 钉转机枢纽/修辞城市):
+# kept here so fix (before rebuild, D-016) purges the stale destinationCity
+# anchor every round — otherwise _prefer_existing_city_candidate re-anchors
+# the wrong pin across rebuilds.
+TRANSIT_WRONG_PIN_TOURS = {
+    "tour_418", "tour_421", "tour_427", "tour_429", "tour_431", "tour_432",
+    "tour_468", "tour_531", "tour_532", "tour_588", "tour_590", "tour_591",
+    "tour_602", "tour_603", "tour_604", "tour_605", "tour_717", "tour_512",
+    "tour_554", "tour_564", "tour_565", "tour_566", "tour_568", "tour_578",
+    "tour_595", "tour_665", "tour_4644", "tour_436", "tour_523", "tour_959",
+    "tour_961", "tour_822", "tour_823", "tour_837", "tour_846", "tour_912",
+    "tour_941", "tour_981", "tour_851", "tour_519", "tour_664", "tour_764",
+    "tour_4791", "tour_4799", "tour_4793", "tour_4661", "tour_4743", "tour_983",
+    "tour_4663", "tour_4666", "tour_755", "tour_785", "tour_4866", "tour_375",
+    "tour_412", "tour_448", "tour_449", "tour_498",
+}
+
+
 def main() -> int:
     try:
         with TOURS_PATH.open(encoding="utf-8-sig") as handle:
@@ -228,6 +246,16 @@ def main() -> int:
             clear_geo_fields(tour)
             cleared += 1
             reasons.append(f"{tour.get('id')}:{place}->(phantom-anchor)")
+            continue
+
+        # A2 transit/comparison wrong pins (国际 tour 钉转机枢纽/修辞城市):
+        # the stale destinationCity anchors _prefer_existing_city_candidate
+        # across rebuilds. Purge so the rhetoric/transit guards re-resolve to
+        # unmapped (D-029 宁缺毋滥).
+        if tour.get("id") in TRANSIT_WRONG_PIN_TOURS:
+            clear_geo_fields(tour)
+            cleared += 1
+            reasons.append(f"{tour.get('id')}:{place}->(transit-wrong-pin)")
             continue
 
         label_only_mismatch = place == "硅谷" and city == "长春市"
