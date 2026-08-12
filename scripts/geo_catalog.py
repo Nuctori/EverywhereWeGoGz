@@ -450,6 +450,7 @@ REGION_ROWS = [
     ("法国", None, ("法国",)),
     ("英国", None, ("英国",)),
     ("美国", None, ("美国",)),
+    ("斯里兰卡", None, ("斯里兰卡",)),
 ]
 REGION_COORDINATES = {
     "中国": (35.8617, 104.1954),
@@ -748,7 +749,8 @@ INTERNATIONAL_COUNTRIES = {
     "越南", "柬埔寨", "老挝", "缅甸", "马尔代夫", "迪拜", "冰岛", "挪威",
     "瑞典", "丹麦", "芬兰", "瑞士", "奥地利", "捷克", "匈牙利", "波兰",
     "希腊", "塞尔维亚", "黑山", "巴西", "秘鲁", "智利", "阿根廷", "南非",
-    "毛里求斯", "欧洲", "非洲", "大洋洲", "北欧", "东欧", "西欧", "南欧",
+    "毛里求斯", "斯里兰卡", "马尔代夫", "欧洲", "非洲", "大洋洲", "北欧",
+    "东欧", "西欧", "南欧",
 }
 # Scenic POIs that outrank their parent city when both appear in a title.
 # Decided by geometry at selection time (same province + within 130km of a
@@ -2055,8 +2057,21 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         destination_confidence = "low"
         destination_geo_source = "title-place-miner"
     destination_region = find_region(destination_text)
+    # International title + departure-province destination: do NOT materialize
+    # the departure region as a pin (斯里兰卡 tour with dest=广东 would show
+    # 广东 region — D-007 占位). Leave it unmapped instead.
+    title_region_here = find_region(str(title or ""))
+    title_international_flag = bool(
+        title_region_here
+        and title_region_here.get("country")
+        and title_region_here.get("country") in INTERNATIONAL_COUNTRIES
+    )
     region_place = (
-        materialize_region(destination_region) if not destination_place else None
+        None
+        if title_international_flag
+        else materialize_region(destination_region)
+        if not destination_place
+        else None
     )
     resolved_destination = destination_place or region_place
     resolved_label = (
