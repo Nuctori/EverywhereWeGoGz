@@ -1365,10 +1365,22 @@ def _iter_place_mentions(
             # Rhetorical mention in marketing copy: "不是巴黎卢浮宫去不起"
             # (not-Paris Louvre), "与纽约第五大道齐名" (ranked with New York),
             # "仿造巴黎街区样式" (Parisian-style blocks), "身处法国巴黎香榭
-            # 丽舍大道" (like being in Paris) are comparisons, not destinations
-            # (D-019 family). (A bare "X的西湖" check was dropped — it also
-            # rejects real destinations like 愉快的重庆之行.)
+            # 丽舍大道" (like being in Paris), "'小伦敦'" (Nuwara Eliya's
+            # nickname), "'马尔代夫'的阳西沙扒湾" (quoted metaphor),
+            # "四川峨眉山共称为四大名山" are comparisons, not destinations.
             if value[max(0, index - 2) : index] == "不是":
+                start = index + 1
+                continue
+            before_char = value[max(0, index - 1) : index]
+            if (
+                before_char in ("小", "'", '"', "‘", "“")
+                or value[max(0, index - 2) : index] in ("被称", "称为", "称作")
+            ):
+                start = index + 1
+                continue
+            if before_char == "的" and place.get("country") == "中国":
+                # "北方的西湖" metaphor; a bare title mention still wins via
+                # title-first ordering, so 愉快的重庆之行 is unaffected.
                 start = index + 1
                 continue
             rhetoric_before = value[max(0, index - 8) : index]
@@ -1382,8 +1394,9 @@ def _iter_place_mentions(
             if any(
                 token in rhetoric_tail
                 for token in (
-                    "齐名", "并称", "媲美", "齐头", "仿造", "仿制",
-                    "模仿", "样式", "风格", "类似", "堪比", "缩影", "化身",
+                    "齐名", "并称", "共称", "合称", "统称", "媲美", "齐头",
+                    "仿造", "仿制", "模仿", "样式", "风格", "类似", "堪比",
+                    "缩影", "化身",
                 )
             ):
                 start = index + 1
