@@ -160,17 +160,21 @@ def fetch():
 def main():
     # Source-migration guard: gz.cctpage.com (康辉广州旧站) died 2026-08 —
     # invalid certificate + 404 on every path. 康辉 moved to cct.cn, a
-    # JS-rendered site with no static list/API (verified 2026-08: product
-    # links load via JS; dujia/{id}.html 404s). A static crawler cannot fetch
-    # it yet — skip with a clear log instead of failing the unified crawl.
-    # Re-enable once a cct.cn API or SSR list exists (or a Playwright crawler).
+    # JS-rendered site. API probe (2026-08): /home/api-domestic/get-inside-tour
+    # returns {"code":"200","data":{"productLists":[]}} — empty for every
+    # parameter combination; getSession.do 404s; parameterized calls hit the
+    # aliyun WAF (HTML challenge); get-near-tour returns testing.cct.cn data
+    # (dev env). No public product API today — skip with a clear log instead
+    # of failing the unified crawl. Re-enable once cct.cn ships a live API or
+    # SSR list (or a Playwright crawler).
     try:
         safe_get(LIST_URL, params={"navid": 6, "pageIndex": 1})
     except Exception as exc:
         print(
             f"[康辉] source gz.cctpage.com unreachable ({exc}) — migrated to "
-            "cct.cn (JS-rendered, not statically crawlable); skipping source. "
-            "Existing tours keep their cct.cn keyword-search fallback."
+            "cct.cn (JS-rendered; API exists but empty/WAF-gated, no live "
+            "product data); skipping source. Existing tours keep their cct.cn "
+            "keyword-search fallback."
         )
         return
     items = fetch()
