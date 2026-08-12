@@ -21,6 +21,19 @@ export function resolveSourceDetailUrl(
   tour: Pick<TourSummary, 'source' | 'title' | 'bookingUrl' | 'meta'>,
 ) {
   const fallbackUrl = String(tour.bookingUrl || '').trim();
+  // 康辉 (cctpage.com) migrated to cct.cn — the old gz.cctpage.com host has an
+  // invalid certificate AND returns 404 (verified 2026-08: 0/25 reachable).
+  // prodcodes cannot be mapped to cct.cn product ids, so fall back to the new
+  // site's keyword search (www.cct.cn/search?keyword=… is reachable).
+  if (
+    tour.source === '康辉'
+    && (fallbackUrl.includes('cctpage.com') || !isHttpUrl(fallbackUrl))
+    && String(tour.title || '').trim()
+  ) {
+    return `https://www.cct.cn/search?keyword=${encodeURIComponent(
+      String(tour.title).trim().slice(0, 20),
+    )}`;
+  }
   // The source bookingUrl (jrt365 groupno / cctpage prodcode detail page) is
   // the most reliable target — return it FIRST. The 假日通 print/tournameno
   // and keyword-search fallbacks only apply when the bookingUrl is missing or
