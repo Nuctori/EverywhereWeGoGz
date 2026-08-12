@@ -305,3 +305,30 @@
 - Alternatives: ①token 白名单（否：reviewer 证实不完备）；②标题整体跳过修辞（否：直飞赫尔辛基 证明 before 航班 token 仍需拒）
 - Confidence: high（tour_764→unmapped、tour_4877→悉尼、tour_4452→沙巴、tour_4237→仙本那 独立实测）
 - Date: 2026-08-12
+
+## D-036: 酒店 POI 统一入 POI 路径——禁止入 PLACE_ROWS 城市表 [Accepted]
+
+- Context: 肇庆喜来登首轮修复放入 PLACE_ROWS（城市级表）→ 标题「肇庆喜来登酒店」label 无 NAMED 坐标 → coarse-parent-city-fallback 产出「肇庆喜来登范围（模糊定位）」city 级占位（tour_3692 实测：紫云谷 poi/exact → 喜来登 city/approximate 精度回退）。审计 BLOCKER-1/2 拦截。修复（2cb9fa1c7）：喜来登移出 PLACE_ROWS → NAMED_PLACE_COORDINATES（含 肇庆喜来登酒店 别名双 key，同坐标）+ EXPLICIT_POI_NAMES + DOMESTIC_POI_INDEX——完全同贞山/禅泉先例。重建后 tour_19/142/3692 全 poi/exact，geo-places city 级喜来登残留 0。
+- Decision: 酒店/景区 POI 一律走 POI 路径（NAMED + EXPLICIT + DOMESTIC_POI_INDEX），禁止放入 PLACE_ROWS 城市表；PLACE_ROWS 只放行政城市/县。
+- Rationale: city 级行让 coarse fallback 把 POI 当城市兜底（模糊定位标签）；POI 路径保证 materialize 走 NAMED 坐标 → poi/exact。
+- Alternatives: ①PLACE_ROWS 行 + NAMED 双注册（否：city 级行仍触发 fallback 路径）；②只改 label 拼接（否：治标，任何标题含 POI 名且 geocoder 失败都落 city）
+- Confidence: high（tour_19/142/3692 + geo-places 残留 独立实测，审计 passed）
+- Date: 2026-08-12
+
+## D-037: 全国城市 catalog 补全——省外 tour 错 pin 的根因修复 [Accepted]
+
+- Context: tour_2877（【品鉴黔川】贵州遵义、赤水、宜宾…合江门…）→ 江门/广东——catalog 只有广东城市 + 少数省外，贵州 tour 的唯一 mention 是「合江门」（宜宾景点）substring 撞的江门——真实目的地 遵义/赤水/宜宾 无 catalog 行 → 挖掘失败。修复（35a156d9a）：数据驱动（title 省份名后 token 提取）补 69 个全国高频目的地城市（贵州/四川/云南/陕西/甘肃/新疆/湖南/湖北/广西/福建/浙江/江苏/山东/河南/安徽/江西/东北/海南/青海/西藏/河北/宁夏/山西），坐标用常识级地级市/州府中心。重建后 tour_2877 → 遵义（title「贵州遵义」first mention 胜出），合江门 substring 不再致错。
+- Decision: catalog 按数据驱动高频目的地持续补全省外城市（title 省份后 token 提取），坐标用稳定常识级地级市中心（D-024 验证源要求对省外地级市放宽为常识级）。
+- Rationale: substring 碰撞（合江门→江门）是 catalog 缺真实目的地时的唯一候选——补全真实目的地后 title 明确 mention 胜出，碰撞不再致错。这是数据基础设施，非模式匹配写死（用户 L2120 要求）。
+- Alternatives: ①江门 continuation guard（否：模式写死，用户否决）；②REGION 级兜底（否：省级 pin 精度不够）
+- Confidence: high（tour_2877→遵义 实测，E2E places 473→485）
+- Date: 2026-08-12
+
+## D-038: 双目的地「X、Y」departure 规则需 Y 后出发 token [Accepted]
+
+- Context: tour_3637（【尚·美食】江门、佛山2天）→ 佛山、tour_3674（珠海江门联游2天）→ 江门——_is_departure_mention 的「X、Y」规则（L1815-1821）把双目的地第一城误判为出发地（DEPARTURE_CITY_NAMES + 紧邻分隔符 + 后随 catalog city → return True）。修复（2cb9fa1c7）：要求 Y（next mention）后跟显式出发 token（起止/出发/往返/双飞/起飞/返程/回程/集散）才判 X 出发——「江门、佛山2天」Y 后是「2天」→ 不判 → 江门保留 → first 胜出。
+- Decision: 「X、Y」模式的出发判定必须由 Y 后的出发 token 证实；行程天数（N天）不是出发证据。
+- Rationale: 「广州、深圳出发」是出发列表（Y 后出发 token），「江门、佛山2天」是双目的地（Y 后天数）——两者形态相同但语义不同，只有 Y 后 token 能区分。
+- Alternatives: ①整条规则移除（否：会漏真实出发列表「广州、深圳出发」）；②X、Y 全保留（否：双目的地第一城被跳）
+- Confidence: high（tour_3637→江门、tour_3674→珠海 独立实测）
+- Date: 2026-08-12
