@@ -1,0 +1,23 @@
+name: Check Booking URLs
+
+on:
+  schedule:
+    # Weekly Monday 03:00 UTC — source-site outages (康辉 cctpage 2026-08)
+    # must surface within a week instead of rotting until a user reports.
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  url-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Probe booking URLs (stratified sample, gated by source health)
+        run: node scripts/check_booking_urls.mjs 10
