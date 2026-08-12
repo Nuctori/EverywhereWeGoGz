@@ -134,6 +134,7 @@ try {
 	);
 	await map
 		.locator(`.destination-cluster-icon[title="${clickableClusterTitle}"]`)
+		.first()
 		.click();
 	await page
 		.getByRole("heading", { name: "选择具体地点" })
