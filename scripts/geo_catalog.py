@@ -785,15 +785,74 @@ DOMESTIC_POI_INDEX = {
 # is itinerary-template pollution. Provinces/macro-regions (青甘/华东/广东)
 # are deliberately NOT here so real domestic trips are never rejected.
 INTERNATIONAL_COUNTRIES = {
-    "美国", "加拿大", "墨西哥", "日本", "韩国", "泰国", "新加坡", "马来西亚",
-    "澳大利亚", "新西兰", "俄罗斯", "英国", "法国", "德国", "意大利", "西班牙",
-    "葡萄牙", "土耳其", "埃及", "摩洛哥", "肯尼亚", "阿联酋", "印度", "印尼",
-    "越南", "柬埔寨", "老挝", "缅甸", "马尔代夫", "迪拜", "冰岛", "挪威",
-    "瑞典", "丹麦", "芬兰", "瑞士", "奥地利", "捷克", "匈牙利", "波兰",
-    "希腊", "塞尔维亚", "黑山", "巴西", "秘鲁", "智利", "阿根廷", "南非",
-    "毛里求斯", "斯里兰卡", "马尔代夫", "尼泊尔", "不丹", "蒙古",
-    "哈萨克斯坦", "菲律宾", "缅甸", "老挝", "高加索", "澳洲", "澳新",
-    "欧洲", "非洲", "大洋洲", "北欧", "东欧", "西欧", "南欧",
+    "美国",
+    "加拿大",
+    "墨西哥",
+    "日本",
+    "韩国",
+    "泰国",
+    "新加坡",
+    "马来西亚",
+    "澳大利亚",
+    "新西兰",
+    "俄罗斯",
+    "英国",
+    "法国",
+    "德国",
+    "意大利",
+    "西班牙",
+    "葡萄牙",
+    "土耳其",
+    "埃及",
+    "摩洛哥",
+    "肯尼亚",
+    "阿联酋",
+    "印度",
+    "印尼",
+    "越南",
+    "柬埔寨",
+    "老挝",
+    "缅甸",
+    "马尔代夫",
+    "迪拜",
+    "冰岛",
+    "挪威",
+    "瑞典",
+    "丹麦",
+    "芬兰",
+    "瑞士",
+    "奥地利",
+    "捷克",
+    "匈牙利",
+    "波兰",
+    "希腊",
+    "塞尔维亚",
+    "黑山",
+    "巴西",
+    "秘鲁",
+    "智利",
+    "阿根廷",
+    "南非",
+    "毛里求斯",
+    "斯里兰卡",
+    "马尔代夫",
+    "尼泊尔",
+    "不丹",
+    "蒙古",
+    "哈萨克斯坦",
+    "菲律宾",
+    "缅甸",
+    "老挝",
+    "高加索",
+    "澳洲",
+    "澳新",
+    "欧洲",
+    "非洲",
+    "大洋洲",
+    "北欧",
+    "东欧",
+    "西欧",
+    "南欧",
 }
 # Scenic POIs that outrank their parent city when both appear in a title.
 # Decided by geometry at selection time (same province + within 130km of a
@@ -1479,10 +1538,7 @@ def _iter_place_mentions(
                 continue
             if (
                 before_char in ("小", "'", '"', "‘", "“")
-                or (
-                    before_char == "古"
-                    and place.get("country") != "中国"
-                )
+                or (before_char == "古" and place.get("country") != "中国")
                 or value[max(0, index - 2) : index] in ("被称", "称为", "称作")
                 or (
                     before_char == "国"
@@ -1499,8 +1555,15 @@ def _iter_place_mentions(
             if any(
                 token in rhetoric_before
                 for token in (
-                    "身处", "置身", "宛如", "仿佛", "犹如", "好像", "仿若",
-                    "誉为", "称之",
+                    "身处",
+                    "置身",
+                    "宛如",
+                    "仿佛",
+                    "犹如",
+                    "好像",
+                    "仿若",
+                    "誉为",
+                    "称之",
                 )
             ):
                 start = index + 1
@@ -1509,8 +1572,7 @@ def _iter_place_mentions(
             # titles: 上海直飞赫尔辛基 names a transit endpoint, not a
             # destination. Only negated by 无需/不用.
             if not negative_before and any(
-                token in rhetoric_before
-                for token in ("经停", "转机", "直飞")
+                token in rhetoric_before for token in ("经停", "转机", "直飞")
             ):
                 start = index + 1
                 continue
@@ -1518,10 +1580,29 @@ def _iter_place_mentions(
             if not in_title and any(
                 token in rhetoric_tail
                 for token in (
-                    "齐名", "并称", "共称", "合称", "统称", "媲美", "齐头",
-                    "仿造", "仿制", "模仿", "样式", "类似", "堪比",
-                    "转机", "航班", "机场", "飞行", "经停", "参考航班",
-                    "总部", "世家", "相提并论", "美誉",
+                    "齐名",
+                    "并称",
+                    "共称",
+                    "合称",
+                    "统称",
+                    "媲美",
+                    "齐头",
+                    "仿造",
+                    "仿制",
+                    "模仿",
+                    "样式",
+                    "类似",
+                    "堪比",
+                    "转机",
+                    "航班",
+                    "机场",
+                    "飞行",
+                    "经停",
+                    "参考航班",
+                    "总部",
+                    "世家",
+                    "相提并论",
+                    "美誉",
                 )
             ):
                 start = index + 1
@@ -1941,8 +2022,17 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
         has_sightseeing_context = any(
             token in text
             for token in (
-                "游览", "参观", "观光", "漫步", "游玩", "探访", "市区",
-                "景点", "游船", "逛街", "打卡",
+                "游览",
+                "参观",
+                "观光",
+                "漫步",
+                "游玩",
+                "探访",
+                "市区",
+                "景点",
+                "游船",
+                "逛街",
+                "打卡",
             )
         )
         if (
@@ -1989,8 +2079,7 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             title_country_is_international = bool(
                 title_country in INTERNATIONAL_COUNTRIES
                 or any(
-                    country in str(title or "")
-                    for country in INTERNATIONAL_COUNTRIES
+                    country in str(title or "") for country in INTERNATIONAL_COUNTRIES
                 )
             )
             # A direct substring scan is more reliable than find_region: the
@@ -1999,8 +2088,7 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             # real international route (美国东西海岸). Substring detection sees
             # both and keeps foreign mentions on real international lines.
             title_has_international = any(
-                country in str(title or "")
-                for country in INTERNATIONAL_COUNTRIES
+                country in str(title or "") for country in INTERNATIONAL_COUNTRIES
             )
             # Reverse direction: a DOMESTIC title (河南/华东… no international
             # signal) whose detail mentions a FOREIGN place (巴厘岛酒店 brand on
@@ -2022,8 +2110,7 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
                 )
                 continue
             if text_index > 0 and (
-                title_country_is_international
-                and mention_country == "中国"
+                title_country_is_international and mention_country == "中国"
             ):
                 _append_unique(mining.setdefault("rejectedLabels", []), label)
                 _append_unique(
@@ -2119,7 +2206,8 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
         # contains independent destinations (沙巴/美奈/棉花堡/卡帕多奇亚) that
         # must NOT outrank the title's first city on international tours.
         poi_named = [
-            item for item in named_candidates
+            item
+            for item in named_candidates
             if item[2].get("name") in POI_OVER_CITY_PRIORITY
         ]
         candidates = poi_named if poi_named else named_candidates
@@ -2132,16 +2220,14 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
     candidates.sort(key=lambda item: (item[0], item[1]))
     _, _, place, label, _ = candidates[0]
     final_label = (
-        label if named_candidates or label in NAMED_PLACE_COORDINATES
-        else place["name"]
+        label if named_candidates or label in NAMED_PLACE_COORDINATES else place["name"]
     )
     # NAMED_PLACE_COORDINATES candidates win (D-024 curation precedent): the
     # curated label has a trusted coordinate (姑婆山/白水寨). Otherwise pick the
     # first candidate that materializes — a POI-class label with no trusted
     # geometry (XX酒店 not in NAMED) must not degrade a poi tour to city.
     ordered = [
-        candidate for candidate in candidates
-        if candidate[3] in NAMED_PLACE_COORDINATES
+        candidate for candidate in candidates if candidate[3] in NAMED_PLACE_COORDINATES
     ] or candidates
     chosen_place = None
     chosen_label = ""
@@ -2278,12 +2364,8 @@ def normalize_tour_geo(raw, title, destination, detail=None):
         destination_place,
         destination_label,
     )
-    if (
-        preferred_place is not destination_place
-        and (
-            destination_place is None
-            or not destination_place.get("latitude")
-        )
+    if preferred_place is not destination_place and (
+        destination_place is None or not destination_place.get("latitude")
     ):
         # Only fall back to the existing city anchor when mining produced no
         # coordinate — a fresh NAMED/curated pin (珠海东澳岛) must not be
@@ -2303,10 +2385,7 @@ def normalize_tour_geo(raw, title, destination, detail=None):
             and title_region_here.get("country")
             and title_region_here.get("country") in INTERNATIONAL_COUNTRIES
         )
-        or any(
-            country in str(title or "")
-            for country in INTERNATIONAL_COUNTRIES
-        )
+        or any(country in str(title or "") for country in INTERNATIONAL_COUNTRIES)
     )
     region_place = (
         None
