@@ -4,7 +4,7 @@ on:
   schedule:
     # Weekly Monday 03:00 UTC — source-site outages (康辉 cctpage 2026-08)
     # must surface within a week instead of rotting until a user reports.
-    - cron: '0 3 * * 1'
+    - cron: "0 3 * * 1"
   workflow_dispatch:
 
 permissions:
@@ -20,4 +20,4 @@ jobs:
         with:
           node-version: 20
       - name: Probe booking URLs (stratified sample, gated by source health)
-        run: node scripts/check_booking_urls.mjs 10
+        run: python3 scripts/check_booking_urls.py 10
