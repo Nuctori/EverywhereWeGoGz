@@ -152,6 +152,8 @@ PLACE_ROWS = [
     # 五台山（山西忻州）：长 alias 优先于 台山 子串——"五台山" 不得命中
     # 广东台山（tour_1264/3436 山西 tour 曾钉台山 via substring）。
     ("五台山", "中国", "山西", 38.983, 113.573, ("五台山",)),
+    # 云台山（河南焦作）：同 class——"云台山" 不得命中 广东台山。
+    ("云台山", "中国", "河南", 35.35, 113.28, ("云台山",)),
     (
         "恩平",
         "中国",
@@ -654,6 +656,7 @@ EXPLICIT_POI_NAMES = {
     "瓦晒湾",
     "七星岩",
     "五台山",
+    "云台山",
     "星湖湿地",
     "星湖绿道",
     "星湖大酒店",
@@ -764,6 +767,10 @@ POI_CONTINUATIONS = {
     # 胡志明亭 = the border-marker memorial at 东兴 (中越界碑), NOT the
     # Vietnamese city 胡志明市. Reject the city mention when followed by 亭.
     "胡志明": ("亭",),
+    # 龙门石窟 (洛阳) is NOT 广东龙门县; 黄龙潭 (云台山 scenic spot) is NOT
+    # 四川黄龙景区 — substring collisions on longer place names.
+    "龙门": ("石",),
+    "黄龙": ("潭",),
 }
 EXPLICIT_TITLE_DESTINATION_NAMES = EXPLICIT_POI_NAMES | {
     "马拉喀什",
@@ -1370,7 +1377,8 @@ def _iter_place_mentions(
             # "仿造巴黎街区样式" (Parisian-style blocks), "身处法国巴黎香榭
             # 丽舍大道" (like being in Paris), "'小伦敦'" (Nuwara Eliya's
             # nickname), "'马尔代夫'的阳西沙扒湾" (quoted metaphor),
-            # "四川峨眉山共称为四大名山" are comparisons, not destinations.
+            # "中国仙本那" (恩施屏山峡谷 nickname), "被誉为北方的西湖"
+            # (metaphor) are comparisons, not destinations.
             if value[max(0, index - 2) : index] == "不是":
                 start = index + 1
                 continue
@@ -1378,18 +1386,21 @@ def _iter_place_mentions(
             if (
                 before_char in ("小", "'", '"', "‘", "“")
                 or value[max(0, index - 2) : index] in ("被称", "称为", "称作")
+                or (
+                    before_char == "国"
+                    and value[max(0, index - 2) : index] == "中国"
+                    and place.get("country") != "中国"
+                )
             ):
-                start = index + 1
-                continue
-            if before_char == "的" and place.get("country") == "中国":
-                # "北方的西湖" metaphor; a bare title mention still wins via
-                # title-first ordering, so 愉快的重庆之行 is unaffected.
                 start = index + 1
                 continue
             rhetoric_before = value[max(0, index - 8) : index]
             if any(
                 token in rhetoric_before
-                for token in ("身处", "置身", "宛如", "仿佛", "犹如", "好像", "仿若")
+                for token in (
+                    "身处", "置身", "宛如", "仿佛", "犹如", "好像", "仿若",
+                    "誉为", "称之",
+                )
             ):
                 start = index + 1
                 continue
@@ -1398,8 +1409,7 @@ def _iter_place_mentions(
                 token in rhetoric_tail
                 for token in (
                     "齐名", "并称", "共称", "合称", "统称", "媲美", "齐头",
-                    "仿造", "仿制", "模仿", "样式", "风格", "类似", "堪比",
-                    "缩影", "化身",
+                    "仿造", "仿制", "模仿", "样式", "类似", "堪比",
                 )
             ):
                 start = index + 1
@@ -1813,6 +1823,22 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             # China provinces/macro-regions and their shorthand (青甘/华东…)
             # must NOT trigger it — 青甘 tour + 敦煌莫高窟 is a real trip.
             title_country_is_international = title_country in INTERNATIONAL_COUNTRIES
+            # Reverse direction: a DOMESTIC title (河南/华东… no international
+            # signal) whose detail mentions a FOREIGN place (巴厘岛酒店 brand on
+            # a 河南 tour) is brand/template text — reject it (D-019 family).
+            # International titles keep foreign mentions (新加坡 tour + 新加坡).
+            if (
+                text_index > 0
+                and not title_country_is_international
+                and mention_country
+                and mention_country != "中国"
+                and mention_country not in ("中国香港", "香港", "澳门")
+            ):
+                _append_unique(mining.setdefault("rejectedLabels", []), label)
+                _append_unique(
+                    mining.setdefault("reasons", []), "title-region-conflict"
+                )
+                continue
             if text_index > 0 and (
                 (
                     title_country_is_international
