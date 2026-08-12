@@ -1,0 +1,9 @@
+tour_19: OK place=肇庆喜来登 level=poi lat=23.2097824 src=osm
+tour_142: OK place=贞山风景区 level=poi lat=23.3256706 src=osm
+tour_3692: OK place=肇庆喜来登酒店 level=poi lat=23.2097824 src=osm
+tour_13: OK place=肇庆星湖大酒店 level=poi lat=23.0571359 src=osm
+tour_278: OK place=蓝钟温泉 level=poi lat=24.0776019 src=title-place-miner
+tour_1411: OK place=肇庆七星岩 level=poi lat=23.0805699 src=geocoder
+tour_2045: OK place=肇庆紫云谷 level=poi lat=23.1267137 src=geocoder
+geo-places city 喜来登 residue: 0
+BAD: 0

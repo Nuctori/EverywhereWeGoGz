@@ -36,8 +36,6 @@ PLACE_ROWS = [
     ),
     ("韶关", "中国", "广东", 24.8104, 113.5972, ("韶关", "韶关市", "南华寺", "丹霞山")),
     ("肇庆", "中国", "广东", 23.0472, 112.4651, ("肇庆", "肇庆市")),
-    # Sheraton Zhaoqing Dinghu — nominatim-verified (永利大道, 鼎湖区).
-    ("肇庆喜来登", "中国", "广东", 23.2100669, 112.5990830, ("肇庆喜来登",)),
     ("佛山", "中国", "广东", 23.0218, 113.1219, ("佛山", "佛山市")),
     ("江门", "中国", "广东", 22.5787, 113.0815, ("江门", "江门市")),
     (
@@ -703,6 +701,7 @@ EXPLICIT_POI_NAMES = {
     "星湖大酒店",
     "紫云谷",
     "贞山",
+    "肇庆喜来登",
     "蓝钟",
     "蓝钟温泉",
     "鼎湖山",
@@ -766,6 +765,11 @@ DOMESTIC_POI_INDEX = {
     "星湖湿地": ("广东", "肇庆"),
     "星湖绿道": ("广东", "肇庆"),
     "星湖大酒店": ("广东", "肇庆"),
+    # Sheraton Zhaoqing Dinghu (永利大道, 鼎湖区) — nominatim-verified
+    # 23.2100669,112.5990830. Hotel POIs live in the POI path (like 禅泉),
+    # NOT the PLACE_ROWS city table — a city-level row makes the fallback
+    # degrade to city级 模糊定位 (audit BLOCKER-2).
+    "肇庆喜来登": ("广东", "肇庆"),
     # 贞山 (四会市, 肇庆) — nominatim/Amap/Wiki 三源验证 23.3257,112.6638.
     "贞山": ("广东", "四会"),
     "紫云谷": ("广东", "肇庆"),
@@ -959,6 +963,23 @@ NAMED_PLACE_COORDINATES = {
         "longitude": 112.6638214,
         "level": "poi",
         "locality": "贞山街道",
+        "coordinateSource": "catalog",
+    },
+    # Sheraton Zhaoqing Dinghu (永利大道, 鼎湖区) — nominatim hotel.
+    # 酒店 label (title 原文) includes the 酒店 suffix, so both keys share
+    # the verified coordinate (audit BLOCKER-1: no city-level 模糊定位).
+    "肇庆喜来登": {
+        "latitude": 23.2100669,
+        "longitude": 112.599083,
+        "level": "poi",
+        "locality": "鼎湖区",
+        "coordinateSource": "catalog",
+    },
+    "肇庆喜来登酒店": {
+        "latitude": 23.2100669,
+        "longitude": 112.599083,
+        "level": "poi",
+        "locality": "鼎湖区",
         "coordinateSource": "catalog",
     },
     "惠州巽寮湾": {
@@ -1812,10 +1833,26 @@ def _is_departure_mention(text, mention):
     next_catalog_gap = (
         value[end : next_catalog_mention["start"]] if next_catalog_mention else ""
     )
+    # 「X、Y」patterns (广州、深圳出发) mark X as departure — but 江门、佛山2天
+    # is a two-destination tour, not a departure. Require an explicit departure
+    # token AFTER the second city (起止/出发/往返/双飞…) so the first city is
+    # only dropped when the list actually reads as a departure list.
+    next_after_text = (
+        value[next_catalog_mention["end"] : next_catalog_mention["end"] + 10].lstrip()
+        if next_catalog_mention
+        else ""
+    )
+    departure_token_after_next = bool(
+        re.match(
+            r"(?:起止|起程|出发|往返|直飞|联运|双飞|起飞|返程|回程|集散)",
+            next_after_text,
+        )
+    )
     if (
         mention["place"]["name"] in DEPARTURE_CITY_NAMES
         and next_catalog_mention
         and re.fullmatch(r"\s*[-—－/／或和及、,，]?\s*", next_catalog_gap)
+        and departure_token_after_next
         and not re.match(r"(?:塔|广场|花城|南沙)", after_text)
     ):
         return True
