@@ -12,6 +12,10 @@
  * 康辉广州旧产品 (SP prodcode) 未迁移 — 此爬虫恢复"康辉源有新数据"而非
  * 修复旧 URL.
  *
+ * WIP (2026-08-14 audit): 输出 raw_kanghui_cct.json 尚无 merge 管线消费
+ * (merge_data.py 无 cct: sourceId 映射, update-data.yml git add 清单不含此文件,
+ * tours.json 0 条 cct.cn tour) — 数据抓取但未进产物. 接入管线前勿宣称已恢复.
+ *
  * Usage: node scripts/crawl_kanghui_cct.mjs [maxProducts=50]
  */
 import { chromium } from 'playwright';

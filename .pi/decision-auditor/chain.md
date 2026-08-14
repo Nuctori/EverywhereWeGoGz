@@ -359,3 +359,12 @@
 - Alternatives: ①只修代码不挂 CI（否：本轮失败测试即 CI 盲区产物，不挂则复发）；②测试只挂 update-data preflight（否：deploy 是发布闸门，schema 破坏必须阻断发布而非只阻断数据管道）；③guards 步骤并入 Build（否：Build 失败晚于测试失败，定位成本高）
 - Confidence: high（deploy run 31806247786 success 实跑 guards；pytest 113 passed 独立复跑；三个 workflow/package.json 挂载点独立 grep 核实）
 - Date: 2026-08-14
+
+## D-042: crawler/URL-gate 政策轮次补记 + update-data.yml preflight 修复 [Accepted]
+
+- Context: reviewer 第三轮发现 65c60ceb7 编辑 update-data.yml 时丢失 `run: |`（步骤只有 name 无 run/uses）→ preflight 步骤失效、数据管道门禁整体停摆（D-041 声称的 guard 为死配置）；契约测试 test_update_data_workflow.mjs:21 断言单引号 cron 与文件双引号漂移（d27cb9f90 窗口外改）→ audit:update-data-workflow 失败。另：c4abcf53c/a6dc2eb16/6330ccf3b/f447a9a3d 的康辉 KNOWN_BROKEN 门禁豁免、cct.cn 迁移、raw_kanghui_cct.json（50 产品未接入 merge 管线，0 条进 tours.json）等政策取舍仅存于 commit message，决策链零覆盖。修复（176532005/本轮）：恢复 run: | + cron 断言改双引号 + crawl_kanghui_cct.mjs 标 WIP。
+- Decision: workflow 编辑后必须过 YAML 结构校验（每 step 有 run/uses）+ 契约测试实跑；决策链补记 crawler 政策轮次；未接入管线的爬虫产物标记 WIP 而非宣称恢复。
+- Rationale: 静默漂移的两种通道（测试失败 × CI 不跑；workflow 结构损坏 × 契约测试未覆盖结构）本轮各出现一次，均须在门禁侧闭合。
+- Alternatives: ①kanghui 数据接入 merge 管线（否：cct: sourceId 映射+字段适配是功能工程，WIP 标记先止血）；②cron 断言回退单引号（否：文件已是双引号，改断言对齐现状）
+- Confidence: high（audit:update-data-workflow/deploy-workflow 修复后通过；YAML 结构校验脚本实测两 workflow OK；pytest 113 passed）
+- Date: 2026-08-14

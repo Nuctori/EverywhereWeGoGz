@@ -47,6 +47,7 @@ jobs:
         run: npm run audit:crawler-syntax
 
       - name: Verify update workflow contract
+        run: |
           npm run audit:update-data-workflow
           npm run test:osm-poi-workflow
           python scripts/test_osm_poi_index.py

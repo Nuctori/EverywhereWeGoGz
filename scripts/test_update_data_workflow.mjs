@@ -18,7 +18,7 @@ function mustInclude(snippet, message) {
   assert.ok(workflow.includes(snippet), message);
 }
 
-mustInclude("- cron: '0 3 * * 1'", 'expected scheduled update-data workflow to run weekly on Monday UTC');
+mustInclude('- cron: "0 3 * * 1"', 'expected scheduled update-data workflow to run weekly on Monday UTC');
 mustInclude('skip_crawls:', 'expected workflow_dispatch skip_crawls input to exist for fast manual verification');
 mustInclude('DETAIL_FETCH_MODE: geo', 'expected weekly refresh to enrich details only for tours without destination coordinates');
 
