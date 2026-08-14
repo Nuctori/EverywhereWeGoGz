@@ -326,7 +326,14 @@ PLACE_ROWS = [
     ("三亚", "中国", "海南", 18.2528, 109.5119, ("三亚", "三亚市")),
     ("昆明", "中国", "云南", 25.0389, 102.7183, ("昆明", "昆明市")),
     ("成都", "中国", "四川", 30.5728, 104.0668, ("成都", "成都市")),
-    ("重庆", "中国", "重庆", 29.563, 106.5516, ("重庆", "重庆市", "武隆", "仙女山")),
+    ("重庆", "中国", "重庆", 29.563, 106.5516, ("重庆", "重庆市")),
+    # 武隆/仙女山 split out of the 重庆 row (D-037 alias layout): as 重庆-row
+    # aliases their place.name resolved to 重庆, so a 重庆 departure in the
+    # same title rejected them as departures AND their pin showed 重庆 city
+    # centre. Standalone rows keep the real county/scenic coordinates
+    # (重庆线路广州武隆仙女山双动5天 -> 武隆, not 重庆/广州).
+    ("武隆", "中国", "重庆", 29.3254, 107.7601, ("武隆",)),
+    ("仙女山", "中国", "重庆", 29.468, 107.737, ("仙女山",)),
     ("北京", "中国", "北京", 39.9042, 116.4074, ("北京", "北京市")),
     ("上海", "中国", "上海", 31.2304, 121.4737, ("上海", "上海市")),
     ("西安", "中国", "陕西", 34.3416, 108.9398, ("西安", "西安市")),
@@ -931,6 +938,14 @@ INTERNATIONAL_COUNTRIES = {
     "东欧",
     "西欧",
     "南欧",
+    # UK constituent countries — 英格兰/苏格兰 titles carry no 英国 string
+    # (【欧洲拼小团】英格兰苏格兰 5 日之旅), so they must still register as
+    # international or the departure-province region 广东 becomes the pin
+    # (test_title_place_miner_keeps_international_destination_before_return_flight).
+    "英格兰",
+    "苏格兰",
+    "威尔士",
+    "爱尔兰",
 }
 # Scenic POIs that outrank their parent city when both appear in a title.
 # Decided by geometry at selection time (same province + within 130km of a
@@ -1674,10 +1689,18 @@ def _iter_place_mentions(
                 continue
             # Flight-endpoint tokens (直飞/转机/经停) reject the city even in
             # titles: 上海直飞赫尔辛基 names a transit endpoint, not a
-            # destination. Only negated by 无需/不用.
-            if not negative_before and any(
+            # destination. Only negated by 无需/不用. EXCEPTION: 「X直飞Y往返」
+            # marks Y as the round-trip target (广州直飞==伦敦往返 = fly out to
+            # London and back), so a 往返 immediately after the mention lifts
+            # the rejection — Y is the destination, not a transit endpoint.
+            flight_endpoint_rejection = not negative_before and any(
                 token in rhetoric_before for token in ("经停", "转机", "直飞")
-            ):
+            )
+            round_trip_target = (
+                "直飞" in rhetoric_before
+                and value[end : end + 2].startswith("往返")
+            )
+            if flight_endpoint_rejection and not round_trip_target:
                 start = index + 1
                 continue
             rhetoric_tail = value[end : end + 30]
@@ -1817,6 +1840,34 @@ def _is_departure_mention(text, mention):
     end = mention["end"]
     after = value[end : min(len(value), end + 16)]
     after_text = after.lstrip()
+    # Is this mention the FIRST city of a contiguous run (广州 in 广州武隆仙女山,
+    # but NOT 武隆/仙女山)? Only run leaders can be departures — the cities
+    # that follow a leader are the route's destinations.
+    previous_mention = next(
+        (
+            candidate
+            for candidate in _iter_place_mentions(value)
+            if candidate["end"] <= start
+            and start - candidate["end"] <= 8
+            and candidate["place"]["name"] != mention["place"]["name"]
+            and re.fullmatch(
+                r"\s*[-—－/／或和及、,，]?\s*",
+                value[candidate["end"] : start],
+            )
+        ),
+        None,
+    )
+    is_run_leader = previous_mention is None
+    # 「重庆线路广州武隆…」: a catalog city opening the title directly before
+    # 线路 is the route's departure hub (线路 = 从X出发的线路), never the
+    # destination — the D-037 nationwide catalog made 重庆 mentionable and it
+    # started winning the mine (test_title_place_miner_rejects_departure_prefixed_route_text).
+    if (
+        start == 0
+        and after_text.startswith("线路")
+        and mention["place"].get("country") == "中国"
+    ):
+        return True
     if after_text.startswith("往返") and mention["place"]["country"] != "中国":
         return False
     before_text = value[max(0, start - 16) : start].rstrip()
@@ -1904,21 +1955,43 @@ def _is_departure_mention(text, mention):
     )
     # 「X、Y」patterns (广州、深圳出发) mark X as departure — but 江门、佛山2天
     # is a two-destination tour, not a departure. Require an explicit departure
-    # token AFTER the second city (起止/出发/往返/双飞…) so the first city is
-    # only dropped when the list actually reads as a departure list.
+    # token AFTER the city run (起止/出发/往返/双飞/双动…) so the first city is
+    # only dropped when the list actually reads as a departure list. Walk to
+    # the END of the contiguous run: 广州武隆仙女山双动5天 has its token after
+    # 仙女山, not after 武隆.
+    run_tail_mention = next_catalog_mention
+    while run_tail_mention:
+        following = next(
+            (
+                candidate
+                for candidate in _iter_place_mentions(value)
+                if candidate["start"] >= run_tail_mention["end"]
+                and candidate["start"] - run_tail_mention["end"] <= 8
+                and candidate["place"]["name"] != mention["place"]["name"]
+            ),
+            None,
+        )
+        if following and re.fullmatch(
+            r"\s*[-—－/／或和及、,，]?\s*",
+            value[run_tail_mention["end"] : following["start"]],
+        ):
+            run_tail_mention = following
+        else:
+            break
     next_after_text = (
-        value[next_catalog_mention["end"] : next_catalog_mention["end"] + 10].lstrip()
-        if next_catalog_mention
+        value[run_tail_mention["end"] : run_tail_mention["end"] + 40].lstrip()
+        if run_tail_mention
         else ""
     )
     departure_token_after_next = bool(
-        re.match(
-            r"(?:起止|起程|出发|往返|直飞|联运|双飞|起飞|返程|回程|集散)",
+        re.search(
+            r"(?:起止|起程|出发|往返|直飞|联运|双飞|双动|双卧|起飞|返程|回程|集散)",
             next_after_text,
         )
     )
     if (
         mention["place"]["name"] in DEPARTURE_CITY_NAMES
+        and is_run_leader
         and next_catalog_mention
         and re.fullmatch(r"\s*[-—－/／或和及、,，]?\s*", next_catalog_gap)
         and departure_token_after_next
@@ -1955,8 +2028,13 @@ def _place_label(text, mention):
     alias = mention["alias"]
     canonical_name = mention["place"]["name"]
     if _is_named_alias(alias, canonical_name):
+        # alias wholly contained in the canonical name (巴厘 ⊂ 巴厘岛,
+        # 禾木 ⊂ 禾木村) is the same place — never concatenate into
+        # 巴厘岛巴厘/禾木村禾木 (66 shipped tours had the doubled label).
         prefix = (
-            f"{canonical_name}{alias}"
+            canonical_name
+            if alias in canonical_name
+            else f"{canonical_name}{alias}"
             if not alias.startswith(canonical_name)
             else alias
         )
@@ -2071,8 +2149,12 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
         and destination_region.get("province") == destination_region.get("name")
     )
     poi_index_enabled = domestic_route
+    # Collect BOTH the matched alias and the canonical name: 武隆/仙女山 live
+    # as aliases under the 重庆 catalog row (D-037 nationwide fill), so matching
+    # rejection by place.name alone would swallow every 重庆-subordinate
+    # destination once 重庆 is marked as departure (重庆线路广州武隆仙女山).
     title_departure_names = {
-        mention["place"]["name"]
+        name
         for mention in _iter_place_mentions(
             title,
             domestic_route=brand_guard_domestic,
@@ -2080,6 +2162,7 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             in_title=True,
         )
         if _is_departure_mention(title, mention)
+        for name in (mention["alias"], mention["place"]["name"])
     }
     direct_place, direct_label = _find_direct_place_match(destination_text)
     if direct_place and direct_place["name"] not in title_departure_names:
@@ -2179,7 +2262,7 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
             in_title=(text_index == 0),
         ):
             label = _place_label(text, mention)
-            if mention["place"]["name"] in title_departure_names:
+            if mention["alias"] in title_departure_names:
                 _append_unique(mining.setdefault("rejectedLabels", []), label)
                 _append_unique(mining.setdefault("reasons", []), "departure-mention")
                 continue

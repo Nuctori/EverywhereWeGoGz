@@ -32,8 +32,18 @@ assert.equal(
     bookingUrl: staleGroupUrl,
     meta: { sourceAttributes: { printUrl: 'javascript:alert(1)', tournameno: '' } },
   }),
+  staleGroupUrl,
+  'invalid stable URLs fall through to the valid bookingUrl detail page (never a keyword search while a detail URL exists)',
+);
+
+assert.equal(
+  resolveSourceDetailUrl({
+    source: '假日通',
+    title: '金水台温泉2天（含晚）',
+    bookingUrl: 'javascript:alert(1)',
+  }),
   'http://www.jrt365.com/tourgroup/tourgroup_list.aspx?keyword=%E9%87%91%E6%B0%B4%E5%8F%B0%E6%B8%A9%E6%B3%892%E5%A4%A9%EF%BC%88%E5%90%AB%E6%99%9A%EF%BC%89',
-  'invalid stable URLs should fall back to a title search instead of opening a stale group URL',
+  'keyword title search remains the last resort when no valid detail URL exists',
 );
 
 const otherSourceUrl = 'https://example.com/tour';
@@ -45,8 +55,8 @@ assert.equal(
 
 assert.equal(
   resolveSourceDetailUrl({ source: '假日通', title: '旧线路', bookingUrl: staleGroupUrl }),
-  'http://www.jrt365.com/tourgroup/tourgroup_list.aspx?keyword=%E6%97%A7%E7%BA%BF%E8%B7%AF',
-  'deep-link summaries without source metadata should use title search',
+  staleGroupUrl,
+  'map-card summaries without source metadata must open the bookingUrl detail page, not a keyword search (560dfc5fb 转跳根因)',
 );
 
 console.log('Source detail URL tests passed.');

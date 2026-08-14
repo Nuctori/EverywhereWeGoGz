@@ -389,7 +389,10 @@ def test_enrichment_ignores_unrelated_itinerary_pois_after_primary_destination_i
     primary = dict(
         hotel_poi(),
         osmId="node/primary",
-        name="翔顺象窝酒店",
+        # The label 新兴象窝 strips the confirmed city prefix; the POI must
+        # carry the matching venue name or the hardened lookup (f1bb159f7,
+        # prefix keys + suffix-match scoring) cannot pair them.
+        name="新兴象窝酒店",
         aliases=[],
         latitude=22.5637358,
         longitude=112.2907439,

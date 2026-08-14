@@ -42,6 +42,7 @@
     "test:destination-aliases": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_destination_aliases.ts",
     "test:search-modes-ui": "node scripts/test_search_modes_ui.mjs",
     "audit:availability": "python scripts/validate_tour_availability.py",
+    "test:geo-schema-guard": "python scripts/test_geo_schema_guard.py",
     "test:geo-data-layer": "node scripts/test_geo_data_layer.mjs",
     "test:map-data-loading": "node scripts/test_map_data_loading.mjs",
     "test:split-tour-data-newlines": "node scripts/test_split_tour_data_newlines.mjs",

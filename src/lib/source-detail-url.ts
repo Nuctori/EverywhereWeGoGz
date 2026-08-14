@@ -34,20 +34,21 @@ export function resolveSourceDetailUrl(
       String(tour.title).trim().slice(0, 20),
     )}`;
   }
-  // The source bookingUrl (jrt365 groupno / cctpage prodcode detail page) is
-  // the most reliable target — return it FIRST. The 假日通 print/tournameno
-  // and keyword-search fallbacks only apply when the bookingUrl is missing or
-  // not a valid http URL (map-card summaries carry no meta.sourceAttributes,
-  // so the old order silently degraded every 假日通 tour to a keyword search
-  // page: 转跳都是错的).
+  // 假日通 stable tourname links FIRST when present: the groupno bookingUrl
+  // rotates/expires (0c771a658 verified), and the detail modal passes the
+  // resolved tour (with meta.sourceAttributes) once detail loading succeeds.
+  // Map-card summaries carry no sourceAttributes, so they fall through to the
+  // bookingUrl below — the real fix for 转跳都是错的 (560dfc5fb): a valid
+  // detail URL must never silently degrade to a keyword search page.
+  if (tour.source === JRT365_SOURCE) {
+    const printUrl = readSourceAttribute(tour, 'printUrl');
+    if (isHttpUrl(printUrl)) return printUrl;
+
+    const tournameno = readSourceAttribute(tour, 'tournameno');
+    if (tournameno) return `${JRT365_PRINT_URL}${encodeURIComponent(tournameno)}`;
+  }
   if (isHttpUrl(fallbackUrl)) return fallbackUrl;
   if (tour.source !== JRT365_SOURCE) return fallbackUrl;
-
-  const printUrl = readSourceAttribute(tour, 'printUrl');
-  if (isHttpUrl(printUrl)) return printUrl;
-
-  const tournameno = readSourceAttribute(tour, 'tournameno');
-  if (tournameno) return `${JRT365_PRINT_URL}${encodeURIComponent(tournameno)}`;
 
   const title = String(tour.title || '').trim();
   if (title) {

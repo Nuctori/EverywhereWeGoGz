@@ -60,7 +60,30 @@ def test_all_tour_details_mining_fields_are_arrays():
     assert not bad, f"{len(bad)} tour-details with invalid mining fields:\n" + "\n".join(bad[:10])
 
 
+def test_unmapped_path_leaves_mining_fields_as_arrays():
+    """D-031 regression: a tour with NO catalog match (unmapped path) must not
+    leave mining fields null either — every return path of
+    mine_destination_place (direct / region-fallback / unmapped) re-fills the
+    four arrays after the mining reset."""
+    tour = {
+        "id": "tour_unmapped",
+        "title": "独家人文探索之旅",
+        "destination": "乌有乡秘境",
+        "geoResolution": {"mining": {"rejectedLabels": None, "reasons": None}},
+    }
+
+    from rebuild_geo_data import rebuild
+
+    before, after = rebuild([tour])
+    assert after == 0, f"unmapped tour must stay without coordinates, got {after}"
+    mining = (tour.get("geoResolution") or {}).get("mining") or {}
+    for key in MINING_ARRAY_KEYS:
+        assert isinstance(mining.get(key), list), (
+            f"unmapped path: mining.{key} must be a list after rebuild, got {mining.get(key)!r}"
+        )
+
 if __name__ == "__main__":
     test_rebuild_leaves_mining_fields_as_arrays()
+    test_unmapped_path_leaves_mining_fields_as_arrays()
     test_all_tour_details_mining_fields_are_arrays()
     print("schema guard tests passed")

@@ -112,7 +112,7 @@ const blueBellSourceTours = sourceTours.filter((tour) => String(tour.title || ''
 const blueBellIndexedTours = list.filter((tour) => String(tour.title || '').includes('蓝钟'));
 assert(blueBellSourceTours.length > 0, 'fixture data must include 蓝钟 destination examples');
 assert(blueBellSourceTours.every((tour) => tour.destinationPlaceName?.includes('蓝钟')), '蓝钟 titles must retain the mined named destination');
-assert(blueBellSourceTours.every((tour) => ['geocoder', 'fallback'].includes(tour.destinationCoordinateSource)), '蓝钟 coordinates must retain a verified or explicit fallback source');
+assert(blueBellSourceTours.every((tour) => ['geocoder', 'fallback', 'catalog'].includes(tour.destinationCoordinateSource)), '蓝钟 coordinates must retain a verified, explicit fallback, or curated catalog source');
 assert(blueBellSourceTours.every((tour) => tour.destinationCoordinateSource !== 'fallback' || isFallbackPrecision(tour.destinationCoordinatePrecision)), '蓝钟 fallback coordinates must retain approximate precision');
 assert(blueBellIndexedTours.length === blueBellSourceTours.length, '蓝钟 examples must survive into the map index');
 assert(blueBellIndexedTours.every((tour) => tour.geo?.destination), '蓝钟 fallback destinations must remain map-selectable');

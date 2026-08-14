@@ -84,8 +84,8 @@ def test_title_place_miner_resolves_named_place_to_city_anchor():
 
     assert tour["destinationCity"] == "珠海"
     assert tour["destinationPlaceName"] == "珠海海泉湾"
-    assert tour["destinationLatitude"] == 22.271
-    assert tour["destinationLongitude"] == 113.5767
+    assert tour["destinationLatitude"] == 22.0722469
+    assert tour["destinationLongitude"] == 113.1109757
     assert tour["geoSource"] == "title-place-miner"
     assert tour["geoConfidence"] == "low"
     assert tour["dataQuality"]["fieldSources"]["destinationPlaceName"] == "inferred"
@@ -134,8 +134,12 @@ def test_title_place_miner_rejects_departure_prefixed_route_text():
     }
     tour = raw_to_tour(raw, 1, empty_detail())
 
-    assert tour["destinationCity"] == ""
-    assert tour["destinationPlaceName"] == ""
+    # 重庆 opens the title before 线路 = departure hub; 广州 is the second
+    # departure (广州…双动 = round-trip rail from 广州). The D-037 nationwide
+    # catalog made the real destination 武隆 mineable, so the departure
+    # cities must be rejected and 武隆 must win.
+    assert tour["destinationCity"] == "武隆"
+    assert tour["departureCity"] == "重庆"
 
 
 def test_title_place_miner_keeps_destination_after_departure_phrase():
