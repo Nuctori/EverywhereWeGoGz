@@ -18,107 +18,119 @@
  *
  * Usage: node scripts/crawl_kanghui_cct.mjs [maxProducts=50]
  */
-import { chromium } from 'playwright';
-import { writeFile, mkdir } from 'node:fs/promises';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { chromium } from "playwright";
+import { writeFile, mkdir } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
-const MAX = Number(process.argv[2] || '50') || 50;
+const ROOT = path.resolve(__dirname, "..");
+const MAX = Number(process.argv[2] || "50") || 50;
 // cct.cn WAF throttles burst requests — serial + 3s delay + one retry.
 const DELAY_MS = 3000;
 
 const LIST_URLS = [
-  'https://m.cct.cn/bourne/guoneilvyou/all-a1-e1-o12007/',
-  'https://m.cct.cn/',
+"https://m.cct.cn/bourne/guoneilvyou/all-a1-e1-o12007/",
+"https://m.cct.cn/",
 ];
 
 async function collectProductIds(page, url) {
-  try {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(4000);
-    return await page.evaluate(() =>
-      Array.from(document.querySelectorAll('a[href*="dujia/"]'))
-        .map((a) => a.getAttribute('href').match(/dujia\/(\d+)\.html/)?.[1])
-        .filter(Boolean),
-    );
-  } catch (error) {
-    console.log(`[cct] list ${url} ERR: ${error.message.slice(0, 80)}`);
-    return [];
-  }
+try {
+await page.goto(url, { waitUntil: "domcontentloaded", timeout: 30000 });
+await page.waitForTimeout(4000);
+return await page.evaluate(() =>
+Array.from(document.querySelectorAll('a[href*="dujia/"]'))
+.map((a) => a.getAttribute("href").match(/dujia\/(\d+)\.html/)?.[1])
+.filter(Boolean),
+);
+} catch (error) {
+console.log(`[cct] list ${url} ERR: ${error.message.slice(0, 80)}`);
+return [];
+}
 }
 
 async function scrapeDetail(page, id) {
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
-    try {
-      await page.goto(`https://m.cct.cn/dujia/${id}.html`, {
-        waitUntil: 'domcontentloaded',
-        timeout: 30000,
-      });
-      await page.waitForTimeout(2500);
-      const data = await page.evaluate(() => {
-        const text = document.body.innerText;
-        const grab = (pattern) => {
-          const m = text.match(pattern);
-          return m ? m[1].trim() : '';
-        };
-        // 出发地/目的地 are label lines: "出发地 | 昆明 北京 广州 ..."
-        const labelLine = (label) => {
-          const m = text.match(new RegExp(`${label}\\s*[|｜：:\\s]+([^\\n]{2,80})`));
-          return m ? m[1].trim() : '';
-        };
-        return {
-          title: (document.title || '').replace(/^【|】?-康辉旅游网$/g, '').replace('-康辉旅游网', '').trim(),
-          price: grab(/¥\s*(\d+)\s*起/),
-          duration: grab(/(\d+\s*[天日])/),
-          departure: labelLine('出发地'),
-          destination: labelLine('目的地'),
-        };
-      });
-      if (data.title && data.title !== '404 您访问的页面不存在') {
-        return { sourceId: `cct:${id}`, source: '康辉', bookingUrl: `https://m.cct.cn/dujia/${id}.html`, ...data };
-      }
-      // 404 title — product gone; not worth retrying
-      return null;
-    } catch (error) {
-      if (attempt === 2) {
-        console.log(`[cct] detail ${id} ERR: ${error.message.slice(0, 80)}`);
-      } else {
-        await new Promise((r) => setTimeout(r, DELAY_MS));
-      }
-    }
-  }
-  return null;
+for (let attempt = 1; attempt <= 2; attempt += 1) {
+try {
+await page.goto(`https://m.cct.cn/dujia/${id}.html`, {
+waitUntil: "domcontentloaded",
+timeout: 30000,
+});
+await page.waitForTimeout(2500);
+const data = await page.evaluate(() => {
+const text = document.body.innerText;
+const grab = (pattern) => {
+const m = text.match(pattern);
+return m ? m[1].trim() : "";
+};
+// 出发地/目的地 are label lines: "出发地 | 昆明 北京 广州 ..."
+const labelLine = (label) => {
+const m = text.match(
+new RegExp(`${label}\\s*[|｜：:\\s]+([^\\n]{2,80})`),
+);
+return m ? m[1].trim() : "";
+};
+return {
+title: (document.title || "")
+.replace(/^【|】?-康辉旅游网$/g, "")
+.replace("-康辉旅游网", "")
+.trim(),
+price: grab(/¥\s*(\d+)\s*起/),
+duration: grab(/(\d+\s*[天日])/),
+departure: labelLine("出发地"),
+destination: labelLine("目的地"),
+};
+});
+if (data.title && data.title !== "404 您访问的页面不存在") {
+return {
+sourceId: `cct:${id}`,
+source: "康辉",
+bookingUrl: `https://m.cct.cn/dujia/${id}.html`,
+...data,
+};
+}
+// 404 title — product gone; not worth retrying
+return null;
+} catch (error) {
+if (attempt === 2) {
+console.log(`[cct] detail ${id} ERR: ${error.message.slice(0, 80)}`);
+} else {
+await new Promise((r) => setTimeout(r, DELAY_MS));
+}
+}
+}
+return null;
 }
 
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({
-  viewport: { width: 390, height: 844 },
-  userAgent:
-    'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+viewport: { width: 390, height: 844 },
+userAgent:
+"Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
 });
 
 const seen = new Set();
 for (const url of LIST_URLS) {
-  for (const id of await collectProductIds(page, url)) seen.add(id);
-  await new Promise((r) => setTimeout(r, DELAY_MS));
+for (const id of await collectProductIds(page, url)) seen.add(id);
+await new Promise((r) => setTimeout(r, DELAY_MS));
 }
 console.log(`[cct] unique products: ${seen.size}`);
 
 const products = [];
 for (const id of [...seen].slice(0, MAX)) {
-  const item = await scrapeDetail(page, id);
-  if (item && item.title && item.title !== '404 您访问的页面不存在') {
-    products.push(item);
-    console.log(`[cct] ${id}: ${item.title.slice(0, 40)} ¥${item.price || '?'} ${item.departure.slice(0, 20)}`);
-  }
-  await new Promise((r) => setTimeout(r, DELAY_MS));
+const item = await scrapeDetail(page, id);
+if (item && item.title && item.title !== "404 您访问的页面不存在") {
+products.push(item);
+console.log(
+`[cct] ${id}: ${item.title.slice(0, 40)} ¥${item.price || "?"} ${item.departure.slice(0, 20)}`,
+);
+}
+await new Promise((r) => setTimeout(r, DELAY_MS));
 }
 await browser.close();
 
-const outDir = path.join(ROOT, 'src', 'data');
+const outDir = path.join(ROOT, "src", "data");
 await mkdir(outDir, { recursive: true });
-const outPath = path.join(outDir, 'raw_kanghui_cct.json');
-await writeFile(outPath, JSON.stringify(products, null, 2), 'utf-8');
+const outPath = path.join(outDir, "raw_kanghui_cct.json");
+await writeFile(outPath, JSON.stringify(products, null, 2), "utf-8");
 console.log(`[cct] saved ${products.length} products -> ${outPath}`);

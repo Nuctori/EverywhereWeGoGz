@@ -368,3 +368,13 @@
 - Alternatives: ①kanghui 数据接入 merge 管线（否：cct: sourceId 映射+字段适配是功能工程，WIP 标记先止血）；②cron 断言回退单引号（否：文件已是双引号，改断言对齐现状）
 - Confidence: high（audit:update-data-workflow/deploy-workflow 修复后通过；YAML 结构校验脚本实测两 workflow OK；pytest 113 passed）
 - Date: 2026-08-14
+
+
+## D-043: URL 门禁双实现一致性纪律 + 无效 URL 防御性空串 [Accepted]
+
+- Context: reviewer 第二轮独立审查发现 check_booking_urls.py（每周健康门禁）的 resolve_source_detail_url 镜像仍按 560dfc5fb 的 bookingUrl-first 顺序解析——TS 前端已在 65c60ceb7 改为 printUrl/tournameno → bookingUrl → keyword（D-039），Python 门禁未同步：门禁探测的是旋转/过期的 groupno URL 而非用户实际打开的稳定 printUrl（printUrl 宿主死亡门禁检测不到，groupno 旋转导致每周误报）。另：TS/Python 对非假日通且 bookingUrl 无效（javascript: 等非 http）的情况原样返回给 window.open。修复（176532005）：Python 镜像同步 D-039 顺序（补 JRT365_PRINT 常量 + sourceAttributes 分支）；TS/Python 对非 http bookingUrl 防御性返回空串（调用方 openExternalLink 已空检查，4034 卡片实测全 http 无实害）；test_geo_schema_guard.py MINING_ARRAY_KEYS 补 candidateSources。
+- Decision: 前端 URL 解析与健康门禁探测必须共享同一顺序语义（双实现镜像纪律，改动一侧必须同步另一侧并实测对比）；不可解析的 URL 一律返回空串而非原样放行；schema guard 覆盖 zod 全部数组字段。
+- Rationale: 门禁的价值 = 探测用户实际落地的 URL；双实现漂移会让门禁度量「错误的东西」（旋转 groupno）而漏掉「真实的东西」（printUrl 宿主死亡）——reviewer 实测两解析器同一输入不同结果证实。防御性空串消除 javascript: 注入面（数据受控但防御不留口）。
+- Alternatives: ①Python 门禁直接调用 TS 解析器（否：门禁用 python/urllib 正是为绕过 cct.cn 对 node fetch 的 WAF 封锁，反着来会复现封锁）；②门禁只测 bookingUrl 不镜像（否：与用户实际打开不一致，本轮已实证漂移）；③无效 URL 保留原样返回（否：javascript: 进 window.open 是注入面）
+- Confidence: high（6 场景镜像对比实测一致：printUrl 优先/tournameno 派生/无 attrs bookingUrl/bookingUrl 无效 keyword/非假日通有效/非假日通无效→空串；test:source-detail-url + schema guard 通过）
+- Date: 2026-08-14
