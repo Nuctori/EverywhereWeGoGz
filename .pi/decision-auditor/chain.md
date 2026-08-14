@@ -378,3 +378,12 @@
 - Alternatives: ①Python 门禁直接调用 TS 解析器（否：门禁用 python/urllib 正是为绕过 cct.cn 对 node fetch 的 WAF 封锁，反着来会复现封锁）；②门禁只测 bookingUrl 不镜像（否：与用户实际打开不一致，本轮已实证漂移）；③无效 URL 保留原样返回（否：javascript: 进 window.open 是注入面）
 - Confidence: high（6 场景镜像对比实测一致：printUrl 优先/tournameno 派生/无 attrs bookingUrl/bookingUrl 无效 keyword/非假日通有效/非假日通无效→空串；test:source-detail-url + schema guard 通过）
 - Date: 2026-08-14
+
+## D-044: formatter 缩进规范显式化——.prettierrc 声明 space/2（防 tab 四犯） [Accepted]
+
+- Context: pi-lens formatter 的 tab 缩进违规三犯（61237a117 引入 → 176532005 fix_tabs 转换修复 → 017bbe1c1 前又复发于 crawl_kanghui_cct.mjs/test_update_data_workflow.mjs，分别 77/164 行）；项目 .editorconfig 声明 indent_style=space 但无 formatter 级配置，formatter 无配置时输出 tab。修复（017bbe1c1）：新增 .prettierrc（{"useTabs": false, "tabWidth": 2}）给 formatter 显式缩进声明。执行缺陷（审计独立实测）：fix_tabs 用 lstrip 删除全部 tab 而非逐层转 2-space → 两文件缩进塌陷（续行/块体顶格），且 formatter 的双引号输出全文件保留（父版本为单引号）。
+- Decision: formatter 缩进规范显式化为 .prettierrc（useTabs:false + tabWidth:2，与 .editorconfig 一致）；缩进转换必须逐层展开（tab→2-space×层级）而非 lstrip 删除。
+- Rationale: 三犯证明既有规范（.editorconfig/口头纪律）不足以约束无配置 formatter；显式配置文件是唯一可被工具读取的约束面。lstrip 删除缩进在「formatter 输出 tab 嵌套」场景下会毁坏层级结构——转换必须 preserve 层级。
+- Alternatives: ①接受 tab 输出（否：违反 .editorconfig、跨编辑器显示错乱）；②禁用 pi-lens formatter（否：环境级行为，配置化更可控）；③tab 逐层转 2-space 脚本（对：正确执行方式，auditor blocker 已按此开出）
+- Confidence: medium（.prettierrc 是否被 pi-lens formatter 实际读取未实测——防四犯验证留待下轮观察 formatter 行为）
+- Date: 2026-08-14
