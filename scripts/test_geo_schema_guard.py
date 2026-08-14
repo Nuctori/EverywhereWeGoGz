@@ -4,6 +4,7 @@ Frontend zod schema requires candidateLabels/rejectedLabels/reasons/
 sourceCandidates to be arrays — a null (from a return path that skipped
 re-filling mining after the D-031 reset) broke detail loading for 4536 tours.
 """
+
 import json
 from pathlib import Path
 
@@ -20,7 +21,9 @@ def test_rebuild_leaves_mining_fields_as_arrays():
         "id": "tour_schema",
         "title": "江门御泉湖居温泉3天",
         "destination": "广东",
-        "geoResolution": {"mining": {"candidateLabels": ["旧残留"], "rejectedLabels": None}},
+        "geoResolution": {
+            "mining": {"candidateLabels": ["旧残留"], "rejectedLabels": None}
+        },
     }
 
     from rebuild_geo_data import rebuild
@@ -57,7 +60,9 @@ def test_all_tour_details_mining_fields_are_arrays():
             val = mining.get(key)
             if not isinstance(val, list):
                 bad.append(f"{path.name}: mining.{key}={val!r}")
-    assert not bad, f"{len(bad)} tour-details with invalid mining fields:\n" + "\n".join(bad[:10])
+    assert not bad, (
+        f"{len(bad)} tour-details with invalid mining fields:\n" + "\n".join(bad[:10])
+    )
 
 
 def test_unmapped_path_leaves_mining_fields_as_arrays():
@@ -81,6 +86,7 @@ def test_unmapped_path_leaves_mining_fields_as_arrays():
         assert isinstance(mining.get(key), list), (
             f"unmapped path: mining.{key} must be a list after rebuild, got {mining.get(key)!r}"
         )
+
 
 if __name__ == "__main__":
     test_rebuild_leaves_mining_fields_as_arrays()

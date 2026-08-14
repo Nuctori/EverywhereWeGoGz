@@ -332,3 +332,30 @@
 - Alternatives: ①整条规则移除（否：会漏真实出发列表「广州、深圳出发」）；②X、Y 全保留（否：双目的地第一城被跳）
 - Confidence: high（tour_3637→江门、tour_3674→珠海 独立实测）
 - Date: 2026-08-12
+
+## D-039: 转跳 URL 解析顺序定案——稳定链接 > bookingUrl > keyword（supersede 560dfc5fb 的 bookingUrl-first） [Accepted]
+
+- Context: 560dfc5fb 修「转跳都是错的」把 bookingUrl 提到 printUrl 前（地图卡片 summary 无 meta.sourceAttributes → 旧序全降级 keyword 搜索页），但副作用是详情弹窗的稳定 tourname 链接被废（groupno bookingUrl 是旋转链接，0c771a658 已实测）；test_source_detail_url.mjs 仍断言旧行为（printUrl 优先）→ npm run test:source-detail-url 失败且 deploy.yml 不跑该测试（静默漂移，本轮实测抓出）。TourDetailModal 源码 `const tour = resolvedTour ?? summaryTour`（详情加载成功传完整 tour 含 sourceAttributes，卡片 summary 无）→ printUrl 分支非死代码。修复（65c60ceb7）：printUrl/tournameno → bookingUrl → keyword；测试断言对齐（测试 3/5 从 keyword 期望改为 staleGroupUrl，新增 keyword 兜底用例：bookingUrl 无效时）。
+- Decision: 假日通稳定链接（printUrl/tournameno）最优先（详情弹窗场景，groupno 旋转），有效 http bookingUrl 次之（地图卡片场景，绝不静默降级 keyword 搜索页），keyword 搜索仅当两者都不可用时兜底；测试断言与此顺序对齐。
+- Rationale: 两个历史提交的意图可合并：0c771a658「稳定链接优先」（详情页有 sourceAttributes 时）与 560dfc5fb「bookingUrl 优先于 keyword」（地图卡片无 sourceAttributes 时）并不冲突——按 sourceAttributes 可用性自然分层，唯一正确顺序即 稳定链接 → bookingUrl → keyword。
+- Alternatives: ①保持 560dfc5fb 的 bookingUrl-first（否：详情弹窗退化到旋转/过期 groupno 链接）；②保持 0c771a658 的 printUrl-first（否：地图卡片全降级 keyword 搜索页——用户报障根因）；③按调用点分别处理（否：同一函数分层即可，无需两套逻辑）
+- Confidence: high（test:source-detail-url 修复后通过；deploy guards 步骤实跑；线上部署验证）
+- Date: 2026-08-14
+
+## D-040: geo 挖掘回归修复——重复 alias 拼接、序列首城出发语义、英伦四国识别、武隆/仙女山拆行 [Accepted]
+
+- Context: 全量 pytest 独立实测 5 failed（7 月初写入，f1bb159f7/35a156d9a 演进致断言过期，CI preflight 只跑 5 个脚本不覆盖）；真实数据影响量化：66 个 tour 重复 alias（巴厘岛巴厘/禾木村禾木，_place_label canonical+alias 拼接未处理 alias⊂canonical）、41 个英爱 tour 国际识别缺口（title 无「英国」字样 → title_international_flag=False → 出发省 region 兜底 pin 广东，tour_850/856 曾广东/空）、tour_1815（<必发><遇见巴渝>广州武隆仙女山、816核工厂、武陵山大裂谷双动/双飞5天 → 广州被当目的地——「双动」不在出发 token 表且 walk 断在顿号实体）、tour_1313 武隆 pin 重庆市中心（武隆/仙女山是重庆行 alias，place.name=重庆 → 出发集合按 name 匹配误伤 + 无独立坐标）。修复（65c60ceb7）：①_place_label alias⊂canonical → 直接用 canonical；②线路前缀出发判定（start==0 + 紧跟线路 + country==中国，防「欧洲线路」误判）+ is_run_leader（序列首城才是出发）+ run-tail walk 到序列末端 + 40 字符 re.search 出发 token（双动/双卧入表）+ round_trip_target 豁免（D-035 直飞X往返的 X 是往返目的地）；③INTERNATIONAL_COUNTRIES 补英格兰/苏格兰/威尔士/爱尔兰；④武隆(29.3254/107.7601)/仙女山(29.468/107.737) 从重庆行拆独立 PLACE_ROWS；⑤title_departure_names 收集 alias+name、拒绝判断改用 alias（重庆下属目的地不被出发误伤）。重建后独立实测：重复 alias 66→0、英爱 0 pin 广东、tour_1313→武隆/重庆出发、tour_1815→非广州。
+- Decision: 出发判定语义定案：连续城市序列的**首城**才是出发（is_run_leader + 序列末端出发 token 证实）；「X线路」前缀仅国内城市是出发；alias⊂canonical 禁止拼接；英伦四国入国际白名单；重庆下属县/景区拆独立 catalog 行（D-037 alias 布局的修正）。
+- Rationale: 每项修复都有确定性数据证据（66/41 tour 计数、tour_1815/1313 实测）；D-037 全国城市补全使重庆可被提及后，出发判定必须能区分「重庆线路」的重庆（出发）与武隆/仙女山（目的地）——按 name 匹配必然误伤 alias 下属目的地；run-tail walk 解决 token 在序列末端（武隆仙女山双动5天）而非第二城后的形态。
+- Alternatives: ①测试断言回退到旧值（否：产品 bug 真实存在且用户可见）；②宽 departure 判定（序列所有城都判出发——实测武隆/仙女山全拒 no-candidate）；③武隆/仙女山留在重庆行仅改 label（否：无独立坐标，pin 仍落重庆市中心）
+- Confidence: high（全量 pytest 113 passed；重建后 66→0/0 pin 广东/tour_1313→武隆/tour_1815 修复均独立实测；线上 tour_1313/tour_308 验证）
+- Date: 2026-08-14
+
+## D-041: CI 测试门禁扩展——schema/转跳/运行时测试入部署 preflight（防静默漂移） [Accepted]
+
+- Context: 本轮两处静默漂移根因：①test:source-detail-url 失败但 deploy.yml 原只有 audit:deploy-workflow 不跑测试（560dfc5fb 声称「57 tests pass」未覆盖）；②update-data.yml preflight 只跑 5 个 python 脚本，test_geo_schema_guard.py（BLOCKER-4 新建）未挂 CI；test_geo_schema_guard.py 原只有 rebuild 直接路径 + 全量扫描两用例，缺 unmapped 路径（D-031 的第三返回路径）。修复（65c60ceb7）：package.json 加 test:geo-schema-guard script；update-data.yml preflight 加 python scripts/test_geo_schema_guard.py；deploy.yml 新增「Data & deeplink guards」步骤（test:source-detail-url + test:runtime-tour-schemas + python scripts/test_geo_schema_guard.py，位于 npm ci 后、Build 前）；test_geo_schema_guard.py 补 test_unmapped_path_leaves_mining_fields_as_arrays（无 catalog 匹配 tour 重建后 mining 四数组仍为 list）。部署验证：deploy run 31806247786 success（3m9s，含 guards 步骤实跑）。
+- Decision: 数据/转跳相关测试纳入部署门禁（deploy.yml guards 步骤）与数据管道 preflight（update-data.yml）；schema 守卫测试显式覆盖 unmapped 路径；CI 结构上消除「测试失败但 CI 不跑」的静默漂移通道。
+- Rationale: 静默漂移机制 = 测试失败 × CI 盲区；本轮 5 个历史失败测试与转跳测试漂移都是该机制的产物；部署门禁使任何数据/转跳回归在发布前拦截（数据是部署产物，schema 守卫必须在 Build 前）；unmapped 是 mine_destination_place 的三种返回路径之一（direct/region/unmapped），前两者已有覆盖，审计 BLOCKER-4 明确要求补全。
+- Alternatives: ①只修代码不挂 CI（否：本轮失败测试即 CI 盲区产物，不挂则复发）；②测试只挂 update-data preflight（否：deploy 是发布闸门，schema 破坏必须阻断发布而非只阻断数据管道）；③guards 步骤并入 Build（否：Build 失败晚于测试失败，定位成本高）
+- Confidence: high（deploy run 31806247786 success 实跑 guards；pytest 113 passed 独立复跑；三个 workflow/package.json 挂载点独立 grep 核实）
+- Date: 2026-08-14

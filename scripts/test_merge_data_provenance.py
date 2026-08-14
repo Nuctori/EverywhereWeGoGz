@@ -249,14 +249,16 @@ def test_detail_fields_are_structured_without_invention():
     }
     detail = {
         **empty_detail(),
-        "itinerary": [{
-            "day": 1,
-            "title": "出发",
-            "description": "",
-            "meals": ["早餐", "午餐"],
-            "accommodation": "当地四星酒店",
-            "activities": [],
-        }],
+        "itinerary": [
+            {
+                "day": 1,
+                "title": "出发",
+                "description": "",
+                "meals": ["早餐", "午餐"],
+                "accommodation": "当地四星酒店",
+                "activities": [],
+            }
+        ],
         "inclusions": ["含旅行保险", "含中文导游"],
         "exclusions": ["个人消费"],
     }

@@ -57,7 +57,9 @@ def test_resolver_requires_specific_name_and_uses_city_context():
     assert resolve_poi("当地酒店", expected_city="新丰", pois=[poi]) is None
     city_prefixed_only = dict(poi, name="新丰温德姆花园酒店", aliases=[])
     assert resolve_poi("温德姆花园酒店", pois=[city_prefixed_only]) is None
-    assert resolve_poi("新丰温德姆花园酒店", expected_city="新丰", pois=[poi]) is not None
+    assert (
+        resolve_poi("新丰温德姆花园酒店", expected_city="新丰", pois=[poi]) is not None
+    )
 
 
 def test_resolver_matches_a_named_poi_with_a_hotel_suffix():
@@ -122,7 +124,9 @@ def test_extractor_reads_real_osm_elements_when_osmium_is_available():
 
 def test_resolver_does_not_pick_an_ambiguous_suffix_match():
     first = hotel_poi()
-    second = dict(first, osmId="node/43", name="温德姆花园酒店", aliases=["新丰温德姆花园酒店"])
+    second = dict(
+        first, osmId="node/43", name="温德姆花园酒店", aliases=["新丰温德姆花园酒店"]
+    )
 
     assert resolve_poi("新丰温德姆花园酒店", pois=[first, second]) is None
 
@@ -141,8 +145,24 @@ def test_resolver_rejects_same_name_poi_when_known_region_conflicts():
         address={"country": "中国", "province": "湖南省"},
     )
 
-    assert resolve_poi("英德岭南东方酒店", expected_city="英德", expected_province="广东", pois=[wrong_city]) is None
-    assert resolve_poi("新丰雅致酒店", expected_city="新丰", expected_province="广东", pois=[wrong_province]) is None
+    assert (
+        resolve_poi(
+            "英德岭南东方酒店",
+            expected_city="英德",
+            expected_province="广东",
+            pois=[wrong_city],
+        )
+        is None
+    )
+    assert (
+        resolve_poi(
+            "新丰雅致酒店",
+            expected_city="新丰",
+            expected_province="广东",
+            pois=[wrong_province],
+        )
+        is None
+    )
 
 
 def test_resolver_uses_existing_city_fallback_when_osm_address_omits_city():
@@ -163,23 +183,29 @@ def test_resolver_uses_existing_city_fallback_when_osm_address_omits_city():
         pois=[nearby],
     )
     assert result is not None
-    assert resolve_poi(
-        "肇庆星湖大酒店",
-        expected_city="肇庆",
-        expected_province="广东",
-        expected_latitude=30.0,
-        expected_longitude=120.0,
-        pois=[nearby],
-    ) is None
+    assert (
+        resolve_poi(
+            "肇庆星湖大酒店",
+            expected_city="肇庆",
+            expected_province="广东",
+            expected_latitude=30.0,
+            expected_longitude=120.0,
+            pois=[nearby],
+        )
+        is None
+    )
     unverified_region = dict(nearby, address={"country": "中国"})
-    assert resolve_poi(
-        "肇庆星湖大酒店",
-        expected_city="肇庆",
-        expected_province="广东",
-        expected_latitude=23.0472,
-        expected_longitude=112.4651,
-        pois=[unverified_region],
-    ) is None
+    assert (
+        resolve_poi(
+            "肇庆星湖大酒店",
+            expected_city="肇庆",
+            expected_province="广东",
+            expected_latitude=23.0472,
+            expected_longitude=112.4651,
+            pois=[unverified_region],
+        )
+        is None
+    )
 
 
 def test_region_context_rejects_short_foreign_city_token_but_keeps_exact_named_poi():
@@ -189,12 +215,15 @@ def test_region_context_rejects_short_foreign_city_token_but_keeps_exact_named_p
         aliases=[],
         address={"country": "\u4e2d\u56fd", "province": "\u5e7f\u4e1c\u7701"},
     )
-    assert resolve_poi(
-        "\u7ef4\u4e5f\u7eb3",
-        expected_city="\u5e7f\u4e1c",
-        expected_province="\u5e7f\u4e1c",
-        pois=[same_name_hotel],
-    ) is None
+    assert (
+        resolve_poi(
+            "\u7ef4\u4e5f\u7eb3",
+            expected_city="\u5e7f\u4e1c",
+            expected_province="\u5e7f\u4e1c",
+            pois=[same_name_hotel],
+        )
+        is None
+    )
 
     exact_named_poi = dict(
         hotel_poi(),
@@ -220,15 +249,17 @@ def test_enrichment_skips_international_itinerary_pois_in_region_context():
         address={"country": "\u4e2d\u56fd", "province": "\u5e7f\u4e1c\u7701"},
     )
     index = build_index([poi], ["guangdong"])
-    tours = [{
-        "id": "international-itinerary-tour",
-        "title": "\u6469\u6d1b\u54e59\u5929\u56db\u5b63\u9152\u5e97\u4e0e\u8679\u6865",
-        "destinationPlaceName": "\u5e7f\u4e1c",
-        "destinationCity": "\u5e7f\u4e1c",
-        "destinationProvince": "\u5e7f\u4e1c",
-        "destinationCoordinateSource": "fallback",
-        "geoResolution": {"mining": {"candidateLabels": ["\u8679\u6865"]}},
-    }]
+    tours = [
+        {
+            "id": "international-itinerary-tour",
+            "title": "\u6469\u6d1b\u54e59\u5929\u56db\u5b63\u9152\u5e97\u4e0e\u8679\u6865",
+            "destinationPlaceName": "\u5e7f\u4e1c",
+            "destinationCity": "\u5e7f\u4e1c",
+            "destinationProvince": "\u5e7f\u4e1c",
+            "destinationCoordinateSource": "fallback",
+            "geoResolution": {"mining": {"candidateLabels": ["\u8679\u6865"]}},
+        }
+    ]
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "osm-poi-index.json"
         path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
@@ -253,11 +284,13 @@ def test_enrichment_replaces_catalog_centroid_but_preserves_verified_geocoder():
             "destinationLongitude": 114.207,
             "geoResolution": {
                 "mining": {
-                    "sourceCandidates": [{
-                        "label": "新丰温德姆花园酒店",
-                        "source": "activity",
-                        "priority": 120,
-                    }]
+                    "sourceCandidates": [
+                        {
+                            "label": "新丰温德姆花园酒店",
+                            "source": "activity",
+                            "priority": 120,
+                        }
+                    ]
                 }
             },
         },
@@ -291,16 +324,18 @@ def test_enrichment_uses_catalog_candidate_labels_for_poi_upgrade():
         address={"country": "中国", "province": "广东省"},
     )
     index = build_index([poi], ["guangdong"])
-    tours = [{
-        "id": "candidate-label-tour",
-        "destinationPlaceName": "肇庆",
-        "destinationCity": "肇庆",
-        "destinationProvince": "广东",
-        "destinationCoordinateSource": "catalog",
-        "destinationLatitude": 23.0472,
-        "destinationLongitude": 112.4651,
-        "geoResolution": {"mining": {"candidateLabels": ["肇庆星湖大酒店"]}},
-    }]
+    tours = [
+        {
+            "id": "candidate-label-tour",
+            "destinationPlaceName": "肇庆",
+            "destinationCity": "肇庆",
+            "destinationProvince": "广东",
+            "destinationCoordinateSource": "catalog",
+            "destinationLatitude": 23.0472,
+            "destinationLongitude": 112.4651,
+            "geoResolution": {"mining": {"candidateLabels": ["肇庆星湖大酒店"]}},
+        }
+    ]
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "osm-poi-index.json"
         path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
@@ -331,21 +366,23 @@ def test_enrichment_prefers_specific_source_candidate_over_broad_current_label()
         address={"country": "中国", "province": "广东省"},
     )
     index = build_index([broad, specific], ["guangdong"])
-    tours = [{
-        "id": "specific-candidate-tour",
-        "destinationPlaceName": "新兴龙山温泉",
-        "destinationCity": "新兴",
-        "destinationProvince": "广东",
-        "destinationCoordinateSource": "fallback",
-        "destinationLatitude": 22.695,
-        "destinationLongitude": 112.225,
-        "geoResolution": {
-            "mining": {
-                "candidateLabels": ["新兴翔顺龙山温泉", "新兴龙山温泉"],
-                "sourceCandidates": [{"label": "新兴翔顺龙山温泉", "priority": 80}],
-            }
-        },
-    }]
+    tours = [
+        {
+            "id": "specific-candidate-tour",
+            "destinationPlaceName": "新兴龙山温泉",
+            "destinationCity": "新兴",
+            "destinationProvince": "广东",
+            "destinationCoordinateSource": "fallback",
+            "destinationLatitude": 22.695,
+            "destinationLongitude": 112.225,
+            "geoResolution": {
+                "mining": {
+                    "candidateLabels": ["新兴翔顺龙山温泉", "新兴龙山温泉"],
+                    "sourceCandidates": [{"label": "新兴翔顺龙山温泉", "priority": 80}],
+                }
+            },
+        }
+    ]
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "osm-poi-index.json"
         path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
@@ -362,20 +399,29 @@ def test_enrichment_does_not_reuse_unsupported_current_poi_label():
         aliases=[],
         latitude=22.5917178,
         longitude=112.2234103,
-        address={"country": "中国", "province": "广东省", "city": "云浮市", "district": "新兴县"},
+        address={
+            "country": "中国",
+            "province": "广东省",
+            "city": "云浮市",
+            "district": "新兴县",
+        },
         kind="attraction",
     )
     index = build_index([poi], ["guangdong"])
-    tours = [{
-        "id": "unsupported-current-label-tour",
-        "destinationPlaceName": "国恩寺",
-        "destinationCity": "新兴",
-        "destinationProvince": "广东",
-        "destinationCoordinateSource": "fallback",
-        "destinationLatitude": 22.695,
-        "destinationLongitude": 112.225,
-        "geoResolution": {"mining": {"candidateLabels": ["新兴象窝", "肇庆七星岩"]}},
-    }]
+    tours = [
+        {
+            "id": "unsupported-current-label-tour",
+            "destinationPlaceName": "国恩寺",
+            "destinationCity": "新兴",
+            "destinationProvince": "广东",
+            "destinationCoordinateSource": "fallback",
+            "destinationLatitude": 22.695,
+            "destinationLongitude": 112.225,
+            "geoResolution": {
+                "mining": {"candidateLabels": ["新兴象窝", "肇庆七星岩"]}
+            },
+        }
+    ]
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "osm-poi-index.json"
         path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
@@ -408,16 +454,20 @@ def test_enrichment_ignores_unrelated_itinerary_pois_after_primary_destination_i
         address={"country": "中国", "province": "广东省"},
     )
     index = build_index([primary, incidental], ["guangdong"])
-    tours = [{
-        "id": "primary-destination-tour",
-        "destinationPlaceName": "新兴象窝",
-        "destinationCity": "新兴",
-        "destinationProvince": "广东",
-        "destinationCoordinateSource": "fallback",
-        "destinationLatitude": 22.695,
-        "destinationLongitude": 112.225,
-        "geoResolution": {"mining": {"candidateLabels": ["新兴象窝", "新兴龙山温泉"]}},
-    }]
+    tours = [
+        {
+            "id": "primary-destination-tour",
+            "destinationPlaceName": "新兴象窝",
+            "destinationCity": "新兴",
+            "destinationProvince": "广东",
+            "destinationCoordinateSource": "fallback",
+            "destinationLatitude": 22.695,
+            "destinationLongitude": 112.225,
+            "geoResolution": {
+                "mining": {"candidateLabels": ["新兴象窝", "新兴龙山温泉"]}
+            },
+        }
+    ]
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "osm-poi-index.json"
         path.write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")

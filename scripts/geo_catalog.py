@@ -1696,10 +1696,9 @@ def _iter_place_mentions(
             flight_endpoint_rejection = not negative_before and any(
                 token in rhetoric_before for token in ("经停", "转机", "直飞")
             )
-            round_trip_target = (
-                "直飞" in rhetoric_before
-                and value[end : end + 2].startswith("往返")
-            )
+            round_trip_target = "直飞" in rhetoric_before and value[
+                end : end + 2
+            ].startswith("往返")
             if flight_endpoint_rejection and not round_trip_target:
                 start = index + 1
                 continue
