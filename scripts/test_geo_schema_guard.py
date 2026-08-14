@@ -10,6 +10,7 @@ from pathlib import Path
 
 MINING_ARRAY_KEYS = (
     "candidateLabels",
+    "candidateSources",
     "rejectedLabels",
     "reasons",
     "sourceCandidates",

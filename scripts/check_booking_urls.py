@@ -30,6 +30,7 @@ FAIL_BELOW_PCT = 90.0
 TIMEOUT = 12
 CONCURRENCY = 8
 JRT365_KEYWORD = "http://www.jrt365.com/tourgroup/tourgroup_list.aspx?keyword="
+JRT365_PRINT = "http://www.jrt365.com/tourname/tourname_ziliao_print.aspx?tournameno="
 # 康辉 migrated to cct.cn (cctpage.com dead 2026-08); cct.cn indexes only a
 # subset of the old catalogue, so search hits are 200 and misses are 404 —
 # plus its WAF throttles concurrent probes. Reported but excluded from the
@@ -38,7 +39,16 @@ KNOWN_BROKEN = {"康辉"}
 
 
 def resolve_source_detail_url(card):
-    """Mirror src/lib/source-detail-url.ts resolveSourceDetailUrl."""
+    """Mirror src/lib/source-detail-url.ts resolveSourceDetailUrl.
+
+    Order matters (D-039): 假日通 stable tourname links (printUrl/tournameno)
+    FIRST — the detail modal passes sourceAttributes once detail loading
+    succeeds and users land on the stable print host; the groupno bookingUrl
+    rotates/expires (0c771a658). The bookingUrl follows (map-card summaries
+    carry no sourceAttributes — never degrade to a keyword search while a
+    valid detail URL exists), keyword search last. Mirrors the TS resolver so
+    the weekly gate probes the URL a user actually opens.
+    """
     fallback = str(card.get("bookingUrl") or "").strip()
     title = str(card.get("title") or "").strip()
     source = str(card.get("source") or "").strip()
@@ -48,13 +58,21 @@ def resolve_source_detail_url(card):
         and title
     ):
         return f"https://www.cct.cn/search?keyword={urllib.parse.quote(title[:20])}"
+    if source == "假日通":
+        attrs = (card.get("meta") or {}).get("sourceAttributes") or {}
+        print_url = str(attrs.get("printUrl") or "").strip()
+        if re.match(r"^https?:", print_url):
+            return print_url
+        tournameno = str(attrs.get("tournameno") or "").strip()
+        if tournameno:
+            return f"{JRT365_PRINT}{urllib.parse.quote(tournameno)}"
     if re.match(r"^https?:", fallback):
         return fallback
     if source != "假日通":
-        return fallback
+        return ""
     if title:
         return f"{JRT365_KEYWORD}{urllib.parse.quote(title[:20])}"
-    return fallback
+    return ""
 
 
 def probe(url):
