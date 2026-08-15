@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-15T10:47:15.571Z",
+  "generatedAt": "2026-08-15T11:04:15.244Z",
   "latestUpdatedAt": "2026-08-01T06:19:05.902940",
   "totalRecords": 4034,
   "listRecords": 4034,
@@ -41,7 +41,7 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 57854245
+      "size": 49497026
     },
     "list": {
       "path": "data/tours-list.json",
