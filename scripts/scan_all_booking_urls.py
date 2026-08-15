@@ -21,16 +21,16 @@ DOMAIN_CONCURRENCY = 8
 
 def probe(url):
     """Same semantics as check_booking_urls.py probe (D-046): HEAD first with
-    gzip/accept headers; ANY non-200 HEAD falls back to GET WITHOUT gzip
-    (nn.gzl.cn rejects HEAD 403 but GET 200; jrt365 GET+gzip connection-resets;
-    gdcts needs gzip on HEAD or the uncompressed body times out)."""
-    head_headers = {
+    gzip/accept headers; ANY non-200 HEAD falls back to GET WITH gzip
+    (nn.gzl.cn rejects HEAD 403 but GET 200; gdcts/nn.gzl.cn need gzip on GET
+    or the uncompressed body times out; jrt365's HEAD is 200 so its GET+gzip
+    reset is never reached)."""
+    headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         "Accept-Encoding": "gzip, deflate",
         "Accept": "text/html,application/xhtml+xml",
     }
-    get_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    req = urllib.request.Request(url, method="HEAD", headers=head_headers)
+    req = urllib.request.Request(url, method="HEAD", headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=8) as resp:
             return resp.status
@@ -38,7 +38,7 @@ def probe(url):
         pass  # non-200 HEAD — confirm via GET below
     except (OSError, urllib.error.URLError):
         pass
-    req = urllib.request.Request(url, headers=get_headers)
+    req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             return resp.status

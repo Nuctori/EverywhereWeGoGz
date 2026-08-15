@@ -79,19 +79,18 @@ def resolve_source_detail_url(card):
 
 
 def probe(url):
-    """HEAD first with gzip/accept headers (gdcts needs them, else huge body
-    times out). HEAD has no body — status 200 alone means reachable. ANY
-    non-200 HEAD falls back to GET without gzip for confirmation: nn.gzl.cn
-    rejects HEAD (403) but serves GET 200; jrt365 GET+gzip connection-resets
-    (verified 2026-08); cct.cn WAF throttles are handled by serial probing
-    (KANGHUI_CONCURRENCY) — a confirmed non-200 is a real failure."""
-    head_headers = {
+    """HEAD first with gzip/accept headers (gdcts/nn.gzl.cn need them, else
+    huge uncompressed bodies time out). HEAD has no body — status 200 alone
+    means reachable. ANY non-200 HEAD falls back to GET WITH gzip: every
+    source whose HEAD is non-200 (nn.gzl.cn 403) needs gzip on GET; jrt365's
+    HEAD is 200 so its GET+gzip connection-reset is never reached. A confirmed
+    non-200 is a real failure."""
+    headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         "Accept-Encoding": "gzip, deflate",
         "Accept": "text/html,application/xhtml+xml",
     }
-    get_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    req = urllib.request.Request(url, method="HEAD", headers=head_headers)
+    req = urllib.request.Request(url, method="HEAD", headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             return resp.status
@@ -99,7 +98,7 @@ def probe(url):
         pass  # non-200 HEAD — confirm via GET below
     except (OSError, urllib.error.URLError):
         pass
-    req = urllib.request.Request(url, headers=get_headers)
+    req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             body = resp.read(300)

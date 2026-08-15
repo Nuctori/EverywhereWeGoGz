@@ -59,9 +59,10 @@ class ProbeTests(unittest.TestCase):
         status, m = self.probe_with([http_error(403), FakeResp(200)])
         self.assertEqual(status, 200)
         self.assertEqual(m.call_count, 2)
-        # GET fallback must NOT carry gzip (jrt365 connection-resets)
+        # GET fallback keeps gzip (gdcts/nn.gzl.cn need it; jrt365's HEAD is
+        # 200 so its GET+gzip reset is never reached)
         headers = {k.lower(): v for k, v in m.call_args.args[0].headers.items()}
-        self.assertNotIn("accept-encoding", headers)
+        self.assertIn("accept-encoding", headers)
 
     def test_head_404_confirmed_by_get_404(self):
         status, m = self.probe_with([http_error(404), http_error(404)])
