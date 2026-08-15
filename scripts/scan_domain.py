@@ -18,38 +18,32 @@ TARGET_DOMAIN = sys.argv[1] if len(sys.argv) > 1 else "m.gdcts.com"
 
 
 def probe(url):
-    req = urllib.request.Request(
-        url,
-        method="HEAD",
-        headers={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept": "text/html,application/xhtml+xml",
-        },
-    )
+    """Same semantics as check_booking_urls.py probe (D-046): HEAD first with
+    gzip/accept headers; ANY non-200 HEAD falls back to GET WITHOUT gzip
+    (nn.gzl.cn rejects HEAD 403 but GET 200; jrt365 GET+gzip connection-resets;
+    gdcts needs gzip on HEAD or the uncompressed body times out)."""
+    head_headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "text/html,application/xhtml+xml",
+    }
+    get_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
+    req = urllib.request.Request(url, method="HEAD", headers=head_headers)
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
             return resp.status
+    except urllib.error.HTTPError:
+        pass  # non-200 HEAD — confirm via GET below
+    except (OSError, urllib.error.URLError):
+        pass
+    req = urllib.request.Request(url, headers=get_headers)
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return resp.status
     except urllib.error.HTTPError as error:
         return error.code
-    except (ssl.SSLCertVerificationError, ssl.SSLError):
-        return 0
     except (OSError, urllib.error.URLError):
-        try:
-            get_req = urllib.request.Request(
-                url,
-                headers={
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                    "Accept-Encoding": "gzip, deflate",
-                    "Accept": "text/html,application/xhtml+xml",
-                },
-            )
-            with urllib.request.urlopen(get_req, timeout=15) as resp:
-                return resp.status
-        except urllib.error.HTTPError as get_err:
-            return get_err.code
-        except (OSError, urllib.error.URLError):
-            return 0
+        return 0
 
 
 def main():

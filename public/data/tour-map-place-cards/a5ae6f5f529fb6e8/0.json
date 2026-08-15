@@ -1,14 +1,1 @@
-[
- {
-  "id": "tour_2075",
-  "sourceId": "SP0213738435",
-  "title": "<特惠>特惠德天仙境，广西德天跨国瀑布+峒那屿湾+靖西鹅泉+青秀山，纯玩动车3天",
-  "source": "康辉",
-  "destination": "广西",
-  "duration": 3,
-  "price": 999,
-  "departureDate": "",
-  "bookingUrl": "https://www.cct.cn/search?keyword=%3C%E7%89%B9%E6%83%A0%3E%E7%89%B9%E6%83%A0%E5%BE%B7%E5%A4%A9%E4%BB%99%E5%A2%83%EF%BC%8C%E5%B9%BF%E8%A5%BF%E5%BE%B7%E5%A4%A9%E8%B7%A8%E5%9B%BD%E7%80%91%E5%B8%83%2B",
-  "transportType": "大巴往返"
- }
-]
+[{"id":"tour_2075","sourceId":"SP0213738435","title":"<特惠>特惠德天仙境，广西德天跨国瀑布+峒那屿湾+靖西鹅泉+青秀山，纯玩动车3天","source":"康辉","destination":"广西","duration":3,"price":999,"departureDate":"","bookingUrl":"https://www.cct.cn/search?keyword=%3C%E7%89%B9%E6%83%A0%3E%E7%89%B9%E6%83%A0%E5%BE%B7%E5%A4%A9%E4%BB%99%E5%A2%83%EF%BC%8C%E5%B9%BF%E8%A5%BF%E5%BE%B7%E5%A4%A9%E8%B7%A8%E5%9B%BD%E7%80%91%E5%B8%83%2B","transportType":"大巴往返"}]

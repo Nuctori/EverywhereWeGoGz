@@ -45,6 +45,10 @@ geo-cache.json
 .review_tmp/
 .pi-tmp-*
 
+# URL scan artifacts (scripts/scan_*.py outputs)
+scripts/_url_*.json
+scripts/_url_*.log
+
 # pi-pair / subagent infra
 .pi/
 .pi-subagents/

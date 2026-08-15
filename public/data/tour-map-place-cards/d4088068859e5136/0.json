@@ -1,14 +1,1 @@
-[
- {
-  "id": "tour_2455",
-  "sourceId": "SP0213750915",
-  "title": "<皇牌玩家>澳大利亚大洋路大堡礁10天文化生态之旅CZ广州往返5-6",
-  "source": "康辉",
-  "destination": "广东",
-  "duration": 10,
-  "price": 20999,
-  "departureDate": "2026-05-06",
-  "bookingUrl": "https://www.cct.cn/search?keyword=%3C%E7%9A%87%E7%89%8C%E7%8E%A9%E5%AE%B6%3E%E6%BE%B3%E5%A4%A7%E5%88%A9%E4%BA%9A%E5%A4%A7%E6%B4%8B%E8%B7%AF%E5%A4%A7%E5%A0%A1%E7%A4%8110%E5%A4%A9%E6%96%87",
-  "transportType": "飞机往返"
- }
-]
+[{"id":"tour_2455","sourceId":"SP0213750915","title":"<皇牌玩家>澳大利亚大洋路大堡礁10天文化生态之旅CZ广州往返5-6","source":"康辉","destination":"广东","duration":10,"price":20999,"departureDate":"2026-05-06","bookingUrl":"https://www.cct.cn/search?keyword=%3C%E7%9A%87%E7%89%8C%E7%8E%A9%E5%AE%B6%3E%E6%BE%B3%E5%A4%A7%E5%88%A9%E4%BA%9A%E5%A4%A7%E6%B4%8B%E8%B7%AF%E5%A4%A7%E5%A0%A1%E7%A4%8110%E5%A4%A9%E6%96%87","transportType":"飞机往返"}]

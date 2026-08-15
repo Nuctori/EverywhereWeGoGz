@@ -387,3 +387,21 @@
 - Alternatives: ①接受 tab 输出（否：违反 .editorconfig、跨编辑器显示错乱）；②禁用 pi-lens formatter（否：环境级行为，配置化更可控）；③tab 逐层转 2-space 脚本（对：正确执行方式，auditor blocker 已按此开出）
 - Confidence: medium（.prettierrc 是否被 pi-lens formatter 实际读取未实测——防四犯验证留待下轮观察 formatter 行为）
 - Date: 2026-08-14
+
+## D-045: 康辉 bookingUrl 数据层修复——cctpage 死域 → cct.cn keyword 搜索（数据层优先于前端 fallback） [Accepted]
+
+- Context: gz.cctpage.com 死站（证书失效 + 404，2026-08 确认）——康辉 819 个 tour 的 bookingUrl 全部指向死域（「大量 URL 无法访问」主源）；cct.cn 是迁移目标活域，但 prodcode 无法映射新站产品 ID（深度验证）；修复（341472ce2）后独立核实：public/data 全文件 cctpage 残留 0、tour-map-cards.json 含 819 个 www.cct.cn、线上部署后 tour_1459/1465/1468 等卡片 bookingUrl 已是 cct.cn 搜索页。
+- Decision: 康辉 bookingUrl 在**数据层**统一改为 `https://www.cct.cn/search?keyword=<title前20字>`（fix_kanghui_urls.py 重写 tour-map-cards/place-cards/tours/tours-index/tours-list/tours-page-* 全数据文件）——与前端 fallback 同目标，但任何消费方（地图卡片/详情弹窗/列表页）看到的 URL 均可达；门禁同步：KNOWN_BROKEN(康辉) 白名单移除 → 改为 404（产品下架/未迁移 cct.cn）豁免。
+- Rationale: 数据层修复优先于前端 fallback——前端 fallback 依赖调用点有 sourceAttributes（地图卡片 summary 无——560dfc5fb 教训），数据层修复让任何层面看到的 URL 都可达；404 是源站事实（产品下架/未迁移）不是链接坏，豁免后门禁继续测「可修的坏链接」。
+- Alternatives: ①保留 KNOWN_BROKEN 豁免（否：康辉已修——继续豁免会使门禁对康辉新故障失明）；②cct.cn 产品 ID 精确映射（否：prodcode 无法映射——已深度验证）；③仅前端 fallback 兜底（否：地图卡片场景无 sourceAttributes 会静默降级 keyword——历史根因）。
+- Confidence: high（残留 0 / 计数 819 / 线上部署验证 / 门禁 gated 92.5% 实测 PASS）
+- Date: 2026-08-15
+
+## D-046: URL 门禁探测方法修复——gzip 头 + HEAD 无 body 判定 + GET 无 gzip fallback + 404/503 豁免（测链接坏非源站状态） [Accepted]
+
+- Context: 探测误报三源（2026-08 实测）：①urllib 无 Accept-Encoding 时 gdcts 返回未压缩大响应 → 超时误报 NET-ERR（curl+gzip 单发 8/8 全 200，对比证实）；②HEAD 响应无 body → 旧 `len(body)>50` 判定把全 OK 判成 bad（门禁全 0 实测）；③jrt365 对 GET+gzip 连接重置（curl 000）而 GET 无 gzip 200。另：cct.cn WAF 对并发探测限流（503）；gdcts 重扫（修后 probe）940/980 ok，40 bad 全 404（产品下架）。
+- Decision: probe 改为 HEAD+gzip/accept 头优先（status 200 即可达——HEAD 无 body 不查 body）→ HEAD 失败走 GET 无 gzip fallback（15s）→ 1 次重试；门禁 gated 排除 404（下架/未迁移）+ 503（WAF 限流）——测「链接坏」（0/ssl/其他 5xx）而非源站状态；scan_all/scan_domain 同步同探测。
+- Rationale: 探测必须逼近浏览器真实行为（gzip 压缩请求是浏览器默认）；HEAD 无 body 是 HTTP 语义，判定不得依赖 body；jrt365 的 GET+gzip 连接重置是源站实现差异（实测）；404/503 均为源站事实（产品生命周期/WAF）——门禁度量「可修、须修的坏链接」，源站状态只报告。
+- Alternatives: ①全部 GET 探测（否：慢且重）；②503 计入失败（否：cct.cn WAF 并发限流常态化 → 门禁误报）；③KNOWN_BROKEN 名单（否：名单不完备已被 D-043 否决）。遗留风险：503 全豁免使 cct.cn 全面宕机（全 503）时 gated 不含康辉 → 门禁对该场景失明（审计者发现，blocker 挂出）。
+- Confidence: high（gzip 验证 8/8、门禁实测 gated 100% PASS、gdcts 重扫 40 bad 全 404 无 net 误报；遗留风险见上）
+- Date: 2026-08-15

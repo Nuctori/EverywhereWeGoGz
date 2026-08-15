@@ -1,14 +1,1 @@
-[
- {
-  "id": "tour_2553",
-  "sourceId": "SP021376609",
-  "title": "【增城白水寨】广州往返增城白水寨风景区+从化南平静修小镇休闲纯玩1天",
-  "source": "康辉",
-  "destination": "广东",
-  "duration": 1,
-  "price": 99,
-  "departureDate": "",
-  "bookingUrl": "https://www.cct.cn/search?keyword=%E3%80%90%E5%A2%9E%E5%9F%8E%E7%99%BD%E6%B0%B4%E5%AF%A8%E3%80%91%E5%B9%BF%E5%B7%9E%E5%BE%80%E8%BF%94%E5%A2%9E%E5%9F%8E%E7%99%BD%E6%B0%B4%E5%AF%A8%E9%A3%8E%E6%99%AF%E5%8C%BA%2B",
-  "transportType": "大巴往返"
- }
-]
+[{"id":"tour_2553","sourceId":"SP021376609","title":"【增城白水寨】广州往返增城白水寨风景区+从化南平静修小镇休闲纯玩1天","source":"康辉","destination":"广东","duration":1,"price":99,"departureDate":"","bookingUrl":"https://www.cct.cn/search?keyword=%E3%80%90%E5%A2%9E%E5%9F%8E%E7%99%BD%E6%B0%B4%E5%AF%A8%E3%80%91%E5%B9%BF%E5%B7%9E%E5%BE%80%E8%BF%94%E5%A2%9E%E5%9F%8E%E7%99%BD%E6%B0%B4%E5%AF%A8%E9%A3%8E%E6%99%AF%E5%8C%BA%2B","transportType":"大巴往返"}]

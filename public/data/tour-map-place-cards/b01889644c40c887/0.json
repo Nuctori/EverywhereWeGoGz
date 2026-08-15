@@ -1,14 +1,1 @@
-[
- {
-  "id": "tour_1765",
-  "sourceId": "SP0213742286",
-  "title": "【全新开业】韶关翁源龙泰翁山源温泉城·海战主题温泉旅游度假区纯玩3天",
-  "source": "康辉",
-  "destination": "广东",
-  "duration": 3,
-  "price": 479,
-  "departureDate": "",
-  "bookingUrl": "https://www.cct.cn/search?keyword=%E3%80%90%E5%85%A8%E6%96%B0%E5%BC%80%E4%B8%9A%E3%80%91%E9%9F%B6%E5%85%B3%E7%BF%81%E6%BA%90%E9%BE%99%E6%B3%B0%E7%BF%81%E5%B1%B1%E6%BA%90%E6%B8%A9%E6%B3%89%E5%9F%8E%C2%B7%E6%B5%B7",
-  "transportType": "大巴往返"
- }
-]
+[{"id":"tour_1765","sourceId":"SP0213742286","title":"【全新开业】韶关翁源龙泰翁山源温泉城·海战主题温泉旅游度假区纯玩3天","source":"康辉","destination":"广东","duration":3,"price":479,"departureDate":"","bookingUrl":"https://www.cct.cn/search?keyword=%E3%80%90%E5%85%A8%E6%96%B0%E5%BC%80%E4%B8%9A%E3%80%91%E9%9F%B6%E5%85%B3%E7%BF%81%E6%BA%90%E9%BE%99%E6%B3%B0%E7%BF%81%E5%B1%B1%E6%BA%90%E6%B8%A9%E6%B3%89%E5%9F%8E%C2%B7%E6%B5%B7","transportType":"大巴往返"}]

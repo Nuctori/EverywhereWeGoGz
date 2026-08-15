@@ -1,14 +1,1 @@
-[
- {
-  "id": "tour_2244",
-  "sourceId": "SP0213733005",
-  "title": "<潇洒行>广州往返--肇庆怀集蓝钟森林温泉酒店 纯玩3天",
-  "source": "康辉",
-  "destination": "广东",
-  "duration": 3,
-  "price": 599,
-  "departureDate": "",
-  "bookingUrl": "https://www.cct.cn/search?keyword=%3C%E6%BD%87%E6%B4%92%E8%A1%8C%3E%E5%B9%BF%E5%B7%9E%E5%BE%80%E8%BF%94--%E8%82%87%E5%BA%86%E6%80%80%E9%9B%86%E8%93%9D%E9%92%9F%E6%A3%AE%E6%9E%97%E6%B8%A9",
-  "transportType": "大巴往返"
- }
-]
+[{"id":"tour_2244","sourceId":"SP0213733005","title":"<潇洒行>广州往返--肇庆怀集蓝钟森林温泉酒店 纯玩3天","source":"康辉","destination":"广东","duration":3,"price":599,"departureDate":"","bookingUrl":"https://www.cct.cn/search?keyword=%3C%E6%BD%87%E6%B4%92%E8%A1%8C%3E%E5%B9%BF%E5%B7%9E%E5%BE%80%E8%BF%94--%E8%82%87%E5%BA%86%E6%80%80%E9%9B%86%E8%93%9D%E9%92%9F%E6%A3%AE%E6%9E%97%E6%B8%A9","transportType":"大巴往返"}]
