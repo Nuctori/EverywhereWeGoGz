@@ -20,7 +20,11 @@ def probe(url):
     req = urllib.request.Request(
         url,
         method="HEAD",
-        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
+        headers={
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "Accept-Encoding": "gzip, deflate",
+            "Accept": "text/html,application/xhtml+xml",
+        },
     )
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
@@ -33,9 +37,13 @@ def probe(url):
         try:
             get_req = urllib.request.Request(
                 url,
-                headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                    "Accept-Encoding": "gzip, deflate",
+                    "Accept": "text/html,application/xhtml+xml",
+                },
             )
-            with urllib.request.urlopen(get_req, timeout=TIMEOUT) as resp:
+            with urllib.request.urlopen(get_req, timeout=15) as resp:
                 return resp.status
         except urllib.error.HTTPError as get_err:
             return get_err.code
