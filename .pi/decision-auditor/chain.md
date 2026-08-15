@@ -452,3 +452,12 @@
 - Alternatives: ①kind 恢复 probe 返回二元组（否：probe 统一 int 语义（D-047）——status 推导零额外请求）；②单测只本地跑（否：CI 是唯一强制点——D-017 先例）；③2 个 cruises URL 移除/替换（否：产品存在（其他 cruises 200），源站页面问题不是数据错误）
 - Confidence: high（kind 代码 + CI 步骤独立核实；6 单测独立重跑 PASS；nn.gzl.cn 全量落盘 + 3 bad 逐一 curl 验证）
 - Date: 2026-08-15
+
+## D-051: 探测语义统一收尾——body-guard + 超时 10s + IncompleteRead 捕获（reviewer 低发现批量执行） [Accepted]
+
+- Context: 26a57c776（上轮审计低风险发现）：scan_all/scan_domain 的 GET fallback 缺 len(body)>50 判定（三脚本语义微差——门禁有、scan 无）；3a31b2490（reviewer 5 条发现）：①test_booking_url_gate.py docstring 仍是 D-046「GET fallback 无 gzip」旧措辞（与 D-048 终态矛盾）；②CI 步骤顺序——单测在 probe 后（gate FAIL 时单测被跳过、诊断不可用）；③probe HEAD 超时三脚本常量不一致（门禁 12/scan_all 6/scan_domain 6）；④http.client.IncompleteRead（HTTPException 子类非 OSError）在 GET read(300) 时未捕获——源站中断响应会中止整个扫描。执行缺陷（审计独立核实）：3a31b2490 只改 TIMEOUT 常量未改调用点——scan_all_booking_urls.py:36 HEAD urlopen 仍硬编码 timeout=8（commit 声称统一 10 未生效）；check_booking_urls.py:96 硬编码 timeout=10 且 TIMEOUT 常量未被引用（死常量）；scan_domain.py:34 正确引用 timeout=TIMEOUT。
+- Decision: ①GET fallback 三脚本统一 len(body)>50 → -1 哨兵（26a57c776）；②docstring 对齐 D-048（GET fallback 带 gzip）；③CI 单测步骤移到 probe 前（诊断永远可用）；④HEAD 超时统一 10s、GET fallback 15s；⑤三脚本捕获 http.client.IncompleteRead → 0；⑥（审计发现）HEAD 调用点硬编码须改 timeout=TIMEOUT 引用常量——消除死常量、使超时统一真正生效。
+- Rationale: 三脚本（门禁/scan_all/scan_domain）是同一探测语义的执行面——各自漂移即各自主观误报（body 判定缺失 → 空 body 200 误判；超时差异 → 同 URL 不同结论）；IncompleteRead 是 read 截断的真实异常路径（源站中断）——不捕获 = 整个全量扫描中止；CI 步骤顺序保证 gate FAIL 时单测仍产出（故障诊断不受门禁失败遮蔽）；「常量只改不引用」= 声称的统一未生效（本次实证——TIMEOUT=10 但 HEAD 调用点仍 8/10 硬编码）。
+- Alternatives: ①三脚本各自维护（否：D-046/D-047/D-048 三连修都是漂移代价的实证）；②IncompleteRead 并入 OSError 捕获（否：它是 HTTPException 子类——必须显式列出，否则仍中止扫描）；③HEAD 超时维持现状 8/10/6（否：同 URL 不同源结论不一致）
+- Confidence: medium（6 单测重跑 PASS、三脚本 py_compile、门禁 gated 100% PASS 独立核实；⑥超时调用点统一本身未修复——blocker 挂出待下轮）
+- Date: 2026-08-15
