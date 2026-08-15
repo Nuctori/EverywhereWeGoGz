@@ -76,24 +76,37 @@ def resolve_source_detail_url(card):
 
 
 def probe(url):
-    """Probe with one retry — cct.cn throttles concurrent probes (WAF)."""
+    """HEAD first with gzip/accept headers (gdcts needs them, else huge body
+    times out). HEAD has no body — status 200 alone means reachable. GET
+    fallback WITHOUT gzip (jrt365 GET+gzip connection-resets, verified 2026-08).
+    One retry for WAF throttles (cct.cn)."""
+    head_headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept-Encoding": "gzip, deflate",
+        "Accept": "text/html,application/xhtml+xml",
+    }
+    get_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
     for attempt in (1, 2):
-        ctx = ssl.create_default_context()
-        req = urllib.request.Request(
-            url,
-            headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"},
-        )
+        req = urllib.request.Request(url, method="HEAD", headers=head_headers)
         try:
-            with urllib.request.urlopen(req, timeout=TIMEOUT, context=ctx) as resp:
-                body = resp.read(300)
-                status = resp.status if len(body) > 50 else -1
-                if status == 200:
-                    return status
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                return resp.status
         except urllib.error.HTTPError as error:
             if error.code == 200:
                 return 200
         except (OSError, urllib.error.URLError):
             pass
+        if attempt == 1:
+            # HEAD refused/errored — GET fallback without gzip
+            req = urllib.request.Request(url, headers=get_headers)
+            try:
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    body = resp.read(300)
+                    return resp.status if len(body) > 50 else -1
+            except urllib.error.HTTPError as error:
+                return error.code
+            except (OSError, urllib.error.URLError):
+                pass
     return 0
 
 
@@ -126,10 +139,11 @@ def main():
 
     ok = [r for r in results if r["status"] == 200]
     # 404 = product delisted / not migrated to the new site (康辉 cct.cn only
-    # indexes part of the old catalogue) — a source-site fact, not a broken
-    # link. Report it but exclude from the gate; network/ssl/5xx = broken
-    # link (fixable) and fails the gate.
-    gated = [r for r in results if r["status"] != 404]
+    # indexes part of the old catalogue); 503 = source-site throttle/WAF
+    # (cct.cn rate-limits concurrent probes) — both source-site facts, not
+    # broken links. Report but exclude from the gate; network(0)/ssl/other 5xx
+    # = broken link (fixable) and fails the gate.
+    gated = [r for r in results if r["status"] not in (404, 503)]
     gated_ok = [r for r in gated if r["status"] == 200]
     pct = (len(ok) / len(results) * 100) if results else 100.0
     gated_pct = (len(gated_ok) / len(gated) * 100) if gated else 100.0
