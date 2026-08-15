@@ -29,6 +29,9 @@ SAMPLE_PER_SOURCE = (
 FAIL_BELOW_PCT = 90.0
 TIMEOUT = 12
 CONCURRENCY = 8
+# 康辉 cct.cn WAF 限流并发探测 -> 串行 (D-046 follow-up, 发现-1): 串行下
+# 503 = 真宕机, 恢复报警 — 全 503 时门禁必须 FAIL (原 503 豁免 = 宕机盲区).
+KANGHUI_CONCURRENCY = 1
 JRT365_KEYWORD = "http://www.jrt365.com/tourgroup/tourgroup_list.aspx?keyword="
 JRT365_PRINT = "http://www.jrt365.com/tourname/tourname_ziliao_print.aspx?tournameno="
 # 康辉 bookingUrls migrated from dead gz.cctpage.com to cct.cn keyword search
@@ -77,37 +80,34 @@ def resolve_source_detail_url(card):
 
 def probe(url):
     """HEAD first with gzip/accept headers (gdcts needs them, else huge body
-    times out). HEAD has no body — status 200 alone means reachable. GET
-    fallback WITHOUT gzip (jrt365 GET+gzip connection-resets, verified 2026-08).
-    One retry for WAF throttles (cct.cn)."""
+    times out). HEAD has no body — status 200 alone means reachable. ANY
+    non-200 HEAD falls back to GET without gzip for confirmation: nn.gzl.cn
+    rejects HEAD (403) but serves GET 200; jrt365 GET+gzip connection-resets
+    (verified 2026-08); cct.cn WAF throttles are handled by serial probing
+    (KANGHUI_CONCURRENCY) — a confirmed non-200 is a real failure."""
     head_headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         "Accept-Encoding": "gzip, deflate",
         "Accept": "text/html,application/xhtml+xml",
     }
     get_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
-    for attempt in (1, 2):
-        req = urllib.request.Request(url, method="HEAD", headers=head_headers)
-        try:
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                return resp.status
-        except urllib.error.HTTPError as error:
-            if error.code == 200:
-                return 200
-        except (OSError, urllib.error.URLError):
-            pass
-        if attempt == 1:
-            # HEAD refused/errored — GET fallback without gzip
-            req = urllib.request.Request(url, headers=get_headers)
-            try:
-                with urllib.request.urlopen(req, timeout=15) as resp:
-                    body = resp.read(300)
-                    return resp.status if len(body) > 50 else -1
-            except urllib.error.HTTPError as error:
-                return error.code
-            except (OSError, urllib.error.URLError):
-                pass
-    return 0
+    req = urllib.request.Request(url, method="HEAD", headers=head_headers)
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return resp.status
+    except urllib.error.HTTPError:
+        pass  # non-200 HEAD — confirm via GET below
+    except (OSError, urllib.error.URLError):
+        pass
+    req = urllib.request.Request(url, headers=get_headers)
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            body = resp.read(300)
+            return resp.status if len(body) > 50 else -1
+    except urllib.error.HTTPError as error:
+        return error.code
+    except (OSError, urllib.error.URLError):
+        return 0
 
 
 def main():
@@ -131,19 +131,26 @@ def main():
                 sample.append({"source": source, "id": card.get("id"), "url": url})
 
     results = []
-    with ThreadPoolExecutor(max_workers=CONCURRENCY) as pool:
-        futures = {pool.submit(probe, item["url"]): item for item in sample}
-        for fut in as_completed(futures):
-            item = futures[fut]
-            results.append({**item, "status": fut.result()})
+
+    def run_batch(batch, workers):
+        out = []
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(probe, item["url"]): item for item in batch}
+            for fut in as_completed(futures):
+                item = futures[fut]
+                out.append({**item, "status": fut.result()})
+        return out
+
+    results = run_batch(
+        [i for i in sample if i["source"] != "康辉"], CONCURRENCY
+    ) + run_batch([i for i in sample if i["source"] == "康辉"], KANGHUI_CONCURRENCY)
 
     ok = [r for r in results if r["status"] == 200]
     # 404 = product delisted / not migrated to the new site (康辉 cct.cn only
-    # indexes part of the old catalogue); 503 = source-site throttle/WAF
-    # (cct.cn rate-limits concurrent probes) — both source-site facts, not
-    # broken links. Report but exclude from the gate; network(0)/ssl/other 5xx
-    # = broken link (fixable) and fails the gate.
-    gated = [r for r in results if r["status"] not in (404, 503)]
+    # indexes part of the old catalogue) — deterministic source-site fact,
+    # excluded from the gate. 503/network/ssl/5xx = source down or broken
+    # link — fail the gate (serial 康辉 probing removes WAF false-503s).
+    gated = [r for r in results if r["status"] != 404]
     gated_ok = [r for r in gated if r["status"] == 200]
     pct = (len(ok) / len(results) * 100) if results else 100.0
     gated_pct = (len(gated_ok) / len(gated) * 100) if gated else 100.0
