@@ -405,3 +405,50 @@
 - Alternatives: ①全部 GET 探测（否：慢且重）；②503 计入失败（否：cct.cn WAF 并发限流常态化 → 门禁误报）；③KNOWN_BROKEN 名单（否：名单不完备已被 D-043 否决）。遗留风险：503 全豁免使 cct.cn 全面宕机（全 503）时 gated 不含康辉 → 门禁对该场景失明（审计者发现，blocker 挂出）。
 - Confidence: high（gzip 验证 8/8、门禁实测 gated 100% PASS、gdcts 重扫 40 bad 全 404 无 net 误报；遗留风险见上）
 - Date: 2026-08-15
+
+## D-047: 门禁 503 豁免撤销 + 康辉串行探测 + probe 语义最终定案（HEAD→GET+gzip fallback） [Accepted]
+
+- Context: 审计发现-1（D-046 遗留风险实证）：503 全豁免使 cct.cn 全面宕机（探测全 503）时康辉全排除 gated → 门禁 PASS——宕机盲区。实测（8c060493c）：康辉 10 样本在并发探测下 8 个 404/503（WAF 限流混杂）；串行探测（KANGHUI_CONCURRENCY=1）后 10 样本 = 6×200 + 4×404（无 503——WAF 限流只吃并发）。另：nn.gzl.cn 拒 HEAD（403）但 GET 200（30 个误报 GET 验证）；jrt365 HEAD 恒 200（curl 验证）→ GET+gzip 连接重置永不触发；gdcts/nn.gzl.cn 的 GET 无 gzip 会大响应 15s 超时。scan_all_booking_urls.py:96 在 ed0797774 引入解包 int 崩溃（probe 返回 int，`status, kind = fut.result()`）——全量扫描从未能运行（reviewer 发现）。
+- Decision: ①门禁 gated 只排除 404（下架/未迁移），503/0/ssl/5xx 全部计入并 FAIL——503 豁免撤销（supersede D-046 的 503 豁免）；②康辉源串行探测（KANGHUI_CONCURRENCY=1）消除 WAF 并发限流假 503——串行下 503 = 真宕机；③probe 最终语义：HEAD+gzip 优先（status 200 即可达，无 body 判定）→ 任意非 200 HEAD 走 GET+gzip fallback 确认（supersede D-046 的 GET 无 gzip——jrt365 HEAD 恒 200 使 GET+gzip 永不触发其连接重置，而 gdcts/nn.gzl.cn 需要 gzip）——三脚本（check_booking_urls/scan_all/scan_domain）统一；④scan_all 崩溃修复（status = fut.result()）+ probe/gated 语义单测锁定（test_booking_url_gate.py 6 tests mock urllib：HEAD 200 gzip 头/403→GET 带 gzip/404 确认/net→0/404 豁免 503 FAIL/全 404 空 gate）。
+- Rationale: 503 豁免的初衷（WAF 限流误报）用串行探测解决更正确——并发限流是探测方法引入的伪故障，串行后 503 即真实宕机信号，无需牺牲门禁检测力；nn.gzl.cn 403→GET 是「任何非 200 HEAD 都 GET 确认」的自然推广；GET+gzip 恢复依赖「jrt365 HEAD 恒 200」的源站事实（curl 已验证）——GET fallback 永远到不了 jrt365，连接重置风险归零；崩溃修复使全量扫描恢复可用（此前 47% 最大 source 无全量证据的根因之一）。
+- Alternatives: ①保留 503 豁免 + 503 占比阈值 FAIL（否：串行探测更直接消除伪 503，无需阈值魔法数字）；②GET fallback 分 source 头（gzip 给 gdcts/nn.gzl.cn、无 gzip 给 jrt365）（否：分派表复杂化——jrt365 HEAD 恒 200 使分派冗余）；③单测只测 probe 不测 gated（否：503 报警语义是发现-1 的回归面，必须锁定）。
+- Confidence: high（门禁实测 gated 100% PASS 含康辉串行 6/10；nn.gzl.cn 30 个误报 GET 验证 200；6 单测通过；scan_all 修复后全量扫描可运行——nn.gzl.cn 1000 全量 0 bad + 886 尾部抽样 80/80 主 agent 实测）
+- Date: 2026-08-15
+
+## D-047: 康辉串行探测 + 503 恢复报警——关闭 D-046 遗留的宕机盲区 [Accepted]
+
+- Context: D-046 明确记录遗留风险「503 全豁免使 cct.cn 全面宕机（全 503）时 gated 不含康辉 → 门禁对该场景失明」；审计者 blocker 实证：cct.cn 是 WAF 限流站，urllib 并发探测常态性出现高比例 503（门禁 10 样本康辉 8 个 404/503），503 全豁免使门禁对康辉源站宕机零检测。修复（8c060493c）独立核实：KANGHUI_CONCURRENCY=1（康辉样本串行探测——WAF 限流只吃并发，单发实测 200）；gated 从 `status not in (404, 503)` 改为 `status != 404`（503 恢复计入失败）。
+- Decision: 康辉样本串行探测（并发 1，run_batch 分离）消除 WAF 并发限流误报后，503 恢复为门禁失败信号——全面宕机（全 503）时门禁 FAIL；404（产品下架/未迁移）仍豁免。Supersede D-046 的「503 豁免」条款。
+- Rationale: 盲区根因 = 503 豁免 × 并发探测误报叠加——串行消除误报后豁免失去必要性，503 即真宕机信号；审计者给出的两个修复选项（503 重试退避 / 503 占比统计）被更简单的「串行+报警」取代（根因消除而非阈值管理）。
+- Alternatives: ①probe 对 503 独立重试 3 次带退避（否：串行已消除误报源，重试延迟不必要）；②503 占比 >40% 时 FAIL（否：阈值需调参，串行后单 503 即真异常，直接报警更简单）；③维持 503 全豁免（否：D-046 记录的盲区实证存在）
+- Confidence: high（KANGHUI_CONCURRENCY/gated 代码独立核实；门禁实测 gated 100% PASS 无 503 误报）
+- Supersedes: D-046（仅 503 豁免条款）
+- Date: 2026-08-15
+
+## D-048: probe 终态——GET fallback 带 gzip（jrt365 HEAD 恒 200 永不触达 GET，修正 D-046 fallback 语义） [Accepted]
+
+- Context: 8c060493c/97153513c 的 probe「GET fallback 无 gzip」使 nn.gzl.cn 全量扫描拖慢（HEAD 403 → GET 无 gzip → 未压缩大响应 15s 超时，实测 5min 仅 250 个）；矛盾点：gdcts/nn.gzl.cn 的 GET 需要 gzip（D-046 已证），jrt365 的 GET+gzip 连接重置（curl 000）。终态修复（b5fc9f66e）关键推理：jrt365 的 HEAD 恒 200（curl HEAD+gzip 实测 200）→ GET fallback 永远不会走到 jrt365 → GET 带 gzip 安全。单测断言同步（GET fallback 带 gzip）。
+- Decision: probe 终态 = HEAD+gzip/accept 头优先（status 200 即可达）→ 非 200 HEAD 统一 GET+gzip fallback（15s）→ 无重试循环（WAF 限流由康辉串行处理，D-047）；GET fallback 带 gzip。
+- Rationale: 所有 HEAD 非 200 的源（nn.gzl.cn 403/gdcts）的 GET 都需要 gzip（否则未压缩大响应超时误报）；「jrt365 GET+gzip 连接重置」只在 jrt365 走到 GET 时相关，而其 HEAD 恒 200 永不触发——两个约束不相交，取交集即「GET 带 gzip」。
+- Alternatives: ①GET fallback 无 gzip 保持（否：nn.gzl.cn 全量扫描拖慢+超时误报实证）；②分 domain 头策略（否：单 probe 交集即可，无需 domain 分支）
+- Confidence: high（nn.gzl.cn 30 个 403 误报 GET 200 验证、单测 6 PASS、门禁 gated 100% PASS）
+- Supersedes: D-046（GET fallback 头语义条款）
+- Date: 2026-08-15
+
+## D-049: 数据文件序列化格式规范化——紧凑 LF 恢复（341472ce2 的 indent=1 CRLF churn 纠正） [Accepted]
+
+- Context: fix_kanghui_urls.py（341472ce2）重写数据文件时用 indent=1 + CRLF → 263 文件 2.68M 行 diff（tours.json 132 万行展开），违反 .editorconfig end_of_line=lf，任何后续 diff 不可审（reviewer High）；原始格式全紧凑单行 LF（tours.json 1 行）。修复（97153513c）：fix_data_format.py 读 JSON → 紧凑 dumps（separators=(',',':')）+ LF 写 + json deep-equal 校验（不一致回滚）——579 文件恢复，独立核实：tours.json 1 行紧凑、cct.cn 819/cctpage 0 计数完好。
+- Decision: 数据文件序列化统一为紧凑单行 LF（separators=(',',':')）；任何数据重写脚本必须保留此格式（改写后 deep-equal 校验）。
+- Rationale: 紧凑单行是仓库数据文件的既有格式（git 历史 341472ce2^ 全 1 行）；CRLF/展开格式使 diff 爆炸不可审且违 .editorconfig；deep-equal 校验保证格式转换零内容损失。
+- Alternatives: ①接受 CRLF 展开格式（否：2.68M 行 diff 不可审）；②仅修 .editorconfig 容忍 CRLF（否：与仓库既有格式/工具链不一致）
+- Confidence: high（579 文件恢复、deep-equal 校验、cct.cn 819/cctpage 0 独立核实）
+- Date: 2026-08-15
+
+## D-050: 全量扫描终态——kind 分类恢复 + 门禁单测接入 CI + nn.gzl.cn 全量终证（2 cruises 页源站挂起接受） [Accepted]
+
+- Context: 05f639e00 修复两处审计残余：①scan_all_booking_urls.py 报告 kind 恒空（D-047 修复后 t["kind"]="" 硬编码——报告按 kind 分类 triage 退化）；②test_booking_url_gate.py（D-047 新建 6 单测）未接 CI——接入 check-booking-urls.yml（weekly + dispatch 步骤）。nn.gzl.cn 全量终证（修复后 probe + scan_domain 落盘 scripts/_url_nn_gzl_cn.json）：1886 个 = 1883 ok + tour_4366 瞬时 502（curl 重试 200 恢复）+ tour_4446/4447 cruises 产品页 curl 000（源站特定页面挂起——同类 cruises URL 抽样 200——非分区问题）。
+- Decision: ①scan_all kind 按 status 推导（200→ok、404→http、0→net、其他→httpN）；②门禁单测接入 weekly workflow（与门禁同生命周期）；③nn.gzl.cn 全量结论 = 1883/1886 可达，2 个 cruises 产品页挂起接受为源站事实残余（0.1%，非链接坏不可修）。
+- Rationale: kind 是报告 triage 的输入——恒空使不可达清单无法按类别分流修复（404 豁免 vs 网络报警）；单测只有接 CI 才构成回归防线（D-017/D-041 纪律——测试失败 × CI 盲区 = 静默漂移通道）；2 个产品页挂起经 curl 双确认（000）且同区抽样 200——个别页面源站问题，数据层/前端均无法修复。
+- Alternatives: ①kind 恢复 probe 返回二元组（否：probe 统一 int 语义（D-047）——status 推导零额外请求）；②单测只本地跑（否：CI 是唯一强制点——D-017 先例）；③2 个 cruises URL 移除/替换（否：产品存在（其他 cruises 200），源站页面问题不是数据错误）
+- Confidence: high（kind 代码 + CI 步骤独立核实；6 单测独立重跑 PASS；nn.gzl.cn 全量落盘 + 3 bad 逐一 curl 验证）
+- Date: 2026-08-15
