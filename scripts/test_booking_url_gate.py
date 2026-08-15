@@ -4,6 +4,7 @@
 404 (delisted) excluded from gate, 503/0/5xx fail the gate.
 Run: python scripts/test_booking_url_gate.py
 """
+
 import email.message
 import sys
 import unittest

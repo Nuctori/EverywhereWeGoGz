@@ -4,15 +4,29 @@ fix_kanghui_urls.py (341472ce2 wrote indent=1 CRLF — 2.68M-line churn,
 violates .editorconfig end_of_line=lf). Content is verified identical
 after rewrite (json.load deep-equal). Use: python scripts/fix_data_format.py
 """
+
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "public" / "data"
-FILES = [DATA / "tour-map-cards.json", DATA / "tours.json", DATA / "tours-index.json", DATA / "tours-list.json"]
+FILES = [
+    DATA / "tour-map-cards.json",
+    DATA / "tours.json",
+    DATA / "tours-index.json",
+    DATA / "tours-list.json",
+]
 FILES += sorted((DATA / "tour-map-place-cards").rglob("*.json"))
-FILES += sorted((DATA / "tours-page-1").glob("*.json")) if (DATA / "tours-page-1").is_dir() else []
-FILES += sorted((DATA / "tours-page-2").glob("*.json")) if (DATA / "tours-page-2").is_dir() else []
+FILES += (
+    sorted((DATA / "tours-page-1").glob("*.json"))
+    if (DATA / "tours-page-1").is_dir()
+    else []
+)
+FILES += (
+    sorted((DATA / "tours-page-2").glob("*.json"))
+    if (DATA / "tours-page-2").is_dir()
+    else []
+)
 
 
 def main() -> None:
