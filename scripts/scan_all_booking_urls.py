@@ -3,6 +3,7 @@
 domain (cct.cn) never blocks fast ones. DNS is resolved once per host first.
 Writes partial results every 250 probes.
 """
+
 import json
 import ssl
 import urllib.error
@@ -77,7 +78,9 @@ def main():
             )
             continue
         host = urlparse(url).netloc
-        by_domain.setdefault(host, []).append({"id": tid, "url": url, "status": 0, "kind": ""})
+        by_domain.setdefault(host, []).append(
+            {"id": tid, "url": url, "status": 0, "kind": ""}
+        )
 
     all_results = []
     for host, targets in sorted(by_domain.items(), key=lambda kv: -len(kv[1])):
@@ -107,7 +110,11 @@ def main():
     print(f"unreachable by kind: {kind_counts}")
     OUT_PATH.write_text(
         json.dumps(
-            {"total": len(all_results), "reachable": len(reachable), "unreachable": unreachable},
+            {
+                "total": len(all_results),
+                "reachable": len(reachable),
+                "unreachable": unreachable,
+            },
             ensure_ascii=False,
             indent=1,
         ),

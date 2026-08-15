@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Scan one domain (default m.gdcts.com) — fast, no cross-domain hangs."""
+
 import json
 import ssl
 import sys
@@ -73,7 +74,7 @@ def main():
             if done % 250 == 0:
                 print(f"  {done}/{len(targets)}", flush=True)
     bad = [r for r in results if r["status"] != 200]
-    print(f"ok={len(results)-len(bad)} bad={len(bad)}")
+    print(f"ok={len(results) - len(bad)} bad={len(bad)}")
     for r in bad[:30]:
         print(f"  [{r['status']}] {r['id']} {r['url'][:90]}")
     Path(f"scripts/_url_{TARGET_DOMAIN.replace('.', '_')}.json").write_text(

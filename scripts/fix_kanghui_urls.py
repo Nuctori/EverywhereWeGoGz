@@ -7,6 +7,7 @@ becomes the new site's keyword search (same target the frontend fallback used).
 
 Rewrites tour-map-cards.json + tour-map-place-cards/*.json (source=康辉).
 """
+
 import json
 import urllib.parse
 from pathlib import Path
