@@ -39,7 +39,8 @@ def probe(url):
     req = urllib.request.Request(url, headers=headers)
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
-            return resp.status
+            body = resp.read(300)
+            return resp.status if len(body) > 50 else -1
     except urllib.error.HTTPError as error:
         return error.code
     except (OSError, urllib.error.URLError):
