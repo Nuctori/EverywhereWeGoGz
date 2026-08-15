@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parent.parent
 CARDS_PATH = ROOT / "public" / "data" / "tour-map-cards.json"
 TIMEOUT = 10
+GET_TIMEOUT = 15
 CONCURRENCY = 12
 TARGET_DOMAIN = sys.argv[1] if len(sys.argv) > 1 else "m.gdcts.com"
 
@@ -39,7 +40,7 @@ def probe(url):
         pass
     req = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
+        with urllib.request.urlopen(req, timeout=GET_TIMEOUT) as resp:
             body = resp.read(300)
             return resp.status if len(body) > 50 else -1
     except urllib.error.HTTPError as error:

@@ -29,6 +29,7 @@ SAMPLE_PER_SOURCE = (
 )
 FAIL_BELOW_PCT = 90.0
 TIMEOUT = 10
+GET_TIMEOUT = 15
 CONCURRENCY = 8
 # 康辉 cct.cn WAF 限流并发探测 -> 串行 (D-046 follow-up, 发现-1): 串行下
 # 503 = 真宕机, 恢复报警 — 全 503 时门禁必须 FAIL (原 503 豁免 = 宕机盲区).
@@ -101,7 +102,7 @@ def probe(url):
         pass
     req = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
+        with urllib.request.urlopen(req, timeout=GET_TIMEOUT) as resp:
             body = resp.read(300)
             return resp.status if len(body) > 50 else -1
     except urllib.error.HTTPError as error:
