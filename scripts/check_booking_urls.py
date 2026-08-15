@@ -93,7 +93,7 @@ def probe(url):
     }
     req = urllib.request.Request(url, method="HEAD", headers=headers)
     try:
-        with urllib.request.urlopen(req, timeout=10) as resp:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
             return resp.status
     except urllib.error.HTTPError:
         pass  # non-200 HEAD — confirm via GET below
