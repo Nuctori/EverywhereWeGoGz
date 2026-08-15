@@ -1,1 +1,38 @@
-[{"id":"tour_1917","sourceId":"SP0213751316","title":"<听海泉州>广州往返洛伽寺·黄金海岸、 惠女风情园、蟳蜅渔村纯玩4天","source":"康辉","destination":"广东","duration":4,"price":1999,"departureDate":"","bookingUrl":"http://gz.cctpage.com/PC/TourLine/Details?prodcode=SP0213751316","transportType":"高铁往返"},{"id":"tour_2116","sourceId":"SP0213752462","title":"<必发古今泉州>广州往返海上佛国洛伽寺、崇武古城、西沙湾、非遗体验纯玩双动5天","source":"康辉","destination":"广东","duration":5,"price":1799,"departureDate":"","bookingUrl":"http://gz.cctpage.com/PC/TourLine/Details?prodcode=SP0213752462","transportType":"高铁往返"},{"id":"tour_3338","sourceId":"4028804e8d464ddb018dc01e400b6c48","title":"【典·深度】福建泉州、动车3天＊古城citywalk＊蟳埔渔村＊洛伽寺＊西街观景天台下午茶＊泮宫古早味＜连住2晚不挪窝，纯玩不进店，深度泉州＞","source":"广之旅","destination":"福建","duration":3,"price":1699,"departureDate":"2026-08-04","bookingUrl":"http://nn.gzl.cn/domestic/4028804e8d464ddb018dc01e400b6c48.html","transportType":"大巴往返"}]
+[
+ {
+  "id": "tour_1917",
+  "sourceId": "SP0213751316",
+  "title": "<听海泉州>广州往返洛伽寺·黄金海岸、 惠女风情园、蟳蜅渔村纯玩4天",
+  "source": "康辉",
+  "destination": "广东",
+  "duration": 4,
+  "price": 1999,
+  "departureDate": "",
+  "bookingUrl": "https://www.cct.cn/search?keyword=%3C%E5%90%AC%E6%B5%B7%E6%B3%89%E5%B7%9E%3E%E5%B9%BF%E5%B7%9E%E5%BE%80%E8%BF%94%E6%B4%9B%E4%BC%BD%E5%AF%BA%C2%B7%E9%BB%84%E9%87%91%E6%B5%B7%E5%B2%B8%E3%80%81%20",
+  "transportType": "高铁往返"
+ },
+ {
+  "id": "tour_2116",
+  "sourceId": "SP0213752462",
+  "title": "<必发古今泉州>广州往返海上佛国洛伽寺、崇武古城、西沙湾、非遗体验纯玩双动5天",
+  "source": "康辉",
+  "destination": "广东",
+  "duration": 5,
+  "price": 1799,
+  "departureDate": "",
+  "bookingUrl": "https://www.cct.cn/search?keyword=%3C%E5%BF%85%E5%8F%91%E5%8F%A4%E4%BB%8A%E6%B3%89%E5%B7%9E%3E%E5%B9%BF%E5%B7%9E%E5%BE%80%E8%BF%94%E6%B5%B7%E4%B8%8A%E4%BD%9B%E5%9B%BD%E6%B4%9B%E4%BC%BD%E5%AF%BA%E3%80%81",
+  "transportType": "高铁往返"
+ },
+ {
+  "id": "tour_3338",
+  "sourceId": "4028804e8d464ddb018dc01e400b6c48",
+  "title": "【典·深度】福建泉州、动车3天＊古城citywalk＊蟳埔渔村＊洛伽寺＊西街观景天台下午茶＊泮宫古早味＜连住2晚不挪窝，纯玩不进店，深度泉州＞",
+  "source": "广之旅",
+  "destination": "福建",
+  "duration": 3,
+  "price": 1699,
+  "departureDate": "2026-08-04",
+  "bookingUrl": "http://nn.gzl.cn/domestic/4028804e8d464ddb018dc01e400b6c48.html",
+  "transportType": "大巴往返"
+ }
+]

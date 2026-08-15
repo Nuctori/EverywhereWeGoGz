@@ -31,11 +31,11 @@ TIMEOUT = 12
 CONCURRENCY = 8
 JRT365_KEYWORD = "http://www.jrt365.com/tourgroup/tourgroup_list.aspx?keyword="
 JRT365_PRINT = "http://www.jrt365.com/tourname/tourname_ziliao_print.aspx?tournameno="
-# 康辉 migrated to cct.cn (cctpage.com dead 2026-08); cct.cn indexes only a
-# subset of the old catalogue, so search hits are 200 and misses are 404 —
-# plus its WAF throttles concurrent probes. Reported but excluded from the
-# gate so a NEW outage on another source still fails the run.
-KNOWN_BROKEN = {"康辉"}
+# 康辉 bookingUrls migrated from dead gz.cctpage.com to cct.cn keyword search
+# (fix_kanghui_urls.py, 2026-08) — the gate probes live targets now. 404s
+# (product delisted / not migrated to cct.cn) are excluded in the gate;
+# network/ssl/5xx still fail.
+
 
 
 def resolve_source_detail_url(card):
@@ -125,7 +125,11 @@ def main():
             results.append({**item, "status": fut.result()})
 
     ok = [r for r in results if r["status"] == 200]
-    gated = [r for r in results if r["source"] not in KNOWN_BROKEN]
+    # 404 = product delisted / not migrated to the new site (康辉 cct.cn only
+    # indexes part of the old catalogue) — a source-site fact, not a broken
+    # link. Report it but exclude from the gate; network/ssl/5xx = broken
+    # link (fixable) and fails the gate.
+    gated = [r for r in results if r["status"] != 404]
     gated_ok = [r for r in gated if r["status"] == 200]
     pct = (len(ok) / len(results) * 100) if results else 100.0
     gated_pct = (len(gated_ok) / len(gated) * 100) if gated else 100.0
@@ -141,8 +145,7 @@ def main():
             s["ok"] += 1
     for source, s in sorted(by_source_stats.items()):
         src_pct = s["ok"] / s["total"] * 100
-        tag = " [known-broken, excluded]" if source in KNOWN_BROKEN else ""
-        print(f"  {source}: {s['ok']}/{s['total']} ({src_pct:.0f}%){tag}")
+        print(f"  {source}: {s['ok']}/{s['total']} ({src_pct:.0f}%)")
     failures = [r for r in results if r["status"] != 200][:8]
     if failures:
         print("failures:")

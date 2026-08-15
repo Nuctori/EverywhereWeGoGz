@@ -1,1 +1,14 @@
-[{"id":"tour_1920","sourceId":"SP0213751985","title":"C位土楼，广州往返海上明珠塔、打卡山海健康步道、南普陀 永定高北土楼群动车 4天","source":"康辉","destination":"广东","duration":4,"price":1899,"departureDate":"","bookingUrl":"http://gz.cctpage.com/PC/TourLine/Details?prodcode=SP0213751985","transportType":"高铁往返"}]
+[
+ {
+  "id": "tour_1920",
+  "sourceId": "SP0213751985",
+  "title": "C位土楼，广州往返海上明珠塔、打卡山海健康步道、南普陀 永定高北土楼群动车 4天",
+  "source": "康辉",
+  "destination": "广东",
+  "duration": 4,
+  "price": 1899,
+  "departureDate": "",
+  "bookingUrl": "https://www.cct.cn/search?keyword=C%E4%BD%8D%E5%9C%9F%E6%A5%BC%EF%BC%8C%E5%B9%BF%E5%B7%9E%E5%BE%80%E8%BF%94%E6%B5%B7%E4%B8%8A%E6%98%8E%E7%8F%A0%E5%A1%94%E3%80%81%E6%89%93%E5%8D%A1%E5%B1%B1%E6%B5%B7%E5%81%A5",
+  "transportType": "高铁往返"
+ }
+]

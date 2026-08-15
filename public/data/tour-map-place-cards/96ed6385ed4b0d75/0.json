@@ -1,1 +1,14 @@
-[{"id":"tour_1883","sourceId":"SP0213731838","title":"<潇洒行>广州往返 东华寺  泡翁山源温泉城·嬉水世界入住翁源龙泰酒店纯玩2天","source":"康辉","destination":"广东","duration":2,"price":299,"departureDate":"","bookingUrl":"http://gz.cctpage.com/PC/TourLine/Details?prodcode=SP0213731838","transportType":"大巴往返"}]
+[
+ {
+  "id": "tour_1883",
+  "sourceId": "SP0213731838",
+  "title": "<潇洒行>广州往返 东华寺  泡翁山源温泉城·嬉水世界入住翁源龙泰酒店纯玩2天",
+  "source": "康辉",
+  "destination": "广东",
+  "duration": 2,
+  "price": 299,
+  "departureDate": "",
+  "bookingUrl": "https://www.cct.cn/search?keyword=%3C%E6%BD%87%E6%B4%92%E8%A1%8C%3E%E5%B9%BF%E5%B7%9E%E5%BE%80%E8%BF%94%20%E4%B8%9C%E5%8D%8E%E5%AF%BA%20%20%E6%B3%A1%E7%BF%81%E5%B1%B1%E6%BA%90%E6%B8%A9",
+  "transportType": "大巴往返"
+ }
+]

@@ -1,1 +1,26 @@
-[{"id":"tour_1644","sourceId":"SP0213714561","title":"<汝城温泉>广州往返湖南汝城温泉·福泉汤谷度假区纯玩3天","source":"康辉","destination":"广东","duration":3,"price":599,"departureDate":"","bookingUrl":"http://gz.cctpage.com/PC/TourLine/Details?prodcode=SP0213714561","transportType":"大巴往返"},{"id":"tour_3247","sourceId":"402880429b03c01c019ba0609b861f2a","title":"【悠享】汝城福泉汤谷温泉酒店·汽车3天＊连住2晚国家五星级温泉酒店+畅泡稀有氡温泉＊含酒店2个自助早餐＋2正餐＜参观汝城泉眼，温泉文化园＞","source":"广之旅","destination":"广东","duration":3,"price":799,"departureDate":"2026-08-07","bookingUrl":"http://nn.gzl.cn/domestic/402880429b03c01c019ba0609b861f2a.html","transportType":"大巴往返"}]
+[
+ {
+  "id": "tour_1644",
+  "sourceId": "SP0213714561",
+  "title": "<汝城温泉>广州往返湖南汝城温泉·福泉汤谷度假区纯玩3天",
+  "source": "康辉",
+  "destination": "广东",
+  "duration": 3,
+  "price": 599,
+  "departureDate": "",
+  "bookingUrl": "https://www.cct.cn/search?keyword=%3C%E6%B1%9D%E5%9F%8E%E6%B8%A9%E6%B3%89%3E%E5%B9%BF%E5%B7%9E%E5%BE%80%E8%BF%94%E6%B9%96%E5%8D%97%E6%B1%9D%E5%9F%8E%E6%B8%A9%E6%B3%89%C2%B7%E7%A6%8F%E6%B3%89%E6%B1%A4",
+  "transportType": "大巴往返"
+ },
+ {
+  "id": "tour_3247",
+  "sourceId": "402880429b03c01c019ba0609b861f2a",
+  "title": "【悠享】汝城福泉汤谷温泉酒店·汽车3天＊连住2晚国家五星级温泉酒店+畅泡稀有氡温泉＊含酒店2个自助早餐＋2正餐＜参观汝城泉眼，温泉文化园＞",
+  "source": "广之旅",
+  "destination": "广东",
+  "duration": 3,
+  "price": 799,
+  "departureDate": "2026-08-07",
+  "bookingUrl": "http://nn.gzl.cn/domestic/402880429b03c01c019ba0609b861f2a.html",
+  "transportType": "大巴往返"
+ }
+]
