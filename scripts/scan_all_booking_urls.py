@@ -86,8 +86,17 @@ def main():
             futures = {pool.submit(probe, t["url"]): t for t in targets}
             for done, fut in enumerate(as_completed(futures), start=1):
                 t = futures[fut]
-                t["status"] = fut.result()
-                t["kind"] = ""
+                status = fut.result()
+                t["status"] = status
+                # derive kind for the report triage (status-based)
+                if status == 200:
+                    t["kind"] = "ok"
+                elif status == 404:
+                    t["kind"] = "http"
+                elif status == 0:
+                    t["kind"] = "net"
+                else:
+                    t["kind"] = f"http{status}"
                 results.append(t)
                 if done % 250 == 0:
                     print(f"  {host} {done}/{len(targets)}", flush=True)

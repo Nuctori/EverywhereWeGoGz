@@ -21,3 +21,5 @@ jobs:
           node-version: 20
       - name: Probe booking URLs (stratified sample, gated by source health)
         run: python3 scripts/check_booking_urls.py 10
+      - name: Gate probe unit tests (gzip/HEAD/403-fallback/404-exempt/503-alarm)
+        run: python3 scripts/test_booking_url_gate.py
