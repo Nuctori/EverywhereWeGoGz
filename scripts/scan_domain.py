@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Scan one domain (default m.gdcts.com) — fast, no cross-domain hangs."""
 
+import http.client
 import json
 import ssl
 import sys
@@ -12,7 +13,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 CARDS_PATH = ROOT / "public" / "data" / "tour-map-cards.json"
-TIMEOUT = 6
+TIMEOUT = 10
 CONCURRENCY = 12
 TARGET_DOMAIN = sys.argv[1] if len(sys.argv) > 1 else "m.gdcts.com"
 
@@ -43,7 +44,7 @@ def probe(url):
             return resp.status if len(body) > 50 else -1
     except urllib.error.HTTPError as error:
         return error.code
-    except (OSError, urllib.error.URLError):
+    except (OSError, urllib.error.URLError, http.client.IncompleteRead):
         return 0
 
 

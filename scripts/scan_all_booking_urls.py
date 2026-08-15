@@ -4,6 +4,7 @@ domain (cct.cn) never blocks fast ones. DNS is resolved once per host first.
 Writes partial results every 250 probes.
 """
 
+import http.client
 import json
 import ssl
 import urllib.error
@@ -15,7 +16,7 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parent.parent
 CARDS_PATH = ROOT / "public" / "data" / "tour-map-cards.json"
 OUT_PATH = ROOT / "scripts" / "_url_scan_report.json"
-TIMEOUT = 6
+TIMEOUT = 10
 DOMAIN_CONCURRENCY = 8
 
 
@@ -45,7 +46,7 @@ def probe(url):
             return resp.status if len(body) > 50 else -1
     except urllib.error.HTTPError as error:
         return error.code
-    except (OSError, urllib.error.URLError):
+    except (OSError, urllib.error.URLError, http.client.IncompleteRead):
         return 0
 
 

@@ -12,6 +12,7 @@ cctpage 2026-08) or a dead fallback must surface within a week, not rot.
 Usage: python scripts/check_booking_urls.py [samplePerSource=10]
 """
 
+import http.client
 import json
 import re
 import ssl
@@ -27,7 +28,7 @@ SAMPLE_PER_SOURCE = (
     int(sys.argv[1]) if len(sys.argv) > 1 and sys.argv[1].isdigit() else 10
 )
 FAIL_BELOW_PCT = 90.0
-TIMEOUT = 12
+TIMEOUT = 10
 CONCURRENCY = 8
 # 康辉 cct.cn WAF 限流并发探测 -> 串行 (D-046 follow-up, 发现-1): 串行下
 # 503 = 真宕机, 恢复报警 — 全 503 时门禁必须 FAIL (原 503 豁免 = 宕机盲区).
@@ -105,7 +106,7 @@ def probe(url):
             return resp.status if len(body) > 50 else -1
     except urllib.error.HTTPError as error:
         return error.code
-    except (OSError, urllib.error.URLError):
+    except (OSError, urllib.error.URLError, http.client.IncompleteRead):
         return 0
 
 

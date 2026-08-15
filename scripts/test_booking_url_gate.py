@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Lightweight unit tests for check_booking_urls.py probe + gate semantics
-(D-046): gzip HEAD first, any non-200 HEAD -> GET fallback without gzip,
-404 (delisted) excluded from gate, 503/0/5xx fail the gate.
+(D-046 → D-048): gzip HEAD first, any non-200 HEAD -> GET fallback WITH
+gzip (D-048 supersedes the D-046 "without gzip" wording — jrt365's HEAD is
+200 so its GET+gzip reset is never reached), 404 (delisted) excluded from
+gate, 503/0/5xx fail the gate.
 Run: python scripts/test_booking_url_gate.py
 """
 
