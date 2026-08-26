@@ -194,8 +194,12 @@ def main():
     print(f"\n[汇总] 原始数据: {len(all_raw)} 条")
     data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
     data_dir = os.path.abspath(data_dir)
+    output_path = os.path.join(data_dir, "raw_saihuitong_full.json")
+    if len(all_raw) == 0 and os.path.exists(output_path):
+        print(f"[saihuitong] 0 items -- keeping existing {output_path}")
+        return
     os.makedirs(data_dir, exist_ok=True)
-    with open(os.path.join(data_dir, "raw_saihuitong_full.json"), "w", encoding="utf-8") as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(all_raw, f, ensure_ascii=False, indent=2)
     print(f"[保存] -> {os.path.join(data_dir, 'raw_saihuitong_full.json')}")
 

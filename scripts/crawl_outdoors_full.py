@@ -316,8 +316,11 @@ def fetch() -> list[dict]:
 def main() -> None:
     items = fetch()
     data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src", "data"))
-    os.makedirs(data_dir, exist_ok=True)
     output_path = os.path.join(data_dir, "raw_outdoors_full.json")
+    if len(items) == 0 and os.path.exists(output_path):
+        print(f"[outdoors] 0 items -- keeping existing {output_path}")
+        return
+    os.makedirs(data_dir, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
     print(f"[save] -> {output_path}")

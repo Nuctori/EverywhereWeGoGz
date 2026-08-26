@@ -445,6 +445,9 @@ def main():
     data_dir = os.path.abspath(data_dir)
     os.makedirs(data_dir, exist_ok=True)
 
+    if len(deduped) == 0 and os.path.exists(os.path.join(data_dir, "raw_http_full.json")):
+        print("[http] 0 items -- keeping existing")
+        return
     with open(os.path.join(data_dir, "raw_http_full.json"), "w", encoding="utf-8") as f:
         json.dump(deduped, f, ensure_ascii=False, indent=2)
 

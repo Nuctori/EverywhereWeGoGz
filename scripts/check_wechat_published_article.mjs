@@ -145,7 +145,29 @@ async function main() {
     throw new Error('count must be an integer between 1 and 100');
   }
 
-  const accessToken = await getAccessToken(appId, appSecret);
+  let accessToken;
+  try {
+    accessToken = await getAccessToken(appId, appSecret);
+  } catch (error) {
+    const msg = String(error?.message || error);
+    if (msg.includes('invalid appid') || msg.includes('invalid appsecret') || msg.includes('Failed to get WeChat access token')) {
+      console.error(`[warn] ${msg} -- skipping WeChat check (credentials invalid), treating as no new articles`);
+      const fallback = {
+        checkedAt: new Date().toISOString(),
+        articles: [],
+        newArticles: [],
+        previousArticleIds,
+        baselineInitialized: false,
+        hasNewArticle: false,
+        nextProcessedArticleIds: previousArticleIds.slice(0, MAX_TRACKED_ARTICLES),
+        skippedDueToInvalidCredentials: true,
+        warning: msg,
+      };
+      console.log(JSON.stringify(fallback));
+      return;
+    }
+    throw error;
+  }
   const payload = await fetchPublishedArticles(accessToken, count);
   console.log(JSON.stringify(buildCheckResult(payload, previousArticleIds, {
     initializeBaseline: legacyOnlyMigration,

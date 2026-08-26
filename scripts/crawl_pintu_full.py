@@ -165,6 +165,9 @@ def main():
     items = fetch()
     data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
     data_dir = os.path.abspath(data_dir)
+    if len(items) == 0 and os.path.exists(os.path.join(data_dir, "raw_pintu_full.json")):
+        print("[pintu] 0 items -- keeping existing")
+        return
     os.makedirs(data_dir, exist_ok=True)
     with open(os.path.join(data_dir, "raw_pintu_full.json"), "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)

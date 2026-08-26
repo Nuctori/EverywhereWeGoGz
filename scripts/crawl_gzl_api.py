@@ -533,6 +533,9 @@ def main():
     else:
         items = fetch()
 
+    if isinstance(items, list) and len(items) == 0 and os.path.exists(output_path):
+        print(f"[gzl] 0 items -- keeping existing {output_path}")
+        return
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
     print(f"[保存] -> {output_path}")

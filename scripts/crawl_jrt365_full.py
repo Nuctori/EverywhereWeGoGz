@@ -429,6 +429,9 @@ def main():
     data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
     data_dir = os.path.abspath(data_dir)
     output_path = os.path.join(data_dir, "raw_jrt365_full.json")
+    if isinstance(items, list) and len(items) == 0 and os.path.exists(output_path):
+        print(f"[jrt365] 0 items -- keeping existing {output_path}")
+        return
     assert_min_raw_items(items, output_path)
     os.makedirs(data_dir, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
