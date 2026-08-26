@@ -461,3 +461,27 @@
 - Alternatives: ①三脚本各自维护（否：D-046/D-047/D-048 三连修都是漂移代价的实证）；②IncompleteRead 并入 OSError 捕获（否：它是 HTTPException 子类——必须显式列出，否则仍中止扫描）；③HEAD 超时维持现状 8/10/6（否：同 URL 不同源结论不一致）
 - Confidence: medium（6 单测重跑 PASS、三脚本 py_compile、门禁 gated 100% PASS 独立核实；⑥超时调用点统一本身未修复——blocker 挂出待下轮）
 - Date: 2026-08-15
+
+## D-052: 采用实时价值排序替代固定阶梯排序 [Accepted]
+- Context: tour-recommendation 旧逻辑按最近未来班期做阶梯 -1/+1/+2/+3，30天内仅差1分且标题命中占4分，班期不变则排序恒定；public/data tours 4034 条中 432 全过期、1667 无日期，用户反馈“排序不是基于当下时间的价值推荐而是一直固定”
+- Decision: 重做 getRecommendationScore 为 6*exp(-days/12) 指数衰减+未来14天密度+总量权重，无未来班期直接 -8 沉底；compareRecommended 同分按最近可出发日期再比；新增 sortBy=soon 与 hideExpired 完全过滤
+- Rationale: 指数衰减使每天分数自然变化，过期沉底随 today 推移自动扩大，解决“固定”投诉；保留标题微调但降权至2分突出时效价值
+- Alternatives: 保留阶梯分仅调阈值（否：仍是离散阶梯，31天 vs 30天几乎无区分）；仅加 soon 排序不改 hot（否：默认 hot 仍固定）
+- Confidence: high
+- Date: 2026-08-26T11:22:41.867Z
+
+## D-053: 假日通跳转改为优先产品页而非合同页 [Accepted]
+- Context: 实测假日通 printUrl 指向 tourname_ziliao_print.aspx 为合同/条款打印模板，无“立即预订”CTA；bookingUrl 的 tourgroup_ziliao.aspx?groupno= 才是带价格/行程/预订的产品页，用户反馈“为什么不是去产品页而是去了合同页”；旧 resolveSourceDetailUrl 优先 printUrl 导致误跳合同页
+- Decision: 假日通链接改为优先可用 bookingUrl 产品页，失效时才降级到 printUrl/tournameno，最后才标题搜索；同步更新 test_source_detail_url 预期：有效 bookingUrl 不再跳合同页
+- Rationale: 产品页是用户完成预订的真实入口，合同页无转化能力；优先 bookingUrl 符合“去产品页”诉求，降级链仍覆盖失效场景
+- Alternatives: 保留 printUrl 优先以求稳定链接（否：牺牲用户主路径）；直接去掉合同页降级（否：失效 bookingUrl 会无处可去）
+- Confidence: high
+- Date: 2026-08-26T11:22:48.764Z
+
+## D-054: 过期团期全链路可见性治理 [Accepted]
+- Context: 卡片此前仅显示日期，无过期沉底感知；详情 DepartureDateSelector 默认选中过期首个日期，且“有位”徽标在全过期时仍为绿；列表无过期过滤，用户会在首屏看到大量已过期团期（验得 432 全过期）
+- Decision: 团期过期全链路治理：卡片过期徽标“班期已过·已沉底”高亮、文案 Today/明天可出发精确到天、详情默认跳最近未来日期且全过期显示“待确认”、列表新增隐藏已过期复选框
+- Rationale: 从列表到详情的过期信号贯通，用户无需靠日历灰化单点发现过期；默认跳最近未来日期避免过期默认选中，过滤器给到用户显式控制而不误杀无日期长线
+- Alternatives: 仅调排序沉底不改展示（否：用户视觉上仍以为可出发）；默认隐藏过期（否：无日期长线被误杀，默认关更安全）
+- Confidence: high
+- Date: 2026-08-26T11:23:03.013Z

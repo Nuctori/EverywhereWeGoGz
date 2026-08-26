@@ -112,6 +112,17 @@ export function formatShortDate(dateStr: string | undefined): string {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
   const now = new Date();
+  const today0 = new Date(); today0.setHours(0,0,0,0);
+  const d0 = new Date(`${dateStr}T00:00:00`);
+  if (!Number.isNaN(d0.getTime())) {
+    const diffDays = Math.round((d0.getTime() - today0.getTime()) / 86400000);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
+    if (diffDays === 0) return `${month}月${day}日 · 今天可出发`;
+    if (diffDays === 1) return `${month}月${day}日 · 明天可出发`;
+    if (diffDays > 1 && diffDays <= 7) return `${month}月${day}日 · ${diffDays}天后`;
+    return `${month}月${day}日`;
+  }
   const diffDays = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   const month = d.getMonth() + 1;
   const day = d.getDate();

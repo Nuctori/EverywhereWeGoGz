@@ -42,6 +42,7 @@ export const TourCard = memo(function TourCard({
   const titleSummary = buildTitleSummary(tour);
   const destinationLabel = getReadableDestination(tour);
   const departureDateLabel = getDepartureDateBadgeLabel(tour);
+  const isExpiredBadge = departureDateLabel === '班期已过';
 
   return (
     <Card
@@ -146,7 +147,7 @@ export const TourCard = memo(function TourCard({
             <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{tour.duration}天</span>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-500">
-            <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />{departureDateLabel}</span>
+            <span className={`flex items-center gap-1.5 ${isExpiredBadge ? 'text-amber-600 font-medium' : ''}`}><Calendar className="h-3.5 w-3.5" />{departureDateLabel}{isExpiredBadge ? ' · 已沉底' : ''}</span>
             {tour.groupSize && <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{tour.groupSize}</span>}
           </div>
         </div>

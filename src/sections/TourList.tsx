@@ -305,6 +305,7 @@ const DEFAULT_FILTERS: FilterState = {
   departureDateEnd: '',
   theme: '',
   sortBy: 'hot',
+  hideExpired: false,
 };
 
 const RECOMMENDED_TITLE_HINTS = [
@@ -398,6 +399,17 @@ function compareToursBySortMode(
       return a.price - b.price;
     case 'price_desc':
       return b.price - a.price;
+    case 'soon': {
+      const aD = (a as TourSummary).departureDate || (a as TourSummary).departureDates?.[0] || '';
+      const bD = (b as TourSummary).departureDate || (b as TourSummary).departureDates?.[0] || '';
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const aNext = ([aD, ...((a as TourSummary).departureDates || [])].filter(Boolean) as string[]).filter((d) => d >= todayStr).sort()[0] ?? '';
+      const bNext = ([bD, ...((b as TourSummary).departureDates || [])].filter(Boolean) as string[]).filter((d) => d >= todayStr).sort()[0] ?? '';
+      if (aNext && bNext && aNext !== bNext) return aNext.localeCompare(bNext);
+      if (aNext && !bNext) return -1;
+      if (!aNext && bNext) return 1;
+      return a.price - b.price;
+    }
     case 'hot':
       return compareRecommended(a, b, RECOMMENDED_TITLE_HINTS);
     case 'new':
@@ -786,6 +798,11 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         tour.duration !== effectiveFilters.duration
       ) {
         return false;
+      }
+
+      if (effectiveFilters.hideExpired) {
+        const allDates = getEffectiveDepartureDates(tour as TourSummary);
+        if (allDates.length > 0 && !allDates.some((d) => d >= today)) return false;
       }
 
       return true;
@@ -1609,7 +1626,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         )}
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <ArrowUpDown className="w-4 h-4 text-stone-500" />
             <Select
               value={filters.sortBy}
@@ -1619,7 +1636,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                   sortBy:
                     value === 'price_asc' ||
                     value === 'price_desc' ||
-                    value === 'new'
+                    value === 'new' ||
+                    value === 'soon'
                       ? value
                       : 'hot',
                 })
@@ -1632,7 +1650,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 <SelectItem value="hot">
                   <span className="flex items-center gap-2">
                     <Flame className="w-3.5 h-3.5 text-orange-500" />
-                    推荐优先
+                    推荐优先（实时价值）
+                  </span>
+                </SelectItem>
+                <SelectItem value="soon">
+                  <span className="flex items-center gap-2">
+                    <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                    最近可出发优先
                   </span>
                 </SelectItem>
                 <SelectItem value="price_asc">价格由低到高</SelectItem>
@@ -1645,6 +1669,15 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 </SelectItem>
               </SelectContent>
             </Select>
+            <label className="flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={Boolean(filters.hideExpired)}
+                onChange={(e) => setFilters({ ...filters, hideExpired: e.target.checked })}
+                className="h-4 w-4 rounded border-stone-300"
+              />
+              隐藏已过期团期
+            </label>
           </div>
 
           {aiRecommendationResult && aiRecommendationResult.items.length > 0 && (

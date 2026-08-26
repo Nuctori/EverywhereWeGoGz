@@ -12,8 +12,16 @@ interface DepartureDateSelectorProps {
 // 出发日期选择器，用于旅游线路详情页展示可选团期
 export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
   const dates = (tour.departureDates || []).filter(Boolean);
-  const fallbackDate = tour.departureDate || dates[0] || '';
-  const [selectedDate, setSelectedDate] = useState(fallbackDate);
+  // 优先选中最近的未来日期，已过期默认不再被选中
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const upcoming = dates.filter((d) => d >= todayStr).sort();
+  const fallbackDate = upcoming[0] || tour.departureDate || dates[0] || '';
+  const initialDate = (() => {
+    // 若默认 departureDate 已过期，改选最近未来日期
+    if (tour.departureDate && tour.departureDate < todayStr && upcoming.length > 0) return upcoming[0]!;
+    return fallbackDate;
+  })();
+  const [selectedDate, setSelectedDate] = useState(initialDate);
   const [showAll, setShowAll] = useState(false);
   const allDates = dates.length > 0 ? dates : (fallbackDate ? [fallbackDate] : []);
   const hotDates = tour.hotDepartureDates || [];
@@ -136,9 +144,12 @@ export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
           <p className="text-xs text-slate-400">
             {tour.duration}天行程 · 预计 {getReturnDate(selectedDate)} 返程
           </p>
+          {upcoming.length === 0 && allDates.length > 0 && (
+            <p className="text-xs text-amber-600 mt-1">当前班期均已过期，请以源站最新日历为准</p>
+          )}
         </div>
-        <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
-          有位
+        <Badge variant="outline" className={`text-xs ${upcoming.length === 0 && allDates.length > 0 ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+          {upcoming.length === 0 && allDates.length > 0 ? '待确认' : '有位'}
         </Badge>
       </div>
     </div>

@@ -1,8 +1,6 @@
 import type { TourSummary } from "@/types/tour";
 
 const JRT365_SOURCE = "假日通";
-const JRT365_PRINT_URL =
-"http://www.jrt365.com/tourname/tourname_ziliao_print.aspx?tournameno=";
 
 function readSourceAttribute(tour: Pick<TourSummary, "meta">, key: string) {
 const value = tour.meta?.sourceAttributes?.[key];
@@ -35,19 +33,21 @@ return `https://www.cct.cn/search?keyword=${encodeURIComponent(
 String(tour.title).trim().slice(0, 20),
 )}`;
 }
-// 假日通 stable tourname links FIRST when present: the groupno bookingUrl
-// rotates/expires (0c771a658 verified), and the detail modal passes the
-// resolved tour (with meta.sourceAttributes) once detail loading succeeds.
-// Map-card summaries carry no sourceAttributes, so they fall through to the
-// bookingUrl below — the real fix for 转跳都是错的 (560dfc5fb): a valid
-// detail URL must never silently degrade to a keyword search page.
+// 假日通：用户要的是“产品页”而非“合同页”。
+// 实测：tourname_ziliao_print.aspx 是合同/条款打印模板（无预订 CTA），
+// tourgroup_ziliao.aspx?groupno= 才是带“立即预订/出发日期/行程/价格”的产品页。
+// 之前为稳定链接优先用 printUrl，反而把用户送去了合同页。
+// 现改为：优先可用 bookingUrl（产品页），无效时再降级到 printUrl/tournameno，最后才搜索。
 if (tour.source === JRT365_SOURCE) {
+if (isHttpUrl(fallbackUrl)) return fallbackUrl;
 const printUrl = readSourceAttribute(tour, "printUrl");
 if (isHttpUrl(printUrl)) return printUrl;
-
 const tournameno = readSourceAttribute(tour, "tournameno");
 if (tournameno)
-return `${JRT365_PRINT_URL}${encodeURIComponent(tournameno)}`;
+return `http://www.jrt365.com/tourname/tourname_ziliao_print.aspx?tournameno=${encodeURIComponent(tournameno)}`;
+const title2 = String(tour.title || "").trim();
+if (title2) return `http://www.jrt365.com/tourgroup/tourgroup_list.aspx?keyword=${encodeURIComponent(title2.slice(0, 20))}`;
+return "";
 }
 if (isHttpUrl(fallbackUrl)) return fallbackUrl;
 if (tour.source !== JRT365_SOURCE) return "";

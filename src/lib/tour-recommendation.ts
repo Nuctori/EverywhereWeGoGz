@@ -1,17 +1,22 @@
-// 本地推荐评分算法：综合标题命中、班期丰富度、近期出发和新品权重对线路排序。
+// 本地推荐评分：以“当下可出发价值”为核心，随日期每日变化。
+// 价值 = 临近度(指数衰减) + 可选密度 + 新品/热度微调；无未来班期直接沉底。
 import type { TourSummary } from '@/types/tour';
 
-function getDaysUntil(dateString: string) {
+export function getDaysUntil(dateString: string) {
   if (!dateString) return null;
-
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
   const target = new Date(`${dateString}T00:00:00`);
   if (Number.isNaN(target.getTime())) return null;
-
   target.setHours(0, 0, 0, 0);
   return Math.round((target.getTime() - today.getTime()) / 86400000);
+}
+
+export function getUpcomingDates(tour: Pick<TourSummary, 'departureDate' | 'departureDates'>) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = `${today.getFullYear()}-${`${today.getMonth() + 1}`.padStart(2, '0')}-${`${today.getDate()}`.padStart(2, '0')}`;
+  return getEffectiveDepartureDates(tour).filter((d) => d >= todayStr);
 }
 
 export function getEffectiveDepartureDates(tour: Pick<TourSummary, 'departureDate' | 'departureDates'>) {
@@ -30,58 +35,50 @@ export function getEffectiveDepartureDates(tour: Pick<TourSummary, 'departureDat
   return Array.from(uniqueDates).sort((left, right) => left.localeCompare(right));
 }
 
-// 综合分先看标题匹配，再叠加班期数量、热门班期、近期出发和新品加权。
 export function getRecommendationScore(
-  tour: Pick<TourSummary, 'title' | 'departureDate' | 'departureDates' | 'hotDepartureDates' | 'isNew'>,
+  tour: Pick<TourSummary, 'title' | 'departureDate' | 'departureDates' | 'hotDepartureDates' | 'isNew' | 'isHot'>,
   titleHints: readonly string[],
 ) {
   let score = 0;
-
-  if (titleHints.some((token) => tour.title.includes(token))) {
-    score += 4;
+  if (titleHints.some((token) => tour.title.includes(token))) score += 2;
+  const upcoming = getUpcomingDates(tour);
+  const hasStructured = getEffectiveDepartureDates(tour).length > 0;
+  if (hasStructured && upcoming.length === 0) return -8 + ((tour as { isHot?: boolean }).isHot ? 0.5 : 0);
+  if (!hasStructured) {
+    score += 0.5;
+    if (tour.isNew) score += 0.8;
+    if ((tour as { isHot?: boolean }).isHot) score += 0.5;
+    return score;
   }
-
-  score += Math.min(tour.departureDates?.length ?? 0, 4);
-  score += Math.min(tour.hotDepartureDates?.length ?? 0, 2);
-
-  const sortedDates = getEffectiveDepartureDates(tour);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayInput = `${today.getFullYear()}-${`${today.getMonth() + 1}`.padStart(2, '0')}-${`${today.getDate()}`.padStart(2, '0')}`;
-  const scoreReferenceDate =
-    sortedDates.find((date) => date >= todayInput) || sortedDates.at(-1) || tour.departureDate;
-  const daysUntil = scoreReferenceDate ? getDaysUntil(scoreReferenceDate) : null;
-
-  if (daysUntil !== null) {
-    if (daysUntil < 0) {
-      score -= 1;
-    } else if (daysUntil <= 7) {
-      score += 3;
-    } else if (daysUntil <= 30) {
-      score += 2;
-    } else if (daysUntil <= 90) {
-      score += 1;
-    }
+  const daysUntil = getDaysUntil(upcoming[0]!)!;
+  // 临近度：指数衰减，越近越高分，30天后趋近0，每过去一天分数都会变
+  const recency = 6 * Math.exp(-Math.max(0, daysUntil) / 12);
+  score += recency;
+  // 可选密度：未来14天内班期越多越有价值
+  const within14 = upcoming.filter((d) => (getDaysUntil(d) ?? 999) <= 14).length;
+  score += Math.min(within14, 4) * 0.6;
+  score += Math.min(upcoming.length, 5) * 0.25;
+  if (tour.hotDepartureDates?.length) {
+    const hotUpcoming = tour.hotDepartureDates.filter((d) => upcoming.includes(d)).length;
+    score += Math.min(hotUpcoming, 2) * 0.5;
   }
-
-  if (tour.isNew) {
-    score += 1;
-  }
-
+  if (tour.isNew) score += 0.7;
+  if ((tour as { isHot?: boolean }).isHot) score += 0.4;
   return score;
 }
 
-// 排序链先比较综合推荐分，再比较热度、班期丰富度，最后才比较价格。
+// 排序：价值分优先，其次按最近可出发日期更近者优先，最后价格。
 export function compareRecommended(
   a: Pick<TourSummary, 'title' | 'departureDate' | 'departureDates' | 'hotDepartureDates' | 'isNew' | 'isHot' | 'price'>,
   b: Pick<TourSummary, 'title' | 'departureDate' | 'departureDates' | 'hotDepartureDates' | 'isNew' | 'isHot' | 'price'>,
   titleHints: readonly string[],
 ) {
-  return (
-    getRecommendationScore(b, titleHints) - getRecommendationScore(a, titleHints) ||
-    (b.isHot ? 1 : 0) - (a.isHot ? 1 : 0) ||
-    (b.hotDepartureDates?.length ?? 0) - (a.hotDepartureDates?.length ?? 0) ||
-    (b.departureDates?.length ?? 0) - (a.departureDates?.length ?? 0) ||
-    a.price - b.price
-  );
+  const scoreDiff = getRecommendationScore(b, titleHints) - getRecommendationScore(a, titleHints);
+  if (Math.abs(scoreDiff) > 0.01) return scoreDiff;
+  const aNext = getUpcomingDates(a)[0] ?? '';
+  const bNext = getUpcomingDates(b)[0] ?? '';
+  if (aNext && bNext && aNext !== bNext) return aNext.localeCompare(bNext);
+  if (aNext && !bNext) return -1;
+  if (!aNext && bNext) return 1;
+  return a.price - b.price;
 }
