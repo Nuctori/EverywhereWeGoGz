@@ -485,3 +485,19 @@
 - Alternatives: 仅调排序沉底不改展示（否：用户视觉上仍以为可出发）；默认隐藏过期（否：无日期长线被误杀，默认关更安全）
 - Confidence: high
 - Date: 2026-08-26T11:23:03.013Z
+
+## D-055: JRT365 空爬取守卫契约对齐——0 条已有文件时保留旧文件而非抛错 [Accepted]
+- Context: CI 2026-08-31 Update Tour Data / crawl-jrt365 在 audit:jrt365-crawl-guard 失败（AssertionError: main() should fail before writing an empty JRT365 raw file）；crawl_jrt365_full.py 在 e3a10f2 新增 `if 0 items and exists: keep existing + return` 防 0 条覆盖；原 test_jrt365_crawl_guard.mjs 仍断言空 main 必抛 SystemExit；本地 sentinel 文件实测保留，CI 日志与代码可复现不一致。
+- Decision: 将 test_jrt365_crawl_guard.mjs 对齐新契约：有旧文件时 main() 正常返回且 sentinel 保留；无旧文件时仍经 assert_min_raw_items 抛 SystemExit 快败；静态断言 guardIndex < writeIndex 保留，lint 模板字符串清理。
+- Rationale: 新契约（0 条保留旧文件）是 e3a10f2 为防全量爬取瞬断覆盖的正确修复；测试应验证契约而非与实现对立；无文件路径仍快败保证首跑不静默空文件。
+- Alternatives: ①回退 e3a10f2 的 retain 逻辑（否：会重引入 0 条覆盖风险）；②测试保留 SystemExit 断言并让实现抛错（否：与 retain 目标矛盾）；③仅改 test 忽略空文件场景（否：会漏掉无文件空写风险）
+- Confidence: high
+- Date: 2026-08-31T19:10:00+08:00
+
+## D-056: booking URL 探针瞬时 0 单次重试去抖（404 不重试） [Accepted]
+- Context: CI 2026-08-31 Check Booking URLs / url-health gated 39/49 79.6% <90%（康辉 0/10 status 0，cct.cn/search?keyword）；本地同样本重跑 gated 39/39 100% PASS（0→404 确认，404 属商品下架/未迁移豁免）；probe 对 cct.cn 瞬时 TLS/网络抖动返回 0（OSError/URLError/IncompleteRead），属瞬时毛刺非确定性失败。
+- Decision: check_booking_urls.py probe 改为 retries=1：_once() 内 HEAD→GET+gzip 语义不变，status==0 时 sleep 0.8s 单次重试；404/503 等确定性状态不重试；新增 time 导入，移除未用 ssl；同步更新 test_booking_url_gate.py（mock sleep，4 次 urlopen 断言瞬时 0 重试）。
+- Rationale: 0 是瞬时网络毛刺（CI 与本地同 URL 0→404 差异为证），单次重试去抖可消除误杀且不掩盖 404 确定性下架；404 不重试避免无谓延迟；康辉已串行（KANGHUI_CONCURRENCY=1）消除 WAF 并发 503 误报，0 重试补最后抖动盲区。
+- Alternatives: ①不重试放任 0 误杀（否：已致 CI 79.6% 误红）；②503 也重试（否：503 已由串行去 WAF，需报警而非重试掩盖）；③全量重试 3 次退避（否：增加 CI 时长，单次 0.8s 已覆盖瞬时抖动）
+- Confidence: high
+- Date: 2026-08-31T19:10:00+08:00

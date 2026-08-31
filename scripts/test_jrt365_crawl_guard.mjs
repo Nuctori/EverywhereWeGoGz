@@ -9,12 +9,25 @@ const crawlerSource = fs.readFileSync(crawlerPath, 'utf8');
 const mainIndex = crawlerSource.indexOf('def main():');
 assert.ok(mainIndex > -1, 'expected JRT365 crawler to define main()');
 const mainSource = crawlerSource.slice(mainIndex);
-const guardIndex = mainSource.indexOf('assert_min_raw_items(items, output_path)');
-const writeIndex = mainSource.indexOf('with open(output_path, "w", encoding="utf-8")');
+const guardIndex = mainSource.indexOf(
+  'assert_min_raw_items(items, output_path)',
+);
+const writeIndex = mainSource.indexOf(
+  'with open(output_path, "w", encoding="utf-8")',
+);
 
-assert.ok(guardIndex > -1, 'expected JRT365 crawler main() to call assert_min_raw_items');
-assert.ok(writeIndex > -1, 'expected JRT365 crawler main() to write through output_path');
-assert.ok(guardIndex < writeIndex, 'expected JRT365 crawl guard to run before writing raw data');
+assert.ok(
+  guardIndex > -1,
+  'expected JRT365 crawler main() to call assert_min_raw_items',
+);
+assert.ok(
+  writeIndex > -1,
+  'expected JRT365 crawler main() to write through output_path',
+);
+assert.ok(
+  guardIndex < writeIndex,
+  'expected JRT365 crawl guard to run before writing raw data',
+);
 
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'jrt365-crawl-guard-'));
 const tempScripts = path.join(tempRoot, 'scripts');
@@ -62,15 +75,21 @@ assert_min_raw_items([], "src/data/raw_jrt365_full.json")
 
 os.environ.pop("JRT365_MIN_RAW_ITEMS", None)
 module.fetch = lambda: []
+# e3a10f2: 0 items with existing file keeps sentinel and returns normally
+module.main()
+with open(os.environ["RAW_UNDER_TEST"], "r", encoding="utf-8") as f:
+    assert f.read() == '[{"title":"sentinel"}]\n'
+
+# 0 items with NO existing file must still fail fast via the guard
+import tempfile
+tmp_no_file = tempfile.mkdtemp()
+empty_path = os.path.join(tmp_no_file, "raw_jrt365_full.json")
 try:
-    module.main()
+    module.assert_min_raw_items([], empty_path)
 except SystemExit as exc:
     assert "crawl produced 0 items" in str(exc)
 else:
-    raise AssertionError("main() should fail before writing an empty JRT365 raw file")
-
-with open(os.environ["RAW_UNDER_TEST"], "r", encoding="utf-8") as f:
-    assert f.read() == '[{"title":"sentinel"}]\n'
+    raise AssertionError("empty JRT365 crawl output should fail fast when no existing file")
 `,
   ],
   {

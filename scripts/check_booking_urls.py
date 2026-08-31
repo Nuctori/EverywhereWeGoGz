@@ -15,8 +15,8 @@ Usage: python scripts/check_booking_urls.py [samplePerSource=10]
 import http.client
 import json
 import re
-import ssl
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -80,35 +80,45 @@ def resolve_source_detail_url(card):
     return ""
 
 
-def probe(url):
+def probe(url, retries=1):
     """HEAD first with gzip/accept headers (gdcts/nn.gzl.cn need them, else
     huge uncompressed bodies time out). HEAD has no body — status 200 alone
     means reachable. ANY non-200 HEAD falls back to GET WITH gzip: every
     source whose HEAD is non-200 (nn.gzl.cn 403) needs gzip on GET; jrt365's
     HEAD is 200 so its GET+gzip connection-reset is never reached. A confirmed
-    non-200 is a real failure."""
+    non-200 is a real failure. Transient network 0 retries once (cct.cn TLS
+    blip caused CI 503->0 flake 2026-08-31); 404 is deterministic no-retry."""
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
         "Accept-Encoding": "gzip, deflate",
         "Accept": "text/html,application/xhtml+xml",
     }
-    req = urllib.request.Request(url, method="HEAD", headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
-            return resp.status
-    except urllib.error.HTTPError:
-        pass  # non-200 HEAD — confirm via GET below
-    except (OSError, urllib.error.URLError):
-        pass
-    req = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(req, timeout=GET_TIMEOUT) as resp:
-            body = resp.read(300)
-            return resp.status if len(body) > 50 else -1
-    except urllib.error.HTTPError as error:
-        return error.code
-    except (OSError, urllib.error.URLError, http.client.IncompleteRead):
-        return 0
+
+    def _once():
+        req = urllib.request.Request(url, method="HEAD", headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+                return resp.status
+        except urllib.error.HTTPError:
+            pass  # non-200 HEAD — confirm via GET below
+        except (OSError, urllib.error.URLError):
+            pass
+        req = urllib.request.Request(url, headers=headers)
+        try:
+            with urllib.request.urlopen(req, timeout=GET_TIMEOUT) as resp:
+                body = resp.read(300)
+                return resp.status if len(body) > 50 else -1
+        except urllib.error.HTTPError as error:
+            return error.code
+        except (OSError, urllib.error.URLError, http.client.IncompleteRead):
+            return 0
+
+    status = _once()
+    # ponytail: single retry for transient 0 only; 404 is source-site fact
+    if status == 0 and retries > 0:
+        time.sleep(0.8)
+        status = _once()
+    return status
 
 
 def main():

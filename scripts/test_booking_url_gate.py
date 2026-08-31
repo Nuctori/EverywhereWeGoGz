@@ -43,9 +43,12 @@ def url_error():
 
 class ProbeTests(unittest.TestCase):
     def probe_with(self, side_effects):
-        with mock.patch.object(
-            gate.urllib.request, "urlopen", side_effect=side_effects
-        ) as m:
+        with (
+            mock.patch.object(
+                gate.urllib.request, "urlopen", side_effect=side_effects
+            ) as m,
+            mock.patch.object(gate.time, "sleep"),
+        ):
             status = gate.probe("http://example.test/page")
         return status, m
 
@@ -72,7 +75,10 @@ class ProbeTests(unittest.TestCase):
         self.assertEqual(status, 404)
 
     def test_head_net_error_get_net_error_returns_0(self):
-        status, m = self.probe_with([url_error(), url_error()])
+        # transient 0 retries once: HEAD+GET ×2 = 4 urlopen calls
+        status, m = self.probe_with(
+            [url_error(), url_error(), url_error(), url_error()]
+        )
         self.assertEqual(status, 0)
 
 
