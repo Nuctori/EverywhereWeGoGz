@@ -4,6 +4,12 @@
  * Requests remain same-origin. The worker maintains a small CDN pool, probes
  * candidates from the current browser network, remembers the best candidate,
  * and always falls back to GitHub Pages when a mirror fails.
+ *
+ * Data files (data/*) are routed through the pool too, but a candidate only
+ * wins selection when its tours-meta.json generatedAt is not older than the
+ * same-origin copy. That keeps mirrors honest across force-pushes: a CDN that
+ * still serves the previous release is treated as unhealthy and users stay on
+ * GitHub Pages until the mirror catches up.
  */
 const CACHE_PREFIX = 'everywhere-we-go-static-';
 const CACHE_NAME = `${CACHE_PREFIX}v3`;
@@ -151,10 +157,6 @@ function probeUrl(candidate) {
   return cdnUrl(candidate, 'data/tours-meta.json', '?pool_probe=1');
 }
 
-function probePageUrl(candidate) {
-  return cdnUrl(candidate, 'data/tours-page-0.json', '?pool_probe=1');
-}
-
 function acceptableStaticResponse(response) {
   if (!response.ok) return false;
   const contentType = (response.headers.get('content-type') || '').toLowerCase();
@@ -162,42 +164,48 @@ function acceptableStaticResponse(response) {
   return !contentType.includes('text/html');
 }
 
-function acceptableProbePayload(meta, page) {
-  if (!meta || Number(meta.totalRecords) <= 0) return false;
-  if (!page || !Array.isArray(page.items) || page.items.length === 0) return false;
-
-  const first = page.items[0];
-  if (typeof first.id !== 'string' || typeof first.title !== 'string') return false;
-  const mealCounts = first?.meta?.structuredDetails?.mealCounts;
-  if (!mealCounts) return true;
-  return ['breakfast', 'lunch', 'dinner'].every((key) => Number.isFinite(Number(mealCounts[key])));
+function acceptableProbePayload(meta) {
+  return Boolean(meta) && Number(meta.totalRecords) > 0;
 }
 
-async function probeCandidate(candidate) {
+// ISO 时间戳同格式可直接字典序比较；镜像 generatedAt 落后于同源即视为过期。
+function isFreshEnough(candidateMeta, originMeta) {
+  if (!originMeta || !originMeta.generatedAt) return true;
+  if (!candidateMeta || !candidateMeta.generatedAt) return false;
+  return String(candidateMeta.generatedAt) >= String(originMeta.generatedAt);
+}
+
+async function readOriginMeta() {
+  try {
+    const response = await fetchWithTimeout(scopedUrl('data/tours-meta.json'), {
+      credentials: 'same-origin',
+      cache: 'no-store',
+    });
+    if (!acceptableStaticResponse(response)) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+async function probeCandidate(candidate, originMeta) {
   const startedAt = performance.now();
   try {
-    const [metaResponse, pageResponse] = await Promise.all([
-      fetchWithTimeout(probeUrl(candidate), {
-        credentials: 'omit',
-        mode: 'cors',
-        cache: 'no-store',
-      }),
-      fetchWithTimeout(probePageUrl(candidate), {
-        credentials: 'omit',
-        mode: 'cors',
-        cache: 'no-store',
-      }),
-    ]);
-    if (!acceptableStaticResponse(metaResponse) || !acceptableStaticResponse(pageResponse)) return null;
+    const metaResponse = await fetchWithTimeout(probeUrl(candidate), {
+      credentials: 'omit',
+      mode: 'cors',
+      cache: 'no-store',
+    });
+    if (!acceptableStaticResponse(metaResponse)) return null;
     const meta = await metaResponse.json();
-    const page = await pageResponse.json();
-    if (!acceptableProbePayload(meta, page)) return null;
+    if (!acceptableProbePayload(meta) || !isFreshEnough(meta, originMeta)) return null;
 
     return {
       id: candidate.id,
       origin: candidate.origin,
       pathPrefix: candidate.pathPrefix,
       fallback: candidate.fallback,
+      generatedAt: meta.generatedAt || '',
       latencyMs: Math.round(performance.now() - startedAt),
     };
   } catch {
@@ -206,7 +214,8 @@ async function probeCandidate(candidate) {
 }
 
 async function selectBestCandidate(cache, pool) {
-  const results = await Promise.all(pool.map(probeCandidate));
+  const originMeta = await readOriginMeta();
+  const results = await Promise.all(pool.map((candidate) => probeCandidate(candidate, originMeta)));
   const healthy = results
     .filter(Boolean)
     .sort((left, right) => Number(left.fallback) - Number(right.fallback) || left.latencyMs - right.latencyMs);
@@ -217,7 +226,7 @@ async function selectBestCandidate(cache, pool) {
   return winner;
 }
 
-async function fetchFromPoolOrOrigin(request, cache) {
+async function fetchFromPoolOrOrigin(request, cache, cacheMode = 'no-store') {
   const requestUrl = new URL(request.url);
   const publicPath = relativePublicPath(requestUrl);
   if (!publicPath) return fetch(request);
@@ -236,7 +245,7 @@ async function fetchFromPoolOrOrigin(request, cache) {
     try {
       const response = await fetchWithTimeout(
         cdnUrl(candidate, publicPath, requestUrl.search),
-        { credentials: 'omit', mode: 'cors', cache: 'no-store' },
+        { credentials: 'omit', mode: 'cors', cache: cacheMode },
       );
       if (acceptableStaticResponse(response)) {
         if (!state || state.origin !== candidate.origin) {
@@ -308,9 +317,17 @@ self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
   if (!isCacheableRequest(event.request, requestUrl)) return;
 
-  // Data indexes are rebuilt on every release. CDN mirrors can keep an old
-  // cdn-assets branch response after a force-push, so data must stay same-origin.
-  if (relativePublicPath(requestUrl)?.startsWith('data/')) return;
+  // Data indexes are rebuilt on every release and requested with a ?v= busting
+  // param. Serve them through the freshness-checked CDN pool, but never put
+  // them into the worker cache — every release would otherwise accumulate a
+  // full copy of the multi-megabyte payloads.
+  if (relativePublicPath(requestUrl)?.startsWith('data/')) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_NAME);
+      return fetchFromPoolOrOrigin(request, cache, 'default');
+    })());
+    return;
+  }
 
   event.respondWith(cacheFirst(event.request));
 });
