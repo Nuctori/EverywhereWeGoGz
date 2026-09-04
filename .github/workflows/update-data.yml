@@ -253,10 +253,12 @@ jobs:
           path: src/data/raw_http_full.json
           if-no-files-found: error
 
-  update-and-deploy:
+  # 单渠道爬取失败不应让整站数据停更（曾因 JRT365 守卫连续 3 周阻断）。
+  # GitHub 表达式不支持算术，用 gate job 数成功数：调度/push 需 >=5/7 渠道成功；
+  # workflow_dispatch 保留原有全量旁路（skip_crawls 场景直接放行）。
+  # 缺失来源由 merge_data.py 沿用上一轮线路（断供保护），完整性审计仍是提交前最终质量门。
+  crawl-gate:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     needs:
       - preflight
       - crawl-jrt365
@@ -266,10 +268,38 @@ jobs:
       - crawl-gzl-api
       - crawl-outdoors
       - crawl-http-aggregate
-    # 单渠道爬取失败不应让整站数据停更（曾因 JRT365 守卫连续 3 周阻断）。
-    # 只要 preflight 通过且 >=5/7 渠道成功就继续合并；缺失来源由 merge_data.py
-    # 沿用上一轮线路（断供保护），数据完整性审计仍是提交前的最终质量门。
-    if: always() && !cancelled() && needs.preflight.result == 'success' && (github.event_name == 'workflow_dispatch' || ((needs.crawl-jrt365.result == 'success' && 1 || 0) + (needs.crawl-saihuitong.result == 'success' && 1 || 0) + (needs.crawl-kanghui.result == 'success' && 1 || 0) + (needs.crawl-pintu.result == 'success' && 1 || 0) + (needs.crawl-gzl-api.result == 'success' && 1 || 0) + (needs.crawl-outdoors.result == 'success' && 1 || 0) + (needs.crawl-http-aggregate.result == 'success' && 1 || 0)) >= 5)
+    if: always() && !cancelled() && needs.preflight.result == 'success'
+    outputs:
+      proceed: ${{ steps.gate.outputs.proceed }}
+    steps:
+      - name: Evaluate crawl majority gate
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          set -euo pipefail
+          successes="$(printf '%s\n' $RESULTS | grep -cx success || true)"
+          echo "crawl results: $RESULTS (successes=$successes)"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$successes" -ge 6 ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    needs:
+      - preflight
+      - crawl-gate
+      - crawl-jrt365
+      - crawl-saihuitong
+      - crawl-kanghui
+      - crawl-pintu
+      - crawl-gzl-api
+      - crawl-outdoors
+      - crawl-http-aggregate
+    if: always() && !cancelled() && needs.preflight.result == 'success' && needs.crawl-gate.outputs.proceed == 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
