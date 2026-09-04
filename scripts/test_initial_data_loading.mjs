@@ -61,8 +61,18 @@ assert(
 );
 
 assert(
-  /setTimeout\(\(\) => \{\s*void loadCatalog\(\);/s.test(tourList),
-  'Full catalog should only be scheduled as delayed background enhancement.',
+  !/setTimeout\(\(\) => \{\s*void loadCatalog\(\);/.test(tourList),
+  'The 20MB tours-list.json catalog must not be auto-scheduled for every visitor; it is a chunk-failure fallback only.',
+);
+
+assert(
+  tourList.includes('inflateTourSummaryFromIndexEntry(entry)') && tourList.includes('const catalogSourceTours = indexCorpusTours.length > 0'),
+  'Search, filters, options, and AI candidates should run on the index-inflated full corpus instead of the 20MB catalog.',
+);
+
+assert(
+  tourList.includes('page: entry.page'),
+  'Index-inflated corpus entries must keep the page field so lazy chunk loading can locate candidates.',
 );
 
 assert(

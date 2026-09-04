@@ -13,10 +13,11 @@ assert.match(worker, /https:\/\/raw\.githubusercontent\.com/);
 assert.match(worker, /EverywhereWeGoGz@cdn-assets/);
 assert.match(worker, /pathPrefix/);
 assert.match(worker, /text\/html/);
-assert.match(worker, /Promise\.all\(pool\.map\(probeCandidate\)\)/);
+assert.match(worker, /Promise\.all\(pool\.map\(\(candidate\) => probeCandidate\(candidate, originMeta\)\)\)/);
 assert.match(worker, /probeUrl\(candidate\)/);
-assert.match(worker, /probePageUrl\(candidate\)/);
 assert.match(worker, /acceptableProbePayload/);
+assert.match(worker, /isFreshEnough/);
+assert.match(worker, /generatedAt/);
 assert.match(worker, /STATE_TTL_MS/);
 assert.match(worker, /data\/tours-meta\.json/);
 assert.match(worker, /pool_probe=1/);
@@ -25,6 +26,11 @@ assert.match(worker, /CDN_TIMEOUT_MS/);
 assert.match(worker, /staleWhileRevalidate/);
 assert.match(worker, /cacheFirst/);
 assert.match(worker, /relativePublicPath\(requestUrl\)\?\.startsWith\('data\/'\)/);
+assert.doesNotMatch(
+  worker,
+  /data must stay same-origin/,
+  'data requests must be routed through the freshness-checked CDN pool, not excluded from it',
+);
 assert.match(worker, /scope/);
 assert.match(entry, /serviceWorker\.register/);
 assert.match(entry, /serviceWorker\.ready/);

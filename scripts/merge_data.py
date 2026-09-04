@@ -1147,6 +1147,29 @@ def main():
             tours.append(tour)
 
     print(f"[转换] 生成 {len(tours)} 条 Tour 数据")
+
+    # 断供保护：某来源本轮没有任何有效记录（爬虫失败/守卫拦截/全部无效）时，
+    # 沿用上一轮 tours.json 里该来源的全部线路，避免单渠道故障让线路从站上蒸发。
+    # 沿用的记录随后一起过 filter_unavailable_tours 重新校验。
+    if existing_tours:
+        new_counts = {}
+        for tour in tours:
+            new_counts[tour.get("source", "")] = new_counts.get(tour.get("source", ""), 0) + 1
+        prev_by_source = {}
+        for record in existing_tours.values():
+            prev_by_source.setdefault(record.get("source", ""), []).append(record)
+        carried = []
+        for source in sorted(prev_by_source):
+            if new_counts.get(source, 0) == 0 and prev_by_source[source]:
+                records = prev_by_source[source]
+                tours.extend(dict(record) for record in records)
+                carried.append((source, len(records)))
+        for source, count in carried:
+            print(f"[断供保护] {source}: 本轮无有效数据，沿用上一轮 {count} 条线路")
+        # 沿用记录带着上一轮的旧 id，整体重编避免与本轮新记录冲突
+        for index, tour in enumerate(tours, 1):
+            tour["id"] = f"tour_{index}"
+
     for source in sorted(set(t["source"] for t in tours)):
         subset = [tour for tour in tours if tour["source"] == source]
         print(

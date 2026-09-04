@@ -1,4 +1,4 @@
-// 数据加载链：loadInitial（分页首屏）→ 按需 loadCatalog（全量列表）→ loadMorePages（滚动懒加载）
+// 数据加载链：loadInitial（分页首屏）→ loadMorePages（滚动懒加载）；分片失败时才回退 loadCatalog 全量列表
 // 筛选/排序/瀑布流、AI 推荐叠加、滚动监听加载更多
 import { useState, useMemo, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import type {
@@ -59,7 +59,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { zhCN } from 'date-fns/locale';
 
-// 数据加载核心 hook：index 负责筛选，chunk 负责展示，全量列表只做后台增强。
+// 数据加载核心 hook：index 负责筛选与全量语料，chunk 负责展示，全量列表仅在分片加载失败时兜底。
 function useToursData() {
   const [tours, setTours] = useState<TourSummary[]>([]);
   const [indexTours, setIndexTours] = useState<TourIndexEntry[]>([]);
@@ -73,7 +73,6 @@ function useToursData() {
   const hasPageChunksRef = useRef(true);
   const catalogLoadedRef = useRef(false);
   const catalogRequestRef = useRef<Promise<void> | null>(null);
-  const backgroundCatalogTimerRef = useRef<number | null>(null);
   const mountedRef = useRef(false);
 
   const syncLoadingMoreState = useCallback(() => {
@@ -84,9 +83,6 @@ function useToursData() {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      if (backgroundCatalogTimerRef.current !== null) {
-        window.clearTimeout(backgroundCatalogTimerRef.current);
-      }
     };
   }, []);
 
@@ -150,10 +146,6 @@ function useToursData() {
         hasPageChunksRef.current = true;
         setHasPageChunks(true);
         setLoading(false);
-
-        backgroundCatalogTimerRef.current = window.setTimeout(() => {
-          void loadCatalog();
-        }, 12000);
       } catch {
         try {
           const fallbackRes = await fetch(getDataUrl('tours-list.json'));
@@ -520,7 +512,21 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
   const previousAiSearchRequestIdRef = useRef<number | null>(null);
-  const catalogSourceTours = catalogTours.length > 0 ? catalogTours : localTours;
+  // 全量语料池：优先用 tours-index.json 膨胀出的全量语料（4034 条、约 5MB），
+  // 避免为搜索/筛选/AI 下载 20MB 的 tours-list.json；分片失败兜底时才落到 catalogTours/localTours。
+  // 膨胀时保留 page 字段，waterfall 的分片懒加载依赖它定位候选所在分页。
+  const indexCorpusTours = useMemo(
+    () =>
+      indexTours.length > 0
+        ? indexTours.map((entry) => ({ ...inflateTourSummaryFromIndexEntry(entry), page: entry.page }))
+        : ([] as Array<TourSummary & { page: number }>),
+    [indexTours],
+  );
+  const catalogSourceTours = indexCorpusTours.length > 0
+    ? indexCorpusTours
+    : catalogTours.length > 0
+      ? catalogTours
+      : localTours;
   const loadedTourById = useMemo(() => {
     const entries = catalogTours.length > 0 ? catalogTours : localTours;
     return new Map(entries.map((tour) => [tour.id, tour]));

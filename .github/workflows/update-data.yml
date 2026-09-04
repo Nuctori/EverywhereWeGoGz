@@ -266,7 +266,10 @@ jobs:
       - crawl-gzl-api
       - crawl-outdoors
       - crawl-http-aggregate
-    if: always() && !cancelled() && needs.preflight.result == 'success' && (github.event_name == 'workflow_dispatch' || (needs.crawl-jrt365.result == 'success' && needs.crawl-saihuitong.result == 'success' && needs.crawl-kanghui.result == 'success' && needs.crawl-pintu.result == 'success' && needs.crawl-gzl-api.result == 'success' && needs.crawl-outdoors.result == 'success' && needs.crawl-http-aggregate.result == 'success'))
+    # 单渠道爬取失败不应让整站数据停更（曾因 JRT365 守卫连续 3 周阻断）。
+    # 只要 preflight 通过且 >=5/7 渠道成功就继续合并；缺失来源由 merge_data.py
+    # 沿用上一轮线路（断供保护），数据完整性审计仍是提交前的最终质量门。
+    if: always() && !cancelled() && needs.preflight.result == 'success' && (github.event_name == 'workflow_dispatch' || ((needs.crawl-jrt365.result == 'success' && 1 || 0) + (needs.crawl-saihuitong.result == 'success' && 1 || 0) + (needs.crawl-kanghui.result == 'success' && 1 || 0) + (needs.crawl-pintu.result == 'success' && 1 || 0) + (needs.crawl-gzl-api.result == 'success' && 1 || 0) + (needs.crawl-outdoors.result == 'success' && 1 || 0) + (needs.crawl-http-aggregate.result == 'success' && 1 || 0)) >= 5)
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -289,49 +292,49 @@ jobs:
         run: npm ci
 
       - name: Download JRT365 raw data
-        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        if: (!cancelled() && needs.crawl-jrt365.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-jrt365
           path: src/data
 
       - name: Download Saihuitong raw data
-        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        if: (!cancelled() && needs.crawl-saihuitong.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-saihuitong
           path: src/data
 
       - name: Download Kanghui raw data
-        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        if: (!cancelled() && needs.crawl-kanghui.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-kanghui
           path: src/data
 
       - name: Download Pintu raw data
-        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        if: (!cancelled() && needs.crawl-pintu.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-pintu
           path: src/data
 
       - name: Download GZL raw data
-        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        if: (!cancelled() && needs.crawl-gzl-api.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-gzl-api
           path: src/data
 
       - name: Download Outdoors raw data
-        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        if: (!cancelled() && needs.crawl-outdoors.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-outdoors
           path: src/data
 
       - name: Download HTTP aggregate raw data
-        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
+        if: (!cancelled() && needs.crawl-http-aggregate.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-http
