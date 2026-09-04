@@ -1142,7 +1142,7 @@ def main():
             existing = existing_tours.get(make_tour_key(tour))
             if existing and existing.get("createdAt"):
                 tour["createdAt"] = existing["createdAt"]
-            if existing.get("updatedAt") and tour_content_equal(tour, existing):
+            if existing and existing.get("updatedAt") and tour_content_equal(tour, existing):
                 tour["updatedAt"] = existing["updatedAt"]
             tours.append(tour)
 
