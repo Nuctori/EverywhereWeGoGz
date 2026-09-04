@@ -273,6 +273,7 @@ jobs:
       proceed: ${{ steps.gate.outputs.proceed }}
     steps:
       - name: Evaluate crawl majority gate
+        id: gate
         env:
           RESULTS: ${{ join(needs.*.result, ' ') }}
         run: |
