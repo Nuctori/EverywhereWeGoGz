@@ -5,7 +5,6 @@ import {
   buildTourDetailUrl,
   buildWeeklyArticleContext,
   ensureDir,
-  fetchWeatherOutlook,
   getDefaultAuthor,
   getDefaultWebsiteUrl,
   loadEnvFiles,
@@ -1219,14 +1218,9 @@ export async function generateWeeklyArticleWithAgentCli(rootDir, options = {}) {
   const tours = readToursData(rootDir);
   const execRunner = options.execRunner || runAiderMessage;
 
-  let weatherOutlook = options.weatherOutlook;
-  if (!weatherOutlook) {
-    try {
-      weatherOutlook = await fetchWeatherOutlook({ location: '广州' });
-    } catch (error) {
-      console.warn(error instanceof Error ? error.message : String(error));
-    }
-  }
+  // 新版文章管线天气段内部自理（fetchDepartureWeatherWindow → buildDetailedWeatherLead），
+  // buildWeeklyArticleContext 已不消费 weatherOutlook；保留 options 透传仅为兼容旧调用方。
+  const weatherOutlook = options.weatherOutlook;
 
   const context = buildWeeklyArticleContext(tours, {
     runDate,

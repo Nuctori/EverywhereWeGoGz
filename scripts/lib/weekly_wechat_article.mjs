@@ -873,6 +873,7 @@ export function buildWeeklyArticleContext(tours, options = {}) {
     runDate,
     season,
     weekWindow,
+    generationMode: options.generationMode,
     articleGoal: '每周旅行团公众号推荐文章',
     editorialContext: {
       audience: '广州及周边出发、想近期报名旅行团的公众号读者',
@@ -1517,4 +1518,12 @@ export function rebuildWeeklyArticleFromStructured(context, structured) {
 
 export function getDefaultWebsiteUrl() {
   return DEFAULT_WEBSITE_URL;
+}
+
+export function buildTourDetailUrl(tour, websiteUrl = DEFAULT_WEBSITE_URL) {
+  if (!tour?.id) return websiteUrl;
+  const resolved = new URL(websiteUrl);
+  resolved.searchParams.set('tour', String(tour.id));
+  resolved.searchParams.set('source', 'wechat');
+  return resolved.toString();
 }
