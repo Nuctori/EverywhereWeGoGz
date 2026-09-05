@@ -290,10 +290,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    # 默认 6h 不够：多周停更后的追赶轮，Mine source geo evidence 单步就需 3h+。
-    # 2026-09-04 追赶轮在 6h13m 被默认上限取消，挖掘进度全部丢失。放宽到 36h 上限，
-    # 常规每周轮的挖掘量回落到分钟级后不会触达。
-    timeout-minutes: 2160
+    # 托管 runner 对单 job 有 6h 硬上限，timeout-minutes 调不上去（2160 会被钳制），
+    # 2026-09-04/05 两轮追赶都在 job 启动后 ~5h58m 被硬顶收掉。
+    # 追赶轮的超量挖掘由下方 mine 步骤的有界超时兜底，job 自身保持默认余量。
+    timeout-minutes: 360
     needs:
       - preflight
       - crawl-gate
@@ -379,6 +379,11 @@ jobs:
         run: python -u scripts/merge_data.py
 
       - name: Mine source geo evidence
+        # 尽力而为：多周积压时单轮挖掘会超 6h 硬上限，不能让它阻断数据刷新。
+        # 超时被收掉后管线继续走 split/audit/commit，地理覆盖沿用已入库缓存；
+        # 挖掘债随每周轮次消化，真正的解法是挖掘增量落盘（TODO）。
+        continue-on-error: true
+        timeout-minutes: 90
         run: python -u scripts/source_geo_enrichment.py --network --write --workers 8
 
       - name: Split merged data
