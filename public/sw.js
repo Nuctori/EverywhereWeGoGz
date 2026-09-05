@@ -340,7 +340,7 @@ self.addEventListener('fetch', (event) => {
   if (relativePublicPath(requestUrl)?.startsWith('data/')) {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
-      return fetchFromPoolOrOrigin(request, cache, 'default');
+      return fetchFromPoolOrOrigin(event.request, cache, 'default');
     })());
     return;
   }
