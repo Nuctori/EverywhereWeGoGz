@@ -5,7 +5,10 @@ import { geoPlacesSchema, tourDetailSchema, toursPageSchema } from '../src/lib/r
 
 const sample = JSON.parse(fs.readFileSync('public/data/tour-details/tour_1.json', 'utf8'));
 const parsed = tourDetailSchema.parse(sample);
-assert.equal(parsed.mealCounts, undefined, 'normalized empty mealCounts should be omitted');
+// 空 mealCounts 省略契约用合成样本验证——活数据探针（tour_1）是否带真实三餐
+// 取决于当轮抓取，2026-09-05 起 tour_1 带了合法的 {1,1,1}，不能再用它断言空值。
+const emptyMealsParsed = tourDetailSchema.parse({ ...sample, mealCounts: {} });
+assert.equal(emptyMealsParsed.mealCounts, undefined, 'normalized empty mealCounts should be omitted');
 const legacyParsed = tourDetailSchema.parse({ ...sample, mealCounts: null });
 assert.equal(legacyParsed.mealCounts, null, 'legacy null mealCounts must remain readable');
 
