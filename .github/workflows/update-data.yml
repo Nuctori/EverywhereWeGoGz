@@ -290,6 +290,10 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    # 默认 6h 不够：多周停更后的追赶轮，Mine source geo evidence 单步就需 3h+。
+    # 2026-09-04 追赶轮在 6h13m 被默认上限取消，挖掘进度全部丢失。放宽到 36h 上限，
+    # 常规每周轮的挖掘量回落到分钟级后不会触达。
+    timeout-minutes: 2160
     needs:
       - preflight
       - crawl-gate
