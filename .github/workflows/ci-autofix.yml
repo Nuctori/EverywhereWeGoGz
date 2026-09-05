@@ -1,0 +1,206 @@
+name: CI Auto Fix
+
+# CI 挂了 → 唤起 pi agent 自动修复 → 修完自动重跑失败的工作流。
+# 护栏：只对首轮失败出手（run_attempt < 2），二轮仍挂升级到追踪 issue，
+# 防止 fix→rerun→fail 无限循环。手动 dispatch 可指定 run_id 做测试或补救。
+
+on:
+  workflow_run:
+    workflows:
+      - Update Tour Data
+      - Deploy GitHub Pages
+      - Refresh Availability Cache
+      - Refresh OSM POI Index
+      - Check CDN Pool
+      - Check Booking URLs
+      - Check WeChat Articles And SUP Orders
+      - Weekly WeChat Article
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: '要修复的失败 run id（留空则自动找最近一次失败）'
+        required: false
+        default: ''
+
+concurrency:
+  group: ci-autofix
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+
+jobs:
+  autofix:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.run_attempt < 2)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: 安装 pi
+        env:
+          COMMAND_CODE_API_KEY: ${{ secrets.COMMAND_CODE_API_KEY }}
+        run: |
+          npm install -g @earendil-works/pi-coding-agent@0.84.4 pi-commandcode-provider@0.6.0 @earendil-works/pi-ai@0.84.4
+          pi install npm:pi-commandcode-provider 2>&1 | tail -n 20 || true
+          mkdir -p "$HOME/.pi/agent"
+          cp -f .pi-commandcode-models.json "$HOME/.pi/agent/commandcode-models.json" 2>/dev/null || true
+
+      - name: 解析目标 run
+        id: target
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_RUN_ID: ${{ github.event.workflow_run.id }}
+          EVENT_NAME: ${{ github.event.workflow_run.name }}
+          INPUT_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          set -euo pipefail
+          if [ -n "$INPUT_RUN_ID" ]; then
+            run_id="$INPUT_RUN_ID"
+            meta="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/$run_id" --jq '"\(.name)|\(.run_attempt)"')"
+            name="${meta%%|*}"; attempt="${meta##*|}"
+          elif [ -n "$EVENT_RUN_ID" ]; then
+            run_id="$EVENT_RUN_ID"; name="$EVENT_NAME"; attempt="${{ github.event.workflow_run.run_attempt }}"
+          else
+            # dispatch 未指定：找最近一次失败（排除本工作流自身）
+            row="$(gh run list --status failure --limit 15
+              --json databaseId,name,workflowName --jq '.[] | select(.workflowName != "CI Auto Fix") | "\(.databaseId)|\(.workflowName)"' | head -1)"
+            run_id="${row%%|*}"; name="${row##*|}"; attempt="?"
+          fi
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          echo "workflow=$name" >> "$GITHUB_OUTPUT"
+          echo "attempt=$attempt" >> "$GITHUB_OUTPUT"
+          echo "target: run=$run_id workflow=$name attempt=$attempt"
+
+      - name: 缺 key 时降级为告警
+        id: keycheck
+        env:
+          COMMAND_CODE_API_KEY: ${{ secrets.COMMAND_CODE_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW: ${{ steps.target.outputs.workflow }}
+          RUN_ID: ${{ steps.target.outputs.run_id }}
+        run: |
+          if [ -z "$COMMAND_CODE_API_KEY" ]; then
+            bash .github/scripts/ci-autofix-comment.sh "$RUN_ID" "$WORKFLOW" \
+              "blocked" "仓库缺少 COMMAND_CODE_API_KEY secret，无法唤起自动修复 agent。" || true
+            echo "has_key=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_key=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: pi 诊断并修复（有界：单提交、守卫通过才落）
+        id: fix
+        if: steps.keycheck.outputs.has_key == 'true'
+        env:
+          COMMAND_CODE_API_KEY: ${{ secrets.COMMAND_CODE_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ steps.target.outputs.run_id }}
+          WORKFLOW: ${{ steps.target.outputs.workflow }}
+        run: |
+          set -euo pipefail
+          pi -p \
+            --provider commandcode \
+            --model z-ai/glm-5.3-flash \
+            --thinking high \
+            --tools read,bash,grep,find,ls,write,edit \
+            "$(cat <<'PROMPT'
+          你是 CI 自动修复 agent。目标：诊断失败 run、修复仓库代码、跑本地守卫、单提交。
+
+          目标失败 run 的 id 和工作流名分别在环境变量 RUN_ID 与 WORKFLOW 中
+          （bash 里 echo "$RUN_ID" "$WORKFLOW" 即可取到），下文以 $RUN_ID 指代。
+
+          调查顺序：
+          1) gh run view $RUN_ID --log-failed 提取真实报错（不要凭名字猜）
+          2) 打开报错对应的脚本/源文件本体核对现状
+          3) git log --oneline -8 看最近改动是否相关
+
+          修复纪律：
+          - 只修导致这次失败的最小范围；不顺手重构
+          - 本仓契约：public/data/** 是生成产物禁止手改；脚本改动后跑对应守卫
+            （npm run audit:*、node scripts/test_*.mjs、python -m py_compile）；
+            改动 .github/workflows 须先本地
+            python -c "import yaml; yaml.safe_load(open(...))" 验证
+          - 环境差异陷阱：托管 runner 单 job 6h 硬上限；GITHUB_TOKEN 推送不触发
+            其他 workflow；GitHub 表达式无算术
+          - 明显是源站临时故障/配额/网络抖动 → 不要改代码，判定 flaky
+          - 修复涉及密钥/凭据 → 判定 blocked，绝不动 .env / secrets / cookies
+
+          收尾（三选一，写入 /tmp/fix-verdict，每行一条）：
+          FIXED:<一句话改动摘要>
+          NOOP:<flaky/外部原因，无需改码>
+          BLOCKED:<需要人工的原因>
+
+          仅 FIXED 时：
+          - 跑过的守卫命令与结果必须全部通过后才允许 git add + commit
+          - 提交信息格式：[auto-fix] <工作流名> $RUN_ID: <摘要>
+          - git push origin HEAD
+          - 然后执行 gh run rerun $RUN_ID --failed（失败则重试一次）
+          PROMPT
+          )" 2>&1 | tee /tmp/pi-autofix.log
+
+          grep -E "^(FIXED|NOOP|BLOCKED):" /tmp/pi-autofix.log | tail -1 > /tmp/fix-verdict || echo "NOOP:agent 未给出结论" > /tmp/fix-verdict
+          cat /tmp/fix-verdict
+
+      - name: 重跑失败的 run（仅 FIXED）
+        if: steps.keycheck.outputs.has_key == 'true' && steps.fix.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ steps.target.outputs.run_id }}
+        run: |
+          if grep -q "^FIXED:" /tmp/fix-verdict; then
+            gh run rerun "$RUN_ID" --failed || gh run rerun "$RUN_ID" || echo "rerun 未成功触发（run 可能不可重跑）"
+          else
+            echo "非 FIXED 结论，跳过重跑"
+          fi
+
+      - name: 结果公示到追踪 issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW: ${{ steps.target.outputs.workflow }}
+          RUN_ID: ${{ steps.target.outputs.run_id }}
+          ATTEMPT: ${{ steps.target.outputs.attempt }}
+          FIX_OUTCOME: ${{ steps.fix.outcome }}
+        run: |
+          verdict="$(cat /tmp/fix-verdict 2>/dev/null || echo 'BLOCKED:agent 步骤未执行（见上方日志）')"
+          bash .github/scripts/ci-autofix-comment.sh "$RUN_ID" "$WORKFLOW" "$verdict"
+
+      - name: 上传修复日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-autofix-log
+          path: /tmp/pi-autofix.log
+          if-no-files-found: ignore
+
+  escalate:
+    # 二轮仍失败：自动修复已用过一次机会，升级人工
+    if: >
+      github.event_name != 'workflow_dispatch' &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt >= 2
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: 升级到追踪 issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          WORKFLOW: ${{ github.event.workflow_run.name }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          bash .github/scripts/ci-autofix-comment.sh "$RUN_ID" "$WORKFLOW" \
+            "ESCALATE:自动修复轮之后第二轮仍然失败，需要人工介入。$RUN_URL"
