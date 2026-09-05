@@ -4978,17 +4978,14 @@
   "地派镇 龙门 广东 中国": {
     "query": "地派镇 龙门 广东 中国",
     "provider": "arcgis",
-    "latitude": 23.842248,
-    "longitude": 114.074151,
-    "displayName": "广东省惠州市龙门地派镇",
+    "latitude": 23.84747,
+    "longitude": 114.08035,
+    "displayName": "广东惠州地派镇",
     "level": "town",
-    "locality": "龙门地派镇",
-    "providerScore": 100.0,
+    "locality": "广东惠州地派镇",
+    "providerScore": 90.2,
     "address": {
-      "formatted": "广东省惠州市龙门地派镇",
-      "country": "中国",
-      "province": "广东省",
-      "city": "惠州市"
+      "formatted": "广东惠州地派镇"
     },
     "precision": "approximate"
   },
@@ -5021,20 +5018,16 @@
   },
   "三英镇 增城 广东 中国": {
     "query": "三英镇 增城 广东 中国",
-    "provider": "photon",
-    "latitude": 23.5678689,
-    "longitude": 116.6436494,
-    "displayName": "三英村   潮州市  广东省 中国",
-    "level": "town",
-    "locality": "潮州市",
+    "provider": "nominatim",
+    "latitude": 23.562218,
+    "longitude": 113.7772115,
+    "displayName": "三英温泉度假酒店, S254, 派潭镇, 增城区, 广州市, 广东省, 中国",
+    "level": "poi",
+    "locality": "派潭镇",
     "providerScore": 80,
     "address": {
-      "formatted": "三英村   潮州市  广东省 中国",
-      "country": "中国",
-      "province": "广东省",
-      "city": "潮州市"
-    },
-    "precision": "approximate"
+      "formatted": "三英温泉度假酒店, S254, 派潭镇, 增城区, 广州市, 广东省, 中国"
+    }
   },
   "林丰镇 龙门 广东 中国": {
     "query": "林丰镇 龙门 广东 中国",
@@ -5410,5 +5403,363 @@
     "locality": "桂城街道",
     "providerScore": 90,
     "matchQuality": 90
+  },
+  "品臻酒店 肇庆 广东 中国": {
+    "query": "品臻酒店 肇庆 广东 中国",
+    "provider": "photon",
+    "latitude": 23.0755821,
+    "longitude": 112.4313924,
+    "displayName": "品臻酒店 玑西路 睦岗街道 肇庆市  广东省 中国",
+    "level": "poi",
+    "locality": "玑东社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "品臻酒店 玑西路 睦岗街道 肇庆市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "肇庆市",
+      "district": "睦岗街道",
+      "locality": "玑东社区",
+      "street": "玑西路",
+      "postalCode": "526040"
+    }
+  },
+  "星酒店 肇庆 广东 中国": {
+    "query": "星酒店 肇庆 广东 中国",
+    "provider": "photon",
+    "latitude": 23.059704,
+    "longitude": 112.4666347,
+    "displayName": "星酒店 文明北路 城东街道 肇庆市  广东省 中国",
+    "level": "poi",
+    "locality": "星湖社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "星酒店 文明北路 城东街道 肇庆市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "肇庆市",
+      "district": "城东街道",
+      "locality": "星湖社区",
+      "street": "文明北路",
+      "postalCode": "526040"
+    }
+  },
+  "林丰村 龙门 广东 中国": {
+    "query": "林丰村 龙门 广东 中国",
+    "provider": "arcgis",
+    "latitude": 21.83135,
+    "longitude": 110.9879,
+    "displayName": "广东茂名林丰村",
+    "level": "town",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "广东茂名林丰村"
+    },
+    "precision": "approximate"
+  },
+  "龙山镇 新兴 广东 中国": {
+    "query": "龙山镇 新兴 广东 中国",
+    "provider": "arcgis",
+    "latitude": 23.75056,
+    "longitude": 113.38815,
+    "displayName": "广东清远龙山镇",
+    "level": "town",
+    "locality": "广东清远龙山镇",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "广东清远龙山镇"
+    },
+    "precision": "approximate"
+  },
+  "星湖大酒店 肇庆 广东 中国": {
+    "query": "星湖大酒店 肇庆 广东 中国",
+    "provider": "photon",
+    "latitude": 23.0571237,
+    "longitude": 112.4669013,
+    "displayName": "星湖大酒店 端州四路 城东街道 肇庆市  广东省 中国",
+    "level": "poi",
+    "locality": "文明社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "星湖大酒店 端州四路 城东街道 肇庆市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "肇庆市",
+      "district": "城东街道",
+      "locality": "文明社区",
+      "street": "端州四路",
+      "postalCode": "526040"
+    }
+  },
+  "古兜村 新会 广东 中国": {
+    "query": "古兜村 新会 广东 中国",
+    "provider": "nominatim",
+    "latitude": 22.1455536,
+    "longitude": 113.0214128,
+    "displayName": "古兜村, G228, 崖门镇, 新会区, 江门市, 广东省, 中国",
+    "level": "town",
+    "locality": "崖门镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "古兜村, G228, 崖门镇, 新会区, 江门市, 广东省, 中国"
+    },
+    "precision": "approximate"
+  },
+  "恩平温泉国际酒店 广东 中国": {
+    "query": "恩平温泉国际酒店 广东 中国",
+    "provider": "nominatim",
+    "latitude": 22.325014,
+    "longitude": 112.3415316,
+    "displayName": "恩平温泉国际酒店, 学前北路, 良西镇, 恩平市, 江门市, 广东省, 中国",
+    "level": "poi",
+    "locality": "良西镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "恩平温泉国际酒店, 学前北路, 良西镇, 恩平市, 江门市, 广东省, 中国"
+    }
+  },
+  "海螺国际大酒店 英德 广东 中国": {
+    "query": "海螺国际大酒店 英德 广东 中国",
+    "provider": "photon",
+    "latitude": 24.179964,
+    "longitude": 113.4117018,
+    "displayName": "海螺国际大酒店 桥西路 英德市 清远市  广东省 中国",
+    "level": "poi",
+    "locality": "清远市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "海螺国际大酒店 桥西路 英德市 清远市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "清远市",
+      "district": "英德市",
+      "street": "桥西路",
+      "postalCode": "513000"
+    }
+  },
+  "崇左德天瀑布": {
+    "query": "崇左德天瀑布",
+    "provider": "nominatim",
+    "latitude": 22.8558796,
+    "longitude": 106.7231618,
+    "displayName": "德天瀑布, 德天村, 大新县, 崇左市, 广西壮族自治区, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "德天瀑布, 德天村, 大新县, 崇左市, 广西壮族自治区, 中国"
+    }
+  },
+  "卓思道温泉 从化 广东 中国": {
+    "query": "卓思道温泉 从化 广东 中国",
+    "provider": "nominatim",
+    "latitude": 23.6907277,
+    "longitude": 113.7029491,
+    "displayName": "卓思道温泉度假酒店, 御泉大道, 良口镇, 从化区, 广州市, 广东省, 中国",
+    "level": "poi",
+    "locality": "良口镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "卓思道温泉度假酒店, 御泉大道, 良口镇, 从化区, 广州市, 广东省, 中国"
+    }
+  },
+  "紫云谷 广东 中国": {
+    "query": "紫云谷 广东 中国",
+    "provider": "nominatim",
+    "latitude": 23.1267137,
+    "longitude": 112.585637,
+    "displayName": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "金渡镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "紫云谷景区, 金渡镇, 高要区, 肇庆市, 广东省, 中国"
+    }
+  },
+  "三百山镇 东江源头 5a 安远 江西 中国": {
+    "query": "三百山镇 东江源头 5a 安远 江西 中国",
+    "provider": "arcgis",
+    "latitude": 24.95079,
+    "longitude": 115.37189,
+    "displayName": "江西赣州三百山镇",
+    "level": "town",
+    "locality": "江西赣州三百山镇",
+    "providerScore": 79.2,
+    "address": {
+      "formatted": "江西赣州三百山镇"
+    }
+  },
+  "广州南沙 .广州 广东 中国": {
+    "query": "广州南沙 .广州 广东 中国",
+    "provider": "photon",
+    "latitude": 22.7004839,
+    "longitude": 113.5528338,
+    "displayName": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+    "level": "poi",
+    "locality": "福生社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "广州市",
+      "district": "珠江街道",
+      "locality": "福生社区",
+      "street": "同安东围路",
+      "postalCode": "511462"
+    }
+  },
+  "温泉乡 腾冲 云南 中国": {
+    "query": "温泉乡 腾冲 云南 中国",
+    "provider": "arcgis",
+    "latitude": 24.6988,
+    "longitude": 99.6951,
+    "displayName": "云南温泉乡",
+    "level": "town",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "云南温泉乡"
+    },
+    "precision": "approximate"
+  },
+  "大酒店 泰山 山东 中国": {
+    "query": "大酒店 泰山 山东 中国",
+    "provider": "nominatim",
+    "latitude": 36.2000622,
+    "longitude": 117.1064733,
+    "displayName": "山海大酒店, 普照, 泰前街道, 泰山区, 泰安市, 山东省, 271000, 中国",
+    "level": "poi",
+    "locality": "泰前街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "山海大酒店, 普照, 泰前街道, 泰山区, 泰安市, 山东省, 271000, 中国"
+    }
+  },
+  "香格里拉大酒店 云南 中国": {
+    "query": "香格里拉大酒店 云南 中国",
+    "provider": "photon",
+    "latitude": 27.8266346,
+    "longitude": 99.7050858,
+    "displayName": "香格里拉大酒店 池慈卡街 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ། 迪庆藏族自治州 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ་གྲོང་ཁྱེར། 云南省 中国",
+    "level": "poi",
+    "locality": "迪庆藏族自治州",
+    "providerScore": 80,
+    "address": {
+      "formatted": "香格里拉大酒店 池慈卡街 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ། 迪庆藏族自治州 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ་གྲོང་ཁྱེར། 云南省 中国",
+      "country": "中国",
+      "province": "云南省",
+      "city": "迪庆藏族自治州",
+      "district": "香格里拉市 སེམས་ཀྱི་ཉི་ཟླ།",
+      "street": "池慈卡街",
+      "houseNumber": "1号",
+      "postalCode": "674400"
+    }
+  },
+  "星湖大酒店 广东 中国": {
+    "query": "星湖大酒店 广东 中国",
+    "provider": "photon",
+    "latitude": 23.0571237,
+    "longitude": 112.4669013,
+    "displayName": "星湖大酒店 端州四路 城东街道 肇庆市  广东省 中国",
+    "level": "poi",
+    "locality": "文明社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "星湖大酒店 端州四路 城东街道 肇庆市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "肇庆市",
+      "district": "城东街道",
+      "locality": "文明社区",
+      "street": "端州四路",
+      "postalCode": "526040"
+    }
+  },
+  "肇庆鼎湖 广东 中国": {
+    "query": "肇庆鼎湖 广东 中国",
+    "provider": "arcgis",
+    "latitude": 23.161895301,
+    "longitude": 112.5625362,
+    "displayName": "广东省肇庆鼎湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "广东省肇庆鼎湖"
+    }
+  },
+  "七星岩 广东 中国": {
+    "query": "七星岩 广东 中国",
+    "provider": "nominatim",
+    "latitude": 23.0805699,
+    "longitude": 112.4727006,
+    "displayName": "七星岩景区, 城东街道, 端州区, 肇庆市, 广东省, 中国",
+    "level": "poi",
+    "locality": "城东街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "七星岩景区, 城东街道, 端州区, 肇庆市, 广东省, 中国"
+    }
+  },
+  "肇庆星酒店": {
+    "query": "肇庆星酒店",
+    "provider": "nominatim",
+    "latitude": 23.059704,
+    "longitude": 112.4666347,
+    "displayName": "星酒店, 牌坊广场, 星湖社区, 城东街道, 端州区, 肇庆市, 广东省, 526040, 中国",
+    "level": "poi",
+    "locality": "城东街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "星酒店, 牌坊广场, 星湖社区, 城东街道, 端州区, 肇庆市, 广东省, 526040, 中国"
+    }
+  },
+  "禅泉度假酒店 新兴 广东 中国": {
+    "query": "禅泉度假酒店 新兴 广东 中国",
+    "provider": "photon",
+    "latitude": 22.5959546,
+    "longitude": 112.2198863,
+    "displayName": "禅泉度假酒店 禅道 塔脚 六祖镇 新兴县 广东省 中国",
+    "level": "poi",
+    "locality": "六祖镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "禅泉度假酒店 禅道 塔脚 六祖镇 新兴县 广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "六祖镇",
+      "district": "塔脚",
+      "street": "禅道",
+      "postalCode": "527400"
+    }
+  },
+  "林丰村 3天＊怡景 龙门 广东 中国": {
+    "query": "林丰村 3天＊怡景 龙门 广东 中国",
+    "provider": "arcgis",
+    "latitude": 21.83135,
+    "longitude": 110.9879,
+    "displayName": "广东茂名林丰村",
+    "level": "town",
+    "locality": "",
+    "providerScore": 80.72,
+    "address": {
+      "formatted": "广东茂名林丰村"
+    },
+    "precision": "approximate"
+  },
+  "三英温泉度假酒店 增城 广东 中国": {
+    "query": "三英温泉度假酒店 增城 广东 中国",
+    "provider": "nominatim",
+    "latitude": 23.562218,
+    "longitude": 113.7772115,
+    "displayName": "三英温泉度假酒店, S254, 派潭镇, 增城区, 广州市, 广东省, 中国",
+    "level": "poi",
+    "locality": "派潭镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "三英温泉度假酒店, S254, 派潭镇, 增城区, 广州市, 广东省, 中国"
+    }
   }
 }
