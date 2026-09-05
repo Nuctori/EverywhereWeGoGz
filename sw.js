@@ -14,7 +14,7 @@
 const CACHE_PREFIX = 'everywhere-we-go-static-';
 const CACHE_NAME = `${CACHE_PREFIX}v3`;
 const STATE_URL = '/__cdn_pool_state__';
-const CDN_TIMEOUT_MS = 1800;
+const CDN_TIMEOUT_MS = 2500;
 const STATE_TTL_MS = 10 * 60 * 1000;
 const DEFAULT_CDN_POOL = [
   { id: 'jsdmirror-cn', origin: 'https://cdn.jsdmirror.cn', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
@@ -116,24 +116,28 @@ function getPool() {
 
 async function fetchWithTimeout(input, init = {}, timeoutMs = CDN_TIMEOUT_MS) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
+    // fetch 在响应头就 resolve；这里拿到头立刻清掉定时器，
+    // body 下载不再受 deadline 约束——否则大文件/慢连接会在
+    // 传输中途被 abort，页面侧表现为 net::ERR_FAILED。
     return await fetch(input, { ...init, signal: controller.signal });
   } finally {
-    clearTimeout(timeout);
+    clearTimeout(timer);
   }
 }
 
 async function readState(cache) {
+  // 返回 { state, stale }：过期状态仍然可用（winner 大概率还是对的），
+  // 只是同时触发后台重选。返回 null state 表示从无记录或全源不健康的负缓存。
   try {
     const response = await cache.match(STATE_URL);
-    if (!response) return null;
+    if (!response) return { state: null, stale: true };
     const state = await response.json();
-    if (Date.now() - Number(state.updatedAt || 0) > STATE_TTL_MS) return null;
-    return state;
+    const stale = Date.now() - Number(state.updatedAt || 0) > STATE_TTL_MS;
+    return { state: state.none ? null : state, stale };
   } catch {
-    return null;
+    return { state: null, stale: true };
   }
 }
 
@@ -220,10 +224,25 @@ async function selectBestCandidate(cache, pool) {
     .filter(Boolean)
     .sort((left, right) => Number(left.fallback) - Number(right.fallback) || left.latencyMs - right.latencyMs);
 
-  if (healthy.length === 0) return null;
+  if (healthy.length === 0) {
+    // 全源不健康也要写负缓存：否则每个请求都会触发一轮重探测（探测风暴）
+    await writeState(cache, { none: true });
+    return null;
+  }
   const winner = healthy[0];
   await writeState(cache, winner);
   return winner;
+}
+
+// 后台选择节流：进行中的选择复用同一 promise，避免并发请求重复探测
+let selectionInFlight = null;
+function ensureSelection(cache, pool) {
+  if (!selectionInFlight) {
+    selectionInFlight = selectBestCandidate(cache, pool).finally(() => {
+      selectionInFlight = null;
+    });
+  }
+  return selectionInFlight;
 }
 
 async function fetchFromPoolOrOrigin(request, cache, cacheMode = 'no-store') {
@@ -232,30 +251,27 @@ async function fetchFromPoolOrOrigin(request, cache, cacheMode = 'no-store') {
   if (!publicPath) return fetch(request);
 
   const pool = await getPool();
-  let state = await readState(cache);
-  if (!state) {
-    state = await selectBestCandidate(cache, pool);
+  const { state, stale } = await readState(cache);
+
+  // 无 winner 或状态过期：同源立即服务，选择放后台——请求路径永不背探测延迟。
+  // 过期状态同时触发一次后台重选（有 in-flight 节流 + 负缓存兜底）。
+  if (!state || stale) {
+    void ensureSelection(cache, pool).catch(() => {});
+    return fetch(request);
   }
 
-  const ordered = state
-    ? [state, ...pool.filter((item) => item.origin !== state.origin)]
-    : pool;
-
-  for (const candidate of ordered) {
-    try {
-      const response = await fetchWithTimeout(
-        cdnUrl(candidate, publicPath, requestUrl.search),
-        { credentials: 'omit', mode: 'cors', cache: cacheMode },
-      );
-      if (acceptableStaticResponse(response)) {
-        if (!state || state.origin !== candidate.origin) {
-          await writeState(cache, candidate);
-        }
-        return response;
-      }
-    } catch {
-      // Try the next candidate and then the GitHub Pages origin.
+  // 有 winner：只试一次，失败直接回源。逐候选串级已移入选择阶段。
+  // 注意不要在这里刷新 state.updatedAt——否则状态永不过期，后台重选失效。
+  try {
+    const response = await fetchWithTimeout(
+      cdnUrl(state, publicPath, requestUrl.search),
+      { credentials: 'omit', mode: 'cors', cache: cacheMode },
+    );
+    if (acceptableStaticResponse(response)) {
+      return response;
     }
+  } catch {
+    // winner 失效，回退同源
   }
 
   // The original same-origin URL is the authoritative final fallback.
