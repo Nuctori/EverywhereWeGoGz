@@ -28,6 +28,8 @@ const DEFAULT_CDN_POOL = [
   },
 ];
 
+const DEFAULT_PROBE_IMAGE = 'data/image-cache/pool-probe.webp';
+
 let poolPromise;
 
 function scopePath() {
@@ -98,11 +100,17 @@ async function loadPool() {
       cache: 'no-store',
       credentials: 'same-origin',
     });
-    if (!response.ok) return DEFAULT_CDN_POOL;
+    if (!response.ok) return { pool: DEFAULT_CDN_POOL, probeImage: DEFAULT_PROBE_IMAGE };
     const config = await response.json();
-    return normalizePool(config.origins);
+    return {
+      pool: normalizePool(config.origins),
+      // 新字段缺失时回退默认；老配置仍工作，只是不做图片直出校验
+      probeImage: typeof config.probeImage === 'string' && config.probeImage.trim()
+        ? config.probeImage.trim()
+        : DEFAULT_PROBE_IMAGE,
+    };
   } catch {
-    return DEFAULT_CDN_POOL;
+    return { pool: DEFAULT_CDN_POOL, probeImage: DEFAULT_PROBE_IMAGE };
   }
 }
 
@@ -165,6 +173,19 @@ function acceptableStaticResponse(response) {
   return !contentType.includes('text/html');
 }
 
+// 图片直出判定：200 + image/* + 最终 URL 仍在候选源上。
+// raw.githubusercontent 兜底源同样按此标准（它对 webp 回 image/webp，实测通过）。
+function acceptableImageResponse(response, candidate) {
+  if (!acceptableStaticResponse(response)) return false;
+  const contentType = (response.headers.get('content-type') || '').toLowerCase();
+  if (!contentType.startsWith('image/')) return false;
+  try {
+    return new URL(response.url).origin === new URL(candidate.origin).origin;
+  } catch {
+    return false;
+  }
+}
+
 function acceptableProbePayload(meta) {
   return Boolean(meta) && Number(meta.totalRecords) > 0;
 }
@@ -189,7 +210,7 @@ async function readOriginMeta() {
   }
 }
 
-async function probeCandidate(candidate, originMeta) {
+async function probeCandidate(candidate, originMeta, probeImage) {
   const startedAt = performance.now();
   try {
     const metaResponse = await fetchWithTimeout(probeUrl(candidate), {
@@ -200,6 +221,18 @@ async function probeCandidate(candidate, originMeta) {
     if (!acceptableStaticResponse(metaResponse)) return null;
     const meta = await metaResponse.json();
     if (!acceptableProbePayload(meta) || !isFreshEnough(meta, originMeta)) return null;
+
+    // 图片直出校验：某些镜像对 JSON 直出、对图片却 301 跳回源站（jsdelivr 主域 2026-09 实测），
+    // 探针只测 JSON 会漏判。要求：ok + image/* content-type + 未被重定向离源。
+    if (probeImage) {
+      const imageResponse = await fetchWithTimeout(cdnUrl(candidate, probeImage, '?pool_probe=1'), {
+        credentials: 'omit',
+        mode: 'cors',
+        cache: 'no-store',
+        redirect: 'follow',
+      });
+      if (!acceptableImageResponse(imageResponse, candidate)) return null;
+    }
 
     return {
       id: candidate.id,
@@ -214,9 +247,10 @@ async function probeCandidate(candidate, originMeta) {
   }
 }
 
-async function selectBestCandidate(cache, pool) {
+async function selectBestCandidate(cache, poolWithProbe) {
+  const { pool, probeImage } = poolWithProbe;
   const originMeta = await readOriginMeta();
-  const results = await Promise.all(pool.map((candidate) => probeCandidate(candidate, originMeta)));
+  const results = await Promise.all(pool.map((candidate) => probeCandidate(candidate, originMeta, probeImage)));
   const healthy = results
     .filter(Boolean)
     .sort((left, right) => Number(left.fallback) - Number(right.fallback) || left.latencyMs - right.latencyMs);
@@ -233,9 +267,9 @@ async function selectBestCandidate(cache, pool) {
 
 // 后台选择节流：进行中的选择复用同一 promise，避免并发请求重复探测
 let selectionInFlight = null;
-function ensureSelection(cache, pool) {
+function ensureSelection(cache, poolWithProbe) {
   if (!selectionInFlight) {
-    selectionInFlight = selectBestCandidate(cache, pool).finally(() => {
+    selectionInFlight = selectBestCandidate(cache, poolWithProbe).finally(() => {
       selectionInFlight = null;
     });
   }
@@ -247,13 +281,13 @@ async function fetchFromPoolOrOrigin(request, cache, cacheMode = 'no-store') {
   const publicPath = relativePublicPath(requestUrl);
   if (!publicPath) return fetch(request);
 
-  const pool = await getPool();
+  const poolWithProbe = await getPool();
   const { state, stale } = await readState(cache);
 
   // 无 winner 或状态过期：同源立即服务，选择放后台——请求路径永不背探测延迟。
   // 过期状态同时触发一次后台重选（有 in-flight 节流 + 负缓存兜底）。
   if (!state || stale) {
-    void ensureSelection(cache, pool).catch(() => {});
+    void ensureSelection(cache, poolWithProbe).catch(() => {});
     return fetch(request);
   }
 

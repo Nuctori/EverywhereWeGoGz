@@ -1,6 +1,7 @@
 {
-  "version": 2,
+  "version": 3,
   "probe": "data/tours-meta.json",
+  "probeImage": "data/image-cache/pool-probe.webp",
   "origins": [
     {
       "id": "jsdmirror-cn",
