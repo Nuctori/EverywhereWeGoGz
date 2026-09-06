@@ -533,11 +533,24 @@ for (let page = 0; page < totalPages; page++) {
   };
   writeTextFileWithRetry(path.join(pageDir, `tours-page-${page}.json`), compactJson(pageData));
 }
+// 数据集缩小时删除上一轮残留的高序分片：残留片与新版前缀片在镜像缓存里
+// 混发时会出现跨代重复 ID，触发前端"nextPage 指回已加载分片"的死循环。
+let stalePageFiles = 0;
+for (const fileName of fs.readdirSync(pageDir)) {
+  const match = fileName.match(/^tours-page-(\d+)\.json$/);
+  if (match && Number(match[1]) >= totalPages) {
+    fs.unlinkSync(path.join(pageDir, fileName));
+    stalePageFiles += 1;
+  }
+}
 console.log(`tours-index.json ${Buffer.byteLength(JSON.stringify(indexTours), 'utf8')} bytes`);
 console.log(`tour-map-cards.json ${fs.statSync(tourMapCardsPath).size} bytes`);
 console.log(`tour-map-place-cards ${destinationPlaces.length} places, ${placeCardChunkCount} chunks`);
 console.log(`tour-deeplink-index.json ${fs.statSync(path.join(dataDir, 'tour-deeplink-index.json')).size} bytes`);
 console.log(`Generated ${totalPages} page chunks (tours-page-0.json ~ tours-page-${totalPages - 1}.json)`);
+if (stalePageFiles > 0) {
+  console.log(`Removed ${stalePageFiles} stale page chunks beyond tours-page-${totalPages - 1}.json`);
+}
 
 
 const sourceSize = fs.statSync(sourcePath).size;

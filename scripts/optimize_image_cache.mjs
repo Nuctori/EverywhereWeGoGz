@@ -10,6 +10,7 @@ const dataDir = path.join(publicDir, 'data');
 const sourcePath = path.join(dataDir, 'tours.json');
 const listPath = path.join(dataDir, 'tours-list.json');
 const detailDir = path.join(dataDir, 'tour-details');
+const manifestPath = path.join(imageCacheDir, 'missing-images.manifest.json');
 const pageFilePattern = /^tours-page-\d+\.json$/;
 const targetExtensions = new Set(['.jpg', '.jpeg', '.png']);
 const skippedExtensions = new Set(['.svg', '.webp', '.gif']);
@@ -26,6 +27,7 @@ const stats = {
   remoteRewriteCount: 0,
   localLegacyRewriteCount: 0,
   unsupportedRewriteCount: 0,
+  manifestFallbackRewriteCount: 0,
   originalBytes: 0,
   webpBytes: 0,
 };
@@ -168,6 +170,38 @@ function collectLocalLegacyImageReplacements(jsonFiles) {
   return replacements;
 }
 
+// download_missing_cache_images.mjs 记录的"始终拉不到"的远程图，
+// 重写为占位图，保证发布数据里不再残留会被浏览器拦截的外链图。
+function collectManifestFallbackReplacements() {
+  if (!fs.existsSync(manifestPath)) return new Map();
+  let entries;
+  try {
+    entries = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  } catch {
+    console.warn(`ignoring malformed manifest: ${path.relative(root, manifestPath)}`);
+    return new Map();
+  }
+  if (!Array.isArray(entries)) return new Map();
+
+  const fallbackPath = ensureFallbackPlaceholder();
+  const replacements = new Map();
+  const stillMissing = [];
+  for (const url of entries) {
+    if (typeof url !== 'string') continue;
+    if (cachedPublicPathForRemoteImage(url)) continue; // 缓存已恢复，交给常规重写
+    // 只把 http:// URL 重写为占位图——它们在 https 页面被混合内容拦截、必然显示不出来。
+    // https:// 拉取失败不代表浏览器里不可用（可能仅反爬），保留外链现状。
+    if (!/^http:\/\//i.test(url)) {
+      stillMissing.push(url);
+      continue;
+    }
+    replacements.set(url, fallbackPath);
+    stillMissing.push(url);
+  }
+  fs.writeFileSync(manifestPath, `${JSON.stringify(stillMissing, null, 2)}\n`, 'utf8');
+  return replacements;
+}
+
 function tryUnlink(filePath) {
   try {
     fs.unlinkSync(filePath);
@@ -295,6 +329,11 @@ async function main() {
     replacements.set(legacyPath, cachedPath);
   }
   stats.localLegacyRewriteCount = localLegacyReplacements.size;
+  const manifestFallbackReplacements = collectManifestFallbackReplacements();
+  for (const [remoteUrl, cachedPath] of manifestFallbackReplacements) {
+    replacements.set(remoteUrl, cachedPath);
+  }
+  stats.manifestFallbackRewriteCount = manifestFallbackReplacements.size;
 
   for (const jsonFile of jsonFiles) {
     rewriteJsonFile(jsonFile, replacements);
@@ -311,6 +350,7 @@ async function main() {
   console.log(`original cleanup deferred: ${stats.removalDeferredCount}`);
   console.log(`webp conversion failures: ${stats.failedConversionCount}`);
   console.log(`external image URLs rewritten to cache: ${stats.remoteRewriteCount}`);
+  console.log(`manifest dead URLs rewritten to placeholder: ${stats.manifestFallbackRewriteCount}`);
   console.log(`legacy local image URLs rewritten to cache: ${stats.localLegacyRewriteCount}`);
   console.log(`unsupported cached images rewritten to fallback: ${stats.unsupportedRewriteCount}`);
   console.log(`remaining legacy cache images: ${remainingLegacyImages}`);

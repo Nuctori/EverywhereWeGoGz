@@ -46,7 +46,7 @@ export const TourCard = memo(function TourCard({
 
   return (
     <Card
-      className="group surface-panel cursor-pointer gap-0 overflow-hidden rounded-[22px] border border-stone-200/80 bg-white/95 py-0 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(15,23,42,0.10)] sm:rounded-[26px]"
+      className="group surface-panel cursor-pointer gap-0 overflow-hidden rounded-[22px] border border-stone-200/80 bg-white/95 py-0 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(15,23,42,0.10)] [contain-intrinsic-size:auto_380px] [content-visibility:auto] sm:rounded-[26px]"
       onClick={onClick}
     >
       <div className="relative h-44 overflow-hidden bg-stone-100 sm:h-52">

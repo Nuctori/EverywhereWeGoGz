@@ -70,6 +70,12 @@ function useToursData() {
   const [hasPageChunks, setHasPageChunks] = useState(true);
   const loadedPagesRef = useRef<Set<number>>(new Set());
   const inFlightPagesRef = useRef<Set<number>>(new Set());
+  // 顺序链的下一片号：与 localTours.length 解耦。分片含重复/空片时
+  // floor(len/24) 会指回已加载分片，导致"哨兵不前进 + 转圈不止"的死循环。
+  const nextPageRef = useRef(1);
+  const totalPagesRef = useRef(Number.POSITIVE_INFINITY);
+  const zeroAddStrikesRef = useRef(0);
+  const seenTourIdsRef = useRef<Set<string>>(new Set());
   const hasPageChunksRef = useRef(true);
   const catalogLoadedRef = useRef(false);
   const catalogRequestRef = useRef<Promise<void> | null>(null);
@@ -143,6 +149,10 @@ function useToursData() {
         setTours(pageData.items);
         setTotal(pageData.meta.total);
         loadedPagesRef.current.add(0);
+        seenTourIdsRef.current = new Set(pageData.items.map((tour: TourSummary) => tour.id));
+        nextPageRef.current = 1;
+        totalPagesRef.current = Math.ceil(pageData.meta.total / PAGE_SIZE);
+        zeroAddStrikesRef.current = 0;
         hasPageChunksRef.current = true;
         setHasPageChunks(true);
         setLoading(false);
@@ -184,6 +194,7 @@ function useToursData() {
           setTours(data);
           setCatalogTours(data);
           setTotal(data.length);
+          seenTourIdsRef.current = new Set(data.map((tour) => tour.id));
           hasPageChunksRef.current = false;
           setHasPageChunks(false);
           setLoading(false);
@@ -205,6 +216,13 @@ function useToursData() {
     if (loadedPagesRef.current.has(neededPage)) return;
     if (inFlightPagesRef.current.has(neededPage)) return;
 
+    // 请求越过分片总数：数据链已到头，收敛而不是反复打 404
+    if (neededPage >= totalPagesRef.current) {
+      hasPageChunksRef.current = false;
+      setHasPageChunks(false);
+      return;
+    }
+
     inFlightPagesRef.current.add(neededPage);
     syncLoadingMoreState();
     try {
@@ -214,11 +232,25 @@ function useToursData() {
       }
       const pageData = toursPageSchema.parse(await res.json());
       loadedPagesRef.current.add(neededPage);
-      setTours((prev) => {
-        const existingIds = new Set(prev.map((tour) => tour.id));
-        const nextItems = pageData.items.filter((tour: TourSummary) => !existingIds.has(tour.id));
-        return prev.concat(nextItems);
-      });
+      const seenIds = seenTourIdsRef.current;
+      const nextItems = pageData.items.filter((tour: TourSummary) => !seenIds.has(tour.id));
+      for (const tour of nextItems) seenIds.add(tour.id);
+      setTours((prev) => prev.concat(nextItems));
+      if (neededPage >= nextPageRef.current) {
+        nextPageRef.current = neededPage + 1;
+      }
+
+      // 分片与索引不一致（重复/空片）时零新增是常态信号：连续多片零新增
+      // 说明顺序链已无法推进，熔断防止底部哨兵无限转圈。
+      if (nextItems.length === 0) {
+        zeroAddStrikesRef.current += 1;
+        if (zeroAddStrikesRef.current >= ZERO_ADD_STRIKE_LIMIT) {
+          hasPageChunksRef.current = false;
+          setHasPageChunks(false);
+        }
+      } else {
+        zeroAddStrikesRef.current = 0;
+      }
     } catch {
       hasPageChunksRef.current = false;
       setHasPageChunks(false);
@@ -237,6 +269,7 @@ function useToursData() {
     total,
     loadMorePages,
     loadedPagesRef,
+    nextPageRef,
     hasPageChunks,
     hasPageChunksRef,
   };
@@ -271,6 +304,8 @@ function fromDateInputValue(value: string) {
 
 const PAGE_SIZE = 24;
 const INITIAL_LOAD_COUNT = 24;
+// 连续 N 片零新增即熔断顺序分片链
+const ZERO_ADD_STRIKE_LIMIT = 3;
 const LONG_TRIP_DURATION_VALUE = 11;
 const DEFAULT_SLIDER_VALUES: [number, number] = [0, 100];
 const VISIBLE_DESTINATION_COUNT = 14;
@@ -483,6 +518,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     loadingMore,
     total,
     loadMorePages,
+    nextPageRef,
     hasPageChunks,
     hasPageChunksRef,
   } = useToursData();
@@ -988,7 +1024,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       }
 
       if (hasPageChunksRef.current && catalogTours.length === 0 && localTours.length < displayResultCount) {
-        const nextPage = Math.floor(localTours.length / PAGE_SIZE);
+        const nextPage = nextPageRef.current;
         const viewVersion = viewVersionRef.current;
 
         setIsLoadingMore(true);
