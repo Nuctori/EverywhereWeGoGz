@@ -249,7 +249,18 @@ async function probeCandidate(candidate, originMeta, probeImage) {
 
 async function selectBestCandidate(cache, poolWithProbe) {
   const { pool, probeImage } = poolWithProbe;
-  const originMeta = await readOriginMeta();
+  let originMeta = await readOriginMeta();
+  if (!originMeta) {
+    // 源站不可达（弱网/被墙）时退回上次记录的 generatedAt：
+    // 否则 isFreshEnough 对所有候选放行，过期镜像会因"无法证伪"而当选。
+    try {
+      const previous = await cache.match(STATE_URL);
+      const lastKnown = previous ? (await previous.json())?.originGeneratedAt : '';
+      if (lastKnown) originMeta = { generatedAt: lastKnown };
+    } catch {
+      // 没有历史记录就维持放行行为
+    }
+  }
   const results = await Promise.all(pool.map((candidate) => probeCandidate(candidate, originMeta, probeImage)));
   const healthy = results
     .filter(Boolean)
@@ -261,7 +272,7 @@ async function selectBestCandidate(cache, poolWithProbe) {
     return null;
   }
   const winner = healthy[0];
-  await writeState(cache, winner);
+  await writeState(cache, { ...winner, originGeneratedAt: originMeta?.generatedAt || '' });
   return winner;
 }
 
@@ -274,6 +285,17 @@ function ensureSelection(cache, poolWithProbe) {
     });
   }
   return selectionInFlight;
+}
+
+// winner 失效后的重选节流：不重选的话坏 winner 会一直占用 10 分钟 TTL，
+// 每个请求都要白等一次超时；也不能每次失败都重选（探测风暴）。
+const WINNER_FAIL_RESELECT_COOLDOWN_MS = 30 * 1000;
+let lastWinnerFailReselectAt = 0;
+function reselectAfterWinnerFailure(cache, poolWithProbe) {
+  const now = Date.now();
+  if (now - lastWinnerFailReselectAt < WINNER_FAIL_RESELECT_COOLDOWN_MS) return;
+  lastWinnerFailReselectAt = now;
+  void ensureSelection(cache, poolWithProbe).catch(() => {});
 }
 
 async function fetchFromPoolOrOrigin(request, cache, cacheMode = 'no-store') {
@@ -304,6 +326,7 @@ async function fetchFromPoolOrOrigin(request, cache, cacheMode = 'no-store') {
   } catch {
     // winner 失效，回退同源
   }
+  reselectAfterWinnerFailure(cache, poolWithProbe);
 
   // The original same-origin URL is the authoritative final fallback.
   return fetch(request);
