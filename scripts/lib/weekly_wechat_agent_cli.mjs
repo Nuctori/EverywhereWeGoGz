@@ -327,7 +327,7 @@ function ensureOpeningWeatherSection(article, context) {
 
   const lines = body.split(/\r?\n/);
   const firstH1Index = lines.findIndex((line) => /^#\s+/.test(line.trim()));
-  const recommendationIndex = lines.findIndex((line) => /^##\s*(?:2\.\s*)?本周25条推荐/.test(line.trim()));
+  const recommendationIndex = lines.findIndex((line) => /^##\s*(?:2\.\s*)?本周(?:25条)?推荐/.test(line.trim()));
   const insertIndex = recommendationIndex >= 0 ? recommendationIndex : (firstH1Index >= 0 ? firstH1Index + 1 : 0);
   const weatherBlock = [
     '## 1. 本周天气与出游节奏',
@@ -1047,10 +1047,10 @@ function buildWriterPrompt(context, researchJson, variantIndex) {
     '必须包含 frontmatter：title, summary, author, cover。',
     '结构必须是：',
     '1. 本周天气与出游节奏',
-    '2. 本周25条推荐（可分组，但必须逐条展开）',
+    '2. 本周推荐（可分组，但必须逐条展开）',
     '3. 结尾提醒',
     '要求：',
-    '- author 固定写 "老广旅行"',
+    '- author 固定写 "老广去边度"',
     '- 不要出现“速览”“当前数据里”“可以理解为”“别误会成”“模型判断”“候选线路”“综合排序”',
     '- 不要出现“当前数据里能打的清凉感主要是”“带池、酒店放松类线路可保留”“作为补充”“适合预算有限”“樱花已过季”“季节红利弱”这种研究备注或找补句。',
     '- 不要写“同第2条”“同第4条”“侧重亲子”“侧重度假”这种拿前文凑数的写法；每条都必须像独立推荐。',

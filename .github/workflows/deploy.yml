@@ -92,6 +92,7 @@ jobs:
           git -C "$artifact_dir" rm -rf . || true
           find "$artifact_dir" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
           cp -a dist/. "$artifact_dir/"
+          rm -f "$artifact_dir/data/tours.json"
           git -C "$artifact_dir" add --all
           git -C "$artifact_dir" -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'chore: publish Pages build artifacts'
           git -C "$artifact_dir" push --force origin HEAD:cdn-assets

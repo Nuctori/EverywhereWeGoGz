@@ -54,7 +54,7 @@ const fakeExecRunner = async ({ prompt, outputPath }) => {
     fs.writeFileSync(outputPath, `---
 title: "版本A：广州本周出游清单"
 summary: "清凉、近场和轻出省都照顾到了。"
-author: "老广旅行"
+author: "老广去边度"
 cover: "/data/image-cache/qingyuan.webp"
 ---
 
@@ -64,7 +64,7 @@ cover: "/data/image-cache/qingyuan.webp"
 
 未来7天广州闷热带阵雨，近场和带池休闲线更舒服。
 
-## 本周25条推荐
+## 本周推荐
 
 ### 山水清凉
 
@@ -100,7 +100,7 @@ cover: "/data/image-cache/qingyuan.webp"
     fs.writeFileSync(outputPath, `---
 title: "版本B：这周出发会更舒服的25条线"
 summary: "更偏编辑口吻的一版。"
-author: "老广旅行"
+author: "老广去边度"
 cover: "/data/image-cache/qingyuan.webp"
 ---
 
@@ -110,7 +110,7 @@ cover: "/data/image-cache/qingyuan.webp"
 
 未来7天广州闷热带阵雨，近场和带池休闲线更舒服。
 
-## 本周25条推荐
+## 本周推荐
 
 ### 山水清凉
 
@@ -146,7 +146,7 @@ cover: "/data/image-cache/qingyuan.webp"
     fs.writeFileSync(outputPath, `---
 title: "返工版：这周出发会更舒服的25条线"
 summary: "返工后去掉了做题腔。"
-author: "老广旅行"
+author: "老广去边度"
 cover: "/data/image-cache/qingyuan.webp"
 ---
 
@@ -156,7 +156,7 @@ cover: "/data/image-cache/qingyuan.webp"
 
 未来7天广州闷热带阵雨，近场和带池休闲线更舒服。
 
-## 本周25条推荐
+## 本周推荐
 
 ### 山水清凉
 
@@ -193,7 +193,7 @@ cover: "/data/image-cache/qingyuan.webp"
 
 未来7天广州闷热带阵雨，近场和带池休闲线更舒服。
 
-## 本周25条推荐
+## 本周推荐
 
 ### 山水清凉
 
