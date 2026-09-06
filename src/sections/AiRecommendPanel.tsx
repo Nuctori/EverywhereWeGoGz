@@ -85,6 +85,12 @@ const waitForNextPaint = () =>
   });
 
 // 进度步骤定义，对应 AiRecommendationProgress.stage，面板进度条按此顺序推进
+const REFINEMENT_MODE_LABELS: Record<string, string> = {
+  new_search: '新搜索',
+  refine_previous: '追问纠偏',
+  broaden: '扩展范围',
+  replace_destination: '替换目的地',
+};
 const progressSteps: Array<{
   stage: AiRecommendationProgress['stage'];
   shortLabel: string;
@@ -686,6 +692,61 @@ export function AiRecommendPanel({
                     </div>
                   ) : null}
                 </div>
+              ) : null}
+              {(result?.refinementMode || result?.searchRounds?.length || result?.usage?.promptTokens) ? (
+                <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-stone-600">
+                  {result?.refinementMode ? (
+                    <Badge className="rounded-full bg-stone-100 text-stone-700 hover:bg-stone-100">
+                      多轮模式：{REFINEMENT_MODE_LABELS[result.refinementMode] ?? result.refinementMode}
+                    </Badge>
+                  ) : null}
+                  {result?.searchRounds?.length ? (
+                    <Badge className="rounded-full bg-stone-100 text-stone-700 hover:bg-stone-100">
+                      多轮查找 {result.searchRounds.length} 轮
+                    </Badge>
+                  ) : null}
+                  {result?.usage && result.usage.promptTokens && result.usage.promptTokens > 0 ? (() => {
+                    const promptTokens = result.usage.promptTokens;
+                    const cachedPromptTokens = result.usage.cachedPromptTokens ?? 0;
+                    return (
+                      <Badge className="rounded-full bg-stone-100 text-stone-700 hover:bg-stone-100">
+                        {cachedPromptTokens
+                          ? `前缀缓存命中 ${Math.round((cachedPromptTokens / promptTokens) * 100)}%（${cachedPromptTokens}/${promptTokens} tok）`
+                          : `前缀缓存未命中（${promptTokens} tok）`}
+                      </Badge>
+                    );
+                  })() : null}
+                  {result?.usage?.reasoningTokens && result.usage.reasoningTokens > 0 ? (
+                    <Badge className="rounded-full bg-stone-100 text-stone-700 hover:bg-stone-100">
+                      思考 {result.usage.reasoningTokens} tok
+                    </Badge>
+                  ) : null}
+                  {result?.usage?.model ? (
+                    <Badge className="rounded-full bg-stone-100 text-stone-700 hover:bg-stone-100">{result.usage.model}</Badge>
+                  ) : null}
+                </div>
+              ) : null}
+              {result?.searchRounds?.length ? (
+                <details className="mt-2 rounded-xl bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-600">
+                  <summary className="cursor-pointer font-medium text-stone-800">多轮查找轨迹</summary>
+                  <ol className="mt-1 list-decimal space-y-1 pl-4">
+                    {result.searchRounds.map((round, index) => (
+                      <li key={`${round.query}-${index}`}>
+                        <span className="font-medium text-stone-800">{round.query}</span>
+                        —— 命中 {round.hitCount} 条
+                        {round.topTitles?.length ? (
+                          <div className="mt-0.5 text-stone-500">参考：{round.topTitles.join('、')}</div>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ol>
+                </details>
+              ) : null}
+              {result?.reasoning ? (
+                <details className="mt-2 rounded-xl bg-white/80 px-3 py-2 text-xs leading-5 text-stone-600">
+                  <summary className="cursor-pointer font-medium text-stone-800">AI 思考过程（思维链）</summary>
+                  <div className="mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap">{result.reasoning}</div>
+                </details>
               ) : null}
             </div>
           )}

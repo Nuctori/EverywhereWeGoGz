@@ -325,11 +325,33 @@ export interface AiRecommendationClarification {
   options?: string[];
 }
 
+export interface AiRecommendationSearchRound {
+  query: string;
+  hitCount: number;
+  topTitles?: string[];
+}
+
+export interface AiRecommendationUsage {
+  model?: string;
+  promptTokens?: number;
+  cachedPromptTokens?: number;
+  completionTokens?: number;
+  reasoningTokens?: number;
+}
+
 export interface AiRecommendationResult {
   conversationId: string;
   summary: string;
   items: AiRecommendationItem[];
   generatedAt: string;
+  /** 模型思维链（检索规划 + 最终排序），仅主供应商开启 thinking 时存在 */
+  reasoning?: string;
+  /** 多轮查找轨迹：每轮检索式、命中数与参考命中 */
+  searchRounds?: AiRecommendationSearchRound[];
+  /** 主供应商返回的 token 用量，含前缀 KV 缓存命中 */
+  usage?: AiRecommendationUsage;
+  /** 本轮多轮模式：new_search / refine_previous / broaden / replace_destination */
+  refinementMode?: string;
   source: 'local-preview' | 'ai-api';
   status?: AiRecommendationStatus;
   preferenceMemory?: AiPreferenceMemory;

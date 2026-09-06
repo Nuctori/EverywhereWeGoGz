@@ -43,6 +43,9 @@ const AI_FREE_PROVIDER_TIMEOUT_MS = 60000;
 const AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS = 42000;
 const AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS = 60000;
 const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 15000;
+// 实测 GLM 开 thinking 后连小任务都要 70s+（token 计入完成预算），
+// 60s 档必超时；思维链供应商单独给足预算。
+const AI_THINKING_PROVIDER_TIMEOUT_MS = 180000;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
 const AI_CACHE_PROMPT_VERSION = '2026-06-10-copy-quality-v2';
@@ -5991,14 +5994,24 @@ function summarizeAiUsage(data: unknown) {
       prompt_tokens?: number;
       completion_tokens?: number;
       total_tokens?: number;
+      prompt_tokens_details?: { cached_tokens?: number };
+      prompt_cache_hit_tokens?: number;
       completion_tokens_details?: { reasoning_tokens?: number };
     };
   })?.usage;
+  const promptTokens = Number(usage?.prompt_tokens ?? 0);
+  // OpenAI 兼容格式走 prompt_tokens_details.cached_tokens，DeepSeek 走 prompt_cache_hit_tokens。
+  const cachedPromptTokens = Math.max(
+    Number(usage?.prompt_tokens_details?.cached_tokens ?? 0),
+    Number(usage?.prompt_cache_hit_tokens ?? 0),
+  );
   const completionTokens = Number(usage?.completion_tokens ?? 0);
   const reasoningTokens = Number(usage?.completion_tokens_details?.reasoning_tokens ?? 0);
   const totalTokens = Number(usage?.total_tokens ?? 0);
   return {
-    tokensSeen: completionTokens > 0 || reasoningTokens > 0 || totalTokens > 0,
+    tokensSeen: promptTokens > 0 || completionTokens > 0 || reasoningTokens > 0 || totalTokens > 0,
+    promptTokens,
+    cachedPromptTokens,
     completionTokens,
     reasoningTokens,
     totalTokens,
@@ -6016,7 +6029,7 @@ function parseAiProviderResponse(data: unknown, config: AiProviderConfig) {
     choices?: Array<{
       finish_reason?: unknown;
       error?: { message?: string; code?: string };
-      message?: { content?: unknown; reasoning?: unknown };
+      message?: { content?: unknown; reasoning?: unknown; reasoning_content?: unknown };
     }>;
   })?.choices?.[0];
   if (choice?.error || choice?.finish_reason === 'error') {
@@ -6028,6 +6041,10 @@ function parseAiProviderResponse(data: unknown, config: AiProviderConfig) {
   }
   const message = choice?.message;
   const content = message?.content;
+  const reasoningText = [
+    typeof message?.reasoning_content === 'string' ? message.reasoning_content : '',
+    typeof message?.reasoning === 'string' ? message.reasoning : '',
+  ].find((text) => text.trim().length > 0) ?? '';
 
   if (typeof content !== 'string' || !content.trim()) {
     throw new Error(getAiProviderParseErrorLabel(
@@ -6053,7 +6070,7 @@ function parseAiProviderResponse(data: unknown, config: AiProviderConfig) {
     throw new Error(getAiProviderParseErrorLabel(config, 'schema_invalid', 'items missing'));
   }
 
-  return parsed;
+  return { parsed, reasoningText, usage };
 }
 
 function emitProgress(
@@ -6781,6 +6798,7 @@ function getProviderTimeoutMs(config: AiProviderConfig) {
   // reasoning or sit behind a cold router. Keep the free tier patient enough to
   // survive CoT/network jitter; keep DeepSeek short because it is the paid fallback.
   if (providerKey.includes('deepseek')) return AI_FAST_FALLBACK_TIMEOUT_MS;
+  if (isThinkingCapableProvider(config)) return AI_THINKING_PROVIDER_TIMEOUT_MS;
   if (
     providerKey.includes('siliconflow') ||
     providerKey.includes('openrouter') ||
@@ -6814,19 +6832,27 @@ function shouldUseLiteAiPrompt(config: AiProviderConfig) {
   );
 }
 
+// 思维链只在主供应商（z.ai GLM）开启：免费/付费兜底保持低延迟，
+// 主模型用真推理换理解与排序质量，reasoning_content 会透出给面板展示。
+function isThinkingCapableProvider(config: AiProviderConfig) {
+  return `${config.baseUrl} ${config.model}`.toLowerCase().includes('api.z.ai');
+}
+
 function buildAiRequestBody(
   config: AiProviderConfig,
   messages: ReturnType<typeof buildAiMessages>,
   maxTokens?: number,
 ) {
   const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
+  const thinkingEnabled = isThinkingCapableProvider(config);
   const body: Record<string, unknown> = {
     model: config.model,
     messages: normalizeMessagesForProvider(messages),
     temperature: 0.25,
-    max_tokens: maxTokens ?? 2048,
+    // GLM 的 thinking token 计入 max_tokens，开思维链时抬高上限避免 JSON 被截断。
+    max_tokens: thinkingEnabled ? Math.max(maxTokens ?? 2048, 3200) : (maxTokens ?? 2048),
     response_format: { type: 'json_object' },
-    thinking: { type: 'disabled' },
+    thinking: { type: thinkingEnabled ? 'enabled' : 'disabled' },
   };
 
   if (providerKey.includes('openrouter')) {
@@ -6911,12 +6937,12 @@ async function callSingleAiProvider(params: {
 
       const data = await response.json();
       shouldRetry = false;
-      const parsed = parseAiProviderResponse(data, config);
+      const { parsed, reasoningText, usage } = parseAiProviderResponse(data, config);
       const qualityIssue = params.qualityCheck?.(parsed, config);
       if (qualityIssue) {
         throw new Error(getAiProviderParseErrorLabel(config, 'quality_check_failed', qualityIssue));
       }
-      return parsed;
+      return { parsed, reasoningText, usage, model: config.model };
     } catch (error) {
       providerLastError = normalizeAiProviderError(error, config);
       if (providerLastError.message.includes('tokens_seen')) {
@@ -6947,13 +6973,31 @@ async function callAiApi(params: {
   const providerErrors: string[] = [];
   const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
   const fallbackConfigs = params.configs.filter(isPaidFallbackProvider);
+  // 思维链供应商单独优先串行：它与免费模型的竞速里几乎必输（thinking 更慢），
+  // 若参与 Promise.any，真思维链永远抢不过快而浅的兜底模型。
+  const thinkingConfigs = foregroundConfigs.filter(isThinkingCapableProvider);
+  const nonThinkingForegroundConfigs = foregroundConfigs.filter(
+    (config) => !isThinkingCapableProvider(config),
+  );
 
-  if (foregroundConfigs.length > 0) {
-    const controllers = foregroundConfigs.map(() => new AbortController());
+  for (const config of thinkingConfigs) {
+    try {
+      return await callSingleAiProvider({ ...params, config });
+    } catch (error) {
+      providerErrors.push(
+        error instanceof Error
+          ? error.message.replace(/\s+/g, ' ').trim()
+          : `AI API failed [${config.model}]`,
+      );
+    }
+  }
+
+  if (nonThinkingForegroundConfigs.length > 0) {
+    const controllers = nonThinkingForegroundConfigs.map(() => new AbortController());
     const foregroundErrors: string[] = [];
     let foregroundTimeoutId: ReturnType<typeof setTimeout> | null = null;
     const foregroundProviderPromise = Promise.any(
-      foregroundConfigs.map((config, index) =>
+      nonThinkingForegroundConfigs.map((config, index) =>
         callSingleAiProvider({ ...params, config, signal: controllers[index].signal })
           .catch((error) => {
             const message = error instanceof Error
@@ -7014,6 +7058,150 @@ async function callAiApi(params: {
     throw new Error(providerErrors.join(' | '));
   }
   throw new Error(providerErrors[0] || 'AI API failed');
+}
+
+// ====== 多轮检索：模型规划检索式 → 本地全量池执行 → 命中并入排序池 ======
+type AiSearchCallResult = {
+  parsed: unknown;
+  reasoningText: string;
+  usage: ReturnType<typeof summarizeAiUsage>;
+  model: string;
+};
+
+type AiPlanningCallMessages = Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+
+function buildCandidateCorpusOverview(candidatePool: AiRecommendationCandidate[]) {
+  const destinationCounts = new Map<string, number>();
+  const themeCounts = new Map<string, number>();
+  const sourceCounts = new Map<string, number>();
+  let priceMin = Number.POSITIVE_INFINITY;
+  let priceMax = 0;
+  let daysMin = Number.POSITIVE_INFINITY;
+  let daysMax = 0;
+
+  for (const tour of candidatePool) {
+    const destination = String(tour.destination || '').trim();
+    if (destination) destinationCounts.set(destination, (destinationCounts.get(destination) || 0) + 1);
+    const theme = String(tour.theme || '').trim();
+    if (theme) themeCounts.set(theme, (themeCounts.get(theme) || 0) + 1);
+    const source = String(tour.source || '').trim();
+    if (source) sourceCounts.set(source, (sourceCounts.get(source) || 0) + 1);
+    if (Number.isFinite(tour.price) && tour.price > 0) {
+      priceMin = Math.min(priceMin, tour.price);
+      priceMax = Math.max(priceMax, tour.price);
+    }
+    if (Number.isFinite(tour.duration) && tour.duration > 0) {
+      daysMin = Math.min(daysMin, tour.duration);
+      daysMax = Math.max(daysMax, tour.duration);
+    }
+  }
+
+  const top = (map: Map<string, number>, limit: number) =>
+    [...map.entries()].sort((left, right) => right[1] - left[1]).slice(0, limit);
+
+  return {
+    total: candidatePool.length,
+    destinations: top(destinationCounts, 24).map(([name, count]) => `${name}(${count})`),
+    themes: top(themeCounts, 12).map(([name, count]) => `${name}(${count})`),
+    sources: top(sourceCounts, 8).map(([name, count]) => `${name}(${count})`),
+    priceRange: Number.isFinite(priceMin) ? `${Math.round(priceMin)}-${Math.round(priceMax)}元` : '未知',
+    daysRange: Number.isFinite(daysMin) ? `${daysMin}-${daysMax}天` : '未知',
+  };
+}
+
+async function planAiSearchRounds(params: {
+  configs: AiProviderConfig[];
+  userText: string;
+  searchQuery: string;
+  candidatePool: AiRecommendationCandidate[];
+  intent: AiTravelIntent | null;
+  preferenceMemory: AiPreferenceMemory | null;
+}): Promise<{ queries: string[]; reasoningText: string; model: string } | null> {
+  const overview = buildCandidateCorpusOverview(params.candidatePool);
+  const messages: AiPlanningCallMessages = [
+    {
+      role: 'system',
+      content: [
+        '你是旅行检索规划师。用户会在下一步给你一条旅行需求，你要把它翻译成 1-3 条"检索式"，用于在一个固定的候选线路池里做关键词检索。',
+        '检索式是给本地检索器的中文短语，每条聚焦一个不同角度（如不同目的地组合、不同玩法主题、宽窄不同的价格档），不要重复同一个角度。',
+        '候选池有限时，宁可宽一点也不要全部挤在同一组热门词上；第二条、第三条检索式应覆盖第一条可能漏掉但同样符合需求的选项。',
+        '严格输出 JSON：{"understanding":"一句中文需求理解","queries":["检索式1","检索式2"],"refinementMode":"new_search|refine_previous|broaden|replace_destination|null"}',
+      ].join('\n'),
+    },
+    {
+      role: 'user',
+      content: JSON.stringify({
+        q: params.userText,
+        sq: params.searchQuery,
+        pm: compactPreferenceMemoryForPrompt(params.preferenceMemory),
+        it: compactIntentForPrompt(params.intent),
+        corpus: overview,
+      }),
+    },
+  ];
+
+  const aiCall = await callAiApi({
+    configs: params.configs,
+    messages: messages as ReturnType<typeof buildAiMessages>,
+    maxTokens: 1600,
+  }) as AiSearchCallResult;
+
+  const parsed = aiCall.parsed as { queries?: unknown; understanding?: unknown };
+  const queries = Array.isArray(parsed?.queries)
+    ? parsed.queries
+      .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+      .map((item) => item.trim())
+      .slice(0, 3)
+    : [];
+  if (queries.length === 0) {
+    throw new Error(getAiProviderParseErrorLabel(
+      { baseUrl: '', model: aiCall.model, apiKey: '' },
+      'schema_invalid',
+      'planning queries missing',
+    ));
+  }
+  void parsed.understanding;
+  return { queries, reasoningText: aiCall.reasoningText, model: aiCall.model };
+}
+
+function executeAiSearchRounds(
+  candidatePool: AiRecommendationCandidate[],
+  queries: string[],
+) {
+  const candidateById = new Map(candidatePool.map((tour) => [tour.id, tour]));
+  const rounds: Array<{ query: string; hitCount: number; topTitles: string[] }> = [];
+  const merged: Array<{ tour: AiRecommendationCandidate; bestScore: number; query: string }> = [];
+  const mergedById = new Map<string, { tour: AiRecommendationCandidate; bestScore: number; query: string }>();
+
+  for (const query of queries) {
+    const hits = localRecommendations(candidatePool, query);
+    const top = hits.slice(0, 36);
+    rounds.push({
+      query,
+      hitCount: hits.length,
+      topTitles: top
+        .slice(0, 6)
+        .map((item) => candidateById.get(item.tourId)?.title ?? item.tourId),
+    });
+    for (const item of top) {
+      const tour = candidateById.get(item.tourId);
+      if (!tour) continue;
+      const existing = mergedById.get(tour.id);
+      if (existing) {
+        existing.bestScore = Math.max(existing.bestScore, item.score);
+      } else {
+        const entry = { tour, bestScore: item.score, query };
+        merged.push(entry);
+        mergedById.set(tour.id, entry);
+      }
+    }
+  }
+
+  merged.sort((left, right) => right.bestScore - left.bestScore);
+  return {
+    rounds,
+    searchedTours: merged.slice(0, 48).map((entry) => entry.tour),
+  };
 }
 
 function getAiFailureDetail(error: unknown) {
@@ -7211,20 +7399,80 @@ export async function requestAiRecommendations({
       : Promise.resolve(weatherContextForRanking);
     const routeAtlasPromise = Promise.resolve(buildRouteAtlas(availableCandidates));
 
+    // 多轮检索：先让模型规划 1-3 条差异化检索式，再在"全量"候选池上本地执行，
+    // 命中候选强制并入排序池——单发注入池外的好线路不再永远不可见。
+    // 规划失败不阻断主链路：自动退回旧的单发注入池。
+    const compactionOptions = {
+      budgetPriority: effectiveIntent?.budgetPriority,
+      intent: effectiveIntent,
+      userText: effectiveUserText,
+      weatherSensitivity: effectiveIntent?.weatherSensitivity,
+      weatherContext: weatherContextForRanking,
+    };
+    let searchRounds: Array<{ query: string; hitCount: number; topTitles: string[] }> = [];
+    let searchPlanningReasoning = '';
+    let searchedCompacted: ReturnType<typeof compactCandidates> = [];
+    if (availableCandidates.length > MAX_AI_CANDIDATES) {
+      try {
+        const plan = await planAiSearchRounds({
+          configs,
+          userText: effectiveUserText,
+          searchQuery,
+          candidatePool: availableCandidates,
+          intent: effectiveIntent,
+          preferenceMemory: aiContextMemoryForThisTurn,
+        });
+        if (!plan) throw new Error('AI search planning returned no result');
+        searchPlanningReasoning = plan.reasoningText;
+        const executed = executeAiSearchRounds(availableCandidates, plan.queries);
+        searchRounds = executed.rounds;
+        if (executed.searchedTours.length > 0) {
+          searchedCompacted = compactCandidates(
+            executed.searchedTours,
+            localItemsForMerge,
+            effectiveIntent,
+            compactionOptions,
+          );
+        }
+        emitProgress(onProgress, {
+          stage: 'context',
+          label: '多轮检索候选池',
+          detail: `已完成 ${executed.rounds.length} 轮查找：${executed.rounds
+            .map((round) => `“${round.query}”命中 ${round.hitCount} 条`)
+            .join('，')}。`,
+          progress: 70,
+          substeps: withActiveSubstep(
+            [
+              ...executed.rounds.map((round, index) => ({
+                id: `search-${index}`,
+                label: `第 ${index + 1} 轮查找：${round.query}`,
+                detail: `命中 ${round.hitCount} 条，参考：${round.topTitles.slice(0, 2).join('、')}`,
+              })),
+              { id: 'merge', label: '合并检索命中与本地优选' },
+            ],
+            'merge',
+          ),
+        });
+      } catch (error) {
+        if (typeof console !== 'undefined' && typeof console.warn === 'function') {
+          console.warn('[ai-recommendation] multi-round search planning failed:', getAiFailureDetail(error));
+        }
+      }
+    }
+    const baseCompacted = compactCandidates(
+      availableCandidates,
+      localItemsForMerge,
+      effectiveIntent,
+      compactionOptions,
+    );
+    const mergedCompactById = new Map<string, ReturnType<typeof compactCandidates>[number]>();
+    for (const candidate of [...searchedCompacted, ...baseCompacted]) {
+      if (!mergedCompactById.has(candidate.id)) mergedCompactById.set(candidate.id, candidate);
+    }
+    const mergedCompact = [...mergedCompactById.values()].slice(0, MAX_AI_CANDIDATES);
     const aiCandidatePool = enrichPromptCandidatesWithSemanticEvidence(
       enrichPromptCandidatesWithMemoryCoverage(
-        compactCandidates(
-          availableCandidates,
-          localItemsForMerge,
-          effectiveIntent,
-          {
-            budgetPriority: effectiveIntent?.budgetPriority,
-            intent: effectiveIntent,
-            userText: effectiveUserText,
-            weatherSensitivity: effectiveIntent?.weatherSensitivity,
-            weatherContext: weatherContextForRanking,
-          },
-        ),
+        mergedCompact,
         availableCandidates,
         aiContextMemoryForThisTurn,
         effectiveIntent,
@@ -7264,7 +7512,7 @@ export async function requestAiRecommendations({
         'rank',
       ),
     });
-    const aiResponse = await callAiApi({
+    const aiCall = await callAiApi({
       configs,
       messages: buildAiMessages({
         userText: effectiveUserText,
@@ -7298,14 +7546,27 @@ export async function requestAiRecommendations({
           intent: effectiveIntent,
         }),
     }) as {
-      intent?: unknown;
-      intentNotes?: unknown;
-      summary?: unknown;
-      items?: unknown;
-      clarification?: unknown;
-      assumptions?: unknown;
-      tradeoffs?: unknown;
+      parsed: {
+        intent?: unknown;
+        intentNotes?: unknown;
+        summary?: unknown;
+        items?: unknown;
+        clarification?: unknown;
+        assumptions?: unknown;
+        tradeoffs?: unknown;
+      };
+      reasoningText?: string;
+      usage?: {
+        tokensSeen: boolean;
+        promptTokens: number;
+        cachedPromptTokens: number;
+        completionTokens: number;
+        reasoningTokens: number;
+        totalTokens: number;
+      };
+      model?: string;
     };
+    const aiResponse = aiCall.parsed;
     const rawSemanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
     const normalizedAiIntent = sanitizeAiBudgetBoundsForTurn(
       normalizeIntent(aiResponse.intent),
@@ -7472,6 +7733,29 @@ export async function requestAiRecommendations({
       ...(clarification ? { clarification } : {}),
       ...(assumptions.length > 0 ? { assumptions } : {}),
       ...(tradeoffs.length > 0 ? { tradeoffs } : {}),
+      ...(finalIntent?.refinementMode ? { refinementMode: finalIntent.refinementMode } : {}),
+      ...(searchRounds.length > 0 ? { searchRounds } : {}),
+      ...(searchPlanningReasoning || aiCall.reasoningText
+        ? {
+            reasoning: [
+              searchPlanningReasoning ? `【检索规划】\n${searchPlanningReasoning}` : '',
+              aiCall.reasoningText ? `【最终排序】\n${aiCall.reasoningText}` : '',
+            ]
+              .filter(Boolean)
+              .join('\n\n'),
+          }
+        : {}),
+      ...(aiCall.usage?.tokensSeen
+        ? {
+            usage: {
+              model: aiCall.model,
+              promptTokens: aiCall.usage.promptTokens,
+              cachedPromptTokens: aiCall.usage.cachedPromptTokens,
+              completionTokens: aiCall.usage.completionTokens,
+              reasoningTokens: aiCall.usage.reasoningTokens,
+            },
+          }
+        : {}),
     };
   } catch (error) {
     const failureDetail = getAiFailureDetail(error);
