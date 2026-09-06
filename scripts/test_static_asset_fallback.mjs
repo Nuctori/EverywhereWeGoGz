@@ -4,12 +4,14 @@ import fs from 'node:fs';
 const worker = fs.readFileSync('public/sw.js', 'utf8');
 const entry = fs.readFileSync('src/main.tsx', 'utf8');
 
-assert.match(worker, /https:\/\/cdn\.jsdelivr\.net/);
 assert.match(worker, /https:\/\/cdn\.jsdmirror\.cn/);
 assert.match(worker, /https:\/\/cdn\.jsdmirror\.com/);
-assert.match(worker, /https:\/\/fastly\.jsdelivr\.net/);
 assert.match(worker, /https:\/\/gcore\.jsdelivr\.net/);
 assert.match(worker, /https:\/\/raw\.githubusercontent\.com/);
+// jsdelivr 主域（cdn/fastly/originfastly）对图片返回 301 跳回 raw.githubusercontent.com，
+// 图片流量被绕出 CDN；实测 2026-09-06 起 5/5 请求 301，故契约禁止它们回到池里。
+assert.doesNotMatch(worker, /https:\/\/cdn\.jsdelivr\.net/);
+assert.doesNotMatch(worker, /https:\/\/fastly\.jsdelivr\.net/);
 assert.match(worker, /EverywhereWeGoGz@cdn-assets/);
 assert.match(worker, /pathPrefix/);
 assert.match(worker, /text\/html/);

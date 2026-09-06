@@ -19,10 +19,7 @@ const STATE_TTL_MS = 10 * 60 * 1000;
 const DEFAULT_CDN_POOL = [
   { id: 'jsdmirror-cn', origin: 'https://cdn.jsdmirror.cn', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
   { id: 'jsdmirror-com', origin: 'https://cdn.jsdmirror.com', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
-  { id: 'jsdelivr', origin: 'https://cdn.jsdelivr.net', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
-  { id: 'jsdelivr-fastly', origin: 'https://fastly.jsdelivr.net', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
   { id: 'jsdelivr-gcore', origin: 'https://gcore.jsdelivr.net', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
-  { id: 'jsdelivr-originfastly', origin: 'https://originfastly.jsdelivr.net', pathPrefix: '/gh/Nuctori/EverywhereWeGoGz@cdn-assets', fallback: false },
   {
     id: 'github-raw',
     origin: 'https://raw.githubusercontent.com',

@@ -13,23 +13,8 @@
       "pathPrefix": "/gh/Nuctori/EverywhereWeGoGz@cdn-assets"
     },
     {
-      "id": "jsdelivr",
-      "origin": "https://cdn.jsdelivr.net",
-      "pathPrefix": "/gh/Nuctori/EverywhereWeGoGz@cdn-assets"
-    },
-    {
-      "id": "jsdelivr-fastly",
-      "origin": "https://fastly.jsdelivr.net",
-      "pathPrefix": "/gh/Nuctori/EverywhereWeGoGz@cdn-assets"
-    },
-    {
       "id": "jsdelivr-gcore",
       "origin": "https://gcore.jsdelivr.net",
-      "pathPrefix": "/gh/Nuctori/EverywhereWeGoGz@cdn-assets"
-    },
-    {
-      "id": "jsdelivr-originfastly",
-      "origin": "https://originfastly.jsdelivr.net",
       "pathPrefix": "/gh/Nuctori/EverywhereWeGoGz@cdn-assets"
     },
     {
