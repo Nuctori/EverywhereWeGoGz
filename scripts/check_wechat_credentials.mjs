@@ -19,7 +19,11 @@ function gh(args, optional = false) {
   }
 }
 
+// 本地跑（无 GITHUB_REPOSITORY）禁止碰远程 issue，避免用个人凭证误创建。
+const issueOpsEnabled = Boolean(repo);
+
 function closeResolvedIssues() {
+  if (!issueOpsEnabled) return;
   try {
     const open = JSON.parse(gh(['issue', 'list', '--state', 'open', '--label', LABEL, '--json', 'number'], true) || '[]');
     for (const issue of open) {
@@ -31,11 +35,18 @@ function closeResolvedIssues() {
 }
 
 function openIssue(detail) {
+  if (!issueOpsEnabled) {
+    console.log('(本地运行：跳过 issue 操作。诊断如下)\n' + detail);
+    return;
+  }
   try {
     gh(['label', 'create', LABEL, '--color', 'D93F0B', '--description', '微信公众号 appId/secret 失效', '--force'], true);
     const open = JSON.parse(gh(['issue', 'list', '--state', 'open', '--label', LABEL, '--json', 'number'], true) || '[]');
     if (open.length === 0) {
       gh(['issue', 'create', '--label', LABEL, '--title', TITLE, '--body', detail]);
+    } else {
+      // 诊断会随错误码变化（如 IP 白名单→appid 错误），刷新正文为最新结论
+      gh(['issue', 'comment', String(open[0].number), '--body', detail]);
     }
   } catch (error) {
     console.warn(`issue 操作失败（忽略）：${error.message}`);
