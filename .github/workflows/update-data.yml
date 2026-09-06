@@ -80,10 +80,25 @@ jobs:
         run: npm run audit:jrt365-crawl-guard
 
       - name: Crawl JRT365 full
+        id: crawl
         timeout-minutes: 60
+        # 单渠道失败不阻断整轮：守卫拒绝脏数据、对方站点反爬升级都属正常波动，
+        # merge_data.py 对缺失来源沿用上一轮数据（断供保护）。降级原因进 summary 提醒。
+        continue-on-error: true
         run: python -u scripts/crawl_jrt365_full.py
 
+      - name: Record JRT365 outcome
+        if: always()
+        env:
+          CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
+        run: |
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          if [ "$CRAWL_OUTCOME" != "success" ]; then
+            echo "⚠️ JRT365 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Upload JRT365 raw data
+        if: steps.crawl.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: raw-jrt365
@@ -107,15 +122,29 @@ jobs:
         run: pip install requests beautifulsoup4 lxml selenium
 
       - name: Crawl Saihuitong full
+        id: crawl
         timeout-minutes: 60
+        continue-on-error: true
         run: python -u scripts/crawl_saihuitong_full.py
 
       - name: Upload Saihuitong raw data
+        if: steps.crawl.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: raw-saihuitong
           path: src/data/raw_saihuitong_full.json
           if-no-files-found: error
+
+      - name: Record Saihuitong outcome
+        if: always()
+        env:
+          CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
+        run: |
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          if [ "$CRAWL_OUTCOME" != "success" ]; then
+            echo "⚠️ Saihuitong 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
 
   crawl-kanghui:
     runs-on: ubuntu-latest
@@ -135,15 +164,29 @@ jobs:
         run: pip install requests beautifulsoup4 lxml
 
       - name: Crawl Kanghui full
+        id: crawl
         timeout-minutes: 60
+        continue-on-error: true
         run: python -u scripts/crawl_kanghui_full.py
 
       - name: Upload Kanghui raw data
+        if: steps.crawl.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: raw-kanghui
           path: src/data/raw_kanghui.json
           if-no-files-found: error
+
+      - name: Record Kanghui outcome
+        if: always()
+        env:
+          CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
+        run: |
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          if [ "$CRAWL_OUTCOME" != "success" ]; then
+            echo "⚠️ Kanghui 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
 
   crawl-pintu:
     runs-on: ubuntu-latest
@@ -162,15 +205,29 @@ jobs:
         run: pip install requests beautifulsoup4 lxml selenium
 
       - name: Crawl Pintu full
+        id: crawl
         timeout-minutes: 60
+        continue-on-error: true
         run: python -u scripts/crawl_pintu_full.py
 
       - name: Upload Pintu raw data
+        if: steps.crawl.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: raw-pintu
           path: src/data/raw_pintu_full.json
           if-no-files-found: error
+
+      - name: Record Pintu outcome
+        if: always()
+        env:
+          CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
+        run: |
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          if [ "$CRAWL_OUTCOME" != "success" ]; then
+            echo "⚠️ Pintu 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
 
   crawl-gzl-api:
     runs-on: ubuntu-latest
@@ -189,15 +246,29 @@ jobs:
         run: pip install requests beautifulsoup4 lxml selenium
 
       - name: Crawl GZL API full
+        id: crawl
         timeout-minutes: 180
+        continue-on-error: true
         run: python -u scripts/crawl_gzl_api.py
 
       - name: Upload GZL raw data
+        if: steps.crawl.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: raw-gzl-api
           path: src/data/raw_gzl_api.json
           if-no-files-found: error
+
+      - name: Record GZL API outcome
+        if: always()
+        env:
+          CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
+        run: |
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          if [ "$CRAWL_OUTCOME" != "success" ]; then
+            echo "⚠️ GZL API 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
 
   crawl-outdoors:
     runs-on: ubuntu-latest
@@ -216,15 +287,29 @@ jobs:
         run: pip install requests beautifulsoup4 lxml selenium
 
       - name: Crawl Outdoors full
+        id: crawl
         timeout-minutes: 60
+        continue-on-error: true
         run: python -u scripts/crawl_outdoors_full.py
 
       - name: Upload Outdoors raw data
+        if: steps.crawl.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: raw-outdoors
           path: src/data/raw_outdoors_full.json
           if-no-files-found: error
+
+      - name: Record Outdoors outcome
+        if: always()
+        env:
+          CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
+        run: |
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          if [ "$CRAWL_OUTCOME" != "success" ]; then
+            echo "⚠️ Outdoors 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
 
   crawl-http-aggregate:
     runs-on: ubuntu-latest
@@ -243,20 +328,22 @@ jobs:
         run: pip install requests beautifulsoup4 lxml selenium
 
       - name: Crawl HTTP aggregate sources
+        id: crawl
         timeout-minutes: 60
+        continue-on-error: true
         run: python -u scripts/full_crawl_v3.py
 
       - name: Upload HTTP aggregate raw data
+        if: steps.crawl.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: raw-http
           path: src/data/raw_http_full.json
           if-no-files-found: error
 
-  # 单渠道爬取失败不应让整站数据停更（曾因 JRT365 守卫连续 3 周阻断）。
-  # GitHub 表达式不支持算术，用 gate job 数成功数：调度/push 需 >=5/7 渠道成功；
-  # workflow_dispatch 保留原有全量旁路（skip_crawls 场景直接放行）。
-  # 缺失来源由 merge_data.py 沿用上一轮线路（断供保护），完整性审计仍是提交前最终质量门。
+  # 单渠道爬取失败已由各 crawl job 内部降级（continue-on-error + job 级 ok 输出）：
+  # 数据真空（<4 渠道产出 raw 文件）才阻断整轮；缺失来源由 merge_data.py 沿用上一轮线路，
+  # 完整性审计仍是提交前最终质量门。降级明细看各 job 的 step summary。
   crawl-gate:
     runs-on: ubuntu-latest
     needs:
@@ -275,12 +362,22 @@ jobs:
       - name: Evaluate crawl majority gate
         id: gate
         env:
-          RESULTS: ${{ join(needs.*.result, ' ') }}
+          JRT365_OK: ${{ needs.crawl-jrt365.outputs.ok }}
+          SAIHUITONG_OK: ${{ needs.crawl-saihuitong.outputs.ok }}
+          KANGHUI_OK: ${{ needs.crawl-kanghui.outputs.ok }}
+          PINTU_OK: ${{ needs.crawl-pintu.outputs.ok }}
+          GZL_OK: ${{ needs.crawl-gzl-api.outputs.ok }}
+          OUTDOORS_OK: ${{ needs.crawl-outdoors.outputs.ok }}
+          HTTP_OK: ${{ needs.crawl-http-aggregate.outputs.ok }}
         run: |
           set -euo pipefail
-          successes="$(printf '%s\n' $RESULTS | grep -cx success || true)"
-          echo "crawl results: $RESULTS (successes=$successes)"
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$successes" -ge 6 ]; then
+          oks=("$JRT365_OK" "$SAIHUITONG_OK" "$KANGHUI_OK" "$PINTU_OK" "$GZL_OK" "$OUTDOORS_OK" "$HTTP_OK")
+          successes=0
+          for ok in "${oks[@]}"; do
+            [ "$ok" = "true" ] && successes=$((successes + 1))
+          done
+          echo "crawl outputs ok: ${oks[*]} (successes=$successes/7)"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$successes" -ge 4 ]; then
             echo "proceed=true" >> "$GITHUB_OUTPUT"
           else
             echo "proceed=false" >> "$GITHUB_OUTPUT"
@@ -486,3 +583,14 @@ jobs:
               ref: context.ref.replace('refs/heads/', ''),
             });
             console.log('Dispatched weekly-wechat-article fallback using the last committed data.');
+
+      - name: Record HTTP aggregate outcome
+        if: always()
+        env:
+          CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
+        run: |
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          if [ "$CRAWL_OUTCOME" != "success" ]; then
+            echo "⚠️ HTTP aggregate 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          fi
+

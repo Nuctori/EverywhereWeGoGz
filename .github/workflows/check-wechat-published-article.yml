@@ -32,6 +32,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Verify WeChat credentials (skip run if broken)
+        id: credentials
+        # 凭证坏 → 去重开 issue → 本轮绿灯跳过；红叉不用于调度任务的凭证过期。
+        continue-on-error: true
+        env:
+          WECHAT_APP_ID: ${{ secrets.WECHAT_APP_ID }}
+          WECHAT_APP_SECRET: ${{ secrets.WECHAT_APP_SECRET }}
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/check_wechat_credentials.mjs
+
+      - name: Stop if credentials are broken
+        if: steps.credentials.outcome == 'failure'
+        run: |
+          echo "WeChat credentials invalid — 已开/更新追踪 issue，本轮跳过（绿灯）。修复凭证后自动恢复。"
+          exit 0
+
       - name: Verify SUP relay helper
         run: |
           python3 scripts/test_run_remote_wechat_sup_orders.py
