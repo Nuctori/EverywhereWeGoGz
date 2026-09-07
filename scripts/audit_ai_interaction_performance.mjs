@@ -8,12 +8,12 @@ const aiPanelSource = fs.readFileSync('src/sections/AiRecommendPanel.tsx', 'utf8
 const aiSearchBody = appSource.match(/const handleAiSearch = \(nextQuery\?: string\) => \{([\s\S]*?)\n  \};/)?.[1] || '';
 assert.ok(aiSearchBody.includes('setAiSearchRequest'), 'AI search should still dispatch an AI request');
 assert.ok(
-  !aiSearchBody.includes('setSubmittedSearchQuery(prompt)'),
-  'AI search click must not submit the natural-language prompt into the plain list search path',
+  aiSearchBody.includes('setSubmittedSearchQuery(prompt)') && aiSearchBody.includes('searchQuery: prompt'),
+  'AI search should sync the prompt into the search query so the relevance-ranked long tail below the pinned recommendations has context',
 );
 assert.ok(
-  aiSearchBody.includes('requestAnimationFrame'),
-  'AI search scroll should be scheduled after the click frame instead of running immediately',
+  aiSearchBody.includes("scrollIntoView({ behavior: 'smooth' })"),
+  'AI search click should smooth-scroll the result list into view',
 );
 
 assert.match(
@@ -23,8 +23,13 @@ assert.match(
 );
 assert.match(
   tourListSource,
-  /if \(isAiSearchMode && !isAiRecommendedTour\) \{[\s\S]*?return false;/,
-  'AI mode should display only tours explicitly selected by AI',
+  /if \(isAiSearchMode && isAiRecommendedTour\) \{\s*return true;/,
+  'AI mode should pin AI-selected tours at the top of the list',
+);
+assert.doesNotMatch(
+  tourListSource,
+  /if \(isAiSearchMode && !isAiRecommendedTour\) \{/,
+  'AI mode must keep the relevance-ranked long tail below the pinned segment instead of truncating the list to 15 items',
 );
 
 assert.ok(

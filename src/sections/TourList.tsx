@@ -711,17 +711,13 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
       const isAiRecommendedTour = aiRecommendationByTourId.has(tour.id);
 
-      // AI 模式展示的是 AI 真正选中的少量方案；未入选候选留在普通浏览模式，
-      // 避免用户把整池候选误认为 AI 推荐结果。
-      if (isAiSearchMode && !isAiRecommendedTour) {
-        return false;
-      }
-
-      if (isAiRecommendedTour) {
+      // AI 模式：AI 选中的方案置顶展示；未入选候选保留为按相关性排序的
+      // 长尾，用户可在置顶段之后继续下滑慢慢浏览（不再截断成只有 15 条）。
+      if (isAiSearchMode && isAiRecommendedTour) {
         return true;
       }
 
-      if (normalizedSearchQuery && !isAiSearchMode && !isAiRecommendedTour) {
+      if (normalizedSearchQuery && !isAiRecommendedTour) {
         const relevance = getTourSearchRelevance(tour, searchContext);
         const minRelevance = hasNaturalLanguageQuery ? 4 : 12;
 
@@ -813,7 +809,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       return true;
     });
 
-    if (normalizedSearchQuery && !isAiSearchMode) {
+    if (normalizedSearchQuery) {
+      // AI 模式下长尾也按相关性排序：置顶段之后继续下滑就是“越来越宽”的相关候选。
       result.sort((a, b) =>
         getTourSearchRelevance(b, searchContext) - getTourSearchRelevance(a, searchContext) ||
         compareToursBySortMode(filters.sortBy, a, b),
