@@ -20,6 +20,7 @@ import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { toursIndexSchema, toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { compareRecommended, getEffectiveDepartureDates } from '@/lib/tour-recommendation';
+import { extractQueryContext, getSearchRelevance, type QuerySearchContext } from '@/lib/search-concepts';
 import {
   findTourDeepLinkResolution,
   inflateTourSummaryFromIndexEntry,
@@ -346,28 +347,8 @@ const RECOMMENDED_TITLE_HINTS = [
   '精选',
 ];
 
-const SEARCH_SPLIT_PATTERN =
-  /(?:\s+|推荐|帮我|帮忙|给我|想要|想找|想去|看看|安排|同时|具有|带有|带|含有|包含|包括|适合|可以|有没有|和|与|及|以及|或者|或|的|旅行团|旅游团|跟团|线路|产品|主题|玩法|一下|一个|一些)+/gu;
 type TourCatalogEntry = TourSummary | TourIndexEntry;
 const searchCorpusCache = new WeakMap<TourCatalogEntry, string>();
-
-function normalizeSearchText(value: string) {
-  return value.trim().toLowerCase();
-}
-
-function extractSearchTerms(query: string) {
-  const normalized = normalizeSearchText(query).replace(/[^\p{Script=Han}a-z0-9]+/gu, ' ');
-  const parts = normalized
-    .split(SEARCH_SPLIT_PATTERN)
-    .map((part) => part.trim())
-    .filter((part) => part.length >= 2 && part.length <= 16 && !/^\d+$/.test(part));
-
-  if (parts.length > 0) {
-    return [...new Set(parts)].slice(0, 8);
-  }
-
-  return normalized && normalized.length <= 16 ? [normalized] : [];
-}
 
 function getTourSearchCorpus(tour: TourCatalogEntry) {
   const cached = searchCorpusCache.get(tour);
@@ -393,27 +374,9 @@ function getTourSearchCorpus(tour: TourCatalogEntry) {
 
 function getTourSearchRelevance(
   tour: TourCatalogEntry,
-  search: { normalized: string; terms: string[] },
+  search: QuerySearchContext,
 ) {
-  if (!search.normalized) return 0;
-
-  const corpus = getTourSearchCorpus(tour);
-  let score = 0;
-
-  if (tour.title.toLowerCase().includes(search.normalized)) score += 32;
-  else if (corpus.includes(search.normalized)) score += 18;
-
-  for (const term of search.terms) {
-    if (tour.destination.toLowerCase().includes(term)) score += 18;
-    else if (tour.theme.toLowerCase().includes(term)) score += 15;
-    else if (tour.title.toLowerCase().includes(term)) score += 14;
-    else if (tour.tags.some((tag) => tag.toLowerCase().includes(term))) score += 12;
-    else if (tour.highlights.some((highlight) => highlight.toLowerCase().includes(term))) score += 10;
-    else if (tour.source.toLowerCase().includes(term) || tour.transportType.toLowerCase().includes(term)) score += 8;
-    else if (corpus.includes(term)) score += 4;
-  }
-
-  return score;
+  return getSearchRelevance(tour.title.toLowerCase(), getTourSearchCorpus(tour), search);
 }
 
 function compareToursBySortMode(
@@ -713,12 +676,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   ]);
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
-  const searchTerms = useMemo(() => extractSearchTerms(searchQuery), [searchQuery]);
-  const hasNaturalLanguageQuery = normalizedSearchQuery.length >= 8 || searchTerms.length >= 2;
-  const searchContext = useMemo(
-    () => ({ normalized: normalizedSearchQuery, terms: searchTerms }),
-    [normalizedSearchQuery, searchTerms],
-  );
+  const searchContext = useMemo(() => extractQueryContext(searchQuery), [searchQuery]);
+  const hasNaturalLanguageQuery =
+    normalizedSearchQuery.length >= 8 || searchContext.concepts.length + searchContext.residues.length >= 2;
   const isAiSearchMode = Boolean(aiRecommendationResult);
   const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode;
   const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;

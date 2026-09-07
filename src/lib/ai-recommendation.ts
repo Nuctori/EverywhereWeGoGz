@@ -1,4 +1,5 @@
 // AI 推荐主链路：负责意图理解、天气补充、候选筛选、排序融合、文案润色和失败回退。
+import { CONCEPT_GROUPS } from '@/lib/search-concepts';
 import type {
   AiProviderConfig,
   AiPreferenceMemory,
@@ -1020,29 +1021,10 @@ function collectThemeHints(text: string) {
   return THEME_KEYWORDS.filter((keyword) => text.includes(keyword));
 }
 
-const COVERAGE_TERM_GROUPS = [
-  {
-    label: '温泉泡汤',
-    aliases: ['温泉', '泡汤', '汤泉', '热泉', '铁泉', '御泉', '私汤', '带池', '泡池'],
-  },
-  {
-    label: '海边沙滩',
-    aliases: ['海边', '海滩', '沙滩', '海景', '海岸', '海湾', '湾'],
-  },
-  {
-    label: '玩水清凉',
-    // 用户说“玩水”时，海湾、海滩和盐洲岛这类滨水目的地也属于实际玩法，
-    // 不能因为数据只写了“温泉联游”就把它误判成纯泡汤线路。
-    aliases: ['玩水', '水上', '漂流', '溯溪', '桨板', '浆板', '冲浪', '游泳', '嬉水', '亲水', '水世界', '水上乐园', '泳池', '海边', '海滩', '沙滩', '海湾', '湾'],
-  },
-  {
-    label: '森林山水',
-    aliases: ['森林', '山水', '瀑布', '峡谷', '溶洞', '氧吧', '湿地', '绿道', '丹霞', '避暑', '清凉'],
-  },
-  {
-    label: '文化逛城',
-    aliases: ['文化', '古城', '古镇', '博物馆', '非遗', '骑楼', '祠', '寺', '水乡', '碉楼'],
-  },
+// 概念词表统一收口到 src/lib/search-concepts.ts 的 CONCEPT_GROUPS（查询侧与
+// 线路侧共用一份）。此处保留 AI 路径独有的三个组：周边小镇/共享电瓶车是候选
+// 事实摘要专用概念，不进用户查询侧；别名超集差异见下方 override。
+const AI_EXTRA_CONCEPT_GROUPS = [
   {
     label: '周边小镇',
     aliases: ['镇子', '小镇', '镇上', '周边有镇', '周边小镇', '县城'],
@@ -1051,19 +1033,35 @@ const COVERAGE_TERM_GROUPS = [
     label: '共享电瓶车',
     aliases: ['共享电瓶车', '共享电动车', '电瓶车', '电动车接驳', '骑电瓶车'],
   },
-  {
-    label: '美食体验',
-    aliases: ['美食', '海鲜', '早茶', '寻味', '牛肉', '火锅', '烧鹅', '茶点'],
-  },
-  {
-    label: '亲子家庭',
-    aliases: ['亲子', '孩子', '小朋友', '家庭', '乐园'],
-  },
-  {
-    label: '户外强度',
-    aliases: ['徒步', '登山', '爬山', '穿越', '骑行', '暴走'],
-  },
 ] as const;
+
+const COVERAGE_TERM_GROUPS = [...CONCEPT_GROUPS, ...AI_EXTRA_CONCEPT_GROUPS].map((group) => ({
+  ...group,
+  // AI 路径保留既有审计语义所需的别名超集：海边沙滩组含海岸/海湾/湾（滨水
+  // 地名也算海滨），玩水清凉组含滨水词（用户说“玩水”时双湾/盐洲岛这类
+  // 滨水目的地属于实际玩法，不能因数据只写“温泉联游”就判成纯泡汤）。
+  ...(group.label === '海边沙滩'
+    ? { aliases: [...group.aliases, '海岸', '海湾', '湾'] }
+    : {}),
+  ...(group.label === '玩水清凉'
+    ? { aliases: [...group.aliases, '水上', '浆板', '游泳', '海边', '海滩', '沙滩', '海湾', '湾'] }
+    : {}),
+  ...(group.label === '森林山水'
+    ? { aliases: [...group.aliases, '绿道'] }
+    : {}),
+  ...(group.label === '文化逛城'
+    ? { aliases: [...group.aliases, '祠', '寺'] }
+    : {}),
+  ...(group.label === '美食体验'
+    ? { aliases: [...group.aliases, '牛肉', '茶点'] }
+    : {}),
+  ...(group.label === '亲子家庭'
+    ? { aliases: [...group.aliases, '家庭'] }
+    : {}),
+  ...(group.label === '户外强度'
+    ? { aliases: [...group.aliases, '暴走'] }
+    : {}),
+}));
 
 const PUBLIC_INTEREST_EVIDENCE_TERMS = [
   '扶贫',
@@ -2599,7 +2597,6 @@ function prioritizeRecommendationItems(
       const detailScore = primitive
         ? Math.min(20, Math.floor(reasonLength / 10))
           + (reasonMentionsCandidateFact(reason, primitive) ? 4 : 0)
-          + (/(温泉|沙滩|海边|山水|古镇|美食|徒步|夜游|返程|周末|日出|住宿|玩水|亲子|避暑|周五|周日|晚出发|晚班|返程)/.test(reason) ? 3 : 0)
           + (primitive.schedule.hasEveningOrNightDeparture ? 2 : 0)
         : Math.min(12, Math.floor(reasonLength / 12));
       const genericBriefReason = reasonLength < 12 || /^价格|低价|便宜|班期|热门|性价比|预算|轻松|自然风光|综合|AI综合推荐/.test(reason);
@@ -2620,14 +2617,29 @@ function prioritizeRecommendationItems(
       };
     })
     .sort((left, right) => {
+      // AI 交给模型的候选带有 ai-* tier：模型的整体判断就是顺序，本地不再替它选团。
+      const leftIsAi = Boolean(left.item.recommendationTier?.startsWith('ai'));
+      const rightIsAi = Boolean(right.item.recommendationTier?.startsWith('ai'));
+      if (leftIsAi !== rightIsAi) return leftIsAi ? -1 : 1;
+      if (leftIsAi && rightIsAi) {
+        // AI 内部仍按 tier 权重（detailed > brief）分组——文案完整度是既有产品
+        // 决策；同 tier 时模型分数就是顺序，仅保留预算硬限/天气两个修正键。
+        const tierGap = right.recommendationTierWeight - left.recommendationTierWeight;
+        if (tierGap !== 0) return tierGap;
+        if (left.budgetFitTier <= -2 || right.budgetFitTier <= -2) {
+          const budgetGap = right.budgetFitTier - left.budgetFitTier;
+          if (budgetGap !== 0) return budgetGap;
+        }
+        const weatherGap = right.weatherScore - left.weatherScore;
+        if (weatherGap !== 0) return weatherGap;
+        const aiScoreGap = right.aiScore - left.aiScore;
+        return aiScoreGap !== 0 ? aiScoreGap : left.index - right.index;
+      }
+
+      // 本地补位条目（未标 tier）：沿用 8ec0200e5 确立的键序——覆盖/冲突等
+      // 事实键先收敛，文案质量随后，模型分数仅在区分度足够且非软信号场景时生效。
       const tierGap = right.recommendationTierWeight - left.recommendationTierWeight;
       if (tierGap !== 0) return tierGap;
-
-      // AI 已经做过一次整体旅行判断时，保留它的选择顺序；
-      // 本地覆盖率和价格只用于打破接近分数的平手，不再反向替 AI 选团。
-      const aiSelectionGap = Number(Boolean(right.item.recommendationTier?.startsWith('ai'))) -
-        Number(Boolean(left.item.recommendationTier?.startsWith('ai')));
-      if (aiSelectionGap !== 0) return aiSelectionGap;
 
       const destinationCoverageGap = right.matchedDestinationHints.length - left.matchedDestinationHints.length;
       if (destinationCoverageGap !== 0) return destinationCoverageGap;
@@ -2643,54 +2655,37 @@ function prioritizeRecommendationItems(
       const scheduleCoverageGap = right.scheduleCoverageCount - left.scheduleCoverageCount;
       if (scheduleCoverageGap !== 0) return scheduleCoverageGap;
 
-      const scheduleCoveragePercentGap = right.scheduleCoveragePercent - left.scheduleCoveragePercent;
-      if (scheduleCoveragePercentGap !== 0) return scheduleCoveragePercentGap;
-
       const budgetGap = right.budgetFitTier - left.budgetFitTier;
       if (budgetGap !== 0) return budgetGap;
 
       const hardConflictGap = left.nonBudgetConflictCount - right.nonBudgetConflictCount;
       if (hardConflictGap !== 0) return hardConflictGap;
 
-      const conflictGap = left.totalConflictCount - right.totalConflictCount;
-      if (conflictGap !== 0) return conflictGap;
-
-      // Weather is a soft tie-breaker. Hard intent conflicts, schedule, budget and
-      // coverage must be settled before a weather advantage can change the order.
-      if (right.weatherScore !== left.weatherScore) return right.weatherScore - left.weatherScore;
-
-      if (left.item.recommendationTier?.startsWith('ai') && right.item.recommendationTier?.startsWith('ai')) {
-        const aiScoreGap = right.aiScore - left.aiScore;
-        if (aiScoreGap !== 0) return aiScoreGap;
-      }
-
-      // 尚未打上 recommendationTier 的 AI 结果仍要保留模型分数顺序；
-      // 多目的地请求先让目的地覆盖和解释质量完成组合判断，再用分数打破平手。
+      // 模型分数在无软信号门控时先于文案质量生效（8ec0200e5 语义）；
+      // 有门控时它移到键序末尾兜底（下方第二次出现）。
       const untypedAiScoreGap = right.aiScore - left.aiScore;
-      const hasMultiDestinationIntent = (intent.destinationHints?.length ?? 0) >= 2;
-      const hasSoftPacePreference = /轻松|不赶|悠闲|慢节奏/.test(context.userText || '');
-      const hasScheduleIntent = Boolean(
-        intent.departureWeekdays?.length ||
-        intent.returnWeekdays?.length ||
-        intent.departureTimeOfDay ||
-        intent.tripDaysMin ||
-        intent.tripDaysMax ||
-        intent.departureWithinDays,
-      );
-      if (!hasMultiDestinationIntent && !hasSoftPacePreference && !hasScheduleIntent && untypedAiScoreGap !== 0) return untypedAiScoreGap;
+      const hasSoftSignalIntent =
+        (intent.destinationHints?.length ?? 0) >= 2 ||
+        /轻松|不赶|悠闲|慢节奏/.test(context.userText || '') ||
+        Boolean(
+          intent.departureWeekdays?.length ||
+          intent.returnWeekdays?.length ||
+          intent.departureTimeOfDay ||
+          intent.tripDaysMin ||
+          intent.tripDaysMax ||
+          intent.departureWithinDays,
+        );
+      if (!hasSoftSignalIntent && untypedAiScoreGap !== 0) return untypedAiScoreGap;
 
       const reasonQualityGap = right.reasonQualityScore - left.reasonQualityScore;
       if (reasonQualityGap !== 0) return reasonQualityGap;
 
       const detailGap = right.detailScore - left.detailScore;
-      if (Math.abs(detailGap) > 0) return detailGap;
-
-      const reasonGap = right.reasonLength - left.reasonLength;
-      if (Math.abs(reasonGap) > 4) return reasonGap;
-
-      if ((hasMultiDestinationIntent || hasSoftPacePreference || hasScheduleIntent) && untypedAiScoreGap !== 0) return untypedAiScoreGap;
+      if (detailGap !== 0) return detailGap;
 
       if (left.hasReason !== right.hasReason) return left.hasReason ? -1 : 1;
+
+      if (hasSoftSignalIntent && untypedAiScoreGap !== 0) return untypedAiScoreGap;
       if (left.localRank >= 0 && right.localRank >= 0 && left.localRank !== right.localRank) {
         return left.localRank - right.localRank;
       }
@@ -6140,6 +6135,7 @@ export const __aiRecommendationTestHooks = {
   getPrimitiveConflictReasons,
   reasonAddressesUserNeed,
   localRecommendations,
+  fallbackRecommendations,
   matchesActiveDateFilters,
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
@@ -6481,17 +6477,15 @@ function auditAiRecommendationsStrict(
   ].slice(0, MAX_AI_RANKED_ITEMS);
 }
 
+// 历史上的复合体验二次硬过滤已删除（1a91e0652）：AI 的选择顺序就是结果顺序，
+// 未覆盖条件由文案层写成待核实项。保留函数只做条数上限，签名不动以稳住 4 处测试引用。
 function keepAiItemsForCompoundExperience(
   items: AiRecommendationItem[],
-  candidateTours: AiRecommendationCandidate[],
+  _candidateTours: AiRecommendationCandidate[],
   userText: string,
 ) {
   const coverageTerms = getCoverageTermsForQuality(userText);
   if (coverageTerms.length < 2 || items.length === 0) return items;
-  // AI 已经基于候选事实、世界知识和用户取舍完成排序；这里不再按覆盖项
-  // 做二次硬过滤。完整匹配、近似匹配和可核实的替代都应保留，由每条理由
-  // 说明缺口，避免把“推荐”退化成“只显示满足全部关键词的团”。
-  void candidateTours;
   return items.slice(0, MAX_AI_SELECTED_ITEMS);
 }
 
