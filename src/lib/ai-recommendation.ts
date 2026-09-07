@@ -30,10 +30,12 @@ const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 // 仍然保留上限，避免把全量线路直接塞进模型上下文。
 const MAX_AI_CANDIDATES = 96;
 const MAX_AI_COMMENTARY_ITEMS = 24;
-// 推荐是给用户挑选，不是把候选池裁成“唯一正确答案”；保留更宽的 AI 排序结果，
-// 让次优但可能合适的线路也能进入选择范围。
-const MAX_AI_SELECTED_ITEMS = 12;
-const MAX_AI_PROMPT_REASON_ITEMS = MAX_AI_SELECTED_ITEMS;
+// 推荐展示结构：前 5 条带完整推荐理由（详细推荐），随后 10 条只保留看点信号
+// （简要推荐）。模型按推荐度一次给出 15 条，本地按位置切分两档展示。
+const MAX_AI_DETAILED_ITEMS = 5;
+const MAX_AI_BRIEF_ITEMS = 10;
+const MAX_AI_SELECTED_ITEMS = MAX_AI_DETAILED_ITEMS + MAX_AI_BRIEF_ITEMS;
+const MAX_AI_PROMPT_REASON_ITEMS = MAX_AI_DETAILED_ITEMS;
 const MAX_AI_RANKED_ITEMS = 24;
 const MAX_DESTINATION_WEATHER_INSIGHTS = 6;
 const ROUTE_ATLAS_MAX_GROUPS = 8;
@@ -1572,18 +1574,27 @@ function buildEffectiveUserText(
   return buildLocalRecommendationText(userText, preferenceMemory);
 }
 
+// 会话中除本轮外还有更早的用户提问，即为追问轮（面板在追问时保留历史消息）。
+function isFollowUpConversation(messages: AiRecommendationMessage[]) {
+  return messages.filter((message) => message.role === 'user').length > 1;
+}
+
 function shouldInheritPreferenceMemoryForTurn(
   text: string,
   intent: AiTravelIntent | null,
   memory: AiPreferenceMemory | null | undefined,
+  isFollowUpTurn: boolean,
 ) {
   void intent;
   if (!memory) return false;
+  // 追问轮默认继承上一轮偏好：多轮短句（如“预算压到600”）几乎总是在上一轮
+  // 需求上追加条件，不继承就会把追问当成全新搜索重排；是否“纠偏/替换/扩展/
+  // 换目的地”仍交给 AI 的 refinementMode 判断，本轮新给出的条件会覆盖记忆。
+  if (isFollowUpTurn) return true;
   const normalizedText = text.replace(/\s+/g, '');
   const isRelativeTurn = /(上一轮|刚才|继续|沿用|保留|类似|这个|这些|上面|前面)/.test(
     normalizedText,
   );
-  // 本地 fallback 只处理明确指代上一轮的情况；是否“纠偏/替换/扩展”交给 AI 的 refinementMode 判断。
   return isRelativeTurn;
 }
 
@@ -2157,31 +2168,6 @@ function getRecommendationTierWeight(item: AiRecommendationItem) {
   }
 }
 
-function isDetailedAiRecommendation(item: AiRecommendationItem) {
-  const reason = stripTerminalPunctuation(item.reason || '').replace(/\s+/g, '');
-  if (!reason) return false;
-
-  const reasonLength = reason.length;
-  const matchedSignalCount = uniqueStrings(item.matchedSignals || []).length;
-  const destinationFactCount = collectDestinationHints(normalizeText(reason)).length > 0 ? 1 : 0;
-  const concreteFactCount = [
-    destinationFactCount,
-    /(?:周[一二三四五六日天]|周末|晚出发|晚班|返程|周日|周五)/,
-    /(?:\d+天|\d+晚|三天|两天|五天|行程|节奏)/,
-    /(?:预算|价格|人均|以内|口碑|评分|住宿|动车|高铁|大巴|飞机)/,
-    /(?:适合|因为|覆盖|同时|兼顾|更符合|优先|相比)/,
-  ].filter((fact) => typeof fact === 'number' ? fact > 0 : fact.test(reason)).length;
-  const isTemplateBrief = (
-    reasonLength < 18 ||
-    /^(?:[\p{Script=Han}A-Za-z]{0,12})?(?:\d+天)?(?:，|,)?(?:可考虑|性价比|热门|低价|价格|预算|经典|综合|AI综合推荐|更贴题|适合|符合需求)[。.]?$/u.test(reason) ||
-    /^(?:有|含|带)(?:温泉|沙滩|海边|山水|美食|周末)(?:和|、)?(?:温泉|沙滩|海边|山水|美食)?[。.]?$/.test(reason)
-  );
-
-  if (isTemplateBrief) return false;
-  if (reasonLength >= 42 && concreteFactCount >= 2) return true;
-  return reasonLength >= 28 && concreteFactCount >= 3 && matchedSignalCount >= 2;
-}
-
 function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecommendationItem[] {
   let commentaryCount = 0;
 
@@ -2204,15 +2190,18 @@ function mergeAiAndLocalRecommendations(
   localItems: AiRecommendationItem[],
 ): AiRecommendationItem[] {
   const seenTourIds = new Set<string>();
+  // 详细/简要按模型给出的推荐顺序切分：前 5 条保留完整理由，随后 10 条只在
+  // matchedSignals 里保留看点；简要位不写 reason，卡片渲染走简要样式。
   const primaryAiItems = aiItems
     .filter((item) => {
       if (seenTourIds.has(item.tourId)) return false;
       seenTourIds.add(item.tourId);
       return true;
     })
-    .map((item) => ({
+    .map((item, aiIndex) => ({
       ...item,
-      recommendationTier: isDetailedAiRecommendation(item) ? 'ai-detailed' : 'ai-brief',
+      recommendationTier: (aiIndex < MAX_AI_DETAILED_ITEMS ? 'ai-detailed' : 'ai-brief') as AiRecommendationItem['recommendationTier'],
+      ...(aiIndex >= MAX_AI_DETAILED_ITEMS ? { reason: undefined } : {}),
     } satisfies AiRecommendationItem));
   if (primaryAiItems.length > 0) {
     const supplementalItems = localItems
@@ -2386,7 +2375,11 @@ function padRecommendationItems(
 }
 
 function countCommentaryItems(items: AiRecommendationItem[]) {
-  return items.reduce((count, item) => count + (item.reason ? 1 : 0), 0);
+  // “建议条数”按 AI 推荐位（详细 + 简要）计；简要位没有 reason，靠 tier 识别。
+  return items.reduce(
+    (count, item) => count + (item.reason || item.recommendationTier === 'ai-brief' ? 1 : 0),
+    0,
+  );
 }
 
 function buildPaddedRecommendationItems(
@@ -4924,6 +4917,11 @@ function rewriteRecommendationCopy(params: {
     if (item.recommendationTier === 'local-supplement') {
       return stripRecommendationCommentary(item);
     }
+    // 简要推荐位（第 6-15 条）的看点由 matchedSignals 承载，不补写完整推荐语，
+    // 否则本地生成的文案会把简要卡片重新撑成详细卡。
+    if (item.recommendationTier === 'ai-brief') {
+      return { ...item, reason: undefined };
+    }
     if (index >= MAX_AI_COMMENTARY_ITEMS) {
       return stripRecommendationCommentary(item);
     }
@@ -5691,7 +5689,7 @@ function buildAiMessages(params: {
   );
 
   const dynamicRequest = {
-    t: 'rank_top6',
+    t: 'rank_5detailed_10brief',
     q: params.userText,
     sq: params.searchQuery,
     rc: compactRecentConversation(params.messages),
@@ -5734,15 +5732,15 @@ function buildAiMessages(params: {
         {
           tourId: '候选 id',
           score: '0-100 number',
-          reason: `前 ${MAX_AI_PROMPT_REASON_ITEMS} 条可以写。请用你自己的判断说明为什么会想去这条线路，具体写它的画面、气质、玩法或取舍；长度和写法由你决定`,
-          matchedSignals: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条需要。2-3 个中文短语；其余条目省略`,
+          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条（详细推荐位）写。请用你自己的判断说明为什么会想去这条线路，具体写它的画面、气质、玩法或取舍；长度和写法由你决定。第 ${MAX_AI_DETAILED_ITEMS + 1} 条起省略 reason`,
+          matchedSignals: `每条都需要。2-3 个中文短语；详细推荐位之外它就是这条推荐的全部看点，要写到具体玩法或体验，不要写空泛的“适合度假”`,
         },
       ],
       itemCountLimit: MAX_AI_SELECTED_ITEMS,
     },
     rq: [
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。先做整体体验判断，再做候选排序。',
-      '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
+      '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮的目的地、主题、天数和同行人偏好。',
       'candidates 里 pc/pricePct 是价格上下文，atoms/cats/seasonAtoms/conflicts 是候选事实摘要。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
@@ -5753,8 +5751,8 @@ function buildAiMessages(params: {
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
       ...promptPolicy.requestRules,
       [
-        `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason/matchedSignals；`,
-        `候选池足够时优先返回 8-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少于 8 个。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
+        `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起省略 reason、只写 matchedSignals；`,
+        `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条是最值得细看的详细推荐，后面 ${MAX_AI_BRIEF_ITEMS} 条是值得顺便比较的简要推荐；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
         '可以参考熟悉当地玩法的人来写，避免让所有线路都长得一样；如果某个软条件需要核实，自行判断它是否值得写进这一条。',
       ].join(''),
     ],
@@ -5788,7 +5786,7 @@ function buildLiteAiMessages(params: {
     params.userText,
   );
   const request = {
-    t: 'rank_top24_lite',
+    t: 'rank_5detailed_10brief_lite',
     q: params.userText,
     sq: params.searchQuery,
     rc: compactRecentConversation(params.messages).slice(-2),
@@ -5822,8 +5820,8 @@ function buildLiteAiMessages(params: {
       items: [{
         tourId: '候选 id',
         score: '0-100 number',
-        sf: '前8条可以写。用你自己的判断说明这条线路为什么值得考虑，像熟悉当地玩法的人在种草；写法和长度自行决定',
-        ss: '仅前8条需要，最多3个短词',
+        sf: `仅前${MAX_AI_DETAILED_ITEMS}条可以写。用你自己的判断说明这条线路为什么值得考虑，像熟悉当地玩法的人在种草；写法和长度自行决定`,
+        ss: `每条都需要，最多3个短词；第${MAX_AI_DETAILED_ITEMS + 1}条起它就是这条推荐的全部看点，要具体`,
       }],
       itemCountLimit: MAX_AI_SELECTED_ITEMS,
     },
@@ -5832,9 +5830,9 @@ function buildLiteAiMessages(params: {
       '返回 intent、intentNotes、clarification、assumptions、tradeoffs 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates 中存在的 id。',
       'JSON 保持可解析即可，文案不要为了短而牺牲具体判断。',
-      `候选池足够时优先返回 8-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少于 8 个。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
+      `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条写 sf，其余条目省略 sf、只写 ss；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
       '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
-      '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。',
+      `多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮偏好。`,
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，优先按 sg 去理解这类软语义；它是理解镜头，不是硬过滤规则。']
@@ -7238,7 +7236,8 @@ export async function requestAiRecommendations({
   const text = getLatestUserText(messages);
   const basePreferenceMemory = preferenceMemory ?? null;
   const baseHardIntent = buildHardIntentFromText(text);
-  const memoryForThisTurn = shouldInheritPreferenceMemoryForTurn(text, baseHardIntent, basePreferenceMemory)
+  const isFollowUpTurn = isFollowUpConversation(messages);
+  const memoryForThisTurn = shouldInheritPreferenceMemoryForTurn(text, baseHardIntent, basePreferenceMemory, isFollowUpTurn)
     ? basePreferenceMemory
     : null;
   const aiContextMemoryForThisTurn = basePreferenceMemory;
@@ -7531,8 +7530,8 @@ export async function requestAiRecommendations({
         preferenceMemory: aiContextMemoryForThisTurn,
         allowPublicInterest: allowPublicInterestForTurn,
       }),
-      maxTokens: 1600,
-      liteMaxTokens: 1000,
+      maxTokens: 2200,
+      liteMaxTokens: 1300,
       qualityCheck: (response) =>
         getAiResponseIntentQualityIssue({
           response,

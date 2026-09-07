@@ -684,7 +684,10 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;
 
   const aiRecommendedCount = useMemo(
-    () => aiRecommendationResult?.items.filter((item) => Boolean(item.reason)).length ?? 0,
+    () =>
+      aiRecommendationResult?.items.filter(
+        (item) => Boolean(item.reason) || item.recommendationTier === 'ai-brief',
+      ).length ?? 0,
     [aiRecommendationResult],
   );
 
@@ -1820,6 +1823,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                   recommendationReason={recommendation?.reason}
                   recommendationRank={recommendation?.rank}
                   recommendationTier={recommendation?.recommendationTier}
+                  recommendationSignals={recommendation?.matchedSignals}
                 />
               );
             })}

@@ -2699,23 +2699,30 @@ const reordered = prioritizeRecommendationItems(
   );
 }
 
-// ─── 回归测试：短 reason 不应被当作 AI 详细推荐置顶 ───
+// ─── 回归测试：详细/简要按模型推荐顺序切分——前 5 条为详细位，其后简要位不保留 reason ───
 {
+  const aiModelOrderItems = [
+    {
+      tourId: 'brief-guangxi',
+      score: 99,
+      reason: '广西崇左3天，标签含越南。',
+      matchedSignals: ['广西'],
+    },
+    ...[2, 3, 4, 5].map((index) => ({
+      tourId: `ai-second-${index}`,
+      score: 90 - index,
+      reason: `第${index}条：周末动车往返，崇左德天瀑布主线完整，节奏适中。`,
+      matchedSignals: ['广西'],
+    })),
+    {
+      tourId: 'detailed-guangxi-vietnam',
+      score: 70,
+      reason: '这条线同时覆盖广西边境和越南方向，德天跨国瀑布、通灵峡谷与越南段组合更贴近“广西越南联游”，不是只推荐广西单点。',
+      matchedSignals: ['广西', '越南', '联游'],
+    },
+  ];
   const tieredItems = mergeAiAndLocalRecommendations(
-    [
-      {
-        tourId: 'brief-guangxi',
-        score: 99,
-        reason: '广西崇左3天，标签含越南。',
-        matchedSignals: ['广西'],
-      },
-      {
-        tourId: 'detailed-guangxi-vietnam',
-        score: 70,
-        reason: '这条线同时覆盖广西边境和越南方向，德天跨国瀑布、通灵峡谷与越南段组合更贴近“广西越南联游”，不是只推荐广西单点。',
-        matchedSignals: ['广西', '越南', '联游'],
-      },
-    ],
+    aiModelOrderItems,
     [{
       tourId: 'local-supplement',
       score: 1000,
@@ -2736,6 +2743,16 @@ const reordered = prioritizeRecommendationItems(
         highlights: ['崇左', '德天瀑布'],
         theme: '自然风光',
       }),
+      ...[2, 3, 4, 5].map((index) => candidate({
+        id: `ai-second-${index}`,
+        title: `广西周末动车3天（${index}）`,
+        destination: '广西',
+        duration: 3,
+        price: 799 + index,
+        tags: ['周末'],
+        highlights: ['德天瀑布'],
+        theme: '自然风光',
+      })),
       candidate({
         id: 'detailed-guangxi-vietnam',
         title: '广西德天越南边境联游4天',
@@ -2756,24 +2773,37 @@ const reordered = prioritizeRecommendationItems(
         highlights: ['补位'],
       }),
     ],
-    intent: buildHardIntentFromText('给我找广西越南联游'),
-    userText: '给我找广西越南联游',
+    intent: buildHardIntentFromText('给我找广西的联游线路'),
+    userText: '给我找广西的联游线路',
   });
 
   assert.equal(
     tieredItems.find((item) => item.tourId === 'brief-guangxi')?.recommendationTier,
-    'ai-brief',
-    'short screenshot-like reason should be classified as AI brief',
+    'ai-detailed',
+    '模型推荐顺序前 5 条落入详细位，本地不按文案长度二次分档',
   );
   assert.equal(
     tieredItems.find((item) => item.tourId === 'detailed-guangxi-vietnam')?.recommendationTier,
-    'ai-detailed',
-    'specific multi-destination reason should be classified as AI detailed',
+    'ai-brief',
+    '模型推荐顺序第 6 条起落入简要位',
+  );
+  assert.equal(
+    tieredItems.find((item) => item.tourId === 'detailed-guangxi-vietnam')?.reason,
+    undefined,
+    '简要位不保留完整 reason，看点由 matchedSignals 承载',
   );
   assert.deepEqual(
     sorted.map((item) => item.tourId),
-    ['detailed-guangxi-vietnam', 'brief-guangxi', 'local-supplement'],
-    'detailed AI recommendation should rank before brief AI, followed by a local comparison option',
+    [
+      'brief-guangxi',
+      'ai-second-2',
+      'ai-second-3',
+      'ai-second-4',
+      'ai-second-5',
+      'detailed-guangxi-vietnam',
+      'local-supplement',
+    ],
+    '详细 AI 推荐整体排在简要 AI 推荐之前，随后是本地比较备选',
   );
 }
 

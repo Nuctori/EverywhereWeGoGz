@@ -23,6 +23,7 @@ interface TourCardProps {
   recommendationReason?: string;
   recommendationRank?: number;
   recommendationTier?: 'ai-detailed' | 'ai-brief' | 'local-supplement';
+  recommendationSignals?: string[];
 }
 
 export const TourCard = memo(function TourCard({
@@ -30,6 +31,7 @@ export const TourCard = memo(function TourCard({
   onClick,
   recommendationReason,
   recommendationTier,
+  recommendationSignals,
 }: TourCardProps) {
   const hasImage = tour.images && tour.images.length > 0;
   // 图片不可用时（含模板占位图或加载失败），用 getFallbackImage 生成来源占位图冒底。
@@ -84,6 +86,18 @@ export const TourCard = memo(function TourCard({
 
         {recommendationTier === 'local-supplement' && (
           <div className="mt-2 text-xs text-stone-400">比较备选</div>
+        )}
+
+        {/* 简要推荐位：不写完整推荐语，看点压缩成一行信号短语 */}
+        {recommendationTier === 'ai-brief' && (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-stone-500">
+            <span className="font-medium text-stone-600">简要推荐</span>
+            {(recommendationSignals || []).slice(0, 3).map((signal) => (
+              <span key={signal} className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] text-stone-600">
+                {signal}
+              </span>
+            ))}
+          </div>
         )}
 
         {/* AI 推荐理由，来自 AiRecommendPanel 结果 */}

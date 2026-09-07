@@ -116,14 +116,20 @@ function getQuestionLead(prompt: string) {
   return null;
 }
 
-// 根据用户输入类型拼接 AI 回复文案，区分疑问句 vs 陈述句
-function buildResultAssistantReply(prompt: string) {
+// 根据用户输入类型拼接 AI 回复文案：追问轮强调是在上一轮基础上调整，避免
+// 每轮都读起来像一次全新回答；区分疑问句 vs 陈述句。
+function buildResultAssistantReply(prompt: string, isFollowUpTurn = false) {
   const questionLead = getQuestionLead(prompt);
   if (questionLead) {
     return questionLead;
   }
 
   const isQuestion = /[？?]$/.test(prompt) || /^(你能|你会|可以|能不能|有没有|怎么|如何|为啥|为什么)/.test(prompt);
+  if (isFollowUpTurn) {
+    return isQuestion
+      ? '可以，我结合你前面几轮的条件一起重新判断了；上面的摘要是这一轮的结论，下面继续保留对话。'
+      : '已在你前面条件的基础上按这轮新要求重新排好了；结论看上面的摘要，下面继续保留对话。';
+  }
   if (isQuestion) {
     return '可以，我先按这个问题帮你判断一下。上面的摘要里是这轮推荐的结论，下面我继续保留对话。';
   }
@@ -150,7 +156,8 @@ function createConversationId() {
 }
 
 function countRecommendedItems(result: AiRecommendationResult | null) {
-  return result?.items.filter((item) => Boolean(item.reason)).length ?? 0;
+  // 详细位有 reason，简要位靠 tier 识别；两者都属于 AI 推荐位。
+  return result?.items.filter((item) => Boolean(item.reason) || item.recommendationTier === 'ai-brief').length ?? 0;
 }
 
 // 判断结果来源：ai-api（AI 正常完成）vs fallback（本地替补），返回对应状态元信息
@@ -280,6 +287,8 @@ export function AiRecommendPanel({
     const requestVersion = requestVersionRef.current + 1;
     requestVersionRef.current = requestVersion;
     const preserveResult = options?.preserveResult ?? false;
+    // 与 ai-recommendation 的 isFollowUpConversation 同口径：本轮之前已有用户提问即为追问轮。
+    const isFollowUpTurn = messages.some((message) => message.role === 'user');
 
     const userMessage = createMessage('user', prompt);
     const nextMessages = preserveResult
@@ -327,7 +336,7 @@ export function AiRecommendPanel({
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
       setMessages((current) => [
         ...current,
-        createMessage('assistant', buildResultAssistantReply(prompt)),
+        createMessage('assistant', buildResultAssistantReply(prompt, isFollowUpTurn)),
       ]);
       onFocusResults();
     } finally {
