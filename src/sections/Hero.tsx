@@ -63,24 +63,24 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
   return (
     <section className="px-4 pb-4 pt-5 sm:px-6 sm:pt-7 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="surface-panel rise-in relative overflow-hidden rounded-[30px] border border-stone-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(251,250,247,0.92)_58%,rgba(255,248,236,0.82))] p-5 sm:p-8 lg:p-10">
+        <div className="surface-panel rise-in relative overflow-hidden rounded-[30px] border border-stone-200/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(251,250,247,0.92)_58%,rgba(255,248,236,0.82))] p-4 sm:p-8 lg:p-10">
           <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(234,88,12,0.35),transparent)]" />
           <div className="absolute right-0 top-0 hidden h-full w-[38%] bg-[linear-gradient(90deg,transparent,rgba(255,247,237,0.68))] lg:block" />
 
-          <div className="relative grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="relative grid items-center gap-5 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_340px] xl:grid-cols-[minmax(0,1fr)_380px]">
             <div className="max-w-4xl">
               <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-stone-400">
                 老广去边度 · 广州出发
               </p>
-              <h1 className="mt-3 max-w-3xl text-3xl font-semibold leading-tight text-stone-950 sm:text-5xl">
+              <h1 className="mt-2 text-2xl font-semibold leading-tight text-stone-950 sm:mt-3 sm:text-5xl">
                 说清楚想怎么玩，直接找合适的团。
               </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-600 sm:text-base">
+              <p className="mt-2 text-sm leading-6 text-stone-600 sm:mt-3 sm:text-base">
                 输入目的地、预算、天数或同行人。系统会先找匹配线路，再把更适合的团排到前面。
               </p>
 
               <form
-                className="mt-8 max-w-4xl rounded-[24px] border border-stone-200/80 bg-white/95 p-2 shadow-[0_18px_45px_rgba(28,25,23,0.08)]"
+                className="mt-5 max-w-4xl rounded-[24px] border border-stone-200/80 bg-white/95 p-2 shadow-[0_18px_45px_rgba(28,25,23,0.08)] sm:mt-8"
                 onSubmit={(event) => {
                   event.preventDefault();
                   handlePrimarySearch();
@@ -108,7 +108,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                       </button>
                     )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 sm:flex-row [&>button]:flex-1">
                     <Button
                       type="submit"
                       size="lg"
@@ -130,8 +130,8 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                 </div>
               </form>
 
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className="self-center pr-1 text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
+              <div className="mobile-chip-scroll -mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0 sm:pb-0">
+                <span className="shrink-0 self-center pr-1 text-xs font-medium uppercase tracking-[0.18em] text-stone-400">
                   热门意图
                 </span>
                 {quickDestinations.map((dest) => {
@@ -146,7 +146,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                         onSearch(dest);
                       }}
                       className={cn(
-                        'group rounded-full border px-3.5 py-2 text-left text-sm transition-colors',
+                        'group shrink-0 rounded-full border px-3.5 py-2 text-left text-sm transition-colors',
                         isActive
                           ? 'border-stone-900 bg-stone-900 text-white hover:border-stone-900 hover:bg-stone-900'
                           : 'border-stone-200 bg-white/85 text-stone-700 hover:border-orange-200 hover:bg-orange-50 hover:text-stone-950',
@@ -155,7 +155,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickD
                       <span className="font-medium">{intent.label}</span>
                       <span
                         className={cn(
-                          'ml-1 text-xs',
+                          'hidden text-xs sm:inline sm:ml-1',
                           isActive ? 'text-stone-300' : 'text-stone-400 group-hover:text-orange-700',
                         )}
                       >

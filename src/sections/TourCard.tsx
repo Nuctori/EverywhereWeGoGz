@@ -15,7 +15,6 @@ import {
   Users,
 } from 'lucide-react';
 import { memo } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getReadableDestination, getDepartureDateBadgeLabel, buildTitleSummary } from '@/lib/tour-display';
 
 interface TourCardProps {
@@ -49,7 +48,7 @@ export const TourCard = memo(function TourCard({
       className="group surface-panel cursor-pointer gap-0 overflow-hidden rounded-[22px] border border-stone-200/80 bg-white/95 py-0 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(15,23,42,0.10)] [contain-intrinsic-size:auto_380px] [content-visibility:auto] sm:rounded-[26px]"
       onClick={onClick}
     >
-      <div className="relative h-44 overflow-hidden bg-stone-100 sm:h-52">
+      <div className="relative h-36 overflow-hidden bg-stone-100 sm:h-52">
         <img
           src={imageSrc}
           alt={tour.title}
@@ -74,19 +73,10 @@ export const TourCard = memo(function TourCard({
         )}
       </div>
 
-      <CardContent className="p-4 sm:p-5">
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <h3 className="line-clamp-2 text-base font-semibold leading-7 text-stone-900 transition-colors group-hover:text-stone-700 sm:line-clamp-3">
-                {tour.title}
-              </h3>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs text-xs">
-              <p>{tour.title}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <CardContent className="p-4 sm:p-5">
+          <h3 className="line-clamp-2 text-[15px] font-semibold leading-6 text-stone-900 transition-colors group-hover:text-stone-700 sm:text-base sm:leading-7 sm:line-clamp-3">
+            {tour.title}
+          </h3>
 
         <p className="mt-2 line-clamp-2 text-sm text-stone-500">
           {titleSummary}
@@ -111,7 +101,7 @@ export const TourCard = memo(function TourCard({
           </div>
         )}
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-1.5 max-sm:gap-2">
           {tags.map((tag) => (
             <Badge
               key={tag}
@@ -141,21 +131,17 @@ export const TourCard = memo(function TourCard({
           )}
         </div>
 
-        <div className="mt-4 space-y-2">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-500">
-            <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{destinationLabel}</span>
-            <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{tour.duration}天</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-500">
-            <span className={`flex items-center gap-1.5 ${isExpiredBadge ? 'text-amber-600 font-medium' : ''}`}><Calendar className="h-3.5 w-3.5" />{departureDateLabel}{isExpiredBadge ? ' · 已沉底' : ''}</span>
-            {tour.groupSize && <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{tour.groupSize}</span>}
-          </div>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-stone-500">
+          <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{destinationLabel}</span>
+          <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{tour.duration}天</span>
+          <span className={`flex items-center gap-1.5 ${isExpiredBadge ? 'text-amber-600 font-medium' : ''}`}><Calendar className="h-3.5 w-3.5" />{departureDateLabel}{isExpiredBadge ? ' · 已沉底' : ''}</span>
+          {tour.groupSize && <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{tour.groupSize}</span>}
         </div>
 
-        <div className="mt-4 flex items-end justify-between gap-3 border-t border-stone-100 pt-4 sm:mt-5">
+        <div className="mt-3.5 flex items-center justify-between gap-3 border-t border-stone-100 pt-3.5 sm:mt-5 sm:pt-4">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-stone-400">参考价格</p>
-            <div className="mt-1 flex items-baseline gap-1.5">
+            <p className="text-[11px] uppercase tracking-[0.18em] text-stone-400 max-sm:hidden">参考价格</p>
+            <div className="mt-0.5 flex items-baseline gap-1.5 sm:mt-1">
               <span className="text-2xl font-semibold tracking-tight text-stone-950">
                 ¥{tour.price.toLocaleString()}
               </span>
@@ -165,7 +151,7 @@ export const TourCard = memo(function TourCard({
                 </span>
               )}
             </div>
-            <p className={'mt-1 text-xs '}>
+            <p className="mt-0.5 text-xs text-stone-400 max-sm:hidden">
               {hasReliableSingleSupplement ? (
                 <>已提供单房差说明</>
               ) : (

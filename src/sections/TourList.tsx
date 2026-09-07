@@ -1288,7 +1288,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
             <Calendar className="w-4 h-4 text-stone-500" />
             出发时间
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-flow-col auto-cols-max grid-rows-2 gap-2 overflow-x-auto pb-1 sm:auto-cols-fr sm:grid-flow-row sm:grid-cols-3 sm:grid-rows-none sm:pb-0 lg:grid-cols-6 mobile-chip-scroll sm:overflow-visible">
             {dateOptions.map((option) => {
               const selected =
                 filters.departureDate === option.value &&
@@ -1326,7 +1326,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
             <Filter className="w-4 h-4 text-stone-500" />
             预算
           </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="grid grid-flow-col auto-cols-max grid-rows-2 gap-2 overflow-x-auto pb-1 sm:auto-cols-fr sm:grid-flow-row sm:grid-cols-3 sm:grid-rows-none sm:pb-0 lg:grid-cols-6 mobile-chip-scroll sm:overflow-visible">
             {budgetOptions.map((option) => (
               <button
                 key={option.label}
@@ -1623,9 +1623,11 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
       <div className="mb-6">
         {heroDestinations.length > 0 && (
-          <div className="mb-4 rounded-[24px] border border-stone-200/80 bg-white/80 px-4 py-3 text-sm text-stone-600">
-            <span className="font-medium text-stone-900">当前热门目的地：</span>{' '}
-            {heroDestinations.join(' · ')}
+          <div className="mobile-chip-scroll mb-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap rounded-[24px] border border-stone-200/80 bg-white/80 px-4 py-3 text-sm text-stone-600">
+            <span className="shrink-0 font-medium text-stone-900">当前热门目的地：</span>
+            {heroDestinations.map((dest) => (
+              <span key={dest} className="shrink-0 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs text-stone-600">{dest}</span>
+            ))}
           </div>
         )}
         {commonFilters}
@@ -1667,9 +1669,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
           </Sheet>
         )}
 
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <ArrowUpDown className="w-4 h-4 text-stone-500" />
+        <div className="mt-5 mobile-chip-scroll -mx-4 flex items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:items-start sm:justify-between sm:gap-3 sm:overflow-visible sm:px-0">
+          <div className="flex shrink-0 items-center gap-2 sm:flex-wrap">
+            <ArrowUpDown className="w-4 h-4 shrink-0 text-stone-500" />
             <Select
               value={filters.sortBy}
               onValueChange={(value) =>
@@ -1685,7 +1687,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 })
               }
             >
-              <SelectTrigger className="h-10 w-[170px] rounded-full border-stone-200 bg-white">
+              <SelectTrigger className="h-10 w-[148px] shrink-0 rounded-full border-stone-200 bg-white sm:w-[170px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -1711,12 +1713,12 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <label className="flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600 cursor-pointer select-none">
+            <label className="flex shrink-0 items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-600 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={Boolean(filters.hideExpired)}
                 onChange={(e) => setFilters({ ...filters, hideExpired: e.target.checked })}
-                className="h-4 w-4 rounded border-stone-300"
+                className="h-4 w-4 shrink-0 rounded border-stone-300"
               />
               隐藏已过期团期
             </label>
@@ -1748,7 +1750,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
           )}
 
           {activeFilterCount > 0 && (
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
               <span className="text-sm text-stone-500">当前已选：</span>
               {filters.destination && (
                 <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
