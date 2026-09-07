@@ -719,7 +719,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
       if (normalizedSearchQuery && !isAiRecommendedTour) {
         const relevance = getTourSearchRelevance(tour, searchContext);
-        const minRelevance = hasNaturalLanguageQuery ? 4 : 12;
+        // AI 查询本质是自然语言需求，长尾阈值与自然语言查询一致，避免
+        // “便宜的河源旅游”这类 7 字查询被关键词级高阈值卡成长尾为空。
+        const minRelevance = isAiSearchMode || hasNaturalLanguageQuery ? 4 : 12;
 
         if (relevance < minRelevance) {
           return false;

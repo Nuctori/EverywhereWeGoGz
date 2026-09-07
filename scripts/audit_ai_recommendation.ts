@@ -48,7 +48,8 @@ const {
   validateAiItems,
 } = __aiRecommendationTestHooks;
 
-// 与主链路一致的 prompt 分层：稳定池（id 排序、跨轮字节一致）+ 当轮重点层。
+// 与主链路一致的 prompt 分层：稳定池（id 排序、跨轮字节一致）+ 当轮重点层
+// （完整档案行，模型首选比较对象）。
 function buildPromptSplit(
   tours: AiRecommendationCandidate[],
   focus: ReturnType<typeof compactCandidates>,
@@ -57,8 +58,7 @@ function buildPromptSplit(
   return {
     stableCandidates: stablePool.candidates,
     routeAtlas: stablePool.routeAtlas,
-    focusFull: focus.filter((candidate) => !stablePool.candidateIds.has(candidate.id)),
-    focusAnnotations: focus.filter((candidate) => stablePool.candidateIds.has(candidate.id)),
+    focusFull: focus,
   };
 }
 

@@ -730,8 +730,6 @@ const FOCUS_PROMPT_CANDIDATE_KEYS = [
   'match', 'conflicts', 'termCoverage', 'termHits',
 ] as const;
 
-const FOCUS_ANNOTATION_KEYS = ['id', 'match', 'conflicts', 'termCoverage', 'termHits'] as const;
-
 function compactCandidatesForLitePrompt(candidates: ReturnType<typeof compactCandidates>) {
   return candidates.map((candidate) => [
     candidate.id,
@@ -2263,20 +2261,26 @@ function getRecommendationTierWeight(item: AiRecommendationItem) {
   }
 }
 
-// 简要推荐位的一句话介绍：超长时按句读截断；没有内容时返回 undefined。
+// 简要推荐位的一句话介绍：超长时按句读截断；去掉悬空的转折/因果连接词，
+// 避免“……虽然。”这种断头句；没有内容时返回 undefined。
 function truncateBriefIntro(reason: string | undefined) {
   const text = (reason || '').trim().replace(/[。．.]+$/u, '');
   if (!text) return undefined;
-  if (text.length <= MAX_AI_BRIEF_INTRO_CHARS) return `${text}。`;
-
-  const cut = text.slice(0, MAX_AI_BRIEF_INTRO_CHARS);
-  const boundary = Math.max(
-    cut.lastIndexOf('，'),
-    cut.lastIndexOf('、'),
-    cut.lastIndexOf('；'),
-    cut.lastIndexOf(' '),
-  );
-  return `${(boundary >= 12 ? cut.slice(0, boundary) : cut).trim()}。`;
+  let cut = text;
+  if (text.length > MAX_AI_BRIEF_INTRO_CHARS) {
+    const window = text.slice(0, MAX_AI_BRIEF_INTRO_CHARS);
+    const boundary = Math.max(
+      window.lastIndexOf('，'),
+      window.lastIndexOf('、'),
+      window.lastIndexOf('；'),
+      window.lastIndexOf('。'),
+    );
+    cut = boundary >= 12 ? window.slice(0, boundary) : window;
+  }
+  cut = cut
+    .replace(/(?:，|、|；)*(?:虽然|但是|但|而且|不过|然而|因为|所以|如果|并且|以及|哪怕|即使)+$/u, '')
+    .replace(/[，、；]+$/u, '');
+  return `${cut}。`;
 }
 
 function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecommendationItem[] {
@@ -4312,6 +4316,9 @@ function extractCandidateCoverageTerms(text: string | undefined) {
   const lexicalTerms = normalized
     .split(/(?:\s+|同时|都要|都得|都想|兼具|兼有|都有|既|又|带有|含有|包含|包括|以及|或者|和|与|及|或|的|旅行团|旅游团|线路|跟团|推荐|帮我|帮忙|想要|想|要|找|看)+/gu)
     .map(canonicalizeCoverageTerm)
+    // “河源旅游”这类目的地+活动粘连词会把整串当检索词，语料里却几乎不会
+    // 出现连续的“河源旅游”，导致目的地候选全部漏配——剥掉活动后缀再匹配。
+    .map((term) => (term.length > 2 ? term.replace(/(?:旅游|旅行)$/u, '') : term))
     .filter((term) => term.length >= 2 && term.length <= 12);
 
   return uniqueStrings([
@@ -5818,7 +5825,6 @@ function buildAiMessages(params: {
   messages: AiRecommendationMessage[];
   stableCandidates: ReturnType<typeof compactCandidates>;
   focusFull: ReturnType<typeof compactCandidates>;
-  focusAnnotations: ReturnType<typeof compactCandidates>;
   routeAtlas: RouteAtlas;
   auditContext: RecommendationAuditContext;
   weatherContext: AiWeatherContext;
@@ -5828,7 +5834,7 @@ function buildAiMessages(params: {
   preferenceMemory: AiPreferenceMemory | null;
   allowPublicInterest: boolean;
 }) {
-  const promptPool = [...params.focusFull, ...params.focusAnnotations, ...params.stableCandidates];
+  const promptPool = [...params.focusFull, ...params.stableCandidates];
   const intentCoverage = analyzeIntentCoverage(promptPool, params.intent);
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
   const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
@@ -5863,6 +5869,9 @@ function buildAiMessages(params: {
 
   const dynamicRequest = {
     t: 'rank_5detailed_10brief',
+    // fh 放在最前：重点候选是与本轮需求最相关的完整档案，提示模型先看这里。
+    fk: FOCUS_PROMPT_CANDIDATE_KEYS,
+    fh: compactCandidatesForPrompt(params.focusFull),
     q: params.userText,
     sq: params.searchQuery,
     rc: compactRecentConversation(params.messages),
@@ -5873,16 +5882,6 @@ function buildAiMessages(params: {
     wx: compactWeatherContextForPrompt(params.weatherContext),
     dw: compactDestinationWeatherInsightsForPrompt(params.destinationWeatherInsights),
     sg: semanticGuidance,
-    fk: FOCUS_PROMPT_CANDIDATE_KEYS,
-    fak: FOCUS_ANNOTATION_KEYS,
-    fh: compactCandidatesForPrompt(params.focusFull),
-    fa: params.focusAnnotations.map((candidate) => [
-      candidate.id,
-      candidate.matchStatus,
-      compactPromptStrings(candidate.conflictReasons, 2, 18),
-      candidate.userTermCoverage,
-      compactPromptStrings(candidate.userTermHits, 4, 12),
-    ]),
     ol: MAX_AI_SELECTED_ITEMS,
     cl: MAX_AI_PROMPT_REASON_ITEMS,
     schema: {
@@ -5916,7 +5915,7 @@ function buildAiMessages(params: {
           tourId: '候选 id',
           score: '0-100 number',
           reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条（详细推荐位）写完整推荐理由：画面、气质、玩法或取舍，长度和写法由你决定。第 ${MAX_AI_DETAILED_ITEMS + 1}-${MAX_AI_SELECTED_ITEMS} 条（简要推荐位）写一句话简单介绍，30 字内说清这条线是什么、最值得去的一点，不要展开成长理由`,
-          matchedSignals: '每条都需要。2-3 个中文短语，概括这条线的核心看点，要具体，不要写空泛的“适合度假”',
+          matchedSignals: '每条都需要。2-3 个中文短语，概括这条线的核心看点，要具体，不要重复标题里已有的词，不要写空泛的“适合度假”',
         },
       ],
       itemCountLimit: MAX_AI_SELECTED_ITEMS,
@@ -5924,8 +5923,7 @@ function buildAiMessages(params: {
     rq: [
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。先做整体体验判断，再做候选排序。',
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮的目的地、主题、天数和同行人偏好。',
-      'candidates（第二条消息的稳定池）是按 id 排序的全池背景候选：atoms/cats/seasonAtoms 是候选事实摘要，pc/pricePct 是价格上下文；里面没有本轮匹配注解。',
-      'fh 是按本轮需求检索/匹配出的重点候选完整条目（末尾 match/conflicts/termCoverage/termHits 是本轮注解）；fa 是重点候选已在稳定池内时的本轮注解行。排序时优先在 fh/fa 中寻找最贴合的选项，再用稳定池补足选择面；不要因为稳定池里某条没有显式标签就直接淘汰。',
+      'fh 排在最前：它是按本轮需求从全池检索/匹配出的重点候选完整档案（末尾 match/conflicts/termCoverage/termHits 是本轮注解），是首选比较对象——目的地、主题、预算类需求应优先在 fh 内挑选并按贴合度排序；candidates（稳定池）只用于补足选择面和多样化，不要拿稳定池里的泛泛热门盖过 fh 里的对题候选，也不要因为稳定池里某条没有显式标签就直接淘汰。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
         : []),
@@ -5955,7 +5953,6 @@ function buildLiteAiMessages(params: {
   messages: AiRecommendationMessage[];
   stableCandidates: ReturnType<typeof compactCandidates>;
   focusFull: ReturnType<typeof compactCandidates>;
-  focusAnnotations: ReturnType<typeof compactCandidates>;
   weatherContext: AiWeatherContext;
   searchQuery: string;
   intent: AiTravelIntent | null;
@@ -5980,13 +5977,6 @@ function buildLiteAiMessages(params: {
     candidates: compactStableCandidatesForLitePrompt(params.stableCandidates),
     fk: FOCUS_LITE_CANDIDATE_KEYS,
     fh: compactCandidatesForLitePrompt(params.focusFull),
-    fa: params.focusAnnotations.map((candidate) => [
-      candidate.id,
-      candidate.matchStatus,
-      compactPromptStrings(candidate.conflictReasons, 1, 14),
-      candidate.userTermCoverage,
-      compactPromptStrings(candidate.userTermHits, 3, 10),
-    ]),
     q: params.userText,
     sq: params.searchQuery,
     rc: compactRecentConversation(params.messages).slice(-2),
@@ -6025,7 +6015,7 @@ function buildLiteAiMessages(params: {
       '返回 intent、intentNotes、clarification、assumptions、tradeoffs 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates/fh 中存在的 id。',
       'JSON 保持可解析即可，文案不要为了短而牺牲具体判断。',
-      'candidates（稳定池）是按 id 排序的全池背景候选；fh 是按本轮需求检索/匹配出的重点候选（含本轮注解列），fa 是池内重点候选的注解行。优先在 fh/fa 中找最贴合的选项，再用稳定池补足选择面。',
+      'candidates（稳定池）是按 id 排序的全池背景候选；fh 是按本轮需求检索/匹配出的重点候选完整档案，优先在 fh 内挑选，再用稳定池补足选择面。',
       `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
       '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
       `多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮偏好。`,
@@ -7659,7 +7649,9 @@ export async function requestAiRecommendations({
       }
     }
     // 当轮重点层：检索命中 + coverage 匹配 + 价格带代表，再叠加记忆/语义证据
-    // 富化。全部依赖本轮意图，进动态 user 消息（fh 完整条目 / fa 池内注解行）。
+    // 富化。全部依赖本轮意图，进动态 user 消息（fh 完整档案行，放在最前）。
+    // 注意：重点候选一律给完整事实行——只给 id+注解的话模型看不到价格与
+    // 玩法，会退回稳定池里挑泛泛的候选，需求匹配（如目的地）直接丢失。
     const focusById = new Map<string, ReturnType<typeof compactCandidates>[number]>();
     for (const candidate of [
       ...searchedCompacted,
@@ -7672,7 +7664,7 @@ export async function requestAiRecommendations({
     ]) {
       if (!focusById.has(candidate.id)) focusById.set(candidate.id, candidate);
     }
-    const enrichedFocus = enrichPromptCandidatesWithSemanticEvidence(
+    const focusFull = enrichPromptCandidatesWithSemanticEvidence(
       enrichPromptCandidatesWithMemoryCoverage(
         [...focusById.values()].slice(0, MAX_AI_FOCUS_CANDIDATES),
         availableCandidates,
@@ -7684,15 +7676,9 @@ export async function requestAiRecommendations({
       effectiveIntent,
       effectiveUserText,
     ).slice(0, MAX_AI_FOCUS_CANDIDATES);
-    const focusFull = enrichedFocus.filter(
-      (candidate) => !stablePool.candidateIds.has(candidate.id),
-    );
-    const focusAnnotations = enrichedFocus.filter((candidate) =>
-      stablePool.candidateIds.has(candidate.id),
-    );
     // 模型可引用的合法 id 全集 = 当轮重点层 + 稳定池（重点层优先，保序去重）。
     const poolById = new Map<string, ReturnType<typeof compactCandidates>[number]>();
-    for (const candidate of [...enrichedFocus, ...stablePool.candidates]) {
+    for (const candidate of [...focusFull, ...stablePool.candidates]) {
       if (!poolById.has(candidate.id)) poolById.set(candidate.id, candidate);
     }
     const aiCandidatePool = [...poolById.values()];
@@ -7733,7 +7719,6 @@ export async function requestAiRecommendations({
         messages,
         stableCandidates: stablePool.candidates,
         focusFull,
-        focusAnnotations,
         routeAtlas: await routeAtlasPromise,
         auditContext,
         weatherContext: weatherContextForRanking,
@@ -7748,7 +7733,6 @@ export async function requestAiRecommendations({
         messages,
         stableCandidates: stablePool.candidates,
         focusFull,
-        focusAnnotations,
         weatherContext: weatherContextForRanking,
         searchQuery,
         intent: effectiveIntent,

@@ -1,6 +1,8 @@
 // 搜索概念表：查询词与线路语料共用的唯一主题词表。
 // 概念 = 用户口中的主题词（沙滩）与线路身上的证据（别名/地名/标签/亮点）之间的桥。
 // 新增主题时只改这里，查询侧和线路侧同时生效。
+import { collectDestinationHints } from './destination-resolver.ts';
+
 export interface QuerySearchContext {
   normalized: string;
   concepts: string[];
@@ -132,19 +134,29 @@ export function extractQueryContext(query: string): QuerySearchContext {
     }
   }
 
+  // 目的地实体（河源/桂林/双月湾）是相关性最强的信号：不切出来的话它会和
+  // “便宜的”黏成整句残渣，任何线路都匹配不上，长尾与搜索全部失效。
+  const destinations = collectDestinationHints(scan);
+  for (const destination of destinations) {
+    stripped = stripped.split(destination).join(' ');
+  }
+
   const residues = [
     ...new Set(
-      stripped
-        .split(RESIDUE_SPLIT_PATTERN)
-        .map((part) => part.trim())
-        // 残渣只兜概念表外的实体。纯汉字碎片在有概念覆盖时几乎都是连接词垃圾
-        // （帮我找同时带/的团）；实体要么自带数字/字母（800内/hilton），要么
-        // 用户查询本身无概念（如 阿那亚），保留全部纯汉字块。
-        .filter((part) => {
-          if (part.length < 2 || part.length > 16 || /^\d+$/.test(part))
-            return false;
-          return concepts.size === 0 || /[\da-z]/i.test(part);
-        }),
+      [
+        ...destinations,
+        ...stripped
+          .split(RESIDUE_SPLIT_PATTERN)
+          .map((part) => part.trim())
+          // 残渣只兜概念表外的实体。纯汉字碎片在有概念覆盖时几乎都是连接词垃圾
+          // （帮我找同时带/的团）；实体要么自带数字/字母（800内/hilton），要么
+          // 用户查询本身无概念（如 阿那亚），保留全部纯汉字块。
+          .filter((part) => {
+            if (part.length < 2 || part.length > 16 || /^\d+$/.test(part))
+              return false;
+            return concepts.size === 0 || /[\da-z]/i.test(part);
+          }),
+      ],
     ),
   ].slice(0, 8);
 
