@@ -16,11 +16,11 @@ const {
   buildLiteAiMessages,
   buildLocalRecommendationQuery,
   buildRecommendationAuditContext,
-  buildRouteAtlas,
   buildTourPrimitive,
   collectAvoidHints,
   collectLiteralAvoidHints,
   compactCandidates,
+  getStablePromptPool,
   allowsPublicInterestForTurn,
   enrichPromptCandidatesWithMemoryCoverage,
   finalizeRecommendationSummary,
@@ -47,6 +47,20 @@ const {
   sanitizeAiSemanticNotesForTurn,
   validateAiItems,
 } = __aiRecommendationTestHooks;
+
+// 与主链路一致的 prompt 分层：稳定池（id 排序、跨轮字节一致）+ 当轮重点层。
+function buildPromptSplit(
+  tours: AiRecommendationCandidate[],
+  focus: ReturnType<typeof compactCandidates>,
+) {
+  const stablePool = getStablePromptPool(tours);
+  return {
+    stableCandidates: stablePool.candidates,
+    routeAtlas: stablePool.routeAtlas,
+    focusFull: focus.filter((candidate) => !stablePool.candidateIds.has(candidate.id)),
+    focusAnnotations: focus.filter((candidate) => stablePool.candidateIds.has(candidate.id)),
+  };
+}
 
 const EMPTY_FILTERS = {
   destination: '',
@@ -1323,16 +1337,18 @@ const explicitPublicTour = candidate({
 const povertyPromptMessages = buildAiMessages({
   userText: '想去贫穷落后一点的地方看看',
   messages: [],
-  candidates: compactCandidates(
+  ...buildPromptSplit(
     [majorCityTour, ruralCountyTour, explicitPublicTour],
-    localRecommendations([majorCityTour, ruralCountyTour, explicitPublicTour], '想去贫穷落后一点的地方看看'),
-    { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
-    {
-      intent: { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
-      userText: '想去贫穷落后一点的地方看看',
-    },
+    compactCandidates(
+      [majorCityTour, ruralCountyTour, explicitPublicTour],
+      localRecommendations([majorCityTour, ruralCountyTour, explicitPublicTour], '想去贫穷落后一点的地方看看'),
+      { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+      {
+        intent: { semanticFocus: ['贫穷地方'], weatherSensitivity: [], departureWeekdays: [] },
+        userText: '想去贫穷落后一点的地方看看',
+      },
+    ),
   ),
-  routeAtlas: buildRouteAtlas([majorCityTour, ruralCountyTour, explicitPublicTour]),
   auditContext: buildRecommendationAuditContext(
     [majorCityTour, ruralCountyTour, explicitPublicTour],
     null,
@@ -1474,8 +1490,7 @@ const promptPublicInterestPattern = /扶贫|公益|贫困|贫穷|欠发达|乡�
 const nonPublicFullPrompt = buildAiMessages({
   userText: '帮我找海边温泉，400以下的，关注天气因素',
   messages: [],
-  candidates: promptCandidates,
-  routeAtlas: buildRouteAtlas(promptTours),
+  ...buildPromptSplit(promptTours, promptCandidates),
   auditContext: promptAuditContext,
   weatherContext: promptWeatherContext,
   destinationWeatherInsights: [],
@@ -1496,7 +1511,7 @@ assert.ok(nonPublicFullPrompt.includes('预算是重要的取舍维度'));
 const nonPublicLitePrompt = buildLiteAiMessages({
   userText: '帮我找海边温泉，400以下的，关注天气因素',
   messages: [],
-  candidates: promptCandidates,
+  ...buildPromptSplit(promptTours, promptCandidates),
   weatherContext: promptWeatherContext,
   searchQuery: '',
   intent: promptIntent,
@@ -1518,8 +1533,7 @@ assert.ok(nonPublicLitePrompt.includes('具体旅行画面'));
 const explicitPublicFullPrompt = buildAiMessages({
   userText: '我要扶贫或者公益属性更强的路线，没有就直说最接近替代',
   messages: [],
-  candidates: promptCandidates,
-  routeAtlas: buildRouteAtlas(promptTours),
+  ...buildPromptSplit(promptTours, promptCandidates),
   auditContext: promptAuditContext,
   weatherContext: promptWeatherContext,
   destinationWeatherInsights: [],
@@ -1531,7 +1545,7 @@ const explicitPublicFullPrompt = buildAiMessages({
 const explicitPublicLitePrompt = buildLiteAiMessages({
   userText: '我要扶贫或者公益属性更强的路线，没有就直说最接近替代',
   messages: [],
-  candidates: promptCandidates,
+  ...buildPromptSplit(promptTours, promptCandidates),
   weatherContext: promptWeatherContext,
   searchQuery: '',
   intent: { semanticFocus: ['扶贫'], weatherSensitivity: [], departureWeekdays: [] },
@@ -1774,10 +1788,12 @@ const weatherInsights = [
 const weatherAlternativePrompt = buildAiMessages({
   userText: '这周广东团期天气都不好，找天气好一点的地方',
   messages: [],
-  candidates: compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
-    userText: '这周广东团期天气都不好，找天气好一点的地方',
-  }),
-  routeAtlas: buildRouteAtlas([qingyuanWeatherTour, yangjiangWeatherTour]),
+  ...buildPromptSplit(
+    [qingyuanWeatherTour, yangjiangWeatherTour],
+    compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
+      userText: '这周广东团期天气都不好，找天气好一点的地方',
+    }),
+  ),
   auditContext: buildRecommendationAuditContext(
     [qingyuanWeatherTour, yangjiangWeatherTour],
     null,
@@ -1802,9 +1818,12 @@ assert.ok(weatherAlternativePromptText.includes('rl'));
 const weatherAlternativeLitePrompt = buildLiteAiMessages({
   userText: '这周广东团期天气都不好，找天气好一点的地方',
   messages: [],
-  candidates: compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
-    userText: '这周广东团期天气都不好，找天气好一点的地方',
-  }),
+  ...buildPromptSplit(
+    [qingyuanWeatherTour, yangjiangWeatherTour],
+    compactCandidates([qingyuanWeatherTour, yangjiangWeatherTour], [], null, {
+      userText: '这周广东团期天气都不好，找天气好一点的地方',
+    }),
+  ),
   weatherContext: {
     destination: '广州',
     travelDate: '2026-06-20',
@@ -2406,14 +2425,17 @@ const reordered = prioritizeRecommendationItems(
   const litePromptMessages = buildLiteAiMessages({
     userText: '想去贫穷落后一点的地方看看',
     messages: [],
-    candidates: compactCandidates(
+    ...buildPromptSplit(
       [majorCityTour, ruralCountyTour, explicitPublicTour],
-      localRecommendations([majorCityTour, ruralCountyTour, explicitPublicTour], '想去贫穷落后一点的地方看看'),
-      { semanticFocus: ['贫穷地方', '落后地区'], weatherSensitivity: [], departureWeekdays: [] },
-      {
-        intent: { semanticFocus: ['贫穷地方', '落后地区'], weatherSensitivity: [], departureWeekdays: [] },
-        userText: '想去贫穷落后一点的地方看看',
-      },
+      compactCandidates(
+        [majorCityTour, ruralCountyTour, explicitPublicTour],
+        localRecommendations([majorCityTour, ruralCountyTour, explicitPublicTour], '想去贫穷落后一点的地方看看'),
+        { semanticFocus: ['贫穷地方', '落后地区'], weatherSensitivity: [], departureWeekdays: [] },
+        {
+          intent: { semanticFocus: ['贫穷地方', '落后地区'], weatherSensitivity: [], departureWeekdays: [] },
+          userText: '想去贫穷落后一点的地方看看',
+        },
+      ),
     ),
     weatherContext: {
       destination: '广州',
@@ -2928,6 +2950,109 @@ const reordered = prioritizeRecommendationItems(
     memoryCoveredCandidates.some((item) => item.id === 'gx-memory'),
     'AI prompt pool should retain previous-memory destination candidates so the model can judge follow-up semantics',
   );
+}
+
+// ─── 回归测试：KV 前缀缓存——同一数据快照下跨轮 prompt 稳定层必须字节级一致 ───
+{
+  const stabilityTours = [majorCityTour, ruralCountyTour, explicitPublicTour];
+  const stabilityWeather = {
+    destination: '广州',
+    travelDate: '2026-06-12',
+    forecastSummary: '多云',
+    seasonAdvice: [] as string[],
+    source: 'seasonal-rule' as const,
+  };
+  const turn1 = buildAiMessages({
+    userText: '想去贫穷落后一点的地方看看',
+    messages: [],
+    ...buildPromptSplit(
+      stabilityTours,
+      compactCandidates(stabilityTours, [], null, { userText: '想去贫穷落后一点的地方看看' }),
+    ),
+    auditContext: buildRecommendationAuditContext(stabilityTours, null, null),
+    weatherContext: stabilityWeather,
+    destinationWeatherInsights: [],
+    searchQuery: '',
+    intent: null,
+    preferenceMemory: null,
+    allowPublicInterest: false,
+  });
+  const turn2 = buildAiMessages({
+    userText: '预算压到600内，优先海边',
+    messages: [
+      { id: 'u0', role: 'user' as const, content: '想去贫穷落后一点的地方看看', createdAt: '2026-09-08T00:00:00.000Z' },
+      { id: 'a0', role: 'assistant' as const, content: '已排好', createdAt: '2026-09-08T00:00:01.000Z' },
+    ],
+    ...buildPromptSplit(
+      stabilityTours,
+      compactCandidates(stabilityTours, [], null, { userText: '预算压到600内，优先海边' }),
+    ),
+    auditContext: buildRecommendationAuditContext(stabilityTours, null, null),
+    weatherContext: stabilityWeather,
+    destinationWeatherInsights: [],
+    searchQuery: '',
+    intent: { budgetMax: 600, weatherSensitivity: [], departureWeekdays: [] },
+    preferenceMemory: null,
+    allowPublicInterest: false,
+  });
+  assert.equal(
+    turn1[0].content,
+    turn2[0].content,
+    '身份/规则 system 消息必须跨轮字节一致',
+  );
+  assert.equal(
+    turn1[1].content,
+    turn2[1].content,
+    '同一数据快照下，稳定池 system 消息必须字节级一致——这是 KV 前缀缓存命中 prompt 大头的前提',
+  );
+  assert.notEqual(
+    turn1[2].content,
+    turn2[2].content,
+    '动态 user 消息应随本轮查询变化（防止测的是假稳定）',
+  );
+
+  const liteTurn1 = buildLiteAiMessages({
+    userText: '想去贫穷落后一点的地方看看',
+    messages: [],
+    ...buildPromptSplit(
+      stabilityTours,
+      compactCandidates(stabilityTours, [], null, { userText: '想去贫穷落后一点的地方看看' }),
+    ),
+    weatherContext: stabilityWeather,
+    searchQuery: '',
+    intent: null,
+    preferenceMemory: null,
+    allowPublicInterest: false,
+  });
+  const liteTurn2 = buildLiteAiMessages({
+    userText: '预算压到600内，优先海边',
+    messages: [
+      { id: 'u0', role: 'user' as const, content: '想去贫穷落后一点的地方看看', createdAt: '2026-09-08T00:00:00.000Z' },
+      { id: 'a0', role: 'assistant' as const, content: '已排好', createdAt: '2026-09-08T00:00:01.000Z' },
+    ],
+    ...buildPromptSplit(
+      stabilityTours,
+      compactCandidates(stabilityTours, [], null, { userText: '预算压到600内，优先海边' }),
+    ),
+    weatherContext: stabilityWeather,
+    searchQuery: '',
+    intent: { budgetMax: 600, weatherSensitivity: [], departureWeekdays: [] },
+    preferenceMemory: null,
+    allowPublicInterest: false,
+  });
+  const liteJson1 = liteTurn1[1].content;
+  const liteJson2 = liteTurn2[1].content;
+  const stableSegment = (json: string) => {
+    const marker = '"fh":';
+    const index = json.indexOf(marker);
+    return index >= 0 ? json.slice(0, index) : json;
+  };
+  assert.equal(
+    stableSegment(liteJson1),
+    stableSegment(liteJson2),
+    'lite user JSON 的稳定段（t/v/sck/candidates，直到 fh 之前）必须跨轮一致',
+  );
+  assert.notEqual(liteJson1, liteJson2, 'lite 动态段应随本轮查询变化');
 }
 
 console.log('AI recommendation audit passed');

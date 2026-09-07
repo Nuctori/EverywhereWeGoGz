@@ -29,6 +29,8 @@ const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 // AI 需要看到足够多的异质候选，才能比较“整体体验”而不是只在同一关键词簇里排序。
 // 仍然保留上限，避免把全量线路直接塞进模型上下文。
 const MAX_AI_CANDIDATES = 96;
+// 当轮重点候选（检索命中/需求匹配/偏好相关）上限：进动态 user 消息，不进稳定前缀。
+const MAX_AI_FOCUS_CANDIDATES = 24;
 const MAX_AI_COMMENTARY_ITEMS = 24;
 // 推荐展示结构：前 5 条带完整推荐理由（详细推荐），随后 10 条只保留看点信号
 // （简要推荐）。模型按推荐度一次给出 15 条，本地按位置切分两档展示。
@@ -51,7 +53,7 @@ const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 15000;
 const AI_THINKING_PROVIDER_TIMEOUT_MS = 180000;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
-const AI_CACHE_PROMPT_VERSION = '2026-06-10-copy-quality-v2';
+const AI_CACHE_PROMPT_VERSION = '2026-09-08-stable-pool-v3';
 const DEFAULT_DEPARTURE_CITY = '广州';
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
@@ -656,6 +658,7 @@ function compactPromptStrings(
     .slice(0, maxItems);
 }
 
+// 完整候选行（25 列）：稳定事实列 + 本轮匹配注解列。用于当轮重点候选（fh）。
 function compactCandidatesForPrompt(candidates: ReturnType<typeof compactCandidates>) {
   return candidates.map((candidate) => [
     candidate.id,
@@ -686,6 +689,47 @@ function compactCandidatesForPrompt(candidates: ReturnType<typeof compactCandida
   ]);
 }
 
+// 稳定池行（21 列）：只保留与本轮查询无关的事实列。跨轮字节级一致是 KV 前缀
+// 缓存命中的前提，任何当轮注解（match/conflicts/termCoverage/termHits）都不进这里。
+function compactStableCandidatesForPrompt(candidates: ReturnType<typeof compactCandidates>) {
+  return candidates.map((candidate) => [
+    candidate.id,
+    compactPromptText(candidate.title, 52),
+    candidate.destination,
+    candidate.tripDays,
+    candidate.price,
+    candidate.theme,
+    candidate.source,
+    candidate.leisureLevel,
+    candidate.isHot ? 1 : 0,
+    compactPromptText(candidate.routeGroup, 26),
+    candidate.schedule.departureDates.slice(0, 3),
+    candidate.schedule.departureWeekdays.slice(0, 3),
+    candidate.schedule.hasEveningOrNightDeparture ? 1 : 0,
+    candidate.priceContext.pricePerDay ?? null,
+    compactPromptStrings(candidate.tags, 2, 10),
+    compactPromptStrings(candidate.highlights, 2, 22),
+    compactPromptStrings(candidate.semanticAtoms, 4, 16),
+    compactPromptStrings(candidate.experienceCategories, 3, 8),
+    compactPromptStrings(candidate.seasonalComfortAtoms, 2, 16),
+    candidate.priceContext.poolPercentile ?? null,
+    candidate.priceContext.poolBand,
+  ]);
+}
+
+const STABLE_PROMPT_CANDIDATE_KEYS = [
+  'id', 'title', 'destination', 'days', 'price', 'theme', 'source',
+  'pace', 'hot', 'routeGroup', 'dates', 'weekdays', 'night', 'pricePerDay',
+  'tags', 'highlights', 'atoms', 'cats', 'seasonAtoms', 'pricePct', 'priceBand',
+] as const;
+
+const FOCUS_PROMPT_CANDIDATE_KEYS = [
+  ...STABLE_PROMPT_CANDIDATE_KEYS,
+  'match', 'conflicts', 'termCoverage', 'termHits',
+] as const;
+
+const FOCUS_ANNOTATION_KEYS = ['id', 'match', 'conflicts', 'termCoverage', 'termHits'] as const;
+
 function compactCandidatesForLitePrompt(candidates: ReturnType<typeof compactCandidates>) {
   return candidates.map((candidate) => [
     candidate.id,
@@ -705,6 +749,31 @@ function compactCandidatesForLitePrompt(candidates: ReturnType<typeof compactCan
   ]);
 }
 
+// lite 稳定池行：与完整路径同样的原则，只留事实列。
+function compactStableCandidatesForLitePrompt(candidates: ReturnType<typeof compactCandidates>) {
+  return candidates.map((candidate) => [
+    candidate.id,
+    compactPromptText(candidate.title, 34),
+    candidate.destination,
+    candidate.tripDays,
+    candidate.price,
+    compactPromptStrings(candidate.semanticAtoms, 2, 12),
+    compactPromptStrings(candidate.experienceCategories, 2, 8),
+    compactPromptStrings(candidate.seasonalComfortAtoms, 1, 14),
+    candidate.priceContext.poolPercentile ?? null,
+    candidate.priceContext.poolBand,
+  ]);
+}
+
+const STABLE_LITE_CANDIDATE_KEYS = [
+  'id', 'title', 'destination', 'days', 'price', 'atoms', 'cats', 'seasonAtoms', 'pricePct', 'priceBand',
+] as const;
+
+const FOCUS_LITE_CANDIDATE_KEYS = [
+  ...STABLE_LITE_CANDIDATE_KEYS,
+  'match', 'conflicts', 'termCoverage', 'termHits',
+] as const;
+
 function buildStablePromptPrefix(params: {
   candidates: ReturnType<typeof compactCandidates>;
   routeAtlas: RouteAtlas;
@@ -715,16 +784,40 @@ function buildStablePromptPrefix(params: {
 
   return {
     v: AI_CACHE_PROMPT_VERSION,
-    ck: [
-      'id', 'title', 'destination', 'days', 'price', 'theme', 'source',
-      'pace', 'hot', 'match', 'routeGroup', 'dates', 'weekdays', 'night',
-      'pricePerDay', 'tags', 'highlights', 'atoms', 'cats', 'seasonAtoms', 'conflicts',
-      'pricePct', 'priceBand', 'termCoverage', 'termHits',
-    ],
+    ck: STABLE_PROMPT_CANDIDATE_KEYS,
     pc: compactRangeForPrompt(formatRange(prices)),
-    candidates: compactCandidatesForPrompt(params.candidates),
+    candidates: compactStableCandidatesForPrompt(params.candidates),
     routeAtlas: compactRouteAtlasForPrompt(params.routeAtlas),
   };
+}
+
+// 稳定候选池：只依赖数据快照本身（多样选取 + 稳定注解 + 按 id 排序），
+// 与本轮查询完全解耦。按 candidateTours 数组引用做 WeakMap 记忆化——同一份
+// 数据下跨轮字节级一致，是第二条 system 消息（prompt 大头）KV 前缀命中的关键。
+interface StablePromptPool {
+  candidates: ReturnType<typeof compactCandidates>;
+  candidateIds: Set<string>;
+  routeAtlas: RouteAtlas;
+}
+const stablePromptPoolCache = new WeakMap<AiRecommendationCandidate[], StablePromptPool>();
+
+function getStablePromptPool(candidateTours: AiRecommendationCandidate[]): StablePromptPool {
+  const cached = stablePromptPoolCache.get(candidateTours);
+  if (cached) return cached;
+
+  const normalized = filterPastOnlyCandidatesWhenFutureExists(
+    candidateTours.map(normalizeCandidateTour),
+  );
+  const stableCandidates = selectDiversePoolCompacted(normalized, [], null)
+    .sort((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0))
+    .slice(0, MAX_AI_CANDIDATES);
+  const pool: StablePromptPool = {
+    candidates: stableCandidates,
+    candidateIds: new Set(stableCandidates.map((candidate) => candidate.id)),
+    routeAtlas: buildRouteAtlas(normalized),
+  };
+  stablePromptPoolCache.set(candidateTours, pool);
+  return pool;
 }
 
 function getLatestUserText(messages: AiRecommendationMessage[]) {
@@ -4378,7 +4471,9 @@ function getResolvedAiConfigs(override?: Partial<AiProviderConfig>): AiProviderC
   );
 }
 
-function compactCandidates(
+// 当轮需求匹配层：coverage 命中 + 价格带代表。选取与注解都依赖本轮 userText/intent，
+// 只进动态 user 消息，不进稳定前缀。
+function selectCoverageFocusCompacted(
   tours: AiRecommendationCandidate[],
   localItems: AiRecommendationItem[],
   intent: AiTravelIntent | null = null,
@@ -4415,17 +4510,8 @@ function compactCandidates(
     localItems,
     context,
   );
-  const diversePool = selectDiversePrimitives(
-    primitives,
-    MAX_AI_CANDIDATES,
-    localItems,
-  );
-  const coverageMatchIds = new Set([
-    ...coverageMatches.map((primitive) => primitive.id),
-    ...coveragePriceRepresentatives.map((primitive) => primitive.id),
-  ]);
 
-  const annotatedCandidates = [
+  return [
     ...coverageMatches
       .map((primitive) =>
         annotateCandidatePrimitive(
@@ -4447,21 +4533,84 @@ function compactCandidates(
           coverageTerms,
         ),
       ),
-    ...diversePool
-      .filter((primitive) => !coverageMatchIds.has(primitive.id))
-      .map((primitive) =>
-        annotateCandidatePrimitive(
-          primitive,
-          intent,
-          sortedPrices,
-          intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
-          coverageTerms,
-        ),
-      ),
-  ]
-    .slice(0, MAX_AI_CANDIDATES);
+  ];
+}
 
-  return annotatedCandidates;
+// 全池多样背景层：选取只依赖候选事实本身（不依赖本轮查询），注解里意图相关
+// 字段由调用方决定——传 localItems=[]/intent=null 时输出跨轮字节级稳定。
+function selectDiversePoolCompacted(
+  tours: AiRecommendationCandidate[],
+  localItems: AiRecommendationItem[],
+  intent: AiTravelIntent | null = null,
+  context?: RecommendationContext,
+) {
+  const allPrimitives = tours.map(buildTourPrimitive);
+  const tourPrimitives = allPrimitives.filter((primitive) => !isLikelyAiNonTour(primitive));
+  const eligiblePrimitives = tourPrimitives.length > 0 ? tourPrimitives : allPrimitives;
+  const primitives = eligiblePrimitives;
+  const sortedPrices = primitives
+    .map((primitive) => primitive.price)
+    .filter((price) => Number.isFinite(price) && price > 0)
+    .sort((a, b) => a - b);
+  const coverageTerms = extractCandidateCoverageTerms(context?.userText);
+  const diversePool = selectDiversePrimitives(
+    primitives,
+    MAX_AI_CANDIDATES,
+    localItems,
+  );
+
+  return diversePool
+    .map((primitive) =>
+      annotateCandidatePrimitive(
+        primitive,
+        intent,
+        sortedPrices,
+        intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
+        coverageTerms,
+      ),
+    );
+}
+
+// 检索命中层：命中集合本身就是本轮检索规划的产物，直接全量注解进入重点层。
+function annotateSearchedHitCompacted(
+  tours: AiRecommendationCandidate[],
+  intent: AiTravelIntent | null = null,
+  context?: RecommendationContext,
+) {
+  const allPrimitives = tours.map(buildTourPrimitive);
+  const tourPrimitives = allPrimitives.filter((primitive) => !isLikelyAiNonTour(primitive));
+  const eligiblePrimitives = tourPrimitives.length > 0 ? tourPrimitives : allPrimitives;
+  const sortedPrices = eligiblePrimitives
+    .map((primitive) => primitive.price)
+    .filter((price) => Number.isFinite(price) && price > 0)
+    .sort((a, b) => a - b);
+  const coverageTerms = extractCandidateCoverageTerms(context?.userText);
+
+  return eligiblePrimitives.map((primitive) =>
+    annotateCandidatePrimitive(
+      primitive,
+      intent,
+      sortedPrices,
+      intentMatchesPrimitive(intent, primitive) ? 'match' : 'soft_conflict',
+      coverageTerms,
+    ),
+  );
+}
+
+function compactCandidates(
+  tours: AiRecommendationCandidate[],
+  localItems: AiRecommendationItem[],
+  intent: AiTravelIntent | null = null,
+  context?: RecommendationContext,
+) {
+  const coverageFocus = selectCoverageFocusCompacted(tours, localItems, intent, context);
+  const diversePool = selectDiversePoolCompacted(tours, localItems, intent, context);
+  const coverageMatchIds = new Set(coverageFocus.map((primitive) => primitive.id));
+
+  return [
+    ...coverageFocus,
+    ...diversePool.filter((primitive) => !coverageMatchIds.has(primitive.id)),
+  ].slice(0, MAX_AI_CANDIDATES);
 }
 
 function getPublicInterestEvidenceScore(primitive: RecommendationPrimitive) {
@@ -5646,7 +5795,9 @@ async function fetchDestinationWeatherInsight(params: {
 function buildAiMessages(params: {
   userText: string;
   messages: AiRecommendationMessage[];
-  candidates: ReturnType<typeof compactCandidates>;
+  stableCandidates: ReturnType<typeof compactCandidates>;
+  focusFull: ReturnType<typeof compactCandidates>;
+  focusAnnotations: ReturnType<typeof compactCandidates>;
   routeAtlas: RouteAtlas;
   auditContext: RecommendationAuditContext;
   weatherContext: AiWeatherContext;
@@ -5656,7 +5807,8 @@ function buildAiMessages(params: {
   preferenceMemory: AiPreferenceMemory | null;
   allowPublicInterest: boolean;
 }) {
-  const intentCoverage = analyzeIntentCoverage(params.candidates, params.intent);
+  const promptPool = [...params.focusFull, ...params.focusAnnotations, ...params.stableCandidates];
+  const intentCoverage = analyzeIntentCoverage(promptPool, params.intent);
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
   const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
   const worldKnowledgeExamples = params.allowPublicInterest
@@ -5679,11 +5831,11 @@ function buildAiMessages(params: {
   ].join('\n');
 
   const stablePrefix = buildStablePromptPrefix({
-    candidates: params.candidates,
+    candidates: params.stableCandidates,
     routeAtlas: params.routeAtlas,
   });
   const semanticGuidance = buildPublicInterestReasoningContext(
-    params.candidates,
+    promptPool,
     params.intent,
     params.userText,
   );
@@ -5700,6 +5852,16 @@ function buildAiMessages(params: {
     wx: compactWeatherContextForPrompt(params.weatherContext),
     dw: compactDestinationWeatherInsightsForPrompt(params.destinationWeatherInsights),
     sg: semanticGuidance,
+    fk: FOCUS_PROMPT_CANDIDATE_KEYS,
+    fak: FOCUS_ANNOTATION_KEYS,
+    fh: compactCandidatesForPrompt(params.focusFull),
+    fa: params.focusAnnotations.map((candidate) => [
+      candidate.id,
+      candidate.matchStatus,
+      compactPromptStrings(candidate.conflictReasons, 2, 18),
+      candidate.userTermCoverage,
+      compactPromptStrings(candidate.userTermHits, 4, 12),
+    ]),
     ol: MAX_AI_SELECTED_ITEMS,
     cl: MAX_AI_PROMPT_REASON_ITEMS,
     schema: {
@@ -5741,7 +5903,8 @@ function buildAiMessages(params: {
     rq: [
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。先做整体体验判断，再做候选排序。',
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮的目的地、主题、天数和同行人偏好。',
-      'candidates 里 pc/pricePct 是价格上下文，atoms/cats/seasonAtoms/conflicts 是候选事实摘要。',
+      'candidates（第二条消息的稳定池）是按 id 排序的全池背景候选：atoms/cats/seasonAtoms 是候选事实摘要，pc/pricePct 是价格上下文；里面没有本轮匹配注解。',
+      'fh 是按本轮需求检索/匹配出的重点候选完整条目（末尾 match/conflicts/termCoverage/termHits 是本轮注解）；fa 是重点候选已在稳定池内时的本轮注解行。排序时优先在 fh/fa 中寻找最贴合的选项，再用稳定池补足选择面；不要因为稳定池里某条没有显式标签就直接淘汰。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
         : []),
@@ -5769,7 +5932,9 @@ function buildAiMessages(params: {
 function buildLiteAiMessages(params: {
   userText: string;
   messages: AiRecommendationMessage[];
-  candidates: ReturnType<typeof compactCandidates>;
+  stableCandidates: ReturnType<typeof compactCandidates>;
+  focusFull: ReturnType<typeof compactCandidates>;
+  focusAnnotations: ReturnType<typeof compactCandidates>;
   weatherContext: AiWeatherContext;
   searchQuery: string;
   intent: AiTravelIntent | null;
@@ -5781,12 +5946,26 @@ function buildLiteAiMessages(params: {
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
   const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
   const semanticGuidance = buildPublicInterestReasoningContext(
-    params.candidates,
+    params.stableCandidates,
     params.intent,
     params.userText,
   );
+  // 键序即字节序：v/sck/candidates（稳定池，按 id 排序）放在最前，q 及当轮
+  // 注解放在其后——跨轮请求的 JSON 前缀保持一致，KV 缓存可以命中到 fh 为止。
   const request = {
     t: 'rank_5detailed_10brief_lite',
+    v: AI_CACHE_PROMPT_VERSION,
+    sck: STABLE_LITE_CANDIDATE_KEYS,
+    candidates: compactStableCandidatesForLitePrompt(params.stableCandidates),
+    fk: FOCUS_LITE_CANDIDATE_KEYS,
+    fh: compactCandidatesForLitePrompt(params.focusFull),
+    fa: params.focusAnnotations.map((candidate) => [
+      candidate.id,
+      candidate.matchStatus,
+      compactPromptStrings(candidate.conflictReasons, 1, 14),
+      candidate.userTermCoverage,
+      compactPromptStrings(candidate.userTermHits, 3, 10),
+    ]),
     q: params.userText,
     sq: params.searchQuery,
     rc: compactRecentConversation(params.messages).slice(-2),
@@ -5794,11 +5973,6 @@ function buildLiteAiMessages(params: {
     it: compactIntentForPrompt(params.intent),
     wx: compactWeatherContextForPrompt(params.weatherContext),
     sg: semanticGuidance,
-    ck: [
-      'id', 'title', 'destination', 'days', 'price', 'match', 'atoms', 'cats', 'weather', 'conflict',
-      'pricePct', 'priceBand', 'termCoverage', 'termHits',
-    ],
-    candidates: compactCandidatesForLitePrompt(params.candidates),
     schema: {
       intent: {
         destinationHints: 'string[]，本轮语义判断后的目的地',
@@ -5828,8 +6002,9 @@ function buildLiteAiMessages(params: {
     rq: [
       '只输出 JSON，不要 Markdown。',
       '返回 intent、intentNotes、clarification、assumptions、tradeoffs 和 items；不要 summary、reason、matchedSignals。',
-      '只允许使用 candidates 中存在的 id。',
+      '只允许使用 candidates/fh 中存在的 id。',
       'JSON 保持可解析即可，文案不要为了短而牺牲具体判断。',
+      'candidates（稳定池）是按 id 排序的全池背景候选；fh 是按本轮需求检索/匹配出的重点候选（含本轮注解列），fa 是池内重点候选的注解行。优先在 fh/fa 中找最贴合的选项，再用稳定池补足选择面。',
       `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条写 sf，其余条目省略 sf、只写 ss；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
       '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
       `多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮偏好。`,
@@ -6120,6 +6295,12 @@ export const __aiRecommendationTestHooks = {
   collectAvoidHints,
   collectLiteralAvoidHints,
   compactCandidates,
+  getStablePromptPool,
+  selectCoverageFocusCompacted,
+  selectDiversePoolCompacted,
+  annotateSearchedHitCompacted,
+  compactStableCandidatesForPrompt,
+  compactCandidatesForPrompt,
   allowsPublicInterestForTurn,
   buildLocalRecommendationQuery,
   buildIntentLocalRecommendations,
@@ -7390,10 +7571,13 @@ export async function requestAiRecommendations({
           tours: availableCandidates,
         })
       : Promise.resolve(weatherContextForRanking);
-    const routeAtlasPromise = Promise.resolve(buildRouteAtlas(availableCandidates));
+    // 稳定候选池：按数据快照记忆化，跨轮字节级一致——第二条 system 消息
+    // （prompt 大头）的 KV 前缀缓存命中依赖它。路线图集随池一起缓存。
+    const stablePool = getStablePromptPool(candidateTours);
+    const routeAtlasPromise = Promise.resolve(stablePool.routeAtlas);
 
     // 多轮检索：先让模型规划 1-3 条差异化检索式，再在"全量"候选池上本地执行，
-    // 命中候选强制并入排序池——单发注入池外的好线路不再永远不可见。
+    // 命中候选进入当轮重点层（动态 user 消息）——单发注入池外的好线路不再永远不可见。
     // 规划失败不阻断主链路：自动退回旧的单发注入池。
     const compactionOptions = {
       budgetPriority: effectiveIntent?.budgetPriority,
@@ -7420,9 +7604,8 @@ export async function requestAiRecommendations({
         const executed = executeAiSearchRounds(availableCandidates, plan.queries);
         searchRounds = executed.rounds;
         if (executed.searchedTours.length > 0) {
-          searchedCompacted = compactCandidates(
+          searchedCompacted = annotateSearchedHitCompacted(
             executed.searchedTours,
-            localItemsForMerge,
             effectiveIntent,
             compactionOptions,
           );
@@ -7452,20 +7635,23 @@ export async function requestAiRecommendations({
         }
       }
     }
-    const baseCompacted = compactCandidates(
-      availableCandidates,
-      localItemsForMerge,
-      effectiveIntent,
-      compactionOptions,
-    );
-    const mergedCompactById = new Map<string, ReturnType<typeof compactCandidates>[number]>();
-    for (const candidate of [...searchedCompacted, ...baseCompacted]) {
-      if (!mergedCompactById.has(candidate.id)) mergedCompactById.set(candidate.id, candidate);
+    // 当轮重点层：检索命中 + coverage 匹配 + 价格带代表，再叠加记忆/语义证据
+    // 富化。全部依赖本轮意图，进动态 user 消息（fh 完整条目 / fa 池内注解行）。
+    const focusById = new Map<string, ReturnType<typeof compactCandidates>[number]>();
+    for (const candidate of [
+      ...searchedCompacted,
+      ...selectCoverageFocusCompacted(
+        availableCandidates,
+        localItemsForMerge,
+        effectiveIntent,
+        compactionOptions,
+      ),
+    ]) {
+      if (!focusById.has(candidate.id)) focusById.set(candidate.id, candidate);
     }
-    const mergedCompact = [...mergedCompactById.values()].slice(0, MAX_AI_CANDIDATES);
-    const aiCandidatePool = enrichPromptCandidatesWithSemanticEvidence(
+    const enrichedFocus = enrichPromptCandidatesWithSemanticEvidence(
       enrichPromptCandidatesWithMemoryCoverage(
-        mergedCompact,
+        [...focusById.values()].slice(0, MAX_AI_FOCUS_CANDIDATES),
         availableCandidates,
         aiContextMemoryForThisTurn,
         effectiveIntent,
@@ -7474,7 +7660,19 @@ export async function requestAiRecommendations({
       localItemsForMerge,
       effectiveIntent,
       effectiveUserText,
+    ).slice(0, MAX_AI_FOCUS_CANDIDATES);
+    const focusFull = enrichedFocus.filter(
+      (candidate) => !stablePool.candidateIds.has(candidate.id),
     );
+    const focusAnnotations = enrichedFocus.filter((candidate) =>
+      stablePool.candidateIds.has(candidate.id),
+    );
+    // 模型可引用的合法 id 全集 = 当轮重点层 + 稳定池（重点层优先，保序去重）。
+    const poolById = new Map<string, ReturnType<typeof compactCandidates>[number]>();
+    for (const candidate of [...enrichedFocus, ...stablePool.candidates]) {
+      if (!poolById.has(candidate.id)) poolById.set(candidate.id, candidate);
+    }
+    const aiCandidatePool = [...poolById.values()];
     if (aiCandidatePool.length === 0) {
       return {
         conversationId,
@@ -7510,7 +7708,9 @@ export async function requestAiRecommendations({
       messages: buildAiMessages({
         userText: effectiveUserText,
         messages,
-        candidates: aiCandidatePool,
+        stableCandidates: stablePool.candidates,
+        focusFull,
+        focusAnnotations,
         routeAtlas: await routeAtlasPromise,
         auditContext,
         weatherContext: weatherContextForRanking,
@@ -7523,7 +7723,9 @@ export async function requestAiRecommendations({
       liteMessages: buildLiteAiMessages({
         userText: effectiveUserText,
         messages,
-        candidates: aiCandidatePool,
+        stableCandidates: stablePool.candidates,
+        focusFull,
+        focusAnnotations,
         weatherContext: weatherContextForRanking,
         searchQuery,
         intent: effectiveIntent,
