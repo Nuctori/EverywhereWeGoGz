@@ -711,17 +711,15 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
 
       const isAiRecommendedTour = aiRecommendationByTourId.has(tour.id);
 
-      // AI 模式：AI 选中的方案置顶展示；未入选候选保留为按相关性排序的
-      // 长尾，用户可在置顶段之后继续下滑慢慢浏览（不再截断成只有 15 条）。
+      // AI 模式：AI 选中的方案置顶展示；其余线路全部保留在长尾里（相关的
+      // 排前面，其余按当前排序跟上），保证置顶段之后能继续下滑浏览全部线路。
       if (isAiSearchMode && isAiRecommendedTour) {
         return true;
       }
 
-      if (normalizedSearchQuery && !isAiRecommendedTour) {
+      if (normalizedSearchQuery && !isAiSearchMode && !isAiRecommendedTour) {
         const relevance = getTourSearchRelevance(tour, searchContext);
-        // AI 查询本质是自然语言需求，长尾阈值与自然语言查询一致，避免
-        // “便宜的河源旅游”这类 7 字查询被关键词级高阈值卡成长尾为空。
-        const minRelevance = isAiSearchMode || hasNaturalLanguageQuery ? 4 : 12;
+        const minRelevance = hasNaturalLanguageQuery ? 4 : 12;
 
         if (relevance < minRelevance) {
           return false;
