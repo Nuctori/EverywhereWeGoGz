@@ -62,10 +62,13 @@ function buildGeoPoint(tour, role) {
   const name = destination ? (nonEmpty(tour.destinationPlaceName) || cityName) : cityName;
   if (!name || !cityName || !validCoordinate(latitude, longitude)) return undefined;
   const semanticLevel = nonEmpty(tour[destination ? 'destinationGeoLevel' : 'departureGeoLevel']);
-  const precision = normalizeGeoPrecision(tour[destination ? 'destinationCoordinatePrecision' : 'departureCoordinatePrecision']);
   const level = ['country', 'region', 'city', 'town', 'poi'].includes(semanticLevel)
     ? semanticLevel
     : (name !== cityName ? 'poi' : 'city');
+  // 精度缺省：geocoder/osm 验证过的 poi/town 视为 exact；city 及以上视为
+  // approximate。避免 72 个地点因字段缺失既无标签也不进模糊统计。
+  const precision = normalizeGeoPrecision(tour[destination ? 'destinationCoordinatePrecision' : 'departureCoordinatePrecision'])
+    || (['poi', 'town'].includes(level) ? 'exact' : 'approximate');
   const locality = nonEmpty(tour[destination ? 'destinationLocality' : 'departureLocality']);
   const address = destination && tour.destinationAddress && typeof tour.destinationAddress === 'object'
     ? Object.fromEntries(Object.entries(tour.destinationAddress).filter(([, value]) => nonEmpty(value)))
@@ -428,12 +431,19 @@ const tourMapIndex = listTours.map((tour) => {
     const point = tour.geo?.[role];
     if (!point) continue;
     const existing = placeMap.get(point.placeId);
+    // 出发/目的角色的 tourIds 必须分离：广州既是主要出发城市又是少量线路的
+    // 目的地，混在同一个列表里会让地图上"广州"点开全是出境团（错标主体）。
+    const roleKey = role === 'destination' ? 'tourIds' : 'departureTourIds';
     if (existing) {
-      if (!existing.tourIds.includes(tour.id)) existing.tourIds.push(tour.id);
-      if (!existing.roles.includes(role)) existing.roles.push(role);
+      if (!existing[roleKey].includes(tour.id)) existing[roleKey].push(tour.id);
       if (existing.confidence !== point.confidence) existing.confidence = 'medium';
     } else {
-      placeMap.set(point.placeId, { ...point, tourIds: [tour.id], roles: [role] });
+      placeMap.set(point.placeId, {
+        ...point,
+        tourIds: role === 'destination' ? [tour.id] : [],
+        departureTourIds: role === 'departure' ? [tour.id] : [],
+        roles: [role],
+      });
     }
   }
   return {
@@ -445,7 +455,15 @@ const tourMapIndex = listTours.map((tour) => {
 });
 
 const geoPlaces = [...placeMap.values()]
-  .map((place) => ({ ...place, tourCount: place.tourIds.length }))
+  .map((place) => {
+    // 角色在聚合完成后统一推导：只有真正作为目的地的地点才带 destination 角色，
+    // 纯出发城市（roles=['departure']）会被前端地图过滤掉。
+    const roles = [
+      ...(place.tourIds.length > 0 ? ['destination'] : []),
+      ...(place.departureTourIds.length > 0 ? ['departure'] : []),
+    ];
+    return { ...place, roles, tourCount: place.tourIds.length };
+  })
   .sort((left, right) => right.tourCount - left.tourCount || left.name.localeCompare(right.name));
 writeTextFileWithRetry(geoPlacesPath, compactJson(geoPlaces));
 writeTextFileWithRetry(tourMapIndexPath, compactJson(tourMapIndex));
