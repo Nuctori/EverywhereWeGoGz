@@ -79,9 +79,18 @@ const waitForNextPaint = () =>
       return;
     }
 
-    window.requestAnimationFrame(() => {
-      window.setTimeout(resolve, 0);
-    });
+    // 后台/被遮挡窗口的 rAF 会被浏览器冻结（visibilityState 仍是 visible）：
+    // 必须有 setTimeout 兜底，否则 AI 请求会在等待首帧处永久挂起，
+    // 表现为“已收到需求”卡死、结果被清空、输入框禁用。
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+
+    window.requestAnimationFrame(() => window.setTimeout(settle, 0));
+    window.setTimeout(settle, 200);
   });
 
 // 进度步骤定义，对应 AiRecommendationProgress.stage，面板进度条按此顺序推进

@@ -88,20 +88,30 @@ export const TourCard = memo(function TourCard({
           <div className="mt-2 text-xs text-stone-400">比较备选</div>
         )}
 
-        {/* 简要推荐位：不写完整推荐语，看点压缩成一行信号短语 */}
-        {recommendationTier === 'ai-brief' && (
-          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-stone-500">
-            <span className="font-medium text-stone-600">简要推荐</span>
-            {(recommendationSignals || []).slice(0, 3).map((signal) => (
-              <span key={signal} className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] text-stone-600">
-                {signal}
-              </span>
-            ))}
+        {/* 简要推荐位：一句话简单介绍 + 看点短语，轻量展示 */}
+        {recommendationTier === 'ai-brief' && (recommendationReason || (recommendationSignals || []).length > 0) && (
+          <div className="mt-3 rounded-2xl bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-600">
+            <p className="line-clamp-2">
+              <span className="font-medium text-stone-700">简要推荐：</span>
+              {recommendationReason}
+            </p>
+            {(recommendationSignals || []).length > 0 && (
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {(recommendationSignals || []).slice(0, 3).map((signal) => (
+                  <span
+                    key={signal}
+                    className="rounded-full bg-white px-2 py-0.5 text-[11px] text-stone-500 ring-1 ring-stone-200"
+                  >
+                    {signal}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
-        {/* AI 推荐理由，来自 AiRecommendPanel 结果 */}
-        {recommendationReason && (
+        {/* AI 详细推荐理由，来自 AiRecommendPanel 结果（简要位走上面的轻量样式） */}
+        {recommendationReason && recommendationTier !== 'ai-brief' && (
           <div
             className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-800"
             title={recommendationReason}

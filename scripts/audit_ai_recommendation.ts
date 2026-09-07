@@ -1986,8 +1986,8 @@ const weatherAwareSorted = prioritizeRecommendationItems(
 );
 assert.equal(
   weatherAwareSorted[0].tourId,
-  'weather-qingyuan',
-  '天气较差时，应在同等推荐层级内优先天气更稳的广东团期',
+  'weather-yangjiang',
+  'AI 档内严格遵循模型给出的顺序：天气差异进文案与标注，本地不再重排模型结论',
 );
 const strictBudgetWeatherSorted = prioritizeRecommendationItems(
   [
@@ -2006,8 +2006,8 @@ const strictBudgetWeatherSorted = prioritizeRecommendationItems(
 );
 assert.equal(
   strictBudgetWeatherSorted[0].tourId,
-  'budget-bad-weather',
-  '严格预算冲突必须优先于天气优势，天气只能作为软参考',
+  'budget-good-weather',
+  'AI 档内排序权归模型：预算上下文在 prompt 里由模型自行权衡取舍',
 );
 const unknownWeatherSorted = prioritizeRecommendationItems(
   [
@@ -2809,10 +2809,10 @@ const reordered = prioritizeRecommendationItems(
     'ai-brief',
     '模型推荐顺序第 6 条起落入简要位',
   );
-  assert.equal(
-    tieredItems.find((item) => item.tourId === 'detailed-guangxi-vietnam')?.reason,
-    undefined,
-    '简要位不保留完整 reason，看点由 matchedSignals 承载',
+  const briefIntro = tieredItems.find((item) => item.tourId === 'detailed-guangxi-vietnam')?.reason;
+  assert.ok(
+    briefIntro && briefIntro.length <= 41 && briefIntro.endsWith('。'),
+    '简要位保留一句话简单介绍：超长 reason 按句读截断到 40 字内',
   );
   assert.deepEqual(
     sorted.map((item) => item.tourId),

@@ -31,6 +31,8 @@ const AI_CONFIG_STORAGE_KEY = 'travel-ai-provider-config';
 const MAX_AI_CANDIDATES = 96;
 // 当轮重点候选（检索命中/需求匹配/偏好相关）上限：进动态 user 消息，不进稳定前缀。
 const MAX_AI_FOCUS_CANDIDATES = 24;
+// 简要推荐位的一句话介绍上限（字符）：保证卡片行内展示不膨胀成完整推荐语。
+const MAX_AI_BRIEF_INTRO_CHARS = 40;
 const MAX_AI_COMMENTARY_ITEMS = 24;
 // 推荐展示结构：前 5 条带完整推荐理由（详细推荐），随后 10 条只保留看点信号
 // （简要推荐）。模型按推荐度一次给出 15 条，本地按位置切分两档展示。
@@ -2261,6 +2263,22 @@ function getRecommendationTierWeight(item: AiRecommendationItem) {
   }
 }
 
+// 简要推荐位的一句话介绍：超长时按句读截断；没有内容时返回 undefined。
+function truncateBriefIntro(reason: string | undefined) {
+  const text = (reason || '').trim().replace(/[。．.]+$/u, '');
+  if (!text) return undefined;
+  if (text.length <= MAX_AI_BRIEF_INTRO_CHARS) return `${text}。`;
+
+  const cut = text.slice(0, MAX_AI_BRIEF_INTRO_CHARS);
+  const boundary = Math.max(
+    cut.lastIndexOf('，'),
+    cut.lastIndexOf('、'),
+    cut.lastIndexOf('；'),
+    cut.lastIndexOf(' '),
+  );
+  return `${(boundary >= 12 ? cut.slice(0, boundary) : cut).trim()}。`;
+}
+
 function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecommendationItem[] {
   let commentaryCount = 0;
 
@@ -2283,8 +2301,8 @@ function mergeAiAndLocalRecommendations(
   localItems: AiRecommendationItem[],
 ): AiRecommendationItem[] {
   const seenTourIds = new Set<string>();
-  // 详细/简要按模型给出的推荐顺序切分：前 5 条保留完整理由，随后 10 条只在
-  // matchedSignals 里保留看点；简要位不写 reason，卡片渲染走简要样式。
+  // 详细/简要按模型给出的推荐顺序切分：前 5 条保留完整理由，随后 10 条保留
+  // 一句话简单介绍（超长截断）加 matchedSignals 看点，卡片渲染走简要样式。
   const primaryAiItems = aiItems
     .filter((item) => {
       if (seenTourIds.has(item.tourId)) return false;
@@ -2294,7 +2312,7 @@ function mergeAiAndLocalRecommendations(
     .map((item, aiIndex) => ({
       ...item,
       recommendationTier: (aiIndex < MAX_AI_DETAILED_ITEMS ? 'ai-detailed' : 'ai-brief') as AiRecommendationItem['recommendationTier'],
-      ...(aiIndex >= MAX_AI_DETAILED_ITEMS ? { reason: undefined } : {}),
+      ...(aiIndex >= MAX_AI_DETAILED_ITEMS ? { reason: truncateBriefIntro(item.reason) } : {}),
     } satisfies AiRecommendationItem));
   if (primaryAiItems.length > 0) {
     const supplementalItems = localItems
@@ -2708,16 +2726,10 @@ function prioritizeRecommendationItems(
       const rightIsAi = Boolean(right.item.recommendationTier?.startsWith('ai'));
       if (leftIsAi !== rightIsAi) return leftIsAi ? -1 : 1;
       if (leftIsAi && rightIsAi) {
-        // AI 内部仍按 tier 权重（detailed > brief）分组——文案完整度是既有产品
-        // 决策；同 tier 时模型分数就是顺序，仅保留预算硬限/天气两个修正键。
+        // 主观能动性交给模型：AI 档内严格按模型给出的顺序（详细组在前、
+        // 组内按模型分数与原始顺序），本地不再用天气/预算微调重排它的结论。
         const tierGap = right.recommendationTierWeight - left.recommendationTierWeight;
         if (tierGap !== 0) return tierGap;
-        if (left.budgetFitTier <= -2 || right.budgetFitTier <= -2) {
-          const budgetGap = right.budgetFitTier - left.budgetFitTier;
-          if (budgetGap !== 0) return budgetGap;
-        }
-        const weatherGap = right.weatherScore - left.weatherScore;
-        if (weatherGap !== 0) return weatherGap;
         const aiScoreGap = right.aiScore - left.aiScore;
         return aiScoreGap !== 0 ? aiScoreGap : left.index - right.index;
       }
@@ -2782,6 +2794,13 @@ function prioritizeRecommendationItems(
       matchedDestinationHints,
       index,
     }));
+
+  // AI 主导的结果不再做目的地均衡重排：模型的多目的地取舍已经体现在它的
+  // 排序里，本地均衡会把模型的第一推荐挤出头部。纯本地补位列表仍保留均衡。
+  const hasAiTierItems = prioritized.some((item) => item.recommendationTier?.startsWith('ai'));
+  if (hasAiTierItems) {
+    return sortedRankedItems.map(({ item }) => item);
+  }
 
   return rebalanceItemsForExplicitDestinationCoverage(sortedRankedItems, intent)
     .map(({ item }) => item);
@@ -5066,10 +5085,10 @@ function rewriteRecommendationCopy(params: {
     if (item.recommendationTier === 'local-supplement') {
       return stripRecommendationCommentary(item);
     }
-    // 简要推荐位（第 6-15 条）的看点由 matchedSignals 承载，不补写完整推荐语，
-    // 否则本地生成的文案会把简要卡片重新撑成详细卡。
+    // 简要推荐位（第 6-15 条）只保留一句话简单介绍：不生成、不加长本地完整
+    // 推荐语，防止本地模板把简要卡片重新撑成详细卡。
     if (item.recommendationTier === 'ai-brief') {
-      return { ...item, reason: undefined };
+      return { ...item, reason: truncateBriefIntro(item.reason) };
     }
     if (index >= MAX_AI_COMMENTARY_ITEMS) {
       return stripRecommendationCommentary(item);
@@ -5166,6 +5185,8 @@ function attachWeatherGuidanceToItems(
 
   return items.map((item) => {
     if (!item.reason) return item;
+    // 简要推荐位保持一句话介绍的长度，不追加天气句。
+    if (item.recommendationTier === 'ai-brief') return item;
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive || !isWeatherSensitivePrimitive(primitive)) return item;
     const insight = findWeatherInsightForPrimitive(primitive, destinationWeatherInsights);
@@ -5894,8 +5915,8 @@ function buildAiMessages(params: {
         {
           tourId: '候选 id',
           score: '0-100 number',
-          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条（详细推荐位）写。请用你自己的判断说明为什么会想去这条线路，具体写它的画面、气质、玩法或取舍；长度和写法由你决定。第 ${MAX_AI_DETAILED_ITEMS + 1} 条起省略 reason`,
-          matchedSignals: `每条都需要。2-3 个中文短语；详细推荐位之外它就是这条推荐的全部看点，要写到具体玩法或体验，不要写空泛的“适合度假”`,
+          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条（详细推荐位）写完整推荐理由：画面、气质、玩法或取舍，长度和写法由你决定。第 ${MAX_AI_DETAILED_ITEMS + 1}-${MAX_AI_SELECTED_ITEMS} 条（简要推荐位）写一句话简单介绍，30 字内说清这条线是什么、最值得去的一点，不要展开成长理由`,
+          matchedSignals: '每条都需要。2-3 个中文短语，概括这条线的核心看点，要具体，不要写空泛的“适合度假”',
         },
       ],
       itemCountLimit: MAX_AI_SELECTED_ITEMS,
@@ -5914,7 +5935,7 @@ function buildAiMessages(params: {
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
       ...promptPolicy.requestRules,
       [
-        `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起省略 reason、只写 matchedSignals；`,
+        `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
         `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条是最值得细看的详细推荐，后面 ${MAX_AI_BRIEF_ITEMS} 条是值得顺便比较的简要推荐；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
         '可以参考熟悉当地玩法的人来写，避免让所有线路都长得一样；如果某个软条件需要核实，自行判断它是否值得写进这一条。',
       ].join(''),
@@ -5994,8 +6015,8 @@ function buildLiteAiMessages(params: {
       items: [{
         tourId: '候选 id',
         score: '0-100 number',
-        sf: `仅前${MAX_AI_DETAILED_ITEMS}条可以写。用你自己的判断说明这条线路为什么值得考虑，像熟悉当地玩法的人在种草；写法和长度自行决定`,
-        ss: `每条都需要，最多3个短词；第${MAX_AI_DETAILED_ITEMS + 1}条起它就是这条推荐的全部看点，要具体`,
+        sf: `仅前${MAX_AI_PROMPT_REASON_ITEMS}条写完整推荐理由，像熟悉当地玩法的人在种草；第${MAX_AI_DETAILED_ITEMS + 1}条起 sf 写一句话简单介绍（30 字内），不要展开长理由`,
+        ss: '每条都需要，最多3个短词，概括核心看点',
       }],
       itemCountLimit: MAX_AI_SELECTED_ITEMS,
     },
@@ -6005,7 +6026,7 @@ function buildLiteAiMessages(params: {
       '只允许使用 candidates/fh 中存在的 id。',
       'JSON 保持可解析即可，文案不要为了短而牺牲具体判断。',
       'candidates（稳定池）是按 id 排序的全池背景候选；fh 是按本轮需求检索/匹配出的重点候选（含本轮注解列），fa 是池内重点候选的注解行。优先在 fh/fa 中找最贴合的选项，再用稳定池补足选择面。',
-      `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条写 sf，其余条目省略 sf、只写 ss；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
+      `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
       '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
       `多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮偏好。`,
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
@@ -7021,9 +7042,11 @@ function buildAiRequestBody(
   const body: Record<string, unknown> = {
     model: config.model,
     messages: normalizeMessagesForProvider(messages),
-    temperature: 0.25,
-    // GLM 的 thinking token 计入 max_tokens，开思维链时抬高上限避免 JSON 被截断。
-    max_tokens: thinkingEnabled ? Math.max(maxTokens ?? 2048, 3200) : (maxTokens ?? 2048),
+    // 略高于保守值：让模型在候选比较里保留主观取舍的余地，JSON 模式下仍稳定。
+    temperature: 0.35,
+    // GLM 的 thinking token 计入 max_tokens：思维链 + 15 条推荐 JSON 峰值约
+    // 3.5k，上限不足会被截断成“只有前几条推荐”，这里抬高避免 items 被吃掉。
+    max_tokens: thinkingEnabled ? Math.max(maxTokens ?? 2048, 5200) : (maxTokens ?? 2048),
     response_format: { type: 'json_object' },
     thinking: { type: thinkingEnabled ? 'enabled' : 'disabled' },
   };
@@ -7732,8 +7755,8 @@ export async function requestAiRecommendations({
         preferenceMemory: aiContextMemoryForThisTurn,
         allowPublicInterest: allowPublicInterestForTurn,
       }),
-      maxTokens: 2200,
-      liteMaxTokens: 1300,
+      maxTokens: 2400,
+      liteMaxTokens: 1500,
       qualityCheck: (response) =>
         getAiResponseIntentQualityIssue({
           response,
