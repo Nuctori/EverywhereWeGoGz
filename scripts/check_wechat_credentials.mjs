@@ -25,9 +25,32 @@ const issueOpsEnabled = Boolean(repo);
 function closeResolvedIssues() {
   if (!issueOpsEnabled) return;
   try {
-    const open = JSON.parse(gh(['issue', 'list', '--state', 'open', '--label', LABEL, '--json', 'number'], true) || '[]');
+    const open = JSON.parse(
+      gh(
+        [
+          'issue',
+          'list',
+          '--state',
+          'open',
+          '--label',
+          LABEL,
+          '--json',
+          'number',
+        ],
+        true,
+      ) || '[]',
+    );
     for (const issue of open) {
-      gh(['issue', 'close', String(issue.number), '--comment', '凭证预检通过，自动关闭。'], true);
+      gh(
+        [
+          'issue',
+          'close',
+          String(issue.number),
+          '--comment',
+          '凭证预检通过，自动关闭。',
+        ],
+        true,
+      );
     }
   } catch {
     // 关不掉历史 issue 不影响本轮
@@ -40,10 +63,45 @@ function openIssue(detail) {
     return;
   }
   try {
-    gh(['label', 'create', LABEL, '--color', 'D93F0B', '--description', '微信公众号 appId/secret 失效', '--force'], true);
-    const open = JSON.parse(gh(['issue', 'list', '--state', 'open', '--label', LABEL, '--json', 'number'], true) || '[]');
+    gh(
+      [
+        'label',
+        'create',
+        LABEL,
+        '--color',
+        'D93F0B',
+        '--description',
+        '微信公众号 appId/secret 失效',
+        '--force',
+      ],
+      true,
+    );
+    const open = JSON.parse(
+      gh(
+        [
+          'issue',
+          'list',
+          '--state',
+          'open',
+          '--label',
+          LABEL,
+          '--json',
+          'number',
+        ],
+        true,
+      ) || '[]',
+    );
     if (open.length === 0) {
-      gh(['issue', 'create', '--label', LABEL, '--title', TITLE, '--body', detail]);
+      gh([
+        'issue',
+        'create',
+        '--label',
+        LABEL,
+        '--title',
+        TITLE,
+        '--body',
+        detail,
+      ]);
     } else {
       // 诊断会随错误码变化（如 IP 白名单→appid 错误），刷新正文为最新结论
       gh(['issue', 'comment', String(open[0].number), '--body', detail]);
@@ -54,7 +112,9 @@ function openIssue(detail) {
 }
 
 if (!appId || !appSecret) {
-  openIssue('`WECHAT_APP_ID` / `WECHAT_APP_SECRET` secret 缺失。到仓库 Settings → Secrets and variables → Actions 配置后重跑。');
+  openIssue(
+    '`WECHAT_APP_ID` / `WECHAT_APP_SECRET` secret 缺失。到仓库 Settings → Secrets and variables → Actions 配置后重跑。',
+  );
   console.error('WeChat credentials missing.');
   process.exit(1);
 }
@@ -67,7 +127,9 @@ try {
   );
   body = await response.json().catch(() => ({}));
 } catch (error) {
-  openIssue(`WeChat token 接口请求失败：${error.message}。多为网络抖动，下一轮会自动重试。`);
+  openIssue(
+    `WeChat token 接口请求失败：${error.message}。多为网络抖动，下一轮会自动重试。`,
+  );
   console.error('WeChat token request failed.');
   process.exit(1);
 }
@@ -82,7 +144,8 @@ const hints = {
   40013: 'appid 不正确',
   40125: 'appsecret 不正确（可能已重置，需要更新 secret）',
   40001: 'appsecret 无效或已过期，需要更新 secret',
-  40164: '调用 IP 不在公众号白名单——GitHub runner IP 每次都变，需在公众号后台「IP 白名单」关闭或清空限制',
+  40164:
+    '调用 IP 不在公众号白名单——GitHub runner IP 每次都变，需在公众号后台「IP 白名单」关闭或清空限制',
   45009: '接口调用频率超限，下一轮自动重试即可',
 };
 const hint = hints[body.errcode] || '见微信公众平台文档错误码说明';
@@ -95,5 +158,7 @@ openIssue(
     '修复后下一轮调度会自动关闭本 issue。凭证有效期间，相关定时工作流将保持绿灯跳过，不再制造红叉。',
   ].join('\n'),
 );
-console.error(`WeChat credentials invalid: errcode=${body.errcode} errmsg=${body.errmsg}`);
+console.error(
+  `WeChat credentials invalid: errcode=${body.errcode} errmsg=${body.errmsg}`,
+);
 process.exit(1);
