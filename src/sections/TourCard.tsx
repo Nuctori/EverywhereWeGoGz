@@ -167,6 +167,7 @@ export const TourCard = memo(function TourCard({
             <p className="text-[11px] uppercase tracking-[0.18em] text-stone-400 max-sm:hidden">¥{tour.price.toLocaleString()} / 人起</p>
             <div className="mt-0.5 flex items-baseline gap-1.5 sm:mt-1">
               <span className="text-2xl font-semibold tracking-tight text-stone-950">¥{tour.price.toLocaleString()}</span>
+              <span className="text-xs text-stone-500 sm:hidden">/人起</span>
               {tour.originalPrice && tour.originalPrice > tour.price && (
                 <span className="text-sm text-stone-400 line-through">
                   ¥{tour.originalPrice.toLocaleString()}

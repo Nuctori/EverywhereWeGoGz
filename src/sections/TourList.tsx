@@ -1629,7 +1629,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
           </Sheet>
         )}
 
-        <div className="mt-5 mobile-chip-scroll -mx-4 flex items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:items-start sm:justify-between sm:gap-3 sm:overflow-visible sm:px-0">
+        <div className="mt-5 mobile-chip-scroll -mx-4 flex items-center gap-2 overflow-x-auto bg-transparent px-4 sm:mx-0 sm:flex-wrap sm:items-start sm:justify-between sm:gap-3 sm:overflow-visible sm:px-0 max-sm:sticky max-sm:top-[64px] max-sm:z-30 max-sm:-mb-1 max-sm:py-2 max-sm:bg-[rgba(247,246,243,0.94)] max-sm:backdrop-blur-xl">
           <div className="flex shrink-0 items-center gap-2 sm:flex-wrap">
             <ArrowUpDown className="w-4 h-4 shrink-0 text-stone-500" />
             <Select
