@@ -28,6 +28,8 @@ env:
 jobs:
   check-and-order:
     runs-on: ubuntu-latest
+    # SSH 中继/微信接口挂住时兜底，避免烧满 runner 默认的 360 分钟。
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4

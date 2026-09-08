@@ -26,6 +26,7 @@ env:
 jobs:
   preflight:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,6 +58,9 @@ jobs:
 
   crawl-jrt365:
     runs-on: ubuntu-latest
+    # job 级超时需大于爬取 step 的 60 分钟，否则 step 用满预算时 job 会先被收掉，
+    # continue-on-error 的降级记录与 ok 输出都来不及写。
+    timeout-minutes: 90
     needs: preflight
     outputs:
       ok: ${{ steps.record-outcome.outputs.ok }}
@@ -110,6 +114,7 @@ jobs:
 
   crawl-saihuitong:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     needs: preflight
     outputs:
       ok: ${{ steps.record-outcome.outputs.ok }}
@@ -154,7 +159,9 @@ jobs:
 
   crawl-kanghui:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # 此前 job 级 60 == 爬取 step 的 60：step 用满预算时 job 先被收掉，
+    # 降级记录（continue-on-error）来不及落盘，放宽到 90 留出收尾余量。
+    timeout-minutes: 90
     needs: preflight
     outputs:
       ok: ${{ steps.record-outcome.outputs.ok }}
@@ -199,6 +206,7 @@ jobs:
 
   crawl-pintu:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     needs: preflight
     outputs:
       ok: ${{ steps.record-outcome.outputs.ok }}
@@ -243,6 +251,8 @@ jobs:
 
   crawl-gzl-api:
     runs-on: ubuntu-latest
+    # job 级超时需大于爬取 step 的 180 分钟（GZL 全量追赶轮），留收尾余量。
+    timeout-minutes: 200
     needs: preflight
     outputs:
       ok: ${{ steps.record-outcome.outputs.ok }}
@@ -287,6 +297,7 @@ jobs:
 
   crawl-outdoors:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     needs: preflight
     outputs:
       ok: ${{ steps.record-outcome.outputs.ok }}
@@ -331,6 +342,7 @@ jobs:
 
   crawl-http-aggregate:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     needs: preflight
     outputs:
       ok: ${{ steps.record-outcome.outputs.ok }}
@@ -377,6 +389,7 @@ jobs:
   # 完整性审计仍是提交前最终质量门。降级明细看各 job 的 step summary。
   crawl-gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs:
       - preflight
       - crawl-jrt365

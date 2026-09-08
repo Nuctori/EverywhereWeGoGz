@@ -18,7 +18,13 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # 与其他 workflow 对齐到 24：此前用 20，脚本行为随 Node 版本漂移时
+          # 只有这个探测工作流单独变红，难以归因。
+          node-version: 24
+      - uses: actions/setup-python@v5
+        with:
+          # 探测脚本此前吃 runner 系统 python3（版本随镜像浮动），固定到仓库标准 3.11。
+          python-version: "3.11"
       - name: Gate probe unit tests (gzip/HEAD/403-fallback/404-exempt/503-alarm)
         run: python3 scripts/test_booking_url_gate.py
       - name: Probe booking URLs (stratified sample, gated by source health)

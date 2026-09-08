@@ -16,6 +16,8 @@ jobs:
   generate-and-publish:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    # LLM 生成 + SSH 发布全流程；挂住时兜底，避免烧满 runner 默认的 360 分钟。
+    timeout-minutes: 60
     permissions:
       contents: read
     steps:
