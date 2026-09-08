@@ -1115,7 +1115,9 @@ def main():
     # 去重
     seen = {}
     for it in all_raw:
-        key = it.get("source", "") + "|" + it.get("title", "") + "|" + str(it.get("price", ""))
+        # Reuse the canonical key so whitespace and numeric price formatting
+        # differences cannot bypass deduplication.
+        key = make_tour_key(it)
         previous = seen.get(key)
         if previous is None or prefer_raw_candidate(previous, it):
             seen[key] = it
@@ -1123,12 +1125,21 @@ def main():
     print(f"[去重] 后: {len(deduped)}条")
 
     # 过滤
-    deduped = [
-        r for r in deduped
-        if r.get('price', 0) > 0
-        and len(r.get('title', '')) > 5
-        and (r.get('source') not in SCHEDULE_REQUIRED_SOURCES or has_structured_departure_dates(r))
-    ]
+    def is_quality_candidate(raw):
+        title = " ".join(str(raw.get("title") or "").split())
+        source = " ".join(str(raw.get("source") or "").split())
+        try:
+            price = float(raw.get("price", 0))
+        except (TypeError, ValueError):
+            return False
+        return (
+            len(title) > 5
+            and bool(source)
+            and price > 0
+            and (source not in SCHEDULE_REQUIRED_SOURCES or has_structured_departure_dates(raw))
+        )
+
+    deduped = [r for r in deduped if is_quality_candidate(r)]
     print(f"[过滤] 有效数据: {len(deduped)}条")
 
     prefetch_image_cache(deduped)

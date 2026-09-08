@@ -25,7 +25,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install OSM extractor
-        run: pip install osmium
+        run: python -m pip install --disable-pip-version-check --no-input osmium
 
       - name: Build regional OSM POI index
         run: python -u scripts/osm_poi_index.py
