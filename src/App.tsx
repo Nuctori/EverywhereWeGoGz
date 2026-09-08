@@ -85,6 +85,7 @@ function App() {
             <div className="text-xs leading-6 text-stone-400 md:text-right">
               <p>覆盖：假日通 · 广州去旅行 · 康辉 · 暴走村 · 广之旅 · 广东中旅 · 品途 · 天涯户外</p>
               <p>© 2024 老广去边度 · 让线路信息更好读</p>
+              <a className="mt-1 inline-block text-orange-700 hover:underline" href="mailto:feedback@nuctori.github.io?subject=线路反馈">没找到合适的团？告诉我们</a>
             </div>
           </div>
         </footer>

@@ -1,5 +1,6 @@
 // 统一加载态/错误态/就绪态、移动端 Sheet vs 桌面端 Dialog
 import type { DayItinerary, ResolvedTour, TourSummary } from '@/types/tour';
+import { useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { resolveSourceDetailUrl } from '@/lib/source-detail-url';
 import {
@@ -102,6 +103,7 @@ export function TourDetailModal({
   loading = false,
   onClose,
 }: TourDetailModalProps) {
+  const [copied, setCopied] = useState(false);
   const isMobile = useIsMobile();
   const tour = resolvedTour ?? summaryTour;
   if (!tour) return null;
@@ -125,6 +127,10 @@ export function TourDetailModal({
   const openExternalLink = (url: string) => {
     if (!url) return;
     window.open(url, '_blank', 'noopener,noreferrer');
+  };
+  const copyShareLink = async () => {
+    const url = window.location.href;
+    try { await navigator.clipboard.writeText(url); setCopied(true); window.setTimeout(() => setCopied(false), 1800); } catch { /* clipboard unavailable */ }
   };
 
   // 过滤管道：逐一清洗行程/费用/退改/备注字段，移除爬虫遗留占位文本（仅过滤不修改原始数据）
@@ -531,6 +537,9 @@ export function TourDetailModal({
         onClick={() => openExternalLink(searchUrl)}
       >
         <Search className="w-4 h-4 mr-2" />打开平台搜索
+      </Button>
+      <Button variant="outline" size="lg" className={cn(isMobile && 'h-11 rounded-2xl')} onClick={copyShareLink}>
+        {copied ? '已复制链接' : '分享线路'}
       </Button>
       {isMobile && (
         <Button variant="outline" className="h-11 rounded-2xl" size="lg" onClick={onClose}>

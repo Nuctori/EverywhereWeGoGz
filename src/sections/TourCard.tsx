@@ -9,6 +9,7 @@ import {
   Calendar,
   Clock,
   Eye,
+  Heart,
   Footprints,
   MapPin,
   Mountain,
@@ -24,6 +25,8 @@ interface TourCardProps {
   recommendationRank?: number;
   recommendationTier?: 'ai-detailed' | 'ai-brief' | 'local-supplement';
   recommendationSignals?: string[];
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
 }
 
 export const TourCard = memo(function TourCard({
@@ -32,6 +35,8 @@ export const TourCard = memo(function TourCard({
   recommendationReason,
   recommendationTier,
   recommendationSignals,
+  isFavorite = false,
+  onToggleFavorite,
 }: TourCardProps) {
   const hasImage = tour.images && tour.images.length > 0;
   // 图片不可用时（含模板占位图或加载失败），用 getFallbackImage 生成来源占位图冒底。
@@ -44,6 +49,7 @@ export const TourCard = memo(function TourCard({
   const destinationLabel = getReadableDestination(tour);
   const departureDateLabel = getDepartureDateBadgeLabel(tour);
   const isExpiredBadge = departureDateLabel === '班期已过';
+  const qualitySignals = [tour.departureDate, tour.destination, tour.transportType, tour.accommodationLevel, tour.meals].filter((value) => Boolean(value?.trim())).length;
 
   return (
     <Card
@@ -68,6 +74,7 @@ export const TourCard = memo(function TourCard({
         <div className="absolute left-4 top-4 rounded-full border border-white/85 bg-white/96 px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-stone-800 shadow-[0_8px_24px_rgba(15,23,42,0.18)] ring-1 ring-black/6 backdrop-blur-md">
           {tour.source}
         </div>
+        {onToggleFavorite && <button type="button" aria-label={isFavorite ? '取消收藏' : '收藏线路'} onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-stone-600 shadow-sm backdrop-blur hover:bg-white"><Heart className={`h-4 w-4 ${isFavorite ? 'fill-orange-500 text-orange-500' : ''}`} /></button>}
         {tour.discountRate && tour.discountRate > 0 && (
           <div className="absolute bottom-4 right-4 rounded-full border border-white/85 bg-white/96 px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-stone-800 shadow-[0_8px_24px_rgba(15,23,42,0.18)] ring-1 ring-black/6 backdrop-blur-md">
             参考降价 {tour.discountRate}%
@@ -126,6 +133,9 @@ export const TourCard = memo(function TourCard({
         )}
 
         <div className="mt-3 flex flex-wrap gap-1.5 max-sm:gap-2">
+          <Badge variant="secondary" className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-normal text-emerald-700 hover:bg-emerald-50">
+            信息 {qualitySignals >= 5 ? '完整' : qualitySignals >= 3 ? '部分完整' : '待补充'}
+          </Badge>
           {tags.map((tag) => (
             <Badge
               key={tag}

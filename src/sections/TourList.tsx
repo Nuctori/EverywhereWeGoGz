@@ -29,6 +29,7 @@ import {
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { computePriceStats, sliderToPrice, priceToSlider } from '@/lib/price-slider';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { trackEvent } from '@/lib/analytics';
 import {
   Select,
   SelectContent,
@@ -506,6 +507,9 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const viewVersionRef = useRef(0);
 // filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('tour-favorites') || '[]')); } catch { return new Set(); }
+  });
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
   const [aiRecommendationResult, setAiRecommendationResult] =
@@ -1084,7 +1088,21 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   }, []);
 
 // 点击卡片后调用 selectTour 异步加载详情，触发 TourDetailModal
-  const handleCardClick = (tour: TourSummary) => selectTour(tour);
+  const handleCardClick = (tour: TourSummary) => {
+    try {
+      const recent = JSON.parse(localStorage.getItem('tour-recent') || '[]').filter((id: string) => id !== tour.id);
+      localStorage.setItem('tour-recent', JSON.stringify([tour.id, ...recent].slice(0, 12)));
+    } catch { /* ignore storage failures */ }
+    trackEvent('tour_detail_open', { tourId: tour.id, source: tour.source });
+    selectTour(tour);
+  };
+  const toggleFavorite = (tour: TourSummary) => setFavoriteIds((current) => {
+    const next = new Set(current);
+    if (next.has(tour.id)) next.delete(tour.id); else next.add(tour.id);
+    try { localStorage.setItem('tour-favorites', JSON.stringify([...next])); } catch { /* ignore */ }
+    trackEvent(next.has(tour.id) ? 'tour_favorite_add' : 'tour_favorite_remove', { tourId: tour.id });
+    return next;
+  });
 
   const resetFilters = () => {
     setFilters(DEFAULT_FILTERS);
@@ -1821,6 +1839,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                   recommendationRank={recommendation?.rank}
                   recommendationTier={recommendation?.recommendationTier}
                   recommendationSignals={recommendation?.matchedSignals}
+                  isFavorite={favoriteIds.has(tour.id)}
+                  onToggleFavorite={() => toggleFavorite(tour)}
                 />
               );
             })}
