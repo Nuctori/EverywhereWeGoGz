@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-07T19:14:13.745Z",
+  "generatedAt": "2026-09-08T22:48:01.410Z",
   "latestUpdatedAt": "2026-09-05T07:49:38.344733",
   "totalRecords": 3695,
   "listRecords": 3695,
@@ -53,7 +53,7 @@
     },
     "geoPlaces": {
       "path": "data/geo-places.json",
-      "size": 256058
+      "size": 255361
     },
     "mapIndex": {
       "path": "data/tour-map-index.json",
@@ -65,8 +65,8 @@
     },
     "mapPlaceCards": {
       "path": "data/tour-map-place-cards/",
-      "files": 422,
-      "chunks": 469
+      "files": 421,
+      "chunks": 468
     }
   }
 }

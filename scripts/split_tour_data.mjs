@@ -406,8 +406,6 @@ for (const staleFile of existingDetailFiles) {
   }
 }
 
-writeTextFileWithRetry(listPath, compactJson(listTours));
-
 const mapCardFields = [
   'id',
   'sourceId',
@@ -453,6 +451,61 @@ const tourMapIndex = listTours.map((tour) => {
     status: tour.geo?.status || 'unmapped',
   };
 });
+
+// 同名同城市同级且坐标重合（<50m）的地点合一：geocoder 对同一 POI 的两次解析
+// 可能给出不同 locality 注记（肇庆星酒店：星湖社区 vs 城东街道），而 placeId
+// 哈希含 locality，同一酒店被拆成两个重叠标记、线路各挂一半。链式分店同名但
+// 坐标不同不会误合；country/city 层级孪生（如新加坡）级别不同也不在合并范围。
+function pointDistanceMeters(left, right) {
+  const rad = Math.PI / 180;
+  const dLat = (right.latitude - left.latitude) * rad;
+  const dLng = (right.longitude - left.longitude) * rad;
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(left.latitude * rad) * Math.cos(right.latitude * rad) * Math.sin(dLng / 2) ** 2;
+  return 6371000 * 2 * Math.asin(Math.sqrt(a));
+}
+const canonicalPlaceId = new Map();
+{
+  const coordinateTwins = new Map();
+  for (const place of placeMap.values()) {
+    const key = [place.country, place.province, place.city, place.normalizedName || place.name, place.level].join('|');
+    if (!coordinateTwins.has(key)) coordinateTwins.set(key, []);
+    coordinateTwins.get(key).push(place);
+  }
+  for (const members of coordinateTwins.values()) {
+    // 按 placeId 取代表：输入注记抖动时合并结果保持稳定，不随 tourCount 翻转
+    const sorted = [...members].sort((left, right) => left.placeId.localeCompare(right.placeId));
+    const representative = sorted[0];
+    for (const extra of sorted.slice(1)) {
+      if (pointDistanceMeters(representative, extra) > 50) continue;
+      canonicalPlaceId.set(extra.placeId, representative.placeId);
+      for (const roleKey of ['tourIds', 'departureTourIds']) {
+        for (const tourId of extra[roleKey]) {
+          if (!representative[roleKey].includes(tourId)) representative[roleKey].push(tourId);
+        }
+      }
+      if (representative.confidence !== extra.confidence) representative.confidence = 'medium';
+      placeMap.delete(extra.placeId);
+    }
+  }
+}
+if (canonicalPlaceId.size > 0) {
+  // 线路自带的 geo.placeId 与权威挂载表必须同步重映射，否则 tours-list 仍指向
+  // 已合并的旧地点，geo 层守卫（test_geo_data_layer）会对不上 geo-places。
+  for (const tour of listTours) {
+    for (const role of ['departure', 'destination']) {
+      const point = tour.geo?.[role];
+      if (!point) continue;
+      point.placeId = canonicalPlaceId.get(point.placeId) ?? point.placeId;
+    }
+  }
+  for (const entry of tourMapIndex) {
+    if (entry.departurePlaceId) entry.departurePlaceId = canonicalPlaceId.get(entry.departurePlaceId) ?? entry.departurePlaceId;
+    if (entry.destinationPlaceId) entry.destinationPlaceId = canonicalPlaceId.get(entry.destinationPlaceId) ?? entry.destinationPlaceId;
+  }
+}
+// tours-list 的写出必须在地点规范化之后：geo.placeId 要以合并后的规范地点为准
+writeTextFileWithRetry(listPath, compactJson(listTours));
 
 const geoPlaces = [...placeMap.values()]
   .map((place) => {

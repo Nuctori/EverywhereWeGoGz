@@ -15,6 +15,7 @@
     "data:split": "node scripts/split_tour_data.mjs",
     "data:images:webp": "node scripts/optimize_image_cache.mjs",
     "audit:data-integrity": "node scripts/audit_data_integrity.mjs",
+    "audit:map-place-consistency": "node scripts/audit_map_place_consistency.mjs",
     "audit:data-integrity:rules": "node scripts/test_audit_data_integrity_rules.mjs",
     "audit:crawler-syntax": "node scripts/test_crawler_syntax.mjs",
     "report:destination-mining": "python scripts/report_destination_mining.py",
