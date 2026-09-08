@@ -44,6 +44,52 @@ for (const jobName of [
   mustInclude(jobName, `expected workflow job ${jobName} to exist`);
 }
 
+// Each crawl job feeds the majority gate through an explicit job output. Keep
+// this contract tested because step outputs are not visible through
+// needs.<job>.outputs until the job maps them explicitly.
+for (const jobName of [
+  'crawl-jrt365:',
+  'crawl-saihuitong:',
+  'crawl-kanghui:',
+  'crawl-pintu:',
+  'crawl-gzl-api:',
+  'crawl-outdoors:',
+  'crawl-http-aggregate:',
+]) {
+  const start = workflow.indexOf(jobName);
+  const nextJob = [
+    'crawl-jrt365:',
+    'crawl-saihuitong:',
+    'crawl-kanghui:',
+    'crawl-pintu:',
+    'crawl-gzl-api:',
+    'crawl-outdoors:',
+    'crawl-http-aggregate:',
+    'crawl-gate:',
+    'update-and-deploy:',
+    'dispatch-weekly-wechat-article-fallback:',
+  ].filter((candidate) => candidate !== jobName)
+    .map((candidate) => workflow.indexOf(`\n  ${candidate}`))
+    .filter((index) => index > start)
+    .sort((a, b) => a - b)[0];
+  const next = nextJob ?? workflow.length;
+  const job = workflow.slice(start, next > start ? next : workflow.length);
+  assert.ok(job.includes('outputs:\n      ok: ${{ steps.record-outcome.outputs.ok }}'), `${jobName} must expose crawl gate output`);
+  assert.ok(job.includes('id: record-outcome'), `${jobName} must assign an id to its outcome step`);
+}
+
+const httpStart = workflow.indexOf('crawl-http-aggregate:');
+const fallbackStart = workflow.indexOf('dispatch-weekly-wechat-article-fallback:');
+assert.ok(httpStart > -1 && fallbackStart > httpStart, 'expected HTTP aggregate job before fallback job');
+assert.ok(
+  workflow.slice(httpStart, fallbackStart).includes('- name: Record HTTP aggregate outcome'),
+  'expected HTTP aggregate outcome recording to remain in the crawl job',
+);
+assert.ok(
+  !workflow.slice(fallbackStart).includes('steps.crawl.outcome'),
+  'fallback job must not reference the crawl step from another job',
+);
+
 for (const stepName of [
   'Crawl JRT365 full',
   'Crawl Saihuitong full',

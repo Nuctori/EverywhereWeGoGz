@@ -58,6 +58,8 @@ jobs:
   crawl-jrt365:
     runs-on: ubuntu-latest
     needs: preflight
+    outputs:
+      ok: ${{ steps.record-outcome.outputs.ok }}
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -88,6 +90,7 @@ jobs:
         run: python -u scripts/crawl_jrt365_full.py
 
       - name: Record JRT365 outcome
+        id: record-outcome
         if: always()
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
@@ -108,6 +111,8 @@ jobs:
   crawl-saihuitong:
     runs-on: ubuntu-latest
     needs: preflight
+    outputs:
+      ok: ${{ steps.record-outcome.outputs.ok }}
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -136,6 +141,7 @@ jobs:
           if-no-files-found: error
 
       - name: Record Saihuitong outcome
+        id: record-outcome
         if: always()
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
@@ -150,6 +156,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: preflight
+    outputs:
+      ok: ${{ steps.record-outcome.outputs.ok }}
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -178,6 +186,7 @@ jobs:
           if-no-files-found: error
 
       - name: Record Kanghui outcome
+        id: record-outcome
         if: always()
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
@@ -191,6 +200,8 @@ jobs:
   crawl-pintu:
     runs-on: ubuntu-latest
     needs: preflight
+    outputs:
+      ok: ${{ steps.record-outcome.outputs.ok }}
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -219,6 +230,7 @@ jobs:
           if-no-files-found: error
 
       - name: Record Pintu outcome
+        id: record-outcome
         if: always()
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
@@ -232,6 +244,8 @@ jobs:
   crawl-gzl-api:
     runs-on: ubuntu-latest
     needs: preflight
+    outputs:
+      ok: ${{ steps.record-outcome.outputs.ok }}
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -260,6 +274,7 @@ jobs:
           if-no-files-found: error
 
       - name: Record GZL API outcome
+        id: record-outcome
         if: always()
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
@@ -273,6 +288,8 @@ jobs:
   crawl-outdoors:
     runs-on: ubuntu-latest
     needs: preflight
+    outputs:
+      ok: ${{ steps.record-outcome.outputs.ok }}
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -301,6 +318,7 @@ jobs:
           if-no-files-found: error
 
       - name: Record Outdoors outcome
+        id: record-outcome
         if: always()
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
@@ -314,6 +332,8 @@ jobs:
   crawl-http-aggregate:
     runs-on: ubuntu-latest
     needs: preflight
+    outputs:
+      ok: ${{ steps.record-outcome.outputs.ok }}
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'
     steps:
       - name: Checkout
@@ -340,6 +360,17 @@ jobs:
           name: raw-http
           path: src/data/raw_http_full.json
           if-no-files-found: error
+
+      - name: Record HTTP aggregate outcome
+        id: record-outcome
+        if: always()
+        env:
+          CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
+        run: |
+          echo "ok=true" >> "$GITHUB_OUTPUT"
+          if [ "$CRAWL_OUTCOME" != "success" ]; then
+            echo "⚠️ HTTP aggregate 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          fi
 
   # 单渠道爬取失败已由各 crawl job 内部降级（continue-on-error + job 级 ok 输出）：
   # 数据真空（<4 渠道产出 raw 文件）才阻断整轮；缺失来源由 merge_data.py 沿用上一轮线路，
@@ -583,14 +614,4 @@ jobs:
               ref: context.ref.replace('refs/heads/', ''),
             });
             console.log('Dispatched weekly-wechat-article fallback using the last committed data.');
-
-      - name: Record HTTP aggregate outcome
-        if: always()
-        env:
-          CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
-        run: |
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-          if [ "$CRAWL_OUTCOME" != "success" ]; then
-            echo "⚠️ HTTP aggregate 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
-          fi
 
