@@ -171,6 +171,9 @@ export function TourDetailModal({
         <Badge variant="outline" className="border-stone-200 bg-white text-xs text-stone-600">
           {tour.source}
         </Badge>
+        <Button type="button" size="sm" className="ml-auto h-8 rounded-full bg-stone-900 px-3 text-xs hover:bg-stone-800" onClick={() => openExternalLink(sourceDetailUrl)}>
+          <ExternalLink className="mr-1.5 h-3.5 w-3.5" />去来源平台确认
+        </Button>
       </div>
 
       {(heroImage || heroFallbackImage) && (
@@ -322,7 +325,7 @@ export function TourDetailModal({
             )}
           </div>
 
-          <div className="mt-4">
+          {tour.suitableFor.length > 0 && <div className="mt-4">
             <h4 className="font-semibold text-stone-800 mb-2">适合人群</h4>
             <div className="flex flex-wrap gap-2">
               {tour.suitableFor.map((s) => (
@@ -331,7 +334,7 @@ export function TourDetailModal({
                 </Badge>
               ))}
             </div>
-          </div>
+          </div>}
 
           <div className="mt-4">
             <h4 className="font-semibold text-stone-800 mb-2">重要须知</h4>

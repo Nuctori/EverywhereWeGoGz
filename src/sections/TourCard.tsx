@@ -164,11 +164,9 @@ export const TourCard = memo(function TourCard({
 
         <div className="mt-3.5 flex items-center justify-between gap-3 border-t border-stone-100 pt-3.5 sm:mt-5 sm:pt-4">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-stone-400 max-sm:hidden">参考价格</p>
+            <p className="text-[11px] uppercase tracking-[0.18em] text-stone-400 max-sm:hidden">¥{tour.price.toLocaleString()} / 人起</p>
             <div className="mt-0.5 flex items-baseline gap-1.5 sm:mt-1">
-              <span className="text-2xl font-semibold tracking-tight text-stone-950">
-                ¥{tour.price.toLocaleString()}
-              </span>
+              <span className="text-2xl font-semibold tracking-tight text-stone-950">¥{tour.price.toLocaleString()}</span>
               {tour.originalPrice && tour.originalPrice > tour.price && (
                 <span className="text-sm text-stone-400 line-through">
                   ¥{tour.originalPrice.toLocaleString()}
@@ -176,11 +174,7 @@ export const TourCard = memo(function TourCard({
               )}
             </div>
             <p className="mt-0.5 text-xs text-stone-400 max-sm:hidden">
-              {hasReliableSingleSupplement ? (
-                <>已提供单房差说明</>
-              ) : (
-                '单人出行费用待确认'
-              )}
+              {hasReliableSingleSupplement ? '双人入住参考价 · 已提供单房差说明' : '双人入住参考价 · 单房差待确认'}
             </p>
           </div>
           <Button

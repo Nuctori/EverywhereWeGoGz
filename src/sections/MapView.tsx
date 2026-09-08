@@ -509,7 +509,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
   return (
     <>
       {!expanded && embedded && (
-        <section className="rounded-[26px] border border-stone-200/80 bg-white/78 p-3 shadow-[0_20px_50px_rgba(28,25,23,0.07)] backdrop-blur" aria-labelledby="embedded-destination-map-title">
+        <section className="hidden rounded-[26px] border border-stone-200/80 bg-white/78 p-3 shadow-[0_20px_50px_rgba(28,25,23,0.07)] backdrop-blur sm:block" aria-labelledby="embedded-destination-map-title">
           <div className="mb-2 flex items-center justify-between gap-3 px-1">
             <div className="min-w-0">
               <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-orange-600">线路目的地</p>

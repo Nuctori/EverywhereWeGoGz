@@ -333,7 +333,7 @@ const DEFAULT_FILTERS: FilterState = {
   departureDateEnd: '',
   theme: '',
   sortBy: 'hot',
-  hideExpired: false,
+  hideExpired: true,
 };
 
 const RECOMMENDED_TITLE_HINTS = [
@@ -1654,7 +1654,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
                 <SelectItem value="hot">
                   <span className="flex items-center gap-2">
                     <Flame className="w-3.5 h-3.5 text-orange-500" />
-                    推荐优先（实时价值）
+                    综合推荐
                   </span>
                 </SelectItem>
                 <SelectItem value="soon">
