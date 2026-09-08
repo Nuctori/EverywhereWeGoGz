@@ -133,9 +133,7 @@ export const TourCard = memo(function TourCard({
         )}
 
         <div className="mt-3 flex flex-wrap gap-1.5 max-sm:gap-2">
-          <Badge variant="secondary" className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-normal text-emerald-700 hover:bg-emerald-50">
-            信息 {qualitySignals >= 5 ? '完整' : qualitySignals >= 3 ? '部分完整' : '待补充'}
-          </Badge>
+          {qualitySignals < 5 && <Badge variant="secondary" className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-normal text-amber-700 hover:bg-amber-50">资料待补充</Badge>}
           {tags.map((tag) => (
             <Badge
               key={tag}

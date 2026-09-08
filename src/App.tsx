@@ -1,8 +1,8 @@
-﻿import { useState } from 'react';
+﻿import { lazy, Suspense, useState } from 'react';
 import { Header } from './sections/Header';
 import { Hero } from './sections/Hero';
 import { TourList } from './sections/TourList';
-import { MapView } from './sections/MapView';
+const MapView = lazy(() => import('./sections/MapView').then((module) => ({ default: module.MapView })));
 
 const QUICK_DESTINATIONS = [
   '广东',
@@ -73,7 +73,7 @@ function App() {
             onSearch={handleSearch}
             onAiSearch={handleAiSearch}
             quickDestinations={QUICK_DESTINATIONS}
-            map={<MapView embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} />}
+            map={<Suspense fallback={<div className="hidden sm:block h-[280px] rounded-[22px] bg-stone-100" aria-hidden="true" />}><MapView embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} /></Suspense>}
           />
           <div id="tour-list" className="scroll-mt-24">
             <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} />
