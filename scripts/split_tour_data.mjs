@@ -187,7 +187,31 @@ const listFields = new Set([
   'boarding',
 ]);
 
-const tours = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+// tours.json 已超 GitHub 100MB 单文件上限不再入库：缺失时从 tours-list +
+// tour-details 分片重建等价目录（与 merge_data 的增量缓存重建同一套语义）。
+let tours;
+let toursFromShards = false;
+if (fs.existsSync(sourcePath)) {
+  tours = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+} else {
+  toursFromShards = true;
+  const listPath = path.join(dataDir, 'tours-list.json');
+  const entries = JSON.parse(fs.readFileSync(listPath, 'utf8'));
+  tours = entries.map((entry) => {
+    const item = { ...entry };
+    delete item.page;
+    const shardPath = path.join(detailsDir, `${entry.id}.json`);
+    if (entry.id && fs.existsSync(shardPath)) {
+      try {
+        Object.assign(item, JSON.parse(fs.readFileSync(shardPath, 'utf8')), { id: entry.id });
+      } catch {
+        /* 分片缺失/损坏时保留列表字段 */
+      }
+    }
+    return item;
+  });
+  process.stderr.write(`tours.json missing, rebuilt ${tours.length} tours from shards\n`);
+}
 
 function isInvalidImage(value) {
   const image = String(value || '').trim();
@@ -359,7 +383,10 @@ for (const tour of tours) {
 }
 
 if (sanitizedImages > 0 || normalizedDestinations > 0 || normalizedSourceLogos > 0) {
-  fs.writeFileSync(sourcePath, compactJson(tours), 'utf8');
+  // tours.json 不入库后，重建态不再回写（避免在 CI 工作区复活 120MB 文件）
+  if (toursFromShards) {
+    fs.writeFileSync(sourcePath, compactJson(tours), 'utf8');
+  }
 }
 const refreshedPlaceholders = refreshExistingPlaceholderLabels();
 
@@ -626,7 +653,10 @@ if (stalePageFiles > 0) {
 }
 
 
-const sourceSize = fs.statSync(sourcePath).size;
+// 重建态没有 tours.json 文件：以重建后的紧凑序列化字节数为准
+const sourceSize = fs.existsSync(sourcePath)
+  ? fs.statSync(sourcePath).size
+  : Buffer.byteLength(compactJson(tours), 'utf8');
 const listSize = fs.statSync(listPath).size;
 const detailFiles = fs.readdirSync(detailsDir).filter((file) => file.endsWith('.json'));
 const detailSize = detailFiles.reduce((total, file) => {
