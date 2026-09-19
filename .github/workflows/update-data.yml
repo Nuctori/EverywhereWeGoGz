@@ -175,21 +175,32 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Python dependencies
-        run: pip install requests beautifulsoup4 lxml
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
 
-      - name: Crawl Kanghui full
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium --with-deps
+
+      # gz.cctpage.com 死站后 (2026-08)，康辉产品迁移至 m.cct.cn；
+      # 旧 crawl_kanghui_full.py 对死站空跑，改跑 cct.cn 适配爬虫。
+      - name: Crawl Kanghui cct.cn
         id: crawl
         timeout-minutes: 60
         continue-on-error: true
-        run: python -u scripts/crawl_kanghui_full.py
+        run: node scripts/crawl_kanghui_cct.mjs
 
       - name: Upload Kanghui raw data
         if: steps.crawl.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: raw-kanghui
-          path: src/data/raw_kanghui.json
+          path: src/data/raw_kanghui_cct.json
           if-no-files-found: error
 
       - name: Record Kanghui outcome
@@ -516,6 +527,26 @@ jobs:
           name: raw-http
           path: src/data
 
+      - name: Install Playwright browser for boarding render
+        run: npx playwright install chromium --with-deps
+
+      - name: Prepare boarding-point render targets
+        run: python -u scripts/enrich_boarding_points.py --prepare-urls
+
+      - name: Render boarding-point detail pages
+        # 尽力而为：反爬升级/渲染超时只影响本轮增量，已入库的 boarding-points
+        #（随仓库提交）会由 merge_with_previous 与 checkout 内容兜底。
+        continue-on-error: true
+        timeout-minutes: 90
+        run: |
+          node scripts/render_pages.mjs --in tmp/boarding_urls_gdcts.json --out tmp/gdcts_rendered.json
+          node scripts/render_pages.mjs --in tmp/boarding_urls_gzl.json --out tmp/gzl_rendered.json
+
+      - name: Collect boarding points
+        continue-on-error: true
+        timeout-minutes: 40
+        run: python -u scripts/enrich_boarding_points.py --source all
+
       - name: Merge crawled data
         run: python -u scripts/merge_data.py
 
@@ -567,6 +598,8 @@ jobs:
           console.log(`- Status: ${report.status}`);
           console.log(`- Total tours: ${report.counts?.totalTours ?? 'n/a'}`);
           console.log(`- Detail shards: ${report.counts?.detailShards ?? 'n/a'}`);
+          console.log(`- Boarding coverage: ${report.counts?.boardingCount ?? 'n/a'}`);
+          console.log(`- Activities coverage: ${report.counts?.activitiesCount ?? 'n/a'}`);
           console.log(`- Errors: ${errors.length}`);
           console.log(`- Warnings: ${warnings.length}`);
 
@@ -590,7 +623,7 @@ jobs:
       - name: Check if data changed
         id: check_changes
         run: |
-          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/geo-places.json scripts/geo-geocode-cache.json src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json public/data/image-cache
+          git add src/data/tours.ts public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/boarding-points public/data/geo-places.json scripts/geo-geocode-cache.json src/data/gzl_rendered_details.json src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_kanghui_cct.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json public/data/image-cache
           if git diff --cached --quiet; then
             echo "Data unchanged, skipping build and deploy"
             echo "changed=false" >> $GITHUB_OUTPUT

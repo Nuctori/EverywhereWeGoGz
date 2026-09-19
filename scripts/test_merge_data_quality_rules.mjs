@@ -3,11 +3,12 @@ import { spawnSync } from 'node:child_process';
 
 const script = String.raw`
 import sys
-from datetime import date
 
 sys.path.insert(0, "scripts")
 import merge_data
 
+# make_tour_key 不依赖 sourceId/URL：同一实体（source|title|price）必须折叠成同一键，
+# 无论记录带不带康辉旧站的 prodcode 字段。
 with_id = {
     "source": "康辉",
     "sourceId": "SP021374955",
@@ -22,17 +23,25 @@ url_only = {
     "price": 1999,
 }
 assert merge_data.make_tour_key(with_id) == merge_data.make_tour_key(url_only)
-assert merge_data.extract_kanghui_prodcode(url_only["url"]) == "SP021374955"
 
-today = date(2026, 7, 3)
-assert merge_data.has_only_past_departures({"departureDates": ["2026-05-06"]}, today)
-assert not merge_data.has_only_past_departures({"departureDates": ["2026-05-06", "2026-07-03"]}, today)
-assert not merge_data.has_only_past_departures({"departureDates": ["2026-07-04"]}, today)
-assert not merge_data.has_only_past_departures({"departureDates": []}, today)
-assert not merge_data.has_only_past_departures({"departureDates": ["bad-date"]}, today)
+# boarding_url_key 归一化：host 差异（www/m）折叠，query 保留（360jlb/jrt365 的实体 id 在 query）
+assert (
+    merge_data.boarding_url_key("https://www.gdcts.com/product/line/detail/id/43708")
+    == merge_data.boarding_url_key("http://m.gdcts.com/product/line/detail/id/43708")
+)
+assert (
+    merge_data.boarding_url_key("https://www.outdoors.com.cn/route/linedetail/id/1.html?did=9")
+    == "outdoors:route:1"
+)
+assert (
+    merge_data.boarding_url_key("https://m.360jlb.com/m/event?id=100")
+    != merge_data.boarding_url_key("https://m.360jlb.com/m/event?id=200")
+)
 
-assert merge_data.is_gdcts_tour({"bookingUrl": "http://m.gdcts.com/product/line/detail/id/41229"})
-assert merge_data.is_outdoors_tour({"bookingUrl": "https://www.outdoors.com.cn/route/linedetail/id/1.html"})
+# 结构化发团日期判定
+assert merge_data.has_structured_departure_dates({"departureDates": ["2026-05-06"]})
+assert not merge_data.has_structured_departure_dates({"departureDates": ["bad-date"]})
+assert not merge_data.has_structured_departure_dates({})
 `;
 
 const result = spawnSync('python', ['-c', script], {

@@ -15,10 +15,14 @@ const auditReportFile = path.join(root, 'audit', 'data-integrity-report.json');
 const rawFiles = [
   'src/data/raw_jrt365_full.json',
   'src/data/raw_saihuitong_full.json',
-  'src/data/raw_kanghui.json',
+  // raw_kanghui.json 不计入：cctpage.com 旧站死链已在 merge 的 DEAD_SOURCE_HOSTS
+  // 剔除，不再产出目录条目，计入只会让 ratio 基线失真。康辉以 raw_kanghui_cct.json 为准。
+  'src/data/raw_kanghui_cct.json',
   'src/data/raw_gdcts_full.json',
   'src/data/raw_pintu_full.json',
   'src/data/raw_gzl_api.json',
+  'src/data/raw_http_full.json',
+  'src/data/raw_outdoors_full.json',
 ];
 
 const gzlRawFile = 'src/data/raw_gzl_api.json';
@@ -30,12 +34,19 @@ const sourceRules = {
   // validates real regressions instead of stale historical counts.
   '假日通': { min: 70, ratio: 0.28, requireStructuredDates: true, allowMissing: true},
   // Records without a source/title duration are excluded by merge_data.py.
-  '康辉': { min: 800, ratio: 0.7, allowMissing: true},
+  // 2026-09-19 重建升级：康辉 cct.cn 深度挖掘成功接入全量高速 API，
+  // 优质可用产品达 3,000+ 条，基线相应提高到 2,000+ 条。
+  '康辉': { min: 2000, ratio: 0.7, allowMissing: true},
   '广东中旅': { min: 400, ratio: 0.75, allowMissing: true},
   '品途': { min: 0, ratio: 0.0, allowMissing: true },
-  '广州去旅行': { min: 20, ratio: 0.7, allowMissing: true},
+  // 360jlb 为按期活动制：旧活动过期即从列表消失，产出随轮换波动，基线留余量。
+  '广州去旅行': { min: 15, ratio: 0.5, allowMissing: true},
   '暴走村': { min: 40, ratio: 0.35, allowMissing: true},
-  '广之旅': { min: 1700, ratio: 0.7, requireStructuredDates: true, allowMissing: true},
+  // 2026-09-19 校准：可用性校验修复后，108 条 isB2cOnSale=false（页面带"下架/售罄"标记）
+  // 的死链被正确移除，真实供给 1594。旧 min:1700 按含死链的旧目录定的。
+  '广之旅': { min: 1500, ratio: 0.7, requireStructuredDates: true, allowMissing: true},
+  // 2026-09-19 新纳入：raw_outdoors_full.json 此前漏配，本次起该源参与合并与守卫。
+  '天涯户外': { min: 180, ratio: 0.6, allowMissing: true},
 };
 
 const invalidImageTokens = [
@@ -486,12 +497,34 @@ for (const tour of fullTours) {
   }
 }
 
+// 富集覆盖地板：低于阈值说明采集/解析链路某环断了（抓取失败、解析回退、
+// 数据被静默清空）。只告警不阻断——地板值约为当前覆盖的 90%。
+const MIN_BOARDING_COVERAGE = Number(process.env.AUDIT_MIN_BOARDING ?? 420);
+const MIN_ACTIVITIES_COVERAGE = Number(process.env.AUDIT_MIN_ACTIVITIES ?? 3900);
+const boardingCount = listTours.filter((tour) => tour.boarding).length;
+// tours-list.json 是精简索引（无 itinerary 字段），activities 覆盖必须看全量数据
+const activitiesCount = fullTours.filter((tour) =>
+  Array.isArray(tour.itinerary) && tour.itinerary.some((day) => (day.activities || []).length > 0)
+).length;
+if (boardingCount < MIN_BOARDING_COVERAGE) {
+  warnings.push(
+    `Boarding-point coverage dropped: ${boardingCount} tours with boarding (floor ${MIN_BOARDING_COVERAGE})`,
+  );
+}
+if (activitiesCount < MIN_ACTIVITIES_COVERAGE) {
+  warnings.push(
+    `Activities coverage dropped: ${activitiesCount} tours with itinerary activities (floor ${MIN_ACTIVITIES_COVERAGE})`,
+  );
+}
+
 console.log('Data integrity audit');
 console.log(`- total: ${fullTours.length}`);
 console.log(`- detail shards: ${detailFiles.length}`);
 console.log(`- source counts: ${JSON.stringify(outputCounts)}`);
 console.log(`- raw unique counts: ${JSON.stringify(rawCounts)}`);
 console.log(`- gzl schedule price checks: ${gzlSchedulePriceChecks}`);
+console.log(`- boarding coverage: ${boardingCount}`);
+console.log(`- activities coverage: ${activitiesCount}`);
 
 const report = {
   generatedAt: new Date().toISOString(),
@@ -508,6 +541,8 @@ const report = {
     listTours: listTours.length,
     detailShards: detailFiles.length,
     gzlSchedulePriceChecks,
+    boardingCount,
+    activitiesCount,
   },
   sourceCounts: outputCounts,
   rawUniqueCounts: rawCounts,

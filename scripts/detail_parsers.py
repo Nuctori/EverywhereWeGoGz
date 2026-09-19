@@ -6,6 +6,7 @@ from __future__ import annotations
 import re
 import threading
 import time
+from html import unescape as html_unescape
 from typing import Any
 from urllib.parse import urljoin
 
@@ -227,7 +228,14 @@ def _collect_text_from_selectors(soup: BeautifulSoup, selectors: list[str]) -> s
 
 
 def _extract_activities(text: str) -> list[str]:
-    activities = re.findall(r"【([^】]{2,30})】", text)
+    # 【】在源站文本里也用来包行程说明标签（【Travel Tips】【温馨提示】等），
+    # 只保留至少含一个 CJK 字符、且不是常见说明标签的条目。
+    blocklist = ("提示", "注意", "自费", "购物", "交通", "备注", "接站", "送站", "接机", "送机")
+    activities = [
+        marker
+        for marker in re.findall(r"【([^】]{2,30})】", text)
+        if re.search(r"[\u4e00-\u9fa5]", marker) and not any(tag in marker for tag in blocklist)
+    ]
     return _dedupe(activities)[:6]
 
 
@@ -878,13 +886,128 @@ def _parse_jrt365_detail(raw: dict[str, Any]) -> dict[str, Any]:
 
 
 # ??????????????????????????
+def _parse_cct_detail(raw: dict[str, Any]) -> dict[str, Any]:
+    """康辉新站 (m.cct.cn/dujia/{id}.html) 详情解析。
+
+    页面服务端渲染：详细行程为 "第N天 标题 描述" 连续块，费用包含/不含为独立小节。
+    """
+    detail = empty_detail()
+    text, _ = _fetch_text(raw["url"])
+    # 去 script/style 后取纯文本，按 天 标题分块
+    text = re.sub(r"<script[\s\S]*?</script>", "", text)
+    text = re.sub(r"<style[\s\S]*?</style>", "", text)
+    plain = re.sub(r"<[^>]+>", "\n", text)
+    plain = html_unescape(plain)
+    plain = re.sub(r"[ \t\u3000]+", " ", plain)
+    plain = re.sub(r"\n{2,}", "\n", plain)
+
+    matches = list(re.finditer(r"第\s*(\d+)\s*天", plain))
+    if matches:
+        itinerary: list[dict[str, Any]] = []
+        for index, match in enumerate(matches):
+            day = int(match.group(1))
+            start = match.start()
+            end = matches[index + 1].start() if index + 1 < len(matches) else _find_section_end(plain, match.end())
+            chunk = plain[start:end].strip()
+            chunk = re.sub(r"^第\s*\d+\s*天\s*", "", chunk).strip()
+            lines = [line.strip() for line in chunk.splitlines() if line.strip()]
+            title_suffix = lines[0].strip("：: ") if lines else ""
+            body = "\n".join(lines[1:]).strip() if len(lines) > 1 else ""
+            description = body or title_suffix
+            itinerary.append(
+                {
+                    "day": day,
+                    "title": title_suffix or f"第{day}天",
+                    "description": description[:2400],
+                    "activities": _extract_activities(chunk),
+                }
+            )
+        # 末尾块可能吞进费用小节，截掉
+        detail["itinerary"] = itinerary
+    if not detail["itinerary"]:
+        return detail
+
+    detail["inclusions"] = _extract_cct_section(plain, "费用包含")
+    detail["exclusions"] = _extract_cct_section(plain, "费用不含")
+    return detail
+
+
+def _find_section_end(plain: str, search_from: int) -> int:
+    """末尾行程块的边界：费用包含/费用不含/预订须知等小节起点。"""
+    ends = [plain.find(kw, search_from) for kw in ("费用包含", "费用不含", "预订须知", "费用说明")]
+    ends = [e for e in ends if e > 0]
+    return min(ends) if ends else len(plain)
+
+
+def _extract_cct_section(plain: str, label: str) -> list[str]:
+    """取 "费用包含/费用不含" 小节并按编号条目拆分。"""
+    start = plain.find(label)
+    if start < 0:
+        return []
+    rest = plain[start + len(label):]
+    ends = [rest.find(kw) for kw in ("费用包含", "费用不含", "预订须知") if rest.find(kw) > 0]
+    body = rest[: min(ends)] if ends else rest
+    body = body.strip()
+    if not body:
+        return []
+    parts = re.split(r"\n(?=\d+[、.])", body)
+    if len(parts) <= 1:
+        parts = re.split(r"(?=\d+[、.])", body)
+    return [p.strip() for p in parts if p.strip()][:20]
+
+
+def parse_rendered_detail(text: str) -> dict[str, Any]:
+    """从 render_pages.mjs 渲染出的页面可见文本解析详情（gzl 短线富集用）。
+
+    渲染文本无 DOM 结构，走两条纯文本路径：
+    第N天分块出行程（含 activities/餐食/住宿），费用包含/不含等标签小节走
+    _apply_section_fields。文本由 enrich_boarding_points.py 顺带解析入缓存，
+    不额外产生抓取量。
+
+    注意：gzl 页面顶部有 "D1 标题" 式行程概要与 D1-D5 页签，会产出只有标题
+    的伪日程块——这里按"有实质内容"过滤，同一天多次出现保留描述最全的。
+    """
+    detail = empty_detail()
+    if not text:
+        return detail
+
+    def content_len(item: dict[str, Any]) -> int:
+        return (
+            len(item.get("description") or "")
+            + 40 * len(item.get("activities") or [])
+            + 20 * len(item.get("meals") or [])
+            + (20 if item.get("accommodation") else 0)
+        )
+
+    by_day: dict[int, dict[str, Any]] = {}
+    for item in _parse_itinerary_from_text(text):
+        has_body = any(
+            (item.get(field) for field in ("description", "activities", "meals", "accommodation")),
+        )
+        if not has_body:
+            continue
+        day = int(item.get("day") or 0)
+        if day not in by_day or content_len(item) > content_len(by_day[day]):
+            by_day[day] = item
+    detail["itinerary"] = [by_day[day] for day in sorted(by_day)]
+    _apply_section_fields(detail, text)
+    return detail
+
+
 def fetch_detail_data(raw: dict[str, Any]) -> dict[str, Any]:
     source = raw.get("source", "")
     try:
         if source == "品途":
             return _parse_pintu_detail(raw)
         if source == "康辉":
-            return _parse_kanghui_detail(raw)
+            url = str(raw.get("url") or "")
+            if "cct.cn" in url:
+                # 新站适配 (crawl_kanghui_cct.mjs)：m.cct.cn 服务端渲染，可解析。
+                return _parse_cct_detail(raw)
+            # 旧站 gz.cctpage.com：证书主机名不匹配（SSL hostname mismatch），
+            # HTTPS 必然失败。819 条逐条重试会让整轮合并空转数分钟，故直接
+            # 返回空详情：raw 列表字段仍进目录，可用性校验标记其死链状态。
+            return empty_detail()
         if source == "广东中旅":
             return _parse_gdcts_detail(raw)
         if source == "广之旅":

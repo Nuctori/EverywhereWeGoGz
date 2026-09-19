@@ -30,6 +30,7 @@ SOURCE_COLORS = {
     '广之旅': '#FF006E',
     '广东中旅': '#8338EC',
     '品途': '#3A86FF',
+    '天涯户外': '#2A9D8F',
 }
 
 PLACEHOLDER_LABEL = '老广精选线路'
@@ -47,12 +48,151 @@ RAW_FILE_PRIORITIES = {
     "raw_jrt365.json": 20,
     "raw_http_full.json": 10,
     "raw_kanghui.json": 10,
+    "raw_kanghui_cct.json": 10,
     "raw_pintu_full.json": 10,
     "raw_saihuitong_full.json": 10,
     "raw_gzl_api.json": 10,
+    "raw_gdcts_full.json": 10,
+    "raw_outdoors_full.json": 10,
 }
 JRT365_HOST_TOKEN = "jrt365.com"
 SCHEDULE_REQUIRED_SOURCES = {"假日通", "广之旅"}
+
+# 上车点采集产物（scripts/enrich_boarding_points.py 写出），按详情页 URL 索引
+BOARDING_DIR = Path(__file__).resolve().parent.parent / "public" / "data" / "boarding-points"
+_BOARDING_CACHE: dict[str, dict] | None = None
+
+
+# outdoors.com.cn 的 did 是"每期日程"id，随班期滚动重生成；稳定的实体是
+# linedetail/id/{线路id}。上车点属于线路而非某一期，故该源按线路 id 归键，
+# 否则源站数据一刷新（did 全变），已采集的上车点索引就全部失配。
+OUTDOORS_ROUTE_RE = re.compile(r"/route/linedetail/id/(\d+)")
+
+
+def boarding_url_key(url: str) -> str:
+    """URL 归一化键。
+
+    同一线路在不同源里 host 不同（详情页抓的是 www.gdcts.com，目录里存 m.gdcts.com），
+    故只取 pathname+query 作为键，末尾斜杠与大小写做统一；outdoors 额外折叠到线路 id。
+    query 必须保留：360jlb (/m/event?id=) 与 jrt365 (?groupno=) 的实体 id 在 query 里，
+    只取 path 会把整站折叠成一个键，导致上车点跨线路串挂。
+    """
+    text = str(url or "").strip()
+    if not text:
+        return ""
+    parsed = urlparse(text)
+    path = (parsed.path or "").rstrip("/").lower()
+    query = parsed.query
+    if "outdoors.com.cn" in (parsed.netloc or "").lower():
+        route = OUTDOORS_ROUTE_RE.search(path)
+        if route:
+            return f"outdoors:route:{route.group(1)}"
+    key = path or text.lower()
+    if query:
+        key = f"{key}?{query.lower()}"
+    return key
+
+
+# 已确认永久死亡的源站主机（站点下线/迁移，非瞬时故障）。
+# 命中的记录在加载阶段直接丢弃——这些 URL 的 SSL/404 是永久性的，
+# 靠可用性校验的 network_error 保留策略只会让死链长期占据目录。
+# 原始 raw 文件仍保留在 git 中作为历史数据，此处只是不再产出目录条目。
+DEAD_SOURCE_HOSTS = {
+    "cctpage.com",   # 康辉旧站：证书已改挂他域，租户被 SaaS 平台下架 (2026-08)
+}
+
+
+def _is_dead_host_record(item: dict) -> bool:
+    try:
+        host = (urlparse(str(item.get("url") or "")).netloc or "").lower()
+    except ValueError:
+        return False
+    return any(host == h or host.endswith("." + h) for h in DEAD_SOURCE_HOSTS)
+
+
+def drop_dead_host_records(data, fname: str) -> list:
+    if not isinstance(data, list):
+        return data
+    kept = [item for item in data if not (isinstance(item, dict) and _is_dead_host_record(item))]
+    dropped = len(data) - len(kept)
+    if dropped:
+        print(f"[{fname}] 剔除死源主机记录 {dropped} 条 (DEAD_SOURCE_HOSTS)")
+    return kept
+
+
+def normalize_kanghui_cct(data) -> list[dict]:
+    """康辉 cct.cn 新格式 → 统一 raw 字段。
+
+    crawl_kanghui_cct.mjs 输出 bookingUrl/duration("5天")/price("1080")字符串/img/tags；
+    管线其余环节期望 url/days(int)/price 可转 float/img/tags。
+    """
+    normalized: list[dict] = []
+    for item in data if isinstance(data, list) else []:
+        if not isinstance(item, dict):
+            continue
+        days = 0
+        match = re.search(r"(\d+)", str(item.get("duration") or item.get("days") or ""))
+        if match:
+            days = int(match.group(1))
+        normalized.append(
+            {
+                "source": item.get("source") or "康辉",
+                "sourceId": item.get("sourceId"),
+                "title": str(item.get("title") or "").strip(),
+                "price": item.get("price"),
+                "url": str(item.get("bookingUrl") or item.get("url") or "").strip(),
+                "days": days,
+                "departureDates": [],
+                "destination": str(item.get("destination") or "").strip(),
+                "img": str(item.get("img") or "").strip(),
+                "tags": item.get("tags") if isinstance(item.get("tags"), list) else [],
+            }
+        )
+    return normalized
+
+
+def load_boarding_index() -> dict[str, dict]:
+    """加载上车点索引：{URL 归一化键: {points, raw, summary}}。"""
+    global _BOARDING_CACHE
+    if _BOARDING_CACHE is not None:
+        return _BOARDING_CACHE
+    index: dict[str, dict] = {}
+    if BOARDING_DIR.exists():
+        for path in sorted(BOARDING_DIR.glob("*.json")):
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            for url, item in (payload.get("items") or {}).items():
+                key = boarding_url_key(url)
+                if key:
+                    index.setdefault(key, item)
+    _BOARDING_CACHE = index
+    return index
+
+
+def boarding_for(raw: dict) -> dict | None:
+    """按源站详情页 URL 取上车点。无数据返回 None（长线多在机场集合，本就没有）。"""
+    index = load_boarding_index()
+    if not index:
+        return None
+    key = boarding_url_key(raw.get("url"))
+    if not key:
+        return None
+    item = index.get(key)
+    if not item:
+        return None
+    points = item.get("points") or []
+    raw_text = str(item.get("raw") or "").strip()
+    if not points and not raw_text:
+        return None
+    payload: dict = {"points": points}
+    if raw_text:
+        payload["raw"] = raw_text
+    summary = str(item.get("summary") or "").strip()
+    if summary:
+        payload["summary"] = summary
+    return payload
 
 
 def stable_hash(value: str) -> int:
@@ -717,7 +857,7 @@ def raw_to_tour(raw, id_counter, detail=None):
         "destination": destination,
         **geo_fields,
         "duration": days or 2,
-        "price": int(price),
+        "price": int(round(float(price))),
         "originalPrice": original_price,
         "priceUnit": "人",
         "departureDate": departure_date,
@@ -764,6 +904,7 @@ def raw_to_tour(raw, id_counter, detail=None):
         "language": str(raw.get("language") or "").strip(),
         "departureDates": departure_dates,
         "hotDepartureDates": departure_dates[:4],
+        "boarding": boarding_for(raw),
         "createdAt": datetime.now().isoformat(),
         "updatedAt": datetime.now().isoformat(),
     }
@@ -915,6 +1056,53 @@ def load_detail_results(deduped, existing_tours):
     return detail_results
 
 
+def apply_gzl_rendered_details(detail_results, deduped):
+    """广之旅渲染详情缓存（enrich_boarding_points.py 顺带产物）优先于静态解析详情。
+
+    gzl 详情页正文由 JS 渲染，requests 静态解析拿不到完整行程；每周为上车点
+    渲染的详情文本里行程/费用结构完整得多。行程天数不少于既有详情时才整段
+    替换（避免渲染截断造成降级），小节字段仅在渲染侧有内容时覆盖。
+    """
+    path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "src", "data", "gzl_rendered_details.json")
+    )
+    if not os.path.exists(path):
+        return detail_results
+    try:
+        with open(path, encoding="utf-8") as f:
+            cache = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return detail_results
+    if not cache:
+        return detail_results
+
+    by_url = {boarding_url_key(url): entry for url, entry in cache.items()}
+    applied = 0
+    for raw in deduped:
+        if raw.get("source") != "广之旅":
+            continue
+        entry = by_url.get(boarding_url_key(str(raw.get("url") or "")))
+        if not entry:
+            continue
+        rendered = entry.get("detail") or {}
+        itinerary = rendered.get("itinerary") or []
+        if not itinerary:
+            continue
+        key = make_tour_key(raw)
+        existing = detail_results.get(key)
+        if existing and (existing.get("itinerary") or []) and len(existing["itinerary"]) > len(itinerary):
+            continue
+        merged = dict(existing or empty_detail())
+        merged["itinerary"] = itinerary
+        for field in ("inclusions", "exclusions", "optionalExpenses", "childPolicy", "cancellationPolicy", "refundPolicy"):
+            if rendered.get(field):
+                merged[field] = rendered[field]
+        detail_results[key] = merged
+        applied += 1
+    print(f"[详情] gzl 渲染详情覆盖 {applied} 条")
+    return detail_results
+
+
 def unique_availability_jobs(tours):
     grouped = {}
     for tour in tours:
@@ -1027,6 +1215,42 @@ def filter_unavailable_tours(tours):
     return apply_availability_filter(tours)
 
 
+def load_existing_tours_from_shards():
+    """tours.json 不入库后，从已提交的 tours-list + tour-details 分片重建缓存。
+
+    tours.json 已超 GitHub 100MB 单文件上限（2026-09 起不再入库）。重建条目 =
+    tours-list 列表字段 ∪ tour-details/{id}.json 详情字段，与原 tours.json 条目
+    语义一致，供增量合并、断供保护与详情缓存复用。
+    """
+    data_dir = os.path.join(os.path.dirname(__file__), "..", "public", "data")
+    list_path = os.path.abspath(os.path.join(data_dir, "tours-list.json"))
+    details_dir = os.path.abspath(os.path.join(data_dir, "tour-details"))
+    existing: dict = {}
+    try:
+        with open(list_path, "r", encoding="utf-8") as f:
+            entries = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"[existing 分片重建] tours-list.json 读取失败: {e}")
+        return existing
+    for entry in entries:
+        tour_id = entry.get("id")
+        item = dict(entry)
+        item.pop("page", None)
+        shard_path = os.path.join(details_dir, f"{tour_id}.json") if tour_id else ""
+        if tour_id and os.path.exists(shard_path):
+            try:
+                with open(shard_path, "r", encoding="utf-8") as f:
+                    shard = json.load(f)
+                item.update(shard)
+                item["id"] = tour_id
+            except (OSError, json.JSONDecodeError):
+                pass
+        key = make_tour_key(item)
+        if key and key not in existing:
+            existing[key] = item
+    return existing
+
+
 def main():
     print("=" * 60)
     print("数据合并脚本")
@@ -1048,6 +1272,9 @@ def main():
             print(f"[existing tours.json] {len(existing_tours)}条")
         except Exception as e:
             print(f"[existing tours.json] 读取失败: {e}")
+    else:
+        existing_tours = load_existing_tours_from_shards()
+        print(f"[existing tours.json] 缺失，从分片重建 {len(existing_tours)}条")
 
     # 1. 尝试读取旧备份数据 (962条)
     backup_path = os.path.join(os.path.dirname(__file__), "..", "tours_json_backup.json")
@@ -1080,9 +1307,17 @@ def main():
         "raw_jrt365_full.json",
         "raw_http_full.json",
         "raw_kanghui.json",
+        # 康辉新站 (cct.cn)：gz.cctpage.com 死站后产品迁移至此，crawl_kanghui_cct.mjs 采集。
+        # 字段与旧格式不同 (bookingUrl/duration/price字符串)，加载时统一归一化。
+        "raw_kanghui_cct.json",
         "raw_pintu_full.json",
         "raw_saihuitong_full.json",
         "raw_gzl_api.json",
+        # 天涯户外：此前漏配，导致该源从未进入目录。周边短线密集且上车点覆盖高。
+        "raw_outdoors_full.json",
+        # 广东中旅独立爬虫 (crawl_gdcts_full.py) 与 CI 的 full_crawl_v3 聚合 (raw_http_full)
+        # 双通道并存，按 source|title|price 去重兜底，与 jrt365 双文件模式一致。
+        "raw_gdcts_full.json",
     ]
     if not os.path.exists(os.path.join(data_dir, "raw_jrt365_full.json")):
         raw_files.insert(1, "raw_jrt365.json")
@@ -1097,6 +1332,9 @@ def main():
                         item for item in data
                         if item.get("source") not in {"品途", "广之旅"}
                     ]
+                if fname == "raw_kanghui_cct.json":
+                    data = normalize_kanghui_cct(data)
+                data = drop_dead_host_records(data, fname)
                 priority = RAW_FILE_PRIORITIES.get(fname, 0)
                 enriched = []
                 for item in data:
@@ -1144,6 +1382,7 @@ def main():
 
     prefetch_image_cache(deduped)
     detail_results = load_detail_results(deduped, existing_tours)
+    detail_results = apply_gzl_rendered_details(detail_results, deduped)
 
     # 转换为前端格式
     tours = []

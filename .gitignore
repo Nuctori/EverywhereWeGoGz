@@ -57,3 +57,6 @@ scripts/_url_*.log
 weekly-wechat-posts/
 *.osm.pbf
 audit/
+
+# tours.json 已超 GitHub 100MB 单文件上限，不再入库（merge 从分片重建缓存）
+public/data/tours.json

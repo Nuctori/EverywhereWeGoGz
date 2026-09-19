@@ -93,7 +93,7 @@ assert.ok(
 for (const stepName of [
   'Crawl JRT365 full',
   'Crawl Saihuitong full',
-  'Crawl Kanghui full',
+  'Crawl Kanghui cct.cn',
   'Crawl Pintu full',
   'Crawl GZL API full',
   'Crawl Outdoors full',
