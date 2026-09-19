@@ -35,6 +35,9 @@ jobs:
           python scripts/test_osm_poi_index.py
           python scripts/audit_osm_poi_index.py
 
+      - name: Rebuild tours.json from shards
+        run: node scripts/rebuild_tours_json_from_shards.mjs
+
       - name: Apply OSM POIs to tour map data
         run: |
           python -u scripts/rebuild_geo_data.py

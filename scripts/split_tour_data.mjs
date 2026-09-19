@@ -383,10 +383,7 @@ for (const tour of tours) {
 }
 
 if (sanitizedImages > 0 || normalizedDestinations > 0 || normalizedSourceLogos > 0) {
-  // tours.json 不入库后，重建态不再回写（避免在 CI 工作区复活 120MB 文件）
-  if (toursFromShards) {
-    fs.writeFileSync(sourcePath, compactJson(tours), 'utf8');
-  }
+  fs.writeFileSync(sourcePath, compactJson(tours), 'utf8');
 }
 const refreshedPlaceholders = refreshExistingPlaceholderLabels();
 
