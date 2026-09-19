@@ -5524,17 +5524,17 @@
     "provider": "photon",
     "latitude": 24.179964,
     "longitude": 113.4117018,
-    "displayName": "海螺国际大酒店 桥西路 英德市 清远市  广东省 中国",
+    "displayName": "海螺国际大酒店 帽子峰三号路 英德市 清远市  广东省 中国",
     "level": "poi",
     "locality": "清远市",
     "providerScore": 80,
     "address": {
-      "formatted": "海螺国际大酒店 桥西路 英德市 清远市  广东省 中国",
+      "formatted": "海螺国际大酒店 帽子峰三号路 英德市 清远市  广东省 中国",
       "country": "中国",
       "province": "广东省",
       "city": "清远市",
       "district": "英德市",
-      "street": "桥西路",
+      "street": "帽子峰三号路",
       "postalCode": "513000"
     }
   },
@@ -5773,6 +5773,23 @@
     "providerScore": 80,
     "address": {
       "formatted": "黄姚古镇, 黄姚镇, 昭平县, 贺州市, 广西壮族自治区, 中国"
+    }
+  },
+  "三门海景区 广西 中国": {
+    "query": "三门海景区 广西 中国",
+    "provider": "photon",
+    "latitude": 24.4092238,
+    "longitude": 107.0258365,
+    "displayName": "三门海景区  同桂 凤山县 河池市 广西壮族自治区 中国",
+    "level": "poi",
+    "locality": "凤山县",
+    "providerScore": 80,
+    "address": {
+      "formatted": "三门海景区  同桂 凤山县 河池市 广西壮族自治区 中国",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "凤山县",
+      "district": "同桂"
     }
   }
 }
