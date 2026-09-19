@@ -382,7 +382,8 @@ for (const tour of tours) {
   }
 }
 
-if (sanitizedImages > 0 || normalizedDestinations > 0 || normalizedSourceLogos > 0) {
+// 重建态（tours.json 缺失）必须落盘，供后续审计/构建步骤读取
+if (sanitizedImages > 0 || normalizedDestinations > 0 || normalizedSourceLogos > 0 || toursFromShards) {
   fs.writeFileSync(sourcePath, compactJson(tours), 'utf8');
 }
 const refreshedPlaceholders = refreshExistingPlaceholderLabels();
