@@ -8,7 +8,6 @@ for (const snippet of [
   "- cron: '33 4 1 * *'",
   'workflow_dispatch:',
   'group: tour-data-writes',
-  'pip install osmium',
   'python -u scripts/osm_poi_index.py',
   'python scripts/test_osm_poi_index.py',
   'python scripts/audit_osm_poi_index.py',
@@ -19,6 +18,14 @@ for (const snippet of [
 ]) {
   assert.ok(workflow.includes(snippet), `expected OSM POI workflow to include ${snippet}`);
 }
+assert.ok(
+  /pip install [^\n]*osmium/.test(workflow),
+  'expected OSM POI workflow to install pyosmium before building the index',
+);
+// 断言钉在"安装了 osmium"上，而不是某一种 pip 写法：工作流曾从
+// `pip install osmium` 加固为
+// `python -m pip install --disable-pip-version-check --no-input osmium`，
+// 当时这条断言没跟着改，导致 preflight 恒失败、整轮数据更新被拦在门外。
 assert.ok(!workflow.includes('.osm.pbf'), 'raw OSM extracts must not be staged or committed');
 
 console.log('OSM POI workflow audit passed');
