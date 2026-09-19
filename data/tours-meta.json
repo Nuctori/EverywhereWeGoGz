@@ -1,72 +1,72 @@
 {
-  "generatedAt": "2026-09-19T11:44:06.868Z",
-  "latestUpdatedAt": "2026-09-19T08:09:59.591996",
-  "totalRecords": 3569,
-  "listRecords": 3569,
-  "detailFiles": 3569,
+  "generatedAt": "2026-09-19T15:03:16.643Z",
+  "latestUpdatedAt": "2026-09-19T11:51:47.104374",
+  "totalRecords": 3904,
+  "listRecords": 3904,
+  "detailFiles": 3904,
   "sourceStats": {
-    "假日通": 83,
+    "假日通": 418,
     "广东中旅": 924,
     "康辉": 819,
     "广州去旅行": 27,
     "广之旅": 1716
   },
   "destinationStats": {
-    "广西": 57,
-    "其他": 828,
-    "广东": 1311,
-    "四川": 101,
-    "重庆": 7,
-    "山东": 29,
-    "湖南": 17,
-    "河南": 7,
-    "湖北": 42,
-    "贵州": 74,
-    "西藏": 46,
-    "华东": 107,
+    "广东": 1429,
+    "其他": 927,
+    "重庆": 11,
+    "山东": 38,
+    "福建": 16,
+    "四川": 105,
+    "西藏": 47,
+    "青甘": 79,
+    "湖南": 27,
+    "华东": 122,
+    "广西": 63,
+    "江西": 36,
+    "桂林": 60,
+    "贵州": 78,
+    "厦门": 40,
+    "北京": 132,
+    "云南": 174,
+    "湖北": 49,
+    "三亚": 115,
+    "张家界": 35,
+    "河南": 12,
+    "内蒙古": 32,
+    "西安": 39,
     "新疆": 120,
-    "港澳": 118,
-    "北京": 119,
-    "内蒙古": 31,
-    "西安": 38,
-    "张家界": 33,
-    "青甘": 77,
-    "江西": 30,
-    "三亚": 109,
-    "云南": 165,
-    "桂林": 56,
-    "厦门": 38,
-    "福建": 9
+    "港澳": 118
   },
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 56530262
+      "size": 66319164
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 18837593
+      "size": 21383175
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 39369320
+      "size": 46762524
     },
     "geoPlaces": {
       "path": "data/geo-places.json",
-      "size": 244730
+      "size": 266025
     },
     "mapIndex": {
       "path": "data/tour-map-index.json",
-      "size": 339966
+      "size": 369707
     },
     "mapCards": {
       "path": "data/tour-map-cards.json",
-      "size": 1491532
+      "size": 1600542
     },
     "mapPlaceCards": {
       "path": "data/tour-map-place-cards/",
-      "files": 404,
-      "chunks": 448
+      "files": 433,
+      "chunks": 479
     }
   }
 }
