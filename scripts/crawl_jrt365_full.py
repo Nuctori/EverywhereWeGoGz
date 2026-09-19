@@ -5,6 +5,7 @@
 """
 
 import re
+import html as html_mod
 import json
 import os
 import sys
@@ -251,7 +252,10 @@ def parse_listing_html(html, seen):
     img_url = img_m.group(1) if img_m else ''
     groupno = extract_groupno(href)
 
-    key = title + '|' + str(price)
+    # 去重必须按 groupno：同一条线路可以同时挂多个团期（同标题同价、不同
+    # groupno），按 title|price 去重会把多团期误杀成一条，实测 420 个在售
+    # 团号被压成 52 条。
+    key = groupno or (title + '|' + str(price))
     if key in seen:
         return None
     seen.add(key)
@@ -313,105 +317,164 @@ def extract_items_from_current_page(driver, By, seen, all_items):
         except Exception:
             pass
     return added
-def fetch():
-    print("[假日通] 全量抓取中...")
+
+
+LISTING_PATH = '/tourgroup/tourgroup_list.aspx'
+# 列表分页是普通 ASP.NET 表单提交：changepage(n) 只是把 thispage 置为 n 后
+# submit id_tjform（见列表页源码），因此纯 HTTP POST 就能翻页，不需要浏览器。
+# 字段取值必须和浏览器默认状态一致：
+#   - typex 默认选中 '1,2,5,6'（全部分类）；发空值会拿到另一种视图
+#   - ishot（仅显示推荐线路）复选框默认不勾选；发 '1' 会把目录过滤成
+#     ~40 条推荐，实测 420 个团被过滤成 40 个
+#   - imageField 是 type=image 提交按钮，浏览器发的是坐标 .x/.y 而非文字值
+LISTING_FORM_BASE = {
+    'typex': '1,2,5,6',
+    'tourname': '',
+    'tourdays': '',
+    'keyword': '',
+    'outdate': '',
+    'dwstatus': 'flash',
+    'sname': '',
+    'productname': '',
+    'salelable1': '',
+    'imageField.x': '10',
+    'imageField.y': '5',
+}
+
+
+def fetch_listing_page(session, page):
+    resp = session.post(
+        BASE_URL + LISTING_PATH,
+        data={**LISTING_FORM_BASE, 'thispage': str(page)},
+        headers={
+            'User-Agent': 'Mozilla/5.0',
+            'Referer': BASE_URL + LISTING_PATH,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        timeout=30,
+    )
+    resp.raise_for_status()
+    return decode_response_text(resp)
+
+
+def parse_total_pages(listing_html):
+    # 页数提示形如 "共：53&#12288;页"——数字与"页"之间是 HTML 实体形式的
+    # 全角空格，必须先反转义再匹配（Selenium 路径拿到的渲染文本没有这个问题）。
+    unescaped = html_mod.unescape(listing_html)
+    m = re.search(r'共：\s*(\d+)\s*页', unescaped)
+    return int(m.group(1)) if m else 1
+
+
+def extract_items_from_listing_html(listing_html, seen, all_items):
+    soup = BeautifulSoup(listing_html, 'lxml')
+    lis = soup.select('#ctl00_ContentPlaceHolder_htmlform_id_list > ul > li')
+    added = 0
+    for li in lis:
+        try:
+            item = parse_listing_html(str(li), seen)
+            if item is None:
+                continue
+            all_items.append(item)
+            added += 1
+        except Exception:
+            pass
+    return added
+
+
+def fetch_listing_http():
+    """纯 HTTP 抓列表。CI 上 Selenium 曾因页面加载超时全军覆没（runner 的
+    headless 浏览器 120s 读超时，0 条产出），而列表页本身只是表单分页，
+    用 requests 更快也更稳。返回 [] 表示这条路失败，调用方再走 Selenium。"""
+    all_items = []
+    seen = set()
+    session = requests.Session()
+    try:
+        first = session.get(
+            BASE_URL + LISTING_PATH,
+            headers={'User-Agent': 'Mozilla/5.0'},
+            timeout=30,
+        )
+        first.raise_for_status()
+        first_html = decode_response_text(first)
+        total_pages = parse_total_pages(first_html)
+        max_pages = env_int('JRT365_MAX_PAGES', 0, minimum=0, maximum=total_pages)
+        if max_pages > 0:
+            total_pages = min(total_pages, max_pages)
+        print(f'[假日通] http/all tours pages={total_pages}')
+        added = extract_items_from_listing_html(first_html, seen, all_items)
+        print(f'[假日通] http/all tours page 1/{total_pages}, added={added}, total={len(all_items)}')
+        for page in range(2, total_pages + 1):
+            listing_html = fetch_listing_page(session, page)
+            added = extract_items_from_listing_html(listing_html, seen, all_items)
+            if page % 10 == 0 or page == total_pages:
+                print(f'[假日通] http/all tours page {page}/{total_pages}, added={added}, total={len(all_items)}')
+            time.sleep(0.8)
+    except Exception as e:
+        print(f'[假日通] http listing error: {e}')
+        return []
+    return all_items
+
+
+def fetch_listing_selenium():
     try:
         from selenium.webdriver.common.by import By
 
         driver = create_webdriver()
         all_items = []
         seen = set()
+        try:
+            driver.get(BASE_URL + LISTING_PATH)
+            time.sleep(2)
 
-        categories = []
-        simple_categories = [
-            ('/tourgroup/tourgroup_list.aspx', 'all tours'),
-        ]
-
-        for path, mudidi_list, cat_name in categories:
-            for mudidi in mudidi_list:
-                try:
-                    driver.get(BASE_URL + path)
-                    time.sleep(2)
-                    driver.execute_script(f'document.getElementById("id_mudidi").value = "{mudidi}";')
-                    driver.execute_script('document.getElementById("id_tjform").submit();')
-                    time.sleep(3)
-
-                    total_pages = 1
-                    try:
-                        elems = driver.find_elements(By.XPATH, "//*[contains(text(), '共：')]")
-                        for elem in elems:
-                            text = elem.text
-                            m = re.search(r'共：\s*(\d+)\s*页', text)
-                            if m:
-                                total_pages = int(m.group(1))
-                                break
-                    except:
-                        pass
-
-                    max_pages = env_int("JRT365_MAX_PAGES", 0, minimum=0, maximum=total_pages)
-                    if max_pages > 0:
-                        total_pages = min(total_pages, max_pages)
-
-                    print(f"[假日通] {cat_name}/{mudidi} pages={total_pages}")
-
-                    for page in range(1, total_pages + 1):
-                        if page > 1:
-                            try:
-                                driver.execute_script(f'changepage({page})')
-                                time.sleep(2)
-                            except:
-                                break
-                        added = extract_items_from_current_page(driver, By, seen, all_items)
-                        if page % 10 == 0 or page == total_pages:
-                            print(f"[假日通] {cat_name}/{mudidi} page {page}/{total_pages}, added={added}, total={len(all_items)}")
-                except Exception as e:
-                    print(f"  {cat_name}/{mudidi} error: {e}")
-
-        for path, name in simple_categories:
+            total_pages = 1
             try:
-                driver.get(BASE_URL + path)
-                time.sleep(2)
+                elems = driver.find_elements(By.XPATH, "//*[contains(text(), '共：')]")
+                for elem in elems:
+                    text = elem.text
+                    m = re.search(r'共：\s*(\d+)\s*页', text)
+                    if m:
+                        total_pages = int(m.group(1))
+                        break
+            except:
+                pass
 
-                total_pages = 1
-                try:
-                    elems = driver.find_elements(By.XPATH, "//*[contains(text(), '共：')]")
-                    for elem in elems:
-                        text = elem.text
-                        m = re.search(r'共：\s*(\d+)\s*页', text)
-                        if m:
-                            total_pages = int(m.group(1))
-                            break
-                except:
-                    pass
+            max_pages = env_int("JRT365_MAX_PAGES", 0, minimum=0, maximum=total_pages)
+            if max_pages > 0:
+                total_pages = min(total_pages, max_pages)
 
-                max_pages = env_int("JRT365_MAX_PAGES", 0, minimum=0, maximum=total_pages)
-                if max_pages > 0:
-                    total_pages = min(total_pages, max_pages)
+            print(f"[假日通] selenium/all tours pages={total_pages}")
 
-                print(f"[假日通] {name} pages={total_pages}")
-
-                for page in range(1, total_pages + 1):
-                    if page > 1:
-                        try:
-                            driver.execute_script(f'changepage({page})')
-                            time.sleep(2)
-                        except:
-                            break
-
-                    added = extract_items_from_current_page(driver, By, seen, all_items)
-                    if page % 10 == 0 or page == total_pages:
-                        print(f"[假日通] {name} page {page}/{total_pages}, added={added}, total={len(all_items)}")
-            except Exception as e:
-                print(f"  {name} error: {e}")
-
-        driver.quit()
-        print(f"[假日通] 列表采集完成: {len(all_items)} 条")
-        all_items = enrich_items_with_details(all_items)
-        print(f"[假日通] 抓取完成: {len(all_items)} 条")
+            for page in range(1, total_pages + 1):
+                if page > 1:
+                    try:
+                        driver.execute_script(f'changepage({page})')
+                        time.sleep(2)
+                    except:
+                        break
+                added = extract_items_from_current_page(driver, By, seen, all_items)
+                if page % 10 == 0 or page == total_pages:
+                    print(f"[假日通] selenium/all tours page {page}/{total_pages}, added={added}, total={len(all_items)}")
+        finally:
+            driver.quit()
         return all_items
     except Exception as e:
         print(f"[假日通] Selenium error: {e}")
         return []
+
+
+def fetch():
+    print("[假日通] 全量抓取中...")
+    # 列表抓取优先走纯 HTTP；0 条（站点改版/被墙等）才降级 Selenium。
+    all_items = fetch_listing_http()
+    if not all_items:
+        print("[假日通] http 列表为空，降级 Selenium")
+        all_items = fetch_listing_selenium()
+    print(f"[假日通] 列表采集完成: {len(all_items)} 条")
+    if not all_items:
+        return []
+    all_items = enrich_items_with_details(all_items)
+    print(f"[假日通] 抓取完成: {len(all_items)} 条")
+    return all_items
 
 
 def refresh_existing():
