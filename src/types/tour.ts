@@ -61,7 +61,7 @@ export interface TourGeoPoint {
 export interface GeoPlaceIndexEntry extends TourGeoPoint {
   tourIds: string[];
   tourCount: number;
-  roles: ('departure' | 'destination' | 'stop')[];
+  roles: ('departure' | 'destination' | 'stop' | 'boarding')[];
 }
 
 export interface TourGeo {
@@ -70,6 +70,33 @@ export interface TourGeo {
   stops: TourGeoPoint[];
   status: GeoStatus;
   routeRegion?: 'local' | 'nearby-province' | 'national' | 'international' | 'unknown';
+}
+
+/**
+ * 上车点（集合点）。多个源站原文写明"统一在指定集合点上下车"/"回程统一送团地点"，
+ * 故同一份数据同时用于上车与下车筛选，不区分两份。
+ *
+ * 结构化字段仅供索引与展示；语义判断以 `TourBoarding.raw` 原文为准，
+ * 因为"增城广场"这类说法与站点实际名称（"增城中海城市广场"）不存在字面匹配关系。
+ */
+export interface BoardingPoint {
+  name: string;
+  /** 行政区，来自源站分组（"增城区：增城中海城市广场"）。 */
+  district?: string | null;
+  /** 接送门槛（"4人起接" 的 4）。低于该人数不接送，是可成行的硬条件。 */
+  quota?: string | null;
+  /** 所属城市，来自省份/城市层级前缀（"广东 广州 龙溪A"）。 */
+  city?: string | null;
+  /** 集合/发车时间，源站给出时才有。 */
+  time?: string | null;
+}
+
+export interface TourBoarding {
+  points: BoardingPoint[];
+  /** 字段原文（含接送方式、回程地点、清单外区域门槛等非站点描述），供 AI 判定。 */
+  raw?: string;
+  /** 展示用摘要，如 "珠江新城B2 等4个上车点"。 */
+  summary?: string;
 }
 
 export interface GeoResolution {
@@ -155,6 +182,7 @@ export interface TourSummary {
   meta?: TourMeta;
   dataQuality?: DataQuality;
   geo?: TourGeo;
+  boarding?: TourBoarding;
 }
 
 export interface TourIndexEntry {
@@ -432,6 +460,7 @@ export type AiRecommendationCandidate = Pick<
   | 'rating'
   | 'groupSize'
   | 'hotDepartureDates'
+  | 'boarding'
 >;
 
 export interface AiRecommendationRequest {

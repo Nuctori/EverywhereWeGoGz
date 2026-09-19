@@ -1,0 +1,13 @@
+tour_1434: OK place= country= title=【潮汕美食3天】电影《给阿嬷的情书》同款潮汕丨&ldqu
+tour_3436: OK place=五台山 country=中国 title=【典·全景】山西太原、忻州、平遥、双飞6天＊五台山＊常家
+tour_4372: OK place=新加坡 country=新加坡 title=【颂·博览】安心新加坡、马来西亚5天＊安心大红花＊南航正
+tour_4373: OK place=新加坡 country=新加坡 title=【典·博览】经典新加坡、马来西亚5/6天＊超值全赏＜双国
+tour_4326: OK place=芭提雅芭堤雅 country=泰国 title=【典·博览】经典泰国、新加坡、马来西亚10天＊超值全景＊
+tour_2900: OK place= country= title=【跟团游】东兴2天＊大清国一号界碑＊万尾金滩＊湛江往返＜
+tour_1264: OK place=五台山 country=中国 title=【品质&bull;全景山西】山西双飞6天丨0自费0购物一
+tour_1364: OK place=五台山 country=中国 title=【劲爆山西】双飞6天丨纯玩不进店丨佛教圣地五台山丨明清古
+tour_1366: OK place=五台山 country=中国 title=【爆款&bull;乐享山西】山西双飞6天丨纯玩0购物0自
+tour_1397: OK place=五台山 country=中国 title=【皇牌&bull;晋地宝藏】山西双飞6天丨0自费0购物一
+tour_3432: OK place=五台山 country=中国 title=【尚·全景】山西太原、忻州、平遥、双飞6天＊五台山＊云冈
+tour_3435: OK place=五台山 country=中国 title=【典·深度】朔州、浑源、忻州、偏关、双飞6天＊五台山＊云
+BAD total: 0

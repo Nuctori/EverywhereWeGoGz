@@ -27,18 +27,16 @@ DEFAULT_GZL_SCHEDULE_WORKERS = 16
 _THREAD_LOCAL = threading.local()
 
 # 目的地列表
+# 2026-09-19 发现：getAllProductList.json 接受 destName='all'，一次枚举全目录
+# （facet 实测 ~2478 条跟团/自由行，比按 74 个目的地轮询多覆盖约 700 条漏采线路），
+# 且列表 item 自带 departureDaysList（完整班期）。默认改走 'all' 单路枚举；
+# 设 GZL_DESTINATIONS 环境变量可恢复按目的地轮询（逗号分隔）。
+DEFAULT_DESTINATIONS = ["all"]
 DESTINATIONS = [
-    "北京", "上海", "云南", "四川", "广西", "海南", "贵州", "西藏", "新疆",
-    "湖南", "湖北", "江西", "福建", "浙江", "江苏", "山东", "河南", "河北",
-    "山西", "陕西", "甘肃", "青海", "宁夏", "内蒙古", "东北", "广东",
-    "香港", "澳门", "台湾", "日本", "韩国", "泰国", "新加坡", "马来西亚",
-    "越南", "柬埔寨", "印尼", "菲律宾", "马尔代夫", "斯里兰卡", "尼泊尔",
-    "印度", "迪拜", "土耳其", "埃及", "肯尼亚", "南非", "摩洛哥",
-    "俄罗斯", "欧洲", "英国", "法国", "德国", "意大利", "瑞士", "西班牙",
-    "葡萄牙", "希腊", "北欧", "东欧", "美国", "加拿大", "墨西哥",
-    "巴西", "阿根廷", "智利", "秘鲁", "澳大利亚", "新西兰", "斐济",
-    "巴厘岛", "普吉岛", "苏梅岛", "长滩岛", "沙巴", "芽庄", "清迈",
-]
+    s.strip()
+    for s in os.environ.get("GZL_DESTINATIONS", "").split(",")
+    if s.strip()
+] or DEFAULT_DESTINATIONS
 
 # 产品类型
 # GZL 的多个 searchtype 会重复返回同一批产品。
@@ -49,6 +47,10 @@ SEARCH_TYPES = [
     ("FREETRAVEL", "自由行"),
     ("YJYT", "一家一团"),
 ]
+
+# 'all' 全量枚举会带回非线路类目（SOLD_GOODS 食品特产 591、HOTEL 酒店 408、
+# SCENIC 门票、VISA 签证、BUS 用车），目录只收旅游线路，故按类型白名单保留。
+TOUR_PRODUCT_TYPES = {"PRODUCTGROUP", "FREE_TOUR", "FIXEDFREETRAVEL", "CRUISE"}
 
 
 def extract_days(title):
@@ -365,8 +367,25 @@ def apply_schedule_snapshot(item, schedule_snapshot):
 
 
 def fetch_schedule_snapshots(items):
+    # scheduleDateMap 补全策略（GZL_SCHEDULE_MODE）：
+    #   auto (默认)：仅对列表未给出班期或无价格的条目调用——列表 item 自带
+    #     departureDaysList（完整班期）与 b2cMinPrice（广之旅自挂起价），已是权威数据；
+    #   always：历史行为，逐条调用（~1700+ 请求），可对照排查；
+    #   never：完全跳过。
+    mode = os.environ.get("GZL_SCHEDULE_MODE", "auto").strip().lower()
+    if mode == "never":
+        print("[广之旅] GZL_SCHEDULE_MODE=never，跳过 schedule 补全")
+        return {}
+
     unique_requests = {}
+    skipped = 0
     for item in items:
+        if mode == "auto":
+            has_dates = bool(item.get("departureDates"))
+            has_price = coerce_price(item.get("price")) > 0
+            if has_dates and has_price:
+                skipped += 1
+                continue
         pd_id = str(item.get("sourceId") or "").strip()
         ptype = str(item.get("productType") or "").strip()
         url = str(item.get("url") or "").strip()
@@ -378,13 +397,17 @@ def fetch_schedule_snapshots(items):
         unique_requests.setdefault(key, (pd_id, ptype, url))
 
     if not unique_requests:
+        print(f"[广之旅] schedule 补全：{skipped} 条已由列表自带班期覆盖，无需调用")
         return {}
 
     workers = max(
         4,
         min(32, int(os.environ.get("GZL_SCHEDULE_WORKERS", str(DEFAULT_GZL_SCHEDULE_WORKERS)) or str(DEFAULT_GZL_SCHEDULE_WORKERS))),
     )
-    print(f"[广之旅] 并发补全 schedule: {len(unique_requests)} 条, workers={workers}")
+    print(
+        f"[广之旅] 并发补全 schedule: {len(unique_requests)} 条, workers={workers}"
+        f"（{skipped} 条已由列表班期覆盖，跳过）"
+    )
 
     def fetch_one(entry):
         key, (pd_id, ptype, url) = entry
@@ -415,8 +438,10 @@ def fetch():
         for search_type, type_name in SEARCH_TYPES:
             page = 1
             empty_count = 0
-            
-            while page <= 50:  # 最多50页
+            # 'all' 单路枚举时全目录 ~190 页（20 条/页），旧的 50 页上限会截断
+            max_pages = int(os.environ.get("GZL_MAX_PAGES", "260") or "260")
+
+            while page <= max_pages:
                 products = fetch_products(session, dest, search_type, page)
                 
                 if not products:
@@ -428,6 +453,8 @@ def fetch():
                 
                 page_items = 0
                 for product in products:
+                    if str(product.get("type") or "").strip() not in TOUR_PRODUCT_TYPES:
+                        continue
                     item = build_base_item(product)
                     if not item["title"]:
                         continue
@@ -532,6 +559,27 @@ def main():
         items = refresh_existing_prices(items)
     else:
         items = fetch()
+
+    # getAllProductList 的任何 searchtype/channel 都不返回 CRUISE（邮轮在独立频道），
+    # 但旧目录里 ~64 条邮轮是有效线路。写盘前把上一轮 raw 的邮轮记录按 sourceId 并回，
+    # 避免每次全量重爬都把邮轮线路蒸发。
+    if items:
+        existing_by_id = {}
+        if os.path.exists(output_path):
+            try:
+                with open(output_path, "r", encoding="utf-8") as f:
+                    previous = json.load(f)
+                for record in previous if isinstance(previous, list) else []:
+                    if "/cruises/" in str(record.get("url") or ""):
+                        existing_by_id[str(record.get("sourceId") or "")] = record
+            except (OSError, json.JSONDecodeError):
+                pass
+        if existing_by_id:
+            present = {str(x.get("sourceId") or "") for x in items}
+            restored = [v for k, v in existing_by_id.items() if k and k not in present]
+            if restored:
+                items = items + restored
+                print(f"[广之旅] 并回上一轮邮轮记录 {len(restored)} 条")
 
     if isinstance(items, list) and len(items) == 0 and os.path.exists(output_path):
         print(f"[gzl] 0 items -- keeping existing {output_path}")

@@ -70,13 +70,22 @@ GLOBAL_NEGATIVE_KEYWORDS = [
     "the resource you are looking for might have been removed",
     "您看的产品不小心飞走了",
     "已下架",
-    "已售罄",
-    "售罄",
     "停止报名",
-    "报名已满",
     "操作失败",
     "404 很抱歉，出错了",
     "server error 404",
+]
+
+# 售罄/报满≠下架：详情页仍然完整，线路本身有效，只是当前班期不可报名。
+# 这类词若放进 GLOBAL_NEGATIVE_KEYWORDS，会在正向特征判定之前短路，
+# 导致整批可售线路被误判删除（天涯户外实测 148 条因此消失）。
+# 因此单独成组，仅在"页面没有任何详情特征"时才作为兜底判据。
+SOLD_OUT_KEYWORDS = [
+    "已售罄",
+    "售罄",
+    "报名已满",
+    "名额已满",
+    "已满员",
 ]
 
 BLOCKED_KEYWORDS = [
@@ -146,6 +155,22 @@ DOMAIN_RULES = [
         # 假日通详情页返回的文本结构不稳定，快速校验只能给到“可达但待人工复核”。
         positive_markers=(),
         negative_keywords=(),
+    ),
+    DomainRule(
+        name="天涯户外",
+        # 此前缺规则，落到严格默认判定，导致整源 255 条被误判下架
+        # （实测页面均返回 200 且含完整行程/集合地内容）。
+        host_contains=("outdoors.com.cn",),
+        positive_markers=("集合地", "活动详情", "行程介绍", "费用说明", "目的地", "行程天数"),
+        negative_keywords=("页面不存在", "找不到", "已下架"),
+    ),
+    DomainRule(
+        name="康辉新站",
+        # 康辉 cct.cn 适配 (crawl_kanghui_cct.mjs)：详情页服务端渲染，
+        # 含"详细行程/费用包含/费用不含/目的地"字段。缺规则会落到严格默认判定。
+        host_contains=("cct.cn",),
+        positive_markers=("详细行程", "费用包含", "费用不含", "目的地", "行程介绍"),
+        negative_keywords=("页面不存在", "404"),
     ),
 ]
 
@@ -615,6 +640,31 @@ def validate_url(url: str, title: str, timeout: float) -> dict[str, Any]:
                 "category": UNAVAILABLE,
                 "reason": "matched negative keyword",
                 "matched_keyword": global_negative,
+            }
+        )
+        return result
+
+    sold_out = match_keyword(text, SOLD_OUT_KEYWORDS)
+    if sold_out and rule:
+        # 售罄/报满：先看页面是否仍携带详情特征。详情完整 → 线路有效（OK），
+        # 售罄状态由调用方按 matched_keyword 识别；仅当页面只剩售罄提示、
+        # 无任何详情特征时才判 UNAVAILABLE（真下架壳页）。
+        rule_positive = match_keyword(text, rule.positive_markers)
+        if rule_positive:
+            result.update(
+                {
+                    "category": OK,
+                    "reason": f"{rule.name} detail markers found (sold out: {sold_out})",
+                    "matched_keyword": rule_positive,
+                    "sold_out": True,
+                }
+            )
+            return result
+        result.update(
+            {
+                "category": UNAVAILABLE,
+                "reason": "sold-out shell without detail content",
+                "matched_keyword": sold_out,
             }
         )
         return result

@@ -30,7 +30,7 @@ import {
   Bus, Hotel, Utensils, Shield, Globe, Wifi, Baby,
   CreditCard, RotateCcw, Calendar, User, BarChart3,
   HeartHandshake, Plane, Footprints, Mountain, TreePine,
-  ExternalLink, Search, X,
+  ExternalLink, Search, X, Navigation,
 } from 'lucide-react';
 
 interface TourDetailModalProps {
@@ -143,6 +143,17 @@ export function TourDetailModal({
   const refundPolicy = getReliablePolicy(resolvedTour?.refundPolicy);
   const childPolicy = getReliablePolicy(resolvedTour?.childPolicy);
   const hasReliableSingleSupplement = Boolean(normalizeText(tour.singleSupplementNote));
+  // 上车点：仅周边短线有（长线在机场集合）。raw 里除站点外还有接送方式、回程地点、
+  // 清单外区域门槛等信息，面板底部以原文呈现，避免摘要丢信息。
+  const boardingPoints = tour.boarding?.points || [];
+  const boardingNote = (() => {
+    const raw = tour.boarding?.raw?.trim();
+    if (!raw) return '';
+    // raw 与站点列表重复度高时不再重复展示
+    const names = boardingPoints.map((point) => point.name);
+    const covered = names.length > 0 && names.every((name) => raw.includes(name));
+    return covered && boardingPoints.length >= 3 ? '' : raw;
+  })();
   const hasAvailabilityData =
     (resolvedTour?.availableSeats ?? 0) > 0 && (resolvedTour?.totalSeats ?? 0) > 0;
   const hasDepartureDates = (tour.departureDates || []).filter(Boolean).length > 0 || Boolean(tour.departureDate);
@@ -269,6 +280,40 @@ export function TourDetailModal({
         )}
 
       </div>
+
+      {/* 上车点：周边短线才有。下车点即上车点（源站原文"统一在指定集合点上下车"）。 */}
+      {boardingPoints.length > 0 && (
+        <div className="mt-4 rounded-lg border border-stone-200 bg-stone-50 p-3 sm:p-4">
+          <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-stone-800">
+            <Navigation className="h-4 w-4 text-stone-500" />
+            上下车点（{boardingPoints.length}个）
+          </h4>
+          <ul className="space-y-1.5">
+            {boardingPoints.map((point, index) => (
+              <li
+                key={`${point.name}-${index}`}
+                className="flex flex-wrap items-baseline gap-x-2 text-xs sm:text-sm text-stone-600"
+              >
+                <span className="font-medium text-stone-800">{point.name}</span>
+                {point.district && (
+                  <span className="text-stone-400">{point.district}</span>
+                )}
+                {point.time && <span className="text-stone-500">{point.time}</span>}
+                {point.quota && (
+                  <span className="rounded bg-stone-200/70 px-1.5 py-0.5 text-[11px] text-stone-600">
+                    {point.quota}人起接
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+          {boardingNote && (
+            <p className="mt-2.5 border-t border-stone-200 pt-2.5 text-[11px] leading-relaxed text-stone-500 sm:text-xs">
+              {boardingNote}
+            </p>
+          )}
+        </div>
+      )}
 
       <Tabs defaultValue="overview" className="w-full">
         {status === 'error' && error && (

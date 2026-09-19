@@ -183,6 +183,8 @@ const listFields = new Set([
   'hotDepartureDates',
   'meta',
   'dataQuality',
+  // 上车点：仅周边短线有（长线在机场集合），供就近上车筛选与 AI 语义判断
+  'boarding',
 ]);
 
 const tours = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));

@@ -1357,6 +1357,20 @@ function getSearchCorpus(tour: AiRecommendationCandidate) {
   const cached = searchCorpusCache.get(tour);
   if (cached) return cached;
 
+  // 上车点：站点名 + 行政区 + 原文。原文必须进语料——"增城广场"这类口语说法
+  // 与站点实际名称（"增城中海城市广场"）不存在字面匹配，只能靠原文命中。
+  const boardingTerms = tour.boarding
+    ? [
+        ...(tour.boarding.points || []).map((p) =>
+          [p.name, p.district, p.city, p.quota ? `${p.quota}人起接` : '']
+            .filter(Boolean)
+            .join(' '),
+        ),
+        tour.boarding.raw || '',
+        tour.boarding.summary || '',
+      ]
+    : [];
+
   const corpus = [
     tour.title,
     tour.destination,
@@ -1370,6 +1384,7 @@ function getSearchCorpus(tour: AiRecommendationCandidate) {
     ...tour.tags,
     ...tour.highlights,
     ...(tour.suitableFor || []),
+    ...boardingTerms,
   ]
     .filter(Boolean)
     .join(' ')

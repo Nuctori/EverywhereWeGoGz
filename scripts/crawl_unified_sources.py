@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parent
 CRAWLERS = [
     ("jrt365", "crawl_jrt365_full"),
     ("kanghui", "crawl_kanghui_full"),
+    # 康辉新站 (cct.cn)：gz.cctpage.com 死站后的适配爬虫，Node 实现经包装接入。
+    ("kanghui-cct", "crawl_kanghui_cct_wrapper"),
     ("gdcts", "crawl_gdcts_full"),
     ("pintu", "crawl_pintu_full"),
     ("saihuitong", "crawl_saihuitong_full"),

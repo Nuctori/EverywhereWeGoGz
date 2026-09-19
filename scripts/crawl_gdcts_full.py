@@ -116,8 +116,82 @@ def fetch():
     return all_items
 
 
+GDCTS_PLAN_API = "http://m.gdcts.com/product/common/getPlanListByMonth"
+
+
+def enrich_departure_plans(items):
+    """用 getPlanListByMonth JSON 接口补班期/价格/余位。
+
+    此前班期依赖详情页 HTML（不稳定且时常 404）；该接口为前端价格日历
+    使用的正式 JSON 端点，返回逐团期 line_date/money/stock_free/领队。
+    每条线路扫当前月+未来 2 个月，3 次请求；无任何团期的线路不落班期字段。
+    """
+    import concurrent.futures as cf
+    from datetime import datetime, timedelta
+
+    today = datetime.now()
+    months = []
+    for offset in range(3):
+        month = (today.replace(day=1) + timedelta(days=32 * (offset + 1))).replace(day=1)
+        if offset == 0:
+            month = today.replace(day=1)
+        months.append(month.strftime("%Y-%m"))
+
+    session = requests.Session()
+    session.headers.update({"X-Requested-With": "XMLHttpRequest"})
+
+    def enrich_one(item):
+        match = re.search(r"/detail/id/(\d+)", str(item.get("url") or ""))
+        if not match:
+            return item
+        product_id = match.group(1)
+        dates = []
+        prices = []
+        for month in months:
+            try:
+                resp = session.post(
+                    GDCTS_PLAN_API,
+                    data={"month": month, "product_id": product_id},
+                    timeout=12,
+                )
+                plans = (resp.json() or {}).get("msg")
+                if not isinstance(plans, dict):
+                    continue
+                for plan in plans.values():
+                    date_value = str(plan.get("line_date") or "").strip()
+                    price = plan.get("money")
+                    if plan.get("is_disable"):
+                        continue
+                    if date_value:
+                        dates.append(date_value)
+                    if isinstance(price, (int, float)) and price > 0:
+                        prices.append(price)
+            except Exception:
+                continue
+
+        dates = sorted(set(dates))
+        if dates:
+            item["departureDates"] = dates
+            item["departureDate"] = dates[0]
+        if prices:
+            item["price"] = min(prices)
+        return item
+
+    workers = max(4, min(16, int(os.environ.get("GDCTS_PLAN_WORKERS", "10") or "10")))
+    print(f"[广东中旅] 补全班期/价格: {len(items)} 条, workers={workers} (接口 {len(months)} 月/条)")
+    with cf.ThreadPoolExecutor(max_workers=workers) as executor:
+        for completed, _ in enumerate(
+            executor.map(enrich_one, items), start=1
+        ):
+            if completed % 100 == 0 or completed == len(items):
+                print(f"[广东中旅] 班期补全 {completed}/{len(items)}")
+    return items
+
+
 def main():
     items = fetch()
+    if items:
+        items = enrich_departure_plans(items)
     data_dir = os.path.join(os.path.dirname(__file__), "..", "src", "data")
     data_dir = os.path.abspath(data_dir)
     os.makedirs(data_dir, exist_ok=True)

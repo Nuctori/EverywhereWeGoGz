@@ -54,7 +54,7 @@ const geoPointSchema = z.object({
 export const geoPlaceIndexEntrySchema = geoPointSchema.extend({
   tourIds: z.array(z.string().min(1)),
   tourCount: z.coerce.number().int().nonnegative(),
-  roles: z.array(z.enum(['departure', 'destination', 'stop'])),
+  roles: z.array(z.enum(['departure', 'destination', 'stop', 'boarding'])),
 });
 
 export const geoPlacesSchema = z.array(geoPlaceIndexEntrySchema);
@@ -153,6 +153,20 @@ const tourMetaSchema = z.object({
   dataQuality: dataQualitySchema.optional(),
 });
 
+export const boardingPointSchema = z.object({
+  name: z.string().min(1),
+  district: z.string().nullish(),
+  quota: z.string().nullish(),
+  city: z.string().nullish(),
+  time: z.string().nullish(),
+});
+
+export const tourBoardingSchema = z.object({
+  points: z.array(boardingPointSchema).default([]),
+  raw: z.string().optional(),
+  summary: z.string().optional(),
+});
+
 export const tourSummarySchema = z.object({
   id: z.string().min(1),
   sourceId: z.string().optional(),
@@ -188,6 +202,7 @@ export const tourSummarySchema = z.object({
   meta: tourMetaSchema.optional(),
   dataQuality: dataQualitySchema.optional(),
   geo: tourGeoSchema.optional(),
+  boarding: tourBoardingSchema.optional(),
 });
 
 export const tourDetailSchema = z.object({

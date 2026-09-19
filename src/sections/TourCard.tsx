@@ -13,6 +13,7 @@ import {
   Footprints,
   MapPin,
   Mountain,
+  Navigation,
   Users,
 } from 'lucide-react';
 import { memo } from 'react';
@@ -50,6 +51,16 @@ export const TourCard = memo(function TourCard({
   const departureDateLabel = getDepartureDateBadgeLabel(tour);
   const isExpiredBadge = departureDateLabel === '班期已过';
   const qualitySignals = [tour.departureDate, tour.destination, tour.transportType, tour.accommodationLevel, tour.meals].filter((value) => Boolean(value?.trim())).length;
+  // 上车点：优先用源站给的摘要，缺摘要时由站点名兜底拼装。
+  const boardingLabel = (() => {
+    const boarding = tour.boarding;
+    if (!boarding) return '';
+    const summary = boarding.summary?.trim();
+    if (summary) return summary;
+    const names = (boarding.points || []).map((point) => point.name).filter(Boolean);
+    if (!names.length) return '';
+    return names.length <= 3 ? names.join('、') : `${names.slice(0, 3).join('、')} 等${names.length}个上车点`;
+  })();
 
   return (
     <Card
@@ -168,6 +179,8 @@ export const TourCard = memo(function TourCard({
           <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{tour.duration}天</span>
           <span className={`flex items-center gap-1.5 ${isExpiredBadge ? 'text-amber-600 font-medium' : ''}`}><Calendar className="h-3.5 w-3.5" />{departureDateLabel}{isExpiredBadge ? ' · 已沉底' : ''}</span>
           {tour.groupSize && <span className="flex items-center gap-1.5"><Users className="h-3.5 w-3.5" />{tour.groupSize}</span>}
+          {/* 就近上车是下单前的关键决策信息，周边短线才有（长线在机场集合） */}
+          {boardingLabel && <span className="flex items-center gap-1.5"><Navigation className="h-3.5 w-3.5" />{boardingLabel}</span>}
         </div>
 
         <div className="mt-3.5 flex items-center justify-between gap-3 border-t border-stone-100 pt-3.5 sm:mt-5 sm:pt-4">
