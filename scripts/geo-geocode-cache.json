@@ -5761,5 +5761,18 @@
     "address": {
       "formatted": "三英温泉度假酒店, S254, 派潭镇, 增城区, 广州市, 广东省, 中国"
     }
+  },
+  "贺州黄姚古镇": {
+    "query": "贺州黄姚古镇",
+    "provider": "nominatim",
+    "latitude": 24.2509662,
+    "longitude": 111.2009023,
+    "displayName": "黄姚古镇, 黄姚镇, 昭平县, 贺州市, 广西壮族自治区, 中国",
+    "level": "town",
+    "locality": "黄姚古镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "黄姚古镇, 黄姚镇, 昭平县, 贺州市, 广西壮族自治区, 中国"
+    }
   }
 }
