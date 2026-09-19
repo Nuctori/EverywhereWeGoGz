@@ -1,0 +1,161 @@
+name: Check JRT365 Source Health
+
+# 假日通(jrt365)是唯一会把大量线路渲染成"空壳页"的渠道：HTTP 200 但标题、
+# 出发月份、价格全空。实测一轮 370 条里 276 条(74.6%)如此，而爬虫长期把
+# 空壳记成 hasDetailContent=true，所以整轮数据更新发现不了——2026-09 站点
+# 因此带着 74% 的死线路运行了很久。
+#
+# 本工作流每日体检该渠道：空壳率超阈值就单渠道重抓，并把空壳线路下架，
+# 然后重新合并/拆分/审计并提交。不需要等周一的整轮更新。
+
+on:
+  schedule:
+    # 与 update-data(周一 03:00)、availability cache(每日 03:30)、
+    # cdn pool(02:17)、wechat(02:00) 错开，避免同组排队。
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+    inputs:
+      force_recrawl:
+        description: 'Skip the health probe and always re-crawl the JRT365 source'
+        required: false
+        default: 'false'
+
+# 与其它写数据的工作流共用同一把锁：push_generated_commit.sh 会 rebase 后推送，
+# 并发交错会在 rebase 冲突时直接以退出码 1 中止。
+concurrency:
+  group: tour-data-writes
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  check-jrt365-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install Python dependencies
+        run: python -m pip install --disable-pip-version-check --no-input requests beautifulsoup4 lxml
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Probe JRT365 source health
+        id: health
+        # 退出码 3 = 空壳率超阈值需要重抓；0 = 健康；其它 = 执行出错。
+        run: |
+          set +e
+          python -u scripts/check_jrt365_health.py --report audit/jrt365-health-report.json
+          code=$?
+          set -e
+          echo "probe_exit=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" = "3" ]; then
+            echo "needs_recrawl=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_recrawl=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$code" != "0" ] && [ "$code" != "3" ]; then
+            echo "::error::JRT365 health probe failed with exit code $code"
+            exit "$code"
+          fi
+
+      - name: Upload health report
+        if: always() && hashFiles('audit/jrt365-health-report.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: jrt365-health-report
+          path: audit/jrt365-health-report.json
+          if-no-files-found: error
+
+      - name: Re-crawl JRT365 source only
+        id: recrawl
+        # 单渠道重抓：只重取详情页并下架空壳，不跑整轮 7 渠道抓取。
+        # JRT365_PRUNE_HOLLOW=1 让爬虫把空壳从 raw 文件里剔除。
+        if: steps.health.outputs.needs_recrawl == 'true' || github.event.inputs.force_recrawl == 'true'
+        env:
+          JRT365_REFRESH_EXISTING: '1'
+          JRT365_PRUNE_HOLLOW: '1'
+          JRT365_REFRESH_WORKERS: '12'
+        run: python -u scripts/crawl_jrt365_full.py
+
+      - name: Merge data
+        if: steps.recrawl.outcome == 'success'
+        env:
+          # 与 update-data.yml 保持一致，保证两条链路的合并口径相同。
+          DETAIL_FETCH_MODE: geo
+          IMAGE_CACHE_MODE: remote
+          AVAILABILITY_FILTER: '0'
+          JRT365_AVAILABILITY_FILTER: '1'
+        run: python -u scripts/merge_data.py
+
+      - name: Split merged data
+        if: steps.recrawl.outcome == 'success'
+        run: npm run data:split
+
+      - name: Optimize cached images
+        if: steps.recrawl.outcome == 'success'
+        run: npm run data:images:webp
+
+      - name: Audit merged data
+        if: steps.recrawl.outcome == 'success'
+        # 阻断式质量门：空壳下架后若线路数跌破来源下限，这里会拦住提交。
+        run: npm run audit:data-integrity
+
+      - name: Summarize outcome
+        if: always()
+        run: |
+          echo "## JRT365 source health" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f audit/jrt365-health-report.json ]; then
+            node --input-type=module - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import fs from 'node:fs';
+          const r = JSON.parse(fs.readFileSync('audit/jrt365-health-report.json', 'utf8'));
+          const c = r.counts || {};
+          console.log(`- Probed URLs: ${r.total}`);
+          console.log(`- Shell pages: ${c.shell ?? 0}`);
+          console.log(`- Content missing: ${c.broken ?? 0}`);
+          console.log(`- Healthy: ${c.ok ?? 0}`);
+          console.log(`- Probe errors: ${c.error ?? 0}`);
+          console.log(`- Shell rate: ${(r.shell_rate * 100).toFixed(1)}% (threshold ${(r.thresholds?.max_shell_rate * 100).toFixed(0)}%)`);
+          console.log(`- Re-crawl triggered: ${r.needs_recrawl}`);
+          EOF
+          else
+            echo "Health report was not generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Check if data changed
+        id: check_changes
+        if: steps.recrawl.outcome == 'success'
+        run: |
+          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/geo-places.json scripts/geo-geocode-cache.json src/data/raw_jrt365_full.json public/data/image-cache
+          if git diff --cached --quiet; then
+            echo "Data unchanged, nothing to commit"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit data changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # 可用性缓存由 refresh-availability-cache.yml 独占维护；合并会顺带
+          # 改写它，这里丢弃以免和那条工作流互相覆盖。
+          git restore src/data/tour-availability-cache.json
+          git commit -m "chore: prune hollow JRT365 tours [$(date +%Y-%m-%d)]"
+          bash scripts/push_generated_commit.sh

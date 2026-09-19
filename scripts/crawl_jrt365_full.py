@@ -7,12 +7,20 @@
 import re
 import json
 import os
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
+
+# 空壳判定与体检脚本共用同一实现。爬虫可能被复制到临时目录后以文件路径方式
+# 加载（见 test_jrt365_crawl_guard.mjs），此时同目录不在 sys.path 上，因此
+# 显式按本文件位置注册一次搜索路径，保证任何加载方式都能导入。
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from jrt365_hollow import is_shell
 
 GROUPNO_RE = re.compile(r'groupno=([^&"\']+)', re.IGNORECASE)
 TOURNAME_RE = re.compile(r'is_tournameno\s*=\s*"([^"]*)"', re.IGNORECASE)
@@ -145,7 +153,19 @@ def fetch_detail_snapshot(item):
 
     detail_text = decode_response_text(detail_resp)
     if '该团号不可在此显示' in detail_text:
-        return {}
+        # 源站对已下架/停售的团号直接返回空壳页并带此提示。实测 370 条里
+        # 276 条(74.6%)走这条路——之前的实现 `return {}` 让调用方原样保留
+        # 上一条记录，于是这些早已失效的线路永远留在库里，且被记为
+        # hasDetailContent=true。改为显式上报空壳，让下游能据此下架。
+        return {
+            'hollow': True,
+            'hasDetailContent': False,
+            'detailTitle': '',
+            'departureDates': [],
+            'departureDate': '',
+        }
+
+    hollow = is_shell(detail_text)
 
     soup = BeautifulSoup(detail_text, 'lxml')
     title = ''
@@ -166,7 +186,7 @@ def fetch_detail_snapshot(item):
     print_url = urljoin(detail_resp.url, print_link.get('href', '').strip()) if print_link and print_link.get('href') else ''
 
     departure_dates = []
-    if tournameno and groupno:
+    if tournameno and groupno and not hollow:
         current_year = time.localtime().tm_year
         current_month = time.localtime().tm_mon
         month_windows = []
@@ -205,7 +225,11 @@ def fetch_detail_snapshot(item):
         'departureDate': departure_dates[0] if departure_dates else '',
         'printUrl': print_url,
         'detailTitle': title,
-        'hasDetailContent': bool(title),
+        # 空壳页面必须记为"无详情内容"。此前只判断 bool(title)，而 title 取自
+        # 空壳页上本就为空的 tourname 节点，于是 74% 的空壳被记成有内容写入
+        # raw 文件，下游审计因此看不到任何异常。
+        'hasDetailContent': bool(title) and not hollow,
+        'hollow': hollow,
     }
 
 
@@ -423,6 +447,25 @@ def refresh_existing():
     return refreshed
 
 
+def prune_hollow_items(items, output_path):
+    """丢弃确认失效的空壳线路，返回 (保留项, 移除数)。
+
+    默认开启——空壳线路对用户毫无价值，且会撑大 raw 计数让下游审计的下限
+    校验失真。可用 JRT365_PRUNE_HOLLOW=0 关闭（仅在需要保留历史样本调试时）。
+    """
+    if not isinstance(items, list):
+        return items, 0
+    if os.environ.get("JRT365_PRUNE_HOLLOW", "1").strip().lower() in {"0", "false", "no", "off"}:
+        print("[假日通] 空壳下架已关闭 (JRT365_PRUNE_HOLLOW=0)")
+        return items, 0
+
+    kept = [item for item in items if not (isinstance(item, dict) and item.get("hollow"))]
+    removed = len(items) - len(kept)
+    if removed:
+        print(f"[假日通] 空壳下架 {removed} 条（保留 {len(kept)} 条）")
+    return kept, removed
+
+
 def main():
     refresh_mode = os.environ.get("JRT365_REFRESH_EXISTING", "").strip().lower() in {"1", "true", "yes", "on"}
     items = refresh_existing() if refresh_mode else fetch()
@@ -432,6 +475,8 @@ def main():
     if isinstance(items, list) and len(items) == 0 and os.path.exists(output_path):
         print(f"[jrt365] 0 items -- keeping existing {output_path}")
         return
+    assert_min_raw_items(items, output_path)
+    items, _ = prune_hollow_items(items, output_path)
     assert_min_raw_items(items, output_path)
     os.makedirs(data_dir, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:

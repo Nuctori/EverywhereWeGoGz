@@ -313,11 +313,15 @@ def has_jrt365_detail_content(raw_html: str) -> bool:
 
 
 def detect_jrt365_broken_schedule_context(raw_html: str) -> bool:
-    empty_title = 'tourname: ""' in raw_html
-    empty_sale_flag = 'salelable3: ""' in raw_html
-    if empty_title or empty_sale_flag:
-        return True
+    """标题在但正文缺失，页面无法支撑预订。
 
+    注意：不能把 `salelable3: ""` 单独当作"已下架"。实测该标记会对
+    **内容完好的线路**误报——22 条带完整标题和 2900~15500 字行程正文的
+    正常线路全部带此标记（它表示"当前不可售"，页面本身是完整的）。
+    早期版本仅凭这一个标记就判 True，导致这些有效线路被
+    apply_availability_filter 误删。此处收紧为：必须先确认页面确实
+    没有可用内容（标题为空，或标题在但详情区为空）。
+    """
     soup = BeautifulSoup(raw_html, "lxml")
     title = ""
     for selector in (
@@ -328,8 +332,6 @@ def detect_jrt365_broken_schedule_context(raw_html: str) -> bool:
         title = (node.get_text(" ", strip=True) if node else "").strip()
         if title:
             break
-    if title:
-        return False
 
     detail_selectors = (
         "#con_e_1",
@@ -342,12 +344,17 @@ def detect_jrt365_broken_schedule_context(raw_html: str) -> bool:
         (node.get_text(" ", strip=True) if node else "").strip()
         for node in (soup.select_one(selector) for selector in detail_selectors)
     )
-    if has_detail_text:
+
+    # 标题与正文都在 -> 内容完整，只是当前不可售，不算损坏。
+    if title and has_detail_text:
         return False
 
-    print_link = soup.select_one("#ctl00_ContentPlaceHolder_htmlform_id_print_xc")
-    print_href = (print_link.get("href", "") if print_link else "").strip()
-    return bool(print_href)
+    # 标题与正文都没有 -> 空壳，交给 detect_jrt365_unavailable_shell。
+    if not title and not has_detail_text:
+        return False
+
+    # 到这里只剩"标题在但正文缺失"这一种真正的内容损坏。
+    return 'salelable3: ""' in raw_html or 'tourname: ""' in raw_html
 
 
 def extract_gzl_product_id(raw_html: str, final_url: str) -> str:

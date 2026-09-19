@@ -37,6 +37,12 @@ fs.mkdirSync(tempData, { recursive: true });
 const tempCrawlerPath = path.join(tempScripts, 'crawl_jrt365_full.py');
 const tempRawPath = path.join(tempData, 'raw_jrt365_full.json');
 fs.copyFileSync(crawlerPath, tempCrawlerPath);
+// The crawler imports the shared hollow-shell classifier from its own directory.
+// Copy it so the isolated fixture still resolves the import.
+fs.copyFileSync(
+  path.join(process.cwd(), 'scripts', 'jrt365_hollow.py'),
+  path.join(tempScripts, 'jrt365_hollow.py'),
+);
 fs.writeFileSync(tempRawPath, '[{"title":"sentinel"}]\n', 'utf8');
 
 const check = spawnSync(
