@@ -81,6 +81,8 @@ interface AiTravelIntent {
   returnWeekdays?: number[];
   departureTimeOfDay?: 'morning' | 'afternoon' | 'evening' | 'night' | 'any' | null;
   destinationHints?: string[];
+  /** 用户点名"X上车/从X出发/X集合"：是上车地而非目的地，门控与评分走上车点语料。 */
+  boardingHints?: string[];
   budgetMax?: number | null;
   budgetMin?: number | null;
   /** 只有用户明确要求严格不超预算时才启用价格硬冲突。 */
@@ -129,6 +131,7 @@ interface RecommendationCopyProfile {
 interface LocalRecommendationQuery {
   normalizedText: string;
   destinationHints: string[];
+  boardingHints: string[];
   avoidHints: string[];
   themeHints: string[];
   coverageTerms: string[];
@@ -230,6 +233,8 @@ interface RecommendationPrimitive {
   experienceCategories: string[];
   seasonalComfortAtoms: string[];
   schedule: ReturnType<typeof inferScheduleHints>;
+  /** 上车点独立语料（不含标题/目的地），供"X上车"意图的门控与评分使用 */
+  boardingCorpus: string;
 }
 
 interface RouteAtlasGroup {
@@ -1106,7 +1111,21 @@ function primitiveHasConflictingTitleDestination(
   return titleHints.every((hint) => !destinationHintsMatchCorpus(intent.destinationHints, hint));
 }
 
+function primitiveMatchesBoardingHints(
+  intent: AiTravelIntent | null,
+  primitive: RecommendationPrimitive,
+) {
+  const hints = intent?.boardingHints;
+  if (!hints?.length) return false;
+  const corpus = (primitive.boardingCorpus || '').toLowerCase();
+  if (!corpus) return false;
+  return hints.some((hint) => corpus.includes(hint.toLowerCase()));
+}
+
 function candidateMatchesDestinationIntent(intent: AiTravelIntent | null, primitive: RecommendationPrimitive) {
+  // 用户点名"X上车"且候选上车点语料命中：直接放行——上车地成立时
+  // 目的地不同不构成冲突（"增城上车去东山岛"是合法诉求）。
+  if (primitiveMatchesBoardingHints(intent, primitive)) return true;
   if (!intent?.destinationHints?.length) return true;
   if (primitiveHasConflictingTitleDestination(intent, primitive)) return false;
   return destinationHintsMatchCorpus(intent.destinationHints, `${primitive.destination} ${primitive.title}`);
@@ -1114,6 +1133,26 @@ function candidateMatchesDestinationIntent(intent: AiTravelIntent | null, primit
 
 function collectThemeHints(text: string) {
   return THEME_KEYWORDS.filter((keyword) => text.includes(keyword));
+}
+
+// "增城上车 / 从广州出发 / 珠江新城集合"——用户点名的上车地不是目的地。
+// 提取成 boardingHints 后：目的地提示要从原文里剥离这些短语再收集，
+// 否则"增城上车"会被当成"想去增城"，召回一堆增城目的地线路。
+const BOARDING_PHRASE_RE = /(?:从|在|于)?([\u4e00-\u9fa5]{2,8}?)(?:上车|出发|集合)/g;
+
+function collectBoardingHints(text: string) {
+  const normalized = normalizeText(text);
+  const hints: string[] = [];
+  for (const match of normalized.matchAll(BOARDING_PHRASE_RE)) {
+    const place = match[1]?.trim();
+    // "出发"前的地名至少两个字，避免"出发前"这类副词误命中
+    if (place && place.length >= 2) hints.push(place);
+  }
+  return uniqueStrings(hints);
+}
+
+function stripBoardingPhrases(text: string) {
+  return normalizeText(text).replace(BOARDING_PHRASE_RE, ' ');
 }
 
 // 概念词表统一收口到 src/lib/search-concepts.ts 的 CONCEPT_GROUPS（查询侧与
@@ -1353,23 +1392,30 @@ function primitiveMatchesAvoid(primitive: RecommendationPrimitive, avoid: string
   return avoid.filter((term) => term && corpus.includes(term.toLowerCase()));
 }
 
+// 上车点语料：站点名 + 行政区 + 原文。原文必须进语料——"增城广场"这类口语说法
+// 与站点实际名称（"增城中海城市广场"）不存在字面匹配，只能靠原文命中。
+// 门控/评分/候选事实摘要共用这一份，避免各处口径漂移。
+function getBoardingCorpus(tour: AiRecommendationCandidate) {
+  if (!tour.boarding) return '';
+  return [
+    ...(tour.boarding.points || []).map((p) =>
+      [p.name, p.district, p.city, p.quota ? `${p.quota}人起接` : '']
+        .filter(Boolean)
+        .join(' '),
+    ),
+    tour.boarding.raw || '',
+    tour.boarding.summary || '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+}
+
 function getSearchCorpus(tour: AiRecommendationCandidate) {
   const cached = searchCorpusCache.get(tour);
   if (cached) return cached;
 
-  // 上车点：站点名 + 行政区 + 原文。原文必须进语料——"增城广场"这类口语说法
-  // 与站点实际名称（"增城中海城市广场"）不存在字面匹配，只能靠原文命中。
-  const boardingTerms = tour.boarding
-    ? [
-        ...(tour.boarding.points || []).map((p) =>
-          [p.name, p.district, p.city, p.quota ? `${p.quota}人起接` : '']
-            .filter(Boolean)
-            .join(' '),
-        ),
-        tour.boarding.raw || '',
-        tour.boarding.summary || '',
-      ]
-    : [];
+  const boardingTerms = tour.boarding ? [getBoardingCorpus(tour)] : [];
 
   const corpus = [
     tour.title,
@@ -1414,7 +1460,8 @@ function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
 
   return {
     normalizedText,
-    destinationHints: collectDestinationHints(normalizedText),
+    boardingHints: collectBoardingHints(normalizedText),
+    destinationHints: collectDestinationHints(stripBoardingPhrases(normalizedText)),
     avoidHints,
     themeHints: collectThemeHints(normalizedText).filter((hint) => !avoidHints.includes(hint)),
     coverageTerms: hasExperienceCoverageNeed
@@ -1471,6 +1518,21 @@ function scoreTour(
       score += 18;
       signals.push(`目的地匹配：${hint}`);
       break;
+    }
+  }
+
+  // 上车点命中只看独立上车语料：标题/目的地里的同名地名（增城温泉）不能冒充上车点
+  if (query.boardingHints.length > 0) {
+    const boardingCorpus = getBoardingCorpus(tour);
+    const matchedBoardingHint = query.boardingHints.find((hint) =>
+      boardingCorpus.includes(normalizeText(hint)),
+    );
+    if (matchedBoardingHint) {
+      score += 26;
+      signals.push(`上车点匹配：${matchedBoardingHint}`);
+    } else {
+      // 点名上车地时，没有命中上车点的候选明显降权，但保留给 AI 复核
+      score -= 18;
     }
   }
 
@@ -1789,8 +1851,9 @@ function buildHardIntentFromText(text: string): AiTravelIntent | null {
     ? ['天气敏感']
     : [];
   const intent: AiTravelIntent = {
+    boardingHints: collectBoardingHints(normalizedText),
     destinationHints: uniqueStrings([
-      ...collectDestinationHints(normalizedText),
+      ...collectDestinationHints(stripBoardingPhrases(normalizedText)),
     ]),
     avoid,
     weatherSensitivity,
@@ -1834,6 +1897,7 @@ function getHardIntentSignalCount(intent: AiTravelIntent | null) {
     ...(intent.departureWeekdays || []),
     ...(intent.returnWeekdays || []),
     ...(intent.destinationHints || []),
+    ...(intent.boardingHints || []),
     ...(intent.avoid || []),
     ...(intent.weatherSensitivity || []),
   ].filter((value) => value !== null && value !== undefined && value !== '').length;
@@ -1924,6 +1988,10 @@ function mergeAiRankingIntent(
 
   return {
     ...aiIntent,
+    boardingHints: uniqueStrings([
+      ...(hardIntent.boardingHints || []),
+      ...(aiIntent.boardingHints || []),
+    ]),
     destinationHints: aiDestinationJudgement
       ? aiIntent.destinationHints || []
       : hardIntent.destinationHints?.length
@@ -3120,6 +3188,7 @@ function buildTourPrimitive(tour: AiRecommendationCandidate): RecommendationPrim
     experienceCategories: extractExperienceCategories(tour),
     seasonalComfortAtoms: extractSeasonalComfortAtoms(tour),
     schedule: inferScheduleHints(tour),
+    boardingCorpus: getBoardingCorpus(tour),
   };
 
   primitiveCache.set(tour, primitive);
@@ -5544,6 +5613,7 @@ function buildDestinationWeatherCandidates(
       (candidate.isHot ? 6 : 0) +
       (shouldInspectDestinationWeather(corpus) ? 10 : 0) +
       (intent?.destinationHints?.length && candidateMatchesDestinationIntent(intent, candidate) ? 16 : 0) +
+      (intent?.boardingHints?.length && primitiveMatchesBoardingHints(intent, candidate) ? 22 : 0) +
       (searchQuery && corpus.includes(searchQuery.toLowerCase()) ? 8 : 0) +
       (travelDate ? 4 : 0)
     );
@@ -5915,7 +5985,8 @@ function buildAiMessages(params: {
       assumptions: 'string[]，最多3条；仅写你对用户未明说但影响判断的合理假设',
       tradeoffs: 'string[]，最多4条；写候选之间最重要的取舍',
       intent: {
-        destinationHints: 'string[]，本轮语义判断后的目的地；若用户在纠偏上一轮偏差，应保留/修正上一轮目的地组合；若明确重开搜索才替换',
+        destinationHints: 'string[]，本轮语义判断后的目的地；若用户在纠偏上一轮偏差，应保留/修正上一轮目的地组合；若明确重开搜索才替换。注意"X上车/从X出发"里的X是上车地不是目的地，不要写进这里',
+        boardingHints: 'string[]，用户点名"X上车/从X出发/X集合"时的上车地（如"增城上车"→["增城"]）；没有则省略',
         semanticFocus: promptPolicy.semanticFocusDescription,
         travelStyle: 'string[]',
         mustHave: 'string[]',
@@ -6346,6 +6417,7 @@ export const __aiRecommendationTestHooks = {
   mergeAiAndLocalRecommendations,
   mergeAiRankingIntent,
   mergeIntentWithMemory,
+  candidateMatchesDestinationIntent,
   normalizeIntent,
   keepAiItemsForCompoundExperience,
   prioritizeRecommendationItems,
@@ -6711,6 +6783,7 @@ function normalizeIntent(value: unknown): AiTravelIntent | null {
       : [],
     departureTimeOfDay: raw.departureTimeOfDay || null,
     destinationHints: Array.isArray(raw.destinationHints) ? raw.destinationHints.map(String).filter(Boolean) : [],
+    boardingHints: Array.isArray(raw.boardingHints) ? raw.boardingHints.map(String).filter(Boolean) : [],
     budgetMin: raw.budgetMin ? Number(raw.budgetMin) : null,
     budgetMax: raw.budgetMax ? Number(raw.budgetMax) : null,
     budgetHardLimit: raw.budgetHardLimit === true,
@@ -6744,6 +6817,19 @@ function attachTurnSemanticContext(
       ...(nextIntent.semanticFocus || []),
       ...getPublicInterestSemanticAnchors(userText),
     ]);
+  }
+  // 上车地意图：代码侧确定性提取（模型未必可靠区分"X上车"与"想去X"）。
+  // 点名上车地的地名同时会从目的地提示里剔除，避免语义错位。
+  const boardingHints = collectBoardingHints(userText);
+  if (boardingHints.length > 0) {
+    nextIntent.boardingHints = uniqueStrings([
+      ...(nextIntent.boardingHints || []),
+      ...boardingHints,
+    ]);
+    nextIntent.destinationHints = (nextIntent.destinationHints || []).filter(
+      (hint) =>
+        !boardingHints.some((place) => hint.includes(place) || place.includes(hint)),
+    );
   }
   return nextIntent;
 }
