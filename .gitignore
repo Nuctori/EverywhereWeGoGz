@@ -60,3 +60,6 @@ audit/
 
 # tours.json 已超 GitHub 100MB 单文件上限，不再入库（merge 从分片重建缓存）
 public/data/tours.json
+
+# CI 中间产物：update-data.yml 写出的"本轮哪些源抓到了新数据"清单
+.fresh-sources

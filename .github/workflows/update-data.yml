@@ -573,7 +573,28 @@ jobs:
       - name: Optimize cached images
         run: npm run data:images:webp
 
+      - name: Record which sources produced fresh raw data
+        # 多数爬虫是 continue-on-error 的：失败时 artifact 不上传，工作区里留下的是
+        # 仓库中上一轮的旧 raw。审计拿旧 raw 算出的 ratio 基线会去比对新目录，
+        # 于是"本轮没抓到"被误判成"数据塌了"（2026-09-21 康辉 195/2638 就是这样红的）。
+        # 这里把真正产出新数据的源写进标记文件，审计据此跳过陈旧源。
+        run: |
+          fresh=""
+          [ "${{ needs.crawl-jrt365.result }}" = "success" ] && fresh="$fresh 假日通"
+          [ "${{ needs.crawl-saihuitong.result }}" = "success" ] && fresh="$fresh 赛会通"
+          [ "${{ needs.crawl-kanghui.result }}" = "success" ] && fresh="$fresh 康辉"
+          [ "${{ needs.crawl-pintu.result }}" = "success" ] && fresh="$fresh 品途"
+          [ "${{ needs.crawl-gzl-api.result }}" = "success" ] && fresh="$fresh 广之旅"
+          [ "${{ needs.crawl-outdoors.result }}" = "success" ] && fresh="$fresh 天涯户外"
+          [ "${{ needs.crawl-http-aggregate.result }}" = "success" ] && fresh="$fresh 广东中旅"
+          echo "fresh crawls:${fresh:- (none)}"
+          printf '%s\n'$fresh > .fresh-sources
+
       - name: Audit merged data
+        env:
+          # 只对"本轮确实抓到新数据"的源执行 ratio 守卫；其余源沿用上一轮目录，
+          # 仍会走下面的 total/去重/字段校验，不会绕过质量门。
+          AUDIT_FRESH_SOURCES_FILE: .fresh-sources
         run: npm run audit:data-integrity
 
       - name: Summarize audit report
@@ -620,9 +641,19 @@ jobs:
           path: audit/data-integrity-report.json
           if-no-files-found: error
 
+      - name: Drop stale tours.json from the index
+        # tours.json 曾入库、后被 .gitignore 排除，索引里可能残留它的跟踪位。
+        # 一旦残留，下面 git add 的 `git diff --cached` 会把它当成"数据有变"，
+        # 于是每轮都产出只剩删除项的提交，并把真实变更淹没掉。
+        # 只点名这一条路径：仓库里另有 audit/ 等"已跟踪但被忽略"的文件，
+        # 若用 git ls-files -ci 批量清理会把它们一并暂存成删除。
+        run: git rm --cached --quiet --ignore-unmatch public/data/tours.json
+
       - name: Check if data changed
         id: check_changes
         run: |
+          # public/data/tours.json 被 .gitignore 排除（超过 GitHub 100MB 单文件上限），
+          # 参数里显式点名被忽略的路径会让 git add 以退出码 1 直接失败。
           git add src/data/tours.ts public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/boarding-points public/data/geo-places.json scripts/geo-geocode-cache.json src/data/gzl_rendered_details.json src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_kanghui_cct.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json public/data/image-cache
           if git diff --cached --quiet; then
             echo "Data unchanged, skipping build and deploy"

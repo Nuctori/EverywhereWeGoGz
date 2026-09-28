@@ -226,6 +226,33 @@ function loadRawCounts() {
   return bySource;
 }
 
+// CI 由 update-data.yml 写出本轮真正抓到新数据的源清单；本地/无该文件时返回空集，
+// 即所有源都按"有新鲜数据"对待，守卫强度不变。
+function loadStaleSources() {
+  const markerPath = process.env.AUDIT_FRESH_SOURCES_FILE;
+  if (!markerPath) {
+    return new Set();
+  }
+  const absolute = path.isAbsolute(markerPath) ? markerPath : path.join(root, markerPath);
+  if (!fs.existsSync(absolute)) {
+    return new Set();
+  }
+  const fresh = new Set(
+    fs
+      .readFileSync(absolute, 'utf8')
+      .split(/\s+/)
+      .map((name) => name.trim())
+      .filter(Boolean),
+  );
+  const stale = new Set();
+  for (const source of Object.keys(sourceRules)) {
+    if (!fresh.has(source)) {
+      stale.add(source);
+    }
+  }
+  return stale;
+}
+
 function collectImages(tour) {
   const images = Array.isArray(tour.images) ? tour.images : [];
   if (tour.image) {
@@ -337,6 +364,7 @@ if (detailFiles.length !== fullTours.length) {
 
 const outputCounts = countBySource(fullTours);
 const rawCounts = loadRawCounts();
+const staleSources = loadStaleSources();
 const rawStructuredJrtKeys = new Set(
   rawJrtTours
     .filter((tour) => sourceOf(tour) === '假日通')
@@ -355,6 +383,15 @@ for (const [source, rule] of Object.entries(sourceRules)) {
   const required = computeRequiredOutputCount(rule, rawCount);
 
   if (outputCount < required) {
+    // 本轮该源没抓到新数据时，raw 是上一轮残留，ratio 基线不成立：
+    // 目录里仍是上一轮的产出，拿旧 raw 去卡它只会把"没抓到"报成"塌了"。
+    // 降级为告警，避免掩盖真正的回归（抓到了新数据却产出骤降仍会 fail）。
+    if (staleSources.has(source)) {
+      warnings.push(
+        `${source} output below raw ratio, but this source had no fresh crawl this round: output=${outputCount}, required>=${required}, rawUnique=${rawCount}`,
+      );
+      continue;
+    }
     fail(
       errors,
       `${source} output count too low: output=${outputCount}, required>=${required}, rawUnique=${rawCount}, ratio=${rule.ratio}`,

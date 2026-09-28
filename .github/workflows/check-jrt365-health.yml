@@ -137,11 +137,22 @@ jobs:
             echo "Health report was not generated." >> "$GITHUB_STEP_SUMMARY"
           fi
 
+      - name: Drop stale tours.json from the index
+        # tours.json 曾入库、后被 .gitignore 排除，索引里可能残留它的跟踪位。
+        # 一旦残留，下面 git add 的 `git diff --cached` 会把它当成"数据有变"，
+        # 于是每轮都产出只剩删除项的提交，并把真实变更淹没掉。
+        # 只点名这一条路径：仓库里另有 audit/ 等"已跟踪但被忽略"的文件，
+        # 若用 git ls-files -ci 批量清理会把它们一并暂存成删除。
+        if: steps.recrawl.outcome == 'success'
+        run: git rm --cached --quiet --ignore-unmatch public/data/tours.json
+
       - name: Check if data changed
         id: check_changes
         if: steps.recrawl.outcome == 'success'
         run: |
-          git add src/data/tours.ts public/data/tours.json public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/geo-places.json scripts/geo-geocode-cache.json src/data/raw_jrt365_full.json public/data/image-cache
+          # public/data/tours.json 被 .gitignore 排除（超过 GitHub 100MB 单文件上限），
+          # 参数里显式点名被忽略的路径会让 git add 以退出码 1 直接失败。
+          git add src/data/tours.ts public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/geo-places.json scripts/geo-geocode-cache.json src/data/raw_jrt365_full.json public/data/image-cache
           if git diff --cached --quiet; then
             echo "Data unchanged, nothing to commit"
             echo "changed=false" >> $GITHUB_OUTPUT
