@@ -284,21 +284,15 @@
   },
   "中山国际酒店 广东 中国": {
     "query": "中山国际酒店 广东 中国",
-    "provider": "photon",
+    "provider": "nominatim",
     "latitude": 22.5231028,
     "longitude": 113.3579104,
-    "displayName": "中山国际酒店 中山一路 西区街道 中山市  广东省 中国",
+    "displayName": "中山国际酒店, 中山一路, 西区街道, 北村, 中山市, 广东省, 528400, 中国",
     "level": "poi",
-    "locality": "中山市",
+    "locality": "西区街道",
     "providerScore": 80,
     "address": {
-      "formatted": "中山国际酒店 中山一路 西区街道 中山市  广东省 中国",
-      "country": "中国",
-      "province": "广东省",
-      "city": "中山市",
-      "district": "西区街道",
-      "street": "中山一路",
-      "postalCode": "528400"
+      "formatted": "中山国际酒店, 中山一路, 西区街道, 北村, 中山市, 广东省, 528400, 中国"
     }
   },
   "广州南沙 广东 中国": {
@@ -1457,22 +1451,15 @@
   },
   "广州南沙 大湾区 广东 中国": {
     "query": "广州南沙 大湾区 广东 中国",
-    "provider": "photon",
-    "latitude": 22.7004839,
-    "longitude": 113.5528338,
-    "displayName": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+    "provider": "arcgis",
+    "latitude": 22.804391301,
+    "longitude": 113.5198188,
+    "displayName": "广东省广州南沙",
     "level": "poi",
-    "locality": "福生社区",
-    "providerScore": 80,
+    "locality": "",
+    "providerScore": 81.0,
     "address": {
-      "formatted": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
-      "country": "中国",
-      "province": "广东省",
-      "city": "广州市",
-      "district": "珠江街道",
-      "locality": "福生社区",
-      "street": "同安东围路",
-      "postalCode": "511462"
+      "formatted": "广东省广州南沙"
     }
   },
   "广州南沙 小乌镇 大湾区 广东 中国": {
@@ -5100,19 +5087,15 @@
   },
   "禾木镇 禾木村 新疆 中国": {
     "query": "禾木镇 禾木村 新疆 中国",
-    "provider": "photon",
-    "latitude": 48.5692063,
-    "longitude": 87.4303716,
-    "displayName": "禾木村 قوم ᠬᠣᠮ   禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ 布尔津县 新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی 中国",
-    "level": "poi",
-    "locality": "禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ",
-    "providerScore": 80,
+    "provider": "arcgis",
+    "latitude": 48.57103,
+    "longitude": 87.43152,
+    "displayName": "新疆阿勒泰禾木村",
+    "level": "town",
+    "locality": "",
+    "providerScore": 78.27,
     "address": {
-      "formatted": "禾木村 قوم ᠬᠣᠮ   禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ 布尔津县 新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی 中国",
-      "country": "中国",
-      "province": "新疆维吾尔自治区 شىنجاڭ ئۇيغۇر ئاپتونوم رايونی",
-      "city": "禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ",
-      "district": "布尔津县"
+      "formatted": "新疆阿勒泰禾木村"
     },
     "precision": "approximate"
   },
@@ -5524,17 +5507,17 @@
     "provider": "photon",
     "latitude": 24.179964,
     "longitude": 113.4117018,
-    "displayName": "海螺国际大酒店 帽子峰三号路 英德市 清远市  广东省 中国",
+    "displayName": "海螺国际大酒店 桥西路 英德市 清远市  广东省 中国",
     "level": "poi",
     "locality": "清远市",
     "providerScore": 80,
     "address": {
-      "formatted": "海螺国际大酒店 帽子峰三号路 英德市 清远市  广东省 中国",
+      "formatted": "海螺国际大酒店 桥西路 英德市 清远市  广东省 中国",
       "country": "中国",
       "province": "广东省",
       "city": "清远市",
       "district": "英德市",
-      "street": "帽子峰三号路",
+      "street": "桥西路",
       "postalCode": "513000"
     }
   },
@@ -5639,42 +5622,28 @@
   },
   "香格里拉大酒店 云南 中国": {
     "query": "香格里拉大酒店 云南 中国",
-    "provider": "photon",
+    "provider": "nominatim",
     "latitude": 27.8266346,
     "longitude": 99.7050858,
-    "displayName": "香格里拉大酒店 池慈卡街 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ། 迪庆藏族自治州 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ་གྲོང་ཁྱེར། 云南省 中国",
+    "displayName": "香格里拉大酒店, 1号, 池慈卡街, 香格里拉市, 建塘镇, 香格里拉市, 迪庆藏族自治州, 云南省, 674400, 中国",
     "level": "poi",
-    "locality": "迪庆藏族自治州",
+    "locality": "建塘镇",
     "providerScore": 80,
     "address": {
-      "formatted": "香格里拉大酒店 池慈卡街 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ། 迪庆藏族自治州 香格里拉市 སེམས་ཀྱི་ཉི་ཟླ་གྲོང་ཁྱེར། 云南省 中国",
-      "country": "中国",
-      "province": "云南省",
-      "city": "迪庆藏族自治州",
-      "district": "香格里拉市 སེམས་ཀྱི་ཉི་ཟླ།",
-      "street": "池慈卡街",
-      "houseNumber": "1号",
-      "postalCode": "674400"
+      "formatted": "香格里拉大酒店, 1号, 池慈卡街, 香格里拉市, 建塘镇, 香格里拉市, 迪庆藏族自治州, 云南省, 674400, 中国"
     }
   },
   "星湖大酒店 广东 中国": {
     "query": "星湖大酒店 广东 中国",
-    "provider": "photon",
+    "provider": "nominatim",
     "latitude": 23.0571237,
     "longitude": 112.4669013,
-    "displayName": "星湖大酒店 端州四路 城东街道 肇庆市  广东省 中国",
+    "displayName": "星湖大酒店, 端州四路, 雅图社区, 文明社区, 城东街道, 端州区, 肇庆市, 广东省, 526040, 中国",
     "level": "poi",
-    "locality": "文明社区",
+    "locality": "城东街道",
     "providerScore": 80,
     "address": {
-      "formatted": "星湖大酒店 端州四路 城东街道 肇庆市  广东省 中国",
-      "country": "中国",
-      "province": "广东省",
-      "city": "肇庆市",
-      "district": "城东街道",
-      "locality": "文明社区",
-      "street": "端州四路",
-      "postalCode": "526040"
+      "formatted": "星湖大酒店, 端州四路, 雅图社区, 文明社区, 城东街道, 端州区, 肇庆市, 广东省, 526040, 中国"
     }
   },
   "肇庆鼎湖 广东 中国": {
@@ -5790,6 +5759,124 @@
       "province": "广西壮族自治区",
       "city": "凤山县",
       "district": "同桂"
+    }
+  },
+  "蓝钟镇 怀集 广东 中国": {
+    "query": "蓝钟镇 怀集 广东 中国",
+    "provider": "arcgis",
+    "latitude": 24.06556,
+    "longitude": 111.948,
+    "displayName": "广东肇庆蓝钟镇",
+    "level": "town",
+    "locality": "广东肇庆蓝钟镇",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "广东肇庆蓝钟镇"
+    },
+    "precision": "approximate"
+  },
+  "胡志明市胡志明 越南": {
+    "query": "胡志明市胡志明 越南",
+    "provider": "arcgis",
+    "latitude": 10.82327,
+    "longitude": 106.62978,
+    "displayName": "胡志明市",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "胡志明市"
+    }
+  },
+  "仙本那斗湖 马来西亚": {
+    "query": "仙本那斗湖 马来西亚",
+    "provider": "nominatim",
+    "latitude": 4.4790765,
+    "longitude": 118.4297732,
+    "displayName": "仙本那, 斗湖省, 沙巴州, 马来西亚",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "仙本那, 斗湖省, 沙巴州, 马来西亚"
+    }
+  },
+  "丽江玉龙雪山": {
+    "query": "丽江玉龙雪山",
+    "provider": "nominatim",
+    "latitude": 27.0984141,
+    "longitude": 100.1767026,
+    "displayName": "玉龙雪山, 丽江市, 云南省, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "玉龙雪山, 丽江市, 云南省, 中国"
+    }
+  },
+  "广州南沙花园酒店 广东 中国": {
+    "query": "广州南沙花园酒店 广东 中国",
+    "provider": "nominatim",
+    "latitude": 22.752538,
+    "longitude": 113.6119416,
+    "displayName": "广州南沙花园酒店, 南沙绿道, 港湾街道, 南沙区, 广州市, 广东省, 511462, 中国",
+    "level": "poi",
+    "locality": "港湾街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "广州南沙花园酒店, 南沙绿道, 港湾街道, 南沙区, 广州市, 广东省, 511462, 中国"
+    }
+  },
+  "古镇村 周庄 江苏 中国": {
+    "query": "古镇村 周庄 江苏 中国",
+    "provider": "nominatim",
+    "latitude": 31.1150802,
+    "longitude": 120.8459437,
+    "displayName": "周庄古镇景区, 中市街, 贞丰里社区, 周庄镇, 昆山市, 苏州市, 江苏省, 215325, 中国",
+    "level": "poi",
+    "locality": "周庄镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "周庄古镇景区, 中市街, 贞丰里社区, 周庄镇, 昆山市, 苏州市, 江苏省, 215325, 中国"
+    }
+  },
+  "无底湖 香格里拉 云南 中国": {
+    "query": "无底湖 香格里拉 云南 中国",
+    "provider": "nominatim",
+    "latitude": 28.2492826,
+    "longitude": 99.9721942,
+    "displayName": "无底湖, 格咱乡, 香格里拉市, 迪庆藏族自治州, 云南省, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "无底湖, 格咱乡, 香格里拉市, 迪庆藏族自治州, 云南省, 中国"
+    }
+  },
+  "清远美林湖": {
+    "query": "清远美林湖",
+    "provider": "nominatim",
+    "latitude": 23.5019284,
+    "longitude": 113.0443901,
+    "displayName": "美林湖, 美林湖大道, 石角镇, 清城区, 清远市, 广东省, 中国",
+    "level": "poi",
+    "locality": "石角镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "美林湖, 美林湖大道, 石角镇, 清城区, 清远市, 广东省, 中国"
+    }
+  },
+  "肇庆丽呈朗誉酒店": {
+    "query": "肇庆丽呈朗誉酒店",
+    "provider": "nominatim",
+    "latitude": 23.0610696,
+    "longitude": 112.4518357,
+    "displayName": "丽呈朗誉酒店, 黄塘路, 康乐社区, 城西街道, 端州区, 肇庆市, 广东省, 526040, 中国",
+    "level": "poi",
+    "locality": "城西街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "丽呈朗誉酒店, 黄塘路, 康乐社区, 城西街道, 端州区, 肇庆市, 广东省, 526040, 中国"
     }
   }
 }
