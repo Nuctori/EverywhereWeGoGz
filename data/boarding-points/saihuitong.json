@@ -1,10 +1,38 @@
 {
  "stats": {
-  "total": 14,
-  "with_points": 14,
+  "total": 49,
+  "with_points": 1,
   "skipped_intl": 0
  },
  "items": {
+  "http://gftblm.360jlb.cn/m/event": {
+   "title": "【长期扫码可进】@工作日活动②群 已结束 广东·广州",
+   "points": [
+    {
+     "name": "广州",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "如需要搜索其他城市站点活动",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "例如：如需找北京站活动在微信搜索“暴走村北京站”即可",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    }
+   ],
+   "raw": "广东 广州 \n 目的地 \n 广东 广州 \n\n 管理员 \n \n 暴走村六六 \n 18666808657\n \n\n 活动亮点 \n \n 超特价转发返10元(规则参看页面) \n \n\n\n\n\n \n 活动已结束 \n \n \n\n \n\n\n \n 详细信息 \n \n \n #重要通知# 目前暴走村每个城市都有独立的小程序 如需要搜索其他城市站点活动 （请分别搜索） 例如：如需找北京站活动在微信搜索“暴走村北京站”即可 （目前已经开通深圳广州上海三个城市， 北京杭州2025年8月开通） \n \n\n\n \n \n 最近报名 \n \n \n \n \n \n \n {{applier.nickname}} \n 1\" class=\"theme-bgcolor applierCount\">\n {{applier.applierCount}}\n \n \n \n \n \n 更多报名 \n \n \n \n\n\n \n \n 咨询留言 \n \n \n 正在加载留言数据... \n \n \n \n \n \n \n \n \n 邀请码 \n × \n \n \n \n \n \n {{errorCodeText}} \n \n \n \n 确定 \n \n \n \n \n \n \n 优惠券 \n × \n \n \n \n \n \n \n ￥ {{el.discountedPrice}} \n \n \n 会员专享\n \n 新用户专享\n \n 普通用户专享\n \n 所有用户可用\n \n 无门槛限制 \n 0\">满{{el.fullAmount}}元使用 \n 截至{{el.fixedDate|date('yyyy-MM-dd HH:mm')}} \n 领取之日{{el.expiredDays}}天内有效 \n \n \n 立即领取 \n 已领取 \n \n \n \n \n \n \n 确定 \n \n \n \n \n \n \n 开通会员 \n × \n \n \n \n \n 请使用手机扫码升级会员 \n \n \n \n \n \n 开通会员 \n × \n \n \n \n \n \n \n 开通时长: \n \n \n \n \n \n 付款方式: \n \n \n \n 支付宝 \n \n \n 微信 \n \n \n \n \n \n 赠送积分: \n 0 \n \n \n 应付金额: \n \n 元\n \n \n \n \n \n 确定 \n 查看会员说明>> \n \n \n \n \n \n\n \n \n 开通会员 \n × \n \n \n \n \n 请使用手机扫码升级会员 \n \n \n \n\n\n \n @所有HR和老板们，如何让公司团建更好玩？一对一为您公司定制行程，这样的团建-太酷啦！ \n \n \n \n ¥0 \n \n 详细信息团建，是企业非常重要的一种团结策略不少企业都会通过各种活动去创造更高的企业文化，团结团队作战能力对于HR来说做好团建活动却不是一件轻松的事做好了是团建，做不好就是团灭了一不小心成了HR的送命题......一提起团建每个人都怨声载道，每个人都满肚子意见可怜的HR熬夜加班策划的方案最后却落得上下不讨好，满腹委屈那么，如何策划一场老板满意、员工叫好的团",
+   "summary": "广州、如需要搜索其他城市站点活动、例如：如需找北京站活动在微信搜索“暴走村北京站”即可"
+  },
   "http://gzqlx.360jlb.cn/m/event?id=883712": {
    "title": "大理集散【秘境德宏7日】芒市-大金塔-和顺-北海湿地-热海-瑞丽-一寨两国-热带雨林-潞江坝咖啡庄园-高黎贡轻徒步-诺邓 云南·大理 07/31-11/12  ( ¥3350) 起",
    "points": [],
