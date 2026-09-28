@@ -102,6 +102,18 @@ jobs:
           git -C "$artifact_dir" push --force origin HEAD:cdn-assets
           git worktree remove --force "$artifact_dir"
 
+      - name: Strip oversized data from the Pages artifact
+        # GitHub Pages 单产物上限 1GB。dist/data/image-cache 是 780MB 的优化后 webp 图库，
+        # 同一份已随上面"Publish build artifacts"步骤完整写入 cdn-assets 分支，
+        # 由 service worker 经 CDN 池直出（见 public/sw.js）。Pages 产物里重复打包它只会
+        # 把产物顶到 1.1GB 触发告警、逼近硬上限。这里只在上传 Pages 前从 dist 移除它，
+        # cdn-assets 的副本不受影响。tours.json(~57MB)同理——全量数据分片已在 cdn-assets，
+        # 运行时也不需要整文件。
+        run: |
+          rm -rf dist/data/image-cache
+          rm -f dist/data/tours.json
+          echo "dist 体积: $(du -sh dist | cut -f1)"
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
