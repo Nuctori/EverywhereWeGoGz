@@ -886,7 +886,28 @@ function hasStrictBudgetLanguage(text: string) {
   );
 }
 
-function parseDuration(text: string) {
+// 中文数字天数归一："两天/三天/两三天/三五天"是用户最常见的表达，纯数字
+// 正则解析不到会让时长约束整条失明（3天/1天线路混进"两天游"结果）。
+// 相邻数字词（两三/三五）按数字域惯例展开成区间。
+const CHINESE_NUMERAL_VALUES: Record<string, number> = {
+  一: 1, 两: 2, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10,
+};
+
+function normalizeChineseNumeralDuration(text: string) {
+  return text.replace(/([一两二三四五六七八九十]{1,3})天/g, (match, numerals: string) => {
+    if (numerals.length === 1) {
+      const value = numerals === '十' ? 10 : CHINESE_NUMERAL_VALUES[numerals];
+      return Number.isFinite(value) ? `${value}天` : match;
+    }
+    const values = [...numerals].map((char) => CHINESE_NUMERAL_VALUES[char]);
+    if (values.some((value) => !Number.isFinite(value))) return match;
+    if (values.length === 2) return `${Math.min(values[0], values[1])}-${Math.max(values[0], values[1])}天`;
+    return `${values[0]}-${values[values.length - 1]}天`;
+  });
+}
+
+function parseDuration(rawText: string) {
+  const text = normalizeChineseNumeralDuration(rawText);
   const chineseRangeMatch = text.match(/(\d{1,2})\s*(?:-|\u5230|\u81f3|~|\uff5e)\s*(\d{1,2})\s*(?:\u5929|\u65e5)/u);
   if (chineseRangeMatch) {
     return {
