@@ -14,7 +14,7 @@ const tourById = new Map(tours.map(t=>[t.id,t]));
 const queries = JSON.parse(fs.readFileSync(new URL('./queries.json', import.meta.url),'utf8'));
 
 const aiConfig = { apiKey: KEY, baseUrl: PROXY, model: DRIVER };
-const RESULTS = 'tmp/aiq/results-final4.jsonl';
+const RESULTS = process.env.AI_QUALITY_RESULTS ?? 'tmp/aiq/results-loop.jsonl';
 const done = new Set(fs.existsSync(RESULTS) ? fs.readFileSync(RESULTS,'utf8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l).id) : []);
 
 async function judge(query, items, expect) {
