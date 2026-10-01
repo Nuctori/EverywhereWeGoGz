@@ -61,6 +61,14 @@ assert(
 );
 
 assert(
+  tourList.includes('loadedPageCount < totalPageCount') &&
+    !tourList.includes('localTours.length < displayResultCount') &&
+    tourList.includes('if (started) {') &&
+    tourList.includes('SENTINEL_NOOP_STRIKE_LIMIT'),
+  'Bottom sentinel must gate on ordered page-chain progress (loadedPageCount/totalPageCount) and only advance visibleCount when a chunk fetch actually starts, so a no-op load never spins at the bottom.',
+);
+
+assert(
   !/setTimeout\(\(\) => \{\s*void loadCatalog\(\);/.test(tourList),
   'The 20MB tours-list.json catalog must not be auto-scheduled for every visitor; it is a chunk-failure fallback only.',
 );

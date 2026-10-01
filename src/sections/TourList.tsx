@@ -70,6 +70,10 @@ function useToursData() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
   const [hasPageChunks, setHasPageChunks] = useState(true);
+  // 顺序链游标（响应式镜像）：loadedPageCount 每次成功落片 +1，totalPageCount 首屏确定。
+  // 只用于渲染判断，真正的推进仍以 ref 为准，避免异步竞态读旧值。
+  const [loadedPageCount, setLoadedPageCount] = useState(1);
+  const [totalPageCount, setTotalPageCount] = useState(Number.POSITIVE_INFINITY);
   const loadedPagesRef = useRef<Set<number>>(new Set());
   const inFlightPagesRef = useRef<Set<number>>(new Set());
   // 顺序链的下一片号：与 localTours.length 解耦。分片含重复/空片时
@@ -154,6 +158,8 @@ function useToursData() {
         seenTourIdsRef.current = new Set(pageData.items.map((tour: TourSummary) => tour.id));
         nextPageRef.current = 1;
         totalPagesRef.current = Math.ceil(pageData.meta.total / PAGE_SIZE);
+        setLoadedPageCount(1);
+        setTotalPageCount(totalPagesRef.current);
         zeroAddStrikesRef.current = 0;
         hasPageChunksRef.current = true;
         setHasPageChunks(true);
@@ -213,16 +219,18 @@ function useToursData() {
     return () => { cancelled = true; };
   }, [loadCatalog]);
 
-  const loadMorePages = useCallback(async (neededPage: number) => {
-    if (!hasPageChunksRef.current) return;
-    if (loadedPagesRef.current.has(neededPage)) return;
-    if (inFlightPagesRef.current.has(neededPage)) return;
+  // 返回值 = 本次是否真的发起了分片请求（false 表示空转：已加载/加载中/越界）。
+  // 底部哨兵据此判断"链是否还在推进"，避免空转时仍然拉动 visibleCount 造成贴底转圈。
+  const loadMorePages = useCallback(async (neededPage: number): Promise<boolean> => {
+    if (!hasPageChunksRef.current) return false;
+    if (loadedPagesRef.current.has(neededPage)) return false;
+    if (inFlightPagesRef.current.has(neededPage)) return false;
 
     // 请求越过分片总数：数据链已到头，收敛而不是反复打 404
     if (neededPage >= totalPagesRef.current) {
       hasPageChunksRef.current = false;
       setHasPageChunks(false);
-      return;
+      return false;
     }
 
     inFlightPagesRef.current.add(neededPage);
@@ -234,6 +242,7 @@ function useToursData() {
       }
       const pageData = toursPageSchema.parse(await res.json());
       loadedPagesRef.current.add(neededPage);
+      setLoadedPageCount(loadedPagesRef.current.size);
       const seenIds = seenTourIdsRef.current;
       const nextItems = pageData.items.filter((tour: TourSummary) => !seenIds.has(tour.id));
       for (const tour of nextItems) seenIds.add(tour.id);
@@ -253,9 +262,11 @@ function useToursData() {
       } else {
         zeroAddStrikesRef.current = 0;
       }
+      return true;
     } catch {
       hasPageChunksRef.current = false;
       setHasPageChunks(false);
+      return false;
     } finally {
       inFlightPagesRef.current.delete(neededPage);
       syncLoadingMoreState();
@@ -272,6 +283,8 @@ function useToursData() {
     loadMorePages,
     loadedPagesRef,
     nextPageRef,
+    loadedPageCount,
+    totalPageCount,
     hasPageChunks,
     hasPageChunksRef,
   };
@@ -308,6 +321,8 @@ const PAGE_SIZE = 24;
 const INITIAL_LOAD_COUNT = 24;
 // 连续 N 片零新增即熔断顺序分片链
 const ZERO_ADD_STRIKE_LIMIT = 3;
+// 底部哨兵连续 N 次空转（无片可加载）即判定链停摆，停止渲染哨兵
+const SENTINEL_NOOP_STRIKE_LIMIT = 2;
 const LONG_TRIP_DURATION_VALUE = 11;
 const DEFAULT_SLIDER_VALUES: [number, number] = [0, 100];
 const VISIBLE_DESTINATION_COUNT = 14;
@@ -483,6 +498,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     total,
     loadMorePages,
     nextPageRef,
+    loadedPageCount,
+    totalPageCount,
     hasPageChunks,
     hasPageChunksRef,
   } = useToursData();
@@ -505,6 +522,10 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const loadMoreTimerRef = useRef<number | null>(null);
   const viewVersionRef = useRef(0);
+  // 哨兵空转熔断：loadMorePages 连续返回 false（无片可加载）达到上限即判定
+  // 链已停摆，令 shouldRenderLoadMore 收敛为 false，兜底杜绝贴底转圈。
+  const sentinelNoopStrikesRef = useRef(0);
+  const [sentinelStalled, setSentinelStalled] = useState(false);
 // filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => {
@@ -905,10 +926,14 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       ? unfilteredDisplayableCount
       : Math.max(total, displayTours.length);
   const displayResultCount = isIndexDrivenView ? displayTours.length : defaultResultCount;
+  // 远端链是否还能推进：只看"顺序链的下一片是否还在分片总数内"，
+  // 不再用 localTours.length（原始加载数）比对展示数——两者口径不同
+  // （一个含被过滤噪音、一个不含），会长期为真并让底部哨兵一直转圈。
   const hasMoreRemotePages =
     hasPageChunks &&
     catalogTours.length === 0 &&
-    localTours.length < displayResultCount;
+    !sentinelStalled &&
+    loadedPageCount < totalPageCount;
   const shouldRenderLoadMore = hasMoreLoadedResults || hasMoreRemotePages;
 
   useEffect(() => {
@@ -987,31 +1012,42 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
         return;
       }
 
-      if (hasPageChunksRef.current && catalogTours.length === 0 && localTours.length < displayResultCount) {
+      if (hasPageChunksRef.current && catalogTours.length === 0 && loadedPageCount < totalPageCount) {
         const nextPage = nextPageRef.current;
         const viewVersion = viewVersionRef.current;
 
         setIsLoadingMore(true);
-        void loadMorePages(nextPage).finally(() => {
+        void loadMorePages(nextPage).then((started) => {
           if (viewVersionRef.current !== viewVersion) {
             setIsLoadingMore(false);
             return;
           }
 
-          setVisibleCount((current) => current + PAGE_SIZE);
+          // 只有真的发起了分片请求才推进 visibleCount。空转（已加载/越界）时
+          // 不再拉动可见数，否则哨兵会一直贴底并无限转圈。
+          if (started) {
+            sentinelNoopStrikesRef.current = 0;
+            setVisibleCount((current) => current + PAGE_SIZE);
+          } else {
+            sentinelNoopStrikesRef.current += 1;
+            if (sentinelNoopStrikesRef.current >= SENTINEL_NOOP_STRIKE_LIMIT) {
+              setSentinelStalled(true);
+            }
+          }
           setIsLoadingMore(false);
         });
       }
     },
     [
       catalogTours.length,
-      displayResultCount,
       displayTours.length,
       hasPageChunksRef,
       isLoadingMore,
       loadMorePages,
       loadingMore,
-      localTours.length,
+      loadedPageCount,
+      totalPageCount,
+      nextPageRef,
       visibleCount,
     ],
   );
@@ -1862,9 +1898,11 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
             </div>
           )}
 
-          {!shouldRenderLoadMore && displayResultCount > INITIAL_LOAD_COUNT && (
+          {!shouldRenderLoadMore && waterfallTours.length > INITIAL_LOAD_COUNT && (
             <div className="py-8 text-center text-sm text-stone-400">
-              已加载全部 {displayResultCount.toLocaleString()} 条结果
+              {sentinelStalled
+                ? `已加载 ${waterfallTours.length.toLocaleString()} 条，暂时无法继续加载`
+                : `已加载全部 ${displayResultCount.toLocaleString()} 条结果`}
             </div>
           )}
         </>
