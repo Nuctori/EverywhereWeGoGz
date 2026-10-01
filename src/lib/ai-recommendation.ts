@@ -47,9 +47,14 @@ const ROUTE_ATLAS_MAX_EXAMPLES = 2;
 const MAX_RECENT_CONVERSATION_MESSAGES = 4;
 const AI_FAST_FALLBACK_TIMEOUT_MS = 9000;
 const AI_FREE_PROVIDER_TIMEOUT_MS = 60000;
-const AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS = 42000;
-const AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS = 60000;
-const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 15000;
+// 前台竞速聚合上限：大 prompt 下现代模型完成一份结构化 JSON 普遍要 25s+，
+// 42s 会把本来能成功的调用掐死在半路降级到本地补位——宁可让用户多等十几秒，
+// 也不要一次必然失败的 AI 调用；流式有 token 信号时再放宽一档。
+const AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS = 75000;
+const AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS = 100000;
+// 未知供应商（自建网关/代理/新云）无法假设首包速度：非流式调用首包即整包，
+// 15s 对大 prompt 结构化输出是必然超时。放宽到 45s，仍受前台聚合上限约束。
+const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 45000;
 // 实测 GLM 开 thinking 后连小任务都要 70s+（token 计入完成预算），
 // 60s 档必超时；思维链供应商单独给足预算。
 const AI_THINKING_PROVIDER_TIMEOUT_MS = 180000;
