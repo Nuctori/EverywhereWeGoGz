@@ -1033,6 +1033,41 @@ function widenNearCityHints(text: string, hints: string[]) {
   return hints.includes('广东') ? hints : [...hints, '广东'];
 }
 
+// 目的地提示的语料富集：别名表只覆盖部分省份（缺北京/华东/云南等），像
+// "国庆去北京玩5天"会因无北京条目而丢失目的地提示，冲突纪律与目的地加权
+// 全部失效。候选语料自身的 destination 字段就是最全的目的地词表——数据驱动、
+// 零人工维护。别名族已覆盖的值不重复注入，避免提示膨胀。
+const corpusDestinationVocabCache = new WeakMap<AiRecommendationCandidate[], Set<string>>();
+
+function getCorpusDestinationVocabulary(tours: AiRecommendationCandidate[]) {
+  let vocabulary = corpusDestinationVocabCache.get(tours);
+  if (!vocabulary) {
+    vocabulary = new Set();
+    for (const tour of tours) {
+      const value = normalizeText(tour.destination || '').trim();
+      if (value && value !== '其他' && value.length >= 2 && value.length <= 6) vocabulary.add(value);
+    }
+    corpusDestinationVocabCache.set(tours, vocabulary);
+  }
+  return vocabulary;
+}
+
+function enrichDestinationHintsWithCorpus(
+  text: string,
+  hints: string[],
+  tours: AiRecommendationCandidate[],
+) {
+  const vocabulary = getCorpusDestinationVocabulary(tours);
+  const normalized = normalizeText(text);
+  const matched: string[] = [];
+  for (const value of vocabulary) {
+    if (hints.includes(value)) continue;
+    if (hints.some((hint) => (DESTINATION_ALIASES[hint] ?? []).includes(value))) continue;
+    if (normalized.includes(value)) matched.push(value);
+  }
+  return [...matched, ...hints];
+}
+
 function collectDestinationHints(text: string) {
   // 返回"具体别名优先、canonical 兜底"的目的地提示。用户说"阳江海陵岛"时，
   // 只返回 ['广东'] 会让所有广东线路拿到同分的目的地命中，真正的阳江线路
@@ -1781,6 +1816,7 @@ function getDeclaredDepartureCity(title: string) {
 
 function localRecommendations(tours: AiRecommendationCandidate[], text: string) {
   const query = buildLocalRecommendationQuery(text);
+  query.destinationHints = enrichDestinationHintsWithCorpus(text, query.destinationHints, tours);
   const items = tours
     .map((tour, index) => scoreTour(tour, query, index))
     .filter((item): item is AiRecommendationItem => Boolean(item))
@@ -2509,6 +2545,28 @@ function limitRecommendationCommentary(items: AiRecommendationItem[]): AiRecomme
 
 // AI 结果排在最前；当 AI 返回较少时，用本地排序补充可比较的次优候选，
 // 让用户有选择空间。补充项不改变 AI 已选项的顺序，也不会被包装成 AI 结论。
+// 按本轮意图的硬冲突（天数/预算/目的地/班期/晚间出发）切分候选：
+// 合规项在前，冲突项在后。冲突判定复用 getPrimitiveConflictReasons——
+// 与"需放宽条件"标注同一套语义，装配序和标注不会打架。
+function splitByIntentConflicts(
+  items: AiRecommendationItem[],
+  intent: AiTravelIntent | null,
+  primitiveByTourId: Map<string, RecommendationPrimitive>,
+) {
+  if (!intent) return { compliant: [...items], conflicting: [] };
+  const compliant: AiRecommendationItem[] = [];
+  const conflicting: AiRecommendationItem[] = [];
+  for (const item of items) {
+    const primitive = primitiveByTourId.get(item.tourId);
+    if (primitive && getPrimitiveConflictReasons(intent, primitive).length === 0) {
+      compliant.push(item);
+    } else {
+      conflicting.push(item);
+    }
+  }
+  return { compliant, conflicting };
+}
+
 function mergeAiAndLocalRecommendations(
   aiItems: AiRecommendationItem[],
   localItems: AiRecommendationItem[],
@@ -7700,6 +7758,18 @@ export async function requestAiRecommendations({
   const memoryBackedIntent = mergeIntentWithMemory(baseHardIntent, memoryForThisTurn);
   const allowPublicInterestForCurrentTurn = allowsPublicInterestForTurn(text, memoryForThisTurn);
   const candidatePool = baseCandidatePool;
+  // 语料目的地富集要在候选池就绪后做；同时作用于 base 与 memory 合并意图，
+  // 保证冲突纪律（getPrimitiveConflictReasons）拿得到完整目的地提示。
+  const corpusDestinationHints = enrichDestinationHintsWithCorpus(
+    text,
+    baseHardIntent?.destinationHints ?? [],
+    candidatePool,
+  );
+  if (baseHardIntent) baseHardIntent.destinationHints = corpusDestinationHints;
+  if (memoryBackedIntent) memoryBackedIntent.destinationHints = uniqueStrings([
+    ...corpusDestinationHints,
+    ...(memoryBackedIntent.destinationHints ?? []),
+  ]);
   let cachedMemoryBackedLocalItems: AiRecommendationItem[] | null = null;
   let cachedFallbackLocalItems: AiRecommendationItem[] | null = null;
   const getFallbackLocalItems = () => {
@@ -8093,14 +8163,32 @@ export async function requestAiRecommendations({
       : compoundRequest
         ? []
         : compactedLocalItems.slice(0, MAX_AI_RANKED_ITEMS);
+    const finalPrimitiveByTourId = new Map(
+      compactedCandidateTours.map((candidate) => [candidate.id, buildTourPrimitive(candidate)]),
+    );
+    // 硬约束装配序：合规 AI 项 → 合规本地补位 → 冲突 AI 项（下游带
+    // "需放宽条件"标注）→ 冲突本地项。模型在 JSON 长尾里经常忘记约束，
+    // 让违规项占据第 5-15 位等于告诉用户约束失效；合规项不足时列表自然
+    // 变短也是诚实行为。模型把合规项全部漏选时（解析/抽取失误）保持原序。
+    const { compliant: compliantAiItems, conflicting: conflictingAiItems } =
+      splitByIntentConflicts(rankedAiItems, finalIntent, finalPrimitiveByTourId);
+    const { compliant: conflictFreeLocals, conflicting: conflictingLocals } =
+      splitByIntentConflicts(
+        padRecommendationItems(compactedLocalItems, fallbackRecommendations(compactedCandidateTours)),
+        finalIntent,
+        finalPrimitiveByTourId,
+      );
     const localItemsForFinalMerge = compoundRequest && aiItems.length === 0
       ? []
       : aiItems.length > 0
-        ? padRecommendationItems(compactedLocalItems, fallbackRecommendations(compactedCandidateTours))
+        ? [...conflictFreeLocals, ...conflictingAiItems, ...conflictingLocals]
         : compactedLocalItems;
 
     const baseMergedItems = buildPaddedRecommendationItems(
-      mergeAiAndLocalRecommendations(rankedAiItems, localItemsForFinalMerge),
+      mergeAiAndLocalRecommendations(
+        compliantAiItems.length > 0 || rankedAiItems.length === 0 ? compliantAiItems : rankedAiItems,
+        localItemsForFinalMerge,
+      ),
       compoundRequest && aiItems.length === 0 ? [] : localItemsForMerge,
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
