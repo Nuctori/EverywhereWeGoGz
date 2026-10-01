@@ -1024,6 +1024,15 @@ function collectDepartureTimeOfDay(text: string) {
   return null;
 }
 
+// "广州周边/附近"是周域语义，不是点名广州市：只留 ['广州'] 会让从化/清远/
+// 佛山等近郊正确答案被判"目的地不匹配"降级（它们不属于广州别名族）。
+// 检测到周边语义且提示里含出发城市时，追加省级候选族。
+function widenNearCityHints(text: string, hints: string[]) {
+  if (!/周边|附近|周围/.test(text)) return hints;
+  if (!hints.includes(DEFAULT_DEPARTURE_CITY)) return hints;
+  return hints.includes('广东') ? hints : [...hints, '广东'];
+}
+
 function collectDestinationHints(text: string) {
   // 返回"具体别名优先、canonical 兜底"的目的地提示。用户说"阳江海陵岛"时，
   // 只返回 ['广东'] 会让所有广东线路拿到同分的目的地命中，真正的阳江线路
@@ -1477,11 +1486,14 @@ function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
   });
   const hasExperienceCoverageNeed = hasExplicitExperienceCoverageNeed(normalizedText);
 
-  return {
-    normalizedText,
-    boardingHints: collectBoardingHints(normalizedText),
-    destinationHints: collectDestinationHints(stripBoardingPhrases(normalizedText)),
-    avoidHints,
+    return {
+      normalizedText,
+      boardingHints: collectBoardingHints(normalizedText),
+      destinationHints: widenNearCityHints(
+        normalizedText,
+        collectDestinationHints(stripBoardingPhrases(normalizedText)),
+      ),
+      avoidHints,
     themeHints: collectThemeHints(normalizedText).filter((hint) => !avoidHints.includes(hint)),
     coverageTerms: hasExperienceCoverageNeed
       ? collectLocalCoverageTerms(normalizedText).filter((hint) => !avoidHints.includes(hint))
@@ -1963,9 +1975,12 @@ function buildHardIntentFromText(text: string): AiTravelIntent | null {
     : [];
   const intent: AiTravelIntent = {
     boardingHints: collectBoardingHints(normalizedText),
-    destinationHints: uniqueStrings([
-      ...collectDestinationHints(stripBoardingPhrases(normalizedText)),
-    ]),
+    destinationHints: widenNearCityHints(
+      normalizedText,
+      uniqueStrings([
+        ...collectDestinationHints(stripBoardingPhrases(normalizedText)),
+      ]),
+    ),
     avoid,
     weatherSensitivity,
     budgetMin: hasTextBudget && budget?.min && Number.isFinite(budget.min) ? budget.min : null,
