@@ -1681,21 +1681,31 @@ function scoreTour(
   if (query.coverageTerms.length > 0) {
     const matchedTerms = query.coverageTerms.filter((term) => getPrimitiveCoverageScore(primitive, [term]) > 0);
     if (matchedTerms.length > 0) {
-      // 字面命中（用户原话里的词，如"漂流"）与概念族命中（玩水清凉）分开计权：
-      // 同档覆盖分会让泛玩水产品淹没真漂流产品，字面词才是本轮的真实诉求。
-      // 字面命中要求线路语料真含该词——getPrimitiveCoverageScore 会做概念桥接，
-      // 海滩/温泉产品会借此蹭到"漂流"的字面分。
+      // 用户原话带字面词（如"漂流"）时：字面命中（且线路语料真含该词——概念
+      // 桥接会让海滩产品蹭到字面分）全权，纯概念族命中降权——否则泛玩水产品
+      // 淹没真漂流产品。没有字面词的查询（"暖和能下海"可能无别名命中）保持
+      // 原权重，概念族本来就是唯一的理解通道。
       const literalTerms = query.literalCoverageTerms;
-      const matchedLiteral = matchedTerms.filter((term) =>
-        literalTerms.includes(term) && corpus.includes(normalizeText(term)));
-      const matchedConceptOnly = matchedTerms.filter((term) => !matchedLiteral.includes(term));
-      const literalRatio = literalTerms.length > 0 ? matchedLiteral.length / literalTerms.length : 0;
-      score += matchedLiteral.length * 28 + matchedConceptOnly.length * 12 + Math.round(literalRatio * 44);
-      signals.push(
-        matchedLiteral.length === literalTerms.length && matchedConceptOnly.length === 0
-          ? `完整覆盖：${matchedLiteral.slice(0, 3).join('、')}`
-          : `部分命中：${[...matchedLiteral, ...matchedConceptOnly].slice(0, 2).join('、')}`,
-      );
+      if (literalTerms.length > 0) {
+        const matchedLiteral = matchedTerms.filter((term) =>
+          literalTerms.includes(term) && corpus.includes(normalizeText(term)));
+        const matchedConceptOnly = matchedTerms.filter((term) => !matchedLiteral.includes(term));
+        const literalRatio = matchedLiteral.length / literalTerms.length;
+        score += matchedLiteral.length * 28 + matchedConceptOnly.length * 12 + Math.round(literalRatio * 44);
+        signals.push(
+          literalRatio === 1 && matchedConceptOnly.length === 0
+            ? `完整覆盖：${matchedLiteral.slice(0, 3).join('、')}`
+            : `部分命中：${[...matchedLiteral, ...matchedConceptOnly].slice(0, 2).join('、')}`,
+        );
+      } else {
+        const coverageRatio = matchedTerms.length / query.coverageTerms.length;
+        score += matchedTerms.length * 28 + Math.round(coverageRatio * 44);
+        signals.push(
+          matchedTerms.length === query.coverageTerms.length
+            ? `完整覆盖：${matchedTerms.slice(0, 3).join('、')}`
+            : `部分命中：${matchedTerms.slice(0, 2).join('、')}`,
+        );
+      }
     }
   }
 
