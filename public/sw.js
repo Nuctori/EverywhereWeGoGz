@@ -298,37 +298,62 @@ function reselectAfterWinnerFailure(cache, poolWithProbe) {
   void ensureSelection(cache, poolWithProbe).catch(() => {});
 }
 
+async function fetchWithWinner(winner, publicPath, search, cacheMode) {
+  try {
+    const response = await fetchWithTimeout(
+      cdnUrl(winner, publicPath, search),
+      { credentials: 'omit', mode: 'cors', cache: cacheMode },
+    );
+    if (acceptableStaticResponse(response)) return response;
+  } catch {
+    // winner 失效，交给调用方回退
+  }
+  return null;
+}
+
 async function fetchFromPoolOrOrigin(request, cache, cacheMode = 'no-store') {
   const requestUrl = new URL(request.url);
   const publicPath = relativePublicPath(requestUrl);
   if (!publicPath) return fetch(request);
 
+  // image-cache 图库只存在于 cdn-assets 分支（Pages 产物已剥离）：
+  // 回源对它是必然 404。JSON 数据源站本身有货，可以立即回源；
+  // JSON 也不能用过期 winner 服务（新鲜度门控），过期 winner 只对图片启用——
+  // 图片内容跨发布基本不变，试一次远好于必 404 的回源。
+  const isStrippedAsset = publicPath.startsWith('data/image-cache/');
+
   const poolWithProbe = await getPool();
   const { state, stale } = await readState(cache);
 
-  // 无 winner 或状态过期：同源立即服务，选择放后台——请求路径永不背探测延迟。
-  // 过期状态同时触发一次后台重选（有 in-flight 节流 + 负缓存兜底）。
-  if (!state || stale) {
-    void ensureSelection(cache, poolWithProbe).catch(() => {});
+  if (state && (!stale || isStrippedAsset)) {
+    if (stale) void ensureSelection(cache, poolWithProbe).catch(() => {});
+    const response = await fetchWithWinner(state, publicPath, requestUrl.search, cacheMode);
+    if (response) return response;
+    reselectAfterWinnerFailure(cache, poolWithProbe);
+    if (!isStrippedAsset) return fetch(request);
+
+    // 剥离资源：等一次重选（in-flight 去重 + 30s 冷却）再试新 winner，仍失败才回源。
+    const reselected = await ensureSelection(cache, poolWithProbe).catch(() => null);
+    if (reselected) {
+      const retry = await fetchWithWinner(reselected, publicPath, requestUrl.search, cacheMode);
+      if (retry) return retry;
+      reselectAfterWinnerFailure(cache, poolWithProbe);
+    }
     return fetch(request);
   }
 
-  // 有 winner：只试一次，失败直接回源。逐候选串级已移入选择阶段。
-  // 注意不要在这里刷新 state.updatedAt——否则状态永不过期，后台重选失效。
-  try {
-    const response = await fetchWithTimeout(
-      cdnUrl(state, publicPath, requestUrl.search),
-      { credentials: 'omit', mode: 'cors', cache: cacheMode },
-    );
-    if (acceptableStaticResponse(response)) {
-      return response;
-    }
-  } catch {
-    // winner 失效，回退同源
-  }
-  reselectAfterWinnerFailure(cache, poolWithProbe);
+  // JSON 且无 winner/已过期：同源立即服务，选择放后台——请求路径不背探测延迟。
+  void ensureSelection(cache, poolWithProbe).catch(() => {});
+  if (!isStrippedAsset) return fetch(request);
 
-  // The original same-origin URL is the authoritative final fallback.
+  // 剥离资源无 winner 时回源必 404：等待本轮选优（in-flight 去重，并发请求共享
+  // 同一次探测），选出 winner 直出；全源不健康（负缓存）才回源放行 404。
+  const winner = await ensureSelection(cache, poolWithProbe).catch(() => null);
+  if (winner) {
+    const response = await fetchWithWinner(winner, publicPath, requestUrl.search, cacheMode);
+    if (response) return response;
+    reselectAfterWinnerFailure(cache, poolWithProbe);
+  }
   return fetch(request);
 }
 

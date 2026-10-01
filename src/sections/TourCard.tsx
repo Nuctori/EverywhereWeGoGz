@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { resolveAssetUrl } from '@/lib/utils';
-import { getFallbackImage } from '@/lib/image';
+import { getFallbackImage, getImagePoolCandidates } from '@/lib/image';
 import {
   Calendar,
   Clock,
@@ -76,9 +76,19 @@ export const TourCard = memo(function TourCard({
           decoding="async"
           fetchPriority="low"
           onError={(event) => {
-            if (event.currentTarget.dataset.fallbackApplied === 'true') return;
-            event.currentTarget.dataset.fallbackApplied = 'true';
-            event.currentTarget.src = getFallbackImage(tour.title);
+            const image = event.currentTarget;
+            if (image.dataset.fallbackApplied === 'true') return;
+            // 本地图库在 Pages 产物里已被剥离，同源 404 时先按 CDN 池候选重试
+            // （SW 未接管/未选优的窗口），全部失败才换占位图。
+            const poolCandidates = getImagePoolCandidates(rawImageSrc);
+            const retryIndex = Number(image.dataset.poolRetryIndex || '0');
+            if (retryIndex < poolCandidates.length) {
+              image.dataset.poolRetryIndex = String(retryIndex + 1);
+              image.src = poolCandidates[retryIndex];
+              return;
+            }
+            image.dataset.fallbackApplied = 'true';
+            image.src = getFallbackImage(tour.title);
           }}
         />
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-stone-950/32 via-stone-950/10 to-transparent" />

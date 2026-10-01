@@ -21,7 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn, resolveAssetUrl } from '@/lib/utils';
-import { getFallbackImage } from '@/lib/image';
+import { getFallbackImage, getImagePoolCandidates } from '@/lib/image';
 import { getReadableDestination, getReadableHighlights, formatDate } from '@/lib/tour-display';
 import { DepartureDateSelector } from '@/components/ui/departure-date-selector';
 import {
@@ -109,6 +109,7 @@ export function TourDetailModal({
   if (!tour) return null;
   const sourceDetailUrl = resolveSourceDetailUrl(tour);
   const heroImage = resolveAssetUrl(tour.images?.[0] || '');
+  const heroPoolCandidates = getImagePoolCandidates(tour.images?.[0] || '');
   const heroFallbackImage = getFallbackImage(tour.title);
   const destinationLabel = getReadableDestination(tour);
   const readableHighlights = getReadableHighlights(tour);
@@ -196,6 +197,7 @@ export function TourDetailModal({
       {(heroImage || heroFallbackImage) && (
         <div className="mb-5 overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 sm:mb-6">
           <img
+            key={tour.id}
             src={heroImage || heroFallbackImage}
             alt={tour.title}
             className="h-44 w-full object-cover sm:h-72"
@@ -204,6 +206,13 @@ export function TourDetailModal({
             onError={(event) => {
               const target = event.currentTarget;
               if (target.dataset.fallbackApplied === 'true') return;
+              // 与 TourCard 同策略：先试 CDN 池候选，全部失败才上占位图
+              const retryIndex = Number(target.dataset.poolRetryIndex || '0');
+              if (retryIndex < heroPoolCandidates.length) {
+                target.dataset.poolRetryIndex = String(retryIndex + 1);
+                target.src = heroPoolCandidates[retryIndex];
+                return;
+              }
               target.dataset.fallbackApplied = 'true';
               target.src = heroFallbackImage;
             }}
