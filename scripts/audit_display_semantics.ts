@@ -10,6 +10,14 @@ import {
 import { compareRecommended } from '../src/lib/tour-recommendation.ts';
 import type { Tour } from '../src/types/tour.ts';
 
+// 夹具日期相对今天生成：写死的日期会过期（2026-06 的夹具到 10 月已全是
+// 过去时，getUpcomingDates 过滤后排序断言全变平），这是上一轮审计静默变红的根因。
+function futureDate(offsetDays: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  return `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}-${`${date.getDate()}`.padStart(2, '0')}`;
+}
+
 function candidate(overrides: Partial<Tour> = {}): Tour {
   return {
     id: 'tour-display-test',
@@ -19,7 +27,7 @@ function candidate(overrides: Partial<Tour> = {}): Tour {
     duration: 3,
     price: 399,
     priceUnit: '人',
-    departureDate: '2026-06-12',
+    departureDate: futureDate(10),
     transportType: '大巴往返',
     accommodationLevel: '舒适型',
     meals: '含早',
@@ -37,7 +45,7 @@ function candidate(overrides: Partial<Tour> = {}): Tour {
     leisureLevel: 'easy',
     suitableFor: [],
     season: '全年',
-    departureDates: ['2026-06-12'],
+    departureDates: [futureDate(10)],
     hotDepartureDates: [],
     ...overrides,
   };
@@ -159,18 +167,20 @@ assert.equal(
     theme: '温泉',
     transportType: '大巴往返',
   })),
-  '3天 · 温泉 · 大巴',
+  // 龙门自 2026-09 起归入惠州别名族（relevance 修复 ed9ce3432）：标题能解析出
+  // 归属地时，摘要带上归属地比空缺更可读。
+  '惠州 · 3天 · 温泉 · 大巴',
 );
 
 const tourWithUpcoming = candidate({
   title: '普通线路',
-  departureDate: '2026-05-30',
-  departureDates: ['2026-05-30', '2026-06-18'],
+  departureDate: futureDate(2),
+  departureDates: [futureDate(2), futureDate(18)],
 });
 const tourWithPastOnly = candidate({
   title: '已过期线路',
-  departureDate: '2026-05-30',
-  departureDates: ['2026-05-30'],
+  departureDate: '2020-01-01',
+  departureDates: ['2020-01-01'],
 });
 
 assert.equal(

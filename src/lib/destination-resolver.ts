@@ -212,6 +212,14 @@ export function resolveTourDestination(tour: Pick<Tour, 'destination' | 'title' 
   const cleanedTitle = stripDepartureContext(tour.title || '');
 
   if (!rawDestination || GENERIC_DESTINATIONS.has(rawDestination)) {
+    // 无点名目的地时，展示要的是高亮里的具体地名（巽寮湾）而不是它的归属市
+    // （惠州）——地名越具体越可读；高亮不可靠（过长/无命中）才退回归一结果。
+    if (!titleHints[0]) {
+      const readableHighlight = (tour.highlights || [])
+        .map((item) => stripHighlightSuffix(item))
+        .find((item) => item && item.length <= 16 && collectDestinationHints(item).includes(inferredDestination));
+      if (readableHighlight) return readableHighlight;
+    }
     return inferredDestination || rawDestination || '';
   }
   if (!inferredDestination) {

@@ -3938,9 +3938,24 @@ function getPrimitiveTitleFact(primitive: RecommendationPrimitive) {
 
 function getPrimitiveWeatherNudge(primitive: RecommendationPrimitive) {
   const categories = new Set(primitive.experienceCategories);
-  if (categories.has('海边沙滩')) return '出发前看一下晴雨和风浪';
-  if (categories.has('玩水清凉')) return '水上活动建议留意降雨和现场开放情况';
-  if (categories.has('温泉泡汤')) return '高温天泡汤体感要稍微取舍';
+  // 提示要跟当季自洽："冬天想暖和"的结果里出现"高温天泡汤要取舍"这类
+  // 夏季措辞，用户感知就是答非所问。按日历季节切换措辞与相关性。
+  const month = new Date().getMonth() + 1;
+  const isColdSeason = month === 12 || month <= 2;
+  const isHotSeason = month >= 6 && month <= 9;
+  if (categories.has('海边沙滩')) {
+    if (isColdSeason) return '冬季水温偏低，下海前先看天气和体感';
+    return '出发前看一下晴雨和风浪';
+  }
+  if (categories.has('玩水清凉')) {
+    if (isColdSeason) return '冬季部分水上项目会缩减，出发前确认开放情况';
+    return '水上活动建议留意降雨和现场开放情况';
+  }
+  if (categories.has('温泉泡汤')) {
+    if (isColdSeason) return '冷天泡汤正是舒服的时候';
+    if (isHotSeason) return '高温天泡汤体感要稍微取舍';
+    return '';
+  }
   if (categories.has('森林山水') || categories.has('户外强度')) return '山水户外遇到连雨天体验会打折';
   return '';
 }
