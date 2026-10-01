@@ -1025,24 +1025,38 @@ function collectDepartureTimeOfDay(text: string) {
 }
 
 function collectDestinationHints(text: string) {
-  const matched = Object.entries(DESTINATION_ALIASES)
-    .map(([destination, aliases]) => ({
-      destination,
-      index: aliases.reduce((bestIndex, alias) => {
-        const index = text.indexOf(alias);
-        if (index === -1 || isBlockedDestinationAliasMatch(destination, alias, text, index)) return bestIndex;
-        return Math.min(bestIndex, index);
-      }, Number.POSITIVE_INFINITY),
-    }))
-    .filter((entry) => Number.isFinite(entry.index))
-    .sort((left, right) => left.index - right.index)
-    .map(({ destination }) => destination);
+  // 返回"具体别名优先、canonical 兜底"的目的地提示。用户说"阳江海陵岛"时，
+  // 只返回 ['广东'] 会让所有广东线路拿到同分的目的地命中，真正的阳江线路
+  // 反而被 generic 命中淹没——具体别名就是用户的真实用词，必须一等公民。
+  const matched: Array<{ hint: string; index: number; canonical: string }> = [];
+  for (const [destination, aliases] of Object.entries(DESTINATION_ALIASES)) {
+    let bestIndex = Number.POSITIVE_INFINITY;
+    let bestAlias: string | null = null;
+    for (const alias of aliases) {
+      const index = text.indexOf(alias);
+      if (index === -1 || isBlockedDestinationAliasMatch(destination, alias, text, index)) continue;
+      if (index < bestIndex) {
+        bestIndex = index;
+        bestAlias = alias;
+      }
+    }
+    if (bestAlias !== null) {
+      matched.push({ hint: bestAlias, index: bestIndex, canonical: destination });
+    }
+  }
+  matched.sort((left, right) => left.index - right.index);
 
-  return matched.filter((destination) =>
-    !matched.some((other) =>
-      other !== destination &&
-      (DESTINATION_ALIASES[destination] || []).includes(other),
-    ));
+  const specificHints: string[] = [];
+  const canonicalHints: string[] = [];
+  for (const entry of matched) {
+    if (entry.hint !== entry.canonical && !specificHints.includes(entry.hint)) {
+      specificHints.push(entry.hint);
+    }
+    if (!canonicalHints.includes(entry.canonical)) {
+      canonicalHints.push(entry.canonical);
+    }
+  }
+  return [...specificHints, ...canonicalHints];
 }
 
 function getDestinationAliasesForHint(hint: string) {
@@ -1518,11 +1532,36 @@ function scoreTour(
     score -= 30;
   }
 
-  for (const hint of query.destinationHints) {
-    if (destinationHintsMatchCorpus([hint], `${tour.destination} ${tour.title} ${corpus}`)) {
+  // 平台定位是广州出发。标题声明了非广州的上车城市（"天津出发到华东5市"）说明
+  // 是外地供应商混入语料的产品，广州用户不可用——重度降权沉底而非硬排除
+  // （保留给 AI 复核与边缘用户）。边界规则避免误伤"一人成团天天出发"这类短语。
+  const declaredDepartureCity = getDeclaredDepartureCity(tour.title);
+  if (declaredDepartureCity && !declaredDepartureCity.includes('广州')) {
+    score -= 30;
+    signals.push(`异地出发：${declaredDepartureCity}`);
+  }
+
+  if (query.destinationHints.length > 0) {
+    // 具体命中（线路语料真含用户说的具体地名，如"阳江/海陵岛"）权重高于
+    // 省域泛命中（只通过别名族命中"广东"）——两者同分会让真目的地被
+    // 同省随机线路淹没。
+    const tourCorpus = `${tour.destination} ${tour.title} ${corpus}`;
+    const normalizedCorpus = normalizeText(tourCorpus);
+    const specificHint = query.destinationHints.find((hint) => {
+      if (!query.destinationHints.some((other) => other !== hint && (DESTINATION_ALIASES[other] ?? []).includes(hint))) {
+        return false;
+      }
+      const index = normalizedCorpus.indexOf(normalizeText(hint));
+      return index !== -1 && !isBlockedDestinationAliasMatch(hint, hint, tourCorpus, index);
+    });
+    const genericHit = destinationHintsMatchCorpus(query.destinationHints, tourCorpus);
+
+    if (specificHint) {
       score += 18;
-      signals.push(`目的地匹配：${hint}`);
-      break;
+      signals.push(`目的地匹配：${specificHint}`);
+    } else if (genericHit) {
+      score += 12;
+      signals.push(`目的地匹配：${query.destinationHints[0]}`);
     }
   }
 
@@ -1667,6 +1706,17 @@ function scoreTour(
     }
   }
 
+  // 泛化查询（用户没提目的地）下的本地性先验：目的地可经别名族归入广东的产品
+  // 是广州出发平台的基本盘，在文本信号都缺失时不应得 0 分被整条过滤。
+  // 结构化复用 destinationHintsMatchCorpus，不新增词表；点名目的地的查询不走
+  // 这条先验，避免外地目的地（北京/新疆）被本地分压掉。
+  if (query.destinationHints.length === 0 && query.boardingHints.length === 0) {
+    if (destinationHintsMatchCorpus(['广东'], `${tour.destination} ${tour.title}`)) {
+      score += 8;
+      signals.push('广州出发圈');
+    }
+  }
+
   if (tour.isHot) score += 4;
   if (tour.rating >= 4.7) score += 3;
 
@@ -1707,6 +1757,16 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
     }));
 }
 
+// 标题里"XX出发/XX往返"的出发城市声明：要求城市名前有边界（起始/标点/数字/括号），
+// 排除"天天出发/随时出发"这类非地名短语（它们前面是词字，无边界）。
+function getDeclaredDepartureCity(title: string) {
+  const match = /(?:^|[\s\【】·／/|,&>\)\(（）：:0-9])([\u4e00-\u9fa5]{2,4})(?:出发|往返)/.exec(normalizeText(title));
+  if (!match) return null;
+  const city = match[1];
+  if (/[天时][出发回]$|^当日|^次日/.test(`${city}出发`) || /往返$/.test(city)) return null;
+  return city;
+}
+
 function localRecommendations(tours: AiRecommendationCandidate[], text: string) {
   const query = buildLocalRecommendationQuery(text);
   const items = tours
@@ -1718,7 +1778,53 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
       reason: index < MAX_AI_COMMENTARY_ITEMS ? item.reason : undefined,
     }));
 
-  return items.length > 0 ? items : fallbackRecommendations(tours);
+  const diversified = interleaveSameScoreVenues(items, tours);
+  return diversified.length > 0 ? diversified : fallbackRecommendations(tours);
+}
+
+// 同分带内的场地公平交错：排序对同分候选只保留语料顺序，同一度假区/同一发团的
+// 姊妹 SKU（标题前缀相同，如"沙扒湾×5"）会成串霸占榜首，把同分的其他目的地
+// 完全挤出候选位。按分数带分组，带内以标题前缀为场地键做轮转，先到先得的
+// 排序质量不变，只是让同分的不同去处都有露出位。
+function interleaveSameScoreVenues(
+  items: AiRecommendationItem[],
+  tours: AiRecommendationCandidate[],
+  venuePrefixLength = 2,
+): AiRecommendationItem[] {
+  const titleById = new Map(tours.map((tour) => [tour.id, normalizeText(tour.title)]));
+  const output: AiRecommendationItem[] = [];
+  let bandStart = 0;
+  while (bandStart < items.length) {
+    let bandEnd = bandStart + 1;
+    while (bandEnd < items.length && items[bandEnd].score === items[bandStart].score) bandEnd += 1;
+
+    const band = items.slice(bandStart, bandEnd);
+    if (band.length <= 2) {
+      output.push(...band);
+    } else {
+      const buckets = new Map<string, AiRecommendationItem[]>();
+      for (const item of band) {
+        const title = titleById.get(item.tourId) || '';
+        const venueKey = title.slice(0, venuePrefixLength) || item.tourId;
+        const bucket = buckets.get(venueKey);
+        if (bucket) bucket.push(item);
+        else buckets.set(venueKey, [item]);
+      }
+      let remaining = true;
+      while (remaining) {
+        remaining = false;
+        for (const bucket of buckets.values()) {
+          const next = bucket.shift();
+          if (next) {
+            output.push(next);
+            remaining = true;
+          }
+        }
+      }
+    }
+    bandStart = bandEnd;
+  }
+  return output;
 }
 
 function buildLocalRecommendationText(
@@ -3125,8 +3231,35 @@ function buildLocalTourReason(
   return baseReason || fallback;
 }
 
-function inferScheduleHints(tour: AiRecommendationCandidate) {
-  const corpus = getSearchCorpus(tour);
+// 晚间出发判定：上车点集合时间是唯一硬证据；其次是明确指示出发时段的词。
+// 刻意不匹配裸 `晚`/`夜游`/`夜宿` —— 它们描述餐食或景点体验，与出发时刻无关。
+// raw 文本里的时间要排除通知类样板（"出发前一天晚餐20:00点前短信通知"）：
+// 只有后面不跟"点前/之前/尚未"的时刻才是集合时刻。
+function inferEveningDeparture(tour: AiRecommendationCandidate, corpus: string) {
+  const structuredTimes = (tour.boarding?.points ?? [])
+    .map((point) => point.time)
+    .filter(Boolean)
+    .map((time) => {
+      const match = /^([01]?\d|2[0-3])[:：]([0-5]\d)$/.exec(String(time).trim());
+      return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+    })
+    .filter((minute): minute is number => minute !== null);
+
+  const raw = tour.boarding?.raw || '';
+  const rawTimes = raw
+    ? [...raw.matchAll(/([01]?\d|2[0-3])[:：]([0-5]\d)(?!\s*(?:点)?\s*(?:前|之前)|尚未)/g)]
+        .map((match) => Number(match[1]) * 60 + Number(match[2]))
+    : [];
+
+  const pickupTimes = structuredTimes.length > 0 ? structuredTimes : rawTimes;
+  if (pickupTimes.length > 0) {
+    // 最早集合时刻决定产品形态：最早一班都在午后，说明不是晚间出发的产品。
+    return Math.min(...pickupTimes) >= 17 * 60 + 30;
+  }
+  return /晚[间上]出发|晚[班点]|夜[班航发]|夕发|卧铺/.test(corpus);
+}
+
+function inferScheduleHints(tour: AiRecommendationCandidate) {  const corpus = getSearchCorpus(tour);
   const dates = getCandidateDepartureDates(tour);
   const weekdays = dates
     .map(getWeekday)
@@ -3143,7 +3276,11 @@ function inferScheduleHints(tour: AiRecommendationCandidate) {
     })
     .filter((weekday): weekday is number => weekday !== null);
   const uniqueWeekdays = [...new Set([...weekdays, ...textWeekdays])].sort((a, b) => a - b);
-  const eveningDeparture = /晚|晚上|夜间|夜发|夜游|卧铺|夕发|夜宿/.test(corpus);
+  // 晚间出发证据必须来自"出发时刻"而非任意文本：单字 `晚` 会命中"含晚餐/晚餐）"，
+  // 让 07:00 发车的大巴团拿到"支持晚间出发"信号（用户按晚间出发下单会误事）。
+  // 证据优先级：上车点结构化时间（≥17:30 视为晚间集合；存在时间且全部在午前则明确否定）
+  // > 出发指示词（晚班/夜航/卧铺/夕发等）> 无证据。
+  const eveningDeparture = inferEveningDeparture(tour, corpus);
   const recurringText = /每周|天天|全年|逢周|固定发团|班期/.test(corpus);
 
   return {
@@ -6433,6 +6570,7 @@ export const __aiRecommendationTestHooks = {
   sanitizeAiPreferenceArraysForTurn,
   sanitizeAiSemanticNotesForTurn,
   validateAiItems,
+  scoreTour,
 };
 
 function setUniqueLookupValue(map: Map<string, string>, key: string, value: string) {

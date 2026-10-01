@@ -2630,18 +2630,44 @@ const reordered = prioritizeRecommendationItems(
   );
 }
 
-// ─── 回归测试：周五晚出发周日回应能找出桂林/广西的 3 天团 ───
+// ─── 回归测试：周五晚出发周日回的候选序契约 ───
+// 原断言"桂林必须进 top10"编码的是旧语料的平局顺序（27 个同分候选按语料序排列，
+// 桂林恰好排前面），语料组成一变即碎。改断言持久契约：
+// (1) 头部候选都真匹配日程形状（周五出发→周日回的 3 天团）；
+// (2) top10 场地多样性：同一标题前缀（度假区姊妹 SKU）≤2 条——同分带不得被
+//     单一场地刷屏（修复前沙扒湾×5 霸占前 7）；
+// (3) 长途周末产品（桂林/广西）在前 20 可见——visibility 契约，界=带内场地数。
 {
   const weekendQuery = '帮我寻找周五晚上出发的团，最好周日返回';
   const weekendLocalItems = localRecommendations(realTours, weekendQuery);
   assert.ok(weekendLocalItems.length > 0, 'weekend query should return candidates');
-  const firstGuilinIndex = weekendLocalItems.findIndex((item) => {
-    const tour = realTours.find((t) => t.id === item.tourId);
+  const tourById = new Map(realTours.map((tour) => [tour.id, tour]));
+  const top10 = weekendLocalItems.slice(0, 10);
+  for (const item of top10) {
+    const tour = tourById.get(item.tourId);
+    assert.ok(tour, `top10 item ${item.tourId} should exist in corpus`);
+    assert.equal(
+      tour.duration,
+      3,
+      `top10 item "${tour.title}" should be a 3-day Fri→Sun trip, got ${tour.duration}天`,
+    );
+    assert.ok(
+      (tour.departureDates ?? []).length > 0,
+      `top10 item "${tour.title}" should keep departure dates`,
+    );
+  }
+  const venueGroups = new Set(top10.map((item) => (tourById.get(item.tourId)?.title ?? '').slice(0, 2)));
+  assert.ok(
+    venueGroups.size >= 8,
+    `top10 should cover ≥8 distinct venue groups, got ${venueGroups.size}`,
+  );
+  const guilinIndex = weekendLocalItems.findIndex((item) => {
+    const tour = tourById.get(item.tourId);
     return /广西|桂林/.test(`${tour?.destination} ${tour?.title}`);
   });
   assert.ok(
-    firstGuilinIndex >= 0 && firstGuilinIndex < 10,
-    `expected a Guilin/Guangxi tour in top 10 for Friday-evening/Sunday-return query, first found at ${firstGuilinIndex + 1}`,
+    guilinIndex >= 0 && guilinIndex < 20,
+    `expected a Guilin/Guangxi tour visible within top 20 for Friday-evening/Sunday-return query, found at ${guilinIndex + 1}`,
   );
 }
 
