@@ -140,6 +140,10 @@ interface LocalRecommendationQuery {
   avoidHints: string[];
   themeHints: string[];
   coverageTerms: string[];
+  // 用户原话里真实出现的覆盖词（字面命中）：权重高于概念族归一项。
+  // "想漂流"归一出「玩水清凉」后,海滩/温泉产品靠概念族拿到同档覆盖分,
+  // 真漂流产品反而沉底——字面词必须单独加权。
+  literalCoverageTerms: string[];
   budget: ReturnType<typeof parseBudget>;
   duration: ReturnType<typeof parseDuration>;
   prefersEasyPace: boolean;
@@ -1360,6 +1364,19 @@ function collectLocalCoverageTerms(text: string) {
   ]).filter((term) => term.length >= 2 && term.length <= 12);
 }
 
+// 字面覆盖词 = 概念组里真实出现在用户原话中的别名/标签（"想漂流"的「漂流」）。
+// 与归一概念（玩水清凉）分开返回，打分时字面命中单独加权。
+function collectLiteralCoverageTerms(text: string) {
+  const literal: string[] = [];
+  for (const group of COVERAGE_TERM_GROUPS) {
+    const matchedAlias = group.aliases.find((alias) => text.includes(alias));
+    const matchedLabel = text.includes(group.label) ? group.label : null;
+    const token = matchedAlias || matchedLabel;
+    if (token && !literal.includes(token)) literal.push(token);
+  }
+  return literal;
+}
+
 function hasExplicitExperienceCoverageNeed(text: string) {
   const normalized = text.replace(/\s+/g, '');
   return /(同时|都要|都得|都想|兼具|兼有|都有|既|又|带有|含有|包含|包括|以及)/.test(normalized)
@@ -1552,7 +1569,13 @@ function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
       avoidHints,
     themeHints: collectThemeHints(normalizedText).filter((hint) => !avoidHints.includes(hint)),
     coverageTerms: hasExperienceCoverageNeed
-      ? collectLocalCoverageTerms(normalizedText).filter((hint) => !avoidHints.includes(hint))
+      ? uniqueStrings([
+          ...collectLiteralCoverageTerms(normalizedText),
+          ...collectLocalCoverageTerms(normalizedText),
+        ]).filter((hint) => !avoidHints.includes(hint))
+      : [],
+    literalCoverageTerms: hasExperienceCoverageNeed
+      ? collectLiteralCoverageTerms(normalizedText).filter((hint) => !avoidHints.includes(hint))
       : [],
     budget: parseBudget(normalizedText),
     duration: inferredTripWindow.tripDaysMin || inferredTripWindow.tripDaysMax
@@ -1658,12 +1681,20 @@ function scoreTour(
   if (query.coverageTerms.length > 0) {
     const matchedTerms = query.coverageTerms.filter((term) => getPrimitiveCoverageScore(primitive, [term]) > 0);
     if (matchedTerms.length > 0) {
-      const coverageRatio = matchedTerms.length / query.coverageTerms.length;
-      score += matchedTerms.length * 28 + Math.round(coverageRatio * 44);
+      // 字面命中（用户原话里的词，如"漂流"）与概念族命中（玩水清凉）分开计权：
+      // 同档覆盖分会让泛玩水产品淹没真漂流产品，字面词才是本轮的真实诉求。
+      // 字面命中要求线路语料真含该词——getPrimitiveCoverageScore 会做概念桥接，
+      // 海滩/温泉产品会借此蹭到"漂流"的字面分。
+      const literalTerms = query.literalCoverageTerms;
+      const matchedLiteral = matchedTerms.filter((term) =>
+        literalTerms.includes(term) && corpus.includes(normalizeText(term)));
+      const matchedConceptOnly = matchedTerms.filter((term) => !matchedLiteral.includes(term));
+      const literalRatio = literalTerms.length > 0 ? matchedLiteral.length / literalTerms.length : 0;
+      score += matchedLiteral.length * 28 + matchedConceptOnly.length * 12 + Math.round(literalRatio * 44);
       signals.push(
-        matchedTerms.length === query.coverageTerms.length
-          ? `完整覆盖：${matchedTerms.slice(0, 3).join('、')}`
-          : `部分命中：${matchedTerms.slice(0, 2).join('、')}`,
+        matchedLiteral.length === literalTerms.length && matchedConceptOnly.length === 0
+          ? `完整覆盖：${matchedLiteral.slice(0, 3).join('、')}`
+          : `部分命中：${[...matchedLiteral, ...matchedConceptOnly].slice(0, 2).join('、')}`,
       );
     }
   }
