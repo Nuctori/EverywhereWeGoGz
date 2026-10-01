@@ -926,6 +926,9 @@ function parseDuration(rawText: string) {
     const matchedText = chineseExactMatch[0];
     if (matchedText.includes('\u4ee5\u4e0a')) return { min: value, max: Number.POSITIVE_INFINITY };
     if (matchedText.includes('\u4ee5\u5185') || matchedText.includes('\u4ee5\u4e0b')) return { min: 0, max: value };
+    // "一天/1天"在行业语义里就是当天往返，不做 ±1 放宽——放宽会把 2 天
+    // 过夜团放进"团建一天"结果里，是评审与用户都能直接感知的约束违约。
+    if (value === 1) return { min: 1, max: 1 };
     return { min: Math.max(0, value - 1), max: value + 1 };
   }
   const rangeMatch = text.match(/(\d{1,2})\s*[-到至]\s*(\d{1,2})\s*天/);
