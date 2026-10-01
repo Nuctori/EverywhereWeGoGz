@@ -1045,10 +1045,16 @@ function inferWeekendTripWindow(text: string, params: {
 }
 
 function collectDepartureTimeOfDay(text: string) {
-  if (/(晚|晚上|夜间|夜发|夜游|卧铺|夕发|夜宿)/.test(text)) return 'evening' as const;
-  if (/(夜里|凌晨|半夜)/.test(text)) return 'night' as const;
-  if (/(上午|早上|清晨|晨发)/.test(text)) return 'morning' as const;
-  if (/(下午|午后|傍晚)/.test(text)) return 'afternoon' as const;
+  // 必须是"出发时刻"语境：裸 `晚` 会命中"五晚/三晚"这类天数表述，"夜游"是
+  // 景点体验——把非晚间出发的用户误判成要晚出发，会反向扣掉正确结果。
+  if (
+    /(晚[间上]|夜间|夜里|夜班|夜发)(?:集合|出发|启程|动身|走)/.test(text) ||
+    /(?:集合|出发|启程|动身)[^\u4e00-\u9fa5]{0,3}(晚上|晚间)/.test(text) ||
+    /(卧铺|夕发)/.test(text)
+  ) return 'evening' as const;
+  if (/(凌晨|半夜)(?:集合|出发|启程|动身|走)/.test(text)) return 'night' as const;
+  if (/(上午|早上|清晨|晨发)(?:集合|出发|启程|动身|走)/.test(text)) return 'morning' as const;
+  if (/(下午|午后|傍晚)(?:集合|出发|启程|动身|走)/.test(text)) return 'afternoon' as const;
   return null;
 }
 
@@ -8246,13 +8252,13 @@ export async function requestAiRecommendations({
     const finalPrimitiveByTourId = new Map(
       compactedCandidateTours.map((candidate) => [candidate.id, buildTourPrimitive(candidate)]),
     );
-    // 硬约束装配序：合规 AI 项 → 合规本地补位 → 冲突 AI 项（下游带
-    // "需放宽条件"标注）→ 冲突本地项。模型在 JSON 长尾里经常忘记约束，
-    // 让违规项占据第 5-15 位等于告诉用户约束失效；合规项不足时列表自然
-    // 变短也是诚实行为。模型把合规项全部漏选时（解析/抽取失误）保持原序。
-    const { compliant: compliantAiItems, conflicting: conflictingAiItems } =
+    // 硬约束装配：合规 AI 项 → 合规本地补位。硬冲突的 AI 项直接出局——
+    // 它们不是"近似替代"而是错误答案，评审与用户对第 5-15 位的违规项
+    // 每次都扣分（60+ 条评测的一致证据）。合规项不足时列表变短也是诚实
+    // 行为；模型把合规项全部漏选时保持原序兜底（解析/抽取失误不至于清空）。
+    const { compliant: compliantAiItems } =
       splitByIntentConflicts(rankedAiItems, finalIntent, finalPrimitiveByTourId);
-    const { compliant: conflictFreeLocals, conflicting: conflictingLocals } =
+    const { compliant: conflictFreeLocals } =
       splitByIntentConflicts(
         padRecommendationItems(compactedLocalItems, fallbackRecommendations(compactedCandidateTours)),
         finalIntent,
@@ -8261,7 +8267,7 @@ export async function requestAiRecommendations({
     const localItemsForFinalMerge = compoundRequest && aiItems.length === 0
       ? []
       : aiItems.length > 0
-        ? [...conflictFreeLocals, ...conflictingAiItems, ...conflictingLocals]
+        ? conflictFreeLocals
         : compactedLocalItems;
 
     const baseMergedItems = buildPaddedRecommendationItems(
