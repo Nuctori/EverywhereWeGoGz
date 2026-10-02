@@ -8349,7 +8349,15 @@ export async function requestAiRecommendations({
 
     const baseMergedItems = buildPaddedRecommendationItems(
       mergeAiAndLocalRecommendations(compliantAiItems, localItemsForFinalMerge),
-      fallbackPaddingPoolForAssembly(compoundRequest, aiItems.length, conflictFreeLocals, fullLocalPool),
+      // AI 在场时的补位池剥离理由：合规池为空的死局（约束极严且模型全选冲突项）
+      // 下，垫底项曾是带"需放宽条件：…"前缀的标注项，整页像系统报错（audit-A
+      // q03 12/12 刷屏）。剥成纯事实卡片后仍是可读的候选列表，只是不带说服文案。
+      fallbackPaddingPoolForAssembly(
+        compoundRequest,
+        aiItems.length,
+        conflictFreeLocals,
+        fullLocalPool,
+      ).map((item) => (aiItems.length > 0 ? { ...item, reason: undefined } : item)),
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
     const mergedCandidateTours = availableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));
