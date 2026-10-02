@@ -2664,6 +2664,20 @@ function splitByIntentConflicts(
   return { compliant, conflicting };
 }
 
+// 补位池 = 合规本地项优先 + 其余本地项垫底；compound 且无 AI 项时保持严格（宁缺毋滥）。
+function fallbackPaddingPoolForAssembly(
+  compoundRequest: boolean,
+  aiItemCount: number,
+  conflictFreeLocals: AiRecommendationItem[],
+  fullLocalPool: AiRecommendationItem[],
+): AiRecommendationItem[] {
+  if (compoundRequest && aiItemCount === 0) return conflictFreeLocals;
+  return [
+    ...conflictFreeLocals,
+    ...fullLocalPool.filter((item) => !conflictFreeLocals.some((c) => c.tourId === item.tourId)),
+  ];
+}
+
 function mergeAiAndLocalRecommendations(
   aiItems: AiRecommendationItem[],
   localItems: AiRecommendationItem[],
@@ -2691,6 +2705,9 @@ function mergeAiAndLocalRecommendations(
       })
       .map((item) => ({
         ...item,
+        // AI 在场时，补位卡片不带本地模板理由——用户可见文案一律由模型生成
+        // （仓库 AGENTS.md 红线）；补位卡片退回纯事实展示（标题/价格/天数）。
+        reason: undefined,
         recommendationTier: 'local-supplement',
       } satisfies AiRecommendationItem));
     return limitRecommendationCommentary([...primaryAiItems, ...supplementalItems])
@@ -6627,7 +6644,11 @@ function getAiProviderParseErrorLabel(config: AiProviderConfig, stage: string, d
   return `AI API unusable [${config.model}] ${stage}${suffix}`;
 }
 
-function parseAiProviderResponse(data: unknown, config: AiProviderConfig) {
+function parseAiProviderResponse(
+  data: unknown,
+  config: AiProviderConfig,
+  schema: 'recommendation' | 'search-plan' = 'recommendation',
+) {
   const usage = summarizeAiUsage(data);
   const choice = (data as {
     choices?: Array<{
@@ -6670,7 +6691,12 @@ function parseAiProviderResponse(data: unknown, config: AiProviderConfig) {
   }
 
   const items = (parsed as { items?: unknown })?.items;
-  if (!Array.isArray(items)) {
+  if (schema === 'search-plan') {
+    const queries = (parsed as { queries?: unknown })?.queries;
+    if (!Array.isArray(queries)) {
+      throw new Error(getAiProviderParseErrorLabel(config, 'schema_invalid', 'queries missing'));
+    }
+  } else if (!Array.isArray(items)) {
     throw new Error(getAiProviderParseErrorLabel(config, 'schema_invalid', 'items missing'));
   }
 
@@ -7517,6 +7543,10 @@ async function callSingleAiProvider(params: {
   liteMaxTokens?: number;
   qualityCheck?: (response: unknown, config: AiProviderConfig) => string | null;
   signal?: AbortSignal;
+  // 期望的响应 schema：recommendation（默认，须含 items）| search-plan（检索规划，须含 queries）。
+  // 此前规划调用复用主解析、被强制要求 items，导致多轮检索规划对所有供应商 100% 抛
+  // schema_invalid，规划功能自上线起从未生效。
+  schema?: 'recommendation' | 'search-plan';
 }) {
   const { config } = params;
   const url = getChatCompletionsUrl(config.baseUrl);
@@ -7571,7 +7601,7 @@ async function callSingleAiProvider(params: {
 
       const data = await response.json();
       shouldRetry = false;
-      const { parsed, reasoningText, usage } = parseAiProviderResponse(data, config);
+      const { parsed, reasoningText, usage } = parseAiProviderResponse(data, config, params.schema);
       const qualityIssue = params.qualityCheck?.(parsed, config);
       if (qualityIssue) {
         throw new Error(getAiProviderParseErrorLabel(config, 'quality_check_failed', qualityIssue));
@@ -7603,6 +7633,7 @@ async function callAiApi(params: {
   maxTokens?: number;
   liteMaxTokens?: number;
   qualityCheck?: (response: unknown, config: AiProviderConfig) => string | null;
+  schema?: 'recommendation' | 'search-plan';
 }) {
   const providerErrors: string[] = [];
   const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
@@ -7778,6 +7809,7 @@ async function planAiSearchRounds(params: {
     configs: params.configs,
     messages: messages as ReturnType<typeof buildAiMessages>,
     maxTokens: 1600,
+    schema: 'search-plan',
   }) as AiSearchCallResult;
 
   const parsed = aiCall.parsed as { queries?: unknown; understanding?: unknown };
@@ -8297,16 +8329,16 @@ export async function requestAiRecommendations({
     const finalPrimitiveByTourId = new Map(
       compactedCandidateTours.map((candidate) => [candidate.id, buildTourPrimitive(candidate)]),
     );
-    // 硬约束装配：合规 AI 项 → 合规本地补位。硬冲突的 AI 项直接出局——
-    // 它们不是"近似替代"而是错误答案，评审与用户对第 5-15 位的违规项
-    // 每次都扣分（60+ 条评测的一致证据）。合规项不足时列表变短也是诚实
-    // 行为；模型把合规项全部漏选时保持原序兜底（解析/抽取失误不至于清空）。
+    // 硬约束装配：合规 AI 项 → 合规本地补位。硬冲突的 AI 项直接出局，不带
+    // "需放宽条件"前缀进入用户可见文案——audit-A 实测整页 12/12 条前缀刷屏
+    // 被打到 4 分。合规项不足时列表由合规本地补位填到最小可见条数（6 条），
+    // 短于 6 条也诚实：宁可列表短，不要一页"行程错位"的凑数项。
+    const { compliant: compliantAiItems } =
+      splitByIntentConflicts(rankedAiItems, finalIntent, finalPrimitiveByTourId);
     const fullLocalPool = padRecommendationItems(
       compactedLocalItems,
       fallbackRecommendations(compactedCandidateTours),
     );
-    const { compliant: compliantAiItems } =
-      splitByIntentConflicts(rankedAiItems, finalIntent, finalPrimitiveByTourId);
     const { compliant: conflictFreeLocals } =
       splitByIntentConflicts(fullLocalPool, finalIntent, finalPrimitiveByTourId);
     const localItemsForFinalMerge = compoundRequest && aiItems.length === 0
@@ -8315,19 +8347,9 @@ export async function requestAiRecommendations({
         ? conflictFreeLocals
         : compactedLocalItems;
 
-    // 补位池 = 合规本地项 + 其余本地项：窄约束把合规池滤到个位数时仍能补到
-    // 最小可见条数（buildPaddedRecommendationItems 内判定），冲突项由下游
-    // "需放宽条件"标注说明取舍。compound 且无 AI 项时保持严格（宁缺毋滥）。
-    const fallbackPaddingPool = compoundRequest && aiItems.length === 0
-      ? conflictFreeLocals
-      : [...conflictFreeLocals, ...fullLocalPool.filter((item) => !conflictFreeLocals.some((c) => c.tourId === item.tourId))];
-
     const baseMergedItems = buildPaddedRecommendationItems(
-      mergeAiAndLocalRecommendations(
-        compliantAiItems.length > 0 || rankedAiItems.length === 0 ? compliantAiItems : rankedAiItems,
-        localItemsForFinalMerge,
-      ),
-      fallbackPaddingPool,
+      mergeAiAndLocalRecommendations(compliantAiItems, localItemsForFinalMerge),
+      fallbackPaddingPoolForAssembly(compoundRequest, aiItems.length, conflictFreeLocals, fullLocalPool),
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
     const mergedCandidateTours = availableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));
