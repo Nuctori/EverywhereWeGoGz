@@ -133,7 +133,7 @@ assert.deepEqual(
   ['guangxi-match', 'vietnam-local', 'inner-mongolia-conflict'],
   'strict audit should only push hard conflicts behind valid AI items and local supplements',
 );
-assert.ok(strictConflictAudited[2]?.reason?.includes('需放宽条件'));
+assert.ok(strictConflictAudited[2]?.reason?.includes('不完全符合你的要求（'));
 
 const validOrderPreserved = prioritizeRecommendationItems(
   [
