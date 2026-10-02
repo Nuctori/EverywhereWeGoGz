@@ -7418,8 +7418,12 @@ function getProviderTimeoutMs(config: AiProviderConfig) {
   const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
   // Experience note: free models often spend the first visible tokens on hidden
   // reasoning or sit behind a cold router. Keep the free tier patient enough to
-  // survive CoT/network jitter; keep DeepSeek short because it is the paid fallback.
-  if (providerKey.includes('deepseek')) return AI_FAST_FALLBACK_TIMEOUT_MS;
+  // survive CoT/network jitter.
+  // 官方 api.deepseek.com 响应快，9s 快速失败让它尽快让位给前台竞速；
+  // 但判定必须锚定端点而非模型名——用户自建网关代理的 deepseek（如
+  // workbuddy 网关）首包要 10-30s，按名字命中 9s 会让 AI 永远不可用，
+  // 用户看到的就全是本地模板兜底（"一点也不种草"的直接根因）。
+  if (config.baseUrl.toLowerCase().includes('api.deepseek.com')) return AI_FAST_FALLBACK_TIMEOUT_MS;
   if (isThinkingCapableProvider(config)) return AI_THINKING_PROVIDER_TIMEOUT_MS;
   if (
     providerKey.includes('siliconflow') ||
@@ -7496,7 +7500,10 @@ function normalizeAiProviderError(error: unknown, config: AiProviderConfig) {
 }
 
 function isPaidFallbackProvider(config: AiProviderConfig) {
-  return `${config.baseUrl} ${config.model}`.toLowerCase().includes('deepseek');
+  // 只有官方付费端点才算"付费兜底"（串行、不进前台竞速）。按模型名含
+  // deepseek 判定会把用户自建网关的 deepseek 主力模型也打入兜底队列，
+  // 让它失去前台竞速资格。
+  return config.baseUrl.toLowerCase().includes('api.deepseek.com');
 }
 
 async function callSingleAiProvider(params: {
