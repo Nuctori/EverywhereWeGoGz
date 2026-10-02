@@ -5568,7 +5568,7 @@ function rewriteRecommendationCopy(params: {
         })
       ),
     );
-    if (currentReason.startsWith('需放宽条件')) {
+    if (currentReason.startsWith('不完全符合你的要求（')) {
       return {
         ...item,
         reason: `${currentReason}。`,
@@ -7002,11 +7002,13 @@ function getAuditNote(reasons: string[]) {
 
 function buildHardConflictReason(reasons: string[]) {
   if (reasons.length === 0) return '';
-  return `需放宽条件：${reasons.slice(0, 3).join('；')}`;
+  // 用户可读措辞：内部审计腔「需放宽条件：」直接漏给用户像系统报错
+  // （audit-A q03 整页 12/12 前缀刷屏被打到 4 分）。
+  return `不完全符合你的要求（${reasons.slice(0, 3).join('；')}），列为备选`;
 }
 
 function isAlternativeRecommendation(item: AiRecommendationItem) {
-  return (item.reason || '').startsWith('需放宽条件：');
+  return (item.reason || '').startsWith('不完全符合你的要求（');
 }
 
 function markAsAlternativeRecommendation(
@@ -7022,7 +7024,7 @@ function markAsAlternativeRecommendation(
       : item.reason,
     matchedSignals: uniqueStrings([
       conflictReason,
-      ...item.matchedSignals.filter((signal) => !signal.startsWith('需放宽条件')),
+      ...item.matchedSignals.filter((signal) => !signal.startsWith('不完全符合你的要求（')),
     ]).slice(0, 5),
   };
 }
@@ -7112,12 +7114,22 @@ function auditAiRecommendationsStrict(
   aiItems.forEach((item) => pushAudited(item, validAiItems, alternativeAiItems));
   localItems.forEach((item) => pushAudited(item, validLocalItems, alternativeLocalItems));
 
-  return [
+  const result = [
     ...validAiItems,
     ...validLocalItems,
     ...alternativeAiItems,
     ...alternativeLocalItems,
-  ].slice(0, MAX_AI_RANKED_ITEMS);
+  ];
+  // 死局封顶：合规项（valid*）为空说明本轮约束下没有任何线路真正达标，
+  // 此时无限展示"需放宽条件"的备选墙等于整页系统报错（audit-A q03 实测
+  // 12/12 前缀刷屏被打到 4 分），封顶到 6 条备选即可。
+  if (validAiItems.length + validLocalItems.length === 0 && alternativeAiItems.length + alternativeLocalItems.length > 6) {
+    return [
+      ...alternativeAiItems.slice(0, 6),
+      ...alternativeLocalItems.slice(0, 6),
+    ].slice(0, MAX_AI_RANKED_ITEMS);
+  }
+  return result.slice(0, MAX_AI_RANKED_ITEMS);
 }
 
 // 历史上的复合体验二次硬过滤已删除（1a91e0652）：AI 的选择顺序就是结果顺序，

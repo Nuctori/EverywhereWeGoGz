@@ -139,7 +139,7 @@ const aiItems = validateAiItems({
 
 const audited = auditAiRecommendations(aiItems, [], tours, inheritedIntent);
 assert.equal(audited[0].tourId, 'phuket-budget');
-assert.ok(audited.find((item) => item.tourId === 'guizhou-cheap')?.matchedSignals.some((signal) => signal.startsWith('需放宽条件')));
+assert.ok(audited.find((item) => item.tourId === 'guizhou-cheap')?.matchedSignals.some((signal) => signal.startsWith('不完全符合你的要求（')));
 const aiOrderTours = [
   candidate({ id: 'ai-first', title: '广东温泉沙滩3天', destination: '广东', duration: 3, price: 1299, tags: ['温泉', '沙滩'], highlights: ['温泉', '沙滩'] }),
   candidate({ id: 'local-favorite', title: '广东温泉沙滩3天', destination: '广东', duration: 3, price: 399, tags: ['温泉', '沙滩'], highlights: ['温泉', '沙滩'] }),
@@ -349,7 +349,7 @@ const auditedAvoid = auditAiRecommendations(
   avoidIntent,
 );
 assert.equal(auditedAvoid.length, 1);
-assert.ok(auditedAvoid[0]?.reason?.includes('需放宽条件'));
+assert.ok(auditedAvoid[0]?.reason?.includes('不完全符合你的要求（'));
 
 function toLocalDateInput(value: Date) {
   return [
@@ -1397,7 +1397,7 @@ const publicInterestAuditedOrder = auditAiRecommendationsStrict(
 assert.equal(publicInterestAuditedOrder[0]?.tourId, 'public-interest-tour');
 assert.equal(publicInterestAuditedOrder[1]?.tourId, 'rural-county');
 assert.equal(publicInterestAuditedOrder[2]?.tourId, 'major-city');
-assert.ok(publicInterestAuditedOrder[2]?.reason?.includes('需放宽条件'));
+assert.ok(publicInterestAuditedOrder[2]?.reason?.includes('不完全符合你的要求（'));
 
 const publicInterestQualityIssue = getAiResponseIntentQualityIssue({
   response: {
@@ -2138,8 +2138,8 @@ const strictAudited = auditAiRecommendationsStrict(
 assert.equal(strictAudited[0].tourId, 'strict-good');
 assert.equal(strictAudited[1].tourId, 'strict-over-budget');
 assert.equal(strictAudited[2].tourId, 'strict-flight-beach');
-assert.ok(strictAudited.find((item) => item.tourId === 'strict-over-budget')?.reason?.includes('需放宽条件'));
-assert.ok(strictAudited.find((item) => item.tourId === 'strict-flight-beach')?.reason?.includes('需放宽条件'));
+assert.ok(strictAudited.find((item) => item.tourId === 'strict-over-budget')?.reason?.includes('不完全符合你的要求（'));
+assert.ok(strictAudited.find((item) => item.tourId === 'strict-flight-beach')?.reason?.includes('不完全符合你的要求（'));
 
 const priorityPreserved = prioritizeRecommendationItems([
   { tourId: 'model-first', score: 10, reason: 'AI order first', matchedSignals: [] },
