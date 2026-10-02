@@ -433,6 +433,61 @@ for (const staleFile of existingDetailFiles) {
   }
 }
 
+// ─── 数据修复 pass 1：目的地字段细化 ───
+// 爬虫富集把目的地归并进泛大区（「赣州古城3天」字段='广东'，赣州其实在
+// 江西），导致目的地筛选/地图聚类/本地性先验全部错归类。标题明写的具体
+// 目的地若在语料中作为真实目的地分类存在（≥3 条产品使用），字段改写为
+// 该具体值——词表来自语料自身 destination 字段，数据驱动零维护。
+const destinationVocabulary = new Map();
+for (const tour of listTours) {
+  const value = (tour.destination || '').trim();
+  if (value && value !== '其他' && value.length >= 2 && value.length <= 8) {
+    destinationVocabulary.set(value, (destinationVocabulary.get(value) || 0) + 1);
+  }
+}
+const knownDestinations = [...destinationVocabulary.keys()]
+  .filter((value) => destinationVocabulary.get(value) >= 3);
+const normalizedTourTitles = new Map(listTours.map((tour) => [tour.id, String(tour.title || '').trim()]));
+let destinationRefined = 0;
+for (const tour of listTours) {
+  const field = (tour.destination || '').trim();
+  if (field !== '广东') continue;
+  const title = normalizedTourTitles.get(tour.id) || '';
+  const match = knownDestinations.find((value) => value !== '广东' && title.includes(value));
+  if (match) {
+    tour.destination = match;
+    tour.destinationProvince = match;
+    destinationRefined += 1;
+  }
+}
+
+// ─── 数据修复 pass 2：集合时刻结构化 ───
+// boarding.raw 的「07:40基盛万科肯德基」模式是唯一的集合时刻证据。提取为
+// points[].time/name 后：上车点展示带时刻、晚出发判定（inferEveningDeparture
+// 的结构化时间路径）有真数据。通知类样板（"前一天20:00点前短信通知"）用
+// 负向前瞻排除。
+let pickupsStructured = 0;
+const PICKUP_TIME_RE = /([01]?\d|2[0-3])[:：]([0-5]\d)(?!\s*(?:点)?\s*(?:前|之前|尚未))/g;
+for (const tour of listTours) {
+  const raw = tour.boarding?.raw;
+  if (!raw || !tour.boarding) continue;
+  if (Array.isArray(tour.boarding.points) && tour.boarding.points.some((point) => point.time)) continue;
+  const matches = [...raw.matchAll(PICKUP_TIME_RE)];
+  if (matches.length === 0) continue;
+  const extracted = matches.map((match, index) => {
+    const nameStart = match.index + match[0].length;
+    const nameRaw = raw.slice(nameStart, nameStart + 40).split(/[,，;；\n]/)[0].trim();
+    return { time: `${match[1]}:${match[2]}`, name: nameRaw || `集合点${index + 1}` };
+  }).filter((point) => point.name.length >= 2);
+  if (extracted.length === 0) continue;
+  tour.boarding.points = [
+    ...(Array.isArray(tour.boarding.points) ? tour.boarding.points : []),
+    ...extracted.map((point) => ({ name: point.name, time: point.time })),
+  ];
+  pickupsStructured += 1;
+}
+console.log(`[split] 目的地字段细化: ${destinationRefined} 条 | 集合时刻结构化: ${pickupsStructured} 条`);
+
 const mapCardFields = [
   'id',
   'sourceId',
