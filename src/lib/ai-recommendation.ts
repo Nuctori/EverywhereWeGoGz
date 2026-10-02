@@ -1761,6 +1761,17 @@ function scoreTour(
     }
   }
 
+  // 短途异地收客检测：geo.destination 坐标距广州 >1000km 且行程 ≤4 天，
+  // 物理上不可行（普陀山/台州类外地收客团）——重度降权。用户点名该目的地
+  // 时不惩罚（长天数与点名场景不适用此规则）。
+  const destinationGeo = (tour.geo as { destination?: { latitude?: number; longitude?: number } } | undefined)?.destination;
+  if (destinationGeo?.latitude && destinationGeo?.longitude && (tour.duration ?? 0) > 0 && (tour.duration ?? 0) <= 4) {
+    const distanceKm = distanceFromGuangzhouKm(destinationGeo.latitude, destinationGeo.longitude);
+    if (distanceKm > 1000 && !query.destinationHints?.some((hint) => normalizeText(tour.title).includes(normalizeText(hint)))) {
+      score -= 24;
+      signals.push(`短途目的地距广州${Math.round(distanceKm)}km，疑似异地收客`);
+    }
+  }
   if (query.budget) {
     const budgetMax = Number.isFinite(query.budget.max) ? query.budget.max : null;
     const budgetMin = Number.isFinite(query.budget.min) ? query.budget.min : null;
@@ -1930,6 +1941,19 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
 
 // 标题里"XX出发/XX往返"的出发城市声明：要求城市名前有边界（起始/标点/数字/括号），
 // 排除"天天出发/随时出发"这类非地名短语（它们前面是词字，无边界）。
+// 目的地坐标与广州基准（23.13N,113.26E）的大圆距离（km）。纯几何计算，
+// 用于短途产品（≤4 天）的异地收客检测：目的地超出高铁/动车 3 小时圈
+// （>1000km）时，两天往返物理上不可行，多为其他城市收客的供应商货。
+function distanceFromGuangzhouKm(latitude: number, longitude: number) {
+  const baseLatitude = 23.13;
+  const baseLongitude = 113.26;
+  const toRad = Math.PI / 180;
+  const dLat = (latitude - baseLatitude) * toRad;
+  const dLng = (longitude - baseLongitude) * toRad;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(baseLatitude * toRad) * Math.cos(latitude * toRad) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(a));
+}
+
 function getDeclaredDepartureCity(title: string) {
   const match = /(?:^|[\s\【】·／/|,&>\)\(（）：:0-9])([\u4e00-\u9fa5]{2,4})(?:出发|往返)/.exec(normalizeText(title));
   if (!match) return null;

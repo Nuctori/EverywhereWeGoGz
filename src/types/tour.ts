@@ -461,6 +461,7 @@ export type AiRecommendationCandidate = Pick<
   | 'groupSize'
   | 'hotDepartureDates'
   | 'boarding'
+  | 'geo'
 >;
 
 export interface AiRecommendationRequest {
