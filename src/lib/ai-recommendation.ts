@@ -2147,6 +2147,9 @@ function buildHardIntentFromText(text: string): AiTravelIntent | null {
     budgetMin: hasTextBudget && budget?.min && Number.isFinite(budget.min) ? budget.min : null,
     budgetMax: hasTextBudget && budget?.max && Number.isFinite(budget.max) ? budget.max : null,
     budgetHardLimit: hasTextBudget && hasStrictBudgetLanguage(normalizedText),
+    // 预算优先级文本解析：premium/low 人群（不考虑钱/穷游）此前从未被解析，
+    // bp 字段等于死代码。
+    budgetPriority: parseBudgetPriorityFromText(normalizedText),
     tripDaysMin: inferredTripWindow.tripDaysMin,
     tripDaysMax: inferredTripWindow.tripDaysMax,
     departureWithinDays: promptDateWindow
@@ -2677,13 +2680,14 @@ function splitByIntentConflicts(
   items: AiRecommendationItem[],
   intent: AiTravelIntent | null,
   primitiveByTourId: Map<string, RecommendationPrimitive>,
+  corpusDestinationVocabulary?: string[],
 ) {
   if (!intent) return { compliant: [...items], conflicting: [] };
   const compliant: AiRecommendationItem[] = [];
   const conflicting: AiRecommendationItem[] = [];
   for (const item of items) {
     const primitive = primitiveByTourId.get(item.tourId);
-    if (primitive && getPrimitiveConflictReasons(intent, primitive).length === 0) {
+    if (primitive && getPrimitiveConflictReasons(intent, primitive, corpusDestinationVocabulary).length === 0) {
       compliant.push(item);
     } else {
       conflicting.push(item);
@@ -3765,7 +3769,11 @@ function intentMatchesPrimitive(intent: AiTravelIntent | null, primitive: Recomm
   return getPrimitiveConflictReasons(intent, primitive).length === 0;
 }
 
-function getPrimitiveConflictReasons(intent: AiTravelIntent | null, primitive: RecommendationPrimitive) {
+function getPrimitiveConflictReasons(
+  intent: AiTravelIntent | null,
+  primitive: RecommendationPrimitive,
+  corpusDestinationVocabulary?: string[],
+) {
   const reasons: string[] = [];
   if (!intent) return reasons;
 
@@ -3826,6 +3834,19 @@ function getPrimitiveConflictReasons(intent: AiTravelIntent | null, primitive: R
   const declaredDepartureCity = getDeclaredDepartureCity(primitive.title);
   if (declaredDepartureCity && !declaredDepartureCity.includes(DEFAULT_DEPARTURE_CITY)) {
     reasons.push(`异地出发：${declaredDepartureCity}`);
+  }
+
+  // 目的地字段与标题声明互相矛盾（字段=广东、标题明写语料中真实存在的异地
+  // 目的地，如「斯里兰卡」配「广东」）是爬虫富集错误：对泛需求用户是货不对板。
+  if (corpusDestinationVocabulary?.length && primitive.destination && primitive.destination !== '其他' && destinationHintsMatchCorpus(['广东'], primitive.destination)) {
+    const normalizedTitle = normalizeText(primitive.title);
+    const contradictory = corpusDestinationVocabulary.find((value) =>
+      value !== normalizeText(primitive.destination) &&
+      !destinationHintsMatchCorpus(['广东'], value) &&
+      normalizedTitle.includes(value));
+    if (contradictory) {
+      reasons.push(`目的地数据存疑：字段=${primitive.destination}，标题=${contradictory}`);
+    }
   }
 
   if (intent.destinationHints?.length) {
@@ -7313,7 +7334,16 @@ function hasExplicitBudgetBoundsText(userText: string) {
 
 function hasExplicitBudgetPriorityText(userText: string) {
   const normalizedText = userText.replace(/\s+/g, '');
-  return /便宜|低价|性价比|省钱|穷游|划算|实惠|不贵|越低越好|能省则省|高端|奢华|豪华|贵一点|品质|不差钱|预算不限/.test(normalizedText);
+  return /便宜|低价|性价比|省钱|穷游|划算|实惠|不贵|越低越好|能省则省|高端|奢华|豪华|贵一点|品质|不差钱|预算不限|不考虑钱|不计成本|预算充足|要住最好的|只求最好|越贵越好|预算紧张/.test(normalizedText);
+}
+
+// 预算优先级文本解析：premium=不考虑钱/要住最好的类，low=穷游/省钱类。
+// 这是意图理解（NLU）而非匹配补丁——bp 此前从未从文本解析，premium 排序
+// 逻辑等于死代码。
+function parseBudgetPriorityFromText(normalizedText: string): AiTravelIntent['budgetPriority'] {
+  if (/不考虑钱|不计成本|预算充足|预算不是问题|要住最好的|只求最好|越贵越好|贵有贵的道理|不差钱|预算不限/.test(normalizedText)) return 'premium';
+  if (/穷游|能省则省|越便宜越好|省钱为主|预算紧张/.test(normalizedText)) return 'low';
+  return null;
 }
 
 function sanitizeAiBudgetBoundsForTurn(
@@ -7967,6 +7997,7 @@ export async function requestAiRecommendations({
   const memoryBackedIntent = mergeIntentWithMemory(baseHardIntent, memoryForThisTurn);
   const allowPublicInterestForCurrentTurn = allowsPublicInterestForTurn(text, memoryForThisTurn);
   const candidatePool = baseCandidatePool;
+    const corpusVocab = [...getCorpusDestinationVocabulary(candidatePool)];
   // 语料目的地富集要在候选池就绪后做；同时作用于 base 与 memory 合并意图，
   // 保证冲突纪律（getPrimitiveConflictReasons）拿得到完整目的地提示。
   const corpusDestinationHints = enrichDestinationHintsWithCorpus(
@@ -8380,13 +8411,13 @@ export async function requestAiRecommendations({
     // 被打到 4 分。合规项不足时列表由合规本地补位填到最小可见条数（6 条），
     // 短于 6 条也诚实：宁可列表短，不要一页"行程错位"的凑数项。
     const { compliant: compliantAiItems } =
-      splitByIntentConflicts(rankedAiItems, finalIntent, finalPrimitiveByTourId);
+      splitByIntentConflicts(rankedAiItems, finalIntent, finalPrimitiveByTourId, corpusVocab);
     const fullLocalPool = padRecommendationItems(
       compactedLocalItems,
       fallbackRecommendations(compactedCandidateTours),
     );
     const { compliant: conflictFreeLocals } =
-      splitByIntentConflicts(fullLocalPool, finalIntent, finalPrimitiveByTourId);
+      splitByIntentConflicts(fullLocalPool, finalIntent, finalPrimitiveByTourId, corpusVocab);
     const localItemsForFinalMerge = compoundRequest && aiItems.length === 0
       ? []
       : aiItems.length > 0
