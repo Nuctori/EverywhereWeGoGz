@@ -144,6 +144,8 @@ interface LocalRecommendationQuery {
   // "想漂流"归一出「玩水清凉」后,海滩/温泉产品靠概念族拿到同档覆盖分,
   // 真漂流产品反而沉底——字面词必须单独加权。
   literalCoverageTerms: string[];
+  // 候选语料自身的目的地词表（数据驱动）：用于检测字段与标题的目的地矛盾。
+  corpusDestinationVocabulary?: string[];
   budget: ReturnType<typeof parseBudget>;
   duration: ReturnType<typeof parseDuration>;
   prefersEasyPace: boolean;
@@ -1667,6 +1669,21 @@ function scoreTour(
     signals.push(`异地出发：${declaredDepartureCity}`);
   }
 
+  // 目的地字段与标题声明互相矛盾（字段=广东、标题明写语料中真实存在的异地
+  // 目的地，如「斯里兰卡」配「广东」）是爬虫富集错误：对泛需求用户是货不对板，
+  // 重度降权；词表来自候选语料自身，用户点名该目的地时不受影响。
+  if (query.corpusDestinationVocabulary?.length && tour.destination && tour.destination !== '其他' && destinationHintsMatchCorpus(['广东'], tour.destination)) {
+    const normalizedTitle = normalizeText(tour.title);
+    const contradictory = query.corpusDestinationVocabulary.find((value) =>
+      value !== normalizeText(tour.destination) &&
+      !destinationHintsMatchCorpus(['广东'], value) &&
+      normalizedTitle.includes(value));
+    if (contradictory) {
+      score -= 24;
+      signals.push(`目的地数据存疑：字段=${tour.destination}，标题=${contradictory}`);
+    }
+  }
+
   if (query.destinationHints.length > 0) {
     // 具体命中（线路语料真含用户说的具体地名，如"阳江/海陵岛"）权重高于
     // 省域泛命中（只通过别名族命中"广东"）——两者同分会让真目的地被
@@ -1812,10 +1829,20 @@ function scoreTour(
 
   if (query.departureTimeOfDay && query.departureTimeOfDay !== 'morning') {
     const hasEveningDeparture = primitive.schedule.hasEveningOrNightDeparture;
+    // 交通方式差异化：大巴团语料实证多为早晨集合发车，与「晚上出发」错位
+    // 要真扣分；动车/高铁周末团行业惯例多为傍晚班次（时刻以票面为准），
+    // 证据缺失时不奖不罚，排在大巴之前。
+    const declaresTrain = /动车|高铁|火车/.test(`${primitive.transportType || ''}${corpus}`);
+    const declaresBus = /大巴/.test(`${primitive.transportType || ''}${corpus}`);
     if (query.departureTimeOfDay === 'evening' || query.departureTimeOfDay === 'night') {
       if (hasEveningDeparture) {
         score += 14;
         signals.push('支持晚间出发');
+      } else if (declaresBus && !declaresTrain) {
+        score -= 10;
+        signals.push('大巴团多为早晨集合，与晚间出发需求错位');
+      } else if (declaresTrain) {
+        // 无时刻证据不奖不罚，但也不吃晚间扣分
       } else if (primitive.schedule.departureWeekdays.length > 0) {
         score -= 4;
       }
@@ -1914,6 +1941,7 @@ function getDeclaredDepartureCity(title: string) {
 function localRecommendations(tours: AiRecommendationCandidate[], text: string) {
   const query = buildLocalRecommendationQuery(text);
   query.destinationHints = enrichDestinationHintsWithCorpus(text, query.destinationHints, tours);
+  query.corpusDestinationVocabulary = [...getCorpusDestinationVocabulary(tours)];
   const items = tours
     .map((tour, index) => scoreTour(tour, query, index))
     .filter((item): item is AiRecommendationItem => Boolean(item))
@@ -7123,12 +7151,9 @@ function auditAiRecommendationsStrict(
   ];
   // 死局封顶：合规项（valid*）为空说明本轮约束下没有任何线路真正达标，
   // 此时无限展示"需放宽条件"的备选墙等于整页系统报错（audit-A q03 实测
-  // 12/12 前缀刷屏被打到 4 分），封顶到 6 条备选即可。
+  // 12/12 前缀刷屏被打到 4 分），备选总数封 6 条。
   if (validAiItems.length + validLocalItems.length === 0 && alternativeAiItems.length + alternativeLocalItems.length > 6) {
-    return [
-      ...alternativeAiItems.slice(0, 6),
-      ...alternativeLocalItems.slice(0, 6),
-    ].slice(0, MAX_AI_RANKED_ITEMS);
+    return [...alternativeAiItems, ...alternativeLocalItems].slice(0, 6);
   }
   return result.slice(0, MAX_AI_RANKED_ITEMS);
 }
