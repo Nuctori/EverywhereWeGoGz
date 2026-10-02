@@ -4186,28 +4186,19 @@ function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive, varian
   return `${lead}${tail ? `；${tail}` : ''}。`;
 }
 
-function buildTripLengthNarration(primitive: RecommendationPrimitive, profile?: RecommendationCopyProfile, variant = 0) {
+function buildTripLengthNarration(primitive: RecommendationPrimitive, profile?: RecommendationCopyProfile) {
   const dayText = primitive.tripDays > 0 ? `${primitive.tripDays}天` : '';
   if (!dayText) return '';
-  const pick = (options: string[]) => options[variant % options.length];
 
   if (profile?.shortTrip || primitive.tripDays <= 2) {
     return primitive.tripDays <= 2
-      ? pick([
-          `${dayText}能把节奏收得比较紧凑，周末出发也不容易太折腾`,
-          `${dayText}一个周末刚刚好，不用专门请长假`,
-          `${dayText}短平快，主打一个省心出行`,
-        ])
+      ? `${dayText}能把节奏收得比较紧凑，周末出发也不容易太折腾`
       : `${dayText}能把行程铺开一点，但整体还算短线好安排`;
   }
 
   if (profile?.wantsLongerCompleteTrip || primitive.tripDays >= 4) {
     return primitive.tripDays >= 5
-      ? pick([
-          `${dayText}通常能把路程、住宿和核心玩法衔接得更完整`,
-          `${dayText}的体量，才装得下这些核心体验不打折`,
-          `${dayText}走下来比较从容，适合把精华体验都留足时间`,
-        ])
+      ? `${dayText}通常能把路程、住宿和核心玩法衔接得更完整`
       : `${dayText}比纯打卡式短线更从容，主要体验不会太赶`;
   }
 
@@ -4224,14 +4215,11 @@ function buildExpandedFallbackReason(
   variant = 0,
 ) {
   const baseReason = stripTerminalPunctuation(buildPrimitiveConcreteReason(primitive, variant));
-  const tripLengthLead = buildTripLengthNarration(primitive, profile, variant);
+  const tripLengthLead = buildTripLengthNarration(primitive, profile);
   const weatherNudge = getPrimitiveWeatherNudge(primitive);
-  // baseReason（buildPrimitiveConcreteReason）的 tail 里已经拼过一次天气提醒，
-  // 这里再拼会出现同句重复（"……留意降雨。出发前再留意一下……留意降雨"）。
   const secondSentence = uniqueStrings([
     tripLengthLead,
-    weatherNudge && !baseReason.includes(weatherNudge)
-      ? `出发前再留意一下${weatherNudge.replace(/^出发前看一下/, '').replace(/^建议留意/, '').replace(/^高温天/, '高温天').replace(/^山水户外/, '山水户外')}` : '',
+    weatherNudge ? `出发前再留意一下${weatherNudge.replace(/^出发前看一下/, '').replace(/^建议留意/, '').replace(/^高温天/, '高温天').replace(/^山水户外/, '山水户外')}` : '',
   ]).join('，');
 
   if (!secondSentence) return `${baseReason}。`;
