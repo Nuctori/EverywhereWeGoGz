@@ -3081,4 +3081,32 @@ const reordered = prioritizeRecommendationItems(
   assert.notEqual(liteJson1, liteJson2, 'lite 动态段应随本轮查询变化');
 }
 
+// ─── 回归：中文数字天数归一（十进制数词 vs 并列区间 vs 节日词）───
+{
+  const cases: Array<[string, number, number]> = [
+    // 十进制数词必须按位值解析，不能被当成区间（十三=13，不是 3-10）
+    ['十三天行程', 12, 14],
+    ['二十五天', 24, 26],
+    ['十五天深度游', 14, 16],
+    ['十日游', 9, 11],
+    // 并列区间
+    ['两三天周边', 2, 3],
+    ['三五天假期', 3, 5],
+    // 单数字 + 行业惯例
+    ['两天游', 1, 3],
+    ['一日游', 1, 1],
+  ];
+  for (const [query, min, max] of cases) {
+    const intent = buildHardIntentFromText(query);
+    assert.equal(intent?.tripDaysMin, min, `「${query}」tripDaysMin 应为 ${min}`);
+    assert.equal(intent?.tripDaysMax, max, `「${query}」tripDaysMax 应为 ${max}`);
+  }
+  // 节日词含中文数字但无"天/日"量词，不得被解析成天数
+  for (const festival of ['十一去北京', '五一假期去哪', '双十一有活动吗']) {
+    const intent = buildHardIntentFromText(festival);
+    assert.equal(intent?.tripDaysMin ?? null, null, `「${festival}」不应被解析出天数`);
+    assert.equal(intent?.tripDaysMax ?? null, null, `「${festival}」不应被解析出天数`);
+  }
+}
+
 console.log('AI recommendation audit passed');

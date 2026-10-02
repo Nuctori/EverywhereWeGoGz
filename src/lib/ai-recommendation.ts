@@ -892,21 +892,47 @@ function hasStrictBudgetLanguage(text: string) {
 
 // 中文数字天数归一："两天/三天/两三天/三五天"是用户最常见的表达，纯数字
 // 正则解析不到会让时长约束整条失明（3天/1天线路混进"两天游"结果）。
-// 相邻数字词（两三/三五）按数字域惯例展开成区间。
+// 多字数字词要区分两类：
+//   十进制数词（十三=13、二十五=25）——含"十"且不在首位，按位值组合；
+//   并列区间（两三=2-3、三五=3-5）——相邻两个个位数字，展开成区间。
 const CHINESE_NUMERAL_VALUES: Record<string, number> = {
   一: 1, 两: 2, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10,
 };
 
-function normalizeChineseNumeralDuration(text: string) {
-  return text.replace(/([一两二三四五六七八九十]{1,3})天/g, (match, numerals: string) => {
-    if (numerals.length === 1) {
-      const value = numerals === '十' ? 10 : CHINESE_NUMERAL_VALUES[numerals];
-      return Number.isFinite(value) ? `${value}天` : match;
+function parseChineseNumeralToken(numerals: string): number | null {
+  if (numerals.length === 1) {
+    const value = CHINESE_NUMERAL_VALUES[numerals];
+    return Number.isFinite(value) ? value : null;
+  }
+  const tenIndex = numerals.indexOf('十');
+  // 十进制数词：十/十X/ X十/ X十Y
+  if (tenIndex !== -1 && numerals.length <= 3) {
+    const tensPart = tenIndex === 0 ? 1 : CHINESE_NUMERAL_VALUES[numerals[0]];
+    const onesPart = tenIndex === numerals.length - 1
+      ? 0
+      : CHINESE_NUMERAL_VALUES[numerals[tenIndex + 1]];
+    if (Number.isFinite(tensPart) && Number.isFinite(onesPart)) {
+      return tensPart * 10 + onesPart;
     }
+    return null;
+  }
+  return null;
+}
+
+function normalizeChineseNumeralDuration(text: string) {
+  // 同时归一 "N日"（一日游/三日游）：parseDuration 的正则认 `天|日`，
+  // 只归一 `天` 会让中文数字的 `日` 形态漏过解析。
+  return text.replace(/([一两二三四五六七八九十]{1,3})天/g, (match, numerals: string) => {
+    const direct = parseChineseNumeralToken(numerals);
+    if (direct !== null) return `${direct}天`;
+    // 并列区间（两三/三五）：全部是相邻个位数字时展开
     const values = [...numerals].map((char) => CHINESE_NUMERAL_VALUES[char]);
     if (values.some((value) => !Number.isFinite(value))) return match;
     if (values.length === 2) return `${Math.min(values[0], values[1])}-${Math.max(values[0], values[1])}天`;
     return `${values[0]}-${values[values.length - 1]}天`;
+  }).replace(/([一两二三四五六七八九十]{1,3})日/g, (match, numerals: string) => {
+    const direct = parseChineseNumeralToken(numerals);
+    return direct !== null ? `${direct}日` : match;
   });
 }
 
@@ -2835,12 +2861,20 @@ function countCommentaryItems(items: AiRecommendationItem[]) {
   );
 }
 
+// 可见结果的最小条数：硬约束装配后若只剩极少几条（"周六晚出发周日早回"
+// 这类窄约束会把本地池滤到个位数），页面几乎空窗，比展示几条"需放宽"的
+// 近似替代更糟。低于此数时用未经冲突过滤的本地池补足——补入项仍走
+// 本地排序，且下游会给硬冲突项打"需放宽条件"标注，用户能看到取舍。
+const MIN_VISIBLE_RECOMMENDATION_ITEMS = 6;
+
 function buildPaddedRecommendationItems(
   items: AiRecommendationItem[],
   fallbackPool: AiRecommendationItem[],
 ) {
   if (items.length > 0) {
-    return limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
+    const limited = limitRecommendationCommentary(items).slice(0, MAX_AI_RANKED_ITEMS);
+    if (limited.length >= MIN_VISIBLE_RECOMMENDATION_ITEMS) return limited;
+    return padRecommendationItems(limited, fallbackPool).slice(0, MAX_AI_RANKED_ITEMS);
   }
   return padRecommendationItems(items, fallbackPool);
 }
@@ -8257,26 +8291,33 @@ export async function requestAiRecommendations({
     // 它们不是"近似替代"而是错误答案，评审与用户对第 5-15 位的违规项
     // 每次都扣分（60+ 条评测的一致证据）。合规项不足时列表变短也是诚实
     // 行为；模型把合规项全部漏选时保持原序兜底（解析/抽取失误不至于清空）。
+    const fullLocalPool = padRecommendationItems(
+      compactedLocalItems,
+      fallbackRecommendations(compactedCandidateTours),
+    );
     const { compliant: compliantAiItems } =
       splitByIntentConflicts(rankedAiItems, finalIntent, finalPrimitiveByTourId);
     const { compliant: conflictFreeLocals } =
-      splitByIntentConflicts(
-        padRecommendationItems(compactedLocalItems, fallbackRecommendations(compactedCandidateTours)),
-        finalIntent,
-        finalPrimitiveByTourId,
-      );
+      splitByIntentConflicts(fullLocalPool, finalIntent, finalPrimitiveByTourId);
     const localItemsForFinalMerge = compoundRequest && aiItems.length === 0
       ? []
       : aiItems.length > 0
         ? conflictFreeLocals
         : compactedLocalItems;
 
+    // 补位池 = 合规本地项 + 其余本地项：窄约束把合规池滤到个位数时仍能补到
+    // 最小可见条数（buildPaddedRecommendationItems 内判定），冲突项由下游
+    // "需放宽条件"标注说明取舍。compound 且无 AI 项时保持严格（宁缺毋滥）。
+    const fallbackPaddingPool = compoundRequest && aiItems.length === 0
+      ? conflictFreeLocals
+      : [...conflictFreeLocals, ...fullLocalPool.filter((item) => !conflictFreeLocals.some((c) => c.tourId === item.tourId))];
+
     const baseMergedItems = buildPaddedRecommendationItems(
       mergeAiAndLocalRecommendations(
         compliantAiItems.length > 0 || rankedAiItems.length === 0 ? compliantAiItems : rankedAiItems,
         localItemsForFinalMerge,
       ),
-      compoundRequest && aiItems.length === 0 ? [] : localItemsForMerge,
+      fallbackPaddingPool,
     );
     const mergedTourIds = new Set(baseMergedItems.map((item) => item.tourId));
     const mergedCandidateTours = availableCandidates.filter((candidate) => mergedTourIds.has(candidate.id));

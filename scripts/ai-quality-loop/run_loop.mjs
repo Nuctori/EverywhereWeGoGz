@@ -5,7 +5,11 @@ import fs from 'node:fs';
 const KEY = process.env.AI_QUALITY_TOKEN ?? '';
 const PROXY = process.env.AI_QUALITY_BASE_URL ?? '';
 const DRIVER = process.env.AI_QUALITY_DRIVER ?? 'gemini-3-flash'; // 被测管线的供应商
-const JUDGE = process.env.AI_QUALITY_JUDGE ?? 'zhushu/moonshotai/kimi-k3';
+// 裁判默认用被测同源的 gemini：代理上的第三方命名空间模型（zhushu/*）会随平台
+// 上下架/子路由故障而 400，裁判挂了会让整轮评分变成 0/0/0 的假回退。
+const JUDGE = process.env.AI_QUALITY_JUDGE ?? DRIVER;
+// 裁判/被测任一返回非 JSON 时重试一次，降低单次抖动对整轮分数的影响。
+const JUDGE_RETRIES = Number(process.env.AI_QUALITY_JUDGE_RETRIES ?? 1);
 
 const mod = await import('../../src/lib/ai-recommendation.ts');
 const { requestAiRecommendations } = mod;
@@ -17,27 +21,42 @@ const aiConfig = { apiKey: KEY, baseUrl: PROXY, model: DRIVER };
 const RESULTS = process.env.AI_QUALITY_RESULTS ?? 'tmp/aiq/results-loop.jsonl';
 const done = new Set(fs.existsSync(RESULTS) ? fs.readFileSync(RESULTS,'utf8').trim().split('\n').filter(Boolean).map(l=>JSON.parse(l).id) : []);
 
-async function judge(query, items, expect) {
+async function judgeOnce(query, items, expect) {
   const lines = items.slice(0, 12).map((it, i) => `${i+1}. ${it.title} | ${it.destination ?? ''} | ${it.duration ?? '?'}天 | ¥${it.price ?? '?'}` +
     (it.reason ? ` | 理由: ${String(it.reason).slice(0,80)}` : '')).join('\n');
-  const sys = '你是旅游推荐质量评审。给定用户需求与推荐结果,输出严格 JSON:{"relevance":1-5,"constraint":1-5,"reason_quality":1-5,"issues":"一句话主要问题,无则空串"}。relevance=结果与需求相关度;constraint=显式约束(目的地/预算/天数/同行人)满足度;reason_quality=理由是否具体不套话。只输出 JSON。';
+  const sys = '你是旅游推荐质量评审。给定用户需求与推荐结果,输出严格 JSON 对象(不要 markdown 代码块、不要解释):{"relevance":1-5,"constraint":1-5,"reason_quality":1-5,"issues":"一句话主要问题,无则空串"}。relevance=结果与需求相关度;constraint=显式约束(目的地/预算/天数/同行人)满足度;reason_quality=理由是否具体不套话。';
   const body = JSON.stringify({ model: JUDGE, messages: [
     { role: 'system', content: sys },
     { role: 'user', content: `需求: ${query}\n约束: ${JSON.stringify(expect)}\n结果:\n${lines || '(空)'}` },
   ], max_tokens: 400, temperature: 0.1 });
-  try {
-    const res = await fetch(`${PROXY}/chat/completions`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${KEY}` },
-      body, signal: AbortSignal.timeout(90000),
-    });
-    const text = await res.text();
-    const jsonLine = text.split('\n').find(l => l.startsWith('data: {'))?.slice(6) || text;
-    const raw = String(JSON.parse(jsonLine).choices?.[0]?.message?.content || '');
-    const m = raw.match(/\{[\s\S]*\}/);
-    return m ? JSON.parse(m[0]) : { relevance: 0, constraint: 0, reason_quality: 0, issues: 'judge-parse-fail' };
-  } catch (e) {
-    return { relevance: 0, constraint: 0, reason_quality: 0, issues: `judge-fail:${String(e).slice(0,40)}` };
+  const res = await fetch(`${PROXY}/chat/completions`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${KEY}` },
+    body, signal: AbortSignal.timeout(90000),
+  });
+  if (!res.ok) throw new Error(`judge HTTP ${res.status}`);
+  const text = await res.text();
+  const jsonLine = text.split('\n').find(l => l.startsWith('data: {'))?.slice(6) || text;
+  const envelope = JSON.parse(jsonLine);
+  const raw = String(envelope.choices?.[0]?.message?.content || '');
+  const m = raw.match(/\{[\s\S]*\}/);
+  if (!m) throw new Error('judge 未返回 JSON');
+  const parsed = JSON.parse(m[0]);
+  if (typeof parsed.relevance !== 'number') throw new Error('judge JSON 缺字段');
+  return parsed;
+}
+
+// 裁判抖动重试：非 JSON / 网络错 / 5xx 都重试，避免单次抖动把整条打成 0 分。
+async function judge(query, items, expect) {
+  let lastError = '';
+  for (let attempt = 0; attempt <= JUDGE_RETRIES; attempt += 1) {
+    try {
+      return await judgeOnce(query, items, expect);
+    } catch (e) {
+      lastError = String(e).slice(0, 60);
+      if (attempt < JUDGE_RETRIES) await new Promise((r) => setTimeout(r, 1500));
+    }
   }
+  return { relevance: 0, constraint: 0, reason_quality: 0, issues: `judge-fail:${lastError}`, judgeFailed: true };
 }
 
 for (const { id, q, expect } of queries) {

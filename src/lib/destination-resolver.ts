@@ -212,12 +212,15 @@ export function resolveTourDestination(tour: Pick<Tour, 'destination' | 'title' 
   const cleanedTitle = stripDepartureContext(tour.title || '');
 
   if (!rawDestination || GENERIC_DESTINATIONS.has(rawDestination)) {
-    // 无点名目的地时，展示要的是高亮里的具体地名（巽寮湾）而不是它的归属市
-    // （惠州）——地名越具体越可读；高亮不可靠（过长/无命中）才退回归一结果。
+    // 无点名目的地时，展示要的是高亮里的具体地名（巽寮湾/盐洲岛），而不是
+    // 归属市或"其他"占位——地名越具体越可读。判定用"高亮自身能解析出地名"
+    // 而非"解析结果等于 inferredDestination"：inferredDestination 常被
+    // '其他' 占位（首个非地名高亮）盖住，等值判定会让具体地名整批丢失。
+    // 长度护栏挡掉整段宣传文案，只取短高亮。
     if (!titleHints[0]) {
       const readableHighlight = (tour.highlights || [])
         .map((item) => stripHighlightSuffix(item))
-        .find((item) => item && item.length <= 16 && collectDestinationHints(item).includes(inferredDestination));
+        .find((item) => item && item.length <= 16 && collectDestinationHints(item).some((hint) => !GENERIC_DESTINATIONS.has(hint)));
       if (readableHighlight) return readableHighlight;
     }
     return inferredDestination || rawDestination || '';
