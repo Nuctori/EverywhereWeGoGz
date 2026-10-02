@@ -3820,6 +3820,14 @@ function getPrimitiveConflictReasons(intent: AiTravelIntent | null, primitive: R
     reasons.push('未识别到晚间或夜间出发');
   }
 
+  // 标题声明由其他城市出发/往返/集散（如「郑州起止广东长隆」）对广州用户是
+  // 行程错位：与本地评分的 getDeclaredDepartureCity 同一套结构化判定，
+  // AI 项与本地项的约束口径保持一致。
+  const declaredDepartureCity = getDeclaredDepartureCity(primitive.title);
+  if (declaredDepartureCity && !declaredDepartureCity.includes(DEFAULT_DEPARTURE_CITY)) {
+    reasons.push(`异地出发：${declaredDepartureCity}`);
+  }
+
   if (intent.destinationHints?.length) {
     if (!candidateMatchesDestinationIntent(intent, primitive)) {
       reasons.push(`目的地不匹配：${intent.destinationHints.join('/')}`);
