@@ -4572,6 +4572,8 @@ function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive
   if (softened && !hasMalformedAiTitleEcho(softened, primitive)) {
     return softened;
   }
+  // 畸形理由（复读标题残句/非字符串）回退到本地事实文案：坏句子比模板句更伤观感，
+  // 这是既有设计决策（见 hasMalformedAiTitleEcho 注释），不要改成返回空串。
   return buildPrimitiveConcreteReason(primitive);
 }
 
