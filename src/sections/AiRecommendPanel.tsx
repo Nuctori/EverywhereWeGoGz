@@ -219,6 +219,9 @@ export function AiRecommendPanel({
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [progressState, setProgressState] = useState<AiRecommendationProgress | null>(null);
   const [expandedStage, setExpandedStage] = useState<AiRecommendationProgress['stage'] | null>(null);
+  // 流式思维链实时区：默认折叠只显示字数/秒数，展开后随增量自动滚到尾部。
+  const [liveThinkingOpen, setLiveThinkingOpen] = useState(false);
+  const liveThinkingScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const storageSaveCleanupRef = useRef<ReturnType<typeof scheduleIdleWork>>(undefined);
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
@@ -276,6 +279,7 @@ export function AiRecommendPanel({
     setPreferenceMemory(null);
     setProgressState(null);
     setExpandedStage(null);
+    setLiveThinkingOpen(false);
     setDetailsOpen(false);
     setFollowUpInput('');
     setMessages([createInitialMessage()]);
@@ -289,6 +293,12 @@ export function AiRecommendPanel({
 
     setExpandedStage((current) => (current === progressState.stage ? current : progressState.stage));
   }, [progressState]);
+
+  useEffect(() => {
+    if (!liveThinkingOpen) return;
+    const container = liveThinkingScrollRef.current;
+    if (container) container.scrollTop = container.scrollHeight;
+  }, [liveThinkingOpen, progressState?.liveThinking?.excerpt]);
 
   const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean }) => {
     const prompt = rawPrompt.trim();
@@ -536,6 +546,39 @@ export function AiRecommendPanel({
                     {progressState.label}
                   </div>
                   <p className="mt-1 text-sm leading-6 text-stone-600">{progressState.detail}</p>
+                  {progressState.liveThinking ? (
+                    <div className="mt-2 rounded-xl border border-orange-100 bg-orange-50/60 px-3 py-2">
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between gap-2 text-left text-xs font-medium text-stone-700"
+                        onClick={() => setLiveThinkingOpen((open) => !open)}
+                      >
+                        <span className="inline-flex min-w-0 items-center gap-1.5">
+                          <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-orange-500" />
+                          <span className="truncate">
+                            {progressState.liveThinking.writingAnswer ? '思维链完成，正在生成结果' : '模型思考中'}
+                            {' · '}
+                            已输出 {progressState.liveThinking.chars} 字
+                            {' · '}
+                            {Math.max(1, Math.round(progressState.liveThinking.elapsedMs / 1000))} 秒
+                          </span>
+                        </span>
+                        {liveThinkingOpen ? (
+                          <ChevronUp className="h-3.5 w-3.5 shrink-0" />
+                        ) : (
+                          <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+                        )}
+                      </button>
+                      {liveThinkingOpen ? (
+                        <div
+                          ref={liveThinkingScrollRef}
+                          className="mt-2 max-h-40 overflow-y-auto whitespace-pre-wrap break-words rounded-lg bg-white/80 px-2.5 py-2 text-xs leading-5 text-stone-500"
+                        >
+                          {progressState.liveThinking.excerpt || '…'}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                   {progressState.substeps?.length ? (
                     <button
                       type="button"

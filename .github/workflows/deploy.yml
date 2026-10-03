@@ -59,6 +59,8 @@ jobs:
         run: |
           npm run test:source-detail-url
           npm run test:runtime-tour-schemas
+          npm run test:ai-streaming
+          npm run test:ai-streaming-progress
           python scripts/test_geo_schema_guard.py
 
       - name: Build

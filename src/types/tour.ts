@@ -326,12 +326,28 @@ export interface AiRecommendationSubstep {
   status: AiRecommendationSubstepStatus;
 }
 
+// 流式思维链快照：主供应商（thinking）走 SSE 时边生成边回传，面板实时展示"模型在干什么"。
+export interface AiRecommendationLiveThinking {
+  /** 正在输出的模型 */
+  model?: string;
+  /** 思维链已输出字符数 */
+  chars: number;
+  /** 思维链尾部摘录（限长，用于实时滚动展示） */
+  excerpt: string;
+  /** 本次 AI 调用已进行毫秒数 */
+  elapsedMs: number;
+  /** 思维链是否已结束、进入正文 JSON 生成阶段 */
+  writingAnswer: boolean;
+}
+
 export interface AiRecommendationProgress {
   stage: AiRecommendationProgressStage;
   label: string;
   detail: string;
   progress: number;
   substeps?: AiRecommendationSubstep[];
+  /** 主供应商流式思维链的当前快照；仅在流式调用进行中存在 */
+  liveThinking?: AiRecommendationLiveThinking;
 }
 
 export interface AiRecommendationStatus {

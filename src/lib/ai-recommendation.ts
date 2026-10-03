@@ -58,6 +58,14 @@ const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 45000;
 // 实测 GLM 开 thinking 后连小任务都要 70s+（token 计入完成预算），
 // 60s 档必超时；思维链供应商单独给足预算。
 const AI_THINKING_PROVIDER_TIMEOUT_MS = 180000;
+// 思维链供应商走 SSE 流式：思维链增量（delta.reasoning_content）实时回传面板，
+// 用户在 70-180s 的等待里能看到模型真的在产出。超时语义从"整请求一刀切"
+// 换成"chunk 间空闲超时"——只要流还活着就不掐，首包/响应头仍走整段上限兜底。
+const AI_STREAM_IDLE_TIMEOUT_MS = 60000;
+// 思维链 chunk 很密，按时间窗聚合后再 emitProgress，避免 React 高频重渲。
+const AI_STREAM_PROGRESS_EMIT_INTERVAL_MS = 600;
+// 面板实时摘录保留的尾部字符数（按码点切，避免截断代理对）。
+const AI_STREAM_EXCERPT_CHARS = 240;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
 const AI_CACHE_PROMPT_VERSION = '2026-09-08-stable-pool-v3';
@@ -1380,10 +1388,26 @@ function canonicalizeCoverageTerm(term: string) {
 
 function collectCoverageTermsFromAliases(text: string) {
   const explicitlyWantsWaterPlay = /玩水|水上|漂流|溯溪|桨板|浆板|冲浪|游泳|嬉水|亲水|水世界|水上乐园|泳池/.test(text);
-  return COVERAGE_TERM_GROUPS
+  const matched = COVERAGE_TERM_GROUPS
     .filter((group) => {
       if (group.label === '玩水清凉' && !explicitlyWantsWaterPlay) return false;
       return group.aliases.some((alias) => text.includes(alias)) || text.includes(group.label);
+    });
+  // 共享别名歧义消解：某概念组若仅靠与其它已命中组"同名或被其标签包含"的
+  // 别名命中（标签本身未出现、也没有独占别名），视作被更具体的概念吸附。
+  // 例如“玩水清凉一下”里的“清凉”只是玩水清凉的修饰成分，不构成森林山水
+  // 诉求——否则山地温泉产品会借森林山水概念蹭成贴合候选，挤占玩水需求重点层。
+  return matched
+    .filter((group) => {
+      if (text.includes(group.label)) return true;
+      const ownAliases = group.aliases.filter((alias) => text.includes(alias));
+      if (ownAliases.length === 0) return true;
+      const others = matched.filter((other) => other.label !== group.label);
+      const otherAliases = new Set(others.flatMap((other) => [...other.aliases]));
+      const otherLabels = others.map((other) => other.label);
+      return ownAliases.some(
+        (alias) => !otherAliases.has(alias) && !otherLabels.some((label) => label.includes(alias)),
+      );
     })
     .map((group) => group.label);
 }
@@ -1451,12 +1475,32 @@ function expandAvoidTerm(term: string) {
   return atoms.length > 0 ? [term, ...atoms] : [term];
 }
 
+// 裸否定口语回避：「不爬山」「不去温泉」「泡温泉就免了」不含既有触发词
+// （不想/避开/不要…），单靠触发词正则提不到，温泉/徒步会被误判成需求概念。
+// 「没有温泉也行」式宽容表述同理：没 + 原子若不剥离，温泉会回流成需求概念、
+// 纯温泉候选借多概念任一命中挤进贴合段。这里只做语法层否定识别，词项全部
+// 复用 AVOID_ATOM_KEYWORDS 原子表与 expandAvoidTerm/cleanAvoidTerm 既有
+// 结构，不新增任何领域词条。
+function collectNegatedAvoidTerms(text: string) {
+  const terms: string[] = [];
+  for (const atom of AVOID_ATOM_KEYWORDS) {
+    for (const match of text.matchAll(new RegExp(`(?:不|别|免|没)(?:去|坐|搭|有)?${atom}`, 'g'))) {
+      terms.push(...expandAvoidTerm(cleanAvoidTerm(match[0])));
+    }
+  }
+  // 「X就免了 / X免了」句式：宾语是话题而非诉求，剥离出回避词
+  for (const match of text.matchAll(/([\u4e00-\u9fa5]{2,6})(?:就)?免了/g)) {
+    terms.push(...expandAvoidTerm(cleanAvoidTerm(match[1])));
+  }
+  return uniqueStrings(terms).filter((term) => term.length >= 2 && term.length <= 12);
+}
+
 function collectAvoidHints(text: string) {
   const normalized = text.replace(/\s+/g, '');
+  const terms = collectNegatedAvoidTerms(normalized);
   const matches = normalized.matchAll(
     /(不要推荐|不推荐|不要|不想|不喜欢|不爱|别|避开|排除|不考虑|拒绝|讨厌|受不了|不接受)([^，。；;,.!?！？]*)/g,
   );
-  const terms: string[] = [];
 
   for (const match of matches) {
     const [, , rawSegment = ''] = match;
@@ -1499,7 +1543,9 @@ function collectLiteralAvoidHints(text: string) {
   if (/(?:不要|不想|不去|别去|避开|排除)[^，。；;,.!?！？、]{0,8}(?:海边|海滩|沙滩|海岛)/.test(normalized)) {
     hints.push('海边', '海滩', '沙滩', '海岛');
   }
-  if (/(?:不要坐|不坐|不要搭|不搭|避开)[^，。；;,.!?！？、]{0,8}(?:飞机|航班|飞行)/.test(normalized)) {
+  // 飞机↔航班成对剥离是既有规则；触发前缀放宽到通用否定前缀——「不要飞机」
+  // 同样排除航班语料，否则仅含「航班」字样的候选仍会被判成贴合需求。
+  if (/(?:不要|不想|不去|别去|避开|排除|不要坐|不坐|不要搭|不搭)[^，。；;,.!?！？、]{0,8}(?:飞机|航班|飞行)/.test(normalized)) {
     hints.push('飞机', '航班');
   }
 
@@ -1595,6 +1641,15 @@ function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
     tripDaysMax: duration?.max && Number.isFinite(duration.max) ? duration.max : null,
   });
   const hasExperienceCoverageNeed = hasExplicitExperienceCoverageNeed(normalizedText);
+  // 回避词按包含关系过滤概念/主题词（「徒步」在回避时「户外徒步」也须剥离），
+  // 否则回避主题会借复合词回流成需求概念。回避词本身是某概念组的别名时
+  // （「爬山」∈ 户外徒步组别名），该概念组标签同样剥离——按既有概念表
+  // 归一后比对，不新增词条。
+  const canonicalAvoidLabels = uniqueStrings(
+    avoidHints.map((hint) => canonicalizeCoverageTerm(normalizeText(hint))).filter(Boolean),
+  );
+  const notAvoidTerm = (hint: string) =>
+    !avoidHints.some((avoid) => hint.includes(avoid)) && !canonicalAvoidLabels.includes(hint);
 
     return {
       normalizedText,
@@ -1604,15 +1659,15 @@ function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
         collectDestinationHints(stripBoardingPhrases(normalizedText)),
       ),
       avoidHints,
-    themeHints: collectThemeHints(normalizedText).filter((hint) => !avoidHints.includes(hint)),
+    themeHints: collectThemeHints(normalizedText).filter(notAvoidTerm),
     coverageTerms: hasExperienceCoverageNeed
       ? uniqueStrings([
           ...collectLiteralCoverageTerms(normalizedText),
           ...collectLocalCoverageTerms(normalizedText),
-        ]).filter((hint) => !avoidHints.includes(hint))
+        ]).filter(notAvoidTerm)
       : [],
     literalCoverageTerms: hasExperienceCoverageNeed
-      ? collectLiteralCoverageTerms(normalizedText).filter((hint) => !avoidHints.includes(hint))
+      ? collectLiteralCoverageTerms(normalizedText).filter(notAvoidTerm)
       : [],
     budget: parseBudget(normalizedText),
     duration: inferredTripWindow.tripDaysMin || inferredTripWindow.tripDaysMax
@@ -6785,6 +6840,215 @@ function parseAiProviderResponse(
   return { parsed, reasoningText, usage };
 }
 
+// ====== SSE 流式消费：思维链增量实时回传，正文与用量在流结束后按非流式同一口径解析 ======
+
+export type AiSseStreamEvent =
+  | { type: 'reasoning'; text: string }
+  | { type: 'content'; text: string }
+  | { type: 'usage'; usage: Record<string, unknown> }
+  | { type: 'error'; message: string }
+  | { type: 'done' };
+
+/**
+ * 增量 SSE 解析器：跨 chunk 缓冲半行，逐行产出 data: 事件。
+ * 容忍 CRLF、keep-alive 注释行（": ping"）与单行坏 JSON（跳过不断流）。
+ */
+export function createAiSseStreamParser() {
+  let buffer = '';
+  let done = false;
+
+  const extractPayloadEvents = (payload: string): AiSseStreamEvent[] => {
+    let data: {
+      error?: { message?: string; code?: string };
+      usage?: Record<string, unknown>;
+      choices?: Array<{
+        finish_reason?: unknown;
+        delta?: { content?: unknown; reasoning?: unknown; reasoning_content?: unknown };
+      }>;
+    };
+    try {
+      data = JSON.parse(payload);
+    } catch {
+      return [];
+    }
+    if (!data || typeof data !== 'object') return [];
+    const events: AiSseStreamEvent[] = [];
+    if (data.error?.message || data.error?.code) {
+      events.push({ type: 'error', message: data.error.message || data.error.code || 'provider error' });
+      return events;
+    }
+    const choice = data.choices?.[0];
+    const delta = choice?.delta;
+    const reasoningText = [
+      typeof delta?.reasoning_content === 'string' ? delta.reasoning_content : '',
+      typeof delta?.reasoning === 'string' ? delta.reasoning : '',
+    ].find((text) => text.length > 0);
+    if (reasoningText) events.push({ type: 'reasoning', text: reasoningText });
+    if (typeof delta?.content === 'string' && delta.content.length > 0) {
+      events.push({ type: 'content', text: delta.content });
+    }
+    if (choice?.finish_reason === 'error') {
+      events.push({ type: 'error', message: 'finish_reason=error' });
+    }
+    if (data.usage && typeof data.usage === 'object') {
+      events.push({ type: 'usage', usage: data.usage });
+    }
+    return events;
+  };
+
+  return {
+    push(chunk: string): AiSseStreamEvent[] {
+      if (done) return [];
+      buffer += chunk;
+      const events: AiSseStreamEvent[] = [];
+      let newlineIndex = buffer.indexOf('\n');
+      while (newlineIndex !== -1) {
+        const line = buffer.slice(0, newlineIndex).replace(/\r$/, '').trim();
+        buffer = buffer.slice(newlineIndex + 1);
+        newlineIndex = buffer.indexOf('\n');
+        if (!line || line.startsWith(':')) continue;
+        if (!line.startsWith('data:')) continue;
+        const payload = line.slice(5).trim();
+        if (!payload) continue;
+        if (payload === '[DONE]') {
+          done = true;
+          events.push({ type: 'done' });
+          continue;
+        }
+        events.push(...extractPayloadEvents(payload));
+      }
+      return events;
+    },
+    isDone: () => done,
+  };
+}
+
+type AiStreamDelta = {
+  model: string;
+  reasoningDelta: string;
+  contentDelta: string;
+};
+
+/**
+ * 消费流式响应体：累积 reasoning/content 增量与 usage，结束后把累积结果
+ * 组装成与非流式相同的完整响应结构，复用 parseAiProviderResponse 的
+ * schema 校验、质检与错误口径。超时双保险：chunk 间空闲超时（活流不误杀）
+ * + 总时长上限（沿用该供应商的整请求预算，防无限流）。
+ */
+async function consumeAiStreamingResponse(params: {
+  response: Response;
+  config: AiProviderConfig;
+  schema: 'recommendation' | 'search-plan';
+  onStreamDelta?: (delta: AiStreamDelta) => void;
+}) {
+  const { response, config } = params;
+  const contentType = response.headers?.get?.('content-type') ?? '';
+  if (!contentType.includes('text/event-stream')) {
+    // 供应商忽略 stream 参数时原样回整包 JSON：直接走与非流式完全相同的解析口径，
+    // 不造 reader（此时 body 是 JSON 文本，SSE 解析器读不到任何 data: 行）。
+    const data = await response.json();
+    return parseAiProviderResponse(data, config, params.schema);
+  }
+  const reader = response.body?.getReader?.();
+  if (!reader) {
+    throw new Error(getAiProviderParseErrorLabel(config, 'stream_unavailable', 'response body is not readable'));
+  }
+
+  const decoder = new TextDecoder();
+  const parser = createAiSseStreamParser();
+  let reasoningText = '';
+  let contentText = '';
+  let usage: Record<string, unknown> | undefined;
+  let idleTimer: ReturnType<typeof setTimeout> | null = null;
+  let totalTimer: ReturnType<typeof setTimeout> | null = null;
+
+  const clearTimers = () => {
+    if (idleTimer) clearTimeout(idleTimer);
+    if (totalTimer) clearTimeout(totalTimer);
+    idleTimer = null;
+    totalTimer = null;
+  };
+
+  const readChunk = (): Promise<ReadableStreamReadResult<Uint8Array>> =>
+    new Promise((resolve, reject) => {
+      let settled = false;
+      const settle = (fn: () => void) => {
+        if (settled) return;
+        settled = true;
+        if (idleTimer) clearTimeout(idleTimer);
+        fn();
+      };
+      idleTimer = setTimeout(() => {
+        void reader.cancel().catch(() => undefined);
+        settle(() => reject(new Error(
+          `AI API timeout [${config.model}] stream idle after ${AI_STREAM_IDLE_TIMEOUT_MS}ms`,
+        )));
+      }, AI_STREAM_IDLE_TIMEOUT_MS);
+      if (!totalTimer) {
+        totalTimer = setTimeout(() => {
+          void reader.cancel().catch(() => undefined);
+          settle(() => reject(new Error(
+            `AI API timeout [${config.model}] stream exceeded ${getProviderTimeoutMs(config)}ms`,
+          )));
+        }, getProviderTimeoutMs(config));
+      }
+      reader.read().then(
+        (result) => settle(() => resolve(result)),
+        (error) => settle(() => reject(error instanceof Error ? error : new Error(String(error)))),
+      );
+    });
+
+  const handleEvents = (events: AiSseStreamEvent[], model: string): AiStreamDelta | null => {
+    let reasoningDelta = '';
+    let contentDelta = '';
+    for (const event of events) {
+      if (event.type === 'reasoning') {
+        reasoningDelta += event.text;
+        reasoningText += event.text;
+      } else if (event.type === 'content') {
+        contentDelta += event.text;
+        contentText += event.text;
+      } else if (event.type === 'usage') {
+        usage = event.usage;
+      } else if (event.type === 'error') {
+        throw new Error(getAiProviderParseErrorLabel(config, 'provider_error', event.message));
+      }
+    }
+    if (!reasoningDelta && !contentDelta) return null;
+    return { model, reasoningDelta, contentDelta };
+  };
+
+  try {
+    for (;;) {
+      const { done, value } = await readChunk();
+      if (done) break;
+      const events = parser.push(decoder.decode(value, { stream: true }));
+      const delta = handleEvents(events, config.model);
+      if (delta) params.onStreamDelta?.(delta);
+    }
+    const tail = decoder.decode();
+    if (tail) {
+      const delta = handleEvents(parser.push(tail), config.model);
+      if (delta) params.onStreamDelta?.(delta);
+    }
+  } finally {
+    clearTimers();
+    void reader.cancel().catch(() => undefined);
+  }
+
+  // 与非流式同一解析口径：组回完整响应结构后走 parseAiProviderResponse。
+  const data = {
+    choices: [{
+      message: {
+        content: contentText,
+        ...(reasoningText ? { reasoning_content: reasoningText } : {}),
+      },
+    }],
+    ...(usage ? { usage } : {}),
+  };
+  return parseAiProviderResponse(data, config, params.schema);
+}
+
 function emitProgress(
   callback: AiRecommendationRequest['onProgress'],
   progress: AiRecommendationProgress,
@@ -6836,9 +7100,11 @@ export const __aiRecommendationTestHooks = {
   buildRecommendationAuditContext,
   buildRouteAtlas,
   buildTourPrimitive,
+  callAiApi,
   collectAvoidHints,
   collectLiteralAvoidHints,
   compactCandidates,
+  createAiSseStreamParser,
   getStablePromptPool,
   selectCoverageFocusCompacted,
   selectDiversePoolCompacted,
@@ -6859,6 +7125,7 @@ export const __aiRecommendationTestHooks = {
   reasonAddressesUserNeed,
   localRecommendations,
   fallbackRecommendations,
+  executeAiSearchRounds,
   matchesActiveDateFilters,
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
@@ -7588,7 +7855,7 @@ function shouldUseLiteAiPrompt(config: AiProviderConfig) {
 }
 
 // 思维链只在主供应商（z.ai GLM）开启：免费/付费兜底保持低延迟，
-// 主模型用真推理换理解与排序质量，reasoning_content 会透出给面板展示。
+// 主模型用真推理换理解与排序质量，reasoning_content 流式增量透出给面板实时展示。
 function isThinkingCapableProvider(config: AiProviderConfig) {
   return `${config.baseUrl} ${config.model}`.toLowerCase().includes('api.z.ai');
 }
@@ -7597,6 +7864,7 @@ function buildAiRequestBody(
   config: AiProviderConfig,
   messages: ReturnType<typeof buildAiMessages>,
   maxTokens?: number,
+  streaming = false,
 ) {
   const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
   const thinkingEnabled = isThinkingCapableProvider(config);
@@ -7610,6 +7878,14 @@ function buildAiRequestBody(
     max_tokens: thinkingEnabled ? Math.max(maxTokens ?? 2048, 5200) : (maxTokens ?? 2048),
     response_format: { type: 'json_object' },
     thinking: { type: thinkingEnabled ? 'enabled' : 'disabled' },
+    ...(streaming
+      ? {
+          stream: true,
+          // 流式下 usage 在末尾 chunk 回传；include_usage 让 OpenAI 兼容端点
+          // 显式附带 token 统计，非流式路径的 usage 口径保持不变。
+          stream_options: { include_usage: true },
+        }
+      : {}),
   };
 
   if (providerKey.includes('openrouter')) {
@@ -7647,6 +7923,8 @@ async function callSingleAiProvider(params: {
   // 此前规划调用复用主解析、被强制要求 items，导致多轮检索规划对所有供应商 100% 抛
   // schema_invalid，规划功能自上线起从未生效。
   schema?: 'recommendation' | 'search-plan';
+  // 思维链供应商流式增量回调（仅 thinking 供应商的 SSE 路径触发）。
+  onStreamDelta?: (delta: AiStreamDelta) => void;
 }) {
   const { config } = params;
   const url = getChatCompletionsUrl(config.baseUrl);
@@ -7655,7 +7933,10 @@ async function callSingleAiProvider(params: {
   const maxTokens = useLitePrompt
     ? params.liteMaxTokens ?? Math.min(params.maxTokens ?? 1600, 640)
     : params.maxTokens;
-  const requestBody = buildAiRequestBody(config, messages, maxTokens);
+  // 思维链供应商走 SSE：思维链生成占整个调用 70%+ 时长，是"进度不可见"的根因；
+  // 免费/兜底模型保持非流式（响应快，且前台竞速按整包对比更简单）。
+  const streaming = isThinkingCapableProvider(config);
+  const requestBody = buildAiRequestBody(config, messages, maxTokens, streaming);
   let providerLastError: Error | null = null;
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -7699,9 +7980,16 @@ async function callSingleAiProvider(params: {
         );
       }
 
-      const data = await response.json();
       shouldRetry = false;
-      const { parsed, reasoningText, usage } = parseAiProviderResponse(data, config, params.schema);
+      const outcome = streaming
+        ? await consumeAiStreamingResponse({
+            response,
+            config,
+            schema: params.schema ?? 'recommendation',
+            onStreamDelta: params.onStreamDelta,
+          })
+        : parseAiProviderResponse(await response.json(), config, params.schema ?? 'recommendation');
+      const { parsed, reasoningText, usage } = outcome;
       const qualityIssue = params.qualityCheck?.(parsed, config);
       if (qualityIssue) {
         throw new Error(getAiProviderParseErrorLabel(config, 'quality_check_failed', qualityIssue));
@@ -7734,6 +8022,8 @@ async function callAiApi(params: {
   liteMaxTokens?: number;
   qualityCheck?: (response: unknown, config: AiProviderConfig) => string | null;
   schema?: 'recommendation' | 'search-plan';
+  // 仅 thinking 供应商（SSE 流式路径）触发；竞速/兜底的整包路径不会回调。
+  onStreamDelta?: (delta: AiStreamDelta) => void;
 }) {
   const providerErrors: string[] = [];
   const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
@@ -7881,6 +8171,7 @@ async function planAiSearchRounds(params: {
   candidatePool: AiRecommendationCandidate[];
   intent: AiTravelIntent | null;
   preferenceMemory: AiPreferenceMemory | null;
+  onStreamDelta?: (delta: AiStreamDelta) => void;
 }): Promise<{ queries: string[]; reasoningText: string; model: string } | null> {
   const overview = buildCandidateCorpusOverview(params.candidatePool);
   const messages: AiPlanningCallMessages = [
@@ -7889,6 +8180,8 @@ async function planAiSearchRounds(params: {
       content: [
         '你是旅行检索规划师。用户会在下一步给你一条旅行需求，你要把它翻译成 1-3 条"检索式"，用于在一个固定的候选线路池里做关键词检索。',
         '检索式是给本地检索器的中文短语，每条聚焦一个不同角度（如不同目的地组合、不同玩法主题、宽窄不同的价格档），不要重复同一个角度。',
+        '检索式必须守住需求里点名过的体验主题：用户明确要某类体验（如海边沙滩）时，不得产出用户没提主题的检索式（如温泉、城市观光、亲子）；差异化只靠目的地组合、价格档、天数、交通这些角度实现。',
+        '只有需求本身没点名体验主题、或点名了多个主题时，才允许每条检索式各占一个不同主题。',
         '候选池有限时，宁可宽一点也不要全部挤在同一组热门词上；第二条、第三条检索式应覆盖第一条可能漏掉但同样符合需求的选项。',
         '严格输出 JSON：{"understanding":"一句中文需求理解","queries":["检索式1","检索式2"],"refinementMode":"new_search|refine_previous|broaden|replace_destination|null"}',
       ].join('\n'),
@@ -7910,6 +8203,7 @@ async function planAiSearchRounds(params: {
     messages: messages as ReturnType<typeof buildAiMessages>,
     maxTokens: 1600,
     schema: 'search-plan',
+    onStreamDelta: params.onStreamDelta,
   }) as AiSearchCallResult;
 
   const parsed = aiCall.parsed as { queries?: unknown; understanding?: unknown };
@@ -7933,18 +8227,59 @@ async function planAiSearchRounds(params: {
 function executeAiSearchRounds(
   candidatePool: AiRecommendationCandidate[],
   queries: string[],
+  userText = '',
 ) {
   const candidateById = new Map(candidatePool.map((tour) => [tour.id, tour]));
-  const rounds: Array<{ query: string; hitCount: number; topTitles: string[] }> = [];
+  const rounds: Array<{ query: string; hitCount: number; alignedCount?: number; topTitles: string[] }> = [];
   const merged: Array<{ tour: AiRecommendationCandidate; bestScore: number; query: string }> = [];
   const mergedById = new Map<string, { tour: AiRecommendationCandidate; bestScore: number; query: string }>();
+
+  // 分离度门：用户点名过的体验主题（复用结构化概念表提取，只认概念组标签）
+  // 是跨轮合并的排序基准。各轮检索式自带主题，规划师可能产出漂移检索式
+  // （沙滩需求里混入「温泉特价」），而每轮满分候选的 bestScore 同台竞争，
+  // 异题主题产品会原分挤进重点层——先保位贴合需求的候选，再按分数补位。
+  // 提取需求概念前先剥离回避短语：「避开温泉」不是想要温泉；回避主题命中
+  // 候选语料的（与 scoreTour 的 avoid 门同一 corpus 口径）一律视作不贴合，
+  // 只能补位。泛需求（提取不出概念组标签、也无回避词）不设门，行为与既往一致。
+  const demandQuery = buildLocalRecommendationQuery(userText);
+  const demandAvoidHints = demandQuery.avoidHints;
+  const demandText = demandAvoidHints.reduce(
+    (text, hint) => text.split(normalizeText(hint)).join(' '),
+    normalizeText(userText),
+  );
+  const demandConcepts = extractCandidateCoverageTerms(demandText)
+    .map(canonicalizeCoverageTerm)
+    .filter((term) => COVERAGE_TERM_GROUPS.some((group) => group.label === term))
+    // 回避主题不得借概念组别名回流：记忆拼接「避开爬山」字面剥离后，其归一
+    // 概念组（户外徒步，别名含爬山/登山/徒步…）仍会被残留语义重新提出——
+    // 按既有概念表把回避词归一到概念组标签后一并剥离（与 R3 的包含关系
+    // 剥离同一意图，覆盖"回避词=别名而非标签"的注入路径）。
+    .filter((term) => !demandAvoidHints.some(
+      (hint) => canonicalizeCoverageTerm(normalizeText(hint)) === term,
+    ));
+  const isAlignedWithDemand = demandConcepts.length > 0 || demandAvoidHints.length > 0
+    ? (tour: AiRecommendationCandidate) => {
+        if (demandAvoidHints.some((hint) => getSearchCorpus(tour).includes(normalizeText(hint)))) {
+          return false;
+        }
+        if (demandConcepts.length === 0) return true;
+        return getPrimitiveCoverageScore(buildTourPrimitive(tour), demandConcepts) > 0;
+      }
+    : null;
 
   for (const query of queries) {
     const hits = localRecommendations(candidatePool, query);
     const top = hits.slice(0, 36);
+    const alignedCount = isAlignedWithDemand
+      ? top.filter((item) => {
+          const tour = candidateById.get(item.tourId);
+          return tour ? isAlignedWithDemand(tour) : false;
+        }).length
+      : undefined;
     rounds.push({
       query,
       hitCount: hits.length,
+      ...(alignedCount !== undefined ? { alignedCount } : {}),
       topTitles: top
         .slice(0, 6)
         .map((item) => candidateById.get(item.tourId)?.title ?? item.tourId),
@@ -7963,10 +8298,20 @@ function executeAiSearchRounds(
     }
   }
 
-  merged.sort((left, right) => right.bestScore - left.bestScore);
+  const byBestScore = (left: { bestScore: number }, right: { bestScore: number }) => right.bestScore - left.bestScore;
+  let ordered = [...merged].sort(byBestScore);
+  if (isAlignedWithDemand) {
+    const aligned = merged.filter((entry) => isAlignedWithDemand(entry.tour)).sort(byBestScore);
+    const rest = merged.filter((entry) => !isAlignedWithDemand(entry.tour)).sort(byBestScore);
+    // 异题补位段限宽：规划师整轮漂移（贴合候选为 0）时，异题满分候选仍会按
+    // 原分灌满检索层、挤掉按需求概念从全池选出的 coverage focus 名额——补位
+    // 只保留少量宽检视角，重点层容量优先还给贴合候选。
+    const breadthLimit = Math.max(0, 48 - aligned.length);
+    ordered = [...aligned, ...rest.slice(0, Math.min(rest.length, 12, breadthLimit))];
+  }
   return {
     rounds,
-    searchedTours: merged.slice(0, 48).map((entry) => entry.tour),
+    searchedTours: ordered.slice(0, 48).map((entry) => entry.tour),
   };
 }
 
@@ -8192,9 +8537,49 @@ export async function requestAiRecommendations({
       weatherSensitivity: effectiveIntent?.weatherSensitivity,
       weatherContext: weatherContextForRanking,
     };
-    let searchRounds: Array<{ query: string; hitCount: number; topTitles: string[] }> = [];
+    let searchRounds: Array<{ query: string; hitCount: number; alignedCount?: number; topTitles: string[] }> = [];
     let searchPlanningReasoning = '';
     let searchedCompacted: ReturnType<typeof compactCandidates> = [];
+    // 流式思维链 → 进度回传的节流器：按时间窗聚合 chunk，只在窗口边界 emitProgress，
+    // 避免思维链每秒几十个 chunk 把 React 打成重渲风暴。
+    const createThinkingProgressEmitter = (
+      stage: AiRecommendationProgress['stage'],
+      progress: number,
+      substeps: AiRecommendationSubstep[],
+      planningLabel: string,
+    ) => {
+      let lastEmitAt = 0;
+      let chars = 0;
+      let excerpt = '';
+      let writingAnswer = false;
+      const startedAt = Date.now();
+      return (delta: AiStreamDelta) => {
+        if (delta.reasoningDelta) {
+          chars += delta.reasoningDelta.length;
+          excerpt = [...(excerpt + delta.reasoningDelta)].slice(-AI_STREAM_EXCERPT_CHARS).join('');
+        }
+        if (delta.contentDelta) writingAnswer = true;
+        const now = Date.now();
+        if (now - lastEmitAt < AI_STREAM_PROGRESS_EMIT_INTERVAL_MS) return;
+        lastEmitAt = now;
+        emitProgress(onProgress, {
+          stage,
+          label: planningLabel,
+          detail: writingAnswer
+            ? '模型思维链已完成，正在生成结构化结果。'
+            : `模型思维链已输出 ${chars} 字，正在推导判断依据。`,
+          progress,
+          substeps,
+          liveThinking: {
+            model: delta.model,
+            chars,
+            excerpt,
+            elapsedMs: now - startedAt,
+            writingAnswer,
+          },
+        });
+      };
+    };
     if (availableCandidates.length > MAX_AI_CANDIDATES) {
       try {
         const plan = await planAiSearchRounds({
@@ -8204,10 +8589,23 @@ export async function requestAiRecommendations({
           candidatePool: availableCandidates,
           intent: effectiveIntent,
           preferenceMemory: aiContextMemoryForThisTurn,
+          onStreamDelta: createThinkingProgressEmitter(
+            'context',
+            56,
+            withActiveSubstep(
+              [
+                { id: 'weather', label: '补充天气信息' },
+                { id: 'season', label: '结合季节与时令' },
+                { id: 'candidate', label: '汇总候选池特征' },
+              ],
+              'candidate',
+            ),
+            '正在规划检索角度',
+          ),
         });
         if (!plan) throw new Error('AI search planning returned no result');
         searchPlanningReasoning = plan.reasoningText;
-        const executed = executeAiSearchRounds(availableCandidates, plan.queries);
+        const executed = executeAiSearchRounds(availableCandidates, plan.queries, effectiveUserText);
         searchRounds = executed.rounds;
         if (executed.searchedTours.length > 0) {
           searchedCompacted = annotateSearchedHitCompacted(
@@ -8220,7 +8618,9 @@ export async function requestAiRecommendations({
           stage: 'context',
           label: '多轮检索候选池',
           detail: `已完成 ${executed.rounds.length} 轮查找：${executed.rounds
-            .map((round) => `“${round.query}”命中 ${round.hitCount} 条`)
+            .map((round) => `“${round.query}”命中 ${round.hitCount} 条${
+              round.alignedCount !== undefined ? `、贴合需求 ${round.alignedCount} 条` : ''
+            }`)
             .join('，')}。`,
           progress: 70,
           substeps: withActiveSubstep(
@@ -8228,7 +8628,9 @@ export async function requestAiRecommendations({
               ...executed.rounds.map((round, index) => ({
                 id: `search-${index}`,
                 label: `第 ${index + 1} 轮查找：${round.query}`,
-                detail: `命中 ${round.hitCount} 条，参考：${round.topTitles.slice(0, 2).join('、')}`,
+                detail: `命中 ${round.hitCount} 条${
+                  round.alignedCount !== undefined ? `、贴合需求 ${round.alignedCount} 条` : ''
+                }，参考：${round.topTitles.slice(0, 2).join('、')}`,
               })),
               { id: 'merge', label: '合并检索命中与本地优选' },
             ],
@@ -8340,6 +8742,19 @@ export async function requestAiRecommendations({
           candidateTours: aiCandidatePool,
           intent: effectiveIntent,
         }),
+      onStreamDelta: createThinkingProgressEmitter(
+        'ranking',
+        82,
+        withActiveSubstep(
+          [
+            { id: 'compact', label: '筛出高相关候选' },
+            { id: 'rank', label: '结合偏好做排序' },
+            { id: 'summary', label: '准备推荐摘要' },
+          ],
+          'rank',
+        ),
+        'AI 正在思考',
+      ),
     }) as {
       parsed: {
         intent?: unknown;

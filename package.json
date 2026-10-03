@@ -46,6 +46,8 @@
     "audit:ai-chat-storage": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_chat_storage.ts",
     "audit:ai-recommendation": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_recommendation.ts",
     "audit:ai-success-path": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_success_path.ts",
+    "test:ai-streaming": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_streaming_sse.ts",
+    "test:ai-streaming-progress": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_streaming_progress.ts",
     "audit:display-semantics": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_display_semantics.ts",
     "audit:initial-data-loading": "node scripts/test_initial_data_loading.mjs",
     "test:tour-deeplink": "node --experimental-strip-types scripts/test_tour_deeplink.mjs",
