@@ -1533,7 +1533,7 @@ function expandAvoidTerm(term: string) {
 function collectNegatedAvoidTerms(text: string) {
   const terms: string[] = [];
   for (const atom of AVOID_ATOM_KEYWORDS) {
-    for (const match of text.matchAll(new RegExp(`(?:不|别|免|没)(?:去|坐|搭|有)?${atom}`, 'g'))) {
+    for (const match of text.matchAll(new RegExp(`(?:不|别|免|没)(?:去|坐|搭|有|泡|看|玩|游|提)?${atom}`, 'g'))) {
       terms.push(...expandAvoidTerm(cleanAvoidTerm(match[0])));
     }
   }
@@ -9281,6 +9281,11 @@ export async function requestAiRecommendations({
       if (budgetMax !== null) {
         if (candidate.price <= budgetMax) constraintFit += 1;
         else if (candidate.price <= budgetMax * 1.25) constraintNear += 1;
+      }
+      // 目的地命中也是约束方向：点名 清远/海陵岛 时，同档下命中的排前面
+      //（b1-q01「清远温泉两天游」同档被非清远货反超的缺口）。
+      if (effectiveIntent?.destinationHints?.length) {
+        constraintFit += candidateMatchesDestinationIntent(effectiveIntent, primitive) ? 1 : 0;
       }
       return {
         ...candidate,
