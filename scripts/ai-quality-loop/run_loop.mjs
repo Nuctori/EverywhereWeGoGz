@@ -73,6 +73,11 @@ const BANK_FILES = {
 };
 const BANK_PREFIX = { bank1: 'b1', bank3: 'b3', bank5: 'b5', bank6: 's' };
 function loadEvalSet() {
+  // AI_QUALITY_BANK_FILE：自定义被测集（修复后定向复测用），相对 ai-quality-loop 目录
+  const custom = process.env.AI_QUALITY_BANK_FILE;
+  if (custom) {
+    return JSON.parse(fs.readFileSync(new URL(custom, import.meta.url), 'utf8'));
+  }
   const cases = [];
   for (const [bank, file] of Object.entries(BANK_FILES)) {
     const items = JSON.parse(fs.readFileSync(new URL(file, import.meta.url), 'utf8'));
