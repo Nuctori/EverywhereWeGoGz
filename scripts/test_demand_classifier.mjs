@@ -94,6 +94,41 @@ check('分类规格下传：贴合候选排在纯温泉之前',
   firstPureSpring === -1 || firstPureSpring > lastAligned,
   `贴合末位 ${lastAligned}，纯温泉首位 ${firstPureSpring}`);
 
+// ── 适配档位编码：单调性 + 可解码 ──
+const { encodeSuitabilityGrade, decodeSuitabilityGrade } = hooks;
+const gradeSamples = [];
+for (let cov = 0; cov <= 3; cov++) {
+  for (let fit = 0; fit <= 3; fit++) {
+    for (const near of [0, 1]) {
+      for (const clean of [0, 1]) {
+        const g = encodeSuitabilityGrade({ demandCoverage: cov, constraintFit: fit, constraintNear: near, qualityClean: clean === 1 });
+        const d = decodeSuitabilityGrade(g);
+        check('编码可解码且保真', d.demandCoverage === cov && d.constraintFit === fit && d.constraintNear === near && d.qualityClean === (clean === 1));
+        gradeSamples.push({ cov, fit, near, clean: clean === 1, g });
+      }
+    }
+  }
+}
+// 字典序单调：元组逐位优先级与整数序一致
+const gradeTuples = [
+  { demandCoverage: 0, constraintFit: 0, constraintNear: 0, qualityClean: false },
+  { demandCoverage: 1, constraintFit: 0, constraintNear: 0, qualityClean: false },
+  { demandCoverage: 2, constraintFit: 0, constraintNear: 0, qualityClean: false },
+  { demandCoverage: 2, constraintFit: 1, constraintNear: 0, qualityClean: false },
+  { demandCoverage: 2, constraintFit: 1, constraintNear: 1, qualityClean: false },
+  { demandCoverage: 2, constraintFit: 1, constraintNear: 1, qualityClean: true },
+];
+let monoOk = true;
+for (let i = 1; i < gradeTuples.length; i++) {
+  const a = encodeSuitabilityGrade(gradeTuples[i - 1]);
+  const b = encodeSuitabilityGrade(gradeTuples[i]);
+  if (!(a < b)) {
+    monoOk = false;
+    check('适配档位单调', false, JSON.stringify(gradeTuples[i - 1]) + '→' + a + ' vs ' + JSON.stringify(gradeTuples[i]) + '→' + b);
+  }
+}
+check('适配档位随字典序元组单调递增', monoOk);
+
 if (failures > 0) {
   console.error(`\n${failures} 项失败`);
   process.exit(1);

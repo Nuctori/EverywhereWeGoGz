@@ -68,7 +68,7 @@ const AI_STREAM_PROGRESS_EMIT_INTERVAL_MS = 600;
 const AI_STREAM_EXCERPT_CHARS = 240;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
-const AI_CACHE_PROMPT_VERSION = '2026-09-08-stable-pool-v3';
+const AI_CACHE_PROMPT_VERSION = '2026-10-05-suitability-grade-v4';
 const DEFAULT_DEPARTURE_CITY = '广州';
 const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
@@ -187,6 +187,8 @@ interface CandidateAuditPrimitive extends RecommendationPrimitive {
   conflictReasons: string[];
   userTermHits: string[];
   userTermCoverage: number;
+  /** 适配档位：字典序键的序数编码（需求满足→约束→质量→贴窗），单调可排序 */
+  suitabilityGrade?: number;
   priceContext: {
     poolPercentile: number | null;
     poolBand: string;
@@ -708,6 +710,7 @@ function compactCandidatesForPrompt(candidates: ReturnType<typeof compactCandida
     candidate.schedule.departureWeekdays.slice(0, 3),
     candidate.schedule.hasEveningOrNightDeparture ? 1 : 0,
     candidate.priceContext.pricePerDay ?? null,
+    candidate.suitabilityGrade ?? null,
     compactPromptStrings(candidate.tags, 2, 10),
     compactPromptStrings(candidate.highlights, 2, 22),
     compactPromptStrings(candidate.semanticAtoms, 4, 16),
@@ -757,7 +760,7 @@ const STABLE_PROMPT_CANDIDATE_KEYS = [
 
 const FOCUS_PROMPT_CANDIDATE_KEYS = [
   ...STABLE_PROMPT_CANDIDATE_KEYS,
-  'match', 'conflicts', 'termCoverage', 'termHits',
+  'match', 'conflicts', 'termCoverage', 'termHits', '适配档',
 ] as const;
 
 function compactCandidatesForLitePrompt(candidates: ReturnType<typeof compactCandidates>) {
@@ -776,6 +779,7 @@ function compactCandidatesForLitePrompt(candidates: ReturnType<typeof compactCan
     candidate.priceContext.poolBand,
     candidate.userTermCoverage,
     compactPromptStrings(candidate.userTermHits, 3, 10),
+    candidate.suitabilityGrade ?? null,
   ]);
 }
 
@@ -801,7 +805,7 @@ const STABLE_LITE_CANDIDATE_KEYS = [
 
 const FOCUS_LITE_CANDIDATE_KEYS = [
   ...STABLE_LITE_CANDIDATE_KEYS,
-  'match', 'conflicts', 'termCoverage', 'termHits',
+  'match', 'conflicts', 'termCoverage', 'termHits', '适配档',
 ] as const;
 
 function buildStablePromptPrefix(params: {
@@ -5177,6 +5181,8 @@ function annotateCandidatePrimitive(
   return {
     ...primitive,
     matchStatus,
+    // 始终携带键：序列化器按列读取；具体数值由 focus 层按分类头规格覆写
+    suitabilityGrade: undefined as number | undefined,
     routeGroup: getDiversityGroupKey(primitive),
     conflictReasons: getPrimitiveConflictReasons(intent, primitive),
     userTermHits,
@@ -5272,6 +5278,40 @@ function parseTransportHints(text: string, avoidHints: string[]) {
   );
   return uniqueStrings((demandText.match(TRANSPORT_FORM_PATTERN) ?? []))
     .filter((hint) => !avoidHints.includes(hint));
+}
+
+// ============ 适配档位：原语语义的可排序整合权重 ============
+// 不是加权和：各维度（需求满足→约束方向→质量红旗→贴窗）之间不可互相收买
+// （「便宜的沙滩」里价格不能收买主题），因此整合权重是字典序键的**序数编码**
+// ——一个整数，它的数值序恒等于分层元组的字典序。可排序、可比较、可解码回
+// 语义（档位越高=需求满足越多→约束越合→无红旗），但不存在可调的自由权重；
+// 每个字段的"位宽"由该字段的取值范围机械决定，调范围即调位宽。
+// 该整数作为事实随候选喂给推荐 AI：同档内模型自由裁量，跨档按档位排序并能
+// 解码出原因（"满足全部需求、预算内、无红旗"）。
+const SUITABILITY_FIT_RADIX = 4; // 约束方向 0..3（天数+预算+节奏最多 3 项）
+const SUITABILITY_NEAR_RADIX = 2; // 贴窗 0/1
+const SUITABILITY_QUALITY_RADIX = 2; // 质量 0/1
+
+function encodeSuitabilityGrade(input: {
+  demandCoverage: number;
+  constraintFit: number;
+  constraintNear: number;
+  qualityClean: boolean;
+}) {
+  const coverage = Math.max(0, Math.min(6, Math.round(input.demandCoverage)));
+  const fit = Math.max(0, Math.min(SUITABILITY_FIT_RADIX - 1, Math.round(input.constraintFit)));
+  const near = input.constraintNear > 0 ? 1 : 0;
+  const clean = input.qualityClean ? 1 : 0;
+  return ((coverage * SUITABILITY_FIT_RADIX + fit) * SUITABILITY_NEAR_RADIX + near) * SUITABILITY_QUALITY_RADIX + clean;
+}
+
+function decodeSuitabilityGrade(grade: number) {
+  const clean = grade % SUITABILITY_QUALITY_RADIX === 1;
+  const rest = Math.floor(grade / SUITABILITY_QUALITY_RADIX);
+  const near = rest % SUITABILITY_NEAR_RADIX;
+  const coverage = Math.floor(rest / (SUITABILITY_NEAR_RADIX * SUITABILITY_FIT_RADIX));
+  const fit = Math.floor(rest / SUITABILITY_NEAR_RADIX) % SUITABILITY_FIT_RADIX;
+  return { demandCoverage: coverage, constraintFit: fit, constraintNear: near, qualityClean: clean };
 }
 
 // ============ 需求分类头：原语归类主路径 ============
@@ -6957,6 +6997,7 @@ function buildAiMessages(params: {
     '你是旅行顾问，不是关键词筛选器，也不是给筛选结果写文案的排序器。你要先理解用户想要的整体旅行体验，再从候选池中比较、推理和取舍。',
     '平台用户默认从广州出发（用户明说其他出发地时除外）。标题或行程里声明由其他城市出发/往返/集散的线路（如「郑州往返」「深圳出发」「佛山出发」），对广州用户是行程错位：除非用户点名要从该城市走，否则不要选进 items；确实值得一提时，在 summary 里一句带过即可。',
     '输出只能引用候选池中真实存在的 tourId；线路事实、价格、班期、酒店、景点和服务来自候选原语。',
+    '重点候选行尾的「适配档」是把 需求满足数→约束满足→贴窗→无红旗 顺序打包成的单调整数：数值越大越贴合本轮需求。跨档时优先高档位；同档内的顺序与取舍由你做顾问判断。',
     '候选池是探索空间，不是已经替你筛好的答案；不要因为某条线路没有显式标签就直接淘汰，也不要因为命中多个词就默认最合适。',
     '预算是重要的取舍维度，不是默认的候选池截断器：预算内优先，但如果更符合整体体验的线路超预算，要把它作为取舍或备选明确说出；只有用户明确要求“严格不超过”时才把超预算线路降为替代。',
     '区分“线路事实”和“目的地判断”：团里是否包含接驳、门票、酒店服务等必须有候选证据；但可以调动世界知识判断某个镇子/度假区的空间形态、步行便利度、当地短途出行方式，以及共享电瓶车是否值得优先查。此类判断要用“更可能、通常、值得优先核实、我会优先查”表达，不能写成已经包含的服务。用户提到共享电瓶车时，要结合具体候选目的地和旅行画面自行推理，不要套用固定地点名单或固定句子。',
@@ -7099,6 +7140,7 @@ function buildLiteAiMessages(params: {
     wx: compactWeatherContextForPrompt(params.weatherContext),
     sg: semanticGuidance,
     schema: {
+      grade: 'fh 行尾适配档=单调整数（需求满足数→约束满足→贴窗→无红旗 的序数编码），越大越贴合本轮需求',
       intent: {
         destinationHints: 'string[]，本轮语义判断后的目的地',
         refinementMode: 'new_search|refine_previous|broaden|replace_destination|null',
@@ -7664,6 +7706,8 @@ export const __aiRecommendationTestHooks = {
   buildExperienceDemandSpec,
   getDemandSatisfiedCount,
   normalizeClassifiedDemandSpec,
+  encodeSuitabilityGrade,
+  decodeSuitabilityGrade,
   enforceCoreCoverageDiscipline,
   matchesActiveDateFilters,
   matchesDateWindow,
@@ -9212,9 +9256,47 @@ export async function requestAiRecommendations({
       effectiveIntent,
       effectiveUserText,
     ).slice(0, MAX_AI_FOCUS_CANDIDATES);
+
+    // 适配档位（可排序整合权重）：把字典序键（需求满足→约束→质量→贴窗）打包成
+    // 单调整数，随候选事实喂给模型——跨档它按档位排序并能解码原因，同档内模型
+    // 自由裁量。词面 fallback 需求规格在此可用；分类头规格优先。
+    const gradeContext = {
+      demands: classifiedSpec?.demands ?? buildExperienceDemandSpec(effectiveUserText),
+      coverageMode: (classifiedSpec?.source === 'classifier' ? 'profile' : 'lexical') as 'profile' | 'lexical',
+    };
+    const candidateByIdForGrade = new Map(availableCandidates.map((c) => [c.id, c]));
+    const focusGraded = focusFull.map((candidate) => {
+      const primitive = buildTourPrimitive(candidateByIdForGrade.get(candidate.id) ?? (candidate as unknown as AiRecommendationCandidate));
+      const demandCoverage = getDemandSatisfiedCount(gradeContext.demands, primitive, gradeContext.coverageMode);
+      const conflictReasons = getPrimitiveConflictReasons(effectiveIntent, primitive);
+      const budgetMax = effectiveIntent?.budgetMax ?? null;
+      const daysMin = effectiveIntent?.tripDaysMin ?? effectiveIntent?.tripDays ?? null;
+      const daysMax = effectiveIntent?.tripDaysMax ?? effectiveIntent?.tripDays ?? null;
+      let constraintFit = 0;
+      let constraintNear = 0;
+      if (daysMin !== null && primitive.tripDays > 0) {
+        if (primitive.tripDays >= daysMin && primitive.tripDays <= (daysMax ?? daysMin)) constraintFit += 1;
+        else if (Math.abs(primitive.tripDays - (daysMin ?? 0)) <= 1) constraintNear += 1;
+      }
+      if (budgetMax !== null) {
+        if (candidate.price <= budgetMax) constraintFit += 1;
+        else if (candidate.price <= budgetMax * 1.25) constraintNear += 1;
+      }
+      return {
+        ...candidate,
+        suitabilityGrade: encodeSuitabilityGrade({
+          demandCoverage,
+          constraintFit,
+          constraintNear,
+          qualityClean: conflictReasons.length === 0,
+        }),
+      };
+    });
     // 模型可引用的合法 id 全集 = 当轮重点层 + 稳定池（重点层优先，保序去重）。
+    // 重点层使用带适配档位的版本（suitabilityGrade 随事实行进提示词）。
+    const focusSource = focusGraded;
     const poolById = new Map<string, ReturnType<typeof compactCandidates>[number]>();
-    for (const candidate of [...focusFull, ...stablePool.candidates]) {
+    for (const candidate of [...focusSource, ...stablePool.candidates]) {
       if (!poolById.has(candidate.id)) poolById.set(candidate.id, candidate);
     }
     const aiCandidatePool = [...poolById.values()];
@@ -9254,7 +9336,7 @@ export async function requestAiRecommendations({
         userText: effectiveUserText,
         messages,
         stableCandidates: stablePool.candidates,
-        focusFull,
+        focusFull: focusGraded,
         routeAtlas: await routeAtlasPromise,
         auditContext,
         weatherContext: weatherContextForRanking,
@@ -9268,7 +9350,7 @@ export async function requestAiRecommendations({
         userText: effectiveUserText,
         messages,
         stableCandidates: stablePool.candidates,
-        focusFull,
+        focusFull: focusGraded,
         weatherContext: weatherContextForRanking,
         searchQuery,
         intent: effectiveIntent,
