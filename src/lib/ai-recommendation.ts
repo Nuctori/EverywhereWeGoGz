@@ -5364,6 +5364,7 @@ function normalizeClassifiedDemandSpec(raw: unknown): ClassifiedDemandSpec | nul
 async function classifyExperienceDemandSpec(params: {
   configs: AiProviderConfig[];
   userText: string;
+  previousDemands?: ExperienceDemand[];
 }): Promise<ClassifiedDemandSpec | null> {
   const messages: AiPlanningCallMessages = [
     {
@@ -5377,11 +5378,18 @@ async function classifyExperienceDemandSpec(params: {
         '- 「不要/不想/避开/免了/没有…也行」的主题放进 avoid（原语标签）。',
         '- 金额、天数、出发时段、目的地、上车点是结构化约束，不输出。',
         '- 没有可识别的体验主题时输出 {"demands":[],"avoid":[]}。',
-        '严格输出 JSON：{"demands":[{"terms":["原语"],"relation":"and"}],"avoid":["原语"]}',
       ].join('\n'),
     },
     { role: 'user', content: params.userText },
   ];
+  // 追问槽位规则：带上轮需求规格时追加一条 user 消息，教模型区分
+  // 放弃/替换（旧主题入 avoid）、追加（新旧并存）、纯约束补充（沿用旧 demand）。
+  if (params.previousDemands?.length) {
+    messages.push({
+      role: 'user',
+      content: `上一轮的需求规格（JSON）：${JSON.stringify(params.previousDemands)}。追问槽位规则：本轮原话表达放弃/替换旧主题（算了/不X了/换/别再提）时，把该旧主题移入 avoid，只保留本轮点名的新主题为 demand；本轮是追加新主题时，旧主题保留为 demand；本轮只是补充约束（预算/天数）时，沿用上一轮全部 demand。`,
+    });
+  }
   try {
     const aiCall = await callAiApi({
       configs: params.configs,
@@ -9082,9 +9090,19 @@ export async function requestAiRecommendations({
     });
     // 需求分类头（原语主路径）：一次廉价模型调用把用户原话归类到封闭原语集；
     // 失败/无配置返回 null，下游全部退回词面 fallback，不阻断主链路。
+    // B1 换主题槽位：追问轮把上一轮用户原话派生的需求规格喂给分类头，
+    // 由模型按槽位规则判定 放弃/追加/沿用——fallback 无此上下文，这是
+    // 分类头主路径相对词面方案的核心增量。
+    const previousUserText = (() => {
+      const userMessages = messages.filter((message) => message.role === 'user');
+      return userMessages.length >= 2 ? String(userMessages[userMessages.length - 2].content ?? '') : '';
+    })();
     const classifiedSpec = await classifyExperienceDemandSpec({
       configs,
       userText: effectiveUserText,
+      previousDemands: buildExperienceDemandSpec(previousUserText).length > 0
+        ? buildExperienceDemandSpec(previousUserText)
+        : undefined,
     });
     const useWeatherResearch = shouldUseWeatherResearch(effectiveUserText, effectiveIntent);
     const weatherContextForRanking = useWeatherResearch
