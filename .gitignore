@@ -63,3 +63,4 @@ public/data/tours.json
 
 # CI 中间产物：update-data.yml 写出的"本轮哪些源抓到了新数据"清单
 .fresh-sources
+tmp/
