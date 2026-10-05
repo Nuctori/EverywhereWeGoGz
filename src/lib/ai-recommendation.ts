@@ -5444,7 +5444,7 @@ function extractCandidateCoverageTerms(text: string | undefined) {
   });
 
   return terms
-    .filter((term) => !/(?:^|[\s\d])(预算|价格|费用|花费|人均|以内|以下|以上|左右|元|块|rmb|人民币|\d)/i.test(term))
+    .filter((term) => !/(?:^|[\s\d])(预算|价格|费用|花费|人均|性价比|划算|实惠|经济|以内|以下|以上|左右|元|块|rmb|人民币|\d)/i.test(term))
     .slice(0, 12);
 }
 
@@ -8219,7 +8219,7 @@ function parseBudgetPriorityFromText(normalizedText: string): AiTravelIntent['bu
   if (/不考虑钱|不计成本|预算充足|预算不是问题|要住最好的|只求最好|越贵越好|贵有贵的道理|不差钱|预算不限/.test(normalizedText)) return 'premium';
   // "便宜/实惠/经济"没有数字，也是明确的省钱诉求——不带金额的低价偏好
   // 此前完全丢失（"便宜的沙滩旅游"里便宜对排序零贡献）。
-  if (/穷游|能省则省|越便宜越好|省钱为主|预算紧张|便宜|实惠|经济|低价|省钱/.test(normalizedText)) return 'low';
+  if (/穷游|能省则省|越便宜越好|省钱为主|预算紧张|便宜|实惠|经济|低价|省钱|性价比|划算/.test(normalizedText)) return 'low';
   return null;
 }
 
