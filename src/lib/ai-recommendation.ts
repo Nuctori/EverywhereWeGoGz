@@ -33,14 +33,14 @@ const MAX_AI_CANDIDATES = 96;
 const MAX_AI_FOCUS_CANDIDATES = 24;
 // 简要推荐位的一句话介绍上限（字符）：保证卡片行内展示不膨胀成完整推荐语。
 const MAX_AI_BRIEF_INTRO_CHARS = 40;
-const MAX_AI_COMMENTARY_ITEMS = 24;
-// 推荐展示结构：前 5 条带完整推荐理由（详细推荐），随后 10 条只保留看点信号
-// （简要推荐）。模型按推荐度一次给出 15 条，本地按位置切分两档展示。
-const MAX_AI_DETAILED_ITEMS = 5;
+const MAX_AI_COMMENTARY_ITEMS = 25;
+// 推荐展示结构：前 15 条带完整推荐理由（重点推荐），随后 10 条只保留看点信号
+// （普通推荐）。模型按推荐度一次给出 25 条，本地按位置切分两档展示。
+const MAX_AI_DETAILED_ITEMS = 15;
 const MAX_AI_BRIEF_ITEMS = 10;
 const MAX_AI_SELECTED_ITEMS = MAX_AI_DETAILED_ITEMS + MAX_AI_BRIEF_ITEMS;
 const MAX_AI_PROMPT_REASON_ITEMS = MAX_AI_DETAILED_ITEMS;
-const MAX_AI_RANKED_ITEMS = 24;
+const MAX_AI_RANKED_ITEMS = 25;
 const MAX_DESTINATION_WEATHER_INSIGHTS = 6;
 const ROUTE_ATLAS_MAX_GROUPS = 8;
 const ROUTE_ATLAS_MAX_EXAMPLES = 2;
@@ -3014,8 +3014,8 @@ function mergeAiAndLocalRecommendations(
   localItems: AiRecommendationItem[],
 ): AiRecommendationItem[] {
   const seenTourIds = new Set<string>();
-  // 详细/简要按模型给出的推荐顺序切分：前 5 条保留完整理由，随后 10 条保留
-  // 一句话简单介绍（超长截断）加 matchedSignals 看点，卡片渲染走简要样式。
+  // 详细/简要按模型给出的推荐顺序切分：前 15 条保留完整理由（重点推荐），
+  // 随后 10 条保留一句话简单介绍（超长截断）加 matchedSignals 看点（普通推荐）。
   const primaryAiItems = aiItems
     .filter((item) => {
       if (seenTourIds.has(item.tourId)) return false;
@@ -3367,6 +3367,14 @@ function getRecommendationRelevanceMetrics(
   };
 }
 
+// 展示分段：重点推荐（ai-detailed）→ 普通推荐（ai-brief）→ 本地补位。
+// 排序与终排纪律都按此分段保序，段内才做满足数/质量排序。
+function recommendationSectionRank(item: AiRecommendationItem) {
+  if (item.recommendationTier === 'ai-detailed') return 0;
+  if (item.recommendationTier === 'ai-brief') return 1;
+  return 2;
+}
+
 function prioritizeRecommendationItems(
   items: AiRecommendationItem[],
   context?: {
@@ -3454,22 +3462,27 @@ function prioritizeRecommendationItems(
       };
     })
     .sort((left, right) => {
-      // 需求覆盖分层对 AI 档与本地档一体生效：零覆盖不得压过有覆盖；
-      // 泛需求（无体验需求）全为 0，排序退化为既有键序。
-      const demandGap = right.demandSatisfied - left.demandSatisfied;
-      if (demandGap !== 0) return demandGap;
-      // AI 交给模型的候选带有 ai-* tier：模型的整体判断就是顺序，本地不再替它选团。
+      // 展示结构是两段式：重点推荐（ai-detailed）整段在前，普通推荐（ai-brief）
+      // 整段在后，本地补位殿后——需求满足数只在段内生效，不得把普通位插进
+      // 重点位中间（那是用户可感知的版式错误）。
+      const sectionGap = recommendationSectionRank(left.item) - recommendationSectionRank(right.item);
+      if (sectionGap !== 0) return sectionGap;
       const leftIsAi = Boolean(left.item.recommendationTier?.startsWith('ai'));
       const rightIsAi = Boolean(right.item.recommendationTier?.startsWith('ai'));
-      if (leftIsAi !== rightIsAi) return leftIsAi ? -1 : 1;
       if (leftIsAi && rightIsAi) {
-        // 主观能动性交给模型：AI 档内严格按模型给出的顺序（详细组在前、
-        // 组内按模型分数与原始顺序），本地不再用天气/预算微调重排它的结论。
+        // 段内先按需求满足数分层（核心体验覆盖仍是正确性约束），同层主观
+        // 能动性交还模型：按模型分数与原始顺序。
+        const satisfiedGap = right.demandSatisfied - left.demandSatisfied;
+        if (satisfiedGap !== 0) return satisfiedGap;
         const tierGap = right.recommendationTierWeight - left.recommendationTierWeight;
         if (tierGap !== 0) return tierGap;
         const aiScoreGap = right.aiScore - left.aiScore;
         return aiScoreGap !== 0 ? aiScoreGap : left.index - right.index;
       }
+      // 以下为本地补位条目（未标 tier）的既有键序——覆盖/冲突等事实键先收敛，
+      // 文案质量随后，模型分数仅在区分度足够且非软信号场景时生效。
+      const demandGap = right.demandSatisfied - left.demandSatisfied;
+      if (demandGap !== 0) return demandGap;
 
       // 本地补位条目（未标 tier）：沿用 8ec0200e5 确立的键序——覆盖/冲突等
       // 事实键先收敛，文案质量随后，模型分数仅在区分度足够且非软信号场景时生效。
@@ -3626,10 +3639,14 @@ function enforceCoreCoverageDiscipline(
       return {
         item,
         index,
+        section: recommendationSectionRank(item),
         satisfied: primitive ? getDemandSatisfiedCount(demands, primitive, coverageMode) : 0,
       };
     })
-    .sort((left, right) => right.satisfied - left.satisfied || left.index - right.index)
+    .sort((left, right) =>
+      left.section - right.section ||
+      right.satisfied - left.satisfied ||
+      left.index - right.index)
     .map(({ item }) => item);
 }
 
@@ -9242,7 +9259,7 @@ export async function requestAiRecommendations({
         preferenceMemory: aiContextMemoryForThisTurn,
         allowPublicInterest: allowPublicInterestForTurn,
       }),
-      maxTokens: 2400,
+      maxTokens: 3600,
       liteMaxTokens: 1500,
       qualityCheck: (response) =>
         getAiResponseIntentQualityIssue({
