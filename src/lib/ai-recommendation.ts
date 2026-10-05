@@ -2254,21 +2254,38 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
   return diversified.length > 0 ? diversified : fallbackRecommendations(tours);
 }
 
-// 同分带内的场地公平交错：排序对同分候选只保留语料顺序，同一度假区/同一发团的
-// 姊妹 SKU（标题前缀相同，如"沙扒湾×5"）会成串霸占榜首，把同分的其他目的地
-// 完全挤出候选位。按分数带分组，带内以标题前缀为场地键做轮转，先到先得的
-// 排序质量不变，只是让同分的不同去处都有露出位。
+// 需求档内的场地公平轮转：同一需求满足档内按场地分桶轮转发射（桶内保持
+// 既有排序）。场地键复用既有结构化地名表（沙扒湾/双月湾/巽寮湾/海陵岛…），
+// 无地名的标题退化为去括号前缀。
+// 为什么不能只做"精确同分带内轮转"：低价偏好是连续计分（价格越低加分越高），
+// 同一场地的姊妹 SKU（沙扒湾家族 18 条：君临/海悦×山景/海景×2天/3天）会拿到
+// 各不相同的分（103/102/102…），同分带碎成 1 条/带、轮转失效——「便宜的沙滩
+// 旅游」头部被最便宜集群整族霸屏，巽寮湾/海陵岛/双月湾全部挤出重点位。轮转
+// 升级到需求档级：桶间交错、桶内保序，分数近似序保留、场地公平恢复。
 function interleaveSameScoreVenues(
   items: AiRecommendationItem[],
   tours: AiRecommendationCandidate[],
   venuePrefixLength = 2,
 ): AiRecommendationItem[] {
+  if (items.length < 3) return items;
   const titleById = new Map(tours.map((tour) => [tour.id, normalizeText(tour.title)]));
+  const venuePlaceTokens = CONCEPT_GROUPS.flatMap((group) => group.places ?? []);
+  const venueKeyOf = (tourId: string) => {
+    const title = titleById.get(tourId) || '';
+    for (const place of venuePlaceTokens) {
+      if (title.includes(place)) return place;
+    }
+    return title.replace(/^【[^】]*】/, '').slice(0, venuePrefixLength) || tourId;
+  };
   const output: AiRecommendationItem[] = [];
   let bandStart = 0;
   while (bandStart < items.length) {
+    // 需求档带 = 需求满足数 + 约束方向 + 质量红旗完全相同：轮转不得跨越这些
+    // 正确性/方向分层（fit=1 不得排到 fit=0 后面、红旗不得洗白）。
+    const bandKey = (item: AiRecommendationItem) =>
+      `${item.demandCoverage ?? 0}|${item.constraintFit ?? 0}|${item.constraintNear ?? 0}|${item.qualityFlag ? 1 : 0}`;
     let bandEnd = bandStart + 1;
-    while (bandEnd < items.length && items[bandEnd].score === items[bandStart].score) bandEnd += 1;
+    while (bandEnd < items.length && bandKey(items[bandEnd]) === bandKey(items[bandStart])) bandEnd += 1;
 
     const band = items.slice(bandStart, bandEnd);
     if (band.length <= 2) {
@@ -2276,8 +2293,7 @@ function interleaveSameScoreVenues(
     } else {
       const buckets = new Map<string, AiRecommendationItem[]>();
       for (const item of band) {
-        const title = titleById.get(item.tourId) || '';
-        const venueKey = title.slice(0, venuePrefixLength) || item.tourId;
+        const venueKey = venueKeyOf(item.tourId);
         const bucket = buckets.get(venueKey);
         if (bucket) bucket.push(item);
         else buckets.set(venueKey, [item]);
