@@ -152,9 +152,15 @@ interface LocalRecommendationQuery {
   // "想漂流"归一出「玩水清凉」后,海滩/温泉产品靠概念族拿到同档覆盖分,
   // 真漂流产品反而沉底——字面词必须单独加权。
   literalCoverageTerms: string[];
+  // 需求关系规格（AND/OR）：字典序排序的顶层键，偏好信号不可反超。
+  demandSpec: ExperienceDemand[];
+  // 交通形态偏好（高铁/邮轮等封闭集）：偏好层信号，压不过覆盖与约束方向键。
+  transportHints: string[];
   // 候选语料自身的目的地词表（数据驱动）：用于检测字段与标题的目的地矛盾。
   corpusDestinationVocabulary?: string[];
   budget: ReturnType<typeof parseBudget>;
+  // 无数字的低价/高品质诉求（"便宜的"）：偏好层信号，在覆盖档内定量生效。
+  budgetPriority: AiTravelIntent['budgetPriority'];
   duration: ReturnType<typeof parseDuration>;
   prefersEasyPace: boolean;
   prefersRecentDeparture: boolean;
@@ -943,6 +949,9 @@ function normalizeChineseNumeralDuration(text: string) {
   }).replace(/([一两二三四五六七八九十]{1,3})日/g, (match, numerals: string) => {
     const direct = parseChineseNumeralToken(numerals);
     return direct !== null ? `${direct}日` : match;
+  }).replace(/([一两二三四五六七八九十]{1,3})晚/g, (match, numerals: string) => {
+    const direct = parseChineseNumeralToken(numerals);
+    return direct !== null ? `${direct}晚` : match;
   });
 }
 
@@ -962,10 +971,14 @@ function parseDuration(rawText: string) {
     const matchedText = chineseExactMatch[0];
     if (matchedText.includes('\u4ee5\u4e0a')) return { min: value, max: Number.POSITIVE_INFINITY };
     if (matchedText.includes('\u4ee5\u5185') || matchedText.includes('\u4ee5\u4e0b')) return { min: 0, max: value };
-    // "一天/1天"在行业语义里就是当天往返，不做 ±1 放宽——放宽会把 2 天
-    // 过夜团放进"团建一天"结果里，是评审与用户都能直接感知的约束违约。
-    if (value === 1) return { min: 1, max: 1 };
-    return { min: Math.max(0, value - 1), max: value + 1 };
+    // "一天/1天"在行业语义里就是当天往返；明示精确天数（"两天""3天"）同理
+    // 不做 ±1 放宽——放宽会让 3 天团与 2 天团同拿约束满足分，"两天"被
+    // 3 天团占头部是评审与用户都能直接感知的约束违约。±1 只留给
+    // "左右/上下"这类模糊措辞。
+    if (matchedText.includes('\u5de6\u53f3') || matchedText.includes('\u4e0a\u4e0b')) {
+      return { min: Math.max(0, value - 1), max: value + 1 };
+    }
+    return { min: value, max: value };
   }
   const rangeMatch = text.match(/(\d{1,2})\s*[-到至]\s*(\d{1,2})\s*天/);
   if (rangeMatch) {
@@ -973,6 +986,14 @@ function parseDuration(rawText: string) {
       min: Number(rangeMatch[1]),
       max: Number(rangeMatch[2]),
     };
+  }
+
+  // 「住两晚」N 晚形态：N 晚住宿对应 N 到 N+1 天行程（两天一晚已被 天 分支
+  // 优先解析为精确 2 天，不会走到这里）。
+  const nightMatch = text.match(/(\d{1,2})\s*晚/);
+  if (nightMatch) {
+    const value = Number(nightMatch[1]);
+    return { min: value, max: value + 1 };
   }
 
   const exactMatch = text.match(/(\d{1,2})\s*天/);
@@ -987,7 +1008,12 @@ function parseDuration(rawText: string) {
     return { min: 0, max: value };
   }
 
-  return { min: Math.max(0, value - 1), max: value + 1 };
+  if (text.includes('左右') || text.includes('上下')) {
+    return { min: Math.max(0, value - 1), max: value + 1 };
+  }
+
+  // 明示精确天数不放宽（与"一天"同一行业语义）。
+  return { min: value, max: value };
 }
 
 function getWeekdayCandidatesFromText(text: string) {
@@ -1007,6 +1033,10 @@ function getWeekdayCandidatesFromText(text: string) {
 function collectDepartureWeekdays(text: string) {
   const normalized = text.replace(/\s+/g, '');
   const returnWeekdays = new Set(collectReturnWeekdays(normalized));
+  // 「周末」是时段原语：周六/周日出发都算（周五晚出发已有显式 周五 分支）。
+  if (/周末/.test(normalized)) {
+    return [5, 6];
+  }
   return getWeekdayCandidatesFromText(normalized)
     .filter((weekday) => {
       if (!returnWeekdays.has(weekday)) return true;
@@ -1196,6 +1226,10 @@ function destinationHintsMatchCorpus(destinationHints: string[] | undefined, cor
       (() => {
         const aliasIndex = normalizedCorpus.indexOf(alias.toLowerCase());
         if (aliasIndex === -1) return false;
+        // 泛命中路径同样过跨词护栏：hint 本字的字面命中若横跨两个词
+        // （「流溪河源头」contains「河源」）不算命中；别名族命中不受此限。
+        if (alias.toLowerCase() === hint.toLowerCase() &&
+            isCrossWordDestinationMatch(corpus, aliasIndex, alias.length)) return false;
         return !isBlockedDestinationAliasMatch(hint, alias, corpus, aliasIndex);
       })(),
     ),
@@ -1276,10 +1310,20 @@ const BOARDING_PHRASE_RE = /(?:从|在|于)?([\u4e00-\u9fa5]{2,8}?)(?:上车|出
 function collectBoardingHints(text: string) {
   const normalized = normalizeText(text);
   const hints: string[] = [];
+  // 时间短语不是地名：「周五晚上出发」的上车地解析曾产出 hint=周五晚上，
+  // 全体候选吃无窗口罚——时间词短语一律不算上车点。
+  const timePhraseRe = /^(?:今天|明天|后天|当天|当日|早上|上午|中午|下午|晚上|夜里|凌晨|傍晚|(?:周|星期|礼拜)[一二三四五六日天末])/;
   for (const match of normalized.matchAll(BOARDING_PHRASE_RE)) {
-    const place = match[1]?.trim();
+    let place = match[1]?.trim() ?? '';
+    // 懒匹配会把前缀残渣卷进地名（「1000以内带娃从广州」→ place=以内带娃从广州）：
+    // 取最后一个 从/在/于 之后的尾段才是出发地；尾段不足两字（「从化」）保留原样。
+    const lastPrep = Math.max(place.lastIndexOf('从'), place.lastIndexOf('在'), place.lastIndexOf('于'));
+    if (lastPrep >= 0) {
+      const tail = place.slice(lastPrep + 1);
+      if (tail.length >= 2) place = tail;
+    }
     // "出发"前的地名至少两个字，避免"出发前"这类副词误命中
-    if (place && place.length >= 2) hints.push(place);
+    if (place && place.length >= 2 && !timePhraseRe.test(place)) hints.push(place);
   }
   return uniqueStrings(hints);
 }
@@ -1311,7 +1355,7 @@ const COVERAGE_TERM_GROUPS = [...CONCEPT_GROUPS, ...AI_EXTRA_CONCEPT_GROUPS].map
     ? { aliases: [...group.aliases, '海岸', '海湾', '湾'] }
     : {}),
   ...(group.label === '玩水清凉'
-    ? { aliases: [...group.aliases, '水上', '浆板', '游泳', '海边', '海滩', '沙滩', '海湾', '湾'] }
+    ? { aliases: [...group.aliases, '水上', '浆板', '海边', '海滩', '沙滩', '海湾', '湾'] }
     : {}),
   ...(group.label === '森林山水'
     ? { aliases: [...group.aliases, '绿道'] }
@@ -1464,6 +1508,7 @@ const AVOID_ATOM_KEYWORDS = [
   '登山',
   '溯溪',
   '漂流',
+  '水上乐园',
   '暴走',
   '穿越',
   '购物',
@@ -1492,14 +1537,25 @@ function collectNegatedAvoidTerms(text: string) {
   for (const match of text.matchAll(/([\u4e00-\u9fa5]{2,6})(?:就)?免了/g)) {
     terms.push(...expandAvoidTerm(cleanAvoidTerm(match[1])));
   }
+  // 后置否定：「水上乐园和漂流就不要了」——话题在前、否定词在后（前置形态
+  // 是 不要X/不X）。只取命中的回避原子（漂流/水上乐园）作排除词，整段话题
+  // 短语不作排除词，防止「预算不要太高」这类非回避句式误吞。
+  for (const match of text.matchAll(/([\u4e00-\u9fa5]{2,8})(?:就)?(?:不要|免了|排除|放弃)(?:了)?/g)) {
+    terms.push(...expandAvoidTerm(cleanAvoidTerm(match[1])).slice(1));
+  }
   return uniqueStrings(terms).filter((term) => term.length >= 2 && term.length <= 12);
 }
 
 function collectAvoidHints(text: string) {
-  const normalized = text.replace(/\s+/g, '');
-  const terms = collectNegatedAvoidTerms(normalized);
-  const matches = normalized.matchAll(
-    /(不要推荐|不推荐|不要|不想|不喜欢|不爱|别|避开|排除|不考虑|拒绝|讨厌|受不了|不接受)([^，。；;,.!?！？]*)/g,
+  // 否定作用域以空格为段边界（记忆拼接文本「不要海边了 海边沙滩 温泉」的
+  // 段间分隔就是空格）：否定触发词只吞本段内的词项，段外的正向重述不吞。
+  // 裸否定（不/别/免/没+原子）仍用紧邻口径，见 collectNegatedAvoidTerms。
+  // 剥离残渣卫生检查：纯虚词残渣（「别全是旅行团」→「全是」）不是回避对象，
+  // 入选会把含这些字样的无辜产品硬清场。
+  const segmentText = text.replace(/[\u3000]+/g, ' ');
+  const terms = collectNegatedAvoidTerms(segmentText.replace(/\s+/g, ''));
+  const matches = segmentText.matchAll(
+    /(不要推荐|不推荐|不要|不想|不喜欢|不爱|别|避开|排除|不考虑|拒绝|讨厌|受不了|不接受)([^，。；;,.!?！？\s]{0,12})/g,
   );
 
   for (const match of matches) {
@@ -1508,7 +1564,8 @@ function collectAvoidHints(text: string) {
       .split(/(?:不要推荐|不推荐|不要|不想|不喜欢|不爱|别|避开|排除|不考虑|拒绝|讨厌|受不了|不接受|、|,|，|\/|\||和|或|以及)/)
       .map(cleanAvoidTerm)
       .flatMap(expandAvoidTerm)
-      .filter((term) => term.length >= 2 && term.length <= 12);
+      .filter((term) => term.length >= 2 && term.length <= 12)
+      .filter((term) => !/^[全都是也很挺蛮真还又再挺蛮]+$/u.test(term));
     terms.push(...segmentTerms);
   }
 
@@ -1516,7 +1573,9 @@ function collectAvoidHints(text: string) {
 }
 
 function collectLiteralAvoidHints(text: string) {
-  const normalized = text.replace(/\s+/g, '');
+  // 空格是否定段的边界（记忆拼接文本靠空格分段）：窗口只在段内计数，
+  // 段外的正向重述（「不要海边了 海边沙滩 温泉」的温泉）不得被吞进回避。
+  const normalized = text.replace(/[\u3000]+/g, ' ');
   const hints: string[] = [];
   const avoidPrefix = '(?:不要|不想|不去|别去|避开|排除|不要坐|不坐|不要搭|不搭)';
   const literalTerms = [
@@ -1535,21 +1594,41 @@ function collectLiteralAvoidHints(text: string) {
   ];
 
   for (const term of literalTerms) {
-    if (new RegExp(`${avoidPrefix}[^，。；;,.!?！？、]{0,8}${term}`).test(normalized)) {
+    // 模板串里必须写 \\s：写成 \s 会被模板求值为字母 s，否定窗就能跨空格吞词。
+    if (new RegExp(`${avoidPrefix}[^，。；;,.!?！？、\\s]{0,8}${term}`).test(normalized)) {
       hints.push(term);
     }
   }
 
-  if (/(?:不要|不想|不去|别去|避开|排除)[^，。；;,.!?！？、]{0,8}(?:海边|海滩|沙滩|海岛)/.test(normalized)) {
-    hints.push('海边', '海滩', '沙滩', '海岛');
+  if (/(?:不要|不想|不去|别去|避开|排除)[^，。；;,.!?！？、\s]{0,8}(?:海边|海滩|沙滩|海岛)/.test(normalized)) {
+    // 家族展开不含「海岛」：供应商类目 theme="海岛度假"（614 条，含大量贴标
+    // 内陆温泉货）会因类目撞字被整族硬清场；用户明确点名「不要海岛」时仍经
+    // 上面 literalTerms 循环按字面进入回避。
+    hints.push('海边', '海滩', '沙滩');
   }
   // 飞机↔航班成对剥离是既有规则；触发前缀放宽到通用否定前缀——「不要飞机」
   // 同样排除航班语料，否则仅含「航班」字样的候选仍会被判成贴合需求。
-  if (/(?:不要|不想|不去|别去|避开|排除|不要坐|不坐|不要搭|不搭)[^，。；;,.!?！？、]{0,8}(?:飞机|航班|飞行)/.test(normalized)) {
+  if (/(?:不要|不想|不去|别去|避开|排除|不要坐|不坐|不要搭|不搭)[^，。；;,.!?！？、\s]{0,8}(?:飞机|航班|飞行)/.test(normalized)) {
     hints.push('飞机', '航班');
   }
 
   return uniqueStrings(hints).slice(0, 8);
+}
+
+// 回避语料展开：回避词经概念归一命中组标签时，该组别名族一并参与语料
+// 排除——「避开爬山」只挡'爬山'二字，会放标题就叫徒步的产品进头部。
+function expandAvoidHintsForCorpus(hints: string[]) {
+  return uniqueStrings(hints.flatMap((hint) => {
+    const normalized = normalizeText(hint);
+    if (!normalized) return [hint];
+    // 排除族只用基础别名（CONCEPT_GROUPS）：AI 审计超集（海边/沙滩/湾…）
+    // 是覆盖判定的宽松证据，拿来做硬排除会把「避开漂流」连坐成屠杀全部
+    // 海滩供给（单字「湾」即可击杀）——排除必须比覆盖严格。
+    const group = CONCEPT_GROUPS.find(
+      (candidate) => candidate.label === canonicalizeCoverageTerm(normalized),
+    );
+    return group ? [normalized, ...group.aliases] : [normalized];
+  }));
 }
 
 function primitiveMatchesAvoid(primitive: RecommendationPrimitive, avoid: string[] | undefined) {
@@ -1669,7 +1748,10 @@ function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
     literalCoverageTerms: hasExperienceCoverageNeed
       ? collectLiteralCoverageTerms(normalizedText).filter(notAvoidTerm)
       : [],
+    demandSpec: buildExperienceDemandSpec(normalizedText, avoidHints),
+    transportHints: parseTransportHints(normalizedText, avoidHints),
     budget: parseBudget(normalizedText),
+    budgetPriority: parseBudgetPriorityFromText(normalizedText),
     duration: inferredTripWindow.tripDaysMin || inferredTripWindow.tripDaysMax
       ? {
           min: inferredTripWindow.tripDaysMin ?? 0,
@@ -1704,12 +1786,22 @@ function scoreTour(
     query.departureTimeOfDay ||
     query.duration,
   );
-  if (query.avoidHints.some((hint) => corpus.includes(normalizeText(hint)))) {
+  if (expandAvoidHintsForCorpus(query.avoidHints).some((hint) => corpus.includes(hint))) {
     return null;
   }
 
   const signals: string[] = [];
   let score = 0;
+  // 结构化约束（天数窗/预算上限）满足数：字典序第二层方向键——覆盖相同的
+  // 候选之间，先比约束方向（"人均800"挡住万元线、"两天"压住 3 天团），再比
+  // 偏好加权。无约束查询两者恒为 0，退化为原排序。
+  let constraintFit = 0;
+  let constraintChecked = 0;
+  let constraintNear = 0;
+  // 质量红旗（异地收客/geo 脏数据/标题天数矛盾/字段矛盾）：字典序质量层——
+  // 同覆盖同约束档下，无红旗候选排在有红旗候选之前（-30/-24 沉底在字典序
+  // 下会被同档高分反超，必须显式分层）。
+  let qualityFlag = false;
 
   if (isLikelyAiNonTour(primitive)) {
     score -= 30;
@@ -1721,6 +1813,7 @@ function scoreTour(
   const declaredDepartureCity = getDeclaredDepartureCity(tour.title);
   if (declaredDepartureCity && !declaredDepartureCity.includes('广州')) {
     score -= 30;
+    qualityFlag = true;
     signals.push(`异地出发：${declaredDepartureCity}`);
   }
 
@@ -1735,24 +1828,30 @@ function scoreTour(
       normalizedTitle.includes(value));
     if (contradictory) {
       score -= 24;
+      qualityFlag = true;
       signals.push(`目的地数据存疑：字段=${tour.destination}，标题=${contradictory}`);
     }
   }
 
   if (query.destinationHints.length > 0) {
-    // 具体命中（线路语料真含用户说的具体地名，如"阳江/海陵岛"）权重高于
-    // 省域泛命中（只通过别名族命中"广东"）——两者同分会让真目的地被
-    // 同省随机线路淹没。
-    const tourCorpus = `${tour.destination} ${tour.title} ${corpus}`;
-    const normalizedCorpus = normalizeText(tourCorpus);
+    // 具体命中（用户点名的地名出现在目的地字段或标题里）权重高于泛命中
+    // （只在长文本语料——如餐食/行程文案——蹭到别名族成员）。单 hint 时
+    // 也做字面判定：否则"台山货 meals 含阳江"与真海陵岛同分，同分带退化为
+    // 池序抽签，点名目的地失去区分度。
+    const titleDestinationCorpus = `${tour.destination} ${tour.title}`;
+    const normalizedTitleDestination = normalizeText(titleDestinationCorpus);
     const specificHint = query.destinationHints.find((hint) => {
-      if (!query.destinationHints.some((other) => other !== hint && (DESTINATION_ALIASES[other] ?? []).includes(hint))) {
-        return false;
-      }
-      const index = normalizedCorpus.indexOf(normalizeText(hint));
-      return index !== -1 && !isBlockedDestinationAliasMatch(hint, hint, tourCorpus, index);
+      const normalizedHint = normalizeText(hint);
+      if (!normalizedHint) return false;
+      const index = normalizedTitleDestination.indexOf(normalizedHint);
+      if (index === -1) return false;
+      if (isCrossWordDestinationMatch(titleDestinationCorpus, index, normalizedHint.length)) return false;
+      return !isBlockedDestinationAliasMatch(hint, hint, titleDestinationCorpus, index);
     });
-    const genericHit = destinationHintsMatchCorpus(query.destinationHints, tourCorpus);
+    const genericHit = destinationHintsMatchCorpus(
+      query.destinationHints,
+      `${tour.destination} ${tour.title} ${corpus}`,
+    );
 
     if (specificHint) {
       score += 18;
@@ -1782,6 +1881,15 @@ function scoreTour(
     if (corpus.includes(normalizeText(hint))) {
       score += 10;
       signals.push(`偏好匹配：${hint}`);
+    }
+  }
+
+  // 交通形态偏好（偏好层）：高铁/邮轮等形态命中的候选小幅上浮——压不过
+  // 覆盖与约束方向键；「高铁出行」此前对排序零贡献。
+  for (const hint of query.transportHints) {
+    if (corpus.includes(hint)) {
+      score += 6;
+      signals.push(`交通形态匹配：${hint}`);
     }
   }
 
@@ -1816,26 +1924,49 @@ function scoreTour(
     }
   }
 
-  // 短途异地收客检测：geo.destination 坐标距广州 >1000km 且行程 ≤4 天，
-  // 物理上不可行（普陀山/台州类外地收客团）——重度降权。用户点名该目的地
-  // 时不惩罚（长天数与点名场景不适用此规则）。
+  // 短途异地收客/geo 脏数据检测：geo.destination 坐标距广州 >1000km 且行程
+  // ≤4 天，物理上不可行（普陀山/台州类外地收客团，或"字段=广东、坐标=巴厘岛"
+  // 的爬虫挂错）——重度降权。判定是纯数据矛盾：字段归广东（或无字段命中）而
+  // 坐标在千里外，与用户点不点名无关——标题含"阳江"救不了坐标在巴厘岛的货。
   const destinationGeo = (tour.geo as { destination?: { latitude?: number; longitude?: number } } | undefined)?.destination;
   if (destinationGeo?.latitude && destinationGeo?.longitude && (tour.duration ?? 0) > 0 && (tour.duration ?? 0) <= 4) {
     const distanceKm = distanceFromGuangzhouKm(destinationGeo.latitude, destinationGeo.longitude);
-    if (distanceKm > 1000 && !query.destinationHints?.some((hint) => normalizeText(tour.title).includes(normalizeText(hint)))) {
+    if (distanceKm > 1000) {
       score -= 24;
+      qualityFlag = true;
       signals.push(`短途目的地距广州${Math.round(distanceKm)}km，疑似异地收客`);
     }
   }
+  // 无数字的低价偏好（"便宜的"）在偏好层定量生效：低价档加分、远高价档
+  // 减分——它压不过需求覆盖层（字典序顶层键），只在覆盖相同的候选间分高下。
+  if (query.budgetPriority === 'low') {
+    // 低价偏好连续计分：价格越低加分越高（封顶 ±8），段内单调——两档悬崖
+    // 加死区曾让"便宜点"对 300-600 主流价位带头部零生效（与不说的排序
+    // 逐位全同）。注意这是偏好层：压不过需求覆盖与约束方向键。
+    const lowPriceBonus = Math.max(-8, Math.min(8, Math.round((650 - tour.price) / 80)));
+    if (lowPriceBonus > 0) {
+      score += lowPriceBonus;
+      signals.push(`低价档贴合省钱偏好：￥${tour.price.toLocaleString()}`);
+    } else if (lowPriceBonus < 0) {
+      score += lowPriceBonus;
+    }
+  }
+
   if (query.budget) {
     const budgetMax = Number.isFinite(query.budget.max) ? query.budget.max : null;
     const budgetMin = Number.isFinite(query.budget.min) ? query.budget.min : null;
+    if (budgetMax !== null) constraintChecked += 1;
 
     if (budgetMin !== null && budgetMax !== null && tour.price >= budgetMin && tour.price <= budgetMax) {
       score += 32;
+      constraintFit += 1;
       signals.push(`预算接近：￥${tour.price.toLocaleString()}`);
     } else if (budgetMax !== null && tour.price <= budgetMax * 1.25) {
+      // 约束方向键只认精确窗：±25% 容差是打分层的软优惠，不能让 ¥688 在
+      // "压到600"下与 ¥599 同拿约束满足分。超窗贴边单独记方向（G3），
+      // 供 fit=0 档内排序：贴窗的真货排在远窗长线前面。
       score += 1;
+      constraintNear = 1;
       signals.push('价格略高但仍可比较');
     } else if (budgetMax !== null && tour.price <= budgetMax * 2) {
       score -= 12;
@@ -1856,10 +1987,12 @@ function scoreTour(
   if (query.duration) {
     if (tour.duration >= query.duration.min && tour.duration <= query.duration.max) {
       score += 10;
+      constraintFit += 1;
       signals.push(`天数合适：${tour.duration}天`);
     } else {
       score -= 10;
     }
+    constraintChecked += 1;
   }
 
   if (query.departureWeekdays.length > 0) {
@@ -1927,6 +2060,21 @@ function scoreTour(
     }
   }
 
+  // 节奏结构化约束进字典序方向键：点名了出发/返程节奏或时段时，有班期
+  // 证据的候选排在无证据候选之前——"周五晚上出发周日回"不再全凭语料序。
+  const wantsScheduleConstraint = query.departureWeekdays.length > 0 ||
+    query.returnWeekdays.length > 0 ||
+    Boolean(query.departureTimeOfDay && query.departureTimeOfDay !== 'morning');
+  if (wantsScheduleConstraint) {
+    constraintChecked += 1;
+    const weekdayOk = query.departureWeekdays.length === 0 ||
+      matchedScheduleWindows.length > 0 ||
+      primitive.schedule.departureWeekdays.some((weekday) => query.departureWeekdays.includes(weekday));
+    const timeOk = !query.departureTimeOfDay || query.departureTimeOfDay === 'morning' ||
+      primitive.schedule.hasEveningOrNightDeparture;
+    if (weekdayOk && timeOk) constraintFit += 1;
+  }
+
   if (query.prefersEasyPace) {
     if (tour.leisureLevel === 'easy') {
       score += 10;
@@ -1961,11 +2109,34 @@ function scoreTour(
     score -= 18;
   }
 
+  // 标题天数与 duration 字段矛盾（字段=1 天、标题明写 6 天 5 晚）是采集脏
+  // 数据：以"1 天团"名义进头部是高风险错位——以标题为基准降权。标题里的
+  // 多天选项（2/3 天、3-4 天）任一容纳字段值即不算矛盾。
+  const tourTitleDays = getTitleDayValues(tour.title);
+  if ((tour.duration ?? 0) > 0 && tourTitleDays.singles.size > 0) {
+    const titleRangeCovers = tourTitleDays.ranges.some(
+      ([min, max]) => tour.duration >= min && tour.duration <= max,
+    );
+    if (!tourTitleDays.singles.has(tour.duration) && !titleRangeCovers) {
+      // 以"1 天团"名义卖 6 天 5 晚是货不对板，与异地收客同级：重度降权沉底。
+      score -= 30;
+      qualityFlag = true;
+      signals.push(`数据存疑：标题标注${[...tourTitleDays.singles].sort((a, b) => a - b).join('/')}天，字段${tour.duration}天`);
+    }
+  }
+
   if (score <= 0) return null;
 
   return {
     tourId: tour.id,
     score,
+    // 需求满足数进字典序顶层键：核心体验覆盖压过 score 里的全部偏好加权
+    //（"便宜的沙滩"里 99 元广州塔不得压过 129 元沙滩团）。
+    demandCoverage: getDemandSatisfiedCount(query.demandSpec, primitive),
+    constraintFit,
+    constraintChecked,
+    constraintNear,
+    qualityFlag,
     reason: buildLocalTourReason(tour, signals, '综合匹配度较高', variant),
     matchedSignals: signals.slice(0, 5),
   };
@@ -2009,12 +2180,53 @@ function distanceFromGuangzhouKm(latitude: number, longitude: number) {
   return 6371 * 2 * Math.asin(Math.sqrt(a));
 }
 
+// 跨词伪匹配护栏：地名命中前后都紧邻汉字、且后接地理接续字（源头/口/畔等）
+// 时，命中其实横跨了两个词（「流溪河源头」里 contains「河源」）——不算目的地
+// 命中。真地名后接普通汉字（阳江海陵岛、河源万绿湖）不受影响。
+const DESTINATION_CONTINUATION_CHARS = new Set(['头', '口', '畔', '边', '尾', '源']);
+
+function isCrossWordDestinationMatch(corpus: string, index: number, hintLength: number) {
+  const prevChar = index > 0 ? corpus[index - 1] : '';
+  const nextChar = index + hintLength < corpus.length ? corpus[index + hintLength] : '';
+  const isCjk = (ch: string) => /[\u4e00-\u9fa5]/.test(ch);
+  return isCjk(prevChar) && isCjk(nextChar) && DESTINATION_CONTINUATION_CHARS.has(nextChar);
+}
+
 function getDeclaredDepartureCity(title: string) {
-  const match = /(?:^|[\s\【】·／/|,&>\)\(（）：:0-9])([\u4e00-\u9fa5]{2,4})(?:出发|往返)/.exec(normalizeText(title));
+  // HTML 实体会污染边界字符（"河南&gt;郑州出发"里的 &gt; 不是 >），
+  // 先归一再找出发城市声明，否则异地收客团绕过检测。
+  const normalizedTitle = normalizeText(title).replace(/&(?:amp|lt|gt|quot|nbsp|#\d+);/gi, '·');
+  // 「昆明起止」「郑州到三亚」是出发城市声明的变体词形（到 形排除 N天/N晚
+  // 后缀与交通工具前缀——大巴到/动车到 是交通段不是出发地）。
+  const match = /(?:^|[\s\【】·／/|,&>\)\(（）：:0-9])([\u4e00-\u9fa5]{2,4})(?:出发|往返)/.exec(normalizedTitle)
+    ?? /(?:^|[\s\【】·／/|,&>\)\(（）：:0-9])([\u4e00-\u9fa5]{2,4})起止/.exec(normalizedTitle)
+    ?? /(?:^|[\s\【】·／/|,&>\)\(（）：:0-9])([\u4e00-\u9fa5]{2,4})到(?![一二三四五六七八九十\d]{0,2}(?:天|日|晚))/.exec(normalizedTitle);
   if (!match) return null;
   const city = match[1];
+  if (/^(?:高铁|动车|火车|大巴|巴士|飞机|步行|开车|班车|直通|接驳)/.test(city)) return null;
   if (/[天时][出发回]$|^当日|^次日/.test(`${city}出发`) || /往返$/.test(city)) return null;
   return city;
+}
+
+// 标题自述天数集合：6天5晚→{6}；2/3天→{2,3}；3-4天→range{3,4}；两天→{2}。
+// 供 duration 字段矛盾检测用（数据质量门，不是需求解析）。
+function getTitleDayValues(title: string) {
+  // 先剥日期形态（10月2日/10月）：「10月2日」的 2 会被当天数收进集合，
+  // 恰好撞上字段值就免检——桂林5天团靠标题里的日期逃过矛盾检测。
+  const normalized = normalizeChineseNumeralDuration(normalizeText(title))
+    .replace(/\d{1,2}月\d{1,2}日/g, ' ')
+    .replace(/\d{1,2}月/g, ' ');
+  const singles = new Set<number>();
+  const ranges: Array<[number, number]> = [];
+  for (const match of normalized.matchAll(/(\d{1,2})\s*(?:天|日)/g)) {
+    singles.add(Number(match[1]));
+  }
+  for (const match of normalized.matchAll(/(\d{1,2})\s*(?:-|到|至|~|～|\/|或)\s*(\d{1,2})\s*(?:天|日)/g)) {
+    const min = Number(match[1]);
+    const max = Number(match[2]);
+    ranges.push([Math.min(min, max), Math.max(min, max)]);
+  }
+  return { singles, ranges };
 }
 
 function localRecommendations(tours: AiRecommendationCandidate[], text: string) {
@@ -2024,7 +2236,15 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
   const items = tours
     .map((tour, index) => scoreTour(tour, query, index))
     .filter((item): item is AiRecommendationItem => Boolean(item))
-    .sort((a, b) => b.score - a.score)
+    // 字典序：需求满足数（核心体验覆盖）→ 结构化约束满足（天数/预算方向）
+    // → 加权和。偏好信号只在覆盖与约束相同的候选之间分高下；泛需求
+    // （demandSpec 空、无约束）各键全为 0，退化为原排序。
+    .sort((a, b) =>
+      (b.demandCoverage ?? 0) - (a.demandCoverage ?? 0) ||
+      (b.constraintFit ?? 0) - (a.constraintFit ?? 0) ||
+      (a.qualityFlag ? 1 : 0) - (b.qualityFlag ? 1 : 0) ||
+      (b.constraintNear ?? 0) - (a.constraintNear ?? 0) ||
+      b.score - a.score)
     .map((item, index) => ({
       ...item,
       reason: index < MAX_AI_COMMENTARY_ITEMS ? item.reason : undefined,
@@ -3153,6 +3373,7 @@ function prioritizeRecommendationItems(
     candidateTours?: AiRecommendationCandidate[];
     intent?: AiTravelIntent | null;
     userText?: string;
+    demandSpec?: ClassifiedDemandSpec;
     destinationWeatherInsights?: DestinationWeatherInsight[];
   },
 ) {
@@ -3168,6 +3389,9 @@ function prioritizeRecommendationItems(
   );
   const intent = context.intent ?? null;
   const coverageTerms = getCoverageTermsForQuality(context.userText);
+  // 需求规格：分类头结果优先（原语主路径），词面解析只是无分类结果时的降级。
+  const demandSpecForRanking = context.demandSpec?.demands ?? buildExperienceDemandSpec(context.userText);
+  const demandCoverageMode = context.demandSpec?.source === 'classifier' ? 'profile' : 'lexical';
   const rankedItems: AiRecommendationItem[] = [];
 
   for (const item of prioritized) {
@@ -3211,6 +3435,11 @@ function prioritizeRecommendationItems(
       return {
         item,
         index,
+        // 需求满足数（AND/OR 语义）：字典序顶层键，AI 档与本地档共用——
+        // 核心体验覆盖不是模型可谈判的，模型只在同一覆盖档内保留排序权。
+        demandSatisfied: primitive
+          ? getDemandSatisfiedCount(demandSpecForRanking, primitive, demandCoverageMode)
+          : 0,
         recommendationTierWeight: getRecommendationTierWeight(item),
         detailScore,
         reasonQualityScore: detailScore + (genericBriefReason ? -4 : 0) + (item.reason ? 2 : 0) + Math.min(3, Math.floor(reasonLength / 30)),
@@ -3225,6 +3454,10 @@ function prioritizeRecommendationItems(
       };
     })
     .sort((left, right) => {
+      // 需求覆盖分层对 AI 档与本地档一体生效：零覆盖不得压过有覆盖；
+      // 泛需求（无体验需求）全为 0，排序退化为既有键序。
+      const demandGap = right.demandSatisfied - left.demandSatisfied;
+      if (demandGap !== 0) return demandGap;
       // AI 交给模型的候选带有 ai-* tier：模型的整体判断就是顺序，本地不再替它选团。
       const leftIsAi = Boolean(left.item.recommendationTier?.startsWith('ai'));
       const rightIsAi = Boolean(right.item.recommendationTier?.startsWith('ai'));
@@ -3357,6 +3590,49 @@ function rebalanceItemsForExplicitDestinationCoverage(
   return [...diversified, ...pool];
 }
 
+// 核心体验覆盖纪律（最终装配层兜底）：检索层/重点层已保证池内贴合，但模型
+// 在"便宜 vs 主题"间自行取舍时，可能把零覆盖候选（如纯城市观光）顶进可见
+// 头部——system prompt 虽要求"错位时宁可明说候选有限"，但没有确定性校验。
+// 这里做排序保位而非硬删：需求概念（与 executeAiSearchRounds 同款提取口径，
+// 只认 COVERAGE_TERM_GROUPS 概念组标签，价格词天然被剔除）非空时，最终可见
+// 列表中"零覆盖候选"稳定排到"有覆盖候选"之后，组内保持原序；不删除不隐藏，
+// 长尾浏览不受影响。多主题需求按任一命中计覆盖。贴合候选不足最小可见条数时
+// 纪律自动放宽——贴合池本身撑不起一页时不强排，避免硬凑出空页（与
+// MIN_VISIBLE_RECOMMENDATION_ITEMS 补位哲学一致）。AI 项与本地补位走同一条
+// 纪律：单点接入最终可见序列，不区分 tier 各写一套。
+function enforceCoreCoverageDiscipline(
+  items: AiRecommendationItem[],
+  context: {
+    candidateTours: AiRecommendationCandidate[];
+    userText?: string;
+    demandSpec?: ClassifiedDemandSpec;
+  },
+): AiRecommendationItem[] {
+  // 最终可见序列统一施加核心体验覆盖纪律（AI 项 + 本地补位同一比较器）：
+  // 按 AND/OR 需求满足数稳定排序——有覆盖的排前面，同档保持既有顺序。
+  // 排序而非分区：池内贴合稀少时贴合项自然置顶、零覆盖项不被丢弃，
+  // 不需要 MIN_VISIBLE 放宽闸（那是硬分区时代的保险丝）。
+  // 需求规格：分类头结果优先（原语主路径 + profile 覆盖口径）。
+  const demands = context.demandSpec?.demands ?? buildExperienceDemandSpec(context.userText);
+  const coverageMode = context.demandSpec?.source === 'classifier' ? 'profile' : 'lexical';
+  if (demands.length === 0 || items.length < 2) return items;
+
+  const primitiveByTourId = new Map(
+    context.candidateTours.map((candidate) => [candidate.id, buildTourPrimitive(candidate)]),
+  );
+  return items
+    .map((item, index) => {
+      const primitive = primitiveByTourId.get(item.tourId);
+      return {
+        item,
+        index,
+        satisfied: primitive ? getDemandSatisfiedCount(demands, primitive, coverageMode) : 0,
+      };
+    })
+    .sort((left, right) => right.satisfied - left.satisfied || left.index - right.index)
+    .map(({ item }) => item);
+}
+
 function getWeekday(date: string) {
 
   const parsed = new Date(`${date}T00:00:00`);
@@ -3444,7 +3720,7 @@ function extractExperienceCategories(tour: AiRecommendationCandidate) {
   ].filter(Boolean).join(' ').toLowerCase();
   const categories: string[] = [];
   const lodgingOnly = /住宿套餐|酒店住宿|门票|门票套餐|景点套票|接载|单程接送|摄影写真/.test(corpus);
-  const hasBeachSignal = /海滩|沙滩|海景|海岛|海湾|湾|游艇|浮潜|潜水|私家海滩|滨海度假/.test(corpus);
+  const hasBeachSignal = /海滩|沙滩|海景|海岛|海湾|游艇|浮潜|潜水|私家海滩|滨海度假/.test(corpus);
   const hasIndoorSignal = /冰世界|冰雪世界|室内|度假村|别墅|庄园|亲子|乐园/.test(corpus);
   const hasMountainSignal = /森林|氧吧|瀑布|峡谷|溶洞|山水|山泉|湿地|绿道|星湖|丹霞|九瀑|云门山|白水寨|古龙峡|黄腾峡|三百山|天露山|紫云谷|姑婆山|草原|长白山|呼伦贝尔|喀纳斯|香格里拉|玉龙雪山|九寨沟/.test(corpus);
   const hasWaterPlaySignal = /漂流|溯溪|桨板|浆板|sup|水上乐园|水世界|冲浪|游泳|嬉水|亲水|山泉水泳道/.test(corpus);
@@ -4882,25 +5158,238 @@ function annotateCandidatePrimitive(
   } satisfies CandidateAuditPrimitive;
 }
 
+// 需求关系建模：体验词项之间的 AND/OR 由语法连词判定，语义完全来自既有概念
+// 桥（extractCandidateCoverageTerms + canonicalizeCoverageTerm），零新增词表。
+// 默认并列即 AND（"有山有海"两个都要）；出现 OR 连词（或/还是/要么）时全部
+// 体验词合并为一个"任一即可"的需求（"温泉或者海边都行"）。预算/天数/上车点
+// 等修饰词不是体验需求，走各自的结构化解析器，不进本规格——它们在排序里
+// 属于偏好层，永远不能反超需求覆盖层（见 getDemandSatisfiedCount）。
+interface ExperienceDemand {
+  terms: string[];
+  relation: 'and' | 'or';
+}
+
+function buildExperienceDemandSpec(text: string | undefined, avoidHints: string[] = []): ExperienceDemand[] {
+  if (!text) return [];
+  const normalizedText = normalizeText(text);
+  // 回避剥离在函数内部闭环（不依赖调用方传入）：终排纪律层曾因重建需求时
+  // 没传回避词，把「不爬山不徒步」重建成正向需求 [户外徒步]——回避主题
+  // 一旦入池会被字典序顶层键顶到榜首。
+  const mergedAvoidHints = uniqueStrings([
+    ...collectAvoidHints(normalizedText),
+    ...collectLiteralAvoidHints(normalizedText),
+    ...avoidHints.map((hint) => normalizeText(hint)),
+  ]).filter(Boolean);
+  const demandText = mergedAvoidHints.reduce(
+    (stripped, hint) => stripped.split(normalizeText(hint)).join(' '),
+    normalizedText,
+  );
+  const avoidLabels = new Set(
+    mergedAvoidHints
+      .map((hint) => canonicalizeCoverageTerm(normalizeText(hint)))
+      .filter(Boolean),
+  );
+  // 只认概念组标签：提取器带出的非概念残渣（便宜/旅游/就免了）不是体验需求，
+  // 它们由预算/天数解析器各自负责；被回避的概念组标签一并剥离（「避开爬山」
+  // 的归一标签是户外徒步，别名回流路径与 executeAiSearchRounds 同一堵法）。
+  const terms = uniqueStrings(
+    extractCandidateCoverageTerms(demandText)
+      .map(canonicalizeCoverageTerm)
+      .filter((term) =>
+        COVERAGE_TERM_GROUPS.some((group) => group.label === term) &&
+        !avoidLabels.has(term)),
+  );
+  if (terms.length === 0) return [];
+  const hasOrRelation = terms.length > 1 && /或|还是|要么|任选|其中之一/.test(demandText);
+  return hasOrRelation
+    ? [{ terms, relation: 'or' }]
+    : terms.map((term) => ({ terms: [term], relation: 'and' as const }));
+}
+
+// 需求满足数 = 被候选覆盖的体验需求个数。AND 需求要求词项全覆盖，OR 需求
+// 任一命中即满足——这是字典序排序的顶层键：核心体验覆盖是正确性约束，
+// 价格/天数/热度等偏好信号只能在覆盖相同的候选之间分高下。
+// mode：classifier 规格吃结构化档案（experienceCategories，富集期的分类
+// 产物）；lexical fallback 才做语料扫描。
+function getDemandSatisfiedCount(
+  demands: ExperienceDemand[],
+  primitive: RecommendationPrimitive,
+  mode: 'lexical' | 'profile' = 'lexical',
+) {
+  if (demands.length === 0) return 0;
+  return demands.reduce((count, demand) => {
+    const coveredTerms = demand.terms.filter((term) =>
+      mode === 'profile'
+        ? primitive.experienceCategories.includes(term)
+        : getPrimitiveCoverageScore(primitive, [term]) > 0,
+    ).length;
+    const satisfied = demand.relation === 'or' ? coveredTerms > 0 : coveredTerms === demand.terms.length;
+    return count + (satisfied ? 1 : 0);
+  }, 0);
+}
+
+// 交通形态偏好（封闭集解析）：「高铁出行」「坐邮轮」进偏好层打分。被回避
+// 的形态（不坐飞机→avoidHints）不进偏好——回避语义由 avoid 通道负责。
+const TRANSPORT_FORM_PATTERN = /高铁|动车|火车|飞机|大巴|邮轮|游轮|轮船/g;
+
+function parseTransportHints(text: string, avoidHints: string[]) {
+  const demandText = avoidHints.reduce(
+    (stripped, hint) => stripped.split(normalizeText(hint)).join(' '),
+    text,
+  );
+  return uniqueStrings((demandText.match(TRANSPORT_FORM_PATTERN) ?? []))
+    .filter((hint) => !avoidHints.includes(hint));
+}
+
+// ============ 需求分类头：原语归类主路径 ============
+// 体验需求只允许落在封闭原语集（概念组标签）上。用户原话 → 原语规格由模型
+// 分类调用完成；词面解析（buildExperienceDemandSpec）降级为无 AI 时的
+// fallback，不再是主路径。金额/天数/出发时段是结构化解析（数字/日期），
+// 不属于词面匹配，走各自的解析器。
+
+const EXPERIENCE_PRIMITIVE_LABELS = COVERAGE_TERM_GROUPS.map((group) => group.label);
+
+interface ClassifiedDemandSpec {
+  demands: ExperienceDemand[];
+  avoid: string[];
+  source: 'classifier' | 'lexical';
+}
+
+// 校验与归一（纯函数，可离线单测）：模型输出只允许封闭原语集内的标签，
+// 关系归一为 and|or，空 demand 丢弃，avoid 同样收敛到原语集。
+function normalizeClassifiedDemandSpec(raw: unknown): ClassifiedDemandSpec | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const labelSet = new Set(EXPERIENCE_PRIMITIVE_LABELS);
+  const rawDemands = (raw as { demands?: unknown }).demands;
+  const demands: ExperienceDemand[] = [];
+  for (const item of (Array.isArray(rawDemands) ? rawDemands : []).slice(0, 8)) {
+    if (!item || typeof item !== 'object') continue;
+    const rawTerms = (item as { terms?: unknown }).terms;
+    const terms = uniqueStrings(
+      (Array.isArray(rawTerms) ? rawTerms : [])
+        .filter((value): value is string => typeof value === 'string')
+        .map((value) => value.trim())
+        .filter((value) => labelSet.has(value)),
+    );
+    if (terms.length === 0) continue;
+    demands.push({
+      terms,
+      relation: (item as { relation?: unknown }).relation === 'or' ? 'or' : 'and',
+    });
+  }
+  const rawAvoid = (raw as { avoid?: unknown }).avoid;
+  const avoid = uniqueStrings(
+    (Array.isArray(rawAvoid) ? rawAvoid : [])
+      .filter((value): value is string => typeof value === 'string')
+      .map((value) => value.trim())
+      .filter((value) => labelSet.has(value)),
+  );
+  if (demands.length === 0 && avoid.length === 0) return null;
+  return { demands, avoid, source: 'classifier' };
+}
+
+async function classifyExperienceDemandSpec(params: {
+  configs: AiProviderConfig[];
+  userText: string;
+}): Promise<ClassifiedDemandSpec | null> {
+  const messages: AiPlanningCallMessages = [
+    {
+      role: 'system',
+      content: [
+        '你是旅行需求分类头。把用户的一句旅行需求分类到封闭的体验原语集上，只输出严格 JSON，不要解释。',
+        `原语集（只能使用这些标签，不得发明新标签）：${EXPERIENCE_PRIMITIVE_LABELS.join('、')}。`,
+        '规则：',
+        '- 每个被点名的体验主题归到对应原语；并列默认各自独立一条 demand（relation="and"）。',
+        '- 「或/或者/都行/任选」连接的主题合并为一条 demand（relation="or"）。',
+        '- 「不要/不想/避开/免了/没有…也行」的主题放进 avoid（原语标签）。',
+        '- 金额、天数、出发时段、目的地、上车点是结构化约束，不输出。',
+        '- 没有可识别的体验主题时输出 {"demands":[],"avoid":[]}。',
+        '严格输出 JSON：{"demands":[{"terms":["原语"],"relation":"and"}],"avoid":["原语"]}',
+      ].join('\n'),
+    },
+    { role: 'user', content: params.userText },
+  ];
+  try {
+    const aiCall = await callAiApi({
+      configs: params.configs,
+      messages: messages as ReturnType<typeof buildAiMessages>,
+      maxTokens: 300,
+      schema: 'search-plan',
+    }) as AiSearchCallResult;
+    return normalizeClassifiedDemandSpec(aiCall.parsed);
+  } catch {
+    // 分类头失败不阻断主链路：调用方退回词面 fallback。
+    return null;
+  }
+}
+
 function extractCandidateCoverageTerms(text: string | undefined) {
   if (!text) return [];
   const normalized = text
       .toLowerCase()
       .replace(/[^\p{Script=Han}a-z0-9]+/gu, ' ');
-  const lexicalTerms = normalized
-    .split(/(?:\s+|同时|都要|都得|都想|兼具|兼有|都有|既|又|带有|含有|包含|包括|以及|或者|和|与|及|或|的|旅行团|旅游团|线路|跟团|推荐|帮我|帮忙|想要|想|要|找|看)+/gu)
-    .map(canonicalizeCoverageTerm)
+  const rawTokens = normalized
+    // 黏连句式的语法停用词（有/也/又/想/去/看/玩）也参与切分："有山有海"
+    // "想看山也想看海"此前整串成残渣，山/海概念全部丢失。这是语法层规则，
+    // 与领域词表无关；切出的单字（山/海）能否保留由概念归一判定（见下）。
+    .split(/(?:\s+|同时|都要|都得|都想|兼具|兼有|都有|既|又|带有|含有|包含|包括|以及|或者|和|与|及|或|的|旅行团|旅游团|线路|跟团|推荐|帮我|帮忙|想要|想|要|找|看|有|也|去|玩)+/gu)
     // “河源旅游”这类目的地+活动粘连词会把整串当检索词，语料里却几乎不会
     // 出现连续的“河源旅游”，导致目的地候选全部漏配——剥掉活动后缀再匹配。
-    .map((term) => (term.length > 2 ? term.replace(/(?:旅游|旅行)$/u, '') : term))
-    .filter((term) => term.length >= 2 && term.length <= 12);
+    .map((token) => (token.length > 2 ? token.replace(/(?:旅游|旅行)$/u, '') : token));
+  const lexicalTerms = rawTokens
+    .map(canonicalizeCoverageTerm)
+    .filter((term) => {
+      if (term.length >= 2 && term.length <= 12) return true;
+      // 单字只有在归一成概念组标签时才保留（山→森林山水、海→海边沙滩），
+      // 语法切碎的残渣（拥/带）自然淘汰。
+      return term.length === 1 &&
+        COVERAGE_TERM_GROUPS.some((group) => group.label === term);
+    });
 
-  return uniqueStrings([
-    ...collectCoverageTermsFromAliases(normalized),
-    ...lexicalTerms,
-  ])
+  const aliasPathTerms = collectCoverageTermsFromAliases(normalized);
+  // 共享别名吸附：某组仅靠"是更具体概念组标签子串"的别名命中（「清凉」⊂
+  // 玩水清凉标签 → 森林山水），且文本里没有该组的专属别名/标签/归一单字时，
+  // 被更具体概念吸附而剔除——语法切词的残渣不得把第二主题偷进需求规格。
+  // 注意方向性：AI 路径别名超集平拷的共享（沙滩∈玩水清凉超集）不触发吸附，
+  // 那是有意的滨水语义；只有标签子串关系才代表"更具体的概念"。
+  const terms = uniqueStrings([...aliasPathTerms, ...lexicalTerms]).filter((term) => {
+    const group = COVERAGE_TERM_GROUPS.find((candidate) => candidate.label === term);
+    if (!group) return true;
+    if (normalized.includes(normalizeText(term))) return true;
+    const hasExclusiveAlias = group.aliases.some((alias) =>
+      !COVERAGE_TERM_GROUPS.some((other) =>
+        other !== group && other.label.includes(alias)) &&
+      normalized.includes(normalizeText(alias)));
+    if (hasExclusiveAlias) return true;
+    // 单字归一（山→森林山水、海→海边沙滩）与整词命中（token===标签）是
+    // 专属证据；仅靠共享别名片段（"水清凉一下"经「清凉」）命中则吸附。
+    return rawTokens.some((token) => {
+      const normalizedToken = normalizeText(token);
+      return (token.length === 1 || normalizedToken === normalizeText(term)) &&
+        canonicalizeCoverageTerm(normalizedToken) === term;
+    });
+  });
+
+  return terms
     .filter((term) => !/(?:^|[\s\d])(预算|价格|费用|花费|人均|以内|以下|以上|左右|元|块|rmb|人民币|\d)/i.test(term))
     .slice(0, 12);
+}
+
+// 体验别名命中护栏：命中位置紧邻场所/器物后缀（「邮轮母港」「潜水艇C-56」）
+// 时，该词是地点/器物名的修饰成分，不是体验本体——多次出现时任一次非场所
+// 命中即算证据。
+const EXPERIENCE_ALIAS_VENUE_SUFFIXES = ['母港', '码头', '机场', '车站', '艇', '馆'];
+
+function corpusHasExperienceAliasHit(corpus: string, alias: string) {
+  if (!alias) return false;
+  let from = 0;
+  while (true) {
+    const index = corpus.indexOf(alias, from);
+    if (index === -1) return false;
+    const after = corpus.slice(index + alias.length, index + alias.length + 2);
+    if (!EXPERIENCE_ALIAS_VENUE_SUFFIXES.some((suffix) => after.startsWith(suffix))) return true;
+    from = index + 1;
+  }
 }
 
 function getPrimitiveCoverageScore(primitive: RecommendationPrimitive, terms: string[]) {
@@ -4914,13 +5403,26 @@ function getPrimitiveCoverageScore(primitive: RecommendationPrimitive, terms: st
   ]
     .filter(Boolean)
     .join(' '));
+  // 体验别名命中护栏：命中位置紧邻场所/器物后缀（「邮轮母港」「潜水艇C-56」）
+  // 时，该词是地点/器物名的修饰成分，不是体验本体——多次出现时任一次非场所
+  // 命中即算证据。
   return uniqueStrings(terms.map(canonicalizeCoverageTerm).filter(Boolean)).reduce((score, term) => {
-    if (coverageEvidenceCorpus.includes(normalizeText(term))) return score + 1;
+    if (corpusHasExperienceAliasHit(coverageEvidenceCorpus, normalizeText(term))) return score + 1;
     const group = COVERAGE_TERM_GROUPS.find((candidate) => candidate.label === term);
     if (!group) return score;
-    const matched = primitive.experienceCategories.includes(group.label) ||
-      group.aliases.some((alias) => coverageEvidenceCorpus.includes(normalizeText(alias)));
-    return score + (matched ? 1 : 0);
+    if (primitive.experienceCategories.includes(group.label)) return score + 1;
+    // 单字别名（"湾"）只是必要证据：内陆温泉（山泉湾/富丽湾/聚龙湾）标题都带湾，
+    // 单靠它计海滨覆盖会让"海边和温泉都要"被内陆泡汤团伪双贴占满——必须有
+    // 同组多字别名或地名证据同现，单字命中本身不作数。
+    const multiCharEvidence =
+      group.aliases.some((alias) =>
+        normalizeText(alias).length > 1 && corpusHasExperienceAliasHit(coverageEvidenceCorpus, normalizeText(alias)),
+      ) ||
+      ((group as { places?: readonly string[] }).places ?? []).some((place) =>
+        coverageEvidenceCorpus.includes(normalizeText(place)),
+      );
+    if (!multiCharEvidence) return score;
+    return score + 1;
   }, 0);
 }
 
@@ -7126,6 +7628,10 @@ export const __aiRecommendationTestHooks = {
   localRecommendations,
   fallbackRecommendations,
   executeAiSearchRounds,
+  buildExperienceDemandSpec,
+  getDemandSatisfiedCount,
+  normalizeClassifiedDemandSpec,
+  enforceCoreCoverageDiscipline,
   matchesActiveDateFilters,
   matchesDateWindow,
   mergeAiAndLocalRecommendations,
@@ -7134,6 +7640,7 @@ export const __aiRecommendationTestHooks = {
   candidateMatchesDestinationIntent,
   normalizeIntent,
   keepAiItemsForCompoundExperience,
+  getCoverageTermsForQuality,
   prioritizeRecommendationItems,
   rewriteRecommendationCopy,
   resolvePromptDateWindow,
@@ -7633,7 +8140,9 @@ function hasExplicitBudgetPriorityText(userText: string) {
 // 逻辑等于死代码。
 function parseBudgetPriorityFromText(normalizedText: string): AiTravelIntent['budgetPriority'] {
   if (/不考虑钱|不计成本|预算充足|预算不是问题|要住最好的|只求最好|越贵越好|贵有贵的道理|不差钱|预算不限/.test(normalizedText)) return 'premium';
-  if (/穷游|能省则省|越便宜越好|省钱为主|预算紧张/.test(normalizedText)) return 'low';
+  // "便宜/实惠/经济"没有数字，也是明确的省钱诉求——不带金额的低价偏好
+  // 此前完全丢失（"便宜的沙滩旅游"里便宜对排序零贡献）。
+  if (/穷游|能省则省|越便宜越好|省钱为主|预算紧张|便宜|实惠|经济|低价|省钱/.test(normalizedText)) return 'low';
   return null;
 }
 
@@ -8228,44 +8737,32 @@ function executeAiSearchRounds(
   candidatePool: AiRecommendationCandidate[],
   queries: string[],
   userText = '',
+  specOverride?: ClassifiedDemandSpec,
 ) {
   const candidateById = new Map(candidatePool.map((tour) => [tour.id, tour]));
   const rounds: Array<{ query: string; hitCount: number; alignedCount?: number; topTitles: string[] }> = [];
   const merged: Array<{ tour: AiRecommendationCandidate; bestScore: number; query: string }> = [];
   const mergedById = new Map<string, { tour: AiRecommendationCandidate; bestScore: number; query: string }>();
 
-  // 分离度门：用户点名过的体验主题（复用结构化概念表提取，只认概念组标签）
-  // 是跨轮合并的排序基准。各轮检索式自带主题，规划师可能产出漂移检索式
-  // （沙滩需求里混入「温泉特价」），而每轮满分候选的 bestScore 同台竞争，
-  // 异题主题产品会原分挤进重点层——先保位贴合需求的候选，再按分数补位。
-  // 提取需求概念前先剥离回避短语：「避开温泉」不是想要温泉；回避主题命中
-  // 候选语料的（与 scoreTour 的 avoid 门同一 corpus 口径）一律视作不贴合，
-  // 只能补位。泛需求（提取不出概念组标签、也无回避词）不设门，行为与既往一致。
-  const demandQuery = buildLocalRecommendationQuery(userText);
-  const demandAvoidHints = demandQuery.avoidHints;
-  const demandText = demandAvoidHints.reduce(
-    (text, hint) => text.split(normalizeText(hint)).join(' '),
-    normalizeText(userText),
-  );
-  const demandConcepts = extractCandidateCoverageTerms(demandText)
-    .map(canonicalizeCoverageTerm)
-    .filter((term) => COVERAGE_TERM_GROUPS.some((group) => group.label === term))
-    // 回避主题不得借概念组别名回流：记忆拼接「避开爬山」字面剥离后，其归一
-    // 概念组（户外徒步，别名含爬山/登山/徒步…）仍会被残留语义重新提出——
-    // 按既有概念表把回避词归一到概念组标签后一并剥离（与 R3 的包含关系
-    // 剥离同一意图，覆盖"回避词=别名而非标签"的注入路径）。
-    .filter((term) => !demandAvoidHints.some(
-      (hint) => canonicalizeCoverageTerm(normalizeText(hint)) === term,
-    ));
-  const isAlignedWithDemand = demandConcepts.length > 0 || demandAvoidHints.length > 0
-    ? (tour: AiRecommendationCandidate) => {
-        if (demandAvoidHints.some((hint) => getSearchCorpus(tour).includes(normalizeText(hint)))) {
-          return false;
-        }
-        if (demandConcepts.length === 0) return true;
-        return getPrimitiveCoverageScore(buildTourPrimitive(tour), demandConcepts) > 0;
-      }
+  // 分离度门：需求规格优先来自分类头（原语主路径，profile 覆盖口径）；
+  // 无分类结果时退回词面 fallback（buildExperienceDemandSpec，回避剥离
+  // 内部闭环）。判定语义不变：满足任一需求且语料不碰回避词 = 贴合，
+  // 回避命中只能补位；泛需求不设门，行为与既往一致。
+  const demandQuery = specOverride ? null : buildLocalRecommendationQuery(userText);
+  const demandAvoidHints = specOverride?.avoid ?? demandQuery?.avoidHints ?? [];
+  const demandSpec = specOverride?.demands ?? buildExperienceDemandSpec(userText, demandAvoidHints);
+  const coverageMode = specOverride?.source === 'classifier' ? 'profile' : 'lexical';
+  const satisfiedOf = (tour: AiRecommendationCandidate) =>
+    getDemandSatisfiedCount(demandSpec, buildTourPrimitive(tour), coverageMode);
+  const avoidCorpusTerms = expandAvoidHintsForCorpus(demandAvoidHints);
+  const hitsAvoid = (tour: AiRecommendationCandidate) =>
+    avoidCorpusTerms.length > 0 &&
+    avoidCorpusTerms.some((hint) => getSearchCorpus(tour).includes(hint));
+  const isAlignedWithDemand = demandSpec.length > 0 || demandAvoidHints.length > 0
+    ? (tour: AiRecommendationCandidate) => !hitsAvoid(tour) && (demandSpec.length === 0 || satisfiedOf(tour) > 0)
     : null;
+  const bySatisfactionThenScore = (left: { tour: AiRecommendationCandidate; bestScore: number }, right: { tour: AiRecommendationCandidate; bestScore: number }) =>
+    satisfiedOf(right.tour) - satisfiedOf(left.tour) || right.bestScore - left.bestScore;
 
   for (const query of queries) {
     const hits = localRecommendations(candidatePool, query);
@@ -8301,13 +8798,18 @@ function executeAiSearchRounds(
   const byBestScore = (left: { bestScore: number }, right: { bestScore: number }) => right.bestScore - left.bestScore;
   let ordered = [...merged].sort(byBestScore);
   if (isAlignedWithDemand) {
-    const aligned = merged.filter((entry) => isAlignedWithDemand(entry.tour)).sort(byBestScore);
+    // 字典序：需求满足数先于加权和；回避命中（satisfied 判定前置拦截）只能补位。
+    const aligned = merged
+      .filter((entry) => isAlignedWithDemand(entry.tour))
+      .sort(bySatisfactionThenScore);
     const rest = merged.filter((entry) => !isAlignedWithDemand(entry.tour)).sort(byBestScore);
-    // 异题补位段限宽：规划师整轮漂移（贴合候选为 0）时，异题满分候选仍会按
-    // 原分灌满检索层、挤掉按需求概念从全池选出的 coverage focus 名额——补位
-    // 只保留少量宽检视角，重点层容量优先还给贴合候选。
+    // 异题补位段限宽：异题满分候选会按原分挤占重点层、挤掉按需求概念从全池
+    // 选出的 coverage focus 名额。补位上限随贴合数动态收缩（12-贴合数，下限 0）：
+    // 整轮漂移（贴合 0）保留 12 条宽检视角；贴合候选充足时重点层贴合计数过半，
+    // 用户点名的主题不会被异题满分候选反超——"混进异题且排在前面"的通道收窄。
     const breadthLimit = Math.max(0, 48 - aligned.length);
-    ordered = [...aligned, ...rest.slice(0, Math.min(rest.length, 12, breadthLimit))];
+    const driftShare = Math.max(0, 12 - aligned.length);
+    ordered = [...aligned, ...rest.slice(0, Math.min(rest.length, driftShare, breadthLimit))];
   }
   return {
     rounds,
@@ -8501,6 +9003,12 @@ export async function requestAiRecommendations({
         'season',
       ),
     });
+    // 需求分类头（原语主路径）：一次廉价模型调用把用户原话归类到封闭原语集；
+    // 失败/无配置返回 null，下游全部退回词面 fallback，不阻断主链路。
+    const classifiedSpec = await classifyExperienceDemandSpec({
+      configs,
+      userText: effectiveUserText,
+    });
     const useWeatherResearch = shouldUseWeatherResearch(effectiveUserText, effectiveIntent);
     const weatherContextForRanking = useWeatherResearch
       ? buildFastWeatherContext({
@@ -8605,7 +9113,7 @@ export async function requestAiRecommendations({
         });
         if (!plan) throw new Error('AI search planning returned no result');
         searchPlanningReasoning = plan.reasoningText;
-        const executed = executeAiSearchRounds(availableCandidates, plan.queries, effectiveUserText);
+        const executed = executeAiSearchRounds(availableCandidates, plan.queries, effectiveUserText, classifiedSpec ?? undefined);
         searchRounds = executed.rounds;
         if (executed.searchedTours.length > 0) {
           searchedCompacted = annotateSearchedHitCompacted(
@@ -8920,13 +9428,20 @@ export async function requestAiRecommendations({
         candidateTours: mergedCandidateTours,
         intent: finalIntent,
         userText: finalEffectiveUserText,
+        demandSpec: classifiedSpec ?? undefined,
         destinationWeatherInsights,
       },
     ).slice(0, aiItems.length > 0 ? MAX_AI_SELECTED_ITEMS : MAX_AI_RANKED_ITEMS);
+    // 最终可见序列统一施加核心体验覆盖纪律（AI 项 + 本地补位同一比较器）。
+    const disciplinedItems = enforceCoreCoverageDiscipline(mergedItems, {
+      candidateTours: availableCandidates,
+      userText: finalEffectiveUserText,
+      demandSpec: classifiedSpec ?? undefined,
+    });
     emitProgress(onProgress, {
       stage: 'completed',
       label: '推荐结果已生成',
-      detail: `已完成排序，给出 ${countCommentaryItems(mergedItems)} 条建议，并展示 ${mergedItems.length} 条匹配线路。`,
+      detail: `已完成排序，给出 ${countCommentaryItems(disciplinedItems)} 条建议，并展示 ${disciplinedItems.length} 条匹配线路。`,
       progress: 100,
       substeps: withActiveSubstep(
         [
@@ -8942,7 +9457,7 @@ export async function requestAiRecommendations({
       conversationId,
       summary: finalizeRecommendationSummary({
         aiSummary: typeof aiResponse.summary === 'string' ? aiResponse.summary : '',
-        items: mergedItems,
+        items: disciplinedItems,
         candidateTours: mergedCandidateTours,
         weatherContext,
         destinationWeatherInsights,
@@ -8951,15 +9466,15 @@ export async function requestAiRecommendations({
         userText: finalEffectiveUserText,
         allowPublicInterest: allowPublicInterestForTurn,
       }),
-      items: mergedItems,
+      items: disciplinedItems,
       generatedAt: new Date().toISOString(),
       source: 'ai-api',
       status: {
         mode: 'ai',
         label: 'AI 已完成推荐',
         detail: aiItems.length > 0
-          ? `已结合需求理解、天气和候选排序，给出 ${countCommentaryItems(mergedItems)} 条建议，并展示 ${mergedItems.length} 条匹配结果。`
-          : `AI 已完成需求理解，但排序结果未稳定映射到候选，已自动改用本地排序并展示 ${mergedItems.length} 条匹配结果。`,
+          ? `已结合需求理解、天气和候选排序，给出 ${countCommentaryItems(disciplinedItems)} 条建议，并展示 ${disciplinedItems.length} 条匹配结果。`
+          : `AI 已完成需求理解，但排序结果未稳定映射到候选，已自动改用本地排序并展示 ${disciplinedItems.length} 条匹配结果。`,
       },
       ...(finalPreferenceMemory ? { preferenceMemory: finalPreferenceMemory } : {}),
       ...(semanticNotes ? { semanticNotes } : {}),

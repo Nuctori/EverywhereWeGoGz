@@ -73,7 +73,18 @@
     "test:wechat-publish-bundle": "node scripts/test_prepare_wechat_publish_bundle.mjs",
     "test:wechat-publish": "node scripts/test_wechat_publish.mjs",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:search-separation": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_search_separation.mjs",
+    "test:separation-r1": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r1_water.mjs",
+    "test:separation-r2": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r2_destination.mjs",
+    "test:separation-r3": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r3_avoid.mjs",
+    "test:separation-r4": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r4_memory.mjs",
+    "test:separation-r5": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r5_redteam.mjs",
+    "test:separation-r7": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r7_focus.mjs",
+    "test:separation-r8": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r8_redteam2.mjs",
+    "test:separation-r9": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r9_assembly.mjs",
+    "test:separation-r9-demand": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r9_demand.mjs",
+    "test:demand-classifier": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_demand_classifier.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",

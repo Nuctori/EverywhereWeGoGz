@@ -296,6 +296,15 @@ export interface AiRecommendationItem {
   score: number;
   reason?: string;
   matchedSignals: string[];
+  /** 需求满足数：字典序排序的顶层键（核心体验覆盖），泛需求为 0 */
+  demandCoverage?: number;
+  /** 结构化约束满足数/检查数（天数窗、预算上限）：字典序第二层方向键 */
+  constraintFit?: number;
+  constraintChecked?: number;
+  /** 质量红旗（异地收客/geo/字段矛盾/标题天数矛盾）：同档排无红旗之后 */
+  qualityFlag?: boolean;
+  /** 预算超窗但贴边（≤1.25x）：fit=0 档内的次级方向键 */
+  constraintNear?: number;
   semanticFit?: string;
   semanticSignals?: string[];
   semanticBoundary?: string;
@@ -372,6 +381,8 @@ export interface AiRecommendationClarification {
 export interface AiRecommendationSearchRound {
   query: string;
   hitCount: number;
+  /** 贴合用户点名体验主题的命中数；需求提取不出概念主题时缺省 */
+  alignedCount?: number;
   topTitles?: string[];
 }
 

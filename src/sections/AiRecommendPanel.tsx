@@ -795,6 +795,7 @@ export function AiRecommendPanel({
                       <li key={`${round.query}-${index}`}>
                         <span className="font-medium text-stone-800">{round.query}</span>
                         —— 命中 {round.hitCount} 条
+                        {round.alignedCount !== undefined ? `、贴合需求 ${round.alignedCount} 条` : ''}
                         {round.topTitles?.length ? (
                           <div className="mt-0.5 text-stone-500">参考：{round.topTitles.join('、')}</div>
                         ) : null}
