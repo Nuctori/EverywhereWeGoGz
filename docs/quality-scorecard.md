@@ -5,9 +5,9 @@
 - 模型：GLM-4.7-Flash（z.ai 网关，内置默认配置）；裁判同源（thinking 关闭 + 重试）
 - 覆盖：ai 模式 33 / fallback 模式 8（夜间网关 429 间歇，fallback 行 = 确定性管线质量）
 
-## 总分（已评分 40/41，1 行多轮持续 429 未判）
+## 总分（已评分 40/41，1 行多轮持续 429 未判；REJUDGE 三轮后终值 08:05）
 
-- relevance **3.0** / constraint **2.77** / reason_quality **2.4**（5 分制）
+- relevance **3.27** / constraint **2.92** / reason_quality **2.65**（5 分制，含 fallback 行与已立案难例）
 - ai 模式行均值：relevance 3.09 / constraint 2.85
 - fallback 模式行均值：relevance 2.5 / constraint 2.33
 
