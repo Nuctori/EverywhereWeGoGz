@@ -9096,7 +9096,13 @@ export async function requestAiRecommendations({
       strictLocalItems,
       fallbackRecommendations(availableCandidates),
       );
-    runtimeFallbackItems = localItemsForMerge;
+    // AI 全挂的 fallback 页同样施加核心体验纪律：否则意图路径的打分没有
+    // 主题覆盖排序，「阳江海陵岛海边度假酒店」的 fallback 页曾被温泉货霸屏
+    // （judge 1/1/1 实锤）。需求规格从 effectiveUserText 词面派生。
+    runtimeFallbackItems = enforceCoreCoverageDiscipline(localItemsForMerge, {
+      candidateTours: availableCandidates,
+      userText: effectiveUserText,
+    });
     runtimePreferenceMemory = nextPreferenceMemory;
     const auditContext = buildRecommendationAuditContext(availableCandidates, previousResult, effectiveIntent);
     emitProgress(onProgress, {
