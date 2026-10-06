@@ -654,7 +654,10 @@ jobs:
         run: |
           # public/data/tours.json 被 .gitignore 排除（超过 GitHub 100MB 单文件上限），
           # 参数里显式点名被忽略的路径会让 git add 以退出码 1 直接失败。
-          git add src/data/tours.ts public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/boarding-points public/data/geo-places.json scripts/geo-geocode-cache.json src/data/gzl_rendered_details.json src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_kanghui_cct.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json public/data/image-cache
+          # tours-page 必须用引号交给 git 展开 pathspec：shell glob 只匹配现存文件，
+          # 线路数收缩时被 split 删除的旧分片进不了暂存区，commit 后工作区仍脏，
+          # push 脚本里的 git pull --rebase 会拒绝执行。
+          git add -A src/data/tours.ts public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json 'public/data/tours-page-*.json' public/data/tour-details public/data/boarding-points public/data/geo-places.json scripts/geo-geocode-cache.json src/data/gzl_rendered_details.json src/data/raw_jrt365_full.json src/data/raw_jrt365.json src/data/raw_saihuitong_full.json src/data/raw_kanghui.json src/data/raw_kanghui_cct.json src/data/raw_pintu_full.json src/data/raw_gzl_api.json src/data/raw_http_full.json src/data/raw_outdoors_full.json public/data/image-cache
           if git diff --cached --quiet; then
             echo "Data unchanged, skipping build and deploy"
             echo "changed=false" >> $GITHUB_OUTPUT

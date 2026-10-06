@@ -192,7 +192,8 @@ for (const stepName of [
   mustInclude(`- name: ${stepName}`, `expected update job step ${stepName} to exist`);
 }
 
-const gitAddMatch = workflow.match(/git add ([^\r\n]+)/);
+// 锚定行首：注释里也会出现 "git add " 字样，不锚定会匹配到注释而非命令。
+const gitAddMatch = workflow.match(/^\s*git add ([^\r\n]+)$/m);
 assert.ok(gitAddMatch, 'expected Check if data changed to stage generated data files');
 
 const gitAddCommand = gitAddMatch[1];

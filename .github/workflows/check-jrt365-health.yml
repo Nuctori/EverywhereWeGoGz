@@ -152,7 +152,10 @@ jobs:
         run: |
           # public/data/tours.json 被 .gitignore 排除（超过 GitHub 100MB 单文件上限），
           # 参数里显式点名被忽略的路径会让 git add 以退出码 1 直接失败。
-          git add src/data/tours.ts public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json public/data/tours-page-*.json public/data/tour-details public/data/geo-places.json scripts/geo-geocode-cache.json src/data/raw_jrt365_full.json public/data/image-cache
+          # tours-page 必须用引号交给 git 展开 pathspec：shell glob 只匹配现存文件，
+          # 线路数收缩时被 split 删除的旧分片（如 tours-page-260.json）永远进不了
+          # 暂存区，commit 后工作区仍脏，push 脚本里的 git pull --rebase 会拒绝执行。
+          git add -A src/data/tours.ts public/data/tours-list.json public/data/tours-meta.json public/data/tours-index.json public/data/tour-map-index.json public/data/tour-map-cards.json public/data/tour-map-place-cards public/data/tour-deeplink-index.json 'public/data/tours-page-*.json' public/data/tour-details public/data/geo-places.json scripts/geo-geocode-cache.json src/data/raw_jrt365_full.json public/data/image-cache
           if git diff --cached --quiet; then
             echo "Data unchanged, nothing to commit"
             echo "changed=false" >> $GITHUB_OUTPUT

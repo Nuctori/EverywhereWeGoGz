@@ -4,6 +4,12 @@ set -euo pipefail
 branch="${GITHUB_REF_NAME:-main}"
 max_attempts=5
 
+# pull --rebase 拒绝脏工作区时不列文件名，先把残留打进日志方便定位。
+if [ -n "$(git status --porcelain)" ]; then
+  echo "Warning: unstaged/untracked leftovers before push:" >&2
+  git status --porcelain >&2
+fi
+
 for ((attempt = 1; attempt <= max_attempts; attempt++)); do
   if git pull --rebase origin "$branch"; then
     if git push origin "HEAD:$branch"; then
