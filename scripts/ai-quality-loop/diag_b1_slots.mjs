@@ -33,7 +33,12 @@ const SYSTEM = [
 
 const SLOT_RULE = (previousDemands) => ({
   role: 'user',
-  content: `上一轮的需求规格（JSON）：${JSON.stringify(previousDemands)}。追问槽位规则：本轮原话表达放弃/替换旧主题（算了/不X了/换/别再提）时，把该旧主题移入 avoid，只保留本轮点名的新主题为 demand；本轮是追加新主题时，旧主题保留为 demand；本轮只是补充约束（预算/天数）时，沿用上一轮全部 demand。`,
+  content: `上一轮的需求规格（JSON）：${JSON.stringify(previousDemands)}。
+追问槽位规则（输出必须符合）：
+1. 用户表达放弃/替换旧主题（算了/不X了/换/别再提X）→ 该旧主题移入 avoid，只保留本轮点名的新主题为 demand。例：上一轮[温泉泡汤]，本轮「算了还是去海边吧」→ 输出 demands=[海边沙滩]、avoid=[温泉泡汤]。
+2. 用户追加新主题（再/也/还想/加个）→ 新旧主题都保留为 demand。例：上一轮[海边沙滩]，本轮「带老人去从化泡温泉」→ 输出 demands=[海边沙滩,温泉泡汤]。
+3. 用户只补充约束（预算/天数/节奏）→ 沿用上一轮全部 demand。
+只有用户明确表达放弃时才移入 avoid；拿不准时保留为 demand。`,
 });
 
 async function classify(userText, previousDemands) {

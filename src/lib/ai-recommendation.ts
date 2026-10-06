@@ -5325,6 +5325,8 @@ const EXPERIENCE_PRIMITIVE_LABELS = COVERAGE_TERM_GROUPS.map((group) => group.la
 interface ClassifiedDemandSpec {
   demands: ExperienceDemand[];
   avoid: string[];
+  /** B6 目的地归一：模型知识把区域词展开成具体目的地（潮汕→潮州/汕头） */
+  destinations?: string[];
   source: 'classifier' | 'lexical';
 }
 
@@ -5337,7 +5339,10 @@ function normalizeClassifiedDemandSpec(raw: unknown): ClassifiedDemandSpec | nul
   const demands: ExperienceDemand[] = [];
   for (const item of (Array.isArray(rawDemands) ? rawDemands : []).slice(0, 8)) {
     if (!item || typeof item !== 'object') continue;
-    const rawTerms = (item as { terms?: unknown }).terms;
+    // 模型输出字段名会漂移（terms/themes 同义）：两个键都接受，防止
+    // 归一层静默丢弃全部 demand——那会让适配档位与覆盖纪律整层失效。
+    const rawTerms = (item as { terms?: unknown; themes?: unknown }).terms
+      ?? (item as { themes?: unknown }).themes;
     const terms = uniqueStrings(
       (Array.isArray(rawTerms) ? rawTerms : [])
         .filter((value): value is string => typeof value === 'string')
@@ -5357,8 +5362,20 @@ function normalizeClassifiedDemandSpec(raw: unknown): ClassifiedDemandSpec | nul
       .map((value) => value.trim())
       .filter((value) => labelSet.has(value)),
   );
-  if (demands.length === 0 && avoid.length === 0) return null;
-  return { demands, avoid, source: 'classifier' };
+  const rawDestinations = (raw as { destinations?: unknown }).destinations;
+  const destinations = uniqueStrings(
+    (Array.isArray(rawDestinations) ? rawDestinations : [])
+      .filter((value): value is string => typeof value === 'string')
+      .map((value) => value.trim())
+      .filter((value) => /^[\u4e00-\u9fa5]{2,6}$/.test(value)),
+  ).slice(0, 6);
+  if (demands.length === 0 && avoid.length === 0 && destinations.length === 0) return null;
+  return {
+    demands,
+    avoid,
+    ...(destinations.length > 0 ? { destinations } : {}),
+    source: 'classifier',
+  };
 }
 
 async function classifyExperienceDemandSpec(params: {
@@ -5376,18 +5393,26 @@ async function classifyExperienceDemandSpec(params: {
         '- 每个被点名的体验主题归到对应原语；并列默认各自独立一条 demand（relation="and"）。',
         '- 「或/或者/都行/任选」连接的主题合并为一条 demand（relation="or"）。',
         '- 「不要/不想/避开/免了/没有…也行」的主题放进 avoid（原语标签）。',
-        '- 金额、天数、出发时段、目的地、上车点是结构化约束，不输出。',
-        '- 没有可识别的体验主题时输出 {"demands":[],"avoid":[]}。',
+        '- 金额、天数、出发时段、上车点是结构化约束，不输出。',
+        '- 目的地输出到 destinations 字段：用户点名单一城市直接照抄；区域词/复合词用你的世界知识展开成具体城市/目的地（潮汕→潮州、汕头；东北→哈尔滨、雪乡；珠三角→广州、深圳、珠海）。无法展开时输出用户原词。',
+        '- 没有可识别的目的地与体验主题时输出 {"demands":[],"avoid":[],"destinations":[]}。',
       ].join('\n'),
     },
     { role: 'user', content: params.userText },
   ];
   // 追问槽位规则：带上轮需求规格时追加一条 user 消息，教模型区分
   // 放弃/替换（旧主题入 avoid）、追加（新旧并存）、纯约束补充（沿用旧 demand）。
+  // 追问槽位判定（追问即换焦点）：本轮点名的新主题 = demands；上一轮主题
+  // 本轮未再点名 → 移入 avoid（用户换焦点了）；明确「也要/都行」才保留。
+  // 角色用 system：规则 + few-shot 示例放系统位，遵从度更高。
   if (params.previousDemands?.length) {
     messages.push({
-      role: 'user',
-      content: `上一轮的需求规格（JSON）：${JSON.stringify(params.previousDemands)}。追问槽位规则：本轮原话表达放弃/替换旧主题（算了/不X了/换/别再提）时，把该旧主题移入 avoid，只保留本轮点名的新主题为 demand；本轮是追加新主题时，旧主题保留为 demand；本轮只是补充约束（预算/天数）时，沿用上一轮全部 demand。`,
+      role: 'system',
+      content: `追问槽位判定（输出必须符合）。上一轮需求：${JSON.stringify(params.previousDemands)}。
+规则：本轮原话点名的新主题 = demands；上一轮主题若本轮原话未再次点名 → 移入 avoid（用户换焦点了）；本轮原话明确说「也要/都行/并且」连同上一轮某主题 → 该主题保留为 demand；本轮明确表达回避的主题 → avoid。
+示例：上一轮[温泉泡汤]，本轮「算了还是去海边吧」→ demands=[海边沙滩]，avoid=[温泉泡汤]。
+示例：上一轮[温泉泡汤]，本轮「海岛潜水和温泉都要」→ demands=[海边沙滩,温泉泡汤]，avoid=[]。
+示例：上一轮[温泉泡汤]，本轮「预算压到800」→ demands=[温泉泡汤]，avoid=[]。`,
     });
   }
   try {
@@ -9104,6 +9129,15 @@ export async function requestAiRecommendations({
         ? buildExperienceDemandSpec(previousUserText)
         : undefined,
     });
+    // B6 目的地归一：分类头用模型知识把区域词展开成具体目的地（潮汕→潮州/汕头、
+    // 东北→哈尔滨/雪乡），并入本轮意图的目的地提示——下游目的地评分/冲突门/
+    // 模型提示词全链路可见。并入在 effectiveIntent 构建之后做原地合并。
+    if (classifiedSpec?.destinations?.length && effectiveIntent) {
+      effectiveIntent.destinationHints = uniqueStrings([
+        ...(effectiveIntent.destinationHints ?? []),
+        ...classifiedSpec.destinations,
+      ]);
+    }
     const useWeatherResearch = shouldUseWeatherResearch(effectiveUserText, effectiveIntent);
     const weatherContextForRanking = useWeatherResearch
       ? buildFastWeatherContext({
