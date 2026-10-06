@@ -38,6 +38,21 @@ check('非标签词项被剔除、合法标签保留',
   JSON.stringify(valid));
 check('source 标记 classifier', valid?.source === 'classifier');
 
+check('模型字段名漂移兼容：themes 键与 terms 同义',
+  JSON.stringify(normalizeClassifiedDemandSpec({
+    demands: [{ relation: 'and', themes: ['美食体验'] }],
+    destinations: ['潮州', '汕头'],
+  })) === JSON.stringify({
+    demands: [{ terms: ['美食体验'], relation: 'and' }],
+    avoid: [],
+    destinations: ['潮州', '汕头'],
+    source: 'classifier',
+  }));
+check('destinations 归一：非法条目剔除、上限 6 个',
+  JSON.stringify((normalizeClassifiedDemandSpec({
+    demands: [{ terms: ['温泉泡汤'], relation: 'and' }],
+    destinations: ['潮州', '汕头', '哈尔滨', '雪乡', '123', 'x', '长隆', '顺德'],
+  }))?.destinations) === JSON.stringify(['潮州', '汕头', '哈尔滨', '雪乡', '长隆', '顺德']));
 check('空 demand 被丢弃、关系归一（非法 relation → and）',
   JSON.stringify(normalizeClassifiedDemandSpec({
     demands: [{ terms: [], relation: 'or' }, { terms: ['亲子家庭'], relation: 'xor' }],
