@@ -23,6 +23,7 @@ const {
   getStablePromptPool,
   allowsPublicInterestForTurn,
   enrichPromptCandidatesWithMemoryCoverage,
+  attachWeatherGuidanceToItems,
   finalizeRecommendationSummary,
   getWeatherRankingScore,
   assessWeatherComfortForDate,
@@ -195,8 +196,8 @@ const mergedCapItems = mergeAiAndLocalRecommendations(
     matchedSignals: [],
   })),
 );
-assert.ok(mergedCapItems.length <= 24);
-assert.ok(mergedCapItems.filter((item) => item.reason).length <= 24);
+assert.ok(mergedCapItems.length <= 25, 'merge cap follows MAX_AI_SELECTED_ITEMS (15 detailed + 10 brief)');
+assert.ok(mergedCapItems.filter((item) => item.reason).length <= 25);
 const auditCapTours = Array.from({ length: 30 }, (_, index) => candidate({
   id: `audit-cap-${index}`,
   title: `广东清凉短线${index}`,
@@ -209,7 +210,7 @@ const auditCapItems = auditAiRecommendations(
   auditCapTours,
   null,
 );
-assert.ok(auditCapItems.length <= 24);
+assert.ok(auditCapItems.length <= 25);
 
 const avoidIntent = mergeIntentWithMemory({ avoid: ['温泉'] }, null);
 const hotSpringTour = candidate({
@@ -313,8 +314,8 @@ const coastalHotSpringPrimitive = buildTourPrimitive(candidate({
 }));
 assert.equal(
   getPrimitiveCoverageScore(coastalHotSpringPrimitive, ['温泉泡汤', '玩水清凉']),
-  2,
-  '滨水温泉目的地 should count as both hot spring and water play for a compound request',
+  1,
+  '温泉产品不再借滨水词蹭玩水覆盖（温泉货霸屏修复后的纪律）：只算温泉泡汤',
 );
 const compoundSelection = keepAiItemsForCompoundExperience(
   [
@@ -1567,8 +1568,8 @@ const zhHardIntent = buildHardIntentFromText(
   '周末2天，预算800以内，想清凉一点，但不想去海边，也不要坐飞机',
 );
 assert.equal(zhHardIntent?.budgetMax, 800);
-assert.equal(zhHardIntent?.tripDaysMin, 1);
-assert.equal(zhHardIntent?.tripDaysMax, 3);
+assert.equal(zhHardIntent?.tripDaysMin, 2, '「周末2天」按下限 2 天解析');
+assert.equal(zhHardIntent?.tripDaysMax, 2, '「周末2天」按 2-2 天窗解析');
 assert.ok(collectLiteralAvoidHints('不想去海边，也不要坐飞机').includes('海边'));
 assert.ok(zhHardIntent?.avoid?.includes('飞机'));
 const fridayNightSundayReturnIntent = buildHardIntentFromText(
@@ -2490,6 +2491,105 @@ const reordered = prioritizeRecommendationItems(
     'natural AI summary should not be replaced with programmatic fallback');
   assert.ok(naturalSummaryText.includes('帮你找了'),
     'natural AI summary text should be preferred over template');
+}
+
+// ─── 回归测试：天气尾缀只补本地构建的 reason，模型亲写 reason 不动 ───
+{
+  const weatherInsight = {
+    destination: '从化',
+    travelDate: '2026-06-12',
+    forecastSummary: '多云转阴',
+    dateSpecificSummary: '6月12日前后多云到阴，适合泡温泉',
+    weatherWindowLabel: '6月12日这班',
+    weatherRiskLevel: 'better',
+    seasonAdvice: [],
+    role: 'destination',
+    source: 'open-meteo',
+  };
+  const weatherCopyTours = [
+    candidate({ id: 'ch-wenquan', title: '从化温泉2天悠闲团', destination: '从化', duration: 2, price: 399, tags: ['温泉'], theme: '温泉度假', departureDates: ['2026-06-12'] }),
+  ];
+  const [rewrittenModelItem] = attachWeatherGuidanceToItems(
+    [{ tourId: 'ch-wenquan', score: 90, reason: '这条从化温泉线节奏不赶，适合周末慢下来。', matchedSignals: ['温泉'], reasonSource: 'ai', recommendationTier: 'ai-detailed' }],
+    weatherCopyTours,
+    [weatherInsight],
+  );
+  assert.equal(rewrittenModelItem.reason, '这条从化温泉线节奏不赶，适合周末慢下来。',
+    'model-written reason must not get a local weather suffix appended (model has dw in prompt)');
+
+  const [rewrittenLocalItem] = attachWeatherGuidanceToItems(
+    [{ tourId: 'ch-wenquan', score: 88, reason: '从化温泉短线，参考价399', matchedSignals: ['温泉'] }],
+    weatherCopyTours,
+    [weatherInsight],
+  );
+  assert.ok(rewrittenLocalItem.reason && rewrittenLocalItem.reason.includes('6月12日这班'),
+    'locally-built reason keeps the weather suffix as its weather channel');
+}
+
+// ─── 回归测试：summary 没复读覆盖词时保留模型原文，不再换本地模板文 ───
+{
+  const nonEchoSummary = finalizeRecommendationSummary({
+    aiSummary: '这两天更适合走滨海度假方向：酒店选择多、节奏不赶；周末班次适合周五晚出发。',
+    items: [{ tourId: 'ch-wenquan', score: 90, reason: '温泉短线', matchedSignals: [] }],
+    candidateTours: [
+      candidate({ id: 'ch-wenquan', title: '从化温泉2天悠闲团', destination: '从化', duration: 2, price: 399, tags: ['温泉'], theme: '温泉度假' }),
+    ],
+    weatherContext: { destination: '广州', travelDate: '2026-06-12', forecastSummary: '多云', seasonAdvice: [], source: 'seasonal-rule' },
+    destinationWeatherInsights: [],
+    intent: { weatherSensitivity: [], departureWeekdays: [] },
+    userText: '带老人去从化泡温泉，预算400以内，别太赶',
+    allowPublicInterest: false,
+  });
+  assert.ok(nonEchoSummary.includes('滨海度假方向'),
+    'model summary must survive even when it does not echo the coverage terms');
+  assert.ok(!/这次先围绕|这次我主要按/.test(nonEchoSummary),
+    'coverage miss must not swap in the local template summary');
+}
+
+// ─── 回归测试：预取的团期天气进 prompt（dw），模型可自行写天气判断 ───
+{
+  const weatherInsight = {
+    destination: '从化',
+    travelDate: '2026-06-12',
+    forecastSummary: '多云转阴',
+    dateSpecificSummary: '6月12日前后多云到阴，适合泡温泉',
+    weatherWindowLabel: '6月12日这班',
+    weatherRiskLevel: 'better',
+    seasonAdvice: [],
+    role: 'destination',
+    source: 'open-meteo',
+  };
+  const weatherPromptMessages = buildAiMessages({
+    userText: '周末去从化泡温泉，两个人',
+    messages: [],
+    ...buildPromptSplit(
+      [candidate({ id: 'ch-wenquan', title: '从化温泉2天悠闲团', destination: '从化', duration: 2, price: 399, tags: ['温泉'], theme: '温泉度假' })],
+      compactCandidates(
+        [candidate({ id: 'ch-wenquan', title: '从化温泉2天悠闲团', destination: '从化', duration: 2, price: 399, tags: ['温泉'], theme: '温泉度假' })],
+        [],
+        { weatherSensitivity: [], departureWeekdays: [] },
+        { userText: '周末去从化泡温泉，两个人' },
+      ),
+    ),
+    auditContext: buildRecommendationAuditContext(
+      [candidate({ id: 'ch-wenquan', title: '从化温泉2天悠闲团', destination: '从化', duration: 2, price: 399, tags: ['温泉'], theme: '温泉度假' })],
+      null,
+      { weatherSensitivity: [], departureWeekdays: [] },
+    ),
+    weatherContext: { destination: '广州', travelDate: '2026-06-12', forecastSummary: '多云', seasonAdvice: [], source: 'seasonal-rule' },
+    destinationWeatherInsights: [weatherInsight],
+    searchQuery: '',
+    intent: { weatherSensitivity: [], departureWeekdays: [] },
+    preferenceMemory: null,
+    allowPublicInterest: false,
+  });
+  const weatherPromptRequest = JSON.parse(weatherPromptMessages[2].content) as { dw?: Array<{ ds?: string }>; rq?: string[] };
+  assert.ok(Array.isArray(weatherPromptRequest.dw) && weatherPromptRequest.dw.length === 1,
+    'dw must carry prefetched destination weather for the model');
+  assert.ok(String(weatherPromptRequest.dw?.[0]?.ds || '').includes('6月12日'),
+    'dw must carry the date-specific summary');
+  assert.ok(JSON.stringify(weatherPromptRequest.rq || []).includes('dw'),
+    'rq must instruct the model to use dw weather windows');
 }
 
 // ─── 回归测试：summary fallback 不应出现程序腔 ───

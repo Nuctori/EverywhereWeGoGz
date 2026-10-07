@@ -40,6 +40,8 @@ const MAX_AI_DETAILED_ITEMS = 15;
 const MAX_AI_BRIEF_ITEMS = 10;
 const MAX_AI_SELECTED_ITEMS = MAX_AI_DETAILED_ITEMS + MAX_AI_BRIEF_ITEMS;
 const MAX_AI_PROMPT_REASON_ITEMS = MAX_AI_DETAILED_ITEMS;
+// 主调用前预取团期天气的重点候选目的地数（dw 字段），与调用后为排序补抓共享快照缓存。
+const MAX_AI_PROMPT_WEATHER_INSIGHTS = 8;
 const MAX_AI_RANKED_ITEMS = 25;
 const MAX_DESTINATION_WEATHER_INSIGHTS = 6;
 const ROUTE_ATLAS_MAX_GROUPS = 8;
@@ -6354,16 +6356,6 @@ function shouldUseAiSummary(
   return true;
 }
 
-function aiSummaryMissesCoverage(summary: string, userText: string | undefined) {
-  const coverageTerms = getCoverageTermsForQuality(userText);
-  if (coverageTerms.length < 2) return false;
-  const normalizedSummary = normalizeText(summary);
-  const mentionedCount = coverageTerms.filter((term) =>
-    normalizedSummary.includes(normalizeText(term))
-  ).length;
-  return mentionedCount < 2;
-}
-
 function attachWeatherGuidanceToItems(
   items: AiRecommendationItem[],
   candidateTours: AiRecommendationCandidate[],
@@ -6376,6 +6368,9 @@ function attachWeatherGuidanceToItems(
     if (!item.reason) return item;
     // 简要推荐位保持一句话介绍的长度，不追加天气句。
     if (item.recommendationTier === 'ai-brief') return item;
+    // 模型亲写的 reason 不再拼本地天气句：主链路 prompt 已预取团期天气（dw），
+    // 天气判断由模型自己写进文案；本地尾缀只负责本地构建的 reason（lite/补位）。
+    if (item.reasonSource === 'ai') return item;
     const primitive = primitiveByTourId.get(item.tourId);
     if (!primitive || !isWeatherSensitivePrimitive(primitive)) return item;
     const insight = findWeatherInsightForPrimitive(primitive, destinationWeatherInsights);
@@ -6426,10 +6421,9 @@ function finalizeRecommendationSummary(params: {
     const fallbackSummary = buildRecommendationSummary(params);
     return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
   }
-  if (aiSummaryMissesCoverage(aiSummary, params.userText)) {
-    const fallbackSummary = buildRecommendationSummary(params);
-    return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
-  }
+  // 不再按「summary 是否复读覆盖词」换成本地模板文：那是用机器文案顶替模型
+  // 文案，一页读起来千篇一律。落点走 prompt 纪律（rq 里要求 summary 写本轮
+  // 具体判断）；这里的本地 summary 只在模型没给出可用文本时兜底。
   if (shouldUseAiSummary(aiSummary, params.weatherContext, { allowPublicInterest })) {
     return uniqueStrings([semanticLead, aiSummary]).filter(Boolean).join('');
   }
@@ -7110,6 +7104,7 @@ function buildAiMessages(params: {
     },
     rq: [
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。先做整体体验判断，再做候选排序。',
+      'summary 要写这一轮的具体判断：落点放在用户点名的目的地/主题/团期/约束上；dw 里有多班团期天气对比时，写出哪几班更稳、哪几班更吃天气，并把影响大的团期判断自然写进对应线路的 reason。不要写成任何查询都成立的通用方向文。',
       '多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮的目的地、主题、天数和同行人偏好。',
       'fh 排在最前：它是按本轮需求从全池检索/匹配出的重点候选完整档案（末尾 match/conflicts/termCoverage/termHits 是本轮注解），是首选比较对象——目的地、主题、预算类需求应优先在 fh 内挑选并按贴合度排序；candidates（稳定池）只用于补足选择面和多样化，不要拿稳定池里的泛泛热门盖过 fh 里的对题候选，也不要因为稳定池里某条没有显式标签就直接淘汰。',
       ...(hasTurnPublicInterestNeed
@@ -7702,6 +7697,7 @@ async function fetchWithTimeout(
 export const __aiRecommendationTestHooks = {
   auditAiRecommendationsStrict,
   auditAiRecommendations,
+  attachWeatherGuidanceToItems,
   buildAiMessages,
   buildHardIntentFromText,
   buildCoverageAwareReason,
@@ -9379,6 +9375,26 @@ export async function requestAiRecommendations({
       };
     }
     const compactedCandidateIds = new Set(aiCandidatePool.map((candidate) => candidate.id));
+    // 团期天气在主调用前预取进 prompt（dw）：重点候选是模型的首选比较对象，
+    // 它们的目的地+最早团期即天气窗口。快照缓存与调用后为排序补抓共享同一份
+    // （按目的地+坐标+日期键控），不产生重复 HTTP。模型拿到真实团期对比后
+    // 自己把天气判断写进 summary/reason，AI 文案不再依赖事后拼接的本地模板句。
+    const focusWeatherInsightsPromise = useWeatherResearch
+      ? Promise.all(
+          buildDestinationWeatherCandidates(focusGraded, searchQuery, effectiveIntent)
+            .slice(0, MAX_AI_PROMPT_WEATHER_INSIGHTS)
+            .map((candidate) =>
+              fetchDestinationWeatherInsight({
+                destination: candidate.destination,
+                travelDate: candidate.travelDate || weatherContextForRanking.travelDate,
+                inferredFrom: ['重点候选团期天气预取'],
+                role: 'destination',
+                queryReason: `该目的地天气和观赏期可能显著影响体验：${candidate.evidence.join(' / ')}`,
+                corpus: candidate.corpus,
+              }),
+            ),
+        )
+      : Promise.resolve([] as DestinationWeatherInsight[]);
     emitProgress(onProgress, {
       stage: 'ranking',
       label: '正在生成推荐结果',
@@ -9403,7 +9419,7 @@ export async function requestAiRecommendations({
         routeAtlas: await routeAtlasPromise,
         auditContext,
         weatherContext: weatherContextForRanking,
-        destinationWeatherInsights: [],
+        destinationWeatherInsights: await focusWeatherInsightsPromise,
         searchQuery,
         intent: effectiveIntent,
         preferenceMemory: aiContextMemoryForThisTurn,
