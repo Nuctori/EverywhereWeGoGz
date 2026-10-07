@@ -121,28 +121,6 @@ interface RecommendationContext {
   userText?: string;
 }
 
-interface RecommendationCopyProfile {
-  key:
-    | 'elderly_cool_relaxed'
-    | 'family_water'
-    | 'weekend_budget'
-    | 'beach_weather_sensitive'
-    | 'scenery_value'
-    | 'general';
-  wantsCool: boolean;
-  wantsRainStability: boolean;
-  wantsRelaxed: boolean;
-  hasFamilyNeed: boolean;
-  hasSeniorNeed: boolean;
-  wantsWater: boolean;
-  wantsBeach: boolean;
-  wantsNature: boolean;
-  prefersValue: boolean;
-  shortTrip: boolean;
-  wantsLongerCompleteTrip: boolean;
-  explicitlyPrefersShortTrip: boolean;
-}
-
 interface LocalRecommendationQuery {
   normalizedText: string;
   destinationHints: string[];
@@ -1781,7 +1759,6 @@ function buildLocalRecommendationQuery(text: string): LocalRecommendationQuery {
 function scoreTour(
   tour: AiRecommendationCandidate,
   query: LocalRecommendationQuery,
-  variant = 0,
 ): AiRecommendationItem | null {
   const corpus = getSearchCorpus(tour);
   const primitive = buildTourPrimitive(tour);
@@ -2143,7 +2120,6 @@ function scoreTour(
     constraintChecked,
     constraintNear,
     qualityFlag,
-    reason: buildLocalTourReason(tour, signals, '综合匹配度较高', variant),
     matchedSignals: signals.slice(0, 5),
   };
 }
@@ -2159,14 +2135,6 @@ function fallbackRecommendations(tours: AiRecommendationCandidate[]): AiRecommen
     .map((tour, index) => ({
       tourId: tour.id,
       score: Math.max(1, 100 - index),
-      reason: index < MAX_AI_COMMENTARY_ITEMS
-        ? buildLocalTourReason(
-            tour,
-            ['候选池补充结果'],
-            '候选池补充结果，建议打开详情核对行程',
-            index,
-          )
-        : undefined,
       matchedSignals: ['候选池补充结果'],
     }));
 }
@@ -2240,7 +2208,7 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
   query.destinationHints = enrichDestinationHintsWithCorpus(text, query.destinationHints, tours);
   query.corpusDestinationVocabulary = [...getCorpusDestinationVocabulary(tours)];
   const items = tours
-    .map((tour, index) => scoreTour(tour, query, index))
+    .map((tour) => scoreTour(tour, query))
     .filter((item): item is AiRecommendationItem => Boolean(item))
     // 字典序：需求满足数（核心体验覆盖）→ 结构化约束满足（天数/预算方向）
     // → 加权和。偏好信号只在覆盖与约束相同的候选之间分高下；泛需求
@@ -2897,7 +2865,6 @@ function buildIntentLocalRecommendations(
       return {
         tourId: primitive.id,
         score,
-        reason: buildLocalTourReason(tour, signals, '基于当前意图的相近候选'),
         matchedSignals: signals.slice(0, 5),
       } satisfies AiRecommendationItem;
     })
@@ -3833,25 +3800,6 @@ function extractSeasonalComfortAtoms(tour: AiRecommendationCandidate) {
   return uniqueStrings([...riskAtoms, ...comfortAtoms]).slice(0, 3);
 }
 
-function buildLocalTourReason(
-  tour: AiRecommendationCandidate,
-  signals: string[],
-  fallback: string,
-  variant = 0,
-) {
-  const primitive = buildTourPrimitive(tour);
-  const profile = buildCopyIntentProfile(null, [
-    primitive.title,
-    primitive.destination,
-    ...signals,
-  ].join(' '));
-  const baseReason = buildExpandedFallbackReason(primitive, profile, variant);
-  const signalText = buildReadableSignalClause(signals);
-
-  if (signalText) return `${stripTerminalPunctuation(baseReason)}；${signalText}。`;
-  return baseReason || fallback;
-}
-
 // 晚间出发判定：上车点集合时间是唯一硬证据；其次是明确指示出发时段的词。
 // 刻意不匹配裸 `晚`/`夜游`/`夜宿` —— 它们描述餐食或景点体验，与出发时刻无关。
 // raw 文本里的时间要排除通知类样板（"出发前一天晚餐20:00点前短信通知"）：
@@ -4474,122 +4422,11 @@ function hasUnsupportedPublicInterestClaim(reason: string, primitive: Recommenda
   return !primitiveHasPublicInterestEvidence(primitive);
 }
 
-function buildPublicInterestAlternativeReason(primitive: RecommendationPrimitive) {
-  const baseReason = stripTerminalPunctuation(buildPrimitiveConcreteReason(primitive));
-  const evidence = primitiveHasPublicInterestEvidence(primitive)
-    ? '候选原语里有乡村、县域或公益相关线索，可作为该方向的优先候选'
-    : '候选没有显式扶贫/公益标注，只能按县域、乡村或周边体验做近似替代';
-  return `${baseReason}；${evidence}`;
-}
 
-function getPrimitiveTitleFact(primitive: RecommendationPrimitive) {
-  return normalizeSemanticAtom(primitive.title)
-    .replace(/^\d+/, '')
-    .slice(0, 14) || primitive.destination || primitive.theme || '这条线路';
-}
 
-function getPrimitiveWeatherNudge(primitive: RecommendationPrimitive) {
-  const categories = new Set(primitive.experienceCategories);
-  // 提示要跟当季自洽："冬天想暖和"的结果里出现"高温天泡汤要取舍"这类
-  // 夏季措辞，用户感知就是答非所问。按日历季节切换措辞与相关性。
-  const month = new Date().getMonth() + 1;
-  const isColdSeason = month === 12 || month <= 2;
-  const isHotSeason = month >= 6 && month <= 9;
-  if (categories.has('海边沙滩')) {
-    if (isColdSeason) return '冬季水温偏低，下海前先看天气和体感';
-    return '出发前看一下晴雨和风浪';
-  }
-  if (categories.has('玩水清凉')) {
-    if (isColdSeason) return '冬季部分水上项目会缩减，出发前确认开放情况';
-    return '水上活动建议留意降雨和现场开放情况';
-  }
-  if (categories.has('温泉泡汤')) {
-    if (isColdSeason) return '冷天泡汤正是舒服的时候';
-    if (isHotSeason) return '高温天泡汤体感要稍微取舍';
-    return '';
-  }
-  if (categories.has('森林山水') || categories.has('户外强度')) return '山水户外遇到连雨天体验会打折';
-  return '';
-}
 
-function formatPrimitivePrice(primitive: RecommendationPrimitive) {
-  return Number.isFinite(primitive.price) && primitive.price > 0
-    ? `￥${primitive.price.toLocaleString()}`
-    : '';
-}
 
-function describePrimitiveExperience(primitive: RecommendationPrimitive) {
-  const categories = primitive.experienceCategories.filter((category) => category !== '非跟团产品');
-  const atoms = getPrimitiveExperienceAtoms(primitive, 3).filter((atom) => atom !== '综合');
-  const titleFact = getPrimitiveTitleFact(primitive);
-  const concreteFacts = uniqueStrings([...atoms, ...categories])
-    .filter((fact, index, all) => !all.some((other, otherIndex) =>
-      otherIndex !== index && other.length > fact.length && other.includes(fact),
-    ))
-    .filter((fact, index, all) => !all.some((other, otherIndex) => {
-      if (otherIndex === index) return false;
-      if (fact === '温泉泡汤' && /温泉|泡汤|汤泉/.test(other)) return true;
-      if (fact === '海边沙滩' && /海边|海滩|沙滩|海岛|海景|双湾/.test(other)) return true;
-      if (fact === '美食体验' && /美食|寻味|早茶|海鲜|餐/.test(other)) return true;
-      if (fact === '户外强度' && /穿越|徒步|登山|爬山|峡谷/.test(other)) return true;
-      return false;
-    }))
-    .slice(0, 3);
 
-  if (concreteFacts.length >= 2) return concreteFacts.join('和');
-  if (concreteFacts.length === 1) return concreteFacts[0];
-  return titleFact;
-}
-
-function describePrimitivePace(primitive: RecommendationPrimitive) {
-  if (primitive.leisureLevel === 'easy') return '节奏偏轻松';
-  if (primitive.leisureLevel === 'hard') return '强度偏高，适合能接受户外消耗的人';
-  return '节奏中等';
-}
-
-function describePrimitiveRoute(primitive: RecommendationPrimitive) {
-  const dayText = primitive.tripDays > 0 ? `${primitive.tripDays}天` : '';
-  const transportText = primitive.transportType
-    ? (primitive.transportType.includes('往返') ? primitive.transportType : `${primitive.transportType}往返`)
-    : '';
-  return [primitive.destination, dayText, transportText].filter(Boolean).join('、');
-}
-
-function buildReadableSignalClause(signals: string[], variant = 0) {
-  const readableSignals = signals
-    .filter((signal) => !/候选池排序靠前|候选池补充结果|综合匹配度较高|偏好匹配：/.test(signal))
-    .slice(0, 2);
-  if (readableSignals.length === 0) return '';
-  const coverageSignal = signals.find((signal) => signal.startsWith('完整覆盖：') || signal.startsWith('部分命中：'));
-  const mustHaveSignal = signals.find((signal) => signal.startsWith('核心诉求命中：'));
-  const styleSignal = signals.find((signal) => signal.startsWith('偏好贴近：'));
-  const destinationSignal = signals.find((signal) => signal.startsWith('目的地贴合：'));
-
-  const phrases = uniqueStrings([
-    coverageSignal
-      ? coverageSignal.startsWith('完整覆盖：')
-        ? `${coverageSignal.replace('完整覆盖：', '')}`
-        : `${coverageSignal.replace('部分命中：', '')}这组需求`
-      : '',
-    mustHaveSignal ? `更接近你这次明说的${mustHaveSignal.replace('核心诉求命中：', '')}` : '',
-    styleSignal ? `整体调性也更靠近${styleSignal.replace('偏好贴近：', '')}` : '',
-    destinationSignal ? `目的地方向和${destinationSignal.replace('目的地贴合：', '')}更接近` : '',
-    ...signals.filter((signal) => !/候选池排序靠前|候选池补充结果|综合匹配度较高|偏好匹配：|完整覆盖：|部分命中：|核心诉求命中：|偏好贴近：|目的地贴合：/.test(signal)).slice(0, 1),
-  ]).filter(Boolean).slice(0, 2);
-
-  if (phrases.length === 0) return '';
-  const leads = ['另外', '再看一点', '补一句'];
-  return `${leads[Math.abs(variant) % leads.length]}${phrases.join('，')}`;
-}
-
-function getStableTextIndex(text: string, modulo: number) {
-  if (modulo <= 1) return 0;
-  let hash = 0;
-  for (const char of text) {
-    hash = (hash * 31 + char.charCodeAt(0)) % 9973;
-  }
-  return hash % modulo;
-}
 
 function hasPositivePriceClaim(text: string) {
   return /(预算友好|价格友好|预算贴边|预算内|预算达到|符合预算|预算符合|在预算|预算约|预算大约|预算\s*\d|低于预算带|低价|便宜|不贵|划算|性价比|省钱|实惠)/.test(text);
@@ -4627,139 +4464,11 @@ function hasUnsupportedPositivePriceClaim(params: {
   return pricePercentile > 50;
 }
 
-function buildPrimitiveConcreteReason(primitive: RecommendationPrimitive, variant = 0) {
-  const priceText = formatPrimitivePrice(primitive);
-  const experienceText = describePrimitiveExperience(primitive);
-  const routeText = describePrimitiveRoute(primitive);
-  const paceText = describePrimitivePace(primitive);
-  const weatherNudge = getPrimitiveWeatherNudge(primitive);
-  const titleFact = getPrimitiveTitleFact(primitive);
-  const routePart = routeText ? `${routeText}，${paceText}` : paceText;
-  const pricePart = priceText ? `参考价${priceText}` : '';
-  const leadTemplates = [
-    `${titleFact}主打${experienceText}，${routePart}`,
-    `${titleFact}的重点是${experienceText}，${routePart}`,
-    `${routePart}，核心体验就是${experienceText}`,
-    `${experienceText}是这条线最具体的亮点，${routePart}`,
-    `${titleFact}这条线把${experienceText}放得更靠前，${routePart}`,
-    `${routePart}，更适合冲着${experienceText}去`,
-  ];
-  const leadIndex = (getStableTextIndex(`${primitive.id}:${primitive.title}`, leadTemplates.length) + variant)
-    % leadTemplates.length;
-  const lead = leadTemplates[leadIndex];
-  const tail = uniqueStrings([
-    pricePart,
-    weatherNudge ? `但${weatherNudge}` : '',
-  ]).join('；');
-  return `${lead}${tail ? `；${tail}` : ''}。`;
-}
 
-function buildTripLengthNarration(primitive: RecommendationPrimitive, profile?: RecommendationCopyProfile) {
-  const dayText = primitive.tripDays > 0 ? `${primitive.tripDays}天` : '';
-  if (!dayText) return '';
 
-  if (profile?.shortTrip || primitive.tripDays <= 2) {
-    return primitive.tripDays <= 2
-      ? `${dayText}能把节奏收得比较紧凑，周末出发也不容易太折腾`
-      : `${dayText}能把行程铺开一点，但整体还算短线好安排`;
-  }
 
-  if (profile?.wantsLongerCompleteTrip || primitive.tripDays >= 4) {
-    return primitive.tripDays >= 5
-      ? `${dayText}通常能把路程、住宿和核心玩法衔接得更完整`
-      : `${dayText}比纯打卡式短线更从容，主要体验不会太赶`;
-  }
 
-  if (primitive.tripDays === 3) {
-    return `${dayText}通常能兼顾主要景点和休息，不会只剩赶路打卡`;
-  }
 
-  return `${dayText}的节奏相对均衡，比较容易把主要体验走完整`;
-}
-
-function buildExpandedFallbackReason(
-  primitive: RecommendationPrimitive,
-  profile: RecommendationCopyProfile,
-  variant = 0,
-) {
-  const baseReason = stripTerminalPunctuation(buildPrimitiveConcreteReason(primitive, variant));
-  const tripLengthLead = buildTripLengthNarration(primitive, profile);
-  const weatherNudge = getPrimitiveWeatherNudge(primitive);
-  const secondSentence = uniqueStrings([
-    tripLengthLead,
-    weatherNudge ? `出发前再留意一下${weatherNudge.replace(/^出发前看一下/, '').replace(/^建议留意/, '').replace(/^高温天/, '高温天').replace(/^山水户外/, '山水户外')}` : '',
-  ]).join('，');
-
-  if (!secondSentence) return `${baseReason}。`;
-  return `${baseReason}。${secondSentence}。`;
-}
-
-function buildCopyIntentProfile(
-  intent: AiTravelIntent | null,
-  userText: string,
-): RecommendationCopyProfile {
-  const text = userText.replace(/\s+/g, '');
-  const joinedStyle = [
-    ...(intent?.travelStyle || []),
-    ...(intent?.mustHave || []),
-    ...(intent?.weatherSensitivity || []),
-    text,
-  ].join(' ');
-  const wantsCool = /(怕热|避暑|清凉|凉快|别太晒|不想暴晒|闷热)/.test(joinedStyle);
-  const wantsRainStability = /(避雨|怕下雨|天气敏感|风浪|台风|降雨|预报)/.test(joinedStyle);
-  const wantsRelaxed = /(轻松|别太赶|慢一点|老人|长辈|休闲|不折腾)/.test(joinedStyle);
-  const hasFamilyNeed = /(亲子|孩子|小朋友|家庭)/.test(joinedStyle);
-  const hasSeniorNeed = /(老人|长辈|爸妈)/.test(joinedStyle);
-  const wantsWater = /(玩水|漂流|泳池|水上乐园|亲水|溯溪|冲浪|水世界)/.test(joinedStyle);
-  const wantsBeach = /(海边|海岛|沙滩|海景)/.test(joinedStyle);
-  const wantsNature = /(风景|山水|自然|森林|草原|雪山|湖)/.test(joinedStyle);
-  const prefersValue = /(便宜|预算|性价比|不贵|划算|值)/.test(joinedStyle) || Boolean(intent?.budgetMax);
-  const shortTrip = Boolean(
-    (intent?.tripDays && intent.tripDays <= 4) ||
-    (intent?.tripDaysMax && intent.tripDaysMax <= 4) ||
-    /周末|3天|4天|短途/.test(joinedStyle),
-  );
-  const explicitlyPrefersShortTrip = Boolean(
-    (intent?.tripDays && intent.tripDays <= 3) ||
-    (intent?.tripDaysMax && intent.tripDaysMax <= 3) ||
-    /周末|短途|当天来回|一日|两日|2天|3天|别太久|时间不多/.test(joinedStyle),
-  );
-  const wantsLongerCompleteTrip = Boolean(
-    !explicitlyPrefersShortTrip &&
-    (
-      /轻松|别太赶|慢一点|悠闲|从容|完整|玩透|住好一点|多住一晚|深度|别折腾|舒展|带爸妈|带老人|适合长辈/.test(joinedStyle) ||
-      Boolean(intent?.tripDaysMin && intent.tripDaysMin >= 4) ||
-      Boolean(intent?.tripDays && intent.tripDays >= 4)
-    )
-  );
-
-  let key: RecommendationCopyProfile['key'] = 'general';
-  if ((hasSeniorNeed || wantsRelaxed) && wantsCool) key = 'elderly_cool_relaxed';
-  else if (hasFamilyNeed && wantsWater) key = 'family_water';
-  else if (shortTrip && prefersValue) key = 'weekend_budget';
-  else if (wantsBeach && wantsRainStability) key = 'beach_weather_sensitive';
-  else if (wantsNature && prefersValue) key = 'scenery_value';
-
-  return {
-    key,
-    wantsCool,
-    wantsRainStability,
-    wantsRelaxed,
-    hasFamilyNeed,
-    hasSeniorNeed,
-    wantsWater,
-    wantsBeach,
-    wantsNature,
-    prefersValue,
-    shortTrip,
-    wantsLongerCompleteTrip,
-    explicitlyPrefersShortTrip,
-  };
-}
-
-function getPrimitivePrimaryCategory(primitive: RecommendationPrimitive) {
-  return primitive.experienceCategories.find((category) => category !== '非跟团产品') || '';
-}
 
 function isGenericMatchedSignal(signal: string) {
   return /^(低价|价格|便宜|班期|热门|性价比|预算|轻松|自然风光|综合|AI综合推荐|天气)$/.test(signal.trim());
@@ -4860,11 +4569,12 @@ function buildSemanticNotesLead(
   userText: string,
   options: { allowPublicInterest: boolean },
 ) {
+  void intent;
+  void userText;
+  void options;
   if (!notes) return '';
-  if (options.allowPublicInterest && hasPublicInterestNeed(intent, userText)) {
-    return '说明：候选里不一定会把这类语义写得很直白，我会按目的地和玩法找更接近的方向。';
-  }
 
+  // 只透传模型自己写的 caveat，不再补本地固定话术：没有模型文本就保持安静。
   const visibleCaveat = normalizeAiText(notes.caveat, 80);
   if (
     visibleCaveat &&
@@ -4872,10 +4582,6 @@ function buildSemanticNotesLead(
     /(近似|替代|未标注|没有明确|无法精准|不完全)/.test(visibleCaveat)
   ) {
     return `说明：${stripTerminalPunctuation(visibleCaveat)}。`;
-  }
-
-  if (notes.cannotAssert.length > 0 || notes.softCriteria.length > 0 || notes.worldKnowledgeUse) {
-    return '说明：候选信息有限，我优先按标题和行程里的具体内容来判断。';
   }
 
   return '';
@@ -4956,93 +4662,20 @@ function reasonAddressesUserNeed(
   );
 }
 
-function buildCoverageAwareReason(
-  primitive: RecommendationPrimitive,
-  userText: string | undefined,
-  variant = 0,
-) {
-  const requestedTerms = getCoverageTermsForQuality(userText);
-  if (requestedTerms.length < 2) return '';
-
-  const matchedTerms = requestedTerms.filter((term) => getPrimitiveCoverageScore(primitive, [term]) > 0);
-  const missingTerms = requestedTerms.filter((term) => !matchedTerms.includes(term));
-  const matchedText = matchedTerms.map((term) => term.replace(/泡汤$/, '')).join('和');
-  // 共享电瓶车属于目的地层面的待核实判断，不把它机械地追加到每张卡的缺口清单；
-  // AI 若有具体世界知识判断可以保留，否则由整体摘要统一提醒。
-  const missingCoverageTerms = missingTerms.filter((term) => term !== '共享电瓶车');
-  const missingText = missingCoverageTerms.map((term) => term.replace(/泡汤$/, '')).join('、');
-  const titleFact = getPrimitiveTitleFact(primitive);
-  const experienceText = describePrimitiveExperience(primitive).replace(/泡汤/g, '泡汤');
-  const paceText = describePrimitivePace(primitive);
-  const priceText = formatPrimitivePrice(primitive);
-
-  if (matchedTerms.length === 0 && missingText) {
-    const noMatchTemplates = [
-      `这条更像常规休闲线，暂时看不出${missingText}的明确亮点；如果你是冲着这些玩法去，建议先别把它排在前面。`,
-      `它的气质和这次想找的${missingText}还不太对得上，除非详情能补充具体安排，否则不建议默认完全满足。`,
-      `如果你期待的是${missingText}，这条目前缺少能让人放心下单的依据；可以先把它当备选，问清玩法和周边交通。`,
-    ];
-    const noMatchReason = noMatchTemplates[(getStableTextIndex(`${primitive.id}:coverage-empty`, noMatchTemplates.length) + variant) % noMatchTemplates.length];
-    return priceText ? `${noMatchReason}参考价${priceText}。` : `${noMatchReason}。`;
-  }
-
-  const leadTemplates = [
-    matchedTerms.includes('温泉泡汤') && matchedTerms.includes('玩水清凉')
-      ? `${titleFact}把泡汤和玩水放在同一趟里，${paceText}`
-      : `${titleFact}更适合把时间留给${matchedText}，${paceText}`,
-    `${titleFact}的重点不是一路赶景点，而是${experienceText}，${paceText}`,
-    `如果你是冲着${matchedText}去的，${titleFact}会比普通打卡线更有针对性`,
-  ];
-  const lead = leadTemplates[(getStableTextIndex(`${primitive.id}:coverage`, leadTemplates.length) + variant) % leadTemplates.length];
-  if (missingCoverageTerms.length === 0) return priceText ? `${lead}；参考价${priceText}。` : `${lead}。`;
-  const verificationLeads = [
-    `我会把${missingText}列为出发前最先核实的一项`,
-    `${missingText}这件事值得在报名时顺手问清`,
-    `如果${missingText}也能对上，这趟的完整度会更高`,
-  ];
-  const verificationLead = verificationLeads[(getStableTextIndex(`${primitive.id}:coverage-check`, verificationLeads.length) + variant) % verificationLeads.length];
-  return `${lead}；${verificationLead}${priceText ? `，参考价${priceText}` : ''}。`;
-}
-
-function buildSharedBikeCaveat(userText: string, index: number) {
-  if (index !== 0 || !/共享电瓶车|共享电动车|电瓶车/.test(userText)) return '';
-  return '共享电瓶车属于当地便利项，候选资料通常不会写全；如果你在意这一点，建议出发前直接问清是否有共享服务或短途接驳';
-}
-
-function ensureSharedBikeRecommendationNote(
-  items: AiRecommendationItem[],
-  candidateTours: RecommendationPrimitive[],
-  userText: string,
-) {
-  if (!/共享电瓶车|共享电动车|电瓶车/.test(userText) || items.length === 0) return items;
-  const primitiveByTourId = new Map(candidateTours.map((primitive) => [primitive.id, primitive]));
-  return items.map((item, index) => {
-    const primitive = primitiveByTourId.get(item.tourId);
-    const caveat = primitive ? buildSharedBikeCaveat(userText, index) : '';
-    if (!caveat || item.reason?.includes(caveat)) return item;
-    return {
-      ...item,
-      reason: `${stripTerminalPunctuation(item.reason || '')}${item.reason ? '。' : ''}${caveat}。`,
-    };
-  });
-}
-
 function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive | undefined) {
   const trimmed = typeof reason === 'string' ? reason.trim() : '';
-  if (!primitive) return trimmed || '综合用户需求、天气和线路特点后较为合适';
+  if (!primitive) return trimmed;
   const softened = softenAiEvidenceCaveats(trimmed);
+  // 用户可见文案一律由模型生成（仓库 AGENTS.md 红线）：模型理由带无证据的
+  // 公益断言、或畸形到不能用（复读标题残句/非字符串）时，直接不展示理由，
+  // 卡片退回纯事实——绝不用本地模板句顶替（坏句子宁可没有，也不编话术）。
   if (softened && hasUnsupportedPublicInterestClaim(softened, primitive)) {
-    return buildPublicInterestAlternativeReason(primitive);
+    return '';
   }
-  // Experience: do not force every AI reason through a fixed price/weather/play checklist.
-  // Soft needs such as public-interest, study travel, or rural value often explain fit through
-  // world knowledge and candidate wording; overwriting those with local templates degrades copy.
   if (softened && !hasMalformedAiTitleEcho(softened, primitive)) {
     return softened;
   }
-  // 畸形理由（复读标题残句/非字符串）回退到本地事实文案：坏句子比模板句更伤观感，
-  // 这是既有设计决策（见 hasMalformedAiTitleEcho 注释），不要改成返回空串。
-  return buildPrimitiveConcreteReason(primitive);
+  return '';
 }
 
 function getDiversityGroupKey(primitive: RecommendationPrimitive) {
@@ -5956,251 +5589,21 @@ function compactRecentConversation(messages: AiRecommendationMessage[]) {
     .filter((message) => message.content);
 }
 
-function buildSummaryTopDestinations(
-  items: AiRecommendationItem[],
-  candidateTours: AiRecommendationCandidate[],
-  intent?: AiTravelIntent | null,
-  userText?: string,
-) {
-  const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
-  const topPrimitives = items
-    .slice(0, 3)
-    .map((item) => primitiveByTourId.get(item.tourId))
-    .filter((primitive): primitive is RecommendationPrimitive => Boolean(primitive));
 
-  if (topPrimitives.length === 0) return '';
-
-  const explicitDestinations = uniqueStrings([
-    ...getExplicitDestinationHintsFromText(userText || ''),
-    ...(intent?.destinationHints || []),
-  ]).slice(0, 3);
-  if (explicitDestinations.length > 0) {
-    return explicitDestinations.join('、');
-  }
-
-  const prioritizePublicInterest = hasPublicInterestNeedFromIntent(intent || null);
-  const coverageTerms = getCoverageTermsForQuality(userText);
-  const matchedCoverageTerms = uniqueStrings(
-    topPrimitives.flatMap((primitive) => getItemCoverageMetrics(primitive, coverageTerms).matchedTerms),
-  );
-  if (matchedCoverageTerms.length >= 2) {
-    return matchedCoverageTerms.slice(0, 3).join('、');
-  }
-
-  const categoryLabelMap: Record<string, string> = {
-    '海边沙滩': '海边度假',
-    '玩水清凉': '水上活动',
-    '森林山水': '山水避暑',
-    '文化逛城': prioritizePublicInterest ? '人文村寨' : '城市休闲',
-    '室内度假': '酒店度假',
-    '温泉泡汤': '酒店放松',
-    '美食体验': '吃住轻松',
-    '户外强度': '户外景观',
-  };
-  const destinationCounts = new Map<string, number>();
-  const categoryCounts = new Map<string, number>();
-
-  for (const primitive of topPrimitives) {
-    const destination = primitive.destination?.trim();
-    if (destination && destination !== '其他' && destination !== '产品特色' && destination.length <= 8) {
-      destinationCounts.set(destination, (destinationCounts.get(destination) || 0) + 1);
-    } else {
-      const normalizedHint = collectDestinationHints(`${primitive.destination} ${primitive.title}`)[0];
-      if (normalizedHint) {
-        destinationCounts.set(normalizedHint, (destinationCounts.get(normalizedHint) || 0) + 1);
-      }
-    }
-
-    const category = prioritizePublicInterest && primitiveHasPublicInterestEvidence(primitive)
-      ? '乡村风貌'
-      : categoryLabelMap[getPrimitivePrimaryCategory(primitive)];
-    if (category) {
-      categoryCounts.set(category, (categoryCounts.get(category) || 0) + 1);
-    }
-  }
-
-  const topDestinations = [...destinationCounts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([destination]) => destination)
-    .slice(0, 2);
-  const topCategories = [...categoryCounts.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .map(([category]) => category)
-    .slice(0, 2);
-
-  const destinationText = topDestinations.length === 0
-    ? ''
-    : topDestinations.length === 1
-      ? `${topDestinations[0]}方向`
-      : `${topDestinations.join('、')}等方向`;
-  const categoryText = topCategories.join('、');
-
-  if (destinationText && categoryText) return `${destinationText}的${categoryText}`;
-  return destinationText || categoryText;
-}
 
 function stripTerminalPunctuation(text: string) {
   return text.replace(/[。；，,\s]+$/u, '').trim();
 }
 
-function isUnhelpfulWeatherNarration(text: string | null | undefined) {
-  const normalized = stripTerminalPunctuation(text || '');
-  if (!normalized) return true;
 
-  return /(未匹配到可查询天气的目的地|暂无可用实况预报|暂无实况预报|天气接口暂时不可用|天气接口暂不可用|本次未请求天气调研|没有拿到强结论天气窗口|先按季节窗口判断)/.test(normalized);
-}
-
-function getRenderableWeatherLead(
-  weatherContext: AiWeatherContext,
-  destinationWeatherInsights: DestinationWeatherInsight[],
-) {
-  const dateWindowLine = buildDestinationWeatherLine(destinationWeatherInsights);
-  if (!isUnhelpfulWeatherNarration(dateWindowLine)) {
-    return stripTerminalPunctuation(dateWindowLine);
-  }
-
-  const directLead = stripTerminalPunctuation(weatherContext.dateSpecificSummary || weatherContext.forecastSummary || '');
-  if (!isUnhelpfulWeatherNarration(directLead)) {
-    return directLead;
-  }
-
-  return '';
-}
 
 function getFallbackWeatherSummary(seasonAdvice: string[], bestSeasonNote?: string | null) {
   return stripTerminalPunctuation(bestSeasonNote || seasonAdvice[0] || '结合当地季节体感和玩法稳定性判断');
 }
 
-function buildSummaryPreferenceText(intent: AiTravelIntent | null) {
-  const bits = uniqueStrings([
-    intent?.tripDays ? `${intent.tripDays}天` : '',
-    intent?.tripDaysMax && !intent.tripDays ? `${intent.tripDaysMax}天内` : '',
-    intent?.budgetMin && intent?.budgetMax
-      ? `${intent.budgetMin}-${intent.budgetMax}元`
-      : intent?.budgetMax
-        ? `预算约${intent.budgetMax}元内`
-        : '',
-    intent?.weatherSensitivity?.includes('怕热') ? '优先避暑' : '',
-    intent?.weatherSensitivity?.includes('避雨') ? '优先避雨' : '',
-    intent?.travelStyle?.slice(0, 1)[0] || '',
-  ]);
 
-  return bits.length > 0 ? bits.join('、') : '当前条件';
-}
 
-function buildRecommendationSummary(params: {
-  items: AiRecommendationItem[];
-  candidateTours: AiRecommendationCandidate[];
-  weatherContext: AiWeatherContext;
-  destinationWeatherInsights: DestinationWeatherInsight[];
-  intent: AiTravelIntent | null;
-  userText?: string;
-}) {
-  const profile = buildCopyIntentProfile(params.intent, params.userText || '');
-  const topDestinations = buildSummaryTopDestinations(
-    params.items,
-    params.candidateTours,
-    params.intent,
-    params.userText,
-  );
-  const preferenceText = buildSummaryPreferenceText(params.intent);
-  const topLine = topDestinations
-    ? (preferenceText === '当前条件'
-        ? `这次先围绕${topDestinations}来找，最终还是看具体玩法。`
-        : `这次更值得先看${topDestinations}，${preferenceText}只是参考，最终还是看具体玩法。`)
-    : `这次我主要按${preferenceText}来排。`;
-  const normalizedWeatherLead = getRenderableWeatherLead(params.weatherContext, params.destinationWeatherInsights);
-  const weatherLead = normalizedWeatherLead
-    ? `天气判断：${normalizedWeatherLead}。`
-    : '';
-  const cautionPool = uniqueStrings([
-    ...(params.weatherContext.seasonAdvice || []),
-    ...params.destinationWeatherInsights.flatMap((insight) => [
-      insight.bestSeasonNote || '',
-      ...(insight.seasonAdvice || []),
-    ]),
-  ]).filter((text) => !weatherLead.includes(text) && !isUnhelpfulWeatherNarration(text));
-  const cautionLine = cautionPool.find((text) => /(台风|暴雨|强降雨|高温|闷热|风浪|花期|雨季|观赏期|取舍)/.test(text))
-    || cautionPool[0]
-    || (profile.wantsBeach
-      ? '海边线不要只看目的地名，关键看具体团期的晴雨和风浪。'
-      : profile.wantsNature
-        ? '山水线景观更看天气完整度，连雨天和高温天都要留意体感落差。'
-        : '注意：同类线路里真正拉开差距的往往是团期天气、节奏和是否有室内兜底。');
-  const caution = stripTerminalPunctuation(cautionLine).replace(/^注意[:：]?\s*/u, '');
 
-  return [
-    topLine,
-    weatherLead,
-    `注意：${caution}。`,
-  ].filter(Boolean).join('');
-}
-
-function buildDestinationWeatherLine(insights: DestinationWeatherInsight[]) {
-  const datedInsights = insights.filter((insight) => insight.travelDate && insight.weatherWindowLabel);
-  if (datedInsights.length === 0) return '';
-
-  const renderWindow = (insight: DestinationWeatherInsight) =>
-    `${insight.weatherWindowLabel || `${formatMonthDay(insight.travelDate)}这班`}的${insight.destination}`;
-  const better = datedInsights.find((insight) => insight.weatherRiskLevel === 'better');
-  const worse = datedInsights.find((insight) =>
-    insight.weatherRiskLevel === 'worse' &&
-    (!better || insight.destination !== better.destination || insight.travelDate !== better.travelDate),
-  );
-  const mixed = datedInsights.find((insight) => insight.weatherRiskLevel === 'mixed');
-
-  if (better && worse) {
-    return `团期天气上，${renderWindow(better)}相对更稳，${renderWindow(worse)}更吃天气。`;
-  }
-  if (better) {
-    return `团期天气上，${renderWindow(better)}相对更稳。`;
-  }
-  if (worse) {
-    return `团期天气上，${renderWindow(worse)}更吃天气。`;
-  }
-  if (mixed) {
-    return `团期天气上，${renderWindow(mixed)}天气波动会更明显。`;
-  }
-  return '';
-}
-
-function buildWeatherActivityLabel(primitive: RecommendationPrimitive) {
-  const categories = new Set(primitive.experienceCategories);
-  if (categories.has('海边沙滩')) return '海边活动';
-  if (categories.has('玩水清凉')) return '水上活动';
-  if (categories.has('森林山水')) return '山水户外';
-  if (categories.has('文化逛城') || categories.has('室内度假')) return '行程完整度';
-  if (categories.has('温泉泡汤')) return '酒店放松体验';
-  return '整体体验';
-}
-
-function buildWeatherReasonSentence(
-  primitive: RecommendationPrimitive,
-  insight: DestinationWeatherInsight | undefined,
-) {
-  if (!insight?.travelDate) return '';
-
-  const dayLabel = `${formatMonthDay(insight.travelDate)}这班`;
-  const core = stripTerminalPunctuation(
-    (insight.dateSpecificSummary || '').replace(new RegExp(`^${formatMonthDay(insight.travelDate)}`), ''),
-  );
-  const activity = buildWeatherActivityLabel(primitive);
-
-  if (core) {
-    if (insight.weatherRiskLevel === 'better') {
-      return `${dayLabel}预计${core}，${activity}完整度更稳。`;
-    }
-    if (insight.weatherRiskLevel === 'worse') {
-      return `${dayLabel}预计${core}，这班更吃天气。`;
-    }
-    if (insight.weatherRiskLevel === 'mixed') {
-      return `${dayLabel}预计${core}，天气有波动，${activity}要留意临场变化。`;
-    }
-    return `${dayLabel}预计${core}。`;
-  }
-
-  return '';
-}
 
 function isWeatherSensitivePrimitive(primitive: RecommendationPrimitive) {
   const corpus = [
@@ -6251,12 +5654,7 @@ function getWeatherRankingScore(
   return 0;
 }
 
-function buildWeatherReasonSuffix(
-  primitive: RecommendationPrimitive,
-  insight: DestinationWeatherInsight | undefined,
-) {
-  return buildWeatherReasonSentence(primitive, insight).replace(/[。；]+$/u, '');
-}
+
 
 // 将排序结果改写成更贴近用户语境的说明文案，但不改变事实约束。
 function rewriteRecommendationCopy(params: {
@@ -6331,11 +5729,11 @@ function rewriteRecommendationCopy(params: {
 
     return {
       ...item,
+      // 模型 reason 带硬伤（评审腔/无据断言/复读标题）时直接不展示理由，
+      // 卡片退回纯事实；语义判断字段（semanticFit/boundary，模型原文）仍在。
       reason: semanticReason
         ? `${stripTerminalPunctuation(semanticReason)}。`
-        : hasHardCopyIssue
-          ? buildPrimitiveConcreteReason(primitive)
-          : undefined,
+        : undefined,
     };
   });
 
@@ -6356,46 +5754,7 @@ function shouldUseAiSummary(
   return true;
 }
 
-function attachWeatherGuidanceToItems(
-  items: AiRecommendationItem[],
-  candidateTours: AiRecommendationCandidate[],
-  destinationWeatherInsights: DestinationWeatherInsight[],
-) {
-  if (destinationWeatherInsights.length === 0) return items;
-  const primitiveByTourId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
 
-  return items.map((item) => {
-    if (!item.reason) return item;
-    // 简要推荐位保持一句话介绍的长度，不追加天气句。
-    if (item.recommendationTier === 'ai-brief') return item;
-    // 模型亲写的 reason 不再拼本地天气句：主链路 prompt 已预取团期天气（dw），
-    // 天气判断由模型自己写进文案；本地尾缀只负责本地构建的 reason（lite/补位）。
-    if (item.reasonSource === 'ai') return item;
-    const primitive = primitiveByTourId.get(item.tourId);
-    if (!primitive || !isWeatherSensitivePrimitive(primitive)) return item;
-    const insight = findWeatherInsightForPrimitive(primitive, destinationWeatherInsights);
-    const weatherSuffix = buildWeatherReasonSuffix(primitive, insight);
-    if (!weatherSuffix) return item;
-
-    const reason = item.reason.trim();
-    const normalizedReason = normalizeText(reason);
-    const normalizedSuffix = normalizeText(weatherSuffix);
-    if (
-      normalizedReason.includes(normalizedSuffix) ||
-      (insight?.travelDate && normalizedReason.includes(formatMonthDay(insight.travelDate).toLowerCase())) ||
-      normalizedReason.includes('这班更吃天气') ||
-      normalizedReason.includes('完整度更稳') ||
-      normalizedReason.includes('天气波动会更大')
-    ) {
-      return item;
-    }
-
-    return {
-      ...item,
-      reason: `${reason}。${weatherSuffix}。`,
-    };
-  });
-}
 
 function finalizeRecommendationSummary(params: {
   aiSummary: string;
@@ -6416,20 +5775,12 @@ function finalizeRecommendationSummary(params: {
     params.userText || '',
     { allowPublicInterest },
   );
-  const hasTurnPublicInterestNeed = allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText || '');
-  if (hasTurnPublicInterestNeed) {
-    const fallbackSummary = buildRecommendationSummary(params);
-    return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
-  }
-  // 不再按「summary 是否复读覆盖词」换成本地模板文：那是用机器文案顶替模型
-  // 文案，一页读起来千篇一律。落点走 prompt 纪律（rq 里要求 summary 写本轮
-  // 具体判断）；这里的本地 summary 只在模型没给出可用文本时兜底。
   if (shouldUseAiSummary(aiSummary, params.weatherContext, { allowPublicInterest })) {
     return uniqueStrings([semanticLead, aiSummary]).filter(Boolean).join('');
   }
-
-  const fallbackSummary = buildRecommendationSummary(params);
-  return uniqueStrings([semanticLead, fallbackSummary || aiSummary]).filter(Boolean).join('');
+  // 模型没给出可用 summary（空/评审腔/合规腔）时宁缺毋假：不展示摘要，
+  // 绝不用本地模板文顶替。面板会回退到状态行的诚实说明。
+  return semanticLead;
 }
 
 function parseDateString(value: string | null | undefined) {
@@ -7697,10 +7048,8 @@ async function fetchWithTimeout(
 export const __aiRecommendationTestHooks = {
   auditAiRecommendationsStrict,
   auditAiRecommendations,
-  attachWeatherGuidanceToItems,
   buildAiMessages,
   buildHardIntentFromText,
-  buildCoverageAwareReason,
   buildItemSemanticReason,
   buildLiteAiMessages,
   buildRecommendationAuditContext,
@@ -7874,7 +7223,7 @@ function validateAiItems(
       tourId: resolvedTourId,
       score: Number.isFinite(Number(item.score)) ? Number(item.score) : 80 - index,
       reason: validatedIndex < MAX_AI_COMMENTARY_ITEMS
-        ? normalizedReason
+        ? (normalizedReason || undefined)
         : undefined,
       matchedSignals: uniqueStrings([...semanticSignals, ...matchedSignals]).slice(0, 5),
       semanticFit: semanticFit || undefined,
@@ -9606,11 +8955,7 @@ export async function requestAiRecommendations({
     ]);
     const mergedItems = prioritizeRecommendationItems(
       rewriteRecommendationCopy({
-        items: attachWeatherGuidanceToItems(
-          baseMergedItems,
-          mergedCandidateTours,
-          destinationWeatherInsights,
-        ),
+        items: baseMergedItems,
         candidateTours: mergedCandidateTours,
         destinationWeatherInsights,
         intent: finalIntent,
@@ -9710,10 +9055,10 @@ export async function requestAiRecommendations({
       candidatePool,
       text,
     );
-    const fallbackItems = ensureSharedBikeRecommendationNote((getCoverageTermsForQuality(text).length >= 2
+    const fallbackItems = (getCoverageTermsForQuality(text).length >= 2
       ? compoundFallback
       : fallbackPool
-    ).slice(0, MAX_AI_SELECTED_ITEMS), candidatePool.map(buildTourPrimitive), text);
+    ).slice(0, MAX_AI_SELECTED_ITEMS);
     if (typeof console !== 'undefined' && typeof console.warn === 'function') {
       console.warn('[ai-recommendation] fallback to local recommendations:', failureDetail);
     }

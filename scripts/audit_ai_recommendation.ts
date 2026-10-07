@@ -12,7 +12,6 @@ const {
   auditAiRecommendations,
   buildAiMessages,
   buildHardIntentFromText,
-  buildCoverageAwareReason,
   buildLiteAiMessages,
   buildLocalRecommendationQuery,
   buildRecommendationAuditContext,
@@ -23,7 +22,6 @@ const {
   getStablePromptPool,
   allowsPublicInterestForTurn,
   enrichPromptCandidatesWithMemoryCoverage,
-  attachWeatherGuidanceToItems,
   finalizeRecommendationSummary,
   getWeatherRankingScore,
   assessWeatherComfortForDate,
@@ -667,7 +665,8 @@ const nonStringReasonItems = validateAiItems({
     { tourId: 'noisy-forest', score: 93, reason: 123, matchedSignals: ['低价'] },
   ],
 }, noisyAlternatives);
-assert.ok(nonStringReasonItems[0].reason?.includes('森林') || nonStringReasonItems[0].reason?.includes('氧吧'));
+assert.ok(nonStringReasonItems[0].reason === undefined,
+  'non-string model reason is dropped, not replaced by local template copy');
 const vagueReasonItems = validateAiItems({
   items: [
     { tourId: 'noisy-beach', score: 94, reason: '自然风光生态，含早轻松，适合本次天气取舍。', matchedSignals: ['自然风光'] },
@@ -716,7 +715,8 @@ const highPriceReasonRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!highPriceReasonRewrite[0].reason?.includes('预算友好'));
-assert.ok(highPriceReasonRewrite[0].reason?.includes('参考价￥30,999'));
+assert.ok(highPriceReasonRewrite[0].reason === undefined,
+  'false positive-price claim makes the reason unusable; drop it instead of fabricating local copy');
 const noBudgetReasonRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -738,7 +738,8 @@ const noBudgetReasonRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/预算贴边|预算内/.test(noBudgetReasonRewrite[0].reason || ''));
-assert.ok(noBudgetReasonRewrite[0].reason?.includes('参考价￥30,999'));
+assert.ok(noBudgetReasonRewrite[0].reason === undefined,
+  'unsupported budget/price claim drops the reason; no local template replacement');
 const inventedBudgetFitRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -760,7 +761,8 @@ const inventedBudgetFitRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/符合预算|预算内|预算贴边/.test(inventedBudgetFitRewrite[0].reason || ''));
-assert.ok(inventedBudgetFitRewrite[0].reason?.includes('参考价￥30,999'));
+assert.ok(inventedBudgetFitRewrite[0].reason === undefined,
+  'unsupported budget/price claim drops the reason; no local template replacement');
 const staleMemoryBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -782,7 +784,8 @@ const staleMemoryBudgetRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/符合预算|预算内|预算贴边/.test(staleMemoryBudgetRewrite[0].reason || ''));
-assert.ok(staleMemoryBudgetRewrite[0].reason?.includes('参考价￥30,999'));
+assert.ok(staleMemoryBudgetRewrite[0].reason === undefined,
+  'unsupported budget/price claim drops the reason; no local template replacement');
 const closeToBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -803,7 +806,8 @@ const closeToBudgetRewrite = rewriteRecommendationCopy({
   userText: '帮我找同时带温泉和沙滩的团',
   allowPublicInterest: false,
 });
-assert.ok(closeToBudgetRewrite[0].reason);
+assert.ok(closeToBudgetRewrite[0].reason === undefined,
+  'unsupported price-claim rewrite drops the reason under the no-fabrication policy');
 const approximateBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -825,7 +829,8 @@ const approximateBudgetRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/预算约|预算大约|预算\s*\d/.test(approximateBudgetRewrite[0].reason || ''));
-assert.ok(approximateBudgetRewrite[0].reason?.includes('参考价￥30,999'));
+assert.ok(approximateBudgetRewrite[0].reason === undefined,
+  'unsupported budget/price claim drops the reason; no local template replacement');
 const beachHotSpringLocal = localRecommendations([
   candidate({
     id: 'only-hot-spring',
@@ -849,8 +854,8 @@ const beachHotSpringLocal = localRecommendations([
   }),
 ], '同时具有海滩和温泉的旅行团');
 assert.equal(beachHotSpringLocal[0].tourId, 'beach-hot-spring');
-assert.ok(beachHotSpringLocal[0].reason?.includes('温泉') || beachHotSpringLocal[0].reason?.includes('盐洲岛'));
-assert.ok(!/可作为具体玩法备选|看点：|行程：|参考价：|这条更像|我会把它看作|具体体验/.test(beachHotSpringLocal[0].reason || ''));
+assert.equal(beachHotSpringLocal[0].reason, undefined,
+  'local ranking produces facts only; ranking correctness asserted via tourId above');
 const beachHotSpringAliasLocal = localRecommendations([
   candidate({
     id: 'only-hot-spring-alias',
@@ -874,16 +879,14 @@ const beachHotSpringAliasLocal = localRecommendations([
   }),
 ], '想找海边能泡汤的跟团');
 assert.equal(beachHotSpringAliasLocal[0].tourId, 'bay-spa');
-assert.ok(
-  /海|滩|湾|汤|温泉|泡池/.test(beachHotSpringAliasLocal[0].reason || ''),
-  `expected bay-spa reason to mention concrete beach/hot-spring facts, got ${beachHotSpringAliasLocal[0].reason || ''}`,
-);
+assert.equal(beachHotSpringAliasLocal[0].reason, undefined,
+  'alias-match local result carries facts only, no fabricated copy');
 const realBeachHotSpringLocal = localRecommendations(
   realTours,
   '给我推荐同时具有海滩和温泉的旅行团',
 ).slice(0, 5);
 assert.ok(
-  realBeachHotSpringLocal.some((item) => item.reason?.includes('温泉') || item.reason?.includes('海滩')),
+  realBeachHotSpringLocal.some((item) => (item.matchedSignals || []).some((signal) => /温泉|海滩|沙滩/.test(signal))),
   `expected top 5 to keep a concrete beach/hot-spring match, got ${realBeachHotSpringLocal.map((item) => item.tourId).join(', ')}`,
 );
 const staleMemoryFallbackResult = await requestAiRecommendations({
@@ -959,10 +962,8 @@ const failedAiFallbackResult = await requestAiRecommendations({
   previousResult: null,
 });
 assert.equal(failedAiFallbackResult.source, 'local-preview');
-assert.ok(
-  ['温泉', '海边', '海滩', '沙滩', '泡汤'].some((term) => (failedAiFallbackResult.items[0]?.reason || '').includes(term)),
-  `expected fallback reason to mention concrete beach/hot-spring facts, got ${failedAiFallbackResult.items[0]?.reason || ''}`,
-);
+assert.ok(failedAiFallbackResult.items.every((item) => item.reason === undefined),
+  'AI-down fallback returns fact cards with no fabricated copy');
 assert.equal(failedAiFallbackResult.preferenceMemory ?? null, null);
 const naturalPhraseFallbackResult = await requestAiRecommendations({
   conversationId: 'audit-natural-phrase-fallback',
@@ -987,10 +988,8 @@ const naturalPhraseFallbackResult = await requestAiRecommendations({
   previousResult: null,
 });
 assert.equal(naturalPhraseFallbackResult.source, 'local-preview');
-assert.ok(
-  ['温泉', '海边', '海滩', '沙滩', '泡汤'].some((term) => (naturalPhraseFallbackResult.items[0]?.reason || '').includes(term)),
-  `expected natural phrase fallback top reason to mention concrete beach/hot-spring facts, got ${naturalPhraseFallbackResult.items[0]?.reason || ''}`,
-);
+assert.ok(naturalPhraseFallbackResult.items.every((item) => item.reason === undefined),
+  'natural-phrase fallback also returns fact cards with no fabricated copy');
 const sanitizedInventedBudget = sanitizeAiBudgetBoundsForTurn(
   {
     budgetMax: 35000,
@@ -1121,11 +1120,10 @@ const variedReasonRewrite = rewriteRecommendationCopy({
   userText: '帮我找海边度假的团',
   allowPublicInterest: false,
 });
-const reasonOpenings = variedReasonRewrite
-  .map((item) => (item.reason || '').split(/[：；，。]/)[0])
-  .filter(Boolean);
-assert.ok(new Set(reasonOpenings).size >= 3);
-assert.ok(variedReasonRewrite.filter((item) => item.reason?.startsWith('主打')).length <= 1);
+assert.ok(variedReasonRewrite.every((item) =>
+    item.reason === undefined || item.reason === '综合匹配，性价比高。',
+  ),
+  'rewrite passes model text through or drops it; it never manufactures local template variety');
 
 const naturalAiReasonRewrite = rewriteRecommendationCopy({
   items: [{
@@ -1201,7 +1199,8 @@ const metaAiReasonRewrite = rewriteRecommendationCopy({
   allowPublicInterest: false,
 });
 assert.ok(!/标题和标签|命中|对题度/.test(metaAiReasonRewrite[0].reason || ''));
-assert.ok(/温泉|沙滩|海边/.test(metaAiReasonRewrite[0].reason || ''));
+assert.ok(metaAiReasonRewrite[0].reason === undefined,
+  'meta-tone model reason is dropped, not rewritten into local copy');
 
 const unsupportedPublicInterestPrimitive = buildTourPrimitive(candidate({
   id: 'unsupported-public-interest',
@@ -1218,8 +1217,8 @@ const sanitizedPublicInterestReason = getConcreteAiReason(
   '推荐尚·悠享增城2天，增城属珠三角边缘经济相对较弱地区，符合扶贫或贫穷地方需求。',
   unsupportedPublicInterestPrimitive,
 );
-assert.ok(sanitizedPublicInterestReason.includes('候选没有显式扶贫/公益标注'));
-assert.ok(!sanitizedPublicInterestReason.includes('经济相对较弱'));
+assert.equal(sanitizedPublicInterestReason, '',
+  'unsupported public-interest claim drops the reason; no replacement narrative is fabricated');
 
 const semanticBoundaryTour = candidate({
   id: 'semantic-boundary',
@@ -1447,9 +1446,8 @@ const weirdSemanticSummary = finalizeRecommendationSummary({
   userText: '帮我找海边温泉，400以下的，关注天气因素',
 });
 assert.ok(!/atoms|软语义判断|扶贫|公益项目/.test(weirdSemanticSummary));
-assert.ok(weirdSemanticSummary.includes('说明：候选信息有限') || weirdSemanticSummary.includes('说明：'));
-assert.ok(weirdSemanticSummary.length > 20);
-assert.ok(!weirdSemanticSummary.includes('推荐方向：'));
+assert.equal(weirdSemanticSummary, '',
+  'unusable model summary + unusable caveat -> no summary at all; tests must not pin any canned lead');
 
 const nonInternalPublicInterestSummary = finalizeRecommendationSummary({
   aiSummary: '候选没有显式扶贫/公益标注，只能按周边体验做近似替代。下单前留意天气。',
@@ -1468,8 +1466,8 @@ const nonInternalPublicInterestSummary = finalizeRecommendationSummary({
   allowPublicInterest: false,
 });
 assert.ok(!/扶贫|公益/.test(nonInternalPublicInterestSummary));
-assert.ok(nonInternalPublicInterestSummary.length > 20);
-assert.ok(!nonInternalPublicInterestSummary.includes('推荐方向：'));
+assert.equal(nonInternalPublicInterestSummary, '',
+  'compliance-leaky model summary is dropped, not replaced by any local copy');
 
 const promptTours = [hotSpringTour, nonHotSpringTour];
 const promptIntent = { budgetMax: 400, weatherSensitivity: ['天气敏感'], departureWeekdays: [] };
@@ -1606,16 +1604,6 @@ const defaultSliderBudgetIntent = buildHardIntentFromText(
 );
 assert.equal(defaultSliderBudgetIntent?.budgetMax ?? null, null);
 
-const waterTownEbikeCandidate = buildTourPrimitive(candidate({
-  id: 'water-town-ebike',
-  title: '温泉水上乐园与古镇2天',
-  destination: '广东',
-  duration: 2,
-  price: 499,
-  theme: '温泉玩水',
-  tags: ['温泉', '玩水', '古镇'],
-  highlights: ['温泉', '水上乐园', '古镇漫步'],
-}));
 const waterOnlyCandidate = buildTourPrimitive(candidate({
   id: 'water-only',
   title: '温泉水上乐园2天',
@@ -1637,15 +1625,6 @@ assert.ok(!reasonAddressesUserNeed(
   waterOnlyCandidate,
   waterTownEbikeQuery,
 ));
-assert.match(
-  buildCoverageAwareReason(waterTownEbikeCandidate, waterTownEbikeQuery),
-  /温泉|玩水|小镇|电瓶车/,
-);
-assert.doesNotMatch(
-  buildCoverageAwareReason(waterOnlyCandidate, waterTownEbikeQuery),
-  /共享电瓶车/,
-  'fallback copy should not repeat the unverifiable shared-ebike gap on every card',
-);
 
 const hotSpringBeachBudgetQuery = '帮我找同时带温泉和沙滩的团. 预算600以内。';
 const hotSpringBeachBudgetIntent = buildHardIntentFromText(hotSpringBeachBudgetQuery);
@@ -2493,37 +2472,20 @@ const reordered = prioritizeRecommendationItems(
     'natural AI summary text should be preferred over template');
 }
 
-// ─── 回归测试：天气尾缀只补本地构建的 reason，模型亲写 reason 不动 ───
+// ─── 回归测试：本地/兜底结果零话术——不再本地编造推荐理由 ───
 {
-  const weatherInsight = {
-    destination: '从化',
-    travelDate: '2026-06-12',
-    forecastSummary: '多云转阴',
-    dateSpecificSummary: '6月12日前后多云到阴，适合泡温泉',
-    weatherWindowLabel: '6月12日这班',
-    weatherRiskLevel: 'better',
-    seasonAdvice: [],
-    role: 'destination',
-    source: 'open-meteo',
-  };
-  const weatherCopyTours = [
+  const localOnlyTours = [
     candidate({ id: 'ch-wenquan', title: '从化温泉2天悠闲团', destination: '从化', duration: 2, price: 399, tags: ['温泉'], theme: '温泉度假', departureDates: ['2026-06-12'] }),
+    candidate({ id: 'xn-beach', title: '巽寮湾沙滩2天', destination: '惠州', duration: 2, price: 299, tags: ['沙滩'], theme: '海边度假' }),
   ];
-  const [rewrittenModelItem] = attachWeatherGuidanceToItems(
-    [{ tourId: 'ch-wenquan', score: 90, reason: '这条从化温泉线节奏不赶，适合周末慢下来。', matchedSignals: ['温泉'], reasonSource: 'ai', recommendationTier: 'ai-detailed' }],
-    weatherCopyTours,
-    [weatherInsight],
-  );
-  assert.equal(rewrittenModelItem.reason, '这条从化温泉线节奏不赶，适合周末慢下来。',
-    'model-written reason must not get a local weather suffix appended (model has dw in prompt)');
-
-  const [rewrittenLocalItem] = attachWeatherGuidanceToItems(
-    [{ tourId: 'ch-wenquan', score: 88, reason: '从化温泉短线，参考价399', matchedSignals: ['温泉'] }],
-    weatherCopyTours,
-    [weatherInsight],
-  );
-  assert.ok(rewrittenLocalItem.reason && rewrittenLocalItem.reason.includes('6月12日这班'),
-    'locally-built reason keeps the weather suffix as its weather channel');
+  for (const item of localRecommendations(localOnlyTours, '周末温泉短线')) {
+    assert.equal(item.reason, undefined,
+      'local pipeline must not fabricate recommendation copy; cards stay factual');
+  }
+  for (const item of fallbackRecommendations(localOnlyTours)) {
+    assert.equal(item.reason, undefined,
+      'pool-fallback items must not fabricate recommendation copy either');
+  }
 }
 
 // ─── 回归测试：summary 没复读覆盖词时保留模型原文，不再换本地模板文 ───
@@ -2610,12 +2572,8 @@ const reordered = prioritizeRecommendationItems(
     userText: '帮我找温泉和山水的团',
     allowPublicInterest: false,
   });
-  assert.ok(fallbackSummaryText.length > 20,
-    'fallback summary should exist');
-  const hasProgrammaticPattern = /证据更明显的线路放前面|没有明确证据的偏好会降为/.test(fallbackSummaryText);
-  if (hasProgrammaticPattern) {
-    console.log('  [audit note] fallback summary contains programmatic language (not a failure, but worth monitoring)');
-  }
+  assert.equal(fallbackSummaryText, '',
+    'no model summary -> no summary; tests must not require any locally fabricated text');
 }
 
 // ─── 回归测试：显式目的地 summary 不应被候选统计带偏 ───
@@ -2665,12 +2623,8 @@ const reordered = prioritizeRecommendationItems(
     userText: '我想玩广西和越南',
     allowPublicInterest: false,
   });
-  assert.ok(explicitDestinationSummary.includes('广西、越南'),
-    'summary should keep explicit destination intent ahead of candidate-derived geography');
-  assert.ok(!explicitDestinationSummary.includes('广东'),
-    'summary should not broaden explicit 广西/越南 intent into neighboring provinces');
-  assert.ok(!explicitDestinationSummary.includes('山水避暑'),
-    'summary should not inject unrequested theme labels for explicit destination turns');
+  assert.equal(explicitDestinationSummary, '',
+    'empty model summary stays empty; intent handling is covered by ranking tests, not copy fabrication');
 }
 
 // ─── 回归测试：详细推荐应排在简介推荐前面 ───
