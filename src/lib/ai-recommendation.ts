@@ -933,7 +933,10 @@ function normalizeChineseNumeralDuration(text: string) {
   }).replace(/([一两二三四五六七八九十]{1,3})日/g, (match, numerals: string) => {
     const direct = parseChineseNumeralToken(numerals);
     return direct !== null ? `${direct}日` : match;
-  }).replace(/([一两二三四五六七八九十]{1,3})晚/g, (match, numerals: string) => {
+    // “周五晚上/星期六晚上”是星期+时刻表述：周数字后的“晚”不是住宿晚数，
+    // 归一成“5晚”会把“周五晚上出发周日回”解析成 5-6 天窗，还短路掉周末
+    // 往返的 2-3 天推断。负向环视只挡星期前缀，正常“五晚/三晚”照常归一。
+  }).replace(/(?<![周星期拜])([一两二三四五六七八九十]{1,3})晚/g, (match, numerals: string) => {
     const direct = parseChineseNumeralToken(numerals);
     return direct !== null ? `${direct}晚` : match;
   });
@@ -1781,6 +1784,11 @@ function scoreTour(
   let constraintFit = 0;
   let constraintChecked = 0;
   let constraintNear = 0;
+  // 预算远超（>2x 上限）长线：字典序层键而非纯分数减法——score 里的 -24
+  // 会被覆盖/热度加分反超（"预算600以内"头部曾被 2.5w-4.5w 的北欧长线霸占，
+  // 它们语料里的"蓝湖温泉/冰岛沙滩"拿到满覆盖分）。outlier 在 localRecommendations
+  // 的排序里整层下沉到所有非 outlier 之下（覆盖键-100），仍保留在列表尾部供比较。
+  let budgetOutlier = false;
   // 质量红旗（异地收客/geo 脏数据/标题天数矛盾/字段矛盾）：字典序质量层——
   // 同覆盖同约束档下，无红旗候选排在有红旗候选之前（-30/-24 沉底在字典序
   // 下会被同档高分反超，必须显式分层）。
@@ -1957,6 +1965,7 @@ function scoreTour(
       // 普通预算是偏好，不是召回硬门槛；保留远价候选给 AI 或本地补位比较，
       // 但让它明显落后于预算内和轻微超预算候选。
       score -= 24;
+      budgetOutlier = true;
     } else if (budgetMin !== null) {
       if (tour.price >= budgetMin) {
         score += 6;
@@ -2119,6 +2128,7 @@ function scoreTour(
     constraintFit,
     constraintChecked,
     constraintNear,
+    budgetOutlier,
     qualityFlag,
     matchedSignals: signals.slice(0, 5),
   };
@@ -2213,12 +2223,22 @@ function localRecommendations(tours: AiRecommendationCandidate[], text: string) 
     // 字典序：需求满足数（核心体验覆盖）→ 结构化约束满足（天数/预算方向）
     // → 加权和。偏好信号只在覆盖与约束相同的候选之间分高下；泛需求
     // （demandSpec 空、无约束）各键全为 0，退化为原排序。
-    .sort((a, b) =>
-      (b.demandCoverage ?? 0) - (a.demandCoverage ?? 0) ||
-      (b.constraintFit ?? 0) - (a.constraintFit ?? 0) ||
-      (a.qualityFlag ? 1 : 0) - (b.qualityFlag ? 1 : 0) ||
-      (b.constraintNear ?? 0) - (a.constraintNear ?? 0) ||
-      b.score - a.score)
+    .sort((a, b) => {
+      // 显式预算查询里，>2x 预算上限的长线先按"预算可用性"整层下沉（覆盖键
+      // 减 100：比任何非 outlier 的覆盖档都低），再比覆盖/约束/偏好——用户说
+      // "预算600以内"时，头部是 439 的巽寮湾而不是 3.8 万的冰岛团，哪怕后者
+      // 语料里恰好有"蓝湖温泉+冰岛沙滩"。outlier 之间保持原相对序；全部候选
+      // 都超预算的极端查询里大家同层，退化为原排序，不会出现空列表。
+      const coverageTier = (item: AiRecommendationItem) =>
+        (item.demandCoverage ?? 0) - (item.budgetOutlier ? 100 : 0);
+      return (
+        coverageTier(b) - coverageTier(a) ||
+        (b.constraintFit ?? 0) - (a.constraintFit ?? 0) ||
+        (a.qualityFlag ? 1 : 0) - (b.qualityFlag ? 1 : 0) ||
+        (b.constraintNear ?? 0) - (a.constraintNear ?? 0) ||
+        b.score - a.score
+      );
+    })
     .map((item, index) => ({
       ...item,
       reason: index < MAX_AI_COMMENTARY_ITEMS ? item.reason : undefined,
@@ -2257,7 +2277,7 @@ function interleaveSameScoreVenues(
     // 需求档带 = 需求满足数 + 约束方向 + 质量红旗完全相同：轮转不得跨越这些
     // 正确性/方向分层（fit=1 不得排到 fit=0 后面、红旗不得洗白）。
     const bandKey = (item: AiRecommendationItem) =>
-      `${item.demandCoverage ?? 0}|${item.constraintFit ?? 0}|${item.constraintNear ?? 0}|${item.qualityFlag ? 1 : 0}`;
+      `${item.demandCoverage ?? 0}|${item.constraintFit ?? 0}|${item.budgetOutlier ? 1 : 0}|${item.constraintNear ?? 0}|${item.qualityFlag ? 1 : 0}`;
     let bandEnd = bandStart + 1;
     while (bandEnd < items.length && bandKey(items[bandEnd]) === bandKey(items[bandStart])) bandEnd += 1;
 
@@ -4147,7 +4167,10 @@ function getPrimitiveConflictReasons(
   const weekdays = intent.departureWeekdays?.filter((day) => Number.isInteger(day)) ?? [];
   if (weekdays.length > 0) {
     const hasWeekday = primitive.schedule.departureWeekdays.some((weekday) => weekdays.includes(weekday));
-    if (!hasWeekday) {
+    // 与上面"N天内可出发"分支同一语义：语料里 47% 的团没有任何班期字段，
+    // 无班期数据≠没有周五/周六班期——只有确有班期且全不命中时才算硬冲突，
+    // 否则"周末出发"查询会把半个语料库记为冲突、AI 装配时整批出局。
+    if (primitive.schedule.departureWeekdays.length > 0 && !hasWeekday) {
       reasons.push(`缺少${weekdays.map((weekday) => WEEKDAY_LABELS[weekday]).join('/')}出发班期`);
     }
   }
@@ -4315,39 +4338,6 @@ function hasMetaRecommendationLanguage(reason: string) {
   return /(从标题和标签看|标题和标签|候选池|候选里|对题|命中|完整覆盖|部分命中|软语义|更值得核对|排序靠前|规则|匹配度|标签党)/.test(reason);
 }
 
-function hasMalformedAiTitleEcho(reason: string, primitive: RecommendationPrimitive) {
-  const title = normalizeText(primitive.title).replace(/[^\p{Script=Han}a-z0-9]/giu, '');
-  const normalizedReason = normalizeText(reason).replace(/[^\p{Script=Han}a-z0-9]/giu, '');
-  // 长标题经常被模型截成“……小镇2把 / ……温泉酒”一类残句。
-  // 这不是世界知识推理，而是输出损坏；宁可回到本地事实文案，也不把坏句子展示给用户。
-  if (title.length < 18 || normalizedReason.includes(title)) return false;
-  const fragments = [
-    title.slice(0, 10),
-    title.slice(4, 14),
-    title.slice(6, 16),
-  ].filter((fragment) => fragment.length === 10);
-  if (fragments.some((fragment) => normalizedReason.includes(fragment))) return true;
-
-  // 流式输出更常见的损坏形态是：标题只写到中途，紧接着就拼上了
-  // “把/的重点/主打/更适合”等正文。比如“……温泉小镇2把泡汤……”。
-  // 只在理由开头检查，避免误伤正文中正常提到一次线路名的情况。
-  const prefixLimit = Math.min(title.length, 22);
-  for (let prefixLength = 8; prefixLength <= prefixLimit; prefixLength += 1) {
-    if (!normalizedReason.startsWith(title.slice(0, prefixLength))) continue;
-    const titleNext = title[prefixLength] || '';
-    const reasonNext = normalizedReason[prefixLength] || '';
-    if (
-      reasonNext &&
-      reasonNext !== titleNext &&
-      /[把的主打更适合适合是有能让值得冲着去]/.test(reasonNext)
-    ) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 function softenAiEvidenceCaveats(reason: string) {
   return reason
     .replace(/在候选(?:里|中)没有(?:明确)?提及/g, '目前没有看到明确安排')
@@ -4428,47 +4418,8 @@ function hasUnsupportedPublicInterestClaim(reason: string, primitive: Recommenda
 
 
 
-function hasPositivePriceClaim(text: string) {
-  return /(预算友好|价格友好|预算贴边|预算内|预算达到|符合预算|预算符合|在预算|预算约|预算大约|预算\s*\d|低于预算带|低价|便宜|不贵|划算|性价比|省钱|实惠)/.test(text);
-}
-
-function hasExplicitValueIntent(intent: AiTravelIntent | null, userText: string) {
-  const corpus = [
-    userText,
-    ...(intent?.travelStyle || []),
-    ...(intent?.semanticFocus || []),
-    ...(intent?.mustHave || []),
-  ].join(' ');
-  return Boolean(intent?.budgetMax) || /(便宜|预算|性价比|不贵|划算|省钱|实惠|低价|穷游)/.test(corpus);
-}
-
-function hasUnsupportedPositivePriceClaim(params: {
-  reason: string;
-  primitive: RecommendationPrimitive;
-  intent: AiTravelIntent | null;
-  userText: string;
-  sortedPrices: number[];
-}) {
-  const hasValueIntent = hasExplicitValueIntent(params.intent, params.userText);
-  if (/预算/.test(params.reason) && !hasValueIntent) return true;
-  if (!hasPositivePriceClaim(params.reason)) return false;
-  if (params.intent?.budgetMax && params.primitive.price > params.intent.budgetMax) return true;
-
-  const pricePercentile = getPricePercentile(params.primitive.price, params.sortedPrices);
-  if (pricePercentile === null) return false;
-
-  if (hasValueIntent) {
-    return pricePercentile > 75;
-  }
-
-  return pricePercentile > 50;
-}
-
-
-
-
-
-
+// 价格口活（"预算友好/符合预算"）按"便宜比无消息好"（用户 2026-10-08）不再
+// 做无据拦截：卡片上价格就印在旁边，用户能自行对照，不必替模型做事实警察。
 
 function isGenericMatchedSignal(signal: string) {
   return /^(低价|价格|便宜|班期|热门|性价比|预算|轻松|自然风光|综合|AI综合推荐|天气)$/.test(signal.trim());
@@ -4666,16 +4617,14 @@ function getConcreteAiReason(reason: unknown, primitive: RecommendationPrimitive
   const trimmed = typeof reason === 'string' ? reason.trim() : '';
   if (!primitive) return trimmed;
   const softened = softenAiEvidenceCaveats(trimmed);
-  // 用户可见文案一律由模型生成（仓库 AGENTS.md 红线）：模型理由带无证据的
-  // 公益断言、或畸形到不能用（复读标题残句/非字符串）时，直接不展示理由，
-  // 卡片退回纯事实——绝不用本地模板句顶替（坏句子宁可没有，也不编话术）。
+  // 用户可见文案一律由模型生成（仓库 AGENTS.md 红线）。展示策略是
+  // "便宜比无消息好"（用户 2026-10-08）：复读标题残句等输出瑕疵照常展示，
+  // 不再整句枪毙成纯事实卡；唯一继续拦的是无证据的公益/贫困事实断言——
+  // 那是事实错误不是文风问题，普通线路不能被贴成扶贫地区。
   if (softened && hasUnsupportedPublicInterestClaim(softened, primitive)) {
     return '';
   }
-  if (softened && !hasMalformedAiTitleEcho(softened, primitive)) {
-    return softened;
-  }
-  return '';
+  return softened;
 }
 
 function getDiversityGroupKey(primitive: RecommendationPrimitive) {
@@ -5719,24 +5668,12 @@ function rewriteRecommendationCopy(params: {
       !hasMetaRecommendationLanguage(semanticReasonCandidate)
       ? semanticReasonCandidate
       : '';
-    const sortedPrices = params.candidateTours
-      .map((tour) => tour.price)
-      .filter((price) => Number.isFinite(price) && price > 0)
-      .sort((a, b) => a - b);
-    const hasHardCopyIssue = Boolean(
-      currentReason && (
-        hasMalformedAiTitleEcho(currentReason, primitive) ||
-        hasInternalRecommendationLanguage(currentReason) ||
-        hasMetaRecommendationLanguage(currentReason) ||
-        hasUnallowedPublicInterestLanguage(currentReason, params) ||
-        hasUnsupportedPositivePriceClaim({
-          reason: currentReason,
-          primitive,
-          intent: params.intent,
-          userText: params.userText,
-          sortedPrices,
-        })
-      ),
+    // "便宜比无消息好"（用户 2026-10-08）：文风瑕疵（评审腔/内部术语/价格
+    // 口活/复读标题残句）不再枪毙理由，模型原文照常展示——有瑕疵的信息
+    // 好过没有信息。唯一保留整句拦截的是无据公益/贫困断言：候选没有证据
+    // 时那是事实错误，退回 semanticFit 或纯事实，不把普通线路贴成扶贫线。
+    const hasPublicInterestIssue = Boolean(
+      currentReason && hasUnallowedPublicInterestLanguage(currentReason, params),
     );
     if (currentReason.startsWith('不完全符合你的要求（')) {
       return {
@@ -5744,9 +5681,7 @@ function rewriteRecommendationCopy(params: {
         reason: `${currentReason}。`,
       };
     }
-    // semanticFit 是模型对这张线路的整体体验判断。优先使用它替代
-    // 公式化 reason，避免一个软条件未被写进句子就触发本地模板回退。
-    if (currentReason && !hasHardCopyIssue) {
+    if (currentReason && !hasPublicInterestIssue) {
       return {
         ...item,
         reason: `${currentReason}。`,
@@ -5755,8 +5690,8 @@ function rewriteRecommendationCopy(params: {
 
     return {
       ...item,
-      // 模型 reason 带硬伤（评审腔/无据断言/复读标题）时直接不展示理由，
-      // 卡片退回纯事实；语义判断字段（semanticFit/boundary，模型原文）仍在。
+      // 理由缺失或带无据公益断言时，用模型自己写的 semanticFit/boundary 顶上；
+      // 两者都没有就退回纯事实卡——绝不用本地模板句顶替。
       reason: semanticReason
         ? `${stripTerminalPunctuation(semanticReason)}。`
         : undefined,

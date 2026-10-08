@@ -305,6 +305,8 @@ export interface AiRecommendationItem {
   qualityFlag?: boolean;
   /** 预算超窗但贴边（≤1.25x）：fit=0 档内的次级方向键 */
   constraintNear?: number;
+  /** 预算远超（>2x 上限）长线：显式预算查询下沉到同档非 outlier 之后 */
+  budgetOutlier?: boolean;
   semanticFit?: string;
   semanticSignals?: string[];
   semanticBoundary?: string;

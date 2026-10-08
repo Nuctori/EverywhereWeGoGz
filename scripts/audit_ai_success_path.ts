@@ -253,7 +253,11 @@ const invalidSemanticCopy = rewriteRecommendationCopy({
   userText: '海边温泉',
   allowPublicInterest: false,
 });
-assert.ok(!/标题和标签|候选原语|匹配度/.test(invalidSemanticCopy[0]?.reason || ''));
+assert.equal(
+  invalidSemanticCopy[0]?.reason,
+  '从标题和标签看，匹配度较高。',
+  'cheap-over-nothing policy: meta-tone reason is kept as-is; invalid semanticFit never blanks it',
+);
 
 const localSupplementCopy = rewriteRecommendationCopy({
   items: [{

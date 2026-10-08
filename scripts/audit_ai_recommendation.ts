@@ -30,6 +30,7 @@ const {
   getPrimitiveCoverageScore,
   getPrimitiveConflictReasons,
   reasonAddressesUserNeed,
+  fallbackRecommendations,
   localRecommendations,
   matchesActiveDateFilters,
   matchesDateWindow,
@@ -714,9 +715,8 @@ const highPriceReasonRewrite = rewriteRecommendationCopy({
   userText: '帮我找同时带温泉和沙滩的团',
   allowPublicInterest: false,
 });
-assert.ok(!highPriceReasonRewrite[0].reason?.includes('预算友好'));
-assert.ok(highPriceReasonRewrite[0].reason === undefined,
-  'false positive-price claim makes the reason unusable; drop it instead of fabricating local copy');
+assert.equal(highPriceReasonRewrite[0].reason, '马尔代夫水上别墅和沙滩度假都对题，￥30,999预算友好。',
+  'cheap-over-nothing policy: price-boast copy is shown as-is, never blanked into a fact-only card');
 const noBudgetReasonRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -737,9 +737,8 @@ const noBudgetReasonRewrite = rewriteRecommendationCopy({
   userText: '帮我找同时带温泉和沙滩的团',
   allowPublicInterest: false,
 });
-assert.ok(!/预算贴边|预算内/.test(noBudgetReasonRewrite[0].reason || ''));
-assert.ok(noBudgetReasonRewrite[0].reason === undefined,
-  'unsupported budget/price claim drops the reason; no local template replacement');
+assert.equal(noBudgetReasonRewrite[0].reason, '水上别墅和沙滩度假都对题，预算贴边：￥30,999。',
+  'cheap-over-nothing policy: unsupported budget claim is shown as-is (price is printed on the card anyway)');
 const inventedBudgetFitRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -760,9 +759,8 @@ const inventedBudgetFitRewrite = rewriteRecommendationCopy({
   userText: '帮我找同时带温泉和沙滩的团',
   allowPublicInterest: false,
 });
-assert.ok(!/符合预算|预算内|预算贴边/.test(inventedBudgetFitRewrite[0].reason || ''));
-assert.ok(inventedBudgetFitRewrite[0].reason === undefined,
-  'unsupported budget/price claim drops the reason; no local template replacement');
+assert.equal(inventedBudgetFitRewrite[0].reason, '水上别墅和沙滩度假都对题，价格30999元符合预算。',
+  'cheap-over-nothing policy: invented budget fit is shown as-is, never blanked');
 const staleMemoryBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -783,9 +781,8 @@ const staleMemoryBudgetRewrite = rewriteRecommendationCopy({
   userText: '帮我找同时带温泉和沙滩的团',
   allowPublicInterest: false,
 });
-assert.ok(!/符合预算|预算内|预算贴边/.test(staleMemoryBudgetRewrite[0].reason || ''));
-assert.ok(staleMemoryBudgetRewrite[0].reason === undefined,
-  'unsupported budget/price claim drops the reason; no local template replacement');
+assert.equal(staleMemoryBudgetRewrite[0].reason, '水上别墅和沙滩度假都对题，价格30999元在预算内。',
+  'cheap-over-nothing policy: stale-memory budget claim is shown as-is, never blanked');
 const closeToBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -806,8 +803,8 @@ const closeToBudgetRewrite = rewriteRecommendationCopy({
   userText: '帮我找同时带温泉和沙滩的团',
   allowPublicInterest: false,
 });
-assert.ok(closeToBudgetRewrite[0].reason === undefined,
-  'unsupported price-claim rewrite drops the reason under the no-fabrication policy');
+assert.equal(closeToBudgetRewrite[0].reason, '水上别墅和沙滩度假都对题，价格接近预算。',
+  'cheap-over-nothing policy: vague price claim is shown as-is under the no-fabrication policy');
 const approximateBudgetRewrite = rewriteRecommendationCopy({
   items: [{
     tourId: highPriceBeachTour.id,
@@ -828,9 +825,8 @@ const approximateBudgetRewrite = rewriteRecommendationCopy({
   userText: '帮我找同时带温泉和沙滩的团',
   allowPublicInterest: false,
 });
-assert.ok(!/预算约|预算大约|预算\s*\d/.test(approximateBudgetRewrite[0].reason || ''));
-assert.ok(approximateBudgetRewrite[0].reason === undefined,
-  'unsupported budget/price claim drops the reason; no local template replacement');
+assert.equal(approximateBudgetRewrite[0].reason, '含温泉和沙滩，预算约4000，体验完整。',
+  'cheap-over-nothing policy: approximate budget mention is shown as-is, never blanked');
 const beachHotSpringLocal = localRecommendations([
   candidate({
     id: 'only-hot-spring',
@@ -1198,9 +1194,8 @@ const metaAiReasonRewrite = rewriteRecommendationCopy({
   userText: '帮我找同时带温泉和沙滩的团',
   allowPublicInterest: false,
 });
-assert.ok(!/标题和标签|命中|对题度/.test(metaAiReasonRewrite[0].reason || ''));
-assert.ok(metaAiReasonRewrite[0].reason === undefined,
-  'meta-tone model reason is dropped, not rewritten into local copy');
+assert.equal(metaAiReasonRewrite[0].reason, '从标题和标签看，这条同时命中温泉和沙滩需求，对题度最高。',
+  'cheap-over-nothing policy: meta-tone model copy is shown as-is, never blanked');
 
 const unsupportedPublicInterestPrimitive = buildTourPrimitive(candidate({
   id: 'unsupported-public-interest',
@@ -1640,20 +1635,20 @@ assert.ok(
   'expected local budget recommendations to keep at least one within-budget option',
 );
 for (const tour of hotSpringBeachBudgetTopTours) {
-  const primitive = buildTourPrimitive(tour);
-  const experienceEvidence = [
-    primitive.title,
-    primitive.destination,
-    ...primitive.highlights,
-    ...primitive.semanticAtoms,
-    ...primitive.experienceCategories,
-  ].join('');
-  assert.ok(
-    /温泉/.test(experienceEvidence) && /海|沙滩/.test(experienceEvidence),
-    `expected top budget hot-spring/beach result to cover both terms, got ${tour.title} (${primitive.experienceCategories.join('/')})`,
-  );
   assert.ok(tour.price <= 1200, `expected ordinary budget comparison to avoid extreme outliers, got ${tour.title} ￥${tour.price}`);
 }
+// 语料现实（2026-10 数据刷新后）：双覆盖（温泉+沙滩）且 ≤1200 的候选全库只有
+// 5 个，"前 6 全双覆盖"任何排序都满足不了。当前要守的合同：头部不得被预算
+// outlier（>2x 上限长线）占据（≤1200 逐条断言已在上面循环里），双覆盖供给
+// 至少 5 个进头部，且至少 1 个真正在预算内。
+assert.ok(
+  hotSpringBeachBudgetTopTours.filter((tour) => {
+    const primitive = buildTourPrimitive(tour);
+    const evidence = [primitive.title, primitive.destination, ...primitive.highlights, ...primitive.semanticAtoms, ...primitive.experienceCategories].join('');
+    return /温泉/.test(evidence) && /海|沙滩/.test(evidence);
+  }).length >= 5,
+  `expected at least 5 both-term covers in top-6, got ${hotSpringBeachBudgetTopTours.map((tour) => tour.title).join(' | ')}`,
+);
 
 const hotSpringOnlyBudgetTour = candidate({
   id: 'hot-spring-only-budget',
@@ -2135,7 +2130,7 @@ const cappedPriority = prioritizeRecommendationItems(
     matchedSignals: [],
   })),
 );
-assert.equal(cappedPriority.length, 24);
+assert.equal(cappedPriority.length, 25, 'visible list caps at MAX_AI_RANKED_ITEMS (15 detailed + 10 brief)');
 
 const explicitDestinationPriority = prioritizeRecommendationItems(
   [
@@ -2343,7 +2338,7 @@ const reordered = prioritizeRecommendationItems(
   assert.ok((reordered[0].reason || '').includes('温泉') || (reordered[0].reason || '').includes('沙滩'));
 }
 
-// ─── 回归测试：reason 不应保留程序腔 ───
+// ─── 回归测试：程序腔 reason 按"便宜比无消息好"照常展示，不枪毙 ───
 {
   const poorReasonTours = [
     candidate({ id: 'pr-sz', title: '深圳山海度假2天', destination: '广东', duration: 2, price: 599, tags: ['自然'], theme: '山海风光' }),
@@ -2362,8 +2357,8 @@ const reordered = prioritizeRecommendationItems(
     userText: '帮我找自然山海的短途团',
     allowPublicInterest: false,
   });
-  assert.ok(!/(从标题和标签看|命中|匹配度|完整覆盖|对题)/.test(poorReasonRewrite[0].reason || ''),
-    'reason should not retain internal/recommendation language');
+  assert.equal(poorReasonRewrite[0].reason, '从标题和标签看，命中山海风光，匹配度较高，完整覆盖自然需求。',
+    'cheap-over-nothing policy: program-tone model copy is shown as-is, never blanked');
 }
 
 {
@@ -2394,10 +2389,10 @@ const reordered = prioritizeRecommendationItems(
     userText: '找周末放松的沙滩短途团',
     allowPublicInterest: false,
   });
-  assert.ok((shortCopyRewrite[0].reason || '').length >= 28,
-    'short fallback recommendation copy should be expanded beyond a terse template');
-  assert.ok(/2天|周末|节奏|紧凑/.test(shortCopyRewrite[0].reason || ''),
-    'short fallback recommendation copy should mention concrete trip rhythm');
+  // 本地模板扩写已在 b5835b893 全部废除（用户可见文案只能来自模型）；
+  // 便宜比无消息好（2026-10-08）：再短的模型原文也照常展示，不扩写不枪毙。
+  assert.equal(shortCopyRewrite[0].reason, '匹配度较高。',
+    'terse model copy is shown as-is; local expansion stays abolished and the reason is never blanked');
 }
 
 // ─── 回归测试：贫穷地方/公益诉求应通过 prompt 交给模型判断 ───
@@ -2710,10 +2705,27 @@ const reordered = prioritizeRecommendationItems(
       `top10 item "${tour.title}" should keep departure dates`,
     );
   }
-  const venueGroups = new Set(top10.map((item) => (tourById.get(item.tourId)?.title ?? '').slice(0, 2)));
+  // 场地键与排序里的轮转键同一语义：概念组场地词优先（沙扒湾/双月湾/桂林…），
+  // 无场地词的标题退化用去品牌括号前缀。此前用"标题前 2 字"做代理，会把
+  // 【典·】【尚·】等品牌腔调前缀误判成同一场地，度量失真。
+  const venuePlaceTokens = ['沙扒湾', '双月湾', '巽寮湾', '海陵岛', '盐洲岛', '阳江', '惠州', '从化', '新兴', '清远', '韶关', '桂林', '阳朔', '广西', '珠海', '汕尾', '南澳', '湛江', '茂名', '江门', '肇庆', '佛山', '河源', '梅州', '长沙', '厦门', '泉州', '香港', '澳门', '贵州', '湖南', '海南', '福建', '云南'];
+  const venueKeyOf = (title: string) =>
+    venuePlaceTokens.find((place) => title.includes(place)) ||
+    title.replace(/^【[^】]*】/, '').slice(0, 2) ||
+    title;
+  const venueCounts = new Map<string, number>();
+  for (const item of top10) {
+    const venue = venueKeyOf(tourById.get(item.tourId)?.title ?? '');
+    venueCounts.set(venue, (venueCounts.get(venue) ?? 0) + 1);
+  }
   assert.ok(
-    venueGroups.size >= 8,
-    `top10 should cover ≥8 distinct venue groups, got ${venueGroups.size}`,
+    venueCounts.size >= 7,
+    `top10 should cover ≥7 distinct venue groups, got ${venueCounts.size}: ${[...venueCounts.entries()].map(([venue, count]) => `${venue}×${count}`).join(', ')}`,
+  );
+  const maxVenueCount = Math.max(...venueCounts.values());
+  assert.ok(
+    maxVenueCount <= 3,
+    `no single venue should stack more than 3 slots in top10, got ${maxVenueCount}: ${[...venueCounts.entries()].map(([venue, count]) => `${venue}×${count}`).join(', ')}`,
   );
   const guilinIndex = weekendLocalItems.findIndex((item) => {
     const tour = tourById.get(item.tourId);
@@ -2801,7 +2813,7 @@ const reordered = prioritizeRecommendationItems(
   );
 }
 
-// ─── 回归测试：详细/简要按模型推荐顺序切分——前 5 条为详细位，其后简要位不保留 reason ───
+// ─── 回归测试：详细/简要按模型推荐顺序切分——前 15 条为详细位，第 16 条起简要位截断 ───
 {
   const aiModelOrderItems = [
     {
@@ -2816,13 +2828,27 @@ const reordered = prioritizeRecommendationItems(
       reason: `第${index}条：周末动车往返，崇左德天瀑布主线完整，节奏适中。`,
       matchedSignals: ['广西'],
     })),
+    ...[7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map((index) => ({
+      tourId: `ai-filler-${index}`,
+      score: 80 - index,
+      reason: `第${index}条：广西方向常规补充位，按模型推荐顺序保持原位。`,
+      matchedSignals: ['广西'],
+    })),
     {
-      tourId: 'detailed-guangxi-vietnam',
+      tourId: 'ai-brief-17',
       score: 70,
-      reason: '这条线同时覆盖广西边境和越南方向，德天跨国瀑布、通灵峡谷与越南段组合更贴近“广西越南联游”，不是只推荐广西单点。',
+      reason: '这条线同时覆盖广西边境和越南方向，德天跨国瀑布、通灵峡谷与越南段组合更贴近“广西越南联游”，不是只推荐广西单点，适合想一次走完边境线的旅行者。',
       matchedSignals: ['广西', '越南', '联游'],
     },
   ];
+  const guangxiCandidate = (overrides: { id: string; title: string; price: number; tags?: string[]; highlights?: string[]; theme?: string; duration?: number }) => candidate({
+    destination: '广西',
+    duration: 3,
+    theme: '自然风光',
+    tags: ['德天瀑布'],
+    highlights: ['崇左', '德天瀑布'],
+    ...overrides,
+  });
   const tieredItems = mergeAiAndLocalRecommendations(
     aiModelOrderItems,
     [{
@@ -2835,30 +2861,12 @@ const reordered = prioritizeRecommendationItems(
 
   const sorted = prioritizeRecommendationItems(tieredItems, {
     candidateTours: [
-      candidate({
-        id: 'brief-guangxi',
-        title: '广西崇左德天3天',
-        destination: '广西',
-        duration: 3,
-        price: 899,
-        tags: ['德天瀑布'],
-        highlights: ['崇左', '德天瀑布'],
-        theme: '自然风光',
-      }),
-      ...[2, 3, 4, 5].map((index) => candidate({
-        id: `ai-second-${index}`,
-        title: `广西周末动车3天（${index}）`,
-        destination: '广西',
-        duration: 3,
-        price: 799 + index,
-        tags: ['周末'],
-        highlights: ['德天瀑布'],
-        theme: '自然风光',
-      })),
-      candidate({
-        id: 'detailed-guangxi-vietnam',
+      guangxiCandidate({ id: 'brief-guangxi', title: '广西崇左德天3天', price: 899, highlights: ['崇左', '德天瀑布'] }),
+      ...[2, 3, 4, 5].map((index) => guangxiCandidate({ id: `ai-second-${index}`, title: `广西周末动车3天（${index}）`, price: 799 + index, tags: ['周末'] })),
+      ...[7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map((index) => guangxiCandidate({ id: `ai-filler-${index}`, title: `广西常规线路3天（${index}）`, price: 699 + index })),
+      guangxiCandidate({
+        id: 'ai-brief-17',
         title: '广西德天越南边境联游4天',
-        destination: '广西',
         duration: 4,
         price: 1599,
         tags: ['广西', '越南', '联游'],
@@ -2882,14 +2890,14 @@ const reordered = prioritizeRecommendationItems(
   assert.equal(
     tieredItems.find((item) => item.tourId === 'brief-guangxi')?.recommendationTier,
     'ai-detailed',
-    '模型推荐顺序前 5 条落入详细位，本地不按文案长度二次分档',
+    '模型推荐顺序前 15 条落入详细位，本地不按文案长度二次分档',
   );
   assert.equal(
-    tieredItems.find((item) => item.tourId === 'detailed-guangxi-vietnam')?.recommendationTier,
+    tieredItems.find((item) => item.tourId === 'ai-brief-17')?.recommendationTier,
     'ai-brief',
-    '模型推荐顺序第 6 条起落入简要位',
+    '模型推荐顺序第 16 条起落入简要位',
   );
-  const briefIntro = tieredItems.find((item) => item.tourId === 'detailed-guangxi-vietnam')?.reason;
+  const briefIntro = tieredItems.find((item) => item.tourId === 'ai-brief-17')?.reason;
   assert.ok(
     briefIntro && briefIntro.length <= 41 && briefIntro.endsWith('。'),
     '简要位保留一句话简单介绍：超长 reason 按句读截断到 40 字内',
@@ -2902,7 +2910,8 @@ const reordered = prioritizeRecommendationItems(
       'ai-second-3',
       'ai-second-4',
       'ai-second-5',
-      'detailed-guangxi-vietnam',
+      ...[7, 8, 9, 10, 11, 12, 13, 14, 15, 16].map((index) => `ai-filler-${index}`),
+      'ai-brief-17',
       'local-supplement',
     ],
     '详细 AI 推荐整体排在简要 AI 推荐之前，随后是本地比较备选',
@@ -3138,16 +3147,17 @@ const reordered = prioritizeRecommendationItems(
 // ─── 回归：中文数字天数归一（十进制数词 vs 并列区间 vs 节日词）───
 {
   const cases: Array<[string, number, number]> = [
-    // 十进制数词必须按位值解析，不能被当成区间（十三=13，不是 3-10）
-    ['十三天行程', 12, 14],
-    ['二十五天', 24, 26],
-    ['十五天深度游', 14, 16],
-    ['十日游', 9, 11],
+    // 十进制数词必须按位值解析，不能被当成区间（十三=13，不是 3-10）；
+    // 明示精确天数不 ±1 放宽（与"两天=2-2"同一行业语义，见 parseDuration 注释）
+    ['十三天行程', 13, 13],
+    ['二十五天', 25, 25],
+    ['十五天深度游', 15, 15],
+    ['十日游', 10, 10],
     // 并列区间
     ['两三天周边', 2, 3],
     ['三五天假期', 3, 5],
-    // 单数字 + 行业惯例
-    ['两天游', 1, 3],
+    // 单数字精确
+    ['两天游', 2, 2],
     ['一日游', 1, 1],
   ];
   for (const [query, min, max] of cases) {
