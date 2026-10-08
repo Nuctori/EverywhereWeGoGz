@@ -16,6 +16,11 @@ const RATE_LIMIT_PER_MINUTE = 20;
 // 换下一个 upstream 前必须命中的失败状态。
 const RETRYABLE_STATUS = new Set([401, 402, 403, 404, 408, 429, 500, 502, 503, 504]);
 
+// GLM 免费档晚高峰常态性 1305 过载（"稍后再试"通常亚秒级缓解）。对 1305 做
+// 同上游短退避重试再换家——直接换家会把流量灌给 4B/免费小模型，那才是文案
+// 与条数崩塌的源头。重试等待不计 CPU（Workers 按 CPU 时间计费）。
+const GLM_429_RETRY_DELAYS_MS = [800, 1600];
+
 const rateBuckets = new Map<string, number[]>();
 
 function corsHeaders(origin: string) {
@@ -28,6 +33,7 @@ function corsHeaders(origin: string) {
 }
 
 // 上游目标硬白名单：协议必须 https、主机必须在枚举内。
+// api.z.ai 曾尝试接入：key 有效但 Workers 出口被 WAF 拦成 405 HTML，不列入。
 const UPSTREAM_HOSTS = new Set(['open.bigmodel.cn', 'api.siliconflow.cn', 'openrouter.ai']);
 
 function assertSafeUpstreamUrl(url: string): string {
@@ -107,37 +113,46 @@ export default {
     const forwarded = pickForwardFields(incomingBody);
 
     const failures: string[] = [];
+    let served: Response | null = null;
 
-    // upstream 1：智谱开放平台 GLM（免费模型，思维链开启）
+    // upstream 1：智谱国内 bigmodel GLM（免费档，思维链开启）。
+    // 429 分两种：1305「模型访问量过大」是晚高峰瞬时过载，短退避重试通常
+    // 亚秒级缓解；1302「账户达到速率限制」是账户 RPM 上限，重试只会加请求，
+    // 直接换下一上游。z.ai（海外集群）实测从 Workers 出口被 WAF 拦成 405
+    // HTML 挑战页，服务端不可用，不接（key 仍有效，可留给本地直连场景）。
     if (env.BIGMODEL_API_KEY) {
       try {
-        const upstreamUrl = assertSafeUpstreamUrl(
-          'https://open.bigmodel.cn/api/paas/v4/chat/completions',
-        );
-        const upstreamResponse = await fetch(upstreamUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${env.BIGMODEL_API_KEY}`,
-          },
-          body: JSON.stringify({ ...forwarded, model: 'GLM-4.7-Flash' }),
-        });
-        if (upstreamResponse.ok) {
-          const headers = new Headers(upstreamResponse);
-          headers.set('Access-Control-Allow-Origin', origin);
-          headers.set('X-EWG-Upstream', 'bigmodel');
-          return new Response(upstreamResponse.body, {
-            status: upstreamResponse.status,
-            headers,
+        const upstreamUrl = assertSafeUpstreamUrl('https://open.bigmodel.cn/api/paas/v4/chat/completions');
+        let attempt = 0;
+        for (;;) {
+          const upstreamResponse = await fetch(upstreamUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${env.BIGMODEL_API_KEY}`,
+            },
+            body: JSON.stringify({ ...forwarded, model: 'GLM-4.7-Flash' }),
           });
-        }
-        const detail = await upstreamResponse.text().catch(() => '');
-        failures.push(`bigmodel: ${upstreamResponse.status} ${detail.slice(0, 300)}`);
-        if (!RETRYABLE_STATUS.has(upstreamResponse.status)) {
-          return new Response(JSON.stringify({ error: { message: failures.join(' | ') } }), {
-            status: upstreamResponse.status,
-            headers: { ...cors, 'Content-Type': 'application/json' },
-          });
+          if (upstreamResponse.ok) {
+            const headers = new Headers();
+            upstreamResponse.headers.forEach((value, key) => headers.set(key, value));
+            headers.set('Access-Control-Allow-Origin', origin);
+            headers.set('X-EWG-Upstream', 'bigmodel');
+            served = new Response(upstreamResponse.body, {
+              status: upstreamResponse.status,
+              headers,
+            });
+            break;
+          }
+          const detail = await upstreamResponse.text().catch(() => '');
+          const is1305Overload = upstreamResponse.status === 429 && detail.includes('1305');
+          if (is1305Overload && attempt < GLM_429_RETRY_DELAYS_MS.length) {
+            await new Promise((resolve) => setTimeout(resolve, GLM_429_RETRY_DELAYS_MS[attempt]));
+            attempt += 1;
+            continue;
+          }
+          failures.push(`bigmodel: ${upstreamResponse.status} ${detail.slice(0, 300)}`);
+          break;
         }
       } catch (error) {
         failures.push(`bigmodel: ${String(error)}`);
@@ -145,6 +160,7 @@ export default {
     } else {
       failures.push('bigmodel: no key configured');
     }
+    if (served) return served;
 
     // upstream 2：硅基流动 Qwen（免费小模型；thinking 参数 GLM 专属，剥离）
     if (env.SILICONFLOW_API_KEY) {
