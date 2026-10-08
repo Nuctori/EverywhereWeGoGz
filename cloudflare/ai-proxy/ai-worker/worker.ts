@@ -199,43 +199,50 @@ export default {
       failures.push('siliconflow: no key configured');
     }
 
-    // upstream 3：OpenRouter 免费档兜底
-    if (env.OPENROUTER_API_KEY) {
+    // upstream 3：OpenRouter 免费档兜底。双 key 轮换 = 两份免费日额度（每账号
+    // 50 次/天），单 key 失效或限频自动换下一把。只做 :free 模型：模型名由
+    // Worker 硬编码覆盖（客户端传什么都不会转发），运行时再断言一次，杜绝
+    // 烧掉账号里的真实余额。
+    const openRouterFreeModel = 'poolside/laguna-xs-2.1:free';
+    const openRouterKeys = [env.OPENROUTER_API_KEY, env.OPENROUTER_API_KEY_2].filter(
+      (key): key is string => Boolean(key),
+    );
+    if (!openRouterFreeModel.endsWith(':free')) {
+      failures.push('openrouter: refusing non-free model (free-only policy)');
+    } else if (openRouterKeys.length === 0) {
+      failures.push('openrouter: no key configured');
+    } else {
       try {
         const { thinking: _dropped, ...baseForwarded } = forwarded;
         const upstreamUrl = assertSafeUpstreamUrl('https://openrouter.ai/api/v1/chat/completions');
-        const upstreamResponse = await fetch(upstreamUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
-            'HTTP-Referer': 'https://nuctori.github.io/EverywhereWeGoGz/',
-            'X-OpenRouter-Title': 'EverywhereWeGoGz',
-          },
-          body: JSON.stringify({ ...baseForwarded, model: 'poolside/laguna-xs-2.1:free' }),
-        });
-        if (upstreamResponse.ok) {
-          const headers = new Headers(upstreamResponse);
-          headers.set('Access-Control-Allow-Origin', origin);
-          headers.set('X-EWG-Upstream', 'openrouter');
-          return new Response(upstreamResponse.body, {
-            status: upstreamResponse.status,
-            headers,
+        for (const [keyIndex, apiKey] of openRouterKeys.entries()) {
+          const upstreamResponse = await fetch(upstreamUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+              'HTTP-Referer': 'https://nuctori.github.io/EverywhereWeGoGz/',
+              'X-OpenRouter-Title': 'EverywhereWeGoGz',
+            },
+            body: JSON.stringify({ ...baseForwarded, model: openRouterFreeModel }),
           });
-        }
-        const detail = await upstreamResponse.text().catch(() => '');
-        failures.push(`openrouter: ${upstreamResponse.status} ${detail.slice(0, 300)}`);
-        if (!RETRYABLE_STATUS.has(upstreamResponse.status)) {
-          return new Response(JSON.stringify({ error: { message: failures.join(' | ') } }), {
-            status: upstreamResponse.status,
-            headers: { ...cors, 'Content-Type': 'application/json' },
-          });
+          if (upstreamResponse.ok) {
+            const headers = new Headers(upstreamResponse);
+            headers.set('Access-Control-Allow-Origin', origin);
+            headers.set('X-EWG-Upstream', openRouterKeys.length > 1 ? `openrouter#${keyIndex + 1}` : 'openrouter');
+            return new Response(upstreamResponse.body, {
+              status: upstreamResponse.status,
+              headers,
+            });
+          }
+          const detail = await upstreamResponse.text().catch(() => '');
+          failures.push(`openrouter#${keyIndex + 1}: ${upstreamResponse.status} ${detail.slice(0, 240)}`);
+          // 单 key 的 401（失效）/402/429（额度或共享池限频）都换下一把；
+          // 全部失败才落到收尾的 502。
         }
       } catch (error) {
         failures.push(`openrouter: ${String(error)}`);
       }
-    } else {
-      failures.push('openrouter: no key configured');
     }
 
     return new Response(
