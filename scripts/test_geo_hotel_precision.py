@@ -377,3 +377,24 @@ def test_rc5_helper_passes_through_without_catalog_city():
     from geocode_destinations import _fuzzy_result_within_city
 
     assert _fuzzy_result_within_city("不存在城市", 23.0, 113.0) is True
+
+
+def test_audit_short_hand_alias_never_doubles_the_label():
+    # dest=多站路线 containing the shorthand 禾木 (canonical 禾木村): the old
+    # concat invented 禾木村禾木. The canonical spelling must win and keep
+    # the curated coordinate.
+    from geo_catalog import _find_direct_place_match, _materialize_named_place
+
+    place, label = _find_direct_place_match(
+        "乌鲁木齐、布尔津、禾木、喀纳斯、伊宁、巴音布鲁克"
+    )
+    assert (place["name"], label) == ("禾木村", "禾木村")
+    assert _materialize_named_place(place, label).get("latitude") is not None
+
+    # A real source span keeps its concat: dest=闸坡 anchors to 阳江闸坡.
+    place, label = _find_direct_place_match("闸坡")
+    assert label == "阳江闸坡"
+
+    # The feed's own wording is echoed as-is (芭提雅芭堤雅 is a source string).
+    place, label = _find_direct_place_match("芭提雅芭堤雅")
+    assert label == "芭提雅芭堤雅"

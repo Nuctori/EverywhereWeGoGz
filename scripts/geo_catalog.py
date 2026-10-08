@@ -1574,7 +1574,18 @@ def _find_direct_place_match(text):
     ]
     if named_matches:
         alias, place = max(named_matches, key=lambda item: len(item[0]))
-        label = alias if alias.startswith(place["name"]) else f"{place['name']}{alias}"
+        if (
+            place["name"].startswith(alias)
+            and f"{place['name']}{alias}" not in value
+        ):
+            # alias ⊂ canonical (禾木 ⊂ 禾木村) and the concatenated span is
+            # invented (dest text has 、禾木、, never 禾木村禾木) — use the
+            # canonical spelling instead of doubling (禾木村禾木). The concat
+            # stays when it reconstructs a real source span (闸坡 → 阳江闸坡,
+            # dest=西双版纳版纳 stays the feed's own wording).
+            label = place["name"]
+        else:
+            label = alias if alias.startswith(place["name"]) else f"{place['name']}{alias}"
         return place, label
     place = find_place(value)
     return (place, place["name"]) if place else (None, "")
