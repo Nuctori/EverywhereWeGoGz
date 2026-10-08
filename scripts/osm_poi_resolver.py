@@ -148,6 +148,15 @@ def _candidate_labels(tour: dict) -> list[str]:
                 or current_name in candidate
                 or candidate in current_name
                 or len(current_tail) >= 3 and current_tail in candidate
+                # Same-city labels are alternate POI spellings of ONE
+                # destination, not competing places (chosen 闸坡 vs the mined
+                # hotel 北洛秘境): the shared city prefix anchors both.
+                or (
+                    city
+                    and candidate != city
+                    and candidate.startswith(city)
+                    and current_name.startswith(city)
+                )
             )
         )
 
@@ -314,6 +323,14 @@ def enrich_tours_from_osm(tours: list[dict], index_path: Path = DEFAULT_INDEX_PA
             continue
         current_source = str(tour.get("destinationCoordinateSource") or "")
         if current_source in {"geocoder", "osm"}:
+            continue
+        if (
+            current_source == "catalog"
+            and str(tour.get("destinationGeoLevel") or "") == "poi"
+        ):
+            # A curated exact POI pin is authoritative. Same-city mined labels
+            # (南昆山生态旅游区 on a 龙门云顶温泉 tour) are itinerary stops,
+            # not the destination — never replace the pin.
             continue
         labels = _candidate_labels(tour)
         if not labels:

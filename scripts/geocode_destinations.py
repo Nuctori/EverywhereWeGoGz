@@ -24,6 +24,11 @@ USER_AGENT = "laoguang-travel-map/1.0 (+https://github.com/)"
 REQUEST_TIMEOUT_SECONDS = 8
 MIN_REQUEST_INTERVAL_SECONDS = 1.1
 GEOCODER_POOL_FAILURE_LIMIT = 2
+# Fuzzy town matches (林丰村→茂名 at 395km) must stay plausibly inside the
+# expected city's catalog footprint. Large counties span ~50km from their
+# centroid, so the bound only kills cross-city wrong pins, not real towns.
+FUZZY_ADMIN_MAX_DISTANCE_KM = 80
+MAX_GEOCODER_CANDIDATE_LABELS = 3
 _last_request_at = 0.0
 _provider_failures: dict[str, int] = {}
 _overpass_endpoint_index = 0
@@ -225,6 +230,89 @@ def destination_queries(tour: dict) -> list[str]:
     return list(dict.fromkeys(normalize_query(query) for query in queries if query))
 
 
+def _mining_candidate_labels(tour: dict) -> list[str]:
+    """Full venue names mined from the source page (hotel brands etc.).
+
+    destinationPlaceName is often a shortened alias (蓝钟温泉) while the source
+    text carries the exact venue name (肇庆怀集蓝钟森林温泉酒店). That exact
+    name is the only string public geocoders can match a rural resort by, so it
+    becomes its own evidence scope instead of being dropped after mining.
+    """
+    resolution = tour.get("geoResolution")
+    mining = (
+        resolution.get("mining")
+        if isinstance(resolution, dict) and isinstance(resolution.get("mining"), dict)
+        else {}
+    )
+    rows = [
+        row
+        for row in mining.get("sourceCandidates", [])
+        if isinstance(row, dict) and str(row.get("label") or "").strip()
+    ]
+    rows.sort(
+        key=lambda row: (
+            -(_try_int(row.get("priority")) or 0),
+            len(str(row.get("label") or "")),
+        )
+    )
+    mined_rows = [str(row["label"]).strip() for row in rows]
+    candidate_labels = mining.get("candidateLabels")
+    mined_labels = [
+        str(value).strip()
+        for value in (candidate_labels if isinstance(candidate_labels, list) else [])
+        if str(value).strip()
+    ]
+    seen = {
+        normalize_query(str(tour.get(key) or "").strip())
+        for key in ("destinationPlaceName", "destinationCity", "destinationProvince")
+    }
+    labels: list[str] = []
+    for label in [*mined_rows, *mined_labels]:
+        normalized = normalize_query(label)
+        if not normalized or normalized in seen:
+            continue
+        seen.add(normalized)
+        # Short tokens are admin/context fragments the primary queries already
+        # carry; only venue-sized names add matching power.
+        if not 4 <= len(normalized) <= 24:
+            continue
+        labels.append(label)
+        if len(labels) >= MAX_GEOCODER_CANDIDATE_LABELS:
+            break
+    return labels
+
+
+def destination_query_groups(tour: dict) -> list[tuple[str, list[str]]]:
+    """(label, queries) pairs: the primary place first, then mined venue names.
+
+    Each group validates results against its own label so a hotel-name query
+    is judged by hotel-name evidence, not by the shortened place alias.
+    """
+    groups: list[tuple[str, list[str]]] = []
+    label = str(tour.get("destinationPlaceName") or "").strip()
+    if label:
+        groups.append((label, destination_queries(tour)))
+    province = str(tour.get("destinationProvince") or "").strip()
+    country = str(tour.get("destinationCountry") or "").strip()
+    country_part = country if country and country != "中国" else "中国"
+    for candidate in _mining_candidate_labels(tour):
+        queries = [
+            " ".join(part for part in (candidate, province, country_part) if part),
+            candidate,
+        ]
+        groups.append(
+            (
+                candidate,
+                list(
+                    dict.fromkeys(
+                        normalize_query(query) for query in queries if query
+                    )
+                ),
+            )
+        )
+    return groups
+
+
 def destination_fuzzy_queries(tour: dict) -> list[str]:
     """Search the nearest administrative place when a POI itself is absent."""
     label = str(tour.get("destinationPlaceName") or "").strip()
@@ -292,6 +380,47 @@ def _has_province_evidence(expected_province: str, text: str) -> bool:
     return _has_admin_evidence(expected_province, text)
 
 
+def _distance_km(
+    latitude_a: object, longitude_a: object, latitude_b: object, longitude_b: object
+) -> float | None:
+    try:
+        lat_a, lon_a, lat_b, lon_b = (
+            float(value)
+            for value in (latitude_a, longitude_a, latitude_b, longitude_b)
+        )
+    except (TypeError, ValueError):
+        return None
+    if not (
+        -90 <= lat_a <= 90
+        and -90 <= lat_b <= 90
+        and -180 <= lon_a <= 180
+        and -180 <= lon_b <= 180
+    ):
+        return None
+    lat_delta = math.radians(lat_b - lat_a)
+    lon_delta = math.radians(lon_b - lon_a)
+    haversine = (
+        math.sin(lat_delta / 2) ** 2
+        + math.cos(math.radians(lat_a))
+        * math.cos(math.radians(lat_b))
+        * math.sin(lon_delta / 2) ** 2
+    )
+    return 6371 * 2 * math.asin(math.sqrt(haversine))
+
+
+def _fuzzy_result_within_city(
+    expected_city: str, latitude: object, longitude: object
+) -> bool:
+    """A fuzzy admin match must sit inside the expected city's footprint."""
+    place = find_place(expected_city) if str(expected_city or "").strip() else None
+    if not isinstance(place, dict):
+        return True
+    distance = _distance_km(
+        place.get("latitude"), place.get("longitude"), latitude, longitude
+    )
+    return distance is None or distance <= FUZZY_ADMIN_MAX_DISTANCE_KM
+
+
 def _result_context_text(display_name: str, address: dict | None) -> str:
     values = [str(display_name or "")]
     if isinstance(address, dict):
@@ -331,6 +460,12 @@ def _has_conflicting_admin_context(
     ):
         return False
     if city_tokens:
+        # Providers format lower levels without suffixes (惠州市龙门地派 for an
+        # expected 龙门 county); the token table above only sees suffixed forms,
+        # so a bare expected-city mention in the display itself clears the
+        # would-be conflict instead of rejecting a POI that sits in the city.
+        if _has_admin_evidence(expected_city, display_name):
+            return False
         return True
     # Providers sometimes return a bare POI name with no administrative suffix.
     # In that case a structured address can still prove the expected city.
@@ -379,7 +514,17 @@ def _contains_named_variant(text: str, variant: str) -> bool:
 def _has_named_evidence(label: str, text: str, expected_city: str = "") -> bool:
     normalized_text = re.sub(r"\s+", "", str(text or ""))
     normalized_text_without_admin_suffixes = _strip_admin_suffixes(normalized_text)
-    variants = _named_variants(label, expected_city)
+    variants = []
+    for variant in _named_variants(label, expected_city):
+        variants.append(variant)
+        # The provider indexes the venue under the brand without the marketing
+        # tail (蓝钟森林温泉) while the mined label carries the full suffix
+        # (蓝钟森林温泉度假酒店); the base name is still named evidence.
+        for suffix in sorted(POI_DESCRIPTIVE_SUFFIXES, key=len, reverse=True):
+            if variant.endswith(suffix) and len(variant) > len(suffix) + 1:
+                variants.append(variant[: -len(suffix)])
+                break
+    variants = list(dict.fromkeys(variants))
     return bool(variants) and any(
         _contains_named_variant(normalized_text, variant)
         or _contains_named_variant(normalized_text_without_admin_suffixes, variant)
@@ -395,6 +540,11 @@ def _named_result_quality(label: str, name: str, expected_city: str = "") -> int
         if normalized_name == variant:
             return 100
         if normalized_name in {variant + suffix for suffix in POI_DESCRIPTIVE_SUFFIXES}:
+            return 90
+        # Mirror image: the provider indexes the resort under the shorter name
+        # (蓝钟森林温泉) while the mined label carries the full venue suffix
+        # (蓝钟森林温泉度假酒店). Same contiguous name, dropped marketing tail.
+        if variant in {normalized_name + suffix for suffix in POI_DESCRIPTIVE_SUFFIXES}:
             return 90
         # Admin-suffix equality (e.g. 硅谷 ↔ 硅谷街道) is only acceptable when
         # the query carried a city context. Without one, a bare POI label must
@@ -639,6 +789,7 @@ def _valid_cached_result(
         > 0
         and not context_conflict
         and result.get("level") == "town"
+        and _fuzzy_result_within_city(expected_city, latitude, longitude)
     )
     return (
         provider in GEOCODER_PROVIDERS
@@ -1136,6 +1287,16 @@ def geocode_query(
                     _provider_failures.get("overpass", 0) + 1
                 )
     merged = _merge_geocoder_results(results)
+    if (
+        merged
+        and merged.get("precision") == "approximate"
+        and not _fuzzy_result_within_city(
+            expected_city, merged.get("latitude"), merged.get("longitude")
+        )
+    ):
+        # Fuzzy town/village wins that land far outside the expected city are
+        # same-name admin collisions (林丰温泉→茂名林丰村), not coarse evidence.
+        return None
     return {"query": query, **merged} if merged else None
 
 
@@ -1206,9 +1367,18 @@ def enrich_tours(
                     "reason": "already-resolved",
                 }
             continue
-        queries = destination_queries(tour)
+        query_groups = destination_query_groups(tour)
         fuzzy_queries = destination_fuzzy_queries(tour)
-        all_queries = list(dict.fromkeys(queries + fuzzy_queries))
+        all_queries = list(
+            dict.fromkeys(
+                [
+                    query
+                    for _, group_queries in query_groups
+                    for query in group_queries
+                ]
+                + fuzzy_queries
+            )
+        )
         resolution = tour.get("geoResolution")
         if not all_queries:
             if isinstance(resolution, dict):
@@ -1225,16 +1395,21 @@ def enrich_tours(
         expected_city = str(tour.get("destinationCity") or "")
         expected_province = str(tour.get("destinationProvince") or "")
         result = None
-        for query in queries:
-            cached_result = cache.get(normalize_query(query))
-            if _valid_cached_result(label, expected_city, cached_result):
-                result = cached_result
-                if isinstance(resolution, dict):
-                    resolution["geocoder"] = {
-                        "status": "resolved-cache",
-                        "queries": all_queries,
-                        "reason": "validated-cache-hit",
-                    }
+        resolved_label = ""
+        for group_label, group_queries in query_groups:
+            for query in group_queries:
+                cached_result = cache.get(normalize_query(query))
+                if _valid_cached_result(group_label, expected_city, cached_result):
+                    result = cached_result
+                    resolved_label = group_label
+                    if isinstance(resolution, dict):
+                        resolution["geocoder"] = {
+                            "status": "resolved-cache",
+                            "queries": all_queries,
+                            "reason": "validated-cache-hit",
+                        }
+                    break
+            if result is not None:
                 break
         if result is None:
             for query in fuzzy_queries:
@@ -1247,6 +1422,7 @@ def enrich_tours(
                     allow_fuzzy=True,
                 ):
                     result = cached_result
+                    resolved_label = label
                     if isinstance(resolution, dict):
                         resolution["geocoder"] = {
                             "status": "resolved-cache-approximate",
@@ -1255,29 +1431,34 @@ def enrich_tours(
                         }
                     break
         if result is None and allow_network:
-            for query in queries:
-                result_key = (
-                    normalize_query(query),
-                    expected_city,
-                    expected_province,
-                    False,
-                )
-                if result_key in network_results:
-                    result = network_results[result_key]
-                else:
-                    result = geocode_query(
-                        label, query, expected_city, expected_province
+            for group_label, group_queries in query_groups:
+                for query in group_queries:
+                    result_key = (
+                        normalize_query(query),
+                        expected_city,
+                        expected_province,
+                        False,
                     )
-                    network_results[result_key] = result
-                if result:
-                    cache[normalize_query(query)] = result
-                    changed = True
-                    if isinstance(resolution, dict):
-                        resolution["geocoder"] = {
-                            "status": "resolved-network",
-                            "queries": all_queries,
-                            "reason": "validated-provider-match",
-                        }
+                    if result_key in network_results:
+                        group_result = network_results[result_key]
+                    else:
+                        group_result = geocode_query(
+                            group_label, query, expected_city, expected_province
+                        )
+                        network_results[result_key] = group_result
+                    if group_result:
+                        result = group_result
+                        resolved_label = group_label
+                        cache[normalize_query(query)] = group_result
+                        changed = True
+                        if isinstance(resolution, dict):
+                            resolution["geocoder"] = {
+                                "status": "resolved-network",
+                                "queries": all_queries,
+                                "reason": "validated-provider-match",
+                            }
+                        break
+                if result is not None:
                     break
         if result is None and allow_network:
             for query in fuzzy_queries:
@@ -1295,6 +1476,7 @@ def enrich_tours(
                     )
                     network_results[result_key] = result
                 if result:
+                    resolved_label = label
                     cache[normalize_query(query)] = result
                     changed = True
                     if isinstance(resolution, dict):
@@ -1313,6 +1495,10 @@ def enrich_tours(
                 else "cache-miss",
             }
         if isinstance(result, dict) and result.get("latitude") is not None:
+            if resolved_label and resolved_label != label:
+                # The win came from a mined venue name; record it as the place
+                # so the map shows the hotel, not the shortened alias.
+                tour["destinationPlaceName"] = resolved_label
             _apply_result(tour, result)
             resolved += 1
     if changed:

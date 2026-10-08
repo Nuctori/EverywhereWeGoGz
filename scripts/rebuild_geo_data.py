@@ -253,6 +253,31 @@ def _preserve_existing_precise_geo(previous: object, current: object) -> bool:
     current_source = str(current.get("destinationCoordinateSource") or "")
     if current_source in {"catalog", "osm"} and current_source != "unknown":
         return False
+    # Fuzzy town pins are the weakest geocoder evidence class: never freeze
+    # them. Dropping forces re-enrichment so improved validation can confirm
+    # them from cache or demote them to the honest city fallback, instead of
+    # carrying a stale wrong pin (龙门林丰温泉→茂名林丰村) across rebuilds.
+    # Country/region-level approximate pins stay frozen: nothing finer exists
+    # for them to resolve to.
+    if (
+        source == "geocoder"
+        and str(previous.get("destinationCoordinatePrecision") or "") == "approximate"
+        and str(previous.get("destinationGeoLevel") or "") == "town"
+    ):
+        current_mining.pop("resolvedCandidate", None)
+        for key in (
+            "destinationLatitude",
+            "destinationLongitude",
+            "destinationGeoLevel",
+            "destinationLocality",
+            "destinationCoordinateSource",
+            "destinationCoordinatePrecision",
+            "destinationAddress",
+            "geoConfidence",
+            "geoSource",
+        ):
+            previous.pop(key, None)
+        return False
     for key in (
         "destinationCity",
         "destinationPlaceName",

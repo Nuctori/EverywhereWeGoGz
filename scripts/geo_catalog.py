@@ -2094,6 +2094,42 @@ def _append_unique(values, value):
         values.append(value)
 
 
+def _title_named_alias_upgrade(
+    title,
+    place,
+    departure_names,
+    *,
+    domestic_route: bool,
+    poi_index_enabled: bool,
+) -> str:
+    """Named alias of `place` mentioned in the title, for bare-city matches.
+
+    A bare city destination (dest=阳江) is the weakest direct evidence. When
+    the title names a specific alias of the SAME catalog place (阳江北洛秘境),
+    that alias is the real destination and must flow downstream so the OSM/geocoder
+    stages can pin the POI instead of the city centroid.
+    """
+    title_text = str(title or "")
+    if not title_text.strip():
+        return ""
+    for mention in _iter_place_mentions(
+        title_text,
+        domestic_route=domestic_route,
+        poi_index_enabled=poi_index_enabled,
+        in_title=True,
+    ):
+        if mention["place"].get("name") != place.get("name"):
+            continue
+        if not _is_inline_named_alias(title_text, mention):
+            continue
+        if mention["alias"] in departure_names or _is_departure_mention(
+            title_text, mention
+        ):
+            continue
+        return _place_label(title_text, mention)
+    return ""
+
+
 def mine_destination_place(raw, title, destination, detail=None, resolution=None):
     """Extract a named destination from title/detail text without treating departure as destination."""
     destination_text = str(destination or "").strip()
@@ -2165,6 +2201,16 @@ def mine_destination_place(raw, title, destination, detail=None, resolution=None
     }
     direct_place, direct_label = _find_direct_place_match(destination_text)
     if direct_place and direct_place["name"] not in title_departure_names:
+        if direct_label == direct_place["name"]:
+            upgrade_label = _title_named_alias_upgrade(
+                title,
+                direct_place,
+                title_departure_names,
+                domestic_route=brand_guard_domestic,
+                poi_index_enabled=poi_index_enabled,
+            )
+            if upgrade_label:
+                direct_label = upgrade_label
         materialized = _materialize_named_place(direct_place, direct_label)
         mining["status"] = (
             "resolved" if materialized.get("latitude") is not None else "no-coordinate"
