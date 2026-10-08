@@ -5233,6 +5233,22 @@ function getTertiaryApiKey() {
   );
 }
 
+function getQuaternaryApiKey() {
+  return (
+    decodeDefaultApiKey(readRuntimeEnv('VITE_AI_QUATERNARY_API_KEY_B64')) ||
+    readRuntimeEnv('VITE_AI_QUATERNARY_API_KEY') ||
+    ''
+  );
+}
+
+function getFifthApiKey() {
+  return (
+    decodeDefaultApiKey(readRuntimeEnv('VITE_AI_FIFTH_API_KEY_B64')) ||
+    readRuntimeEnv('VITE_AI_FIFTH_API_KEY') ||
+    ''
+  );
+}
+
 function getFallbackApiKey() {
   return (
     decodeDefaultApiKey(readRuntimeEnv('VITE_AI_FALLBACK_API_KEY_B64')) ||
@@ -5302,13 +5318,23 @@ function getResolvedAiConfigs(override?: Partial<AiProviderConfig>): AiProviderC
     baseUrl: readRuntimeEnv('VITE_AI_TERTIARY_BASE_URL') || '',
     model: readRuntimeEnv('VITE_AI_TERTIARY_MODEL') || '',
   });
+  const quaternaryConfig = buildAiProviderConfig({
+    apiKey: getQuaternaryApiKey(),
+    baseUrl: readRuntimeEnv('VITE_AI_QUATERNARY_BASE_URL') || '',
+    model: readRuntimeEnv('VITE_AI_QUATERNARY_MODEL') || '',
+  });
+  const fifthConfig = buildAiProviderConfig({
+    apiKey: getFifthApiKey(),
+    baseUrl: readRuntimeEnv('VITE_AI_FIFTH_BASE_URL') || '',
+    model: readRuntimeEnv('VITE_AI_FIFTH_MODEL') || '',
+  });
   const fallbackConfig = buildAiProviderConfig({
     apiKey: getFallbackApiKey(),
     baseUrl: readRuntimeEnv('VITE_AI_FALLBACK_BASE_URL') || readRuntimeEnv('DEEPSEEK_BASE_URL') || '',
     model: readRuntimeEnv('VITE_AI_FALLBACK_MODEL') || readRuntimeEnv('DEEPSEEK_MODEL') || '',
   });
 
-  const configs = [primaryConfig, secondaryConfig, tertiaryConfig, fallbackConfig].filter((config): config is AiProviderConfig => Boolean(config));
+  const configs = [primaryConfig, secondaryConfig, tertiaryConfig, quaternaryConfig, fifthConfig, fallbackConfig].filter((config): config is AiProviderConfig => Boolean(config));
   return configs.filter((config, index) =>
     configs.findIndex((candidate) => sameAiProviderConfig(candidate, config)) === index,
   );
@@ -7788,6 +7814,10 @@ function getProviderTimeoutMs(config: AiProviderConfig) {
   if (
     providerKey.includes('siliconflow') ||
     providerKey.includes('openrouter') ||
+    providerKey.includes('modelscope') ||
+    providerKey.includes('groq') ||
+    providerKey.includes('mistral') ||
+    providerKey.includes('bigmodel') ||
     providerKey.includes('qwen') ||
     providerKey.includes('z.ai') ||
     providerKey.includes('glm')
@@ -7814,14 +7844,23 @@ function shouldUseLiteAiPrompt(config: AiProviderConfig) {
   return (
     providerKey.includes('openrouter') ||
     providerKey.includes('siliconflow') ||
+    providerKey.includes('modelscope') ||
+    providerKey.includes('groq') ||
+    providerKey.includes('mistral') ||
     providerKey.includes('qwen')
   );
 }
 
-// 思维链只在主供应商（z.ai GLM）开启：免费/付费兜底保持低延迟，
-// 主模型用真推理换理解与排序质量，reasoning_content 流式增量透出给面板实时展示。
+// 思维链只在 GLM 官方端点（z.ai / bigmodel.cn，同一套 v4 API）及自建代理
+// （ai.114124.xyz，Worker 首选上游即 bigmodel GLM，thinking 参数原样透传）开启：
+// 免费/付费兜底保持低延迟，主模型用真推理换理解与排序质量。
 function isThinkingCapableProvider(config: AiProviderConfig) {
-  return `${config.baseUrl} ${config.model}`.toLowerCase().includes('api.z.ai');
+  const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
+  return (
+    providerKey.includes('api.z.ai') ||
+    providerKey.includes('open.bigmodel.cn') ||
+    providerKey.includes('ai.114124.xyz')
+  );
 }
 
 function buildAiRequestBody(

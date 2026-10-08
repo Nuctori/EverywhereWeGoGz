@@ -1,0 +1,13 @@
+name = "ewg-ai-proxy"
+main = "ai-worker/worker.ts"
+compatibility_date = "2026-09-01"
+
+# 自定义域：workers.dev 在大陆被墙，必须走自有域名（114124.xyz 已托管在本 CF 账户）。
+# wrangler deploy 会自动创建 DNS 记录与证书。
+routes = [
+  { pattern = "ai.114124.xyz", custom_domain = true },
+]
+
+# Workers 免费版即可运行；secrets 不进 wrangler.toml，用 `wrangler secret put` 设置：
+#   BIGMODEL_API_KEY / SILICONFLOW_API_KEY / OPENROUTER_API_KEY
+# workers_dev 默认开启，部署后地址形如 https://ewg-ai-proxy.<子域>.workers.dev

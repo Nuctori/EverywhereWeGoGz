@@ -67,22 +67,13 @@ jobs:
         run: npm run build:pages
         env:
           APP_BASE: EverywhereWeGoGz
-          VITE_AI_DEFAULT_BASE_URL: https://api.z.ai/api/paas/v4
+          # 供应商链 2026-10-08 二次重组：key 全部收进 Cloudflare Worker 服务端 secrets，
+          # 前端只认 https://ai.114124.xyz（Origin 白名单 + 每 IP 限速），bundle 零明文 key。
+          # Worker 内部链：bigmodel GLM-4.7-Flash → SiliconFlow → OpenRouter，改上游进
+          # cloudflare/ai-proxy（wrangler secret put 修改 key，deploy.yml 不再持有任何 key）。
+          VITE_AI_DEFAULT_BASE_URL: https://ai.114124.xyz/v1
           VITE_AI_DEFAULT_MODEL: GLM-4.7-Flash
-          VITE_AI_DEFAULT_API_KEY_B64: MmMzZjFiNjZkMDc4NDk5N2E0NmZlYzk5MzllZGU2MDguSlJ0NWJSRFl6T2NVWVVadg==
-          VITE_AI_SECONDARY_BASE_URL: https://api.siliconflow.cn/v1
-          VITE_AI_SECONDARY_MODEL: Qwen/Qwen3.5-4B
-          VITE_AI_SECONDARY_API_KEY_B64: c2stcGF3ZGJzaXhucnhvY2NkY3VkeGVwbWhzZHdrZmtqcm5qeWZpemFlcnJ6eGF0bHdv
-          VITE_AI_TERTIARY_BASE_URL: https://openrouter.ai/api/v1
-          # 免费 slot 实测 2026-10-02：glm-4.5-air:free 已下架（404，免费档转付费），
-          # dots-3-note-preview:free 三连调用 1.1~1.8s 直出中文内容、512K ctx。
-          VITE_AI_TERTIARY_MODEL: dots-studio/dots-3-note-preview:free
-          VITE_AI_TERTIARY_API_KEY_B64: c2stb3ItdjEtZTlkNGY2YmViOTk3NzNkZjc5NWEwMDNlM2NlYzQzYzE5NzI5YzQxYmY4MTk0ZGRhMjZmN2RkNTU1NGU5NzMwZg==
-          VITE_AI_FALLBACK_BASE_URL: https://openrouter.ai/api/v1
-          # 原 DeepSeek 官方 slot 欠费 402 退役（充值后可在 .env.example 恢复）；
-          # laguna-xs-2.1:free 免费但上游偶发 429，只作最后兜底。
-          VITE_AI_FALLBACK_MODEL: poolside/laguna-xs-2.1:free
-          VITE_AI_FALLBACK_API_KEY_B64: c2stb3ItdjEtZTlkNGY2YmViOTk3NzNkZjc5NWEwMDNlM2NlYzQzYzE5NzI5YzQxYmY4MTk0ZGRhMjZmN2RkNTU1NGU5NzMwZg==
+          VITE_AI_DEFAULT_API_KEY: ewg-proxy（非机密占位，Worker 只校验 Origin）
 
       - name: Publish build artifacts to CDN branch
         shell: bash
