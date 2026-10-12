@@ -112,6 +112,7 @@ jobs:
           WORKFLOW: ${{ steps.target.outputs.workflow }}
         run: |
           set -euo pipefail
+          set +e
           pi -p \
             --provider commandcode \
             --model z-ai/glm-5.3-flash \
@@ -151,8 +152,17 @@ jobs:
           - 然后执行 gh run rerun $RUN_ID --failed（失败则重试一次）
           PROMPT
           )" 2>&1 | tee /tmp/pi-autofix.log
+          pi_status=$?
+          set -e
 
-          grep -E "^(FIXED|NOOP|BLOCKED):" /tmp/pi-autofix.log | tail -1 > /tmp/fix-verdict || echo "NOOP:agent 未给出结论" > /tmp/fix-verdict
+          if [ "$pi_status" -ne 0 ]; then
+            # agent 崩溃时把真实报错带进公示（欠费/限流/安装失败等），
+            # 别只留一句"步骤未执行"让人点开日志才知道原因。
+            last_err="$(tail -c 3000 /tmp/pi-autofix.log | tr '\n\t' '  ' | sed 's/  */ /g' | tail -c 300)"
+            echo "BLOCKED:agent 异常退出(status=$pi_status)：$last_err" > /tmp/fix-verdict
+          else
+            grep -E "^(FIXED|NOOP|BLOCKED):" /tmp/pi-autofix.log | tail -1 > /tmp/fix-verdict || echo "NOOP:agent 未给出结论" > /tmp/fix-verdict
+          fi
           cat /tmp/fix-verdict
 
       - name: 重跑失败的 run（仅 FIXED）
