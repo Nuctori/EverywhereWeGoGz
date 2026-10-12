@@ -5208,9 +5208,17 @@ function getFallbackApiKey() {
   );
 }
 
+// 浏览器 fetch 的 header 值只接受 ISO-8859-1 字节串：设置面板粘贴 key/baseUrl
+// 时混进中文、全角或零宽字符，fetch 会在发出前直接抛 "String contains non
+// ISO-8859-1 code point"，整轮 AI 未发先死。合法 key 与端点只含可打印 ASCII，
+// 装配配置时统一剥离其余字符。
+function sanitizeAiConfigText(value: string) {
+  return value.replace(/[^\x21-\x7E]/g, '');
+}
+
 function buildAiProviderConfig(config: Partial<AiProviderConfig>): AiProviderConfig | null {
-  const apiKey = typeof config.apiKey === 'string' ? config.apiKey.trim() : '';
-  const baseUrl = typeof config.baseUrl === 'string' ? config.baseUrl.trim() : '';
+  const apiKey = typeof config.apiKey === 'string' ? sanitizeAiConfigText(config.apiKey) : '';
+  const baseUrl = typeof config.baseUrl === 'string' ? sanitizeAiConfigText(config.baseUrl) : '';
   const model = typeof config.model === 'string' ? config.model.trim() : '';
   if (!apiKey || !baseUrl || !model) return null;
   return { apiKey, baseUrl, model };
@@ -5284,8 +5292,17 @@ function getResolvedAiConfigs(override?: Partial<AiProviderConfig>): AiProviderC
   });
 
   const configs = [primaryConfig, secondaryConfig, tertiaryConfig, quaternaryConfig, fifthConfig, fallbackConfig].filter((config): config is AiProviderConfig => Boolean(config));
-  return configs.filter((config, index) =>
-    configs.findIndex((candidate) => sameAiProviderConfig(candidate, config)) === index,
+  // 自定义/localStorage 配置整体失败时不让整轮 AI 落空：把内置默认链
+  // （Cloudflare Worker 反代后面的 GLM → SiliconFlow → OpenRouter 免费池）
+  // 追加到队尾做最后兜底。主槽无自定义配置时二者本就相同，去重后只有一条。
+  const defaultConfig = buildAiProviderConfig({
+    apiKey: getDefaultApiKey(),
+    baseUrl: readRuntimeEnv('VITE_AI_DEFAULT_BASE_URL'),
+    model: readRuntimeEnv('VITE_AI_DEFAULT_MODEL'),
+  });
+  const pooledConfigs = defaultConfig ? [...configs, defaultConfig] : configs;
+  return pooledConfigs.filter((config, index) =>
+    pooledConfigs.findIndex((candidate) => sameAiProviderConfig(candidate, config)) === index,
   );
 }
 
@@ -7763,9 +7780,12 @@ function getProviderTimeoutMs(config: AiProviderConfig) {
 }
 
 function getProviderRequestHeaders(config: AiProviderConfig): Record<string, string> {
+  // header 构造是 latin1 的最后一道关口：无论配置从哪个路径装配（面板输入、
+  // localStorage、env），这里都必须保证值可安全进 fetch，否则浏览器在发出前
+  // 直接抛 non ISO-8859-1，整轮 AI 未发先死。
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${config.apiKey}`,
+    Authorization: `Bearer ${sanitizeAiConfigText(config.apiKey)}`,
   };
   if (`${config.baseUrl} ${config.model}`.toLowerCase().includes('openrouter')) {
     headers['HTTP-Referer'] = 'https://nuctori.github.io/EverywhereWeGoGz/';
