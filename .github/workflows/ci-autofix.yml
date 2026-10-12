@@ -70,6 +70,9 @@ jobs:
                   "contextWindow": 262144,
                   "maxTokens": 131072,
                   "thinkingLevelMap": {"low": "low", "high": "high", "max": "max"},
+                  # kimi 网关拒收 role=developer 消息（pi 默认按 OpenAI o 系
+                  # 发 developer role），必须显式关闭；store 字段同理不认。
+                  "compat": {"supportsStore": False, "supportsDeveloperRole": False},
               }],
           }}}
           with open(os.path.expanduser("~/.pi/agent/models.json"), "w", encoding="utf-8") as f:
