@@ -49,14 +49,32 @@ jobs:
         with:
           node-version: "24"
 
-      - name: 安装 pi
+      - name: 安装 pi（Kimi For Coding 自定义供应商）
         env:
-          COMMAND_CODE_API_KEY: ${{ secrets.COMMAND_CODE_API_KEY }}
+          KIMI_CODING_API_KEY: ${{ secrets.KIMI_CODING_API_KEY }}
         run: |
-          npm install -g @earendil-works/pi-coding-agent@0.84.4 pi-commandcode-provider@0.6.0 @earendil-works/pi-ai@0.84.4
-          pi install npm:pi-commandcode-provider 2>&1 | tail -n 20 || true
+          npm install -g @earendil-works/pi-coding-agent@0.85.1 @earendil-works/pi-ai@0.85.1
           mkdir -p "$HOME/.pi/agent"
-          cp -f .pi-commandcode-models.json "$HOME/.pi/agent/commandcode-models.json" 2>/dev/null || true
+          # 自定义 openai-completions 供应商（与本地 pi 的 models.json 同构）：
+          # key 只从 secret 注入运行时文件，不落仓库。
+          python3 - <<'PY'
+          import json, os
+          cfg = {"providers": {"kimi-coding-ci": {
+              "apiKey": os.environ["KIMI_CODING_API_KEY"],
+              "api": "openai-completions",
+              "baseUrl": "https://api.kimi.com/coding/v1",
+              "models": [{
+                  "id": "kimi-k2.7-code",
+                  "name": "Kimi K2.7 Code",
+                  "reasoning": True,
+                  "contextWindow": 262144,
+                  "maxTokens": 131072,
+                  "thinkingLevelMap": {"low": "low", "high": "high", "max": "max"},
+              }],
+          }}}
+          with open(os.path.expanduser("~/.pi/agent/models.json"), "w", encoding="utf-8") as f:
+              json.dump(cfg, f)
+          PY
 
       - name: 解析目标 run
         id: target
@@ -87,16 +105,16 @@ jobs:
       - name: 缺 key 时降级为告警
         id: keycheck
         env:
-          COMMAND_CODE_API_KEY: ${{ secrets.COMMAND_CODE_API_KEY }}
+          KIMI_CODING_API_KEY: ${{ secrets.KIMI_CODING_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WORKFLOW: ${{ steps.target.outputs.workflow }}
           RUN_ID: ${{ steps.target.outputs.run_id }}
         run: |
-          if [ -z "$COMMAND_CODE_API_KEY" ]; then
+          if [ -z "$KIMI_CODING_API_KEY" ]; then
             # verdict 必须是单个参数且用大写 BLOCKED: 前缀——拆成两个参数会让
             # 脚本把 "blocked" 当 verdict、丢弃详情，落进「❓ 未知结论」分支。
             bash .github/scripts/ci-autofix-comment.sh "$RUN_ID" "$WORKFLOW" \
-              "BLOCKED:仓库缺少 COMMAND_CODE_API_KEY secret，无法唤起自动修复 agent。" || true
+              "BLOCKED:仓库缺少 KIMI_CODING_API_KEY secret，无法唤起自动修复 agent。" || true
             echo "has_key=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_key=true" >> "$GITHUB_OUTPUT"
@@ -106,7 +124,7 @@ jobs:
         id: fix
         if: steps.keycheck.outputs.has_key == 'true'
         env:
-          COMMAND_CODE_API_KEY: ${{ secrets.COMMAND_CODE_API_KEY }}
+          KIMI_CODING_API_KEY: ${{ secrets.KIMI_CODING_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUN_ID: ${{ steps.target.outputs.run_id }}
           WORKFLOW: ${{ steps.target.outputs.workflow }}
@@ -114,8 +132,8 @@ jobs:
           set -euo pipefail
           set +e
           pi -p \
-            --provider commandcode \
-            --model z-ai/glm-5.3-flash \
+            --provider kimi-coding-ci \
+            --model kimi-k2.7-code \
             --thinking high \
             --tools read,bash,grep,find,ls,write,edit \
             "$(cat <<'PROMPT'
