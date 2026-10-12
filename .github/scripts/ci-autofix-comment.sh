@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # CI Auto Fix 的结果公示：把每次自动修复的结论评论到追踪 issue（无则创建）。
 # 用法: ci-autofix-comment.sh <run_id> <workflow_name> <verdict|ESCALATE:...|BLOCKED:...>
+# 防刷屏：同一工作流连续处于同一未解决状态（⛔/❓/🫧/🔥）时不再重发评论，
+# 状态变化（如 ⛔→🫧→✅）或该工作流尚无记录时才发，避免周期性失败每周刷两条。
 set -euo pipefail
 
 run_id="${1:?usage: ci-autofix-comment.sh <run_id> <workflow> <verdict>}"
@@ -31,10 +33,27 @@ EOF
 )
 
 existing="$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number' 2>/dev/null || true)"
-if [ -n "$existing" ]; then
-  gh issue comment "$existing" --body "$body"
-else
+if [ -z "$existing" ]; then
   gh issue create --title "$title" --body "$body
 
 本 issue 由 ci-autofix 自动创建，用于汇总每次 CI 失败的自动修复结论。"
+  exit 0
 fi
+
+# 防刷屏：只有当该工作流最新一条记录来自 bot 且状态图标与本次相同时才跳过；
+# 人工评论、无历史记录、状态变化（⛔→🫧→✅ 等）都放行。
+last_author="$(gh issue view "$existing" --json comments --jq '.comments[-1].author.login // ""' 2>/dev/null || echo '')"
+last_for_workflow="$(gh issue view "$existing" --json comments --jq "[.comments[] | select(.body | contains(\"**${workflow}** run\"))][-1].body // \"\"" 2>/dev/null || echo '')"
+
+case "$last_author" in
+  github-actions|github-actions\[bot\]|app/github-actions)
+    case "$last_for_workflow" in
+      "${icon}"*)
+        echo "skip: ${workflow} 已处于 ${icon} 状态，不重复评论"
+        exit 0
+        ;;
+    esac
+    ;;
+esac
+
+gh issue comment "$existing" --body "$body"

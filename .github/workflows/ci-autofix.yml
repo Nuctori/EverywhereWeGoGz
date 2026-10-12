@@ -93,8 +93,10 @@ jobs:
           RUN_ID: ${{ steps.target.outputs.run_id }}
         run: |
           if [ -z "$COMMAND_CODE_API_KEY" ]; then
+            # verdict 必须是单个参数且用大写 BLOCKED: 前缀——拆成两个参数会让
+            # 脚本把 "blocked" 当 verdict、丢弃详情，落进「❓ 未知结论」分支。
             bash .github/scripts/ci-autofix-comment.sh "$RUN_ID" "$WORKFLOW" \
-              "blocked" "仓库缺少 COMMAND_CODE_API_KEY secret，无法唤起自动修复 agent。" || true
+              "BLOCKED:仓库缺少 COMMAND_CODE_API_KEY secret，无法唤起自动修复 agent。" || true
             echo "has_key=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_key=true" >> "$GITHUB_OUTPUT"
@@ -166,7 +168,9 @@ jobs:
           fi
 
       - name: 结果公示到追踪 issue
-        if: always()
+        # 缺 key 时 keycheck 已公示真实原因；这里再发一条「步骤未执行」就是
+        # 每次失败刷两条废评论的来源，故只在 agent 真正跑过时公示。
+        if: always() && steps.keycheck.outputs.has_key == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WORKFLOW: ${{ steps.target.outputs.workflow }}
