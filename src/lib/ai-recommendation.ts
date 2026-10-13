@@ -69,6 +69,13 @@ const AI_STREAM_PROGRESS_EMIT_INTERVAL_MS = 600;
 // 面板实时摘录保留的尾部字符数（按码点切，避免截断代理对）。
 const AI_STREAM_EXCERPT_CHARS = 240;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
+// thinking 端点的 max_tokens 地板：GLM 系思维链计入输出预算，GLM-4.7 实测
+// 思维链单独就烧 5k+ token（旧地板 5200 被整段吃满、正文 0 token 直接判废）。
+// 官方输出上限 128K，这里抬到 16k 给思维链 + 15 条推荐 JSON 留足余量；
+// 上限只是天花板不改变正常输出长度，真正的熔断是供应商超时而非预算。
+const AI_THINKING_MIN_MAX_TOKENS = 16384;
+// tokens_seen（思维链吃满预算）重试时的升压上限。
+const AI_THINKING_MAX_TOKENS_CEILING = 32768;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
 const AI_CACHE_PROMPT_VERSION = '2026-10-05-suitability-grade-v4';
 const DEFAULT_DEPARTURE_CITY = '广州';
@@ -6863,6 +6870,26 @@ type AiStreamDelta = {
   contentDelta: string;
 };
 
+// 整包 JSON 回退的共用解析：坏 JSON 必须带供应商标签，不能让裸 SyntaxError
+// 直接炸穿调用方（此前 response.json() 失败会绕过所有错误口径）。
+function parseWholeJsonText(wholeJson: string, config: AiProviderConfig, schema: 'recommendation' | 'search-plan') {
+  let data: unknown;
+  try {
+    data = JSON.parse(wholeJson);
+  } catch (error) {
+    throw new Error(getAiProviderParseErrorLabel(
+      config,
+      'json_parse_failed',
+      error instanceof Error ? error.message : 'stream body is not valid JSON',
+    ));
+  }
+  return parseAiProviderResponse(data, config, schema);
+}
+
+async function parseWholeJsonBody(response: Response, config: AiProviderConfig, schema: 'recommendation' | 'search-plan') {
+  return parseWholeJsonText(await response.text(), config, schema);
+}
+
 /**
  * 消费流式响应体：累积 reasoning/content 增量与 usage，结束后把累积结果
  * 组装成与非流式相同的完整响应结构，复用 parseAiProviderResponse 的
@@ -6877,11 +6904,10 @@ async function consumeAiStreamingResponse(params: {
 }) {
   const { response, config } = params;
   const contentType = response.headers?.get?.('content-type') ?? '';
-  if (!contentType.includes('text/event-stream')) {
+  if (contentType.includes('application/json')) {
     // 供应商忽略 stream 参数时原样回整包 JSON：直接走与非流式完全相同的解析口径，
     // 不造 reader（此时 body 是 JSON 文本，SSE 解析器读不到任何 data: 行）。
-    const data = await response.json();
-    return parseAiProviderResponse(data, config, params.schema);
+    return parseWholeJsonBody(response, config, params.schema);
   }
   const reader = response.body?.getReader?.();
   if (!reader) {
@@ -6952,7 +6978,29 @@ async function consumeAiStreamingResponse(params: {
     return { model, reasoningDelta, contentDelta };
   };
 
+  // content-type 不可信：OpenRouter 的 SSE 不带 Content-Type 头，若只认头会把
+  // SSE 体误判成整包 JSON 炸出裸 SyntaxError。嗅探首块字节按 SSE 语法判定，
+  // 不是 SSE 才退回整包 JSON 解析。
+  let streamHead = '';
+  {
+    const { done, value } = await readChunk();
+    streamHead = done ? '' : decoder.decode(value, { stream: true });
+    if (!/^\s*(?:data|event|id|retry):|^\s*:/.test(streamHead)) {
+      let wholeJson = streamHead;
+      for (;;) {
+        const rest = await readChunk();
+        if (rest.done) break;
+        wholeJson += decoder.decode(rest.value, { stream: true });
+      }
+      wholeJson += decoder.decode();
+      return parseWholeJsonText(wholeJson, config, params.schema);
+    }
+  }
+
   try {
+    // 首块已在嗅探阶段读出且确认是 SSE，先喂解析器再进入常规读循环。
+    const headDelta = handleEvents(parser.push(streamHead), config.model);
+    if (headDelta) params.onStreamDelta?.(headDelta);
     for (;;) {
       const { done, value } = await readChunk();
       if (done) break;
@@ -7831,9 +7879,12 @@ function buildAiRequestBody(
     messages: normalizeMessagesForProvider(messages),
     // 略高于保守值：让模型在候选比较里保留主观取舍的余地，JSON 模式下仍稳定。
     temperature: 0.35,
-    // GLM 的 thinking token 计入 max_tokens：思维链 + 15 条推荐 JSON 峰值约
-    // 3.5k，上限不足会被截断成“只有前几条推荐”，这里抬高避免 items 被吃掉。
-    max_tokens: thinkingEnabled ? Math.max(maxTokens ?? 2048, 5200) : (maxTokens ?? 2048),
+    // GLM 的 thinking token 计入 max_tokens：GLM-4.7 思维链实测 5k+ 起步，
+    // 地板必须远高于正文需求（见 AI_THINKING_MIN_MAX_TOKENS 注释），否则
+    // reasoning 吃满预算、content 为空，整轮 AI 直接落进本地补位。
+    max_tokens: thinkingEnabled
+      ? Math.max(maxTokens ?? 2048, AI_THINKING_MIN_MAX_TOKENS)
+      : (maxTokens ?? 2048),
     response_format: { type: 'json_object' },
     thinking: { type: thinkingEnabled ? 'enabled' : 'disabled' },
     ...(streaming
@@ -7894,7 +7945,10 @@ async function callSingleAiProvider(params: {
   // 思维链供应商走 SSE：思维链生成占整个调用 70%+ 时长，是"进度不可见"的根因；
   // 免费/兜底模型保持非流式（响应快，且前台竞速按整包对比更简单）。
   const streaming = isThinkingCapableProvider(config);
-  const requestBody = buildAiRequestBody(config, messages, maxTokens, streaming);
+  // tokens_seen（思维链吃满输出预算）重试时升压 max_tokens：同参重试对这类
+  // 失败是确定性复现，只有抬预算才有恢复机会。
+  let activeMaxTokens = maxTokens;
+  let requestBody = buildAiRequestBody(config, messages, activeMaxTokens, streaming);
   let providerLastError: Error | null = null;
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -7946,7 +8000,9 @@ async function callSingleAiProvider(params: {
             schema: params.schema ?? 'recommendation',
             onStreamDelta: params.onStreamDelta,
           })
-        : parseAiProviderResponse(await response.json(), config, params.schema ?? 'recommendation');
+        // 非流式路径也走带标签的整包解析：网关无视 stream:false 回 SSE 时
+        // 不允许炸出绕过错误口径的裸 SyntaxError。
+        : await parseWholeJsonBody(response, config, params.schema ?? 'recommendation');
       const { parsed, reasoningText, usage } = outcome;
       const qualityIssue = params.qualityCheck?.(parsed, config);
       if (qualityIssue) {
@@ -7957,6 +8013,13 @@ async function callSingleAiProvider(params: {
       providerLastError = normalizeAiProviderError(error, config);
       if (providerLastError.message.includes('tokens_seen')) {
         shouldRetry = attempt === 0;
+        if (shouldRetry && streaming) {
+          activeMaxTokens = Math.min(
+            Math.max(activeMaxTokens ?? 2048, AI_THINKING_MIN_MAX_TOKENS) * 2,
+            AI_THINKING_MAX_TOKENS_CEILING,
+          );
+          requestBody = buildAiRequestBody(config, messages, activeMaxTokens, streaming);
+        }
       }
       if (providerLastError.message.includes('timeout')) {
         shouldRetry = false;

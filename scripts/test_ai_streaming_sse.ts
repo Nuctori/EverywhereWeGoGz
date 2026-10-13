@@ -1,7 +1,7 @@
 // AI 流式链路契约测试：SSE 增量解析器纯函数 + callAiApi 思维链供应商流式分支。
 // 覆盖：跨 chunk 半行缓冲、CRLF、keep-alive 注释、坏 JSON 行跳过、[DONE]、
 // usage 采集、流式→非流式同一解析口径、供应商忽略 stream 参数时的整包回退、
-// search-plan schema 流式解析。
+// search-plan schema 流式解析、思维链吃满 max_tokens 后的升压重试。
 // 运行：npm run test:ai-streaming
 import { strict as assert } from 'node:assert';
 import {
@@ -46,7 +46,7 @@ function sseFrame(payload: string) {
   assert.equal(collected[2].text, '{"items":');
   assert.ok(parser.isDone(), 'parser should be done after [DONE]');
 }
-console.info('[1/5] SSE 增量解析器（跨 chunk 缓冲 / 注释 / 坏行 / DONE）通过');
+console.info('[1/8] SSE 增量解析器（跨 chunk 缓冲 / 注释 / 坏行 / DONE）通过');
 
 // ====== 2. CRLF 行尾 + done 后继续 push 必须为空 ======
 {
@@ -55,7 +55,7 @@ console.info('[1/5] SSE 增量解析器（跨 chunk 缓冲 / 注释 / 坏行 / D
   assert.deepEqual(events.map((event) => event.type), ['content', 'done'], 'CRLF line endings should parse');
   assert.deepEqual(parser.push('data: {"choices":[{"delta":{"content":"late"}}]}\n'), [], 'push after done must be a no-op');
 }
-console.info('[2/5] CRLF 行尾与 DONE 幂等通过');
+console.info('[2/8] CRLF 行尾与 DONE 幂等通过');
 
 // ====== 3. callAiApi 思维链供应商流式分支（mock fetch SSE） ======
 {
@@ -110,7 +110,7 @@ console.info('[2/5] CRLF 行尾与 DONE 幂等通过');
     const usage = (result as { usage?: { tokensSeen?: boolean; reasoningTokens?: number } }).usage;
     assert.equal(usage?.tokensSeen, true, 'trailing usage chunk must feed the usage summary');
     assert.equal(usage?.reasoningTokens, 40, 'reasoning token count must survive the streaming path');
-    console.info('[3/5] callAiApi 流式分支（SSE→增量回调→同口径解析）通过');
+    console.info('[3/8] callAiApi 流式分支（SSE→增量回调→同口径解析）通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -146,7 +146,7 @@ console.info('[2/5] CRLF 行尾与 DONE 幂等通过');
     assert.equal(items?.[0]?.tourId, 't2', 'full-json fallback must parse when provider ignores stream');
     assert.equal(result.reasoningText, '整包思维链');
     assert.equal(deltas.length, 0, 'no delta callbacks on the full-json fallback path');
-    console.info('[4/5] 供应商忽略 stream 参数的整包回退通过');
+    console.info('[4/8] 供应商忽略 stream 参数的整包回退通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -177,7 +177,136 @@ console.info('[2/5] CRLF 行尾与 DONE 幂等通过');
     const queries = (result.parsed as { queries?: string[] }).queries;
     assert.deepEqual(queries, ['海边 一日', '温泉 周末'], 'search-plan schema must validate on the streaming path');
     assert.equal(result.reasoningText, '规划中');
-    console.info('[5/5] search-plan schema 流式解析通过');
+    console.info('[5/8] search-plan schema 流式解析通过');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// ====== 6. 思维链吃满 max_tokens（tokens_seen/content_missing）：首次按新地板
+// 发请求，重试必须升压 max_tokens 而不是同参复现必败 ======
+{
+  const starvedBody = [
+    sseFrame('{"choices":[{"delta":{"reasoning_content":"一直思考"}}]}'),
+    sseFrame('{"choices":[{"delta":{}}],"usage":{"prompt_tokens":300,"completion_tokens":16384,"completion_tokens_details":{"reasoning_tokens":16300},"total_tokens":16684}}'),
+    sseFrame('[DONE]'),
+  ];
+  const healthyBody = [
+    sseFrame('{"choices":[{"delta":{"content":"{\\"summary\\":\\"升压后成功\\",\\"items\\":[\\"恢复\\"]}"}}]}'),
+    sseFrame('{"choices":[{"delta":{}}],"usage":{"prompt_tokens":300,"completion_tokens":900,"completion_tokens_details":{"reasoning_tokens":600},"total_tokens":1200}}'),
+    sseFrame('[DONE]'),
+  ];
+  const requestBodies: Array<Record<string, unknown>> = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (_input: unknown, init?: { body?: string }) => {
+    requestBodies.push(JSON.parse(init?.body ?? '{}') as Record<string, unknown>);
+    const frames = requestBodies.length === 1 ? starvedBody : healthyBody;
+    let frameCursor = 0;
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (frameCursor < frames.length) {
+          controller.enqueue(frames[frameCursor]);
+          frameCursor += 1;
+        } else {
+          controller.close();
+        }
+      },
+    });
+    return new Response(stream, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+  }) as typeof fetch;
+
+  try {
+    const result = await callAiApi({
+      configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+      messages: [{ role: 'user', content: 'q' }],
+      maxTokens: 3600,
+      schema: 'recommendation',
+    });
+    assert.equal(requestBodies.length, 2, 'starved first attempt must escalate and retry once');
+    assert.equal(
+      requestBodies[0]?.max_tokens,
+      16384,
+      'thinking request must lift max_tokens to the starvation-safe floor regardless of caller budget',
+    );
+    assert.equal(
+      requestBodies[1]?.max_tokens,
+      32768,
+      'retry after tokens_seen starvation must double max_tokens up to the ceiling',
+    );
+    const items = (result.parsed as { items?: unknown[] }).items;
+    assert.deepEqual(items, ['恢复'], 'escalated retry must still parse through the shared schema');
+    console.info('[6/8] 思维链吃满预算→升压 max_tokens 重试通过');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// ====== 7. content-type 不可信：OpenRouter 的 SSE 不带 Content-Type 头。
+// 响应体是 SSE 就按流消费；是整包 JSON（无 content-type 变体）也要能回退解析，
+// 两条路都不允许炸出裸 SyntaxError。 ======
+{
+  const makeStream = (frames: string[]) => {
+    let frameCursor = 0;
+    return new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (frameCursor < frames.length) {
+          controller.enqueue(encoder.encode(frames[frameCursor]));
+          frameCursor += 1;
+        } else {
+          controller.close();
+        }
+      },
+    });
+  };
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () =>
+    // 注意：不给 content-type（headers 里只有无关字段）。
+    new Response(makeStream([
+      'data: {"choices":[{"delta":{"reasoning_content":"无头思考"}}]}\n\n',
+      'data: {"choices":[{"delta":{"content":"{\\"summary\\":\\"无头SSE\\",\\"items\\":[\\"嗅探\\"]}"}}]}\n\n',
+      'data: [DONE]\n\n',
+    ]), { status: 200, headers: { 'x-unrelated': '1' } })) as typeof fetch;
+
+  try {
+    const result = await callAiApi({
+      // OpenRouter 藏在 Worker 反代后面，客户端视角是 thinking 端点（走 SSE 路径）。
+      configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'free-model', apiKey: 'test-key' }],
+      messages: [{ role: 'user', content: 'q' }],
+      maxTokens: 512,
+      schema: 'recommendation',
+    });
+    const items = (result.parsed as { items?: unknown[] }).items;
+    assert.deepEqual(items, ['嗅探'], 'SSE body without content-type must be consumed as a stream');
+    assert.equal(result.reasoningText, '无头思考', 'reasoning must survive the sniff path');
+    console.info('[7/8] 缺 content-type 的 SSE 嗅探通过');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+{
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () =>
+    new Response(
+      JSON.stringify({
+        choices: [{ message: { content: '{"summary":"无头整包","items":[{"tourId":"t9","score":70,"reason":"整包","matchedSignals":[]}]}' } }],
+        usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+      }),
+      // 整包 JSON 但没带 content-type：嗅探后退回整包解析，不能炸裸 SyntaxError。
+      { status: 200, headers: {} },
+    )) as typeof fetch;
+
+  try {
+    const result = await callAiApi({
+      configs: [{ baseUrl: 'https://example.gateway/v1', model: 'gateway-model', apiKey: 'test-key' }],
+      messages: [{ role: 'user', content: 'q' }],
+      maxTokens: 512,
+      schema: 'recommendation',
+    });
+    const items = (result.parsed as { items?: Array<{ tourId?: string }> }).items;
+    assert.equal(items?.[0]?.tourId, 't9', 'whole-json body without content-type must fall back to json parsing');
+    console.info('[8/8] 缺 content-type 的整包 JSON 回退通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
