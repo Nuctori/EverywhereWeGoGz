@@ -7,9 +7,11 @@ OpenRouter :free），按序重试，带 Origin 白名单 + 每 IP 限速。
 ## 布署
 
 ```bash
-npx wrangler secret put BIGMODEL_API_KEY      # 智谱开放平台 key
+npx wrangler secret put BIGMODEL_API_KEY      # 智谱开放平台 key（账号 1）
+npx wrangler secret put BIGMODEL_API_KEY_2    # 智谱第二账号 key（可选；配置即启用双 key 轮换）
 npx wrangler secret put SILICONFLOW_API_KEY   # 硅基流动 key（新 key 只进这里，不进前端）
 npx wrangler secret put OPENROUTER_API_KEY    # OpenRouter key
+npx wrangler secret put OPENROUTER_API_KEY_2  # OpenRouter 第二把 key（双把轮换免费日额度）
 npx wrangler deploy
 ```
 

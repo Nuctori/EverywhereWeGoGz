@@ -46,7 +46,7 @@ function sseFrame(payload: string) {
   assert.equal(collected[2].text, '{"items":');
   assert.ok(parser.isDone(), 'parser should be done after [DONE]');
 }
-console.info('[1/8] SSE 增量解析器（跨 chunk 缓冲 / 注释 / 坏行 / DONE）通过');
+console.info('[1/9] SSE 增量解析器（跨 chunk 缓冲 / 注释 / 坏行 / DONE）通过');
 
 // ====== 2. CRLF 行尾 + done 后继续 push 必须为空 ======
 {
@@ -55,7 +55,7 @@ console.info('[1/8] SSE 增量解析器（跨 chunk 缓冲 / 注释 / 坏行 / D
   assert.deepEqual(events.map((event) => event.type), ['content', 'done'], 'CRLF line endings should parse');
   assert.deepEqual(parser.push('data: {"choices":[{"delta":{"content":"late"}}]}\n'), [], 'push after done must be a no-op');
 }
-console.info('[2/8] CRLF 行尾与 DONE 幂等通过');
+console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
 
 // ====== 3. callAiApi 思维链供应商流式分支（mock fetch SSE） ======
 {
@@ -110,7 +110,7 @@ console.info('[2/8] CRLF 行尾与 DONE 幂等通过');
     const usage = (result as { usage?: { tokensSeen?: boolean; reasoningTokens?: number } }).usage;
     assert.equal(usage?.tokensSeen, true, 'trailing usage chunk must feed the usage summary');
     assert.equal(usage?.reasoningTokens, 40, 'reasoning token count must survive the streaming path');
-    console.info('[3/8] callAiApi 流式分支（SSE→增量回调→同口径解析）通过');
+    console.info('[3/9] callAiApi 流式分支（SSE→增量回调→同口径解析）通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -146,7 +146,7 @@ console.info('[2/8] CRLF 行尾与 DONE 幂等通过');
     assert.equal(items?.[0]?.tourId, 't2', 'full-json fallback must parse when provider ignores stream');
     assert.equal(result.reasoningText, '整包思维链');
     assert.equal(deltas.length, 0, 'no delta callbacks on the full-json fallback path');
-    console.info('[4/8] 供应商忽略 stream 参数的整包回退通过');
+    console.info('[4/9] 供应商忽略 stream 参数的整包回退通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -177,7 +177,7 @@ console.info('[2/8] CRLF 行尾与 DONE 幂等通过');
     const queries = (result.parsed as { queries?: string[] }).queries;
     assert.deepEqual(queries, ['海边 一日', '温泉 周末'], 'search-plan schema must validate on the streaming path');
     assert.equal(result.reasoningText, '规划中');
-    console.info('[5/8] search-plan schema 流式解析通过');
+    console.info('[5/9] search-plan schema 流式解析通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -235,7 +235,7 @@ console.info('[2/8] CRLF 行尾与 DONE 幂等通过');
     );
     const items = (result.parsed as { items?: unknown[] }).items;
     assert.deepEqual(items, ['恢复'], 'escalated retry must still parse through the shared schema');
-    console.info('[6/8] 思维链吃满预算→升压 max_tokens 重试通过');
+    console.info('[6/9] 思维链吃满预算→升压 max_tokens 重试通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -279,7 +279,7 @@ console.info('[2/8] CRLF 行尾与 DONE 幂等通过');
     const items = (result.parsed as { items?: unknown[] }).items;
     assert.deepEqual(items, ['嗅探'], 'SSE body without content-type must be consumed as a stream');
     assert.equal(result.reasoningText, '无头思考', 'reasoning must survive the sniff path');
-    console.info('[7/8] 缺 content-type 的 SSE 嗅探通过');
+    console.info('[7/9] 缺 content-type 的 SSE 嗅探通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -306,7 +306,46 @@ console.info('[2/8] CRLF 行尾与 DONE 幂等通过');
     });
     const items = (result.parsed as { items?: Array<{ tourId?: string }> }).items;
     assert.equal(items?.[0]?.tourId, 't9', 'whole-json body without content-type must fall back to json parsing');
-    console.info('[8/8] 缺 content-type 的整包 JSON 回退通过');
+    console.info('[8/9] 缺 content-type 的整包 JSON 回退通过');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// ====== 9. 网关 502（all upstreams failed）：429/5xx 必须退避重试一次，
+// 第二次成功要能正常返回，不能一次性判死落本地补位。 ======
+{
+  const originalFetch = globalThis.fetch;
+  let callCount = 0;
+  globalThis.fetch = (async () => {
+    callCount += 1;
+    if (callCount === 1) {
+      return new Response(
+        JSON.stringify({ error: { message: 'all upstreams failed: bigmodel: 429 ... | openrouter#1: 429 ...' } }),
+        { status: 502, headers: { 'content-type': 'application/json' } },
+      );
+    }
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(sseFrame('{"choices":[{"delta":{"content":"{\\"summary\\":\\"重试成功\\",\\"items\\":[\\"复活\\"]}"}}]}'));
+        controller.enqueue(sseFrame('[DONE]'));
+        controller.close();
+      },
+    });
+    return new Response(stream, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+  }) as typeof fetch;
+
+  try {
+    const result = await callAiApi({
+      configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+      messages: [{ role: 'user', content: 'q' }],
+      maxTokens: 512,
+      schema: 'recommendation',
+    });
+    assert.equal(callCount, 2, 'a 502 from the gateway must be retried once before giving up');
+    const items = (result.parsed as { items?: unknown[] }).items;
+    assert.deepEqual(items, ['复活'], 'the retried attempt must parse through the shared schema');
+    console.info('[9/9] 网关 502 退避重试通过');
   } finally {
     globalThis.fetch = originalFetch;
   }

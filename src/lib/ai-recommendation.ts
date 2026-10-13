@@ -69,6 +69,10 @@ const AI_STREAM_PROGRESS_EMIT_INTERVAL_MS = 600;
 // 面板实时摘录保留的尾部字符数（按码点切，避免截断代理对）。
 const AI_STREAM_EXCERPT_CHARS = 240;
 const AI_PROVIDER_RETRY_DELAY_MS = 450;
+// 429/5xx 的单供应商重试退避：这类失败是上游瞬时不可用（限频/过载/网关全部
+// 上游打满），450ms 快重试大概率原地复现；给一次 4s 级退避，等限频窗口滑动
+// /过载缓解后再试。其余错误（网络瞬断等）保持快重试。
+const AI_PROVIDER_RATE_RETRY_DELAY_MS = 4000;
 // thinking 端点的 max_tokens 地板：GLM 系思维链计入输出预算，GLM-4.7 实测
 // 思维链单独就烧 5k+ token（旧地板 5200 被整段吃满、正文 0 token 直接判废）。
 // 官方输出上限 128K，这里抬到 16k 给思维链 + 15 条推荐 JSON 留足余量；
@@ -7950,6 +7954,8 @@ async function callSingleAiProvider(params: {
   let activeMaxTokens = maxTokens;
   let requestBody = buildAiRequestBody(config, messages, activeMaxTokens, streaming);
   let providerLastError: Error | null = null;
+  // 命中 429/5xx 时记录状态码：决定重试前用快退避还是限频级退避。
+  let lastRateLimitedStatus = 0;
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     let shouldRetry = attempt === 0;
@@ -7969,6 +7975,7 @@ async function callSingleAiProvider(params: {
         const errorBody = await response.text();
         let providerMessage = response.statusText || '';
         shouldRetry = response.status === 429 || response.status >= 500;
+        lastRateLimitedStatus = shouldRetry ? response.status : 0;
         if (errorBody) {
           try {
             const parsed = JSON.parse(errorBody) as {
@@ -8025,7 +8032,11 @@ async function callSingleAiProvider(params: {
         shouldRetry = false;
       }
       if (shouldRetry && attempt === 0) {
-        await new Promise((resolve) => setTimeout(resolve, AI_PROVIDER_RETRY_DELAY_MS));
+        const retryDelay = lastRateLimitedStatus
+          ? AI_PROVIDER_RATE_RETRY_DELAY_MS
+          : AI_PROVIDER_RETRY_DELAY_MS;
+        lastRateLimitedStatus = 0;
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
       } else {
         break;
       }

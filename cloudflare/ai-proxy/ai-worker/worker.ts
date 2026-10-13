@@ -18,8 +18,17 @@ const RETRYABLE_STATUS = new Set([401, 402, 403, 404, 408, 429, 500, 502, 503, 5
 
 // GLM 免费档晚高峰常态性 1305 过载（"稍后再试"通常亚秒级缓解）。对 1305 做
 // 同上游短退避重试再换家——直接换家会把流量灌给 4B/免费小模型，那才是文案
-// 与条数崩塌的源头。重试等待不计 CPU（Workers 按 CPU 时间计费）。
-const GLM_429_RETRY_DELAYS_MS = [800, 1600];
+// 与条数崩塌的源头。1302 是账户每分钟滚动窗口限频，几秒后窗口滑过即恢复，
+// 同样值得一次短退避重试；重试再失败立即换家。重试等待不计 CPU（Workers
+// 按 CPU 时间计费）。
+const GLM_1305_RETRY_DELAYS_MS = [800, 1600];
+const GLM_1302_RETRY_DELAYS_MS = [2500];
+// 1305（平台过载）把 key#1 打满重试梯子后切 key#2 前的短退避：换号躲不开
+// 平台过载，先等过载窗口过去；1302 换号即换新鲜配额，无需等待直接切。
+const GLM_KEY_SWITCH_DELAY_MS = 2500;
+// OpenRouter 免费 key 双把轮换：两把 key 打的是同一个上游免费池，#1 撞 429
+// 时 #2 立刻上大概率同样 429；间隔一次短退避再换，等共享池腾出配额。
+const OPENROUTER_KEY_SWITCH_DELAY_MS = 2500;
 
 const rateBuckets = new Map<string, number[]>();
 
@@ -115,44 +124,67 @@ export default {
     const failures: string[] = [];
     let served: Response | null = null;
 
-    // upstream 1：智谱国内 bigmodel GLM（免费档，思维链开启）。
-    // 429 分两种：1305「模型访问量过大」是晚高峰瞬时过载，短退避重试通常
-    // 亚秒级缓解；1302「账户达到速率限制」是账户 RPM 上限，重试只会加请求，
-    // 直接换下一上游。z.ai（海外集群）实测从 Workers 出口被 WAF 拦成 405
-    // HTML 挑战页，服务端不可用，不接（key 仍有效，可留给本地直连场景）。
-    if (env.BIGMODEL_API_KEY) {
+    // upstream 1：智谱国内 bigmodel GLM（免费档，思维链开启）。双 key 轮换
+    // （BIGMODEL_API_KEY / BIGMODEL_API_KEY_2，两把独立账号）叠加账户配额。
+    // 429 分两种：1305「模型访问量过大」是平台瞬时过载，短退避重试通常亚秒级
+    // 缓解；1302「账户达到速率限制」是账户 RPM 滚动窗口，短退避等窗口滑动后
+    // 同 key 重试一次，仍 429 才换下一把 key / 下一上游。z.ai（海外集群）实测
+    // 从 Workers 出口被 WAF 拦成 405 HTML 挑战页，服务端不可用，不接（key 仍
+    // 有效，可留给本地直连场景）。
+    const bigmodelKeys = [env.BIGMODEL_API_KEY, env.BIGMODEL_API_KEY_2].filter(
+      (key): key is string => Boolean(key),
+    );
+    if (bigmodelKeys.length > 0) {
       try {
         const upstreamUrl = assertSafeUpstreamUrl('https://open.bigmodel.cn/api/paas/v4/chat/completions');
-        let attempt = 0;
-        for (;;) {
-          const upstreamResponse = await fetch(upstreamUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${env.BIGMODEL_API_KEY}`,
-            },
-            body: JSON.stringify({ ...forwarded, model: 'GLM-4.7-Flash' }),
-          });
-          if (upstreamResponse.ok) {
-            const headers = new Headers();
-            upstreamResponse.headers.forEach((value, key) => headers.set(key, value));
-            headers.set('Access-Control-Allow-Origin', origin);
-            headers.set('X-EWG-Upstream', 'bigmodel');
-            served = new Response(upstreamResponse.body, {
-              status: upstreamResponse.status,
-              headers,
+        // 上一把 key 的 429 细分：1302 换号即换新鲜账户配额，直接切；
+        // 1305 换号同命运（平台过载），短退避等过载窗口过去再切。
+        let previousKeyFailure: '1302' | '1305' | null = null;
+        for (const [keyIndex, apiKey] of bigmodelKeys.entries()) {
+          if (keyIndex > 0 && previousKeyFailure === '1305') {
+            await new Promise((resolve) => setTimeout(resolve, GLM_KEY_SWITCH_DELAY_MS));
+          }
+          let attempt = 0;
+          for (;;) {
+            const upstreamResponse = await fetch(upstreamUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${apiKey}`,
+              },
+              body: JSON.stringify({ ...forwarded, model: 'GLM-4.7-Flash' }),
             });
+            if (upstreamResponse.ok) {
+              const headers = new Headers();
+              upstreamResponse.headers.forEach((value, key) => headers.set(key, value));
+              headers.set('Access-Control-Allow-Origin', origin);
+              headers.set('X-EWG-Upstream', bigmodelKeys.length > 1 ? `bigmodel#${keyIndex + 1}` : 'bigmodel');
+              served = new Response(upstreamResponse.body, {
+                status: upstreamResponse.status,
+                headers,
+              });
+              break;
+            }
+            const detail = await upstreamResponse.text().catch(() => '');
+            const retryDelays = upstreamResponse.status === 429
+              ? (detail.includes('1305')
+                  ? GLM_1305_RETRY_DELAYS_MS
+                  : detail.includes('1302') ? GLM_1302_RETRY_DELAYS_MS : [])
+              : [];
+            if (upstreamResponse.status === 429 && attempt < retryDelays.length) {
+              await new Promise((resolve) => setTimeout(resolve, retryDelays[attempt]));
+              attempt += 1;
+              continue;
+            }
+            failures.push(
+              `bigmodel#${keyIndex + 1}: ${upstreamResponse.status} ${detail.slice(0, 300)}`,
+            );
+            previousKeyFailure = detail.includes('1302')
+              ? '1302'
+              : detail.includes('1305') ? '1305' : null;
             break;
           }
-          const detail = await upstreamResponse.text().catch(() => '');
-          const is1305Overload = upstreamResponse.status === 429 && detail.includes('1305');
-          if (is1305Overload && attempt < GLM_429_RETRY_DELAYS_MS.length) {
-            await new Promise((resolve) => setTimeout(resolve, GLM_429_RETRY_DELAYS_MS[attempt]));
-            attempt += 1;
-            continue;
-          }
-          failures.push(`bigmodel: ${upstreamResponse.status} ${detail.slice(0, 300)}`);
-          break;
+          if (served) break;
         }
       } catch (error) {
         failures.push(`bigmodel: ${String(error)}`);
@@ -215,7 +247,13 @@ export default {
       try {
         const { thinking: _dropped, ...baseForwarded } = forwarded;
         const upstreamUrl = assertSafeUpstreamUrl('https://openrouter.ai/api/v1/chat/completions');
+        let previousKeyRateLimited = false;
         for (const [keyIndex, apiKey] of openRouterKeys.entries()) {
+          // 上一把 key 撞 429（共享免费池限频）时短退避再试下一把：两把 key
+          // 打的是同一个池，无缝换把大概率原地复现。其他失败（401 失效等）不等。
+          if (keyIndex > 0 && previousKeyRateLimited) {
+            await new Promise((resolve) => setTimeout(resolve, OPENROUTER_KEY_SWITCH_DELAY_MS));
+          }
           const upstreamResponse = await fetch(upstreamUrl, {
             method: 'POST',
             headers: {
@@ -237,6 +275,7 @@ export default {
           }
           const detail = await upstreamResponse.text().catch(() => '');
           failures.push(`openrouter#${keyIndex + 1}: ${upstreamResponse.status} ${detail.slice(0, 240)}`);
+          previousKeyRateLimited = upstreamResponse.status === 429;
           // 单 key 的 401（失效）/402/429（额度或共享池限频）都换下一把；
           // 全部失败才落到收尾的 502。
         }
