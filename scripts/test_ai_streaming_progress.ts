@@ -130,10 +130,10 @@ try {
     onProgress: (progress) => progressEvents.push(progress),
   });
 
-  // 1) 流式请求确实开启，且要求末尾 usage
+  // 1) 流式请求确实开启，且要求末尾 usage；思维链强制关闭（GLM 死循环，2026-10-14）
   assert.equal(issued.zaiRequestBody?.stream, true, 'request must ask for SSE streaming');
   assert.deepEqual(issued.zaiRequestBody?.stream_options, { include_usage: true });
-  assert.deepEqual(issued.zaiRequestBody?.thinking, { type: 'enabled' });
+  assert.deepEqual(issued.zaiRequestBody?.thinking, { type: 'disabled' });
 
   // 2) onProgress 实时透出思维链快照
   const thinkingEvents = progressEvents.filter((event) => event.liveThinking);

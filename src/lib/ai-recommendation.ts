@@ -57,12 +57,10 @@ const AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS = 100000;
 // 未知供应商（自建网关/代理/新云）无法假设首包速度：非流式调用首包即整包，
 // 15s 对大 prompt 结构化输出是必然超时。放宽到 45s，仍受前台聚合上限约束。
 const AI_DEFAULT_PROVIDER_TIMEOUT_MS = 45000;
-// 实测 GLM 开 thinking 后连小任务都要 70s+（token 计入完成预算），
-// 60s 档必超时；思维链供应商单独给足预算。
+// GLM 主力供应商走 SSE 流式时的整请求预算：25 条 items 全文生成实测 40-80s，
+// 60s/45s 档都会把正常响应掐死在半路。超时语义从"整请求一刀切"换成
+// "chunk 间空闲超时"——只要流还活着就不掐，首包/响应头仍走整段上限兜底。
 const AI_THINKING_PROVIDER_TIMEOUT_MS = 180000;
-// 思维链供应商走 SSE 流式：思维链增量（delta.reasoning_content）实时回传面板，
-// 用户在 70-180s 的等待里能看到模型真的在产出。超时语义从"整请求一刀切"
-// 换成"chunk 间空闲超时"——只要流还活着就不掐，首包/响应头仍走整段上限兜底。
 const AI_STREAM_IDLE_TIMEOUT_MS = 60000;
 // 思维链 chunk 很密，按时间窗聚合后再 emitProgress，避免 React 高频重渲。
 const AI_STREAM_PROGRESS_EMIT_INTERVAL_MS = 600;
@@ -73,12 +71,11 @@ const AI_PROVIDER_RETRY_DELAY_MS = 450;
 // 上游打满），450ms 快重试大概率原地复现；给一次 4s 级退避，等限频窗口滑动
 // /过载缓解后再试。其余错误（网络瞬断等）保持快重试。
 const AI_PROVIDER_RATE_RETRY_DELAY_MS = 4000;
-// thinking 端点的 max_tokens 地板：GLM 系思维链计入输出预算，GLM-4.7 实测
-// 思维链单独就烧 5k+ token（旧地板 5200 被整段吃满、正文 0 token 直接判废）。
-// 官方输出上限 128K，这里抬到 16k 给思维链 + 15 条推荐 JSON 留足余量；
-// 上限只是天花板不改变正常输出长度，真正的熔断是供应商超时而非预算。
+// thinking 已全局关闭（见 isGlmPrimaryStreamProvider 注释），这两个常量只剩
+// 一个用途：正文（25 条 items 全文）吃满 max_tokens 触发 tokens_seen 时的
+// 升压重试预算（地板×2 封顶 32k）。
 const AI_THINKING_MIN_MAX_TOKENS = 16384;
-// tokens_seen（思维链吃满预算）重试时的升压上限。
+// tokens_seen（输出吃满预算）重试时的升压上限。
 const AI_THINKING_MAX_TOKENS_CEILING = 32768;
 const WEATHER_FETCH_TIMEOUT_MS = 2200;
 const AI_CACHE_PROMPT_VERSION = '2026-10-05-suitability-grade-v4';
@@ -7814,7 +7811,7 @@ function getProviderTimeoutMs(config: AiProviderConfig) {
   // workbuddy 网关）首包要 10-30s，按名字命中 9s 会让 AI 永远不可用，
   // 用户看到的就全是本地模板兜底（"一点也不种草"的直接根因）。
   if (config.baseUrl.toLowerCase().includes('api.deepseek.com')) return AI_FAST_FALLBACK_TIMEOUT_MS;
-  if (isThinkingCapableProvider(config)) return AI_THINKING_PROVIDER_TIMEOUT_MS;
+  if (isGlmPrimaryStreamProvider(config)) return AI_THINKING_PROVIDER_TIMEOUT_MS;
   if (
     providerKey.includes('siliconflow') ||
     providerKey.includes('openrouter') ||
@@ -7858,10 +7855,16 @@ function shouldUseLiteAiPrompt(config: AiProviderConfig) {
   );
 }
 
-// 思维链只在 GLM 官方端点（z.ai / bigmodel.cn，同一套 v4 API）及自建代理
-// （ai.114124.xyz，Worker 首选上游即 bigmodel GLM，thinking 参数原样透传）开启：
-// 免费/付费兜底保持低延迟，主模型用真推理换理解与排序质量。
-function isThinkingCapableProvider(config: AiProviderConfig) {
+// GLM 主力供应商：自建代理（ai.114124.xyz，Worker 首选上游即 bigmodel GLM）
+// 与 GLM 官方端点（z.ai / bigmodel.cn，同一套 v4 API）。它们共享两条待遇：
+// ① SSE 流式 + 180s 预算：25 条 items 全文生成实测 40-80s，非流式 45s 档会把
+//    正常响应掐死在半路，流式还能让面板实时看到生成进度。
+// ② thinking 强制 disabled：GLM-4.7-Flash 的思维链在结构化大任务上会进
+//    "逐字段检查 schema"的死循环（2026-10-14 实测复现：16384 token 全被思维链
+//    烧光、正文 0 字节；升压 32k 重试也只是让模型多写了两段就在 intentNotes
+//    后被掐断——合法 JSON 但没有 items，整轮 AI 落进本地补位）。该模型的
+//    thinking 只认 enabled/disabled，传 low 会被无视照常全量思考，只能关。
+function isGlmPrimaryStreamProvider(config: AiProviderConfig) {
   const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
   return (
     providerKey.includes('api.z.ai') ||
@@ -7877,20 +7880,20 @@ function buildAiRequestBody(
   streaming = false,
 ) {
   const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
-  const thinkingEnabled = isThinkingCapableProvider(config);
   const body: Record<string, unknown> = {
     model: config.model,
     messages: normalizeMessagesForProvider(messages),
     // 略高于保守值：让模型在候选比较里保留主观取舍的余地，JSON 模式下仍稳定。
     temperature: 0.35,
-    // GLM 的 thinking token 计入 max_tokens：GLM-4.7 思维链实测 5k+ 起步，
-    // 地板必须远高于正文需求（见 AI_THINKING_MIN_MAX_TOKENS 注释），否则
-    // reasoning 吃满预算、content 为空，整轮 AI 直接落进本地补位。
-    max_tokens: thinkingEnabled
-      ? Math.max(maxTokens ?? 2048, AI_THINKING_MIN_MAX_TOKENS)
-      : (maxTokens ?? 2048),
+    // GLM 主力正文需求 3600（25 条 items 全文实测 ~2600 token）即够，
+    // 不再为思维链抬 16k 地板；正文真吃满预算走 tokens_seen 升压重试兜底。
+    max_tokens: maxTokens ?? 2048,
     response_format: { type: 'json_object' },
-    thinking: { type: thinkingEnabled ? 'enabled' : 'disabled' },
+    // 思维链对 GLM 一律显式关死：GLM-4.7-Flash 开 thinking 会在结构化任务上
+    // 死循环吃满输出预算（见 isGlmPrimaryStreamProvider 注释），显式 disabled
+    // 同时防上游将来把默认值改成开。其他供应商收到的也是 disabled（Worker 对
+    // siliconflow/openrouter 会剥离该参数，其余端点实测忽略不报错）。
+    thinking: { type: 'disabled' },
     ...(streaming
       ? {
           stream: true,
@@ -7936,7 +7939,7 @@ async function callSingleAiProvider(params: {
   // 此前规划调用复用主解析、被强制要求 items，导致多轮检索规划对所有供应商 100% 抛
   // schema_invalid，规划功能自上线起从未生效。
   schema?: 'recommendation' | 'search-plan';
-  // 思维链供应商流式增量回调（仅 thinking 供应商的 SSE 路径触发）。
+  // GLM 主力流式增量回调（仅其 SSE 路径触发）。
   onStreamDelta?: (delta: AiStreamDelta) => void;
 }) {
   const { config } = params;
@@ -7946,10 +7949,11 @@ async function callSingleAiProvider(params: {
   const maxTokens = useLitePrompt
     ? params.liteMaxTokens ?? Math.min(params.maxTokens ?? 1600, 640)
     : params.maxTokens;
-  // 思维链供应商走 SSE：思维链生成占整个调用 70%+ 时长，是"进度不可见"的根因；
-  // 免费/兜底模型保持非流式（响应快，且前台竞速按整包对比更简单）。
-  const streaming = isThinkingCapableProvider(config);
-  // tokens_seen（思维链吃满输出预算）重试时升压 max_tokens：同参重试对这类
+  // GLM 主力走 SSE 流式：长生成（40-80s）有实时进度可见，且空闲超时只掐
+  // 真死流不误杀慢响应；免费/兜底模型保持非流式（响应快，且前台竞速按
+  // 整包对比更简单）。
+  const streaming = isGlmPrimaryStreamProvider(config);
+  // tokens_seen（正文吃满输出预算）重试时升压 max_tokens：同参重试对这类
   // 失败是确定性复现，只有抬预算才有恢复机会。
   let activeMaxTokens = maxTokens;
   let requestBody = buildAiRequestBody(config, messages, activeMaxTokens, streaming);
@@ -8054,17 +8058,18 @@ async function callAiApi(params: {
   liteMaxTokens?: number;
   qualityCheck?: (response: unknown, config: AiProviderConfig) => string | null;
   schema?: 'recommendation' | 'search-plan';
-  // 仅 thinking 供应商（SSE 流式路径）触发；竞速/兜底的整包路径不会回调。
+  // 仅 GLM 主力供应商（SSE 流式路径）触发；竞速/兜底的整包路径不会回调。
   onStreamDelta?: (delta: AiStreamDelta) => void;
 }) {
   const providerErrors: string[] = [];
   const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
   const fallbackConfigs = params.configs.filter(isPaidFallbackProvider);
-  // 思维链供应商单独优先串行：它与免费模型的竞速里几乎必输（thinking 更慢），
-  // 若参与 Promise.any，真思维链永远抢不过快而浅的兜底模型。
-  const thinkingConfigs = foregroundConfigs.filter(isThinkingCapableProvider);
+  // GLM 主力单独优先串行：质量远好于免费小模型兜底池，若进 Promise.any 竞速，
+  // "谁先完成用谁"会让浅而快的兜底模型常年抢走首发位。关掉思维链后主力
+  // 通常 20-80s 完成，串行等待是可接受的代价。
+  const thinkingConfigs = foregroundConfigs.filter(isGlmPrimaryStreamProvider);
   const nonThinkingForegroundConfigs = foregroundConfigs.filter(
-    (config) => !isThinkingCapableProvider(config),
+    (config) => !isGlmPrimaryStreamProvider(config),
   );
 
   for (const config of thinkingConfigs) {

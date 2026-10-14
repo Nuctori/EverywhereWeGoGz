@@ -95,9 +95,11 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
       onStreamDelta: (delta) => deltas.push({ reasoning: delta.reasoningDelta, content: delta.contentDelta }),
     });
 
-    assert.equal(capturedRequestBody?.stream, true, 'thinking provider request must ask for SSE streaming');
+    assert.equal(capturedRequestBody?.stream, true, 'GLM primary request must ask for SSE streaming');
     assert.deepEqual(capturedRequestBody?.stream_options, { include_usage: true }, 'streaming must request trailing usage');
-    assert.deepEqual(capturedRequestBody?.thinking, { type: 'enabled' });
+    // 2026-10-14 起 GLM 思维链强制关闭：开 thinking 会在结构化大任务上死循环
+    // 吃满输出预算，正文归零直接降级本地补位。
+    assert.deepEqual(capturedRequestBody?.thinking, { type: 'disabled' });
     assert.deepEqual(
       deltas.map((delta) => delta.reasoning).join(''),
       '思考A思考B',
@@ -183,8 +185,9 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
   }
 }
 
-// ====== 6. 思维链吃满 max_tokens（tokens_seen/content_missing）：首次按新地板
-// 发请求，重试必须升压 max_tokens 而不是同参复现必败 ======
+// ====== 6. 输出吃满 max_tokens（tokens_seen/content_missing）：首次按调用方
+// 预算发请求（思维链已关，不再抬 16k 地板），重试必须升压 max_tokens 而不是
+// 同参复现必败 ======
 {
   const starvedBody = [
     sseFrame('{"choices":[{"delta":{"reasoning_content":"一直思考"}}]}'),
@@ -225,17 +228,17 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
     assert.equal(requestBodies.length, 2, 'starved first attempt must escalate and retry once');
     assert.equal(
       requestBodies[0]?.max_tokens,
-      16384,
-      'thinking request must lift max_tokens to the starvation-safe floor regardless of caller budget',
+      3600,
+      'request must use the caller budget verbatim now that thinking is force-disabled',
     );
     assert.equal(
       requestBodies[1]?.max_tokens,
       32768,
-      'retry after tokens_seen starvation must double max_tokens up to the ceiling',
+      'retry after tokens_seen starvation must escalate max_tokens up to the ceiling',
     );
     const items = (result.parsed as { items?: unknown[] }).items;
     assert.deepEqual(items, ['恢复'], 'escalated retry must still parse through the shared schema');
-    console.info('[6/9] 思维链吃满预算→升压 max_tokens 重试通过');
+    console.info('[6/9] 输出吃满预算→升压 max_tokens 重试通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
