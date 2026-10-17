@@ -1,6 +1,14 @@
 // 线路展示层：负责标题摘要、目的地兜底、主题推断和日期展示文案。
+//
+// 日期一律按"日历日"处理（见 @/lib/calendar-date）：数据里的 departureDate 是
+// "广州当地某天出发"，换算成绝对时刻再切回字符串会在 UTC+ 时区整体前移一天。
 import type { Tour } from '@/types/tour';
 import { resolveTourDestination, sanitizeTourHighlights } from '@/lib/destination-resolver';
+import {
+  daysBetweenCalendarDates,
+  parseCalendarDate,
+  todayCalendarDate,
+} from '@/lib/calendar-date';
 
 const GENERIC_DESTINATION_FALLBACK = '目的地待确认';
 const GENERIC_HIGHLIGHT_TERMS = new Set([
@@ -71,63 +79,88 @@ export function formatDate(dateStr: string | undefined): string {
 }
 
 /**
- * 获取最近的未来出发日期（返回 ISO 日期字符串）
+ * 获取最近的未来出发日期（返回 `YYYY-MM-DD`，今天是"未来"，空串表示没有可出发班期）
  */
-export function getUpcomingDepartureDate(tour: Tour) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
+export function getUpcomingDepartureDate(tour: Tour, today: string = todayCalendarDate()) {
   const dates = [tour.departureDate, ...(tour.departureDates || [])]
-    .filter(Boolean)
-    .map((value) => new Date(`${value}T00:00:00`))
-    .filter((date) => !Number.isNaN(date.getTime()))
-    .sort((a, b) => a.getTime() - b.getTime());
-
-  const futureDate = dates.find((date) => date.getTime() >= today.getTime());
-  return futureDate ? futureDate.toISOString().slice(0, 10) : '';
+    .map((value) => parseCalendarDate(value || ''))
+    .filter((value): value is string => Boolean(value))
+    .sort();
+  return dates.find((date) => date >= today) ?? '';
 }
 
-// 根据最近未来出发日期返回徽标文本：有未来日期则显示日期，无则输“班期已过”或“班期待确认”或“待定”
-export function getDepartureDateBadgeLabel(tour: Tour) {
-  const upcomingDate = getUpcomingDepartureDate(tour);
-  if (upcomingDate) return formatShortDate(upcomingDate);
-  const hasAnyStructuredDate = [tour.departureDate, ...(tour.departureDates || [])].some(Boolean);
+/** 班期状态：展示层唯一真相，调用方不再对中文文案做字符串嗅探。 */
+export type DepartureStatus = 'scheduled' | 'expired' | 'unconfirmed' | 'unknown';
+
+export interface DepartureBadge {
+  status: DepartureStatus;
+  /** 徽标文案（纯展示，不参与判断）。 */
+  label: string;
+  /** status 为 scheduled 时的最近可出发日历日。 */
+  upcomingDate?: string;
+}
+
+export function getDepartureBadge(
+  tour: Tour,
+  today: string = todayCalendarDate(),
+): DepartureBadge {
+  const upcomingDate = getUpcomingDepartureDate(tour, today);
+  if (upcomingDate) {
+    return { status: 'scheduled', label: formatShortDate(upcomingDate), upcomingDate };
+  }
+  const hasAnyStructuredDate = [tour.departureDate, ...(tour.departureDates || [])].some(
+    (value) => Boolean(parseCalendarDate(value || '')),
+  );
   if (hasAnyStructuredDate) {
-    return '班期已过';
+    return { status: 'expired', label: '班期已过' };
   }
   if (
     tour.dataQuality?.isDepartureDateReliable === false ||
     tour.dataQuality?.hasStructuredDepartureDates === false
   ) {
-    return '班期待确认';
+    return { status: 'unconfirmed', label: '班期待确认' };
   }
-  return '待定';
+  return { status: 'unknown', label: '待定' };
+}
+
+// 根据最近未来出发日期返回徽标文本：有未来日期则显示日期，无则输出“班期已过”/“班期待确认”/“待定”。
+export function getDepartureDateBadgeLabel(tour: Tour) {
+  return getDepartureBadge(tour).label;
 }
 
 /**
  * 简短日期标签（用于卡片展示）
+ *
+ * 只接受纯日历日（`YYYY-MM-DD`）。带时刻的 ISO 串先按本地历法归一，不参与
+ * "今天/明天/后天"推算——那类值表达的是绝对时刻，换算成"哪一天出发"需要业务时区，
+ * 属于上游数据清洗的职责，展示层不猜。
  */
 export function formatShortDate(dateStr: string | undefined): string {
   if (!dateStr) return '待定';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
-  const now = new Date();
-  const today0 = new Date(); today0.setHours(0,0,0,0);
-  const d0 = new Date(`${dateStr}T00:00:00`);
-  if (!Number.isNaN(d0.getTime())) {
-    const diffDays = Math.round((d0.getTime() - today0.getTime()) / 86400000);
-    const month = d.getMonth() + 1;
-    const day = d.getDate();
-    if (diffDays === 0) return `${month}月${day}日 · 今天可出发`;
-    if (diffDays === 1) return `${month}月${day}日 · 明天可出发`;
-    if (diffDays > 1 && diffDays <= 7) return `${month}月${day}日 · ${diffDays}天后`;
-    return `${month}月${day}日`;
+  const calendarDate = parseCalendarDate(dateStr);
+  if (!calendarDate) {
+    const parsed = new Date(dateStr);
+    return Number.isNaN(parsed.getTime()) ? dateStr : `${parsed.getMonth() + 1}月${parsed.getDate()}日`;
   }
-  const diffDays = Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  const month = d.getMonth() + 1;
-  const day = d.getDate();
-  if (diffDays >= 0 && diffDays <= 7) return `${month}月${day}日 · 即将出发`;
-  return `${month}月${day}日`;
+  const [, monthText, dayText] = calendarDate.split('-');
+  return `${Number(monthText)}月${Number(dayText)}日`;
+}
+
+/**
+ * "今天/明天/N天后"的临近感单独成函数。
+ *
+ * 卡片上日期只出现一次：角标写"最早 10月18日 出发"，这里再给"今天/明天"作为补充，
+ * 避免再拼一遍日期造成"10月18日 · 今天可出发 出发"这种重复病句。
+ */
+export function formatRelativeDayLabel(dateStr: string | undefined, today: string = todayCalendarDate()): string {
+  const calendarDate = parseCalendarDate(dateStr || '');
+  if (!calendarDate) return '';
+  const diffDays = daysBetweenCalendarDates(today, calendarDate);
+  if (diffDays === null) return '';
+  if (diffDays === 0) return '今天';
+  if (diffDays === 1) return '明天';
+  if (diffDays > 1 && diffDays <= 7) return `${diffDays}天后`;
+  return '';
 }
 
 // 主题信号模式

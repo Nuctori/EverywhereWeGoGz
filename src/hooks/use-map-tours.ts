@@ -169,6 +169,7 @@ export function useMapTours() {
       chunkTours.forEach((tour) => allToursById.set(tour.id, tour));
       const tours = [...allToursById.values()];
       placeToursCacheRef.current.set(placeId, tours);
+      // 指针只在"这一片真的成功"之后推进；失败时保持原值等下一次重试。
       placeToursNextChunkRef.current.set(placeId, chunkIndex + 1);
       setPlaceToursError((current) => current?.placeId === placeId ? null : current);
       setPlaceToursLoaded((current) => new Set(current).add(placeId));
@@ -184,10 +185,12 @@ export function useMapTours() {
     } catch (error) {
       if (controller.signal.aborted && !timedOut) return;
       const message = error instanceof Error ? error.message : 'Failed to load map tours.';
+      // 指针只在成功后才前进，重试会重新请求同一片；这里只把错误暴露给 UI，
+      // 避免把上一次的部分结果当成完整数据。
       setPlaceToursError({ placeId, message });
       setState((current) => ({
         ...current,
-        toursError: error instanceof Error ? error.message : 'Failed to load map tours.',
+        toursError: message,
       }));
     } finally {
       window.clearTimeout(timeoutId);

@@ -1,22 +1,22 @@
 // 本地推荐评分：以“当下可出发价值”为核心，随日期每日变化。
 // 价值 = 临近度(指数衰减) + 可选密度 + 新品/热度微调；无未来班期直接沉底。
 import type { TourSummary } from '@/types/tour';
+import {
+  compareCalendarDates,
+  daysBetweenCalendarDates,
+  parseCalendarDate,
+  todayCalendarDate,
+} from '@/lib/calendar-date';
 
-export function getDaysUntil(dateString: string) {
-  if (!dateString) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(`${dateString}T00:00:00`);
-  if (Number.isNaN(target.getTime())) return null;
-  target.setHours(0, 0, 0, 0);
-  return Math.round((target.getTime() - today.getTime()) / 86400000);
+export function getDaysUntil(dateString: string, today: string = todayCalendarDate()) {
+  return daysBetweenCalendarDates(today, dateString);
 }
 
-export function getUpcomingDates(tour: Pick<TourSummary, 'departureDate' | 'departureDates'>) {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayStr = `${today.getFullYear()}-${`${today.getMonth() + 1}`.padStart(2, '0')}-${`${today.getDate()}`.padStart(2, '0')}`;
-  return getEffectiveDepartureDates(tour).filter((d) => d >= todayStr);
+export function getUpcomingDates(
+  tour: Pick<TourSummary, 'departureDate' | 'departureDates'>,
+  today: string = todayCalendarDate(),
+) {
+  return getEffectiveDepartureDates(tour).filter((d) => d >= today);
 }
 
 export function getEffectiveDepartureDates(tour: Pick<TourSummary, 'departureDate' | 'departureDates'>) {
@@ -24,15 +24,11 @@ export function getEffectiveDepartureDates(tour: Pick<TourSummary, 'departureDat
   const uniqueDates = new Set<string>();
 
   for (const value of values) {
-    if (!value) continue;
-
-    const candidate = String(value).trim();
-    if (!candidate) continue;
-    if (Number.isNaN(new Date(`${candidate}T00:00:00`).getTime())) continue;
-    uniqueDates.add(candidate);
+    const candidate = parseCalendarDate(value);
+    if (candidate) uniqueDates.add(candidate);
   }
 
-  return Array.from(uniqueDates).sort((left, right) => left.localeCompare(right));
+  return Array.from(uniqueDates).sort(compareCalendarDates);
 }
 
 export function getRecommendationScore(

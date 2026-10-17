@@ -1,24 +1,41 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Flame, ChevronRight } from 'lucide-react';
 import type { Tour } from '@/types/tour';
 import { formatDate } from '@/lib/tour-display';
 import { formatDepartureDateToggleLabel } from '@/lib/departure-date-display';
+import {
+  addCalendarDays,
+  compareCalendarDates,
+  daysBetweenCalendarDates,
+  parseCalendarDate,
+  todayCalendarDate,
+} from '@/lib/calendar-date';
 
 interface DepartureDateSelectorProps {
   tour: Tour;
 }
 
+const WEEKDAY_LABELS = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+function getWeekdayIndex(calendarDate: string) {
+  const [year, month, day] = calendarDate.split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+}
+
 // 出发日期选择器，用于旅游线路详情页展示可选团期
 export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
-  const dates = (tour.departureDates || []).filter(Boolean);
+  const todayStr = todayCalendarDate();
+  const dates = (tour.departureDates || [])
+    .map((value) => parseCalendarDate(value))
+    .filter((value): value is string => Boolean(value));
   // 优先选中最近的未来日期，已过期默认不再被选中
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const upcoming = dates.filter((d) => d >= todayStr).sort();
-  const fallbackDate = upcoming[0] || tour.departureDate || dates[0] || '';
+  const upcoming = dates.filter((d) => d >= todayStr).sort(compareCalendarDates);
+  const fallbackDate = upcoming[0] || parseCalendarDate(tour.departureDate) || dates[0] || '';
   const initialDate = (() => {
     // 若默认 departureDate 已过期，改选最近未来日期
-    if (tour.departureDate && tour.departureDate < todayStr && upcoming.length > 0) return upcoming[0]!;
+    const defaultDate = parseCalendarDate(tour.departureDate);
+    if (defaultDate && defaultDate < todayStr && upcoming.length > 0) return upcoming[0]!;
     return fallbackDate;
   })();
   const [selectedDate, setSelectedDate] = useState(initialDate);
@@ -31,25 +48,22 @@ export function DepartureDateSelector({ tour }: DepartureDateSelectorProps) {
     return null;
   }
 
-  // 计算返程日期 departureDate + duration
+  // 计算返程日期 departureDate + duration（日历日加法，不经过本地时区换算）
   const getReturnDate = (departStr: string) => {
-    const d = new Date(departStr);
-    d.setDate(d.getDate() + tour.duration);
-    return `${d.getMonth() + 1}月${d.getDate()}日`;
+    const returnDate = addCalendarDays(departStr, tour.duration);
+    if (!returnDate) return '';
+    const [, month, day] = returnDate.split('-');
+    return `${Number(month)}月${Number(day)}日`;
   };
 
   // 格式化日期标签：今天/明天/周几/N天后/已过期
   // 返回值 tag 含义：hot=热门/past=已过期/near=临近出发/normal=普通
   const formatDateLabel = (dateStr: string) => {
-    const d = new Date(dateStr);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diff = Math.round((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-    const month = d.getMonth() + 1;
-    const day = d.getDate();
-    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    const weekday = weekdays[d.getDay()];
+    const diff = daysBetweenCalendarDates(todayStr, dateStr) ?? 0;
+    const [, monthText, dayText] = dateStr.split('-');
+    const month = Number(monthText);
+    const day = Number(dayText);
+    const weekday = WEEKDAY_LABELS[getWeekdayIndex(dateStr)];
 
     if (diff === 0) return { main: '今天', sub: `${month}/${day} ${weekday}`, tag: 'hot' };
     if (diff === 1) return { main: '明天', sub: `${month}/${day} ${weekday}`, tag: 'hot' };

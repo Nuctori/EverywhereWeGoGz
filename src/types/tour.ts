@@ -174,7 +174,8 @@ export interface TourSummary {
   discountRate?: number;
   groupSize: string;
   theme: string;
-  leisureLevel: 'easy' | 'medium' | 'hard';
+  /** `unknown` = 该数据切片没有体力信息（例如地图降采样卡片），展示与排序都不得臆断成 easy。 */
+  leisureLevel: 'easy' | 'medium' | 'hard' | 'unknown';
   suitableFor: string[];
   season: string;
   departureDates?: string[];
@@ -206,7 +207,8 @@ export interface TourIndexEntry {
   isNew: boolean;
   isFlashSale: boolean;
   theme: string;
-  leisureLevel: 'easy' | 'medium' | 'hard';
+  /** 见 TourSummary.leisureLevel：`unknown` 表示切片里没有体力信息。 */
+  leisureLevel: 'easy' | 'medium' | 'hard' | 'unknown';
   rating: number;
   groupSize: string;
   suitableFor: string[];

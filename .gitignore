@@ -67,3 +67,7 @@ tmp/
 
 # Mimosa 安全扫描插件工作区（本地产物，勿入库）
 .mimosa/
+
+# DSH 本地 Agent 工作区（反应式历史 / 工作流运行库，勿入库）
+.dsh-reactive/
+.workflow-one/

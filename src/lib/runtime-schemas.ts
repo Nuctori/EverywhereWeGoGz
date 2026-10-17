@@ -167,6 +167,8 @@ export const tourBoardingSchema = z.object({
   summary: z.string().optional(),
 });
 
+export const leisureLevelSchema = z.enum(['easy', 'medium', 'hard', 'unknown']);
+
 export const tourSummarySchema = z.object({
   id: z.string().min(1),
   sourceId: z.string().optional(),
@@ -194,7 +196,7 @@ export const tourSummarySchema = z.object({
   discountRate: nonNegativeNumber.optional(),
   groupSize: z.string().optional().default(''),
   theme: z.string().optional().default(''),
-  leisureLevel: z.enum(['easy', 'medium', 'hard']).optional().default('easy'),
+  leisureLevel: leisureLevelSchema.optional().default('easy'),
   suitableFor: stringArrayDefaultEmpty,
   season: z.string().optional().default(''),
   departureDates: z.array(z.string()).optional(),
@@ -275,7 +277,7 @@ export const tourIndexEntrySchema = z.object({
   isNew: booleanDefaultFalse,
   isFlashSale: booleanDefaultFalse,
   theme: z.string().optional().default(''),
-  leisureLevel: z.enum(['easy', 'medium', 'hard']).optional().default('easy'),
+  leisureLevel: leisureLevelSchema.optional().default('easy'),
   rating: nonNegativeNumber.optional().default(0),
   groupSize: z.string().optional().default(''),
   suitableFor: stringArrayDefaultEmpty,
@@ -340,9 +342,19 @@ export const aiRecommendationItemSchema = z.object({
   score: z.coerce.number().finite(),
   reason: z.string().optional(),
   matchedSignals: z.array(z.string()).optional().default([]),
+  // 排序契约字段（见 tour-recommendation 字典序排序）：漏一个都会让重载后的
+  // 排序与当轮不一致，或让整条持久化结果校验失败被丢弃。
+  demandCoverage: z.coerce.number().optional(),
+  constraintFit: z.coerce.number().optional(),
+  constraintChecked: z.coerce.number().optional(),
+  qualityFlag: z.boolean().optional(),
+  constraintNear: z.coerce.number().optional(),
+  budgetOutlier: z.boolean().optional(),
   semanticFit: z.string().optional(),
   semanticSignals: z.array(z.string()).optional(),
   semanticBoundary: z.string().optional(),
+  reasonSource: z.enum(['ai', 'fallback']).optional(),
+  recommendationTier: z.enum(['ai-detailed', 'ai-brief', 'local-supplement']).optional(),
 });
 
 const aiRecommendationStatusSchema = z.object({
@@ -389,12 +401,32 @@ export const aiPreferenceMemorySchema = z.object({
   updatedAt: z.string(),
 });
 
+const aiRecommendationSearchRoundSchema = z.object({
+  query: z.string(),
+  hitCount: z.coerce.number(),
+  alignedCount: z.coerce.number().optional(),
+  topTitles: z.array(z.string()).optional(),
+});
+
+const aiRecommendationUsageSchema = z.object({
+  model: z.string().optional(),
+  promptTokens: z.coerce.number().optional(),
+  cachedPromptTokens: z.coerce.number().optional(),
+  completionTokens: z.coerce.number().optional(),
+  reasoningTokens: z.coerce.number().optional(),
+});
+
 export const aiRecommendationResultSchema = z.object({
   conversationId: z.string().min(1),
   summary: z.string(),
   items: z.array(aiRecommendationItemSchema),
   generatedAt: z.string(),
   source: z.enum(['local-preview', 'ai-api']),
+  // 诊断性字段：不参与渲染，但持久化往返时保留，重载后才能解释当轮排序。
+  reasoning: z.string().optional(),
+  searchRounds: z.array(aiRecommendationSearchRoundSchema).optional(),
+  usage: aiRecommendationUsageSchema.optional(),
+  refinementMode: z.string().optional(),
   status: aiRecommendationStatusSchema.optional(),
   preferenceMemory: aiPreferenceMemorySchema.optional(),
   semanticNotes: aiRecommendationSemanticNotesSchema.optional(),

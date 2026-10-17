@@ -81,15 +81,18 @@ export function inflateTourSummaryFromMapCard(entry: TourMapCardEntry): TourSumm
     destination: entry.destination,
     duration: entry.duration,
     price: entry.price,
+    // 地图卡片是降采样索引，单价按源站口径只能是"每人"；不要在此处臆造其它单位。
     priceUnit: '人',
-    departureDate: entry.departureDate,
-    transportType: entry.transportType,
+    departureDate: entry.departureDate ?? '',
+    transportType: entry.transportType ?? '',
+    // 以下字段分片里没有对应内容，填"未知"占位。注意 leisureLevel 不能用
+    // 'easy' 占位：它会渲染成"轻松"徽章并被 AI 当作体力偏好证据，是伪造事实。
     accommodationLevel: '',
     meals: '',
     singleSupplementNote: '',
     highlights: [],
     rating: 0,
-    bookingUrl: entry.bookingUrl,
+    bookingUrl: entry.bookingUrl ?? '',
     images: [],
     tags: [],
     isHot: false,
@@ -97,7 +100,7 @@ export function inflateTourSummaryFromMapCard(entry: TourMapCardEntry): TourSumm
     isFlashSale: false,
     groupSize: '',
     theme: '',
-    leisureLevel: 'easy',
+    leisureLevel: 'unknown',
     suitableFor: [],
     season: '',
   };

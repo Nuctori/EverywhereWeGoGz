@@ -67,6 +67,7 @@
     "generate:weekly-wechat-article": "node scripts/generate_weekly_wechat_article.mjs",
     "prepare:wechat-publish-bundle": "node scripts/prepare_wechat_publish_bundle.mjs",
     "publish:wechat-draft": "node scripts/publish_wechat_draft.mjs",
+    "test:tour-facts": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_tour_facts.mjs",
     "test:departure-date-display": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_departure_date_display.ts",
     "test:source-detail-url": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_source_detail_url.mjs",
     "test:weekly-wechat-article": "node scripts/test_weekly_wechat_article.mjs",
@@ -85,7 +86,10 @@
     "test:separation-r8": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r8_redteam2.mjs",
     "test:separation-r9": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r9_assembly.mjs",
     "test:separation-r9-demand": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_separation_r9_demand.mjs",
-    "test:demand-classifier": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_demand_classifier.mjs"
+    "test:demand-classifier": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_demand_classifier.mjs",
+    "test:calendar-date": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_calendar_date_semantics.mjs",
+    "test:ai-chat-storage-roundtrip": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_chat_storage_roundtrip.mjs",
+    "test:tour-detail-orchestration": "node scripts/test_tour_detail_orchestration.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",
