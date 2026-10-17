@@ -1,4 +1,4 @@
-﻿import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Header } from './sections/Header';
 import { Hero } from './sections/Hero';
 import { TourList } from './sections/TourList';
@@ -63,10 +63,11 @@ function App() {
 
   return (
     <div className="min-h-screen text-slate-900">
+      <a href="#tour-list" className="skip-link">跳到线路列表</a>
       <div className="relative min-h-screen">
         <Header onOpenMap={() => setMapExpanded(true)} />
 
-        <main className="pb-16">
+        <main id="main-content" className="pb-16">
           <Hero
             searchQuery={draftSearchQuery}
             onSearchChange={setDraftSearchQuery}
@@ -75,8 +76,8 @@ function App() {
             quickDestinations={QUICK_DESTINATIONS}
             map={<Suspense fallback={<div className="hidden sm:block h-[280px] rounded-[22px] bg-stone-100" aria-hidden="true" />}><MapView embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} /></Suspense>}
           />
-          <div id="tour-list" className="scroll-mt-24">
-            <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} />
+          <div id="tour-list" tabIndex={-1} className="scroll-mt-24 outline-none">
+            <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} onClearSearch={() => { setDraftSearchQuery(''); setSubmittedSearchQuery(''); setAiSearchRequest(null); }} />
           </div>
         </main>
 
@@ -84,7 +85,8 @@ function App() {
           <div className="mx-auto flex max-w-7xl flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="text-xs leading-6 text-stone-400 md:text-right">
               <p>覆盖：假日通 · 广州去旅行 · 康辉 · 暴走村 · 广之旅 · 广东中旅 · 品途 · 天涯户外</p>
-              <p>© 2024 老广去边度 · 让线路信息更好读</p>
+              <p>© {new Date().getFullYear()} 老广去边度 · 让线路信息更好读</p>
+              <p>价格与班期仅供参考，预订前请向来源平台确认。</p>
               <a className="mt-1 inline-block text-orange-700 hover:underline" href="mailto:feedback@nuctori.github.io?subject=线路反馈">没找到合适的团？告诉我们</a>
             </div>
           </div>

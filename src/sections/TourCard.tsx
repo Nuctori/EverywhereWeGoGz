@@ -1,4 +1,4 @@
-﻿import type { Tour } from '@/types/tour';
+import type { Tour } from '@/types/tour';
 // 线路卡片组件件：展示标題、图片、价格、强度标签和 AI推荐理由的容器单元。
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -64,7 +64,7 @@ export const TourCard = memo(function TourCard({
 
   return (
     <Card
-      className="group surface-panel cursor-pointer gap-0 overflow-hidden rounded-[22px] border border-stone-200/80 bg-white/95 py-0 transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(15,23,42,0.10)] [contain-intrinsic-size:auto_380px] [content-visibility:auto] sm:rounded-[26px]"
+      className="tour-card group surface-panel flex h-full cursor-pointer flex-col gap-0 overflow-hidden rounded-[22px] border border-stone-200/80 bg-white py-0 transition duration-200 hover:-translate-y-1 hover:border-teal-900/20 hover:shadow-[0_18px_42px_rgba(30,65,54,0.10)] [contain-intrinsic-size:auto_380px] [content-visibility:auto] sm:rounded-[26px]"
       onClick={onClick}
     >
       <div className="relative h-36 overflow-hidden bg-stone-100 sm:h-52">
@@ -95,7 +95,7 @@ export const TourCard = memo(function TourCard({
         <div className="absolute left-4 top-4 rounded-full border border-white/85 bg-white/96 px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-stone-800 shadow-[0_8px_24px_rgba(15,23,42,0.18)] ring-1 ring-black/6 backdrop-blur-md">
           {tour.source}
         </div>
-        {onToggleFavorite && <button type="button" aria-label={isFavorite ? '取消收藏' : '收藏线路'} onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-stone-600 shadow-sm backdrop-blur hover:bg-white"><Heart className={`h-4 w-4 ${isFavorite ? 'fill-orange-500 text-orange-500' : ''}`} /></button>}
+        {onToggleFavorite && <button type="button" aria-label={isFavorite ? '取消收藏' : '收藏线路'} aria-pressed={isFavorite} title={isFavorite ? '已收藏，点击取消' : '收藏这条线路'} onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }} className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-stone-600 shadow-sm backdrop-blur hover:bg-white"><Heart className={`h-4 w-4 ${isFavorite ? 'fill-orange-500 text-orange-500' : ''}`} /></button>}
         {tour.discountRate && tour.discountRate > 0 && (
           <div className="absolute bottom-4 right-4 rounded-full border border-white/85 bg-white/96 px-3 py-1.5 text-[11px] font-semibold tracking-[0.01em] text-stone-800 shadow-[0_8px_24px_rgba(15,23,42,0.18)] ring-1 ring-black/6 backdrop-blur-md">
             参考降价 {tour.discountRate}%
@@ -103,9 +103,9 @@ export const TourCard = memo(function TourCard({
         )}
       </div>
 
-        <CardContent className="p-4 sm:p-5">
-          <h3 className="line-clamp-2 text-[15px] font-semibold leading-6 text-stone-900 transition-colors group-hover:text-stone-700 sm:text-base sm:leading-7 sm:line-clamp-3">
-            {tour.title}
+        <CardContent className="flex flex-1 flex-col p-4 sm:p-5">
+          <h3 className="text-[15px] font-semibold leading-6 text-stone-900 transition-colors group-hover:text-teal-900 sm:text-base sm:leading-7">
+            <button type="button" className="line-clamp-2 rounded-md text-left sm:line-clamp-3" onClick={(event) => { event.stopPropagation(); onClick(); }}>{tour.title}</button>
           </h3>
 
         <p className="mt-2 line-clamp-2 text-sm text-stone-500">
@@ -184,7 +184,7 @@ export const TourCard = memo(function TourCard({
           )}
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-stone-500">
+        <div className="mb-5 mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] text-stone-500">
           <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{destinationLabel}</span>
           <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{tour.duration}天</span>
           <span className={`flex items-center gap-1.5 ${isExpiredBadge ? 'text-amber-600 font-medium' : ''}`}><Calendar className="h-3.5 w-3.5" />{departureDateLabel}{isExpiredBadge ? ' · 已沉底' : ''}</span>
@@ -193,9 +193,9 @@ export const TourCard = memo(function TourCard({
           {boardingLabel && <span className="flex items-center gap-1.5"><Navigation className="h-3.5 w-3.5" />{boardingLabel}</span>}
         </div>
 
-        <div className="mt-3.5 flex items-center justify-between gap-3 border-t border-stone-100 pt-3.5 sm:mt-5 sm:pt-4">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-stone-100 pt-4 sm:pt-5">
           <div>
-            <p className="text-[11px] uppercase tracking-[0.18em] text-stone-400 max-sm:hidden">¥{tour.price.toLocaleString()} / 人起</p>
+            <p className="text-[11px] text-stone-500 max-sm:hidden">参考团费 / 人起</p>
             <div className="mt-0.5 flex items-baseline gap-1.5 sm:mt-1">
               <span className="text-2xl font-semibold tracking-tight text-stone-950">¥{tour.price.toLocaleString()}</span>
               <span className="text-xs text-stone-500 sm:hidden">/人起</span>
@@ -212,7 +212,7 @@ export const TourCard = memo(function TourCard({
           <Button
             size="sm"
             variant="outline"
-            className="h-9 rounded-xl border-stone-200 bg-white px-3 text-xs text-stone-700 hover:bg-stone-50 hover:text-stone-900"
+            className="h-11 rounded-xl border-teal-900/15 bg-teal-50/70 px-3 text-xs text-teal-900 hover:bg-teal-100 hover:text-teal-950"
             onClick={(e) => {
               e.stopPropagation();
               onClick();

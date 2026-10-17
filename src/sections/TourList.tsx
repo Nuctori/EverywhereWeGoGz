@@ -486,9 +486,10 @@ function getSourceOptions(tours: TourCatalogEntry[]) {
 interface TourListProps {
   searchQuery: string;
   aiSearchRequest: AiSearchRequest | null;
+  onClearSearch: () => void;
 }
 
-export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
+export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourListProps) {
   const {
     tours: localTours,
     indexTours,
@@ -513,9 +514,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     selectTour,
     clearSelectedTour,
   } = useTourDetail();
-  const [showFilters, setShowFilters] = useState(() =>
-    typeof window !== 'undefined' ? window.innerWidth >= 768 : false,
-  );
+  const [showFilters, setShowFilters] = useState(false);
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
@@ -1201,7 +1200,8 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
     <div className="surface-panel rounded-[24px] border border-stone-200/80 bg-white/92 p-4 sm:rounded-[28px] sm:p-6">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3 sm:mb-5 sm:gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-stone-900">筛选</h2>
+          <h3 className="text-base font-semibold text-stone-900">按你的节奏选</h3>
+          <p className="mt-1 text-xs text-stone-500">筛选即时生效，无需再次搜索</p>
         </div>
         <div className="ml-auto flex items-center gap-2">
           {activeFilterCount > 0 && (
@@ -1216,6 +1216,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
             variant="outline"
             className="h-10 gap-2 rounded-full border-stone-200 bg-white px-4 text-sm text-stone-600 hover:bg-stone-50 hover:text-stone-900"
             onClick={() => setShowFilters((prev) => !prev)}
+            aria-expanded={showFilters}
           >
             <SlidersHorizontal className="w-4 h-4" />
             更多筛选
@@ -1636,14 +1637,12 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       />
 
       <div className="mb-6">
-        {heroDestinations.length > 0 && (
-          <div className="mobile-chip-scroll mb-4 flex items-center gap-2 overflow-x-auto whitespace-nowrap rounded-[24px] border border-stone-200/80 bg-white/80 px-4 py-3 text-sm text-stone-600">
-            <span className="shrink-0 font-medium text-stone-900">当前热门目的地：</span>
-            {heroDestinations.map((dest) => (
-              <span key={dest} className="shrink-0 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs text-stone-600">{dest}</span>
-            ))}
-          </div>
-        )}
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="mb-2 text-[10px] font-semibold tracking-[0.22em] text-teal-700">FIND YOUR NEXT JOURNEY</p><h2 className="text-2xl font-semibold tracking-tight text-[#173e38] sm:text-3xl">挑一条心动的线路</h2><p className="mt-2 text-sm text-stone-500">先选目的地，再按时间和预算缩小范围。</p></div>
+          <a href="#" className="inline-flex min-h-11 items-center gap-1 text-xs text-stone-600 hover:text-teal-800">返回搜索 ↑</a>
+        </div>
+        {heroDestinations.length > 0 && <div className="sr-only">当前热门目的地：{heroDestinations.join('、')}</div>}
+        {searchQuery && <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-teal-900/10 bg-teal-50/70 px-4 py-3"><p className="min-w-0 break-words text-sm text-teal-950">正在查找：<strong>{searchQuery}</strong></p><Button variant="ghost" className="h-11 shrink-0 rounded-xl text-teal-900" onClick={onClearSearch}><X className="mr-1 h-4 w-4" />清除搜索</Button></div>}
         {commonFilters}
 
         {!isMobile && showFilters && (
@@ -1837,7 +1836,7 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
       </div>
 
       {displayResultCount > 0 && (
-        <div className="mb-5 flex items-center justify-between text-sm text-stone-500">
+        <div role="status" aria-live="polite" aria-atomic="true" className="mb-5 flex items-center justify-between text-sm text-stone-500">
           <span>共 {displayResultCount.toLocaleString()} 条结果</span>
           {shouldRenderLoadMore && (
             <span className="text-xs text-stone-400">
@@ -1853,12 +1852,16 @@ export function TourList({ searchQuery, aiSearchRequest }: TourListProps) {
           <p className="text-stone-500">加载旅行数据中...</p>
         </div>
       ) : displayTours.length === 0 ? (
-        <div className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/90 py-20 text-center">
-          <div className="mb-4 text-5xl">暂无结果</div>
+        <div role="status" className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/90 px-5 py-16 text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-800"><MapPin className="h-6 w-6" /></div>
           <h3 className="mb-2 text-lg font-semibold text-stone-700">
             {emptyStateTitle}
           </h3>
-          <p className="mx-auto max-w-xl text-stone-500">{emptyStateDescription}</p>
+          <p className="mx-auto max-w-xl text-sm leading-7 text-stone-500">{emptyStateDescription}</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            {activeFilterCount > 0 && <Button variant="outline" className="h-11 rounded-xl" onClick={resetFilters}>重置筛选</Button>}
+            {searchQuery && <Button className="h-11 rounded-xl bg-teal-900 hover:bg-teal-800" onClick={onClearSearch}>清除搜索，浏览全部</Button>}
+          </div>
         </div>
       ) : (
         <>
