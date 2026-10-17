@@ -8,6 +8,7 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  Search,
   Settings,
   Sparkles,
   TriangleAlert,
@@ -54,9 +55,14 @@ interface AiRecommendPanelProps {
   result: AiRecommendationResult | null;
   request: AiSearchRequest | null;
   clearVersion: number;
+  // 搜索阶段（请求已发出、首条结果还没落地）的轮次 id：每轮换新，用来清掉上一轮的进度与对话。
+  searchingVersion: number;
   onResultChange: (result: AiRecommendationResult | null) => void;
   onFocusResults: () => void;
 }
+
+// 首屏「AI 正在找团」占位卡片，列表相关滚动定位也认这个 id。
+export const AI_PENDING_CARD_ID = 'ai-pending-card';
 
 const MAX_PERSISTED_MESSAGES = 40;
 const scheduleIdleWork = (callback: () => void) => {
@@ -198,6 +204,7 @@ export function AiRecommendPanel({
   result,
   request,
   clearVersion,
+  searchingVersion,
   onResultChange,
   onFocusResults,
 }: AiRecommendPanelProps) {
@@ -284,6 +291,19 @@ export function AiRecommendPanel({
     setFollowUpInput('');
     setMessages([createInitialMessage()]);
   }, [clearVersion]);
+
+  // 新一轮搜索开始：上一轮结果已被清掉，不能留着旧的进度/对话说「已完成」。
+  useEffect(() => {
+    if (searchingVersion === 0) return;
+
+    setPreferenceMemory(null);
+    setProgressState(null);
+    setExpandedStage(null);
+    setLiveThinkingOpen(false);
+    setDetailsOpen(false);
+    setFollowUpInput('');
+    setMessages([createInitialMessage()]);
+  }, [searchingVersion]);
 
   useEffect(() => {
     if (!progressState?.substeps?.length) {
@@ -372,7 +392,7 @@ export function AiRecommendPanel({
     onFocusResults,
     onResultChange,
     preferenceMemory,
-    request?.searchQuery,
+    request,
     result,
     searchQuery,
     tours,
@@ -383,13 +403,9 @@ export function AiRecommendPanel({
     if (!request || handledRequestIdRef.current === request.id) return;
     if (!toursReady) return;
     handledRequestIdRef.current = request.id;
-    onResultChange(null);
-    setProgressState(null);
-    setExpandedStage(null);
-    setDetailsOpen(false);
-    setFollowUpInput('');
+    // 结果的清空与进度重置由上面的 searchingVersion 统一处理，这里只负责发起请求。
     void submitPrompt(request.prompt, { preserveResult: false });
-  }, [onResultChange, request, submitPrompt, toursReady]);
+  }, [request, submitPrompt, toursReady]);
 
   const clearConversation = () => {
     requestVersionRef.current += 1;
@@ -426,23 +442,73 @@ export function AiRecommendPanel({
   };
 
   const hasAiActivity = Boolean(progressState || resultStatusMeta || messages.length > 1);
+  const searching = Boolean(request);
+  const searchingDetail = progressState?.detail || '正在理解这句需求，马上开始筛线路。';
   const recommendedCount = countRecommendedItems(result);
   const compactStatusLabel = loading
     ? progressState?.label || '正在筛选'
-    : hasResult
-      ? `已置顶 ${recommendedCount} 条建议`
-      : '描述需求，AI 帮你置顶';
+    : searching
+      ? '正在按这句话找团'
+      : hasResult
+        ? `已置顶 ${recommendedCount} 条建议`
+        : '描述需求，AI 帮你置顶';
   const compactStatusDetail = loading
     ? progressState?.detail || '正在结合班期、预算和线路信息。'
-    : hasResult
-      ? result?.summary || resultStatusMeta?.detail || '推荐线路已排到前面。'
-      : '一句话说预算、天数、同行人和偏好就行。';
+    : searching
+      ? searchingDetail
+      : hasResult
+        ? result?.summary || resultStatusMeta?.detail || '推荐线路已排到前面。'
+        : '一句话说预算、天数、同行人和偏好就行。';
   const followUpPlaceholder = hasResult
     ? '在这里接着细调，比如：预算压到600内，优先海边，别太赶'
     : '补充一点条件也行，比如：带温泉、沙滩，周末短线';
 
-  if (!hasAiActivity) {
+  if (!hasAiActivity && !searching) {
     return null;
+  }
+
+  if (!hasAiActivity) {
+    // 搜索阶段先给一张轻量占位卡：列表保持原样、不清空，等首条进度/结果落地后再换成完整面板，
+    // 避免「点了 AI 找团之后一片空白」。
+    return (
+      <div
+        id={AI_PENDING_CARD_ID}
+        role="status"
+        aria-live="polite"
+        className="mb-4 rounded-[24px] border border-orange-100/80 bg-white/90 p-3 shadow-[0_16px_40px_rgba(28,25,23,0.05)] backdrop-blur sm:p-4"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-sm font-semibold text-stone-950">
+              <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+              AI 正在按这句话找团
+            </div>
+            <p className="mt-1 line-clamp-2 break-words text-sm leading-6 text-stone-600">
+              {searchingDetail}
+            </p>
+            <p className="mt-1 break-words text-xs leading-5 text-stone-500">
+              已记下：<span className="text-stone-700">{request?.prompt}</span>
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+              onClick={clearConversation}
+            >
+              取消这次查找
+            </Button>
+            <Badge className="rounded-full bg-stone-200 px-2.5 py-1 text-[11px] text-stone-800 hover:bg-stone-200">
+              找团中
+            </Badge>
+          </div>
+        </div>
+        <p className="mt-2 text-xs leading-5 text-stone-400">
+          下面的线路先保持不动，等 AI 选出建议后再置顶；想换条件可以直接取消重来。
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -460,7 +526,7 @@ export function AiRecommendPanel({
               </Badge>
             )}
             <span className="text-xs font-normal text-stone-400">
-              推荐结果会置顶显示
+              {searching ? '正在重新挑选，列表先保持原样' : '推荐结果会置顶显示'}
             </span>
           </div>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-stone-500 sm:text-sm">
@@ -484,6 +550,8 @@ export function AiRecommendPanel({
             <div className="flex items-center gap-2 text-sm font-semibold text-stone-950">
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+              ) : searching ? (
+                <Search className="h-4 w-4 text-orange-600" />
               ) : hasResult ? (
                 <CheckCircle2 className="h-4 w-4 text-orange-600" />
               ) : (

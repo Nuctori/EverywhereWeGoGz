@@ -22,6 +22,7 @@ import {
   sanitizeAiIntentForTurn,
 } from '@/lib/ai-semantic-policy';
 import { DESTINATION_ALIASES, isBlockedDestinationAliasMatch } from '@/lib/destination-resolver';
+import { todayCalendarDate } from '@/lib/calendar-date';
 import { storedAiProviderConfigSchema } from '@/lib/runtime-schemas';
 
 // 常量区统一描述推荐链路的容量、超时和缓存策略，避免各阶段各自硬编码。
@@ -2076,6 +2077,8 @@ function scoreTour(
   }
 
   if (query.prefersEasyPace) {
+    // 'unknown'（降采样切片没有体力字段）既不加分也不减分：把"不知道"当成
+    // "轻松"会让缺字段的线路在"想要轻松"的查询里被系统性抬高。
     if (tour.leisureLevel === 'easy') {
       score += 10;
       signals.push('行程强度较轻');
@@ -5893,7 +5896,9 @@ function getEarliestDate(values: Array<string | null | undefined>) {
 
 function getLikelyTravelDate(text: string, tours: AiRecommendationCandidate[]) {
   if (/(未来7天|未来七天|近7天|近七天|最近|这周|本周|这几天|\d{1,2}天内出发|\d{1,2}天内)/.test(text)) {
-    return new Date().toISOString().slice(0, 10);
+    // 日历日语义：toISOString 是 UTC 视角，UTC+8 的凌晨会把"今天"算成昨天，
+    // 天气窗口与班期过滤整体前移一天。
+    return todayCalendarDate();
   }
 
   return tours

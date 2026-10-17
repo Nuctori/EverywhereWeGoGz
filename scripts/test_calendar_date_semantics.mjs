@@ -9,6 +9,7 @@ import {
   todayCalendarDate,
 } from '../src/lib/calendar-date.ts';
 import {
+  formatRelativeDayLabel,
   formatShortDate,
   getDepartureBadge,
   getDepartureDateBadgeLabel,
@@ -88,12 +89,15 @@ const noDateTour = { ...base, departureDate: '', departureDates: [] };
 
 assert.equal(getUpcomingDepartureDate(todayTour, today), today);
 assert.equal(getDepartureBadge(todayTour, today).status, 'scheduled');
+// 日期只给"月日"，"今天/明天"由 formatRelativeDayLabel 单独给（卡片上只出现一次日期）
 assert.equal(getDepartureBadge(todayTour, today).label, formatShortDate(today));
-assert.match(getDepartureDateBadgeLabel({ ...todayTour, departureDate: today }), /今天可出发|月/);
+assert.equal(formatRelativeDayLabel(today, today), '今天');
+assert.equal(getDepartureDateBadgeLabel({ ...todayTour, departureDate: today }), formatShortDate(today));
 assert.equal(getDepartureBadge(pastTour, today).status, 'expired');
 assert.equal(getDepartureBadge(pastTour, today).label, '班期已过');
 assert.equal(getDepartureBadge(tomorrowTour, today).status, 'scheduled');
-assert.match(getDepartureBadge(tomorrowTour, today).label, /明天可出发/);
+assert.equal(getDepartureBadge(tomorrowTour, today).label, formatShortDate(tomorrow));
+assert.equal(formatRelativeDayLabel(tomorrow, today), '明天');
 assert.equal(getDepartureBadge(noDateTour, today).status, 'unknown');
 assert.equal(
   getDepartureBadge({ ...noDateTour, dataQuality: { isDepartureDateReliable: false } }, today).status,

@@ -19,7 +19,10 @@ import { cn, getDataUrl } from '@/lib/utils';
 import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
 import { toursIndexSchema, toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
-import { compareRecommended, getEffectiveDepartureDates } from '@/lib/tour-recommendation';
+import { compareRecommended, getEffectiveDepartureDates, getUpcomingDates } from '@/lib/tour-recommendation';
+import { addCalendarDays, todayCalendarDate, toCalendarDate } from '@/lib/calendar-date';
+import { DESTINATION_TIER_META, PRIMARY_DESTINATION_TIERS, groupDestinationsByTier } from '@/lib/destination-tiers';
+import { getDeparturePlan } from '@/lib/tour-facts';
 import { extractQueryContext, getSearchRelevance, type QuerySearchContext } from '@/lib/search-concepts';
 import {
   findTourDeepLinkResolution,
@@ -299,16 +302,12 @@ function formatDateLabel(value: string, today: string) {
 }
 
 function addDays(dateString: string, days: number) {
-  const date = new Date(`${dateString}T00:00:00`);
-  date.setDate(date.getDate() + days);
-  return toDateInputValue(date);
+  return addCalendarDays(dateString, days) ?? dateString;
 }
 
+// 本地日历日输入值（date picker 语义），不是 UTC 日期。
 function toDateInputValue(date: Date) {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, '0');
-  const day = `${date.getDate()}`.padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return toCalendarDate(date);
 }
 
 function fromDateInputValue(value: string) {
@@ -406,11 +405,11 @@ function compareToursBySortMode(
     case 'price_desc':
       return b.price - a.price;
     case 'soon': {
-      const aD = (a as TourSummary).departureDate || (a as TourSummary).departureDates?.[0] || '';
-      const bD = (b as TourSummary).departureDate || (b as TourSummary).departureDates?.[0] || '';
-      const todayStr = new Date().toISOString().slice(0, 10);
-      const aNext = ([aD, ...((a as TourSummary).departureDates || [])].filter(Boolean) as string[]).filter((d) => d >= todayStr).sort()[0] ?? '';
-      const bNext = ([bD, ...((b as TourSummary).departureDates || [])].filter(Boolean) as string[]).filter((d) => d >= todayStr).sort()[0] ?? '';
+      // 统一走日历日语义：UTC 的 toISOString 在东八区会把"今天"前移一天，
+      // 与展示层的 today 基准不一致，排序与徽标因此互相矛盾。
+      const todayStr = todayCalendarDate();
+      const aNext = getUpcomingDates(a as TourSummary, todayStr)[0] ?? '';
+      const bNext = getUpcomingDates(b as TourSummary, todayStr)[0] ?? '';
       if (aNext && bNext && aNext !== bNext) return aNext.localeCompare(bNext);
       if (aNext && !bNext) return -1;
       if (!aNext && bNext) return 1;
@@ -656,9 +655,18 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     [maxPriceAll],
   );
 
+  // 目的地按"近郊 / 省内 / 国内"分层：用户问的是"周末近点还是走远点"，
+  // 而不是"广州、云南、华东、三亚"这几个层级不同的词怎么排。归类不确定的一律进下拉。
+  const destinationTiers = useMemo(
+    () => groupDestinationsByTier(destinationOptions),
+    [destinationOptions],
+  );
   const visibleDestinations = useMemo(() => {
-    return destinationOptions.slice(0, VISIBLE_DESTINATION_COUNT);
-  }, [destinationOptions]);
+    // 分组标签 + 每组最多 6 个，和下方 chips 的渲染口径保持一致；
+    // 超出部分统一进"更多目的地"下拉，保证每个目的地都能被选到。
+    const shown = PRIMARY_DESTINATION_TIERS.flatMap((tier) => destinationTiers[tier].slice(0, 6));
+    return shown.length > 0 ? shown : destinationOptions.slice(0, VISIBLE_DESTINATION_COUNT);
+  }, [destinationOptions, destinationTiers]);
   const overflowDestinations = useMemo(
     () => destinationOptions.filter((dest) => !visibleDestinations.includes(dest)),
     [destinationOptions, visibleDestinations],
@@ -704,8 +712,27 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   const hasNaturalLanguageQuery =
     normalizedSearchQuery.length >= 8 || searchContext.concepts.length + searchContext.residues.length >= 2;
   const isAiSearchMode = Boolean(aiRecommendationResult);
-  const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode;
+  // 搜索阶段：请求已发出、首条结果还没落地。此时列表保持原样，不被搜索词收窄/清空；
+  // 等首条结果落地后再切到置顶长尾视图（模式切换本身会把可见条数重置）。
+  const isAiSearching = Boolean(aiSearchRequest && !aiRecommendationResult);
+  const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode || isAiSearching;
   const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;
+  // 搜索阶段沿用清空搜索前的视图：不按搜索词收窄，也不套用被搜索词带出来的过滤条件。
+  const searchStageFilters = useMemo<FilterState>(
+    () => ({
+      ...effectiveFilters,
+      destination: '',
+      source: '',
+      theme: '',
+      departureDate: '',
+      departureDateStart: '',
+      departureDateEnd: '',
+      duration: null,
+      minPrice: null,
+      maxPrice: null,
+    }),
+    [effectiveFilters],
+  );
 
   const aiRecommendedCount = useMemo(
     () =>
@@ -728,6 +755,9 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   const displayTours = useMemo(() => {
     if (resultSourceTours.length === 0) return [];
 
+    // 搜索阶段沿用清空前的视图：不按搜索词收窄，也不套用被搜索词带出来的过滤条件。
+    const queryForRanking = isAiSearching ? '' : normalizedSearchQuery;
+    const activeDisplayFilters = isAiSearching ? searchStageFilters : effectiveFilters;
     const result = resultSourceTours.filter((tour) => {
       if (!isDisplayableTour(tour)) {
         return false;
@@ -741,7 +771,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         return true;
       }
 
-      if (normalizedSearchQuery && !isAiSearchMode && !isAiRecommendedTour) {
+      if (queryForRanking && !isAiSearchMode && !isAiRecommendedTour) {
         const relevance = getTourSearchRelevance(tour, searchContext);
         const minRelevance = hasNaturalLanguageQuery ? 4 : 12;
 
@@ -750,48 +780,52 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         }
       }
 
-      if (effectiveFilters.destination && !tour.destination.includes(effectiveFilters.destination)) {
+      if (
+        activeDisplayFilters.destination &&
+        !tour.destination.includes(activeDisplayFilters.destination)
+      ) {
         return false;
       }
 
-      if (effectiveFilters.source && tour.source !== effectiveFilters.source) {
+      if (activeDisplayFilters.source && tour.source !== activeDisplayFilters.source) {
         return false;
       }
 
-      if (effectiveFilters.theme && tour.theme !== effectiveFilters.theme) {
+      if (activeDisplayFilters.theme && tour.theme !== activeDisplayFilters.theme) {
         return false;
       }
 
-      if (dateFilter) {
+      const activeDateFilter = isAiSearching ? null : dateFilter;
+      if (activeDateFilter) {
         const candidateDates = getEffectiveDepartureDates(tour);
         if (candidateDates.length === 0) {
           return false;
         }
 
-        if (dateFilter.mode === 'exact' && !candidateDates.includes(dateFilter.date)) {
+        if (activeDateFilter.mode === 'exact' && !candidateDates.includes(activeDateFilter.date)) {
           return false;
         }
 
         if (
-          dateFilter.mode === 'within' &&
-          !candidateDates.some((date) => date >= today && date <= dateFilter.date)
+          activeDateFilter.mode === 'within' &&
+          !candidateDates.some((date) => date >= today && date <= activeDateFilter.date)
         ) {
           return false;
         }
 
         if (
-          dateFilter.mode === 'after' &&
-          !candidateDates.some((date) => date >= dateFilter.date)
+          activeDateFilter.mode === 'after' &&
+          !candidateDates.some((date) => date >= activeDateFilter.date)
         ) {
           return false;
         }
 
-        if (dateFilter.mode === 'range') {
+        if (activeDateFilter.mode === 'range') {
           const inRange = candidateDates.some((date) => {
-            if (dateFilter.start && date < dateFilter.start) {
+            if (activeDateFilter.start && date < activeDateFilter.start) {
               return false;
             }
-            if (dateFilter.end && date > dateFilter.end) {
+            if (activeDateFilter.end && date > activeDateFilter.end) {
               return false;
             }
             return true;
@@ -802,30 +836,30 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         }
       }
 
-      if (effectiveFilters.minPrice !== null && tour.price < effectiveFilters.minPrice) {
+      if (activeDisplayFilters.minPrice !== null && tour.price < activeDisplayFilters.minPrice) {
         return false;
       }
 
-      if (effectiveFilters.maxPrice !== null && tour.price > effectiveFilters.maxPrice) {
+      if (activeDisplayFilters.maxPrice !== null && tour.price > activeDisplayFilters.maxPrice) {
         return false;
       }
 
       if (
-        effectiveFilters.duration === LONG_TRIP_DURATION_VALUE &&
+        activeDisplayFilters.duration === LONG_TRIP_DURATION_VALUE &&
         tour.duration < LONG_TRIP_DURATION_VALUE
       ) {
         return false;
       }
 
       if (
-        effectiveFilters.duration &&
-        effectiveFilters.duration !== LONG_TRIP_DURATION_VALUE &&
-        tour.duration !== effectiveFilters.duration
+        activeDisplayFilters.duration &&
+        activeDisplayFilters.duration !== LONG_TRIP_DURATION_VALUE &&
+        tour.duration !== activeDisplayFilters.duration
       ) {
         return false;
       }
 
-      if (effectiveFilters.hideExpired) {
+      if (activeDisplayFilters.hideExpired) {
         const allDates = getEffectiveDepartureDates(tour as TourSummary);
         if (allDates.length > 0 && !allDates.some((d) => d >= today)) return false;
       }
@@ -833,7 +867,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
       return true;
     });
 
-    if (normalizedSearchQuery) {
+    if (queryForRanking) {
       // AI 模式下长尾也按相关性排序：置顶段之后继续下滑就是“越来越宽”的相关候选。
       result.sort((a, b) =>
         getTourSearchRelevance(b, searchContext) - getTourSearchRelevance(a, searchContext) ||
@@ -868,6 +902,8 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   }, [
     aiRecommendationByTourId,
     isAiSearchMode,
+    isAiSearching,
+    searchStageFilters,
     dateFilter,
     effectiveFilters,
     filters.sortBy,
@@ -925,6 +961,18 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
       ? unfilteredDisplayableCount
       : Math.max(total, displayTours.length);
   const displayResultCount = isIndexDrivenView ? displayTours.length : defaultResultCount;
+  // 数据状态：让用户知道"这些结果里有多少现在真的能报"。这不是营销数字，
+  // 而是回答"站里的班期是不是旧的"。只统计结构化班期，不猜。
+  const departureHealth = useMemo(() => {
+    let bookable = 0;
+    let expired = 0;
+    for (const tour of displayTours) {
+      const plan = getDeparturePlan(tour as TourSummary, today);
+      if (plan.status === 'scheduled') bookable += 1;
+      else if (plan.status === 'expired') expired += 1;
+    }
+    return { bookable, expired, total: displayTours.length };
+  }, [displayTours, today]);
   // 远端链是否还能推进：只看"顺序链的下一片是否还在分片总数内"，
   // 不再用 localTours.length（原始加载数）比对展示数——两者口径不同
   // （一个含被过滤噪音、一个不含），会长期为真并让底部哨兵一直转圈。
@@ -1090,7 +1138,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   ]);
 
   const displayContextKey = [
-    aiRecommendationResult ? 'ai' : 'plain',
+    aiRecommendationResult ? 'ai' : isAiSearching ? 'ai-searching' : 'plain',
     effectiveFilters.destination,
     effectiveFilters.source,
     effectiveFilters.theme,
@@ -1189,8 +1237,6 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     );
   };
 
-  const baseChipClass =
-    'h-10 shrink-0 rounded-full border px-4 text-sm transition-colors';
   const selectedChipClass =
     'border-stone-300 bg-stone-900 text-white hover:border-stone-900 hover:bg-stone-900';
   const idleChipClass =
@@ -1236,38 +1282,57 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
 
       <div className="space-y-4 sm:space-y-5">
         <div>
-          <div className="mb-3 flex items-center gap-2 text-sm font-medium text-stone-700">
-            <MapPin className="w-4 h-4 text-stone-500" />
-            目的地
+          <div className="mb-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span className="flex items-center gap-2 text-sm font-medium text-stone-700">
+              <MapPin className="w-4 h-4 text-stone-500" />
+              想去哪一片
+            </span>
+            <span className="text-xs text-stone-400">按距离分组，选一个就等于按目的地筛好了</span>
           </div>
-          <div className="mobile-chip-scroll flex gap-2 overflow-x-auto pb-1 sm:flex-wrap">
+          <div className="mobile-chip-scroll flex flex-wrap items-center gap-2 pb-1">
             <button
               type="button"
               onClick={() => setFilters({ ...filters, destination: '' })}
               className={cn(
-                baseChipClass,
-                !filters.destination
-                  ? selectedChipClass
-                  : idleChipClass,
+                'h-10 shrink-0 rounded-full border px-4 text-sm transition-colors',
+                !filters.destination ? selectedChipClass : idleChipClass,
               )}
             >
               全部目的地
             </button>
-            {visibleDestinations.map((dest) => (
-              <button
-                key={dest}
-                type="button"
-                onClick={() => setFilters({ ...filters, destination: dest })}
-                className={cn(
-                  baseChipClass,
-                  filters.destination === dest
-                    ? selectedChipClass
-                    : idleChipClass,
-                )}
-              >
-                {dest}
-              </button>
-            ))}
+            {PRIMARY_DESTINATION_TIERS.map((tier) => {
+              const tierDestinations = destinationTiers[tier].slice(0, 6);
+              if (tierDestinations.length === 0) return null;
+              return (
+                <div key={tier} className="flex min-w-0 items-center gap-2">
+                  <span
+                    className="shrink-0 rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-500"
+                    title={DESTINATION_TIER_META[tier].hint}
+                  >
+                    {DESTINATION_TIER_META[tier].label}
+                  </span>
+                  {tierDestinations.map((dest) => (
+                    <button
+                      key={dest}
+                      type="button"
+                      aria-pressed={filters.destination === dest}
+                      onClick={() =>
+                        setFilters({
+                          ...filters,
+                          destination: filters.destination === dest ? '' : dest,
+                        })
+                      }
+                      className={cn(
+                        'h-10 shrink-0 rounded-full border px-4 text-sm transition-colors',
+                        filters.destination === dest ? selectedChipClass : idleChipClass,
+                      )}
+                    >
+                      {dest}
+                    </button>
+                  ))}
+                </div>
+              );
+            })}
             <Select
               value={selectedDestinationInOverflow ? filters.destination : 'more-destinations'}
               onValueChange={(value) => {
@@ -1632,13 +1697,14 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         result={aiRecommendationResult}
         request={aiSearchRequest}
         clearVersion={aiClearVersion}
+        searchingVersion={aiSearchRequest?.id ?? 0}
         onResultChange={setAiRecommendationResult}
         onFocusResults={focusResults}
       />
 
       <div className="mb-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div><p className="mb-2 text-[10px] font-semibold tracking-[0.22em] text-orange-700">FIND YOUR NEXT JOURNEY</p><h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">挑一条心动的线路</h2><p className="mt-2 text-sm text-stone-500">先选目的地，再按时间和预算缩小范围。</p></div>
+          <div><p className="mb-2 text-[10px] font-semibold tracking-[0.22em] text-orange-700">广州出发 · 各平台线路</p><h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">挑一条心动的线路</h2><p className="mt-2 text-sm text-stone-500">先看能不能报、哪天走，再看价格和细节。点开任意一条都能看到来源平台的原文。</p></div>
           <a href="#" className="inline-flex min-h-11 items-center gap-1 text-xs text-stone-600 hover:text-orange-800">返回搜索 ↑</a>
         </div>
         {heroDestinations.length > 0 && <div className="sr-only">当前热门目的地：{heroDestinations.join('、')}</div>}
@@ -1837,7 +1903,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
 
       {displayResultCount > 0 && (
         <div role="status" aria-live="polite" aria-atomic="true" className="mb-5 flex items-center justify-between text-sm text-stone-500">
-          <span>共 {displayResultCount.toLocaleString()} 条结果</span>
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">共 {displayResultCount.toLocaleString()} 条<div className="sr-only">结果</div>{departureHealth.bookable > 0 && (<><span className="text-stone-300">·</span><span className="text-stone-600">{departureHealth.bookable.toLocaleString()} 条有未来班期</span></>)}{departureHealth.expired > 0 && (<><span className="text-stone-300">·</span><span className="text-amber-700">{departureHealth.expired.toLocaleString()} 条班期已结束</span></>)}{!filters.hideExpired && departureHealth.expired > 0 && (<span className="text-xs text-stone-400">（已包含已过期班期）</span>)}</span>
           {shouldRenderLoadMore && (
             <span className="text-xs text-stone-400">
               已显示 {waterfallTours.length.toLocaleString()} 条

@@ -14,6 +14,7 @@ import { getFallbackImage, getImagePoolCandidates } from '@/lib/image';
 import {
   Building2,
   Calendar,
+  Clock,
   Eye,
   Heart,
   Info,
@@ -23,7 +24,7 @@ import {
   Utensils,
 } from 'lucide-react';
 import { memo } from 'react';
-import { formatShortDate, getReadableDestination, getReadableTheme } from '@/lib/tour-display';
+import { formatRelativeDayLabel, getReadableDestination, getReadableTheme } from '@/lib/tour-display';
 import { todayCalendarDate } from '@/lib/calendar-date';
 import {
   getDepartureLeadLabel,
@@ -70,6 +71,7 @@ export const TourCard = memo(function TourCard({
   const destination = getReadableDestination(tour);
   const departurePlan = getDeparturePlan(tour, today);
   const departureLead = getDepartureLeadLabel(tour, today);
+  const relativeDay = formatRelativeDayLabel(departurePlan.nextDate, today);
   const facts = getDistinctFacts(tour, today);
   const theme = getReadableTheme(tour);
   const singleSupplement = getSingleSupplementAmountLabel(tour);
@@ -236,10 +238,10 @@ export const TourCard = memo(function TourCard({
           <div className="min-w-0">
             <p className="text-[11px] font-medium">
               {departurePlan.status === 'scheduled' ? (
-                // 只留"最近哪天能走"；班期密度已经在差异点那一行出现过，不再重复。
+                // 日期只在图片角标出现一次；这里只补充"今天/明天"和时间感受。
                 <span className="inline-flex items-center gap-1 text-stone-600">
-                  <Calendar className="h-3 w-3" />
-                  最近 {formatShortDate(departurePlan.nextDate)} 出发
+                  <Clock className="h-3 w-3" />
+                  {relativeDay ? `${relativeDay}就能出发` : `还能选 ${departurePlan.upcomingCount} 个班期`}
                 </span>
               ) : (
                 <span className={departurePlan.status === 'expired' ? 'inline-flex items-center gap-1 text-amber-700' : 'inline-flex items-center gap-1 text-stone-500'}>

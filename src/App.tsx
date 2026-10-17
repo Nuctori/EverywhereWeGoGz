@@ -1,16 +1,19 @@
 import { lazy, Suspense, useState } from 'react';
 import { Header } from './sections/Header';
 import { Hero } from './sections/Hero';
+import type { QuickIntent } from './sections/Hero';
 import { TourList } from './sections/TourList';
 const MapView = lazy(() => import('./sections/MapView').then((module) => ({ default: module.MapView })));
 
-const QUICK_DESTINATIONS = [
-  '广东',
-  '云南',
-  '三亚',
-  '北京',
-  '四川',
-  '新疆',
+// Hero 的快捷入口换成"一句需求"而不是裸地名：点“广东”只会落一个地名筛选，
+// 点“周末去广东泡温泉”能直接走需求解析，才符合搜索框的双动作设计。
+const QUICK_INTENTS: QuickIntent[] = [
+  { label: '周末去广东泡温泉', detail: '2天 · 温泉 · 大巴可达', query: '周末去广东泡温泉' },
+  { label: '云南亲子游', detail: '5天以内 · 适合带娃', query: '云南亲子游 5天以内' },
+  { label: '三亚海边度假', detail: '不赶路 · 住海景', query: '三亚海边度假 不赶路' },
+  { label: '北京文化深度游', detail: '人文景点 · 讲解', query: '北京文化深度游 有讲解' },
+  { label: '四川九寨沟看秋色', detail: '秋季 · 自然风光', query: '四川九寨沟看秋色' },
+  { label: '新疆小团慢游', detail: '人少 · 节奏慢', query: '新疆小团慢游 节奏慢' },
 ];
 
 export interface AiSearchRequest {
@@ -73,7 +76,7 @@ function App() {
             onSearchChange={setDraftSearchQuery}
             onSearch={handleSearch}
             onAiSearch={handleAiSearch}
-            quickDestinations={QUICK_DESTINATIONS}
+            quickIntents={QUICK_INTENTS}
             map={<Suspense fallback={<div className="hidden sm:block h-[280px] rounded-[22px] bg-stone-100" aria-hidden="true" />}><MapView embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} /></Suspense>}
           />
           <div id="tour-list" tabIndex={-1} className="scroll-mt-24 outline-none">

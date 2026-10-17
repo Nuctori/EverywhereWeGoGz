@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
@@ -40,12 +39,12 @@ async function registerStaticAssetServiceWorker() {
 }
 
 async function bootstrap() {
-  await registerStaticAssetServiceWorker();
+  try { await registerStaticAssetServiceWorker(); } catch (error) { console.warn('[sw] bootstrap sw failed', error); }
+  try {
   createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
+    <App />,
   );
+  } catch (error) { console.error('[render] failed', error); document.getElementById('root')!.textContent = 'RENDER ERROR: ' + String(error); }
 }
 
 void bootstrap();
