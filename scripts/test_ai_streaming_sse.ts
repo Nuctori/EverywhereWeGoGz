@@ -46,7 +46,7 @@ function sseFrame(payload: string) {
   assert.equal(collected[2].text, '{"items":');
   assert.ok(parser.isDone(), 'parser should be done after [DONE]');
 }
-console.info('[1/9] SSE 增量解析器（跨 chunk 缓冲 / 注释 / 坏行 / DONE）通过');
+console.info('[1/11] SSE 增量解析器（跨 chunk 缓冲 / 注释 / 坏行 / DONE）通过');
 
 // ====== 2. CRLF 行尾 + done 后继续 push 必须为空 ======
 {
@@ -55,7 +55,7 @@ console.info('[1/9] SSE 增量解析器（跨 chunk 缓冲 / 注释 / 坏行 / D
   assert.deepEqual(events.map((event) => event.type), ['content', 'done'], 'CRLF line endings should parse');
   assert.deepEqual(parser.push('data: {"choices":[{"delta":{"content":"late"}}]}\n'), [], 'push after done must be a no-op');
 }
-console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
+console.info('[2/11] CRLF 行尾与 DONE 幂等通过');
 
 // ====== 3. callAiApi 思维链供应商流式分支（mock fetch SSE） ======
 {
@@ -112,7 +112,7 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
     const usage = (result as { usage?: { tokensSeen?: boolean; reasoningTokens?: number } }).usage;
     assert.equal(usage?.tokensSeen, true, 'trailing usage chunk must feed the usage summary');
     assert.equal(usage?.reasoningTokens, 40, 'reasoning token count must survive the streaming path');
-    console.info('[3/9] callAiApi 流式分支（SSE→增量回调→同口径解析）通过');
+    console.info('[3/11] callAiApi 流式分支（SSE→增量回调→同口径解析）通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -148,7 +148,7 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
     assert.equal(items?.[0]?.tourId, 't2', 'full-json fallback must parse when provider ignores stream');
     assert.equal(result.reasoningText, '整包思维链');
     assert.equal(deltas.length, 0, 'no delta callbacks on the full-json fallback path');
-    console.info('[4/9] 供应商忽略 stream 参数的整包回退通过');
+    console.info('[4/11] 供应商忽略 stream 参数的整包回退通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -179,7 +179,7 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
     const queries = (result.parsed as { queries?: string[] }).queries;
     assert.deepEqual(queries, ['海边 一日', '温泉 周末'], 'search-plan schema must validate on the streaming path');
     assert.equal(result.reasoningText, '规划中');
-    console.info('[5/9] search-plan schema 流式解析通过');
+    console.info('[5/11] search-plan schema 流式解析通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -238,7 +238,7 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
     );
     const items = (result.parsed as { items?: unknown[] }).items;
     assert.deepEqual(items, ['恢复'], 'escalated retry must still parse through the shared schema');
-    console.info('[6/9] 输出吃满预算→升压 max_tokens 重试通过');
+    console.info('[6/11] 输出吃满预算→升压 max_tokens 重试通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -282,7 +282,7 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
     const items = (result.parsed as { items?: unknown[] }).items;
     assert.deepEqual(items, ['嗅探'], 'SSE body without content-type must be consumed as a stream');
     assert.equal(result.reasoningText, '无头思考', 'reasoning must survive the sniff path');
-    console.info('[7/9] 缺 content-type 的 SSE 嗅探通过');
+    console.info('[7/11] 缺 content-type 的 SSE 嗅探通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -309,7 +309,7 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
     });
     const items = (result.parsed as { items?: Array<{ tourId?: string }> }).items;
     assert.equal(items?.[0]?.tourId, 't9', 'whole-json body without content-type must fall back to json parsing');
-    console.info('[8/9] 缺 content-type 的整包 JSON 回退通过');
+    console.info('[8/11] 缺 content-type 的整包 JSON 回退通过');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -348,7 +348,143 @@ console.info('[2/9] CRLF 行尾与 DONE 幂等通过');
     assert.equal(callCount, 2, 'a 502 from the gateway must be retried once before giving up');
     const items = (result.parsed as { items?: unknown[] }).items;
     assert.deepEqual(items, ['复活'], 'the retried attempt must parse through the shared schema');
-    console.info('[9/9] 网关 502 退避重试通过');
+    console.info('[9/11] 网关 502 退避重试通过');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// ====== 10. 半截正文 + finish_reason=length：必须落进 tokens_seen 口径并
+// 升压重试（3600 → 32768），而不是报 json_parse_failed 直接降级本地补位。
+// 现场：GLM-4.7-Flash 正文在 items 中间被输出预算掐断；原实现只在正文完全
+// 为空时才认 tokens_seen，且升压条件 attempt===0 让第二次重发同一份预算。 ======
+{
+  const truncatedBody = [
+    sseFrame('{"choices":[{"delta":{"content":"{\\"intentNotes\\":{\\"w\\":\\"先看预算\\"},\\"items\\":[{\\"tourId\\":\\"t1\\",\\"sf\\":"}}]}'),
+    sseFrame('{"choices":[{"delta":{},"finish_reason":"length"}],"usage":{"prompt_tokens":900,"completion_tokens":3600,"total_tokens":4500}}'),
+    sseFrame('[DONE]'),
+  ];
+  const healthyBody = [
+    sseFrame('{"choices":[{"delta":{"content":"{\\"items\\":[\\"恢复\\"]}"}}]}'),
+    sseFrame('{"choices":[{"delta":{},"finish_reason":"stop"}]}'),
+    sseFrame('[DONE]'),
+  ];
+  const requestBodies: Array<Record<string, unknown>> = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (_input: unknown, init?: { body?: string }) => {
+    requestBodies.push(JSON.parse(init?.body ?? '{}') as Record<string, unknown>);
+    const frames = requestBodies.length === 1 ? truncatedBody : healthyBody;
+    let frameCursor = 0;
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (frameCursor < frames.length) {
+          controller.enqueue(frames[frameCursor]);
+          frameCursor += 1;
+        } else {
+          controller.close();
+        }
+      },
+    });
+    return new Response(stream, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+  }) as typeof fetch;
+
+  try {
+    const result = await callAiApi({
+      configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+      messages: [{ role: 'user', content: 'q' }],
+      maxTokens: 3600,
+      schema: 'recommendation',
+    });
+    assert.equal(requestBodies.length, 2, 'truncated (finish_reason=length) response must be retried');
+    assert.equal(requestBodies[1]?.max_tokens, 32768, 'retry must escalate the output budget');
+    assert.deepEqual((result.parsed as { items?: unknown[] }).items, ['恢复']);
+    console.info('[10/11] 半截正文 finish_reason=length → tokens_seen 升压重试通过');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// ====== 11. 坏 JSON 的错误证据与修复：结构坏了也必须给出解析器原文、正文长度、
+// 尾部残片与 finish_reason，不能只剩一句 "AI response is not JSON"；字符串内
+// 裸换行这种常见走样应就地修复后走通解析。 ======
+{
+  const makeStreamResponse = (frames: string[]) => {
+    let frameCursor = 0;
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (frameCursor < frames.length) {
+          controller.enqueue(encoder.encode(frames[frameCursor]));
+          frameCursor += 1;
+        } else {
+          controller.close();
+        }
+      },
+    });
+    return new Response(stream, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+  };
+
+  const originalFetch = globalThis.fetch;
+  try {
+    // 11a：真结构错误（items 不是数组）。
+    globalThis.fetch = (async () => makeStreamResponse([
+      'data: {"choices":[{"delta":{"content":"{\\"items\\": \\"oops\\"}"}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+      'data: [DONE]\n\n',
+    ])) as typeof fetch;
+    let message = '';
+    try {
+      await callAiApi({
+        configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+        messages: [{ role: 'user', content: 'q' }],
+        maxTokens: 3600,
+        schema: 'recommendation',
+      });
+    } catch (error) {
+      message = error instanceof Error ? error.message : String(error);
+    }
+    assert.ok(message.includes('schema_invalid'), `expected schema_invalid, got: ${message}`);
+    assert.ok(message.includes('items missing'), 'schema failure must name the missing field');
+
+    // 11b：字符串内裸换行 —— 应被修复并解析成功。
+    globalThis.fetch = (async () => makeStreamResponse([
+      'data: {"choices":[{"delta":{"content":"{\\"items\\":[\\"a\\nb\\"]}"}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+      'data: [DONE]\n\n',
+    ])) as typeof fetch;
+    const repaired = await callAiApi({
+      configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+      messages: [{ role: 'user', content: 'q' }],
+      maxTokens: 3600,
+      schema: 'recommendation',
+    });
+    assert.deepEqual(
+      (repaired.parsed as { items?: unknown[] }).items,
+      ['a\nb'],
+      'bare newline inside a JSON string must be repaired, not fatal',
+    );
+
+    // 11c：半截 JSON 且 finish_reason=stop（结构真的坏了）：错误串必须带证据。
+    globalThis.fetch = (async () => makeStreamResponse([
+      'data: {"choices":[{"delta":{"content":"{\\"items\\":[{\\"tourId\\":\\"t1\\","}}]}\n\n',
+      'data: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+      'data: [DONE]\n\n',
+    ])) as typeof fetch;
+    message = '';
+    try {
+      await callAiApi({
+        configs: [{ baseUrl: 'https://api.z.ai/api/paas/v4', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+        messages: [{ role: 'user', content: 'q' }],
+        maxTokens: 3600,
+        schema: 'recommendation',
+      });
+    } catch (error) {
+      message = error instanceof Error ? error.message : String(error);
+    }
+    assert.ok(message.includes('json_parse_failed'), `expected json_parse_failed, got: ${message}`);
+    assert.ok(message.includes('chars='), 'parse failure must report the content length');
+    assert.ok(message.includes('tail='), 'parse failure must report the tail fragment');
+    assert.ok(message.includes('finish_reason=stop'), 'parse failure must report finish_reason');
+    console.info('[11/11] 坏 JSON 错误证据与裸换行修复通过');
   } finally {
     globalThis.fetch = originalFetch;
   }

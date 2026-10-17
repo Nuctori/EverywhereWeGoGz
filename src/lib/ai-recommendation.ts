@@ -6533,9 +6533,10 @@ function buildLiteAiMessages(params: {
     },
     rq: [
       '只输出 JSON，不要 Markdown。',
+      'JSON 必须能被 JSON.parse 直接解析：字符串里的换行写成 \\n，引号写成 \\"，不要用尾逗号，不要在 JSON 前后加任何说明文字。',
       '返回 intent、intentNotes、clarification、assumptions、tradeoffs 和 items；不要 summary、reason、matchedSignals。',
       '只允许使用 candidates/fh 中存在的 id。',
-      'JSON 保持可解析即可，文案不要为了短而牺牲具体判断。',
+      '文案保持具体判断即可，不要为了短而牺牲判断；但每条 sf 控制在 60 字内，确保整个 JSON 不会因为太长而被截断。',
       'candidates（稳定池）是按 id 排序的全池背景候选；fh 是按本轮需求检索/匹配出的重点候选完整档案，优先在 fh 内挑选，再用稳定池补足选择面。',
       `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
       '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
@@ -6552,7 +6553,7 @@ function buildLiteAiMessages(params: {
   return [
     {
       role: 'system' as const,
-      content: '你是旅行顾问。先理解整体体验，再基于给定候选比较排序；严格输出 JSON，不要编造 tourId 或候选事实。',
+      content: '你是旅行顾问。先理解整体体验，再基于给定候选比较排序；严格输出 JSON，字符串内不能出现裸换行，不要编造 tourId 或候选事实。',
     },
     { role: 'user' as const, content: JSON.stringify(request) },
   ];
@@ -6570,15 +6571,82 @@ function getChatCompletionsUrl(baseUrl: string) {
 }
 
 function parseAiJson(content: string) {
-  try {
-    return JSON.parse(content);
-  } catch {
-    const recovered = recoverPartialAiJson(content);
-    if (recovered) return recovered;
-    const match = content.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('AI response is not JSON');
-    return JSON.parse(match[0]);
+  // 一次解析即带回错误：不抛、不吞，让错误在最后统一抛出时仍可取证。
+  const parseOrError = (text: string): { value: unknown; error: unknown } => {
+    try {
+      return { value: JSON.parse(text) as unknown, error: null };
+    } catch (error) {
+      return { value: null, error };
+    }
+  };
+
+  const direct = parseOrError(content);
+  if (!direct.error) return direct.value;
+
+  // 字符串内裸换行/制表符是最常见的可修走样，先修再走原有恢复链。
+  const repaired = repairBareControlCharsInJson(content);
+  if (repaired) {
+    const repairedResult = parseOrError(repaired);
+    if (!repairedResult.error) return repairedResult.value;
   }
+
+  const recovered = recoverPartialAiJson(content);
+  if (recovered) return recovered;
+  const match = content.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error('AI response is not JSON');
+  const fenced = parseOrError(match[0]);
+  if (!fenced.error) return fenced.value;
+  // 原实现在这里用内层 JSON.parse 的裸错误替换了外层错误，解析细节被整体丢弃，
+  // 面板只剩 "AI response is not JSON"，分不清结构坏了还是被输出预算掐断。
+  throw direct.error;
+}
+
+// 现场口径：模型正文里出现字符串内未转义的换行/制表符（多行文案的常见走样）。
+// 只修字符串内的裸控制字符，不动结构；修完仍要过 JSON.parse，过不了就走原错误口径。
+function repairBareControlCharsInJson(content: string) {
+  let repaired = '';
+  let inString = false;
+  let escaped = false;
+  let changed = false;
+
+  for (const char of content) {
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+        repaired += char;
+        continue;
+      }
+      if (char === '\\') {
+        escaped = true;
+        repaired += char;
+        continue;
+      }
+      if (char === '"') {
+        inString = false;
+        repaired += char;
+        continue;
+      }
+      if (char === '\n' || char === '\r' || char === '\t') {
+        repaired += char === '\t' ? '\\t' : char === '\n' ? '\\n' : '\\r';
+        changed = true;
+        continue;
+      }
+      repaired += char;
+      continue;
+    }
+    if (char === '"') inString = true;
+    repaired += char;
+  }
+
+  return changed ? repaired : null;
+}
+
+// JSON 解析失败的证据：截断时尾部残片能直接区分"结构坏了"和"输出被预算掐断"。
+function getJsonParseFailureDetail(content: string) {
+  const trimmed = content.trim();
+  if (!trimmed) return 'empty content';
+  const tail = trimmed.slice(Math.max(0, trimmed.length - 80)).replace(/\s+/g, ' ');
+  return `tail="${tail}"`;
 }
 
 function findMatchingJsonEnd(content: string, startIndex: number, openChar: '{' | '[') {
@@ -6758,14 +6826,28 @@ function parseAiProviderResponse(
     ));
   }
 
+  // finish_reason=length 是"输出预算先于结构耗尽"的唯一硬信号。此前只在正文
+  // 完全为空时才走 tokens_seen 口径，半截正文落进 json_parse_failed，
+  // 让升压重试（同参必败）永远没机会——GLM-4.7-Flash 现场即此形态。
+  const finishReason = typeof choice?.finish_reason === 'string' ? choice.finish_reason : '';
+  const truncated = finishReason === 'length';
+
   let parsed: unknown;
   try {
     parsed = parseAiJson(content);
   } catch (error) {
+    // 证据必须带进错误串：解析器原文 + 正文长度 + 尾部残片 + finish_reason，
+    // 否则面板只剩 "AI response is not JSON"，分不清结构坏了还是被掐断。
+    const detail = [
+      error instanceof Error ? error.message : '',
+      `chars=${content.length}`,
+      getJsonParseFailureDetail(content),
+      ...(finishReason ? [`finish_reason=${finishReason}`] : []),
+    ].filter(Boolean).join(', ');
     throw new Error(getAiProviderParseErrorLabel(
       config,
-      'json_parse_failed',
-      error instanceof Error ? error.message : '',
+      truncated ? 'tokens_seen/json_parse_failed' : 'json_parse_failed',
+      truncated ? `completion=${usage.completionTokens}, ${detail}` : detail,
     ));
   }
 
@@ -6776,7 +6858,12 @@ function parseAiProviderResponse(
       throw new Error(getAiProviderParseErrorLabel(config, 'schema_invalid', 'queries missing'));
     }
   } else if (!Array.isArray(items)) {
-    throw new Error(getAiProviderParseErrorLabel(config, 'schema_invalid', 'items missing'));
+    // 截断后"合法 JSON 但没有 items"同样属于预算耗尽，走升压重试而不是直接判死。
+    throw new Error(getAiProviderParseErrorLabel(
+      config,
+      truncated ? 'tokens_seen/schema_invalid' : 'schema_invalid',
+      truncated ? `items missing, finish_reason=length, completion=${usage.completionTokens}` : 'items missing',
+    ));
   }
 
   return { parsed, reasoningText, usage };
@@ -6788,6 +6875,7 @@ export type AiSseStreamEvent =
   | { type: 'reasoning'; text: string }
   | { type: 'content'; text: string }
   | { type: 'usage'; usage: Record<string, unknown> }
+  | { type: 'finish'; finishReason: string }
   | { type: 'error'; message: string }
   | { type: 'done' };
 
@@ -6831,6 +6919,10 @@ export function createAiSseStreamParser() {
     }
     if (choice?.finish_reason === 'error') {
       events.push({ type: 'error', message: 'finish_reason=error' });
+    } else if (typeof choice?.finish_reason === 'string' && choice.finish_reason) {
+      // 把正常结束原因（stop/length/...）透传给消费方：length 是判定"被输出
+      // 预算掐断"的唯一硬信号，丢了它半截正文就只会报 json_parse_failed。
+      events.push({ type: 'finish', finishReason: choice.finish_reason });
     }
     if (data.usage && typeof data.usage === 'object') {
       events.push({ type: 'usage', usage: data.usage });
@@ -6920,6 +7012,7 @@ async function consumeAiStreamingResponse(params: {
   let reasoningText = '';
   let contentText = '';
   let usage: Record<string, unknown> | undefined;
+  let finishReason = '';
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let totalTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -6971,6 +7064,8 @@ async function consumeAiStreamingResponse(params: {
         contentText += event.text;
       } else if (event.type === 'usage') {
         usage = event.usage;
+      } else if (event.type === 'finish') {
+        finishReason = event.finishReason;
       } else if (event.type === 'error') {
         throw new Error(getAiProviderParseErrorLabel(config, 'provider_error', event.message));
       }
@@ -7020,8 +7115,10 @@ async function consumeAiStreamingResponse(params: {
   }
 
   // 与非流式同一解析口径：组回完整响应结构后走 parseAiProviderResponse。
+  // finish_reason 必须一起回填，否则流式路径会丢掉"被输出预算掐断"的信号。
   const data = {
     choices: [{
+      ...(finishReason ? { finish_reason: finishReason } : {}),
       message: {
         content: contentText,
         ...(reasoningText ? { reasoning_content: reasoningText } : {}),
@@ -7844,14 +7941,20 @@ function getProviderRequestHeaders(config: AiProviderConfig): Record<string, str
 }
 
 function shouldUseLiteAiPrompt(config: AiProviderConfig) {
-  const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
+  // 判定只锚定端点（AGENTS.md：模型判定不得按模型名子串分类）。用户自建网关
+  // 常把任意模型名（含 glm/qwen 之类子串）挂在自有域名下，按名字命中会把这些
+  // 端点降级成 lite prompt，丢掉完整文案能力——GLM 主力端点走的是完整 prompt，
+  // 这里是"是否值得赌免费弱模型"的问题，只能由端点回答。
+  const baseUrl = config.baseUrl.toLowerCase();
   return (
-    providerKey.includes('openrouter') ||
-    providerKey.includes('siliconflow') ||
-    providerKey.includes('modelscope') ||
-    providerKey.includes('groq') ||
-    providerKey.includes('mistral') ||
-    providerKey.includes('qwen')
+    baseUrl.includes('openrouter') ||
+    baseUrl.includes('siliconflow') ||
+    baseUrl.includes('modelscope') ||
+    baseUrl.includes('groq') ||
+    baseUrl.includes('mistral') ||
+    // 阿里百炼 / 通义端点（DashScope 兼容模式）。
+    baseUrl.includes('dashscope.aliyuncs.com') ||
+    baseUrl.includes('/compatible-mode')
   );
 }
 
@@ -7958,11 +8061,17 @@ async function callSingleAiProvider(params: {
   let activeMaxTokens = maxTokens;
   let requestBody = buildAiRequestBody(config, messages, activeMaxTokens, streaming);
   let providerLastError: Error | null = null;
+  // tokens_seen 升压重试必须可以连续两次：首次升到地板×2，被掐断后还能再翻倍到
+  // 封顶。原实现一旦进入第 2 次尝试，attempt 已是 1，升压条件 attempt===0 恒假，
+  // 第二次重发的是同一份预算——对大 prompt 就是确定性复现（GLM 半截正文现场）。
+  let tokenEscalations = 0;
   // 命中 429/5xx 时记录状态码：决定重试前用快退避还是限频级退避。
   let lastRateLimitedStatus = 0;
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    let shouldRetry = attempt === 0;
+  // 总尝试次数 = 首发 + 两次升压：升压重试是"同参必败"的唯一出路，必须给够。
+  const maxAttempts = 3;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    let shouldRetry = attempt < maxAttempts - 1;
     try {
       const response = await fetchWithTimeout(
         url,
@@ -8023,8 +8132,10 @@ async function callSingleAiProvider(params: {
     } catch (error) {
       providerLastError = normalizeAiProviderError(error, config);
       if (providerLastError.message.includes('tokens_seen')) {
-        shouldRetry = attempt === 0;
-        if (shouldRetry && streaming) {
+        // 升压不能受 attempt 限制：第二、三次尝试发的必须是更大的预算。
+        shouldRetry = tokenEscalations < 2 && streaming;
+        if (shouldRetry) {
+          tokenEscalations += 1;
           activeMaxTokens = Math.min(
             Math.max(activeMaxTokens ?? 2048, AI_THINKING_MIN_MAX_TOKENS) * 2,
             AI_THINKING_MAX_TOKENS_CEILING,
@@ -8035,7 +8146,7 @@ async function callSingleAiProvider(params: {
       if (providerLastError.message.includes('timeout')) {
         shouldRetry = false;
       }
-      if (shouldRetry && attempt === 0) {
+      if (shouldRetry && attempt < maxAttempts - 1) {
         const retryDelay = lastRateLimitedStatus
           ? AI_PROVIDER_RATE_RETRY_DELAY_MS
           : AI_PROVIDER_RETRY_DELAY_MS;
