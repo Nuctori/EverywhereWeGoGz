@@ -64,7 +64,7 @@ export const TourCard = memo(function TourCard({
 
   return (
     <Card
-      className="tour-card group surface-panel flex h-full cursor-pointer flex-col gap-0 overflow-hidden rounded-[22px] border border-stone-200/80 bg-white py-0 transition duration-200 hover:-translate-y-1 hover:border-teal-900/20 hover:shadow-[0_18px_42px_rgba(30,65,54,0.10)] [contain-intrinsic-size:auto_380px] [content-visibility:auto] sm:rounded-[26px]"
+      className="tour-card group surface-panel flex h-full cursor-pointer flex-col gap-0 overflow-hidden rounded-[22px] border border-stone-200/80 bg-white py-0 transition duration-200 hover:-translate-y-1 hover:border-orange-900/20 hover:shadow-[0_18px_42px_rgba(28,25,23,0.10)] [contain-intrinsic-size:auto_380px] [content-visibility:auto] sm:rounded-[26px]"
       onClick={onClick}
     >
       <div className="relative h-36 overflow-hidden bg-stone-100 sm:h-52">
@@ -104,7 +104,7 @@ export const TourCard = memo(function TourCard({
       </div>
 
         <CardContent className="flex flex-1 flex-col p-4 sm:p-5">
-          <h3 className="text-[15px] font-semibold leading-6 text-stone-900 transition-colors group-hover:text-teal-900 sm:text-base sm:leading-7">
+          <h3 className="text-[15px] font-semibold leading-6 text-stone-900 transition-colors group-hover:text-orange-900 sm:text-base sm:leading-7">
             <button type="button" className="line-clamp-2 rounded-md text-left sm:line-clamp-3" onClick={(event) => { event.stopPropagation(); onClick(); }}>{tour.title}</button>
           </h3>
 
@@ -141,7 +141,7 @@ export const TourCard = memo(function TourCard({
         {/* AI 详细推荐理由，来自 AiRecommendPanel 结果（简要位走上面的轻量样式） */}
         {recommendationReason && recommendationTier !== 'ai-brief' && (
           <div
-            className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-800"
+            className="mt-3 rounded-2xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs leading-5 text-orange-800"
             title={recommendationReason}
           >
             <p className="line-clamp-3">
@@ -212,7 +212,7 @@ export const TourCard = memo(function TourCard({
           <Button
             size="sm"
             variant="outline"
-            className="h-11 rounded-xl border-teal-900/15 bg-teal-50/70 px-3 text-xs text-teal-900 hover:bg-teal-100 hover:text-teal-950"
+            className="h-11 rounded-xl border-orange-900/15 bg-orange-50/70 px-3 text-xs text-orange-900 hover:bg-orange-100 hover:text-orange-950"
             onClick={(e) => {
               e.stopPropagation();
               onClick();

@@ -81,14 +81,14 @@
     min-width: 320px;
     overflow-x: hidden;
     font-family: var(--font-sans);
-    background: #faf9f6;
+    background: #fafafa;
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4 {
     letter-spacing: 0;
   }
   ::selection {
-    background: rgba(217, 181, 114, 0.28);
+    background: rgba(249, 115, 22, 0.20);
     color: #1c1917;
   }
 }
@@ -131,12 +131,12 @@
 
 .hero-shell {
   position: relative;
-  background: radial-gradient(ellipse at 90% 10%, #dce9dd 0, transparent 48%), linear-gradient(120deg, #eeefe6, #f5f1e7 58%, #e8eee3);
-  border: 1px solid #e1e5d9;
+  background: linear-gradient(120deg, #ffffff, #fafafa);
+  border: 1px solid #e7e5e4;
 }
 
 :where(button, a, input, [role="combobox"]):focus-visible {
-  outline: 3px solid #267466;
+  outline: 3px solid #ea580c;
   outline-offset: 4px;
 }
 
@@ -149,7 +149,7 @@ input[type="search"]::-webkit-search-cancel-button { display: none; }
   left: 16px;
   transform: translateY(-160%);
   border-radius: 12px;
-  background: #194e43;
+  background: #ea580c;
   color: white;
   padding: 12px 20px;
 }

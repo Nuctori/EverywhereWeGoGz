@@ -1638,11 +1638,11 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
 
       <div className="mb-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div><p className="mb-2 text-[10px] font-semibold tracking-[0.22em] text-teal-700">FIND YOUR NEXT JOURNEY</p><h2 className="text-2xl font-semibold tracking-tight text-[#173e38] sm:text-3xl">挑一条心动的线路</h2><p className="mt-2 text-sm text-stone-500">先选目的地，再按时间和预算缩小范围。</p></div>
-          <a href="#" className="inline-flex min-h-11 items-center gap-1 text-xs text-stone-600 hover:text-teal-800">返回搜索 ↑</a>
+          <div><p className="mb-2 text-[10px] font-semibold tracking-[0.22em] text-orange-700">FIND YOUR NEXT JOURNEY</p><h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">挑一条心动的线路</h2><p className="mt-2 text-sm text-stone-500">先选目的地，再按时间和预算缩小范围。</p></div>
+          <a href="#" className="inline-flex min-h-11 items-center gap-1 text-xs text-stone-600 hover:text-orange-800">返回搜索 ↑</a>
         </div>
         {heroDestinations.length > 0 && <div className="sr-only">当前热门目的地：{heroDestinations.join('、')}</div>}
-        {searchQuery && <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-teal-900/10 bg-teal-50/70 px-4 py-3"><p className="min-w-0 break-words text-sm text-teal-950">正在查找：<strong>{searchQuery}</strong></p><Button variant="ghost" className="h-11 shrink-0 rounded-xl text-teal-900" onClick={onClearSearch}><X className="mr-1 h-4 w-4" />清除搜索</Button></div>}
+        {searchQuery && <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-orange-900/10 bg-orange-50/70 px-4 py-3"><p className="min-w-0 break-words text-sm text-orange-950">正在查找：<strong>{searchQuery}</strong></p><Button variant="ghost" className="h-11 shrink-0 rounded-xl text-orange-900" onClick={onClearSearch}><X className="mr-1 h-4 w-4" />清除搜索</Button></div>}
         {commonFilters}
 
         {!isMobile && showFilters && (
@@ -1853,14 +1853,14 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         </div>
       ) : displayTours.length === 0 ? (
         <div role="status" className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/90 px-5 py-16 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-800"><MapPin className="h-6 w-6" /></div>
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-orange-50 text-orange-800"><MapPin className="h-6 w-6" /></div>
           <h3 className="mb-2 text-lg font-semibold text-stone-700">
             {emptyStateTitle}
           </h3>
           <p className="mx-auto max-w-xl text-sm leading-7 text-stone-500">{emptyStateDescription}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             {activeFilterCount > 0 && <Button variant="outline" className="h-11 rounded-xl" onClick={resetFilters}>重置筛选</Button>}
-            {searchQuery && <Button className="h-11 rounded-xl bg-teal-900 hover:bg-teal-800" onClick={onClearSearch}>清除搜索，浏览全部</Button>}
+            {searchQuery && <Button className="h-11 rounded-xl bg-orange-900 hover:bg-orange-800" onClick={onClearSearch}>清除搜索，浏览全部</Button>}
           </div>
         </div>
       ) : (
