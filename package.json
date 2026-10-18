@@ -58,6 +58,7 @@
     "test:search-flow-e2e": "node scripts/test_search_flow_e2e.mjs",
     "test:ai-partial-e2e": "node scripts/test_ai_partial_e2e.mjs",
     "test:ai-panel-layout-e2e": "node scripts/test_ai_panel_layout_e2e.mjs",
+    "test:hero-buttons-e2e": "node scripts/test_hero_buttons_e2e.mjs",
     "test:ai-streaming-stability-e2e": "node scripts/test_ai_streaming_stability_e2e.mjs",
     "test:search-modes-ui": "node scripts/test_search_modes_ui.mjs",
     "test:ui-refresh": "node scripts/test_ui_refresh.mjs",

@@ -101,12 +101,14 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                   </button>
                 )}
               </div>
-              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+              {/* 竖排时 flex-1 作用在交叉轴上等于 auto，按钮高度会塌回文字高度（实测 20px），
+                  所以必须自带 shrink-0 和明确的最小高度。 */}
+              <div className="mt-2 flex flex-col gap-2 sm:flex-row [&>button]:shrink-0">
                 <Button
                   type="submit"
                   size="lg"
                   className={cn(
-                    'h-12 flex-1 rounded-[15px] shadow-none',
+                    'h-12 min-h-12 flex-1 rounded-[15px] shadow-none',
                     primaryIsAi
                       ? 'bg-orange-600 text-white hover:bg-orange-700'
                       : 'bg-stone-900 text-white hover:bg-stone-800',
@@ -126,7 +128,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                   type="button"
                   size="lg"
                   disabled={aiButtonDisabled}
-                  className="h-12 flex-1 rounded-[15px] border border-orange-200 bg-orange-50 text-orange-900 shadow-none hover:bg-orange-100 disabled:opacity-50"
+                  className="h-12 min-h-12 flex-1 rounded-[15px] border border-orange-200 bg-orange-50 text-orange-900 shadow-none hover:bg-orange-100 disabled:opacity-50"
                   onClick={() => onAiSearch(searchQuery)}
                 >
                   <Sparkles className="mr-1 h-4 w-4" />AI 帮我挑
