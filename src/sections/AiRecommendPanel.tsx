@@ -302,6 +302,8 @@ export function AiRecommendPanel({
   const [expandedStage, setExpandedStage] = useState<AiRecommendationProgress['stage'] | null>(null);
   // 流式思维链实时区：默认折叠只显示字数/秒数，展开后随增量自动滚到尾部。
   const [liveThinkingOpen, setLiveThinkingOpen] = useState(false);
+  // 对话记录默认折叠：它只是历史轮次的回执，长期占着 224px 却几乎没人回看。
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
   const liveThinkingScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const storageSaveCleanupRef = useRef<ReturnType<typeof scheduleIdleWork>>(undefined);
@@ -651,6 +653,11 @@ export function AiRecommendPanel({
         : hasResult
           ? result?.summary || resultStatusMeta?.detail || '推荐线路已排到前面。'
           : '一句话说预算、天数、同行人和偏好就行。';
+  // 对话记录去掉首条欢迎语：它不是一轮真实对话，只是初始引导。
+  // 也要过滤掉没有 assistant 内容的半截状态（请求进行中只插了用户消息）。
+  const transcript = messages.slice(1).some((message) => message.role === 'assistant' && message.content.trim())
+    ? messages.slice(1)
+    : [];
   const followUpPlaceholder = hasResult
     ? '在这里接着细调，比如：预算压到600内，优先海边，别太赶'
     : '补充一点条件也行，比如：带温泉、沙滩，周末短线';
@@ -723,10 +730,13 @@ export function AiRecommendPanel({
               {searching ? '正在重新挑选，列表先保持原样' : '推荐结果会置顶显示'}
             </span>
           </div>
-          {/* 窄屏隐藏这句说明：手机上它会折成两三行，把面板顶掉一大半首屏。 */}
-          <p className="mt-1 hidden max-w-2xl text-xs leading-5 text-stone-500 sm:block sm:text-sm">
-            AI 会先理解你想要的旅行体验，再比较线路；预算、偏好和取舍都会一起考虑。
-          </p>
+          {/* 指南只在没有结果时出现。有结果后这一段就是在复读下面的摘要，
+              还把「已置顶 N 条建议」挤到第二屏。 */}
+          {!hasResult && (
+            <p className="mt-1 hidden max-w-2xl text-xs leading-5 text-stone-500 sm:block sm:text-sm">
+              AI 会先理解你想要的旅行体验，再比较线路；预算、偏好和取舍都会一起考虑。
+            </p>
+          )}
         </div>
         <Button
           type="button"
@@ -794,13 +804,15 @@ export function AiRecommendPanel({
 
       {detailsOpen && (
         <div className="mt-3 space-y-3 rounded-[22px] border border-stone-200 bg-white/80 p-3">
-          {progressState && (
+          {/* 还没有结果时这块就是"生成过程"，要露出来；有结果后它只是一次
+              已完成的调用回执，默认收着，想看得自己展开。 */}
+          {progressState && (!hasResult || loading) && (
             <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-4">
               {/* 标题卡上已经写着同一句状态时，这里不再重复一遍标题，
                   只留进度条和步骤——展开细节的用途是看"走到哪一步"，不是复读状态。 */}
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className={cn('flex items-center gap-2 text-sm font-semibold text-stone-900', progressState.label === compactStatusLabel && 'hidden')}>
+                  <div className={cn('flex items-center gap-2 text-sm font-semibold', progressState.label === compactStatusLabel && 'hidden')}>
                     {loading ? (
                       <Loader2 className="h-4 w-4 animate-spin text-stone-700" />
                     ) : progressState.stage === 'fallback' ? (
@@ -810,10 +822,10 @@ export function AiRecommendPanel({
                     )}
                     {progressState.label}
                   </div>
-                  {/* 进度 detail 只在它没被上层摘要重复时展示。
-                      搜索/生成时上层已经写着同一句话（"正在按这句话找团"
-                      "已置顶 N 条建议"），这里再写一遍是同屏重复。 */}
+                  {/* 结果已落地后，这句 detail（"已生成 N 条建议，并展示 M 条线路"）
+                      是生成过程回执，摘要本身在下面的结果卡里。 */}
                   {progressState.detail &&
+                  !hasResult &&
                   progressState.detail.trim() !== compactStatusDetail.trim() ? (
                     <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{progressState.detail}</p>
                   ) : null}
@@ -1029,8 +1041,15 @@ export function AiRecommendPanel({
                   ) : null}
                 </div>
               ) : null}
+              {/* 下面四块都是给"想核对这轮怎么来的"人准备的诊断信息：
+                  多轮轨迹、模型/缓存命中、思维链、本轮理解与取舍。
+                  默认收进一个折叠区，避免把结果卡撑成 600px 的技术报告。 */}
+              {(result?.refinementMode || result?.searchRounds?.length || result?.usage?.promptTokens || result?.reasoning || result?.assumptions?.length || result?.tradeoffs?.length) ? (
+                <details className="mt-3 border-t border-stone-200 pt-2">
+                  <summary className="cursor-pointer text-xs font-medium text-stone-600">这轮是怎么排的</summary>
+                  <div className="mt-2 space-y-2">
               {(result?.refinementMode || result?.searchRounds?.length || result?.usage?.promptTokens) ? (
-                <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] text-stone-600">
+                <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-stone-600">
                   {result?.refinementMode ? (
                     <Badge className="rounded-full bg-stone-100 text-stone-700 hover:bg-stone-100">
                       多轮模式：{REFINEMENT_MODE_LABELS[result.refinementMode] ?? result.refinementMode}
@@ -1080,9 +1099,12 @@ export function AiRecommendPanel({
                 </details>
               ) : null}
               {result?.reasoning ? (
-                <details className="mt-2 rounded-xl bg-white/80 px-3 py-2 text-xs leading-5 text-stone-600">
+                <details className="rounded-xl bg-white/80 px-3 py-2 text-xs leading-5 text-stone-600">
                   <summary className="cursor-pointer font-medium text-stone-800">AI 思考过程（思维链）</summary>
                   <div className="mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap">{result.reasoning}</div>
+                </details>
+              ) : null}
+                  </div>
                 </details>
               ) : null}
             </div>
@@ -1090,13 +1112,25 @@ export function AiRecommendPanel({
 
           {/* 对话区只在有 assistant 回复可读时才出现。请求进行中只有刚插进去的
               用户消息，渲染出来就是一条贴着右边、左侧大片空白的孤立气泡，
-              看着像一张空白卡片；此时面板该显示的是进度，不是复读用户输入。 */}
-          {messages.slice(1).some((message) => message.role === 'assistant' && message.content.trim()) && (
+              看着像一张空白卡片；此时面板该显示的是进度，不是复读用户输入。
+              默认折叠成一行，要看历史再展开。 */}
+          {transcript.length > 0 && (
+            <div className="rounded-2xl border border-stone-200 bg-stone-50/70 px-3 py-2">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between gap-2 text-left text-xs font-medium text-stone-600"
+                aria-expanded={transcriptOpen}
+                onClick={() => setTranscriptOpen((open) => !open)}
+              >
+                <span>对话记录 · {transcript.length} 条</span>
+                {transcriptOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+              </button>
+              {transcriptOpen && (
             <div
               ref={scrollRef}
-              className="max-h-56 space-y-3 overflow-y-auto rounded-2xl border border-stone-200 bg-stone-50/70 p-3"
+              className="mt-2 max-h-56 space-y-3 overflow-y-auto p-1"
             >
-              {messages.slice(1).map((message) => (
+              {transcript.map((message) => (
                 <div
                   key={message.id}
                   className={cn('flex', message.role === 'user' ? 'justify-end' : 'justify-start')}
@@ -1114,6 +1148,8 @@ export function AiRecommendPanel({
                 </div>
               ))}
             </div>
+              )}
+            </div>
           )}
 
           {showComposer ? (
@@ -1128,7 +1164,7 @@ export function AiRecommendPanel({
               value={followUpInput}
               onChange={(event) => setFollowUpInput(event.target.value)}
               placeholder={followUpPlaceholder}
-              className="h-11 rounded-xl border-stone-200 bg-stone-50 text-sm"
+              className="h-11 flex-1 rounded-xl border-stone-200 bg-stone-50 text-sm"
               disabled={loading || !toursReady}
             />
             <Button
