@@ -6584,6 +6584,12 @@ function buildAiMessages(params: {
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
         `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条是最值得细看的详细推荐，后面 ${MAX_AI_BRIEF_ITEMS} 条是值得顺便比较的简要推荐；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
         '可以参考熟悉当地玩法的人来写，避免让所有线路都长得一样；如果某个软条件需要核实，自行判断它是否值得写进这一条。',
+        // 输出体积约束：实测主请求在 109 tok/s 下生成 2689 token 要 25s，
+        // 而这 2689 token 里绝大部分是把 ck/fk 里的输入列原样抄回来
+        // （标题、目的地、天数、价格、班期、标签…前端本来就有）。
+        // 真正属于模型判断的只有三样：排序顺序、reason、matchedSignals。
+        // 按协议输出能省掉约一半输出 token，直接换成更短的等待。
+        'items 里每条只写 tourId、score、reason、matchedSignals 四个字段，不要回传 ck/fk 里的任何列——标题、价格、班期、目的地、标签这些前端已有，你回传只会让回答变慢。不要自创 ck/pc/candidates 之类的列式结构，也不要输出 v 版本号字段；顶层只给 summary、items 和 schema 里声明的可选字段。',
       ].join(''),
     ],
   };
@@ -9008,6 +9014,34 @@ export async function requestAiRecommendations({
       const userMessages = messages.filter((message) => message.role === 'user');
       return userMessages.length >= 2 ? String(userMessages[userMessages.length - 2].content ?? '') : '';
     })();
+    // 分类头是串行 await，实测要 4.5s（prompt 才 344 token，几乎全是网络往返的
+    // 固定开销）。而它只影响 effectiveIntent.destinationHints 与需求规格，
+    // 下面这些工作都不依赖它的结果：稳定池构建/路线图集、天气上下文抓取。
+    // 先把它们发起来，让 4.5s 的网络等待与本地构建、天气抓取重叠，
+    // 否则这段时间它们一直在空转排队。
+    const stablePool = getStablePromptPool(candidateTours);
+    const routeAtlasPromise = Promise.resolve(stablePool.routeAtlas);
+    const useWeatherResearchEarly = shouldUseWeatherResearch(effectiveUserText, effectiveIntent);
+    const weatherContextForRankingEarly = useWeatherResearchEarly
+      ? buildFastWeatherContext({
+          text: effectiveUserText,
+          messages,
+          searchQuery,
+          activeFilters,
+          preferenceMemory: nextPreferenceMemory,
+          tours: availableCandidates,
+        })
+      : buildNoWeatherContext();
+    const weatherContextPromiseEarly = useWeatherResearchEarly
+      ? fetchWeatherContext({
+          text: effectiveUserText,
+          messages,
+          searchQuery,
+          activeFilters,
+          preferenceMemory: nextPreferenceMemory,
+          tours: availableCandidates,
+        })
+      : Promise.resolve(weatherContextForRankingEarly);
     const classifiedSpec = await classifyExperienceDemandSpec({
       configs,
       userText: effectiveUserText,
@@ -9024,31 +9058,36 @@ export async function requestAiRecommendations({
         ...classifiedSpec.destinations,
       ]);
     }
+    // 天气上下文：分类头之前已经按当时的 intent 发起过一次（见上方预热）。
+    // 若分类头补出了目的地、且改变了"是否要做天气研究"的判断，就用补全后的
+    // intent 重新发起，保证语义与串行版本一致；否则直接复用预热的那次，
+    // 省掉一次网络往返。两条分支拿到的结果形状完全相同。
     const useWeatherResearch = shouldUseWeatherResearch(effectiveUserText, effectiveIntent);
-    const weatherContextForRanking = useWeatherResearch
-      ? buildFastWeatherContext({
-          text: effectiveUserText,
-          messages,
-          searchQuery,
-          activeFilters,
-          preferenceMemory: nextPreferenceMemory,
-          tours: availableCandidates,
-        })
-      : buildNoWeatherContext();
-    const weatherContextPromise = useWeatherResearch
-      ? fetchWeatherContext({
-          text: effectiveUserText,
-          messages,
-          searchQuery,
-          activeFilters,
-          preferenceMemory: nextPreferenceMemory,
-          tours: availableCandidates,
-        })
-      : Promise.resolve(weatherContextForRanking);
-    // 稳定候选池：按数据快照记忆化，跨轮字节级一致——第二条 system 消息
-    // （prompt 大头）的 KV 前缀缓存命中依赖它。路线图集随池一起缓存。
-    const stablePool = getStablePromptPool(candidateTours);
-    const routeAtlasPromise = Promise.resolve(stablePool.routeAtlas);
+    const prewarmMatched = useWeatherResearch === useWeatherResearchEarly;
+    const weatherContextForRanking = prewarmMatched
+      ? weatherContextForRankingEarly
+      : useWeatherResearch
+        ? buildFastWeatherContext({
+            text: effectiveUserText,
+            messages,
+            searchQuery,
+            activeFilters,
+            preferenceMemory: nextPreferenceMemory,
+            tours: availableCandidates,
+          })
+        : buildNoWeatherContext();
+    const weatherContextPromise = prewarmMatched
+      ? weatherContextPromiseEarly
+      : useWeatherResearch
+        ? fetchWeatherContext({
+            text: effectiveUserText,
+            messages,
+            searchQuery,
+            activeFilters,
+            preferenceMemory: nextPreferenceMemory,
+            tours: availableCandidates,
+          })
+        : Promise.resolve(weatherContextForRanking);
 
     // 多轮检索：先让模型规划 1-3 条差异化检索式，再在"全量"候选池上本地执行，
     // 命中候选进入当轮重点层（动态 user 消息）——单发注入池外的好线路不再永远不可见。

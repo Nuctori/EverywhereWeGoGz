@@ -100,4 +100,61 @@ assert.match(
   'the click path must top up a not-yet-warm pool before starting the request',
 );
 
+// --- AI 查询总耗时：输出体积与串行等待 ---
+// 线上实测一次点击 42s：分类头 4.5s + 检索规划 2.9s + 主推荐 34.7s。
+// 主推荐里约 25s 在生成 2689 token，而其中绝大部分是把 ck/fk 的输入列
+// 原样抄回来（标题/价格/班期/标签前端本来就有）。协议本身是精简的
+// {tourId,score,reason,matchedSignals}，所以要守住"别让模型回传输入列"。
+const recommendSource = fs.readFileSync('src/lib/ai-recommendation.ts', 'utf8');
+
+assert.ok(
+  recommendSource.includes('items 里每条只写 tourId、score、reason、matchedSignals 四个字段'),
+  'the prompt must tell the model to emit only the four protocol fields, ' +
+    'otherwise it copies the 21 input columns back and doubles completion tokens',
+);
+assert.ok(
+  /不要自创 ck\/pc\/candidates 之类的列式结构/.test(recommendSource),
+  'the prompt must forbid re-inventing the columnar ck/pc/candidates envelope',
+);
+// 输出字段白名单必须真的只有协议四件套，多一个字段就是多一份输出成本。
+{
+  const itemsSchema = recommendSource.match(/items: \[\s*\{([\s\S]{0,700}?)\}\s*,\s*\]/);
+  assert.ok(itemsSchema, 'the items schema block must stay discoverable');
+  const fields = [...itemsSchema[1].matchAll(/^\s*(tourId|score|reason|matchedSignals|[A-Za-z]+):/gm)].map(
+    (m) => m[1],
+  );
+  const unique = [...new Set(fields)].sort();
+  assert.deepEqual(
+    unique,
+    ['matchedSignals', 'reason', 'score', 'tourId'],
+    `the items schema must stay exactly the four protocol fields, got: ${unique.join(',')}`,
+  );
+}
+
+// 分类头是纯网络往返（prompt 仅 344 token 却要 4.5s），它等待期间
+// 稳定池构建与天气抓取必须已经在跑，不能串行排队。
+{
+  const poolAt = recommendSource.indexOf('const stablePool = getStablePromptPool(candidateTours);');
+  const classifyAt = recommendSource.indexOf(
+    'const classifiedSpec = await classifyExperienceDemandSpec({',
+  );
+  assert.ok(poolAt > 0 && classifyAt > 0, 'both the pool build and the classifier must stay discoverable');
+  assert.ok(
+    poolAt < classifyAt,
+    'the stable pool must be built before awaiting the classifier, ' +
+      'so the 4.5s network round-trip overlaps with local construction instead of queueing behind it',
+  );
+  const weatherAt = recommendSource.indexOf('const weatherContextPromiseEarly');
+  assert.ok(
+    weatherAt > 0 && weatherAt < classifyAt,
+    'the weather fetch must be kicked off before awaiting the classifier',
+  );
+  // 预热与最终判定不一致时必须重新发起，否则会用到按旧 intent 抓的天气。
+  assert.match(
+    recommendSource,
+    /const prewarmMatched = useWeatherResearch === useWeatherResearchEarly;/,
+    'the prewarmed weather context must be validated against the post-classifier decision',
+  );
+}
+
 console.info('AI interaction performance audit passed');
