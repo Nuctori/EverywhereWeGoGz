@@ -8,7 +8,7 @@ import {
   __aiRecommendationTestHooks,
 } from '../src/lib/ai-recommendation.ts';
 
-const { createAiSseStreamParser, callAiApi } = __aiRecommendationTestHooks;
+const { createAiSseStreamParser, callAiApi, describeAiItemsShapeIssue, requestAiFormatCorrection } = __aiRecommendationTestHooks;
 
 const encoder = new TextEncoder();
 function sseFrame(payload: string) {
@@ -485,6 +485,207 @@ console.info('[2/11] CRLF 行尾与 DONE 幂等通过');
     assert.ok(message.includes('tail='), 'parse failure must report the tail fragment');
     assert.ok(message.includes('finish_reason=stop'), 'parse failure must report finish_reason');
     console.info('[11/11] 坏 JSON 错误证据与裸换行修复通过');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// ====== 12. 现场回归：items 回成【位置数组】且正文在数组中途被掐断 ======
+// GLM-4.7-Flash 真实响应（22755 字符）尾部是 `..."广东 2天 温泉泡汤",["2026-10`：
+// 元素不是 schema 要求的 {tourId,...} 对象，而是 [标题,目的地,天数,价格,...] 位置数组。
+// 原恢复逻辑只认 {} 对象，一条都救不回来 → 整轮降级到本地补位。
+// 现在要求：完好的位置数组元素必须被救回，不能因为半截就丢掉全部。
+{
+  const originalFetch = globalThis.fetch;
+  const makeSseResponse = (frames: string[]) => {
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const frame of frames) controller.enqueue(new TextEncoder().encode(frame));
+        controller.close();
+      },
+    });
+    return new Response(stream, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+  };
+  const positionalItems = Array.from({ length: 25 }, (_, index) => [
+    `喜运来温泉2天(${index}号楼)`, '广东', 2, 189, '海岛度假', '假日通', 'easy', 1,
+    '广东 2天 温泉泡汤', ['2026-10-01', '2026-10-02'], `天然温泉池，第 ${index} 条`,
+  ]);
+  let body = '';
+  for (const item of positionalItems) body = `${body}${body ? ',' : ''}${JSON.stringify(item)}`;
+  const cut = body.lastIndexOf('"2026-10-01"');
+  const truncatedContent = `{"items":[${body.slice(0, cut)}"2026-10`;
+
+  const frames = [
+    `data: ${JSON.stringify({ choices: [{ delta: { content: truncatedContent } }] })}\n\n`,
+    // 现场就是不老实报 stop 的
+    'data: {"choices":[{"delta":{},"finish_reason":"stop"}],"usage":{"completion_tokens":9000}}\n\n',
+    'data: [DONE]\n\n',
+  ];
+  let callCount = 0;
+  globalThis.fetch = (async () => {
+    callCount += 1;
+    return makeSseResponse(frames);
+  }) as typeof fetch;
+
+  try {
+    const result = await callAiApi({
+      configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+      messages: [{ role: 'user', content: 'q' }],
+      maxTokens: 3600,
+      schema: 'recommendation',
+    });
+    const items = (result.parsed as { items?: unknown[] }).items ?? [];
+    assert.ok(
+      items.length >= 20,
+      `truncated positional-array items must be recovered, got ${items.length} (was 0 before the fix)`,
+    );
+    assert.ok(Array.isArray(items[0]), 'recovered elements keep their original positional-array shape');
+    // 救回完整内容后不该再多跑一轮模型（那要再等几十秒）
+    assert.equal(callCount, 1, 'a recoverable body must not trigger a redundant retry');
+    console.info(`[12/13] 位置数组半截正文恢复通过（救回 ${items.length}/25 条）`);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// ====== 13. 截断判定的边界：不能把"结构坏了"也当成"被预算掐断" ======
+// 升压重试对"模型回了废话"是无效的（同参必败），却要多等两轮生成。
+// 只有确实像 JSON 又没写完的正文才算截断。
+{
+  const originalFetch = globalThis.fetch;
+  const sse = (payload: string) => `data: ${payload}\n\n`;
+  const driveWith = (content: string) => {
+    const frames = [
+      sse(JSON.stringify({ choices: [{ delta: { content } }] })),
+      sse(JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }] })),
+      sse('[DONE]'),
+    ];
+    return frames;
+  };
+  const runCount = async (content: string) => {
+    let calls = 0;
+    globalThis.fetch = (async () => {
+      calls += 1;
+      const frames = driveWith(content);
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (const frame of frames) controller.enqueue(new TextEncoder().encode(frame));
+          controller.close();
+        },
+      });
+      return new Response(stream, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+    }) as typeof fetch;
+    let message = '';
+    try {
+      await callAiApi({
+        configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+        messages: [{ role: 'user', content: 'q' }],
+        maxTokens: 3600,
+        schema: 'recommendation',
+      });
+    } catch (error) {
+      message = error instanceof Error ? error.message : String(error);
+    }
+    return { calls, message };
+  };
+
+  try {
+    // 不像 JSON 的废话：结构坏了，重试无用，必须只打一轮。
+    const garbage = await runCount('here is some text without braces');
+    assert.equal(garbage.calls, 1, 'non-JSON prose must not be retried as if it were truncated output');
+    assert.ok(garbage.message.includes('json_parse_failed'), 'prose must still be reported as a parse failure');
+    assert.ok(
+      !garbage.message.includes('tokens_seen'),
+      'prose must not be labelled tokens_seen — that would escalate the budget for nothing',
+    );
+
+    // 确实是 JSON 却没写完：必须走升压重试。
+    const truncated = await runCount('{"items":["ok","half');
+    assert.ok(truncated.calls > 1, 'a genuinely truncated JSON body must be retried with a bigger budget');
+    assert.ok(truncated.message.includes('tokens_seen'), 'genuinely truncated JSON must be labelled tokens_seen');
+    console.info('[13/13] 截断判定边界（废话不重试 / 真截断重试）通过');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// ====== 14. 受限格式追问：一条都没救回来时，回头提醒模型一次 ======
+// 约定：只在 items 形状/映射错到零可用条目时追问，且必须把错误原文摆给模型，
+// 不能静默重发同一份 prompt（同参必败）。有救回任何条目时绝不追问。
+{
+  const originalFetch = globalThis.fetch;
+  const sse = (payload: string) => `data: ${payload}\n\n`;
+  const makeResponse = (content: string) => {
+    const frames = [
+      sse(JSON.stringify({ choices: [{ delta: { content } }] })),
+      sse(JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }] })),
+      sse('[DONE]'),
+    ];
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        for (const frame of frames) controller.enqueue(new TextEncoder().encode(frame));
+        controller.close();
+      },
+    });
+    return new Response(stream, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+  };
+
+  try {
+    // 14a：位置数组这种"零可用条目"的形状，追问提示必须点明收到了什么。
+    const issue = describeAiItemsShapeIssue({ items: [['标题A', '广东', 2, 189]] });
+    assert.ok(issue.includes('数组'), `shape issue must name the array shape, got: ${issue}`);
+    assert.ok(issue.includes('tourId'), 'shape issue must state the expected object contract');
+
+    // 14b：追问真的发出，且最后一条消息带着错误原文（"至少提醒一次"）。
+    const bodies: Array<Record<string, unknown>> = [];
+    globalThis.fetch = (async (_input: unknown, init?: { body?: string }) => {
+      bodies.push(JSON.parse(init?.body ?? '{}') as Record<string, unknown>);
+      return makeResponse('{"items":[{"tourId":"t1","reason":"ok"}]}');
+    }) as typeof fetch;
+
+    const retried = await requestAiFormatCorrection({
+      configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+      messages: [{ role: 'system', content: 'S' }, { role: 'user', content: 'U' }] as never,
+      schema: 'recommendation',
+      issue,
+      startedAt: Date.now(),
+    });
+    assert.equal(bodies.length, 1, 'exactly one correction request must be sent');
+    const sentMessages = (bodies[0]?.messages ?? []) as Array<{ role: string; content: string }>;
+    assert.equal(sentMessages.length, 3, 'the correction must append one message to the original prompt');
+    const reminder = sentMessages[sentMessages.length - 1]?.content ?? '';
+    assert.ok(reminder.includes('不符合约定'), 'the reminder must tell the model the reply was off-contract');
+    assert.ok(reminder.includes('数组'), 'the reminder must quote the actual shape problem back to the model');
+    assert.deepEqual(
+      (retried?.parsed as { items?: unknown[] })?.items,
+      [{ tourId: 't1', reason: 'ok' }],
+      'the correction response must be returned for re-validation',
+    );
+
+    // 14c：预算耗尽时不许再追问（不能让用户多等一轮）。
+    const beforeBudget = bodies.length;
+    const skipped = await requestAiFormatCorrection({
+      configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+      messages: [{ role: 'user', content: 'U' }] as never,
+      schema: 'recommendation',
+      issue,
+      startedAt: Date.now() - 10 * 60_000,
+    });
+    assert.equal(skipped, null, 'an exhausted time budget must skip the correction entirely');
+    assert.equal(bodies.length, beforeBudget, 'no request may be sent once the budget is exhausted');
+
+    // 14d：追问本身失败时返回 null，调用方照常降级，不把异常抛给上层。
+    globalThis.fetch = (async () => new Response('boom', { status: 500 })) as typeof fetch;
+    const failed = await requestAiFormatCorrection({
+      configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+      messages: [{ role: 'user', content: 'U' }] as never,
+      schema: 'recommendation',
+      issue,
+      startedAt: Date.now(),
+    });
+    assert.equal(failed, null, 'a failed correction must resolve to null instead of throwing');
+
+    console.info('[14/14] 受限格式追问（带错误原文 / 预算封顶 / 失败不抛出）通过');
   } finally {
     globalThis.fetch = originalFetch;
   }

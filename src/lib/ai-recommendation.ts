@@ -267,10 +267,19 @@ type RouteAtlas = RouteAtlasGroup[];
 type RecommendationAuditContext = ReturnType<typeof buildRecommendationAuditContext>;
 
 const searchCorpusCache = new WeakMap<AiRecommendationCandidate, string>();
-const atlasRegionsCache = new WeakMap<AiRecommendationCandidate, string[]>();
-const primitiveCache = new WeakMap<AiRecommendationCandidate, RecommendationPrimitive>();
+const atlasRegionsCache = new Map<string, string[]>();
+const primitiveExperienceAtomsCache = new Map<string, string[]>();
+// 原语按 tour id 缓存，而不是按对象引用。TourList 每次渲染都会重建候选对象，
+// normalizeCandidateTour 又会为过期线路再造一层新对象，引用做的 WeakMap 因此
+// 几乎永远查不中：6483 条候选冷算约 500ms，正好压在点「AI 帮我挑」的那一帧上。
+// 原语内容本身只由线路字段决定（见 buildTourPrimitive），按 id 缓存不改变结果。
+const primitiveCache = new Map<string, RecommendationPrimitive>();
 const normalizedTourCache = new WeakMap<AiRecommendationCandidate, AiRecommendationCandidate>();
 const routeAtlasCache = new WeakMap<AiRecommendationCandidate[], Map<string, RouteAtlas>>();
+// 稳定池按"池内容指纹"缓存，而不是按数组引用。TourList 每次渲染都会重建
+// aiCandidateTours 数组，引用缓存等于每轮都重算：6483 条候选在全量重算下
+// 实测约 600ms 的同步主线程占用，正好压在点「AI 帮我挑」的那一帧上。
+const stablePromptPoolByFingerprint = new Map<string, StablePromptPool>();
 const weatherSnapshotCache = new Map<string, Promise<{
   forecastSummary: string;
   dateSpecificSummary?: string;
@@ -824,13 +833,53 @@ interface StablePromptPool {
 }
 const stablePromptPoolCache = new WeakMap<AiRecommendationCandidate[], StablePromptPool>();
 
+// 池指纹只覆盖会影响稳定池内容的字段（id 排序后逐条取值），不读高亮/标签等
+// 长数组：指纹计算本身必须是毫秒级的，否则就又把成本搬回了点击路径。
+const STABLE_POOL_FINGERPRINT_VERSION = 'v1';
+const STABLE_POOL_FINGERPRINT_MAX_ENTRIES = 4;
+
+function getStablePoolFingerprint(candidateTours: AiRecommendationCandidate[]): string {
+  const entries = candidateTours
+    .map((tour) =>
+      `${tour.id}~${tour.destination}~${tour.theme}~${tour.price}~${tour.duration}~${tour.transportType}~${tour.source}~${
+        (tour.tags || []).length
+      }~${(tour.highlights || []).length}~${
+        (tour.departureDates || []).length + (tour.hotDepartureDates || []).length
+      }`,
+    )
+    .sort();
+  return `${STABLE_POOL_FINGERPRINT_VERSION}:${entries.length}:${hashPromptFingerprint(entries.join('|'))}`;
+}
+
+function hashPromptFingerprint(value: string): string {
+  // FNV-1a：够用来判断"池有没有变"，且不随池大小线性分配大字符串。
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193) >>> 0;
+  }
+  return hash.toString(36);
+}
+
 function getStablePromptPool(candidateTours: AiRecommendationCandidate[]): StablePromptPool {
   const cached = stablePromptPoolCache.get(candidateTours);
   if (cached) return cached;
 
+  const fingerprint = getStablePoolFingerprint(candidateTours);
+  const fingerprintCached = stablePromptPoolByFingerprint.get(fingerprint);
+  if (fingerprintCached) {
+    stablePromptPoolCache.set(candidateTours, fingerprintCached);
+    return fingerprintCached;
+  }
+
   const normalized = filterPastOnlyCandidatesWhenFutureExists(
     candidateTours.map(normalizeCandidateTour),
   );
+  // 归一化会产出新对象（约 1/4 的线路 departureDate 被换成最近可发团日），
+  // 所以按原对象预热过的原语缓存不会被 normalizeCandidateTour 的产物命中。
+  // 这里顺手把归一化后的对象也预热一次（同样的缓存，同样的结果，只是提前算），
+  // 否则这一步冷算就是点击时那 400-500ms。
+  warmAiRecommendationBatch(normalized);
   const stableCandidates = selectDiversePoolCompacted(normalized, [], null)
     .sort((left, right) => (left.id < right.id ? -1 : left.id > right.id ? 1 : 0))
     .slice(0, MAX_AI_CANDIDATES);
@@ -840,7 +889,53 @@ function getStablePromptPool(candidateTours: AiRecommendationCandidate[]): Stabl
     routeAtlas: buildRouteAtlas(normalized),
   };
   stablePromptPoolCache.set(candidateTours, pool);
+  if (stablePromptPoolByFingerprint.size >= STABLE_POOL_FINGERPRINT_MAX_ENTRIES) {
+    const oldest = stablePromptPoolByFingerprint.keys().next().value;
+    if (oldest !== undefined) stablePromptPoolByFingerprint.delete(oldest);
+  }
+  stablePromptPoolByFingerprint.set(fingerprint, pool);
   return pool;
+}
+
+// AI 交互会用到的一大批按候选缓存的派生数据（搜索语料、原语、路线图集）是
+// 懒构建的：第一次真正用到时要在主线程一次性算完 600ms 左右。下面这几个导出
+// 供页面在空闲期把它切成小片预热——一次算完 600ms 的空闲任务照样会卡住交互，
+// 每片只处理约 100 条（实测 <10ms），片与片之间把主线程还回去。
+const WARM_AI_BATCH_SIZE = 100;
+
+/**
+ * 预热指定的一批候选（原语 + 路线图集分组键）。这些缓存都是按候选对象建立的，
+ * 所以真正的 getStablePromptPool 会整批命中；这里只是把同样的活提前干完，
+ * 不缓存任何结果，也就不会改变任何输出。
+ */
+export function warmAiRecommendationBatch(candidateTours: AiRecommendationCandidate[]) {
+  for (const tour of candidateTours) {
+    // 关键：原语缓存是建在"归一化后的对象"上的（normalizeCandidateTour 会把
+    // 过期线路的 departureDate 换成最近可发团日并返回新对象）。只对原始对象
+    // 建缓存，点击时的新对象仍要冷算原语（实测 ~500ms），所以必须对归一化
+    // 后的产物建缓存。
+    const normalized = normalizeCandidateTour(tour);
+    buildTourPrimitive(normalized);
+    getAtlasGroupKey(normalized);
+  }
+}
+
+// AI 交互会用到的一大批按候选缓存的派生数据（搜索语料、原语、路线图集）是
+// 懒构建的：第一次真正用到时要在主线程一次性算完 600ms 左右。下面三个导出
+// 供页面在空闲期把它切成小片预热——一次算完 600ms 的空闲任务照样会卡住交互，
+// 每片只处理约 100 条（实测 <10ms），片与片之间把主线程还回去。
+export const AI_RECOMMENDATION_WARM_BATCH_SIZE = WARM_AI_BATCH_SIZE;
+
+export function getAiRecommendationWarmPiece(
+  candidateTours: AiRecommendationCandidate[],
+  pieceIndex: number,
+): AiRecommendationCandidate[] {
+  const start = pieceIndex * WARM_AI_BATCH_SIZE;
+  return candidateTours.slice(start, start + WARM_AI_BATCH_SIZE);
+}
+
+export function isAiRecommendationPoolWarm(candidateTours: AiRecommendationCandidate[]): boolean {
+  return candidateTours.length === 0 || stablePromptPoolCache.has(candidateTours);
 }
 
 function getLatestUserText(messages: AiRecommendationMessage[]) {
@@ -3904,7 +3999,7 @@ function inferScheduleHints(tour: AiRecommendationCandidate) {  const corpus = g
 }
 
 function buildTourPrimitive(tour: AiRecommendationCandidate): RecommendationPrimitive {
-  const cached = primitiveCache.get(tour);
+  const cached = primitiveCache.get(tour.id);
   if (cached) return cached;
 
   const primitive = {
@@ -3933,12 +4028,13 @@ function buildTourPrimitive(tour: AiRecommendationCandidate): RecommendationPrim
     boardingCorpus: getBoardingCorpus(tour),
   };
 
-  primitiveCache.set(tour, primitive);
+  primitiveCache.set(tour.id, primitive);
   return primitive;
 }
 
 function getAtlasRegions(tour: AiRecommendationCandidate) {
-  const cached = atlasRegionsCache.get(tour);
+  // 同样按 id 缓存：候选对象每轮都会重建，引用缓存查不中（与 buildTourPrimitive 同理）。
+  const cached = atlasRegionsCache.get(tour.id);
   if (cached) return cached;
 
   const corpus = getSearchCorpus(tour);
@@ -3950,7 +4046,7 @@ function getAtlasRegions(tour: AiRecommendationCandidate) {
     .map(([destination]) => destination);
 
   const resolved = regions.length > 0 ? regions : [tour.destination || '其他'];
-  atlasRegionsCache.set(tour, resolved);
+  atlasRegionsCache.set(tour.id, resolved);
   return resolved;
 }
 
@@ -4265,8 +4361,11 @@ function getMatchedDestinationHints(intent: AiTravelIntent | null, primitive: Re
 function rankPrimitive(
   primitive: RecommendationPrimitive,
   localItems: AiRecommendationItem[],
+  localRankById?: Map<string, number>,
 ) {
-  const localRank = localItems.findIndex((item) => item.tourId === primitive.id);
+  const localRank = localRankById
+    ? (localRankById.get(primitive.id) ?? -1)
+    : localItems.findIndex((item) => item.tourId === primitive.id);
   const localRankBoost = localRank >= 0 ? Math.max(0, 200 - localRank * 6) : 0;
   const nearestDeparture = primitive.schedule.departureDates[0];
   const todayTimestamp = parseDateString(getTodayInputValue())?.getTime() ?? 0;
@@ -4290,6 +4389,17 @@ function rankPrimitive(
 }
 
 function getPrimitiveExperienceAtoms(primitive: RecommendationPrimitive, limit = 2) {
+  // 稳定池构建时每条原语会问它两次（候选池够小则每个只问一次），
+  // 而它内部要过滤/去重一堆数组。这里按原语（按 id，原语本身按 id 缓存）记住结果。
+  const cacheKey = `${primitive.id}\u0000${limit}`;
+  const cached = primitiveExperienceAtomsCache.get(cacheKey);
+  if (cached) return cached;
+  const atoms = computePrimitiveExperienceAtoms(primitive, limit);
+  primitiveExperienceAtomsCache.set(cacheKey, atoms);
+  return atoms;
+}
+
+function computePrimitiveExperienceAtoms(primitive: RecommendationPrimitive, limit: number) {
   const broadTerms = new Set([
     primitive.destination,
     primitive.theme,
@@ -4658,7 +4768,20 @@ function selectDiversePrimitives(
 ) {
   if (primitives.length <= limit) return primitives;
 
-  const ranked = [...primitives].sort((a, b) => rankPrimitive(b, localItems) - rankPrimitive(a, localItems));
+  // rankPrimitive 为每条原语做一次 O(n) 的 localItems.findIndex，而排序比较器会
+  // 把每个元素重复比很多次——直接放进比较器是 O(n²·log n)，6k 条候选实测 ~60ms
+  // 全压在点击那一帧。这里先按 id 建索引、每条只算一次。
+  const localRankById = new Map<string, number>();
+  localItems.forEach((item, index) => {
+    if (!localRankById.has(item.tourId)) localRankById.set(item.tourId, index);
+  });
+  const rankById = new Map<string, number>();
+  for (const primitive of primitives) {
+    rankById.set(primitive.id, rankPrimitive(primitive, localItems, localRankById));
+  }
+  const rankOf = (primitive: RecommendationPrimitive) => rankById.get(primitive.id) ?? 0;
+
+  const ranked = [...primitives].sort((a, b) => rankOf(b) - rankOf(a));
   const groups = new Map<string, RecommendationPrimitive[]>();
 
   for (const primitive of ranked) {
@@ -4669,7 +4792,7 @@ function selectDiversePrimitives(
   }
 
   const groupEntries = [...groups.entries()].sort(([, a], [, b]) =>
-    rankPrimitive(b[0], localItems) - rankPrimitive(a[0], localItems),
+    rankOf(b[0]) - rankOf(a[0]),
   );
   const selected: RecommendationPrimitive[] = [];
   const selectedIds = new Set<string>();
@@ -6710,8 +6833,12 @@ function parseCompleteObjectsFromArrayAfterKey(content: string, key: string) {
   const objects: unknown[] = [];
   let inString = false;
   let escaped = false;
-  let objectDepth = 0;
-  let objectStart = -1;
+  // 元素既可能是 {…} 对象，也可能是 [ …] 位置数组（模型有时不按 schema 输出，
+  // 现场 GLM 就回了 ["标题","广东",2,189,…]）。两种都要认：只认 {} 时位置数组
+  // 一条都救不回来，24 条完好数据全丢，白降级到本地补位。
+  let elementDepth = 0;
+  let elementStart = -1;
+  let elementOpen = '';
 
   for (let index = arrayStart + 1; index < content.length; index += 1) {
     const char = content[index];
@@ -6730,20 +6857,28 @@ function parseCompleteObjectsFromArrayAfterKey(content: string, key: string) {
       inString = true;
       continue;
     }
-    if (char === '{') {
-      if (objectDepth === 0) objectStart = index;
-      objectDepth += 1;
+    if (char === '{' || char === '[') {
+      if (elementDepth === 0) {
+        elementStart = index;
+        elementOpen = char;
+      }
+      elementDepth += 1;
       continue;
     }
-    if (char === '}') {
-      objectDepth -= 1;
-      if (objectDepth === 0 && objectStart >= 0) {
-        try {
-          objects.push(JSON.parse(content.slice(objectStart, index + 1)));
-        } catch {
-          // Skip malformed objects and keep earlier complete items.
+    if (char === '}' || char === ']') {
+      // items 数组自身的收尾（还没有元素开过）：结束扫描。
+      if (elementDepth === 0) break;
+      if (elementStart >= 0 && char === (elementOpen === '{' ? '}' : ']')) {
+        elementDepth -= 1;
+        if (elementDepth === 0) {
+          try {
+            objects.push(JSON.parse(content.slice(elementStart, index + 1)));
+          } catch {
+            // Skip malformed elements and keep earlier complete items.
+          }
+          elementStart = -1;
+          elementOpen = '';
         }
-        objectStart = -1;
       }
     }
   }
@@ -6796,6 +6931,34 @@ function getAiProviderParseErrorLabel(config: AiProviderConfig, stage: string, d
   return `AI API unusable [${config.model}] ${stage}${suffix}`;
 }
 
+// 结构层截断判据。只看"结尾不是收尾括号"会把任何坏输出都当成截断——模型回了
+// 一段不带花括号的废话时，那既不会因为加大预算而变好，又平白多等两轮生成。
+// 所以必须先确认正文确实像一份 JSON（有对象起点），再判断它没写完。
+function looksTruncatedJson(content: string) {
+  const trimmed = content.trim();
+  if (!trimmed) return false;
+  // 不像 JSON 的输出属于"结构坏了"，不是"被预算掐断"，不该走升压重试。
+  const startsLikeJson = trimmed.startsWith('{') || trimmed.startsWith('[') || trimmed.startsWith('```');
+  if (!startsLikeJson) return false;
+
+  const lastChar = trimmed[trimmed.length - 1];
+  if (lastChar !== '}' && lastChar !== ']') return true;
+
+  // 结尾是括号也可能停在字符串里（如 `{"a":"x}`），扫一遍确认字符串是否闭合。
+  let inString = false;
+  let escaped = false;
+  for (const char of trimmed) {
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === '"') inString = false;
+      continue;
+    }
+    if (char === '"') inString = true;
+  }
+  return inString;
+}
+
 function parseAiProviderResponse(
   data: unknown,
   config: AiProviderConfig,
@@ -6831,11 +6994,12 @@ function parseAiProviderResponse(
     ));
   }
 
-  // finish_reason=length 是"输出预算先于结构耗尽"的唯一硬信号。此前只在正文
-  // 完全为空时才走 tokens_seen 口径，半截正文落进 json_parse_failed，
-  // 让升压重试（同参必败）永远没机会——GLM-4.7-Flash 现场即此形态。
+  // finish_reason=length 是"输出预算先于结构耗尽"的硬信号。但网关/模型并不总会
+  // 如实给出：现场 GLM-4.7-Flash 正文在 items 中途被掐断，finish_reason 却是
+  // stop。半截 JSON 结构上是自证的——解析失败且不是收尾括号，就按截断处理，
+  // 让它走升压重试，而不是立刻降级到本地补位。
   const finishReason = typeof choice?.finish_reason === 'string' ? choice.finish_reason : '';
-  const truncated = finishReason === 'length';
+  const truncated = finishReason === 'length' || looksTruncatedJson(content);
 
   let parsed: unknown;
   try {
@@ -6847,7 +7011,7 @@ function parseAiProviderResponse(
       error instanceof Error ? error.message : '',
       `chars=${content.length}`,
       getJsonParseFailureDetail(content),
-      ...(finishReason ? [`finish_reason=${finishReason}`] : []),
+      `finish_reason=${finishReason || 'none'}`,
     ].filter(Boolean).join(', ');
     throw new Error(getAiProviderParseErrorLabel(
       config,
@@ -7185,6 +7349,8 @@ export const __aiRecommendationTestHooks = {
   buildRouteAtlas,
   buildTourPrimitive,
   callAiApi,
+  describeAiItemsShapeIssue,
+  requestAiFormatCorrection,
   collectAvoidHints,
   collectLiteralAvoidHints,
   compactCandidates,
@@ -7223,6 +7389,7 @@ export const __aiRecommendationTestHooks = {
   mergeIntentWithMemory,
   candidateMatchesDestinationIntent,
   normalizeIntent,
+  normalizeCandidateTour,
   keepAiItemsForCompoundExperience,
   getCoverageTermsForQuality,
   prioritizeRecommendationItems,
@@ -7313,6 +7480,38 @@ function resolveAiCandidateTourId(
   return '';
 }
 
+// 模型偶尔不按 schema 输出 items 对象，而是回成位置数组
+// （现场 GLM：[标题, 目的地, 天数, 价格, 主题, 来源, 节奏, 评分, 原子串, 班期, 理由]）。
+// 这里按"是不是对象"分流，不靠猜字段顺序以外的东西：位置数组按固定槽位取值，
+// 取不到 tourId 时后面仍由 resolveAiCandidateTourId 用标题做兜底匹配。
+function normalizeRawAiItem(rawItem: unknown): Record<string, unknown> | null {
+  if (rawItem && typeof rawItem === 'object' && !Array.isArray(rawItem)) {
+    return rawItem as Record<string, unknown>;
+  }
+  if (Array.isArray(rawItem)) {
+    const [
+      title,
+      ,
+      ,
+      ,
+      ,
+      ,
+      grade,
+      ,
+      ,
+      dates,
+      reason,
+    ] = rawItem as unknown[];
+    return {
+      title,
+      grade,
+      departureDates: Array.isArray(dates) ? dates : undefined,
+      reason,
+    };
+  }
+  return null;
+}
+
 function validateAiItems(
   value: unknown,
   candidateTours: AiRecommendationCandidate[],
@@ -7326,7 +7525,9 @@ function validateAiItems(
   const validatedItems: AiRecommendationItem[] = [];
 
   for (const [index, rawItem] of rawItems.entries()) {
-    const item = rawItem as Partial<AiRecommendationItem> & {
+    const normalizedRawItem = normalizeRawAiItem(rawItem);
+    if (!normalizedRawItem) continue;
+    const item = normalizedRawItem as Partial<AiRecommendationItem> & {
       id?: unknown;
       title?: unknown;
       destination?: unknown;
@@ -8166,6 +8367,67 @@ async function callSingleAiProvider(params: {
   throw providerLastError || new Error(`AI API failed [${config.model}]`);
 }
 
+// 格式追问的总时长硬上限：从本轮请求开始算，超过就放弃追问直接走原有降级路径，
+// 不允许"为了问一次格式"把用户等待时间再翻一倍。
+const AI_FORMAT_CORRECTION_BUDGET_MS = 150_000;
+
+/**
+ * 描述模型这次 items 的形状问题，用于追问时把错误原文摆给模型看。
+ * 只说事实（收到的是什么、要求的是什么），不猜模型意图。
+ */
+function describeAiItemsShapeIssue(aiResponse: { items?: unknown }) {
+  const items = Array.isArray(aiResponse.items) ? aiResponse.items : [];
+  if (items.length === 0) return 'items 是空数组，没有返回任何候选。';
+  const first = items[0];
+  if (Array.isArray(first)) {
+    return `items 的元素是数组（位置数组，形如 ${JSON.stringify(first).slice(0, 120)}），要求的是对象 {tourId, score, reason, matchedSignals}。`;
+  }
+  if (first && typeof first === 'object') {
+    const keys = Object.keys(first as Record<string, unknown>).slice(0, 8).join(', ');
+    return `items 的元素是对象，但键是 [${keys}]，没有一个叫 tourId 且能对上候选 id。`;
+  }
+  return `items 的元素是 ${typeof first} 标量，要求的是对象 {tourId, score, reason, matchedSignals}。`;
+}
+
+/**
+ * 受限格式追问：把上一轮的格式错误写进对话，请模型按 schema 原样重答一次。
+ * 只在"一条可用候选都没救回来"时调用，因此不会让任何有结果的请求多等一轮。
+ * 追问本身失败（超时/网络/仍不合格式）时返回 null，调用方照常走降级。
+ */
+async function requestAiFormatCorrection(params: {
+  configs: AiProviderConfig[];
+  messages: ReturnType<typeof buildAiMessages>;
+  schema: 'recommendation' | 'search-plan';
+  issue: string;
+  startedAt: number;
+}) {
+  const elapsed = Date.now() - params.startedAt;
+  if (elapsed > AI_FORMAT_CORRECTION_BUDGET_MS) return null;
+
+  const correction = [
+    '你上一条回复的 items 结构不符合约定，无法使用。',
+    `具体情况：${params.issue}`,
+    '请只输出一个 JSON 对象，items 的每一项都必须是对象，且 tourId 必须取自本轮候选里真实存在的 id，reason 和 matchedSignals 照原要求写。',
+    '不要解释，不要用代码块包裹，直接输出 JSON。',
+  ].join('\n');
+
+  try {
+    const call = await callAiApi({
+      configs: params.configs,
+      messages: [
+        ...params.messages,
+        { role: 'user', content: correction },
+      ] as ReturnType<typeof buildAiMessages>,
+      maxTokens: 3600,
+      schema: params.schema,
+    });
+    return { call, parsed: call.parsed as { items?: unknown } & Record<string, unknown> };
+  } catch {
+    // 追问失败不改变原有语义：调用方随后照常抛 items_unmapped 并降级。
+    return null;
+  }
+}
+
 async function callAiApi(params: {
   configs: AiProviderConfig[];
   messages: ReturnType<typeof buildAiMessages>;
@@ -8947,22 +9209,26 @@ export async function requestAiRecommendations({
         'rank',
       ),
     });
-    const aiCall = await callAiApi({
+    // 提到调用外：格式追问要用同一份 prompt 再追加一条纠正消息重发。
+    const aiMessages = buildAiMessages({
+      userText: effectiveUserText,
+      messages,
+      stableCandidates: stablePool.candidates,
+      focusFull: focusGraded,
+      routeAtlas: await routeAtlasPromise,
+      auditContext,
+      weatherContext: weatherContextForRanking,
+      destinationWeatherInsights: await focusWeatherInsightsPromise,
+      searchQuery,
+      intent: effectiveIntent,
+      preferenceMemory: aiContextMemoryForThisTurn,
+      allowPublicInterest: allowPublicInterestForTurn,
+    });
+    // 格式追问的时长预算起点：从本轮排序请求真正发出前开始算。
+    const aiRequestStartedAt = Date.now();
+    let aiCall = await callAiApi({
       configs,
-      messages: buildAiMessages({
-        userText: effectiveUserText,
-        messages,
-        stableCandidates: stablePool.candidates,
-        focusFull: focusGraded,
-        routeAtlas: await routeAtlasPromise,
-        auditContext,
-        weatherContext: weatherContextForRanking,
-        destinationWeatherInsights: await focusWeatherInsightsPromise,
-        searchQuery,
-        intent: effectiveIntent,
-        preferenceMemory: aiContextMemoryForThisTurn,
-        allowPublicInterest: allowPublicInterestForTurn,
-      }),
+      messages: aiMessages,
       liteMessages: buildLiteAiMessages({
         userText: effectiveUserText,
         messages,
@@ -9016,7 +9282,27 @@ export async function requestAiRecommendations({
       };
       model?: string;
     };
-    const aiResponse = aiCall.parsed;
+    const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
+    const compactedLocalItems = localItemsForMerge.filter((item) => compactedCandidateIds.has(item.tourId));
+    // 形状/映射错到一条都救不回来时，先回头追问模型一次要正确格式，再决定是否降级。
+    // 判定放在所有派生解析之前：追问成功就用新响应重新解析，intent/summary 等
+    // 文案也一起换成模型第二次的输出，不会出现"条目来自重答、摘要来自首答"的错配。
+    // 只在零可用条目时问；凡是能救回任何条目的都不问（有结果就直接用，不让用户
+    // 干等一轮生成）。总时长由 requestAiFormatCorrection 内的硬预算兜住。
+    let aiResponse = aiCall.parsed;
+    if (validateAiItems(aiResponse, compactedCandidateTours).length === 0 && Array.isArray(aiResponse.items)) {
+      const retried = await requestAiFormatCorrection({
+        configs,
+        messages: aiMessages,
+        schema: 'recommendation',
+        issue: describeAiItemsShapeIssue(aiResponse),
+        startedAt: aiRequestStartedAt,
+      });
+      if (retried) {
+        aiCall = retried.call as typeof aiCall;
+        aiResponse = retried.parsed as typeof aiResponse;
+      }
+    }
     const rawSemanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
     const normalizedAiIntent = sanitizeAiBudgetBoundsForTurn(
       normalizeIntent(aiResponse.intent),
@@ -9059,8 +9345,6 @@ export async function requestAiRecommendations({
       ),
     );
     const finalEffectiveUserText = buildEffectiveUserText(text, finalPreferenceMemory);
-    const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
-    const compactedLocalItems = localItemsForMerge.filter((item) => compactedCandidateIds.has(item.tourId));
     const validatedAiItems = validateAiItems(aiResponse, compactedCandidateTours);
     if (validatedAiItems.length === 0 && Array.isArray(aiResponse.items)) {
       throw new Error('AI API unusable items_unmapped: returned tourIds did not match current candidates');

@@ -43,6 +43,7 @@
     "audit:structured-tour-data": "python scripts/audit_structured_tour_fields.py",
     "test:runtime-tour-schemas": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_runtime_tour_schemas.mjs",
     "audit:ai-interaction-performance": "node scripts/audit_ai_interaction_performance.mjs",
+    "audit:ai-pick-interaction": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_pick_interaction.ts",
     "audit:ai-chat-storage": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_chat_storage.ts",
     "audit:ai-recommendation": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_recommendation.ts",
     "audit:ai-success-path": "node --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/audit_ai_success_path.ts",

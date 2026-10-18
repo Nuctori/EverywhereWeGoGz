@@ -33,10 +33,14 @@ import type {
   FilterState,
 } from '@/types/tour';
 import {
+  AI_RECOMMENDATION_WARM_BATCH_SIZE,
   clearAiProviderConfig,
+  getAiRecommendationWarmPiece,
   getStoredAiProviderConfig,
+  isAiRecommendationPoolWarm,
   requestAiRecommendations,
   saveAiProviderConfig,
+  warmAiRecommendationBatch,
 } from '@/lib/ai-recommendation';
 import {
   clearStoredAiChatState,
@@ -98,6 +102,57 @@ const waitForNextPaint = () =>
     window.requestAnimationFrame(() => window.setTimeout(settle, 0));
     window.setTimeout(settle, 200);
   });
+
+// AI 推荐用到的派生数据（搜索语料/原语/路线图集）是懒构建的，首次用到要在
+// 主线程一次性算完几百毫秒，正好压在点「AI 帮我挑」的那一帧上。这里在浏览器
+// 空闲期逐片预热（每片约 100 条，实测 <10ms），片之间隔一会儿再要下一段空闲：
+// 用户这时候既没点击也没在输入，主线程随时能被他抢回去。
+const WARM_PIECE_GAP_MS = 700;
+// 兜底上限：完全抢不到空闲时间时，别把预热任务无限挂着。
+const WARM_DEADLINE_MS = 20_000;
+const useAiRecommendationWarmup = (candidateTours: AiRecommendationCandidate[]) => {
+  useEffect(() => {
+    if (candidateTours.length === 0 || isAiRecommendationPoolWarm(candidateTours)) return;
+
+    let cancelled = false;
+    let stopIdle: (() => void) | undefined;
+    let gapTimer: number | undefined;
+    let pieceIndex = 0;
+    const startedAt = Date.now();
+    const pieceCount = Math.ceil(candidateTours.length / AI_RECOMMENDATION_WARM_BATCH_SIZE);
+
+    const schedulePiece = () => {
+      stopIdle = scheduleIdleWork(() => {
+        stopIdle = undefined;
+        if (cancelled) return;
+
+        const piece = getAiRecommendationWarmPiece(candidateTours, pieceIndex);
+        pieceIndex += 1;
+        try {
+          warmAiRecommendationBatch(piece);
+        } catch {
+          // 预热失败不影响任何功能：真正的调用会照常自己算出来。
+          return;
+        }
+
+        if (cancelled || pieceIndex >= pieceCount) return;
+        if (Date.now() - startedAt > WARM_DEADLINE_MS) return;
+        gapTimer = window.setTimeout(() => {
+          gapTimer = undefined;
+          if (!cancelled) schedulePiece();
+        }, WARM_PIECE_GAP_MS);
+      });
+    };
+
+    schedulePiece();
+
+    return () => {
+      cancelled = true;
+      stopIdle?.();
+      if (gapTimer !== undefined) window.clearTimeout(gapTimer);
+    };
+  }, [candidateTours]);
+};
 
 // 进度步骤定义，对应 AiRecommendationProgress.stage，面板进度条按此顺序推进
 const REFINEMENT_MODE_LABELS: Record<string, string> = {
@@ -242,6 +297,8 @@ export function AiRecommendPanel({
   const hasResult = Boolean(result && result.items.length > 0);
   const toursReady = !toursLoading && tours.length > 0;
   const resultStatusMeta = getResultStatusMeta(result);
+  // 挂在所有渲染分支之前：空闲预热是纯优化，且不受下面任何条件渲染影响。
+  useAiRecommendationWarmup(tours);
   useEffect(() => {
     if (didRestoreStoredResultRef.current || !storedChatState.result) return;
 
@@ -349,7 +406,9 @@ export function AiRecommendPanel({
     if (!preserveResult) {
       onResultChange(null);
     }
-    setDetailsOpen(true);
+    // 只保留用户已经展开的细节区，不再每次提交都强行展开进度细节：
+    // 那样点一次「AI 帮我挑」会在同一屏里展开/收起两套内容（先展开细节，
+    // 随后 searchingVersion 又把细节和对话全部重置），看起来像页面在抽动。
     setFollowUpInput('');
 
     try {

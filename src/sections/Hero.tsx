@@ -1,9 +1,12 @@
 import { ArrowRight, CalendarDays, MapPin, Search, Sparkles, X } from 'lucide-react';
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { getPrimarySearchAction, decideSearchAction } from '@/lib/search-routing';
+
+// 主按钮判定等用户停手再切，避免打字途中按钮身份来回跳。
+const HERO_ROUTE_DEBOUNCE_MS = 350;
 
 export interface QuickIntent {
   label: string;
@@ -24,9 +27,19 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
   const inputRef = useRef<HTMLInputElement>(null);
   // 一个输入框，两个按钮不再让用户自己猜：这里先判断这句话更像"地名"还是"带预算天数的需求"，
   // 直接把按钮语义写出来，并让主按钮自动切换成对应动作。
-  const route = decideSearchAction(searchQuery);
+  // 只在停顿后判定（防抖）：逐字判定会让主按钮在打字途中反复改名、并在"搜索线路/AI
+  // 搜索"之间来回跳，顺手把第二个按钮禁用掉——用户还没打完，两个按钮已经换了两次身份。
+  const [settledQuery, setSettledQuery] = useState(searchQuery);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSettledQuery(searchQuery), HERO_ROUTE_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+  const route = useMemo(() => decideSearchAction(settledQuery), [settledQuery]);
   const primaryIsAi = route.action === 'ai';
   const trimmed = searchQuery.trim();
+  // 第二个按钮不再因为"主按钮已经会走 AI"就被禁用：两个按钮都能点，
+  // 只是主按钮会根据这句话自动变成更合适的那个动作。
+  const aiButtonDisabled = !trimmed;
 
   const handlePrimarySearch = () => {
     const action = getPrimarySearchAction(searchQuery);
@@ -112,7 +125,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                 <Button
                   type="button"
                   size="lg"
-                  disabled={primaryIsAi || !trimmed}
+                  disabled={aiButtonDisabled}
                   className="h-12 flex-1 rounded-[15px] border border-orange-200 bg-orange-50 text-orange-900 shadow-none hover:bg-orange-100 disabled:opacity-50"
                   onClick={() => onAiSearch(searchQuery)}
                 >
@@ -120,7 +133,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                 </Button>
               </div>
               <p id="search-help" className="mt-2 px-1 text-xs leading-5 text-stone-500">
-                主按钮会随你写的内容自动切换：写地名就是搜索，写预算天数就走 AI。
+                写地名就搜索，写清楚预算天数主按钮会变成「按需求找团」；想直接让 AI 挑就点「AI 帮我挑」。
               </p>
             </form>
 

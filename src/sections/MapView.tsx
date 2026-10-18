@@ -508,26 +508,45 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
 
   return (
     <>
-      {!expanded && embedded && (
-        <section className="hidden rounded-[26px] border border-stone-200/80 bg-white/78 p-3 shadow-[0_20px_50px_rgba(28,25,23,0.07)] backdrop-blur sm:block" aria-labelledby="embedded-destination-map-title">
-          <div className="mb-2 flex items-center justify-between gap-3 px-1">
-            <div className="min-w-0">
-              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-orange-600">线路目的地</p>
-              <h2 id="embedded-destination-map-title" className="mt-0.5 truncate text-base font-semibold text-stone-950">点地点，直接看对应旅行团</h2>
+      {/* 放大时不能卸载内嵌地图：它的组件状态（选中的地点、相近地点面板、
+          已加载的地块、切换中的底图源）全在这里面，一卸载就全丢——用户点了
+          「放大」本来是想接着看刚才那个点的团，结果回来是个空地图，还得重新点。
+          展开态改用 portal 里的同一个实例，内嵌位置用占位撑住布局。 */}
+      {embedded && (
+        <section
+          className={expanded
+            ? 'hidden h-[280px] sm:block'
+            : 'hidden rounded-[26px] border border-stone-200/80 bg-white/78 p-3 shadow-[0_20px_50px_rgba(28,25,23,0.07)] backdrop-blur sm:block'}
+          aria-labelledby="embedded-destination-map-title"
+          aria-hidden={expanded || undefined}
+        >
+          {expanded ? (
+            // 展开时内嵌位置只留占位：头像标题留着会把 aria-labelledby 指向重复 id。
+            <div className="mb-2 flex items-center justify-between gap-3 px-1">
+              <p className="text-[11px] text-stone-400">地图已放大，关闭后回到这里。</p>
             </div>
-            <button type="button" onClick={openExpandedMap} className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full border border-stone-200 bg-white px-2.5 text-xs font-medium text-stone-700 shadow-sm transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-stone-950"><Map className="h-3.5 w-3.5 text-orange-600" /> 放大</button>
-          </div>
-          <p className="mb-2 px-1 text-[11px] text-stone-400">
-            {placesLoading ? (
-              '正在加载已定位地点…'
-            ) : (
-              <>
-                已定位 {visiblePlaces.length} 个地点
-                {approximateTourCount > 0 && ` · ${approximateTourCount} 条线路使用模糊坐标`}
-              </>
-            )}
-          </p>
-          {mapSurface}
+          ) : (
+            <>
+              <div className="mb-2 flex items-center justify-between gap-3 px-1">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-orange-600">线路目的地</p>
+                  <h2 id="embedded-destination-map-title" className="mt-0.5 truncate text-base font-semibold text-stone-950">点地点，直接看对应旅行团</h2>
+                </div>
+                <button type="button" onClick={openExpandedMap} className="inline-flex h-8 shrink-0 items-center gap-1 rounded-full border border-stone-200 bg-white px-2.5 text-xs font-medium text-stone-700 shadow-sm transition-colors hover:border-orange-200 hover:bg-orange-50 hover:text-stone-950"><Map className="h-3.5 w-3.5 text-orange-600" /> 放大</button>
+              </div>
+              <p className="mb-2 px-1 text-[11px] text-stone-400">
+                {placesLoading ? (
+                  '正在加载已定位地点…'
+                ) : (
+                  <>
+                    已定位 {visiblePlaces.length} 个地点
+                    {approximateTourCount > 0 && ` · ${approximateTourCount} 条线路使用模糊坐标`}
+                  </>
+                )}
+              </p>
+              {mapSurface}
+            </>
+          )}
         </section>
       )}
       {!expanded && !embedded && (
