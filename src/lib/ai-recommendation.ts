@@ -8384,7 +8384,11 @@ async function callSingleAiProvider(params: {
         const errorBody = await response.text();
         let providerMessage = response.statusText || '';
         shouldRetry = response.status === 429 || response.status >= 500;
-        lastRateLimitedStatus = shouldRetry ? response.status : 0;
+        // 只有 429（真的被限流）才值得用 4s 长退避等配额恢复。
+        // 5xx（502/503/504 这类网关抖动）不是配额问题，等 4 秒既等不来配额，
+        // 又白白把一次点击拖长 8 秒——实测复测时三连 502 就是这样把
+        // 一个 344 token 的小请求拖到 27s 的。5xx 走短退避尽快重试。
+        lastRateLimitedStatus = shouldRetry && response.status === 429 ? response.status : 0;
         if (errorBody) {
           try {
             const parsed = JSON.parse(errorBody) as {
@@ -8441,6 +8445,15 @@ async function callSingleAiProvider(params: {
       }
       if (providerLastError.message.includes('timeout')) {
         shouldRetry = false;
+      }
+      // 5xx 是网关自身故障（不是本请求的错，也不是配额问题），重试同一个
+      // 网关基本是确定性复现：实测三连 502 每次都要再等一轮。只重试一次
+      // 兜住"偶发抖动"，之后立刻交给外层换下一个 provider——
+      // 那边有 6 个候选端点，比在这里干等有效得多。
+      // 错误文案形如 "AI API failed [glm-4.7-flash]: 502 Bad Gateway"，
+      // 状态码紧跟在 "]: " 之后。
+      if (/\]: 5\d\d\b/.test(providerLastError.message)) {
+        shouldRetry = attempt === 0;
       }
       if (shouldRetry && attempt < maxAttempts - 1) {
         const retryDelay = lastRateLimitedStatus
