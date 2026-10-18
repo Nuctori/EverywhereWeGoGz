@@ -14,6 +14,13 @@
 const CALENDAR_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 const MS_PER_DAY = 86_400_000;
 
+// 日历日校验是纯函数，且输入的取值集合很小（数据里就那几百个日期，反复出现）。
+// 每次校验都要 new Date(Date.UTC(...)) 回读，在排序比较器和评分里会被调用到
+// 十万量级（线上 CPU 剖面里占 35%），这里按字符串记忆化。
+// 存 null 表示"已确认非法"，避免对脏数据反复重算。
+const calendarDateCache = new Map<string, string | null>();
+const CALENDAR_DATE_CACHE_MAX = 4096;
+
 function pad2(value: number) {
   return `${value}`.padStart(2, '0');
 }
@@ -32,19 +39,26 @@ export function todayCalendarDate(now: Date = new Date()): string {
 export function parseCalendarDate(value: string | null | undefined): string | null {
   if (!value) return null;
   const trimmed = String(value).trim();
+  const cached = calendarDateCache.get(trimmed);
+  if (cached !== undefined) return cached;
+
   const match = CALENDAR_DATE_PATTERN.exec(trimmed);
-  if (!match) return null;
+  if (!match) {
+    if (calendarDateCache.size >= CALENDAR_DATE_CACHE_MAX) calendarDateCache.clear();
+    calendarDateCache.set(trimmed, null);
+    return null;
+  }
   const [, year, month, day] = match;
   const probe = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
   // 回读校验挡掉 2026-02-30 / 2026-13-01 这类"格式对、日期不存在"的值。
-  if (
-    probe.getUTCFullYear() !== Number(year) ||
-    probe.getUTCMonth() !== Number(month) - 1 ||
-    probe.getUTCDate() !== Number(day)
-  ) {
-    return null;
-  }
-  return trimmed;
+  const valid =
+    probe.getUTCFullYear() === Number(year) &&
+    probe.getUTCMonth() === Number(month) - 1 &&
+    probe.getUTCDate() === Number(day);
+  const result = valid ? trimmed : null;
+  if (calendarDateCache.size >= CALENDAR_DATE_CACHE_MAX) calendarDateCache.clear();
+  calendarDateCache.set(trimmed, result);
+  return result;
 }
 
 export function isValidCalendarDate(value: string | null | undefined): boolean {
