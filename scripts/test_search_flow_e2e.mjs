@@ -114,17 +114,26 @@ try {
   assert(baselineTitles.length > 0, '首屏必须至少渲染出一条线路');
   record('首屏列表', `共 ${baselineCount} 条，首条「${baselineTitles[0]}」`);
 
-  // --- 2. 普通搜索：输入地名 → 点搜索 → 结果收窄且确实变了 ---
+  // --- 2. 普通搜索：输入地名 → 点搜索 → 结果确实换成了相关的线路 ---
   await input.fill('云南');
   await searchButton.click();
   // 搜索后会出现「正在查找：云南」的提示条
   await page.getByText(/正在查找：/).first().waitFor({ state: 'visible', timeout: 30000 });
-  await page.waitForTimeout(1200);
+  await page.waitForTimeout(1500);
 
   const searchedCount = await readResultCount(page);
   assert(typeof searchedCount === 'number', '搜索后应能读到结果条数');
-  assert(searchedCount < baselineCount, `搜索「云南」应收窄结果：${searchedCount} 应小于 ${baselineCount}`);
   const searchedTitles = await readTopTitles(page);
+
+  // 收窄断言只在"首屏是全量"时成立：本地自建服务首屏 6476 条，搜索后 183 条；
+  // 而线上首屏走分片懒加载只渲染 24 条，搜索后反而是"换成 176 条云南线路"，
+  // 条数会变大。所以这里不比较大小，只要求"搜索后结果确实变了、且都对得上关键词"。
+  if (baselineCount > 1000) {
+    assert(
+      searchedCount < baselineCount,
+      `搜索「云南」应收窄结果：${searchedCount} 应小于 ${baselineCount}`,
+    );
+  }
   assert(
     JSON.stringify(searchedTitles) !== JSON.stringify(baselineTitles),
     '搜索后列表内容必须发生变化，不能还是原来那几条',
@@ -143,12 +152,28 @@ try {
   record('搜索相关性', `前排 ${relevantCount}/${searchedTitles.length} 条标题全部命中「云南」`);
   record('普通搜索', `「云南」→ ${searchedCount} 条（原 ${baselineCount}），首条「${searchedTitles[0] ?? '—'}」`);
 
-  // --- 3. 清除搜索：回到全量 ---
+  // --- 3. 清除搜索：回到搜索前的浏览范围 ---
+  // 注意：这里只断言"范围回到全量、且不再是搜索词那批"，不断言首条标题与首屏完全一致。
+  // 实测（用修复前的提交重新构建也复现，属既有行为、非本次改动引入）：清除搜索后
+  // 条数回到 6476，但排序与首屏不同——首屏首条是温泉类，清除后首条变成四川线。
+  // 这是既有问题，不在这次任务范围内顺手改；E2E 只锁住"清除确实生效"这个核心语义。
   await page.getByRole('button', { name: /清除搜索/ }).first().click();
-  await page.waitForTimeout(1000);
+  await page.waitForTimeout(1500);
   const clearedCount = await readResultCount(page);
-  assert(clearedCount === baselineCount, `清除搜索应回到 ${baselineCount} 条，实际 ${clearedCount}`);
-  record('清除搜索', `回到 ${clearedCount} 条`);
+  assert(typeof clearedCount === 'number', '清除搜索后应能读到结果条数');
+  if (baselineCount > 1000) {
+    assert(clearedCount === baselineCount, `清除搜索应回到 ${baselineCount} 条，实际 ${clearedCount}`);
+  }
+  const clearedTitles = await readTopTitles(page);
+  assert(
+    JSON.stringify(clearedTitles) !== JSON.stringify(searchedTitles),
+    '清除搜索后列表必须不再是搜索词那批结果',
+  );
+  assert(
+    (await page.getByText(/正在查找：/).count()) === 0,
+    '清除搜索后「正在查找」提示条必须消失',
+  );
+  record('清除搜索', `回到 ${clearedCount} 条，不再是「云南」那批`);
 
   // --- 4. AI 帮我挑：点击后要有进度反馈，且点击本身不阻塞主线程 ---
   await input.fill('周末去广东泡温泉');
