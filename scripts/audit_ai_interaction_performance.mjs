@@ -18,8 +18,8 @@ assert.ok(
 
 assert.match(
   tourListSource,
-  /const isAiSearchMode = Boolean\(aiRecommendationResult\);/,
-  'pending AI requests must not switch TourList into AI mode before results exist',
+  /const isAiSearchMode = Boolean\(aiRecommendationResult\) \|\| aiStreamingItems\.length > 0;/,
+  'AI mode must wait for a final result or validated streaming items, never just an in-flight request',
 );
 assert.match(
   tourListSource,

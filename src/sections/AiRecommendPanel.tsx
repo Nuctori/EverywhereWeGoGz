@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import type {
   AiRecommendationCandidate,
+  AiRecommendationItem,
   AiRecommendationMessage,
   AiRecommendationProgress,
   AiRecommendationResult,
@@ -68,6 +69,8 @@ interface AiRecommendPanelProps {
   searchingVersion: number;
   onResultChange: (result: AiRecommendationResult | null) => void;
   onFocusResults: () => void;
+  // 流式增量：模型还在生成时把已完整的条目回传给列表先渲染。
+  onPartialItems?: (items: AiRecommendationItem[]) => void;
 }
 
 // 首屏「AI 正在找团」占位卡片，列表相关滚动定位也认这个 id。
@@ -272,6 +275,7 @@ export function AiRecommendPanel({
   searchingVersion,
   onResultChange,
   onFocusResults,
+  onPartialItems,
 }: AiRecommendPanelProps) {
   const storedChatState = useMemo(() => readStoredAiChatState(), []);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -425,6 +429,7 @@ export function AiRecommendPanel({
       : [createInitialMessage(), userMessage];
     setMessages(nextMessages);
     setLoading(true);
+    onPartialItems?.([]);
     const startedAt = Date.now();
     // 把"这一轮开始了"写进 storage，另一个标签页打开时就知道这边正在跑。
     saveStoredAiProgress({
@@ -491,6 +496,11 @@ export function AiRecommendPanel({
         onProgress: (progress) => {
           if (requestVersionRef.current !== requestVersion) return;
           setProgressState(progress);
+          // 流式增量：模型还在逐条写 items 时，把已完整的部分交给列表先渲染。
+          // 只要有一条就先摆出来，后续条数增长时继续刷新。
+          if (progress.partialItems) {
+            onPartialItems?.(progress.partialItems);
+          }
           // 节流后写进 storage：另一个标签页据此实时看到阶段和"已跑多少秒"。
           // liveThinking 的思维链摘录不跨标签页同步——那是本页的调试信息，
           // 体积大且频繁变化，会把 storage 写入变成性能问题。
@@ -511,6 +521,8 @@ export function AiRecommendPanel({
       });
       if (requestVersionRef.current !== requestVersion) return;
       onResultChange(nextResult);
+      // 正式结果落地，撤掉流式增量渲染，避免两套数据同时生效。
+      onPartialItems?.([]);
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
       setMessages((current) => [
         ...current,
@@ -520,6 +532,7 @@ export function AiRecommendPanel({
     } finally {
       if (requestVersionRef.current === requestVersion) {
         setLoading(false);
+        onPartialItems?.([]);
       }
       // 无论成功、降级还是被新一轮顶掉，都要把"进行中"从 storage 撤下，
       // 否则另一个标签页会一直显示这边在跑（直到 AI_PROGRESS_STALE_MS 兜底）。

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 import type {
   AiRecommendationCandidate,
+  AiRecommendationItem,
   AiRecommendationResult,
   TourIndexEntry,
   TourSummary,
@@ -533,6 +534,10 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   const [aiClearVersion, setAiClearVersion] = useState(0);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
+  // 流式增量推荐：模型还在逐条生成时，先把已写完整的那部分摆出来。
+  // 与 aiRecommendationResult 分开存，避免半成品覆盖正式结果（正式结果一到
+  // 就清空它）。只在"正在搜索、还没有正式结果"时接管列表。
+  const [aiStreamingItems, setAiStreamingItems] = useState<AiRecommendationItem[]>([]);
   const previousAiSearchRequestIdRef = useRef<number | null>(null);
   // 全量语料池：优先用 tours-index.json 膨胀出的全量语料（4034 条、约 5MB），
   // 避免为搜索/筛选/AI 下载 20MB 的 tours-list.json；分片失败兜底时才落到 catalogTours/localTours。
@@ -711,10 +716,17 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   const searchContext = useMemo(() => extractQueryContext(searchQuery), [searchQuery]);
   const hasNaturalLanguageQuery =
     normalizedSearchQuery.length >= 8 || searchContext.concepts.length + searchContext.residues.length >= 2;
-  const isAiSearchMode = Boolean(aiRecommendationResult);
+  const isAiSearchMode = Boolean(aiRecommendationResult) || aiStreamingItems.length > 0;
+  // 流式增量生效中：还没有正式结果，但模型已经吐出若干条完整推荐。
+  // 这时候不再算"搜索中"，直接按已有条目切到置顶长尾视图，
+  // 让用户第一时间看到模型挑出来的线路。
+  const isStreamingAiPartials =
+    !aiRecommendationResult && aiStreamingItems.length > 0;
   // 搜索阶段：请求已发出、首条结果还没落地。此时列表保持原样，不被搜索词收窄/清空；
   // 等首条结果落地后再切到置顶长尾视图（模式切换本身会把可见条数重置）。
-  const isAiSearching = Boolean(aiSearchRequest && !aiRecommendationResult);
+  const isAiSearching = Boolean(
+    aiSearchRequest && !aiRecommendationResult && !isStreamingAiPartials,
+  );
   const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode || isAiSearching;
   const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;
   // 搜索阶段沿用清空搜索前的视图：不按搜索词收窄，也不套用被搜索词带出来的过滤条件。
@@ -745,12 +757,14 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   const aiRecommendationByTourId = useMemo(
     () =>
       new Map(
-        aiRecommendationResult?.items.map((item, index) => [
+        // 流式增量期间用已生成的部分排序；正式结果一到就换成完整结果
+        // （此时 aiStreamingItems 已被清空）。
+        (aiStreamingItems.length > 0 ? aiStreamingItems : aiRecommendationResult?.items ?? []).map((item, index) => [
           item.tourId,
           { ...item, rank: index + 1 },
-        ]) ?? [],
+        ]),
       ),
-    [aiRecommendationResult],
+    [aiRecommendationResult, aiStreamingItems],
   );
   const displayTours = useMemo(() => {
     if (resultSourceTours.length === 0) return [];
@@ -932,6 +946,8 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   const clearAiRecommendation = useCallback(() => {
     clearStoredAiChatState();
     setAiRecommendationResult(null);
+    // 新一轮/清空时也要撤掉流式增量，否则会残留上一轮的部分推荐。
+    setAiStreamingItems([]);
     setAiClearVersion((current) => current + 1);
   }, []);
 
@@ -1710,6 +1726,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         searchingVersion={aiSearchRequest?.id ?? 0}
         onResultChange={setAiRecommendationResult}
         onFocusResults={focusResults}
+        onPartialItems={setAiStreamingItems}
       />
 
       <div className="mb-6">

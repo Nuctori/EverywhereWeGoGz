@@ -321,11 +321,14 @@ export interface AiRecommendationItem {
 export type AiRecommendationProcessMode = 'ai' | 'fallback' | 'local-only';
 
 // AI 推荐阶段按 queued → intent → context → ranking → completed/fallback 流转。
+// streaming-items 是 ranking 中的一个子状态：模型还在逐条写 items，
+// 但已经有若干条完整可用，先把它们摆出来，避免用户对着加载态干等。
 export type AiRecommendationProgressStage =
   | 'queued'
   | 'intent'
   | 'context'
   | 'ranking'
+  | 'streaming-items'
   | 'completed'
   | 'fallback';
 
@@ -361,6 +364,11 @@ export interface AiRecommendationProgress {
   substeps?: AiRecommendationSubstep[];
   /** 主供应商流式思维链的当前快照；仅在流式调用进行中存在 */
   liveThinking?: AiRecommendationLiveThinking;
+  /**
+   * 流式增量推荐：模型还在生成后续条目时，已经写完整并通过校验的那部分。
+   * 仅供 UI 提前展示，正式结果仍以请求结束后的完整解析为准。
+   */
+  partialItems?: AiRecommendationItem[];
 }
 
 export interface AiRecommendationStatus {

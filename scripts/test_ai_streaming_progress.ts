@@ -160,6 +160,13 @@ try {
 
   console.info(`[1/2] 流式思维链经 onProgress 实时透出（${thinkingEvents.length} 个 liveThinking 事件）通过`);
   console.info('[2/2] 终态清理 + 结果思维链/usage 同口径保留通过');
+  const previews = progressEvents.filter((event) => event.partialItems?.length);
+  assert.ok(previews.length > 0, 'main pipeline must expose validated partial items, not silently swallow callback errors');
+  const firstPreviewIndex = progressEvents.indexOf(previews[0]);
+  const completedIndex = progressEvents.findIndex((event) => event.stage === 'completed');
+  assert.ok(firstPreviewIndex < completedIndex, 'preview must precede completion');
+  assert.ok(previews.every((event) => event.partialItems!.every((item) => ['tour_a', 'tour_b'].includes(item.tourId))));
+  console.info('[3/3] 真实推荐管线在 completed 前派发已校验增量条目通过');
   console.info('AI streaming progress transparency tests passed');
 } finally {
   globalThis.fetch = originalFetch;

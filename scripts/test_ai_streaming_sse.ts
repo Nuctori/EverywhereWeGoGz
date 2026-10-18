@@ -847,4 +847,58 @@ async function test16ColumnarReply() {
 
 await test16ColumnarReply();
 
+// 增量只读顶层 items，不能误认嵌套数据或列式回复。
+{
+  const extract = __aiRecommendationTestHooks.extractCompletedStreamItems;
+  const one = { tourId: 'tour_1', score: 90, reason: '含括号[]和引号"的理由', matchedSignals: ['温泉'] };
+  const prefix = '{"summary":"摘要","items":[' + JSON.stringify(one);
+  assert.deepEqual(extract(prefix), [one]);
+  assert.deepEqual(extract(prefix + ',{"tourId":"half'), [one]);
+  assert.equal(extract('{"intent":{"items":[{"tourId":"wrong"}]}}'), null);
+  assert.equal(extract('{"candidates":[["tour_1",90]]}'), null);
+  assert.equal(extract('{"items":['), null);
+  const full = prefix + ',' + JSON.stringify({ ...one, tourId: 'tour_2' }) + ']}';
+  const arrivals: number[] = [];
+  let previous = 0;
+  for (let i = 0; i <= full.length; i++) {
+    const count = extract(full.slice(0, i))?.length ?? 0;
+    if (count > previous) arrivals.push(i);
+    previous = count;
+  }
+  assert.equal(arrivals.length, 2);
+  assert.ok(arrivals[0] < arrivals[1] && arrivals[1] < full.length);
+}
+
+// 真正的 SSE 接线测试：暂停网络尾部，首条必须已经回调，主 Promise 仍未完成。
+{
+  const originalFetch = globalThis.fetch;
+  let controller!: ReadableStreamDefaultController<Uint8Array>;
+  const partials: unknown[][] = [];
+  let resolveFirst!: () => void;
+  const first = new Promise<void>((resolve) => { resolveFirst = resolve; });
+  globalThis.fetch = (async () => new Response(new ReadableStream<Uint8Array>({
+    start(c) { controller = c; },
+  }), { headers: { 'content-type': 'text/event-stream' } })) as typeof fetch;
+  const emit = (content: string) => controller.enqueue(sseFrame(JSON.stringify({ choices: [{ delta: { content } }] })));
+  let completed = false;
+  try {
+    const pending = callAiApi({
+      configs: [{ baseUrl: 'https://api.z.ai/api/paas/v4', model: 'GLM-4.7-Flash', apiKey: 'test' }],
+      messages: [{ role: 'user', content: '测试' }],
+      onPartialItems(items) {
+        partials.push(items);
+        if (items.length === 1) resolveFirst();
+      },
+    }).then((result) => { completed = true; return result; });
+    await Promise.resolve();
+    emit('{"summary":"摘要","items":[{"tourId":"tour_1","score":90,"reason":"温泉","matchedSignals":[]}');
+    await first;
+    assert.equal(completed, false, 'first item must arrive before stream completion');
+    emit(',{"tourId":"tour_2","score":80,"reason":"古镇","matchedSignals":[]}]}');
+    controller.enqueue(sseFrame('[DONE]'));
+    controller.close();
+    await pending;
+    assert.deepEqual(partials.map((items) => items.length), [0, 1, 2]);
+  } finally { globalThis.fetch = originalFetch; }
+}
 console.info('AI streaming contract tests passed');

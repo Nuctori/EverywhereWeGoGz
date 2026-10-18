@@ -6974,6 +6974,97 @@ function looksTruncatedJson(content: string) {
  * 数组，交给下游归一化）。绝不把 summary 里的字符串数组误当成候选。
  * 认不出来就返回 null，调用方照原口径报 schema_invalid。
  */
+/**
+ * 增量 items 提取器：从「还在流式写入、尚未闭合」的 JSON 文本里，
+ * 抽出已经写完整的 items 元素。
+ *
+ * 已闭合条目可以在尾部 JSON 和后续条目到达前预览。
+ * 首条时间仍取决于排队、前置调用和模型的字段顺序，不能按条数推算。
+ *
+ * 只做"提取已闭合的数组元素"这一件事，不猜结构、不修复语法：
+ * - 用括号深度扫描，字符串内的括号和转义一律跳过（标题里常带括号）；
+ * - 只认顶层 "items" 键下的数组元素，别的键（summary/tradeoffs…）不看；
+ * - 元素必须能被 JSON.parse，没闭合的半个元素留到下一轮。
+ * 解析失败返回 null，绝不抛错——这是尽力而为的体验优化，不能影响正式解析。
+ */
+function extractCompletedStreamItems(rawText: string): unknown[] | null {
+  if (!rawText) return null;
+  // 先定位顶层 "items" 键。列式回复（candidates）也一并认，保持与
+  // salvageAiItemsFromResponse 同一口径。
+  let start = -1;
+  let objectDepth = 0;
+  for (let i = 0; i < rawText.length; i += 1) {
+    const char = rawText[i];
+    if (char === '"') {
+      const tokenStart = i;
+      let escape = false;
+      for (i += 1; i < rawText.length; i += 1) {
+        if (escape) escape = false;
+        else if (rawText[i] === '\\') escape = true;
+        else if (rawText[i] === '"') break;
+      }
+      if (i >= rawText.length) break;
+      if (objectDepth === 1) {
+        let key: unknown;
+        try { key = JSON.parse(rawText.slice(tokenStart, i + 1)); } catch { continue; }
+        if (key === 'items') {
+          const suffix = /^\s*:\s*\[/.exec(rawText.slice(i + 1));
+          if (suffix) { start = i + 1 + suffix[0].length; break; }
+        }
+      }
+    } else if (char === '{' || char === '[') objectDepth += 1;
+    else if (char === '}' || char === ']') objectDepth -= 1;
+  }
+  // 列式 candidates 需要 ck 映射；等正式解析，不能猜列含义提前显示。
+  if (start < 0) return null;
+  const items: unknown[] = [];
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  let elementStart = -1;
+
+  for (let index = start; index < rawText.length; index += 1) {
+    const char = rawText[index];
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char === '\\') {
+        escaped = true;
+      } else if (char === '"') {
+        inString = false;
+      }
+      continue;
+    }
+    if (char === '"') {
+      inString = true;
+      continue;
+    }
+    if (char === '{' || char === '[') {
+      if (depth === 0) elementStart = index;
+      depth += 1;
+      continue;
+    }
+    if (char === '}' || char === ']') {
+      if (depth === 0) {
+        // 外层 items 数组闭合，收工。
+        break;
+      }
+      depth -= 1;
+      if (depth === 0 && elementStart >= 0) {
+        const rawElement = rawText.slice(elementStart, index + 1);
+        try {
+          items.push(JSON.parse(rawElement));
+        } catch {
+          // 半个元素或语法走样：丢弃这一条，不影响后面。
+        }
+        elementStart = -1;
+      }
+    }
+  }
+
+  return items.length > 0 ? items : null;
+}
+
 function salvageAiItemsFromResponse(parsed: unknown): unknown[] | null {
   if (!parsed || typeof parsed !== 'object') return null;
 
@@ -7230,6 +7321,9 @@ async function consumeAiStreamingResponse(params: {
   config: AiProviderConfig;
   schema: 'recommendation' | 'search-plan';
   onStreamDelta?: (delta: AiStreamDelta) => void;
+  // 增量条目回调：流还没结束时，每凑齐一条完整的 items 元素就回调一次，
+  // 让上层先把已生成的推荐摆出来。只是体验优化，失败不影响正式解析。
+  onPartialItems?: (items: unknown[]) => void;
 }) {
   const { response, config } = params;
   const contentType = response.headers?.get?.('content-type') ?? '';
@@ -7333,18 +7427,38 @@ async function consumeAiStreamingResponse(params: {
     // 首块已在嗅探阶段读出且确认是 SSE，先喂解析器再进入常规读循环。
     const headDelta = handleEvents(parser.push(streamHead), config.model);
     if (headDelta) params.onStreamDelta?.(headDelta);
+    // 只在元素可能闭合时扫描，避免每个 token 都重扫累积正文。
+    let emittedCount = 0;
+    let inspectedLength = 0;
+    const flushPartialItems = () => {
+      if (!params.onPartialItems || !contentText) return;
+      const addedText = contentText.slice(inspectedLength);
+      inspectedLength = contentText.length;
+      if (!addedText.includes('}') && !addedText.includes(']')) return;
+      const items = extractCompletedStreamItems(contentText);
+      if (!items || items.length <= emittedCount) return;
+      emittedCount = items.length;
+      try {
+        params.onPartialItems(items);
+      } catch {
+        // 展示层的问题不能反过来打断正式解析。
+      }
+    };
+    flushPartialItems();
     for (;;) {
       const { done, value } = await readChunk();
       if (done) break;
       const events = parser.push(decoder.decode(value, { stream: true }));
       const delta = handleEvents(events, config.model);
       if (delta) params.onStreamDelta?.(delta);
+      flushPartialItems();
     }
     const tail = decoder.decode();
     if (tail) {
       const delta = handleEvents(parser.push(tail), config.model);
       if (delta) params.onStreamDelta?.(delta);
     }
+    flushPartialItems();
   } finally {
     clearTimers();
     void reader.cancel().catch(() => undefined);
@@ -7418,6 +7532,7 @@ export const __aiRecommendationTestHooks = {
   callAiApi,
   describeAiItemsShapeIssue,
   salvageAiItemsFromResponse,
+  extractCompletedStreamItems,
   requestAiFormatCorrection,
   collectAvoidHints,
   collectLiteralAvoidHints,
@@ -8340,6 +8455,8 @@ async function callSingleAiProvider(params: {
   schema?: 'recommendation' | 'search-plan';
   // GLM 主力流式增量回调（仅其 SSE 路径触发）。
   onStreamDelta?: (delta: AiStreamDelta) => void;
+  // 流式增量条目回调：用于边生成边展示。
+  onPartialItems?: (items: unknown[]) => void;
 }) {
   const { config } = params;
   const url = getChatCompletionsUrl(config.baseUrl);
@@ -8369,6 +8486,8 @@ async function callSingleAiProvider(params: {
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     let shouldRetry = attempt < maxAttempts - 1;
     try {
+      // 每次重试/切换供应商先撤回上一份临时结果，不能混合不同响应。
+      params.onPartialItems?.([]);
       const response = await fetchWithTimeout(
         url,
         {
@@ -8419,6 +8538,7 @@ async function callSingleAiProvider(params: {
             config,
             schema: params.schema ?? 'recommendation',
             onStreamDelta: params.onStreamDelta,
+            onPartialItems: params.onPartialItems,
           })
         // 非流式路径也走带标签的整包解析：网关无视 stream:false 回 SSE 时
         // 不允许炸出绕过错误口径的裸 SyntaxError。
@@ -8541,6 +8661,8 @@ async function callAiApi(params: {
   schema?: 'recommendation' | 'search-plan';
   // 仅 GLM 主力供应商（SSE 流式路径）触发；竞速/兜底的整包路径不会回调。
   onStreamDelta?: (delta: AiStreamDelta) => void;
+  // 流式增量条目：每凑齐一条完整的 items 元素就回调一次，用于边生成边展示。
+  onPartialItems?: (items: unknown[]) => void;
 }) {
   const providerErrors: string[] = [];
   const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
@@ -9362,6 +9484,10 @@ export async function requestAiRecommendations({
     });
     // 格式追问的时长预算起点：从本轮排序请求真正发出前开始算。
     const aiRequestStartedAt = Date.now();
+    // 必须在请求发出前初始化：流式回调会在 await 返回之前执行。
+    const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
+    const partialPrimitiveById = new Map(compactedCandidateTours.map((candidate) => [candidate.id, buildTourPrimitive(candidate)]));
+    let partialRevision = '';
     let aiCall = await callAiApi({
       configs,
       messages: aiMessages,
@@ -9397,6 +9523,43 @@ export async function requestAiRecommendations({
         ),
         'AI 正在思考',
       ),
+      // 临时预览：仅派发已闭合、已映射且通过当前意图硬约束的条目。
+      // 最终响应仍会结合完整 intent、天气和覆盖纪律重新装配。
+      onPartialItems: (partialItems: unknown[]) => {
+        try {
+          const validatedPartial = validateAiItems(
+            { items: partialItems },
+            compactedCandidateTours,
+          );
+          const audited = keepAiItemsForCompoundExperience(
+            auditAiRecommendationsStrict(validatedPartial, [], compactedCandidateTours, effectiveIntent),
+            compactedCandidateTours,
+            text,
+          );
+          const { compliant } = splitByIntentConflicts(audited, effectiveIntent, partialPrimitiveById, corpusVocab);
+          const revision = JSON.stringify(compliant);
+          if (revision !== partialRevision) {
+            partialRevision = revision;
+            emitProgress(onProgress, {
+              stage: 'streaming-items',
+              label: 'AI 已挑出部分线路',
+              detail: `正在逐条生成推荐，已可先看 ${compliant.length} 条。`,
+              progress: 88,
+              substeps: withActiveSubstep(
+                [
+                  { id: 'compact', label: '筛出高相关候选' },
+                  { id: 'rank', label: '结合偏好做排序' },
+                  { id: 'summary', label: '准备推荐摘要' },
+                ],
+                'rank',
+              ),
+              partialItems: compliant,
+            });
+          }
+        } catch {
+          // 增量展示失败不影响正式结果。
+        }
+      },
     }) as {
       parsed: {
         intent?: unknown;
@@ -9418,7 +9581,6 @@ export async function requestAiRecommendations({
       };
       model?: string;
     };
-    const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
     const compactedLocalItems = localItemsForMerge.filter((item) => compactedCandidateIds.has(item.tourId));
     // 形状/映射错到一条都救不回来时，先回头追问模型一次要正确格式，再决定是否降级。
     // 判定放在所有派生解析之前：追问成功就用新响应重新解析，intent/summary 等
