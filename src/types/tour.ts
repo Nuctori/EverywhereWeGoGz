@@ -348,6 +348,8 @@ export interface AiRecommendationLiveThinking {
   model?: string;
   /** 思维链已输出字符数 */
   chars: number;
+  /** 正文 JSON 已输出字符数（与思维链分开统计） */
+  outputChars?: number;
   /** 思维链尾部摘录（限长，用于实时滚动展示） */
   excerpt: string;
   /** 本次 AI 调用已进行毫秒数 */

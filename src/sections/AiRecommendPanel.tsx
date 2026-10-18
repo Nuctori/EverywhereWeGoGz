@@ -185,6 +185,11 @@ const progressSteps: Array<{
   { stage: 'completed', shortLabel: '已完成' },
 ];
 
+// 流式增量阶段在进度条上归到「生成推荐」；独立成项会让高亮跳到一个不存在的步骤。
+function resolveProgressStepIndex(stage: AiRecommendationProgress['stage']) {
+  return progressSteps.findIndex((item) => item.stage === (stage === 'streaming-items' ? 'ranking' : stage));
+}
+
 // 识别天气/气温类查询，返回特殊引导文案；非天气查询返回 null
 function getQuestionLead(prompt: string) {
   const normalized = prompt.replace(/\s+/g, '');
@@ -405,8 +410,14 @@ export function AiRecommendPanel({
       return;
     }
 
-    setExpandedStage((current) => (current === progressState.stage ? current : progressState.stage));
+    // 默认收起：阶段拆解只在用户主动展开时展开。此前每个阶段切换都会自动展开，
+    // 面板高度随阶段来回抽动，一屏几乎全被进度信息占满。
+    setExpandedStage((current) => (current === progressState.stage ? current : null));
   }, [progressState]);
+
+  // 展开「AI 调节」只是看进度，不是追加新的追问，输入框留到收起之后再出现。
+  // 手机上它和步骤条、阶段拆解叠在一起，高度会从 216px 涨到 434px。
+  const showComposer = !loading || !detailsOpen;
 
   useEffect(() => {
     if (!liveThinkingOpen) return;
@@ -495,7 +506,17 @@ export function AiRecommendPanel({
         previousResult: preserveResult ? result : null,
         onProgress: (progress) => {
           if (requestVersionRef.current !== requestVersion) return;
-          setProgressState(progress);
+          setProgressState((previous) => {
+            // 正文增量与推荐条目来自两路回调，不能互相覆盖：否则状态标题
+            // 在「思考」/「已挑出」之间跳动，输出统计也每出一条就消失。
+            if (previous?.stage === 'streaming-items' && progress.stage === 'ranking' && !progress.partialItems) {
+              return { ...previous, liveThinking: progress.liveThinking ?? previous.liveThinking };
+            }
+            if (progress.stage === 'streaming-items') {
+              return { ...progress, liveThinking: previous?.liveThinking };
+            }
+            return progress;
+          });
           // 流式增量：模型还在逐条写 items 时，把已完整的部分交给列表先渲染。
           // 只要有一条就先摆出来，后续条数增长时继续刷新。
           if (progress.partialItems) {
@@ -698,11 +719,12 @@ export function AiRecommendPanel({
                 已记住偏好
               </Badge>
             )}
-            <span className="text-xs font-normal text-stone-400">
+            <span className="hidden text-xs font-normal text-stone-400 sm:inline">
               {searching ? '正在重新挑选，列表先保持原样' : '推荐结果会置顶显示'}
             </span>
           </div>
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-stone-500 sm:text-sm">
+          {/* 窄屏隐藏这句说明：手机上它会折成两三行，把面板顶掉一大半首屏。 */}
+          <p className="mt-1 hidden max-w-2xl text-xs leading-5 text-stone-500 sm:block sm:text-sm">
             AI 会先理解你想要的旅行体验，再比较线路；预算、偏好和取舍都会一起考虑。
           </p>
         </div>
@@ -774,9 +796,11 @@ export function AiRecommendPanel({
         <div className="mt-3 space-y-3 rounded-[22px] border border-stone-200 bg-white/80 p-3">
           {progressState && (
             <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-4">
+              {/* 标题卡上已经写着同一句状态时，这里不再重复一遍标题，
+                  只留进度条和步骤——展开细节的用途是看"走到哪一步"，不是复读状态。 */}
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-stone-900">
+                  <div className={cn('flex items-center gap-2 text-sm font-semibold text-stone-900', progressState.label === compactStatusLabel && 'hidden')}>
                     {loading ? (
                       <Loader2 className="h-4 w-4 animate-spin text-stone-700" />
                     ) : progressState.stage === 'fallback' ? (
@@ -786,7 +810,13 @@ export function AiRecommendPanel({
                     )}
                     {progressState.label}
                   </div>
-                  <p className="mt-1 text-sm leading-6 text-stone-600">{progressState.detail}</p>
+                  {/* 进度 detail 只在它没被上层摘要重复时展示。
+                      搜索/生成时上层已经写着同一句话（"正在按这句话找团"
+                      "已置顶 N 条建议"），这里再写一遍是同屏重复。 */}
+                  {progressState.detail &&
+                  progressState.detail.trim() !== compactStatusDetail.trim() ? (
+                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{progressState.detail}</p>
+                  ) : null}
                   {progressState.liveThinking ? (
                     <div className="mt-2 rounded-xl border border-orange-100 bg-orange-50/60 px-3 py-2">
                       <button
@@ -797,9 +827,9 @@ export function AiRecommendPanel({
                         <span className="inline-flex min-w-0 items-center gap-1.5">
                           <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin text-orange-500" />
                           <span className="truncate">
-                            {progressState.liveThinking.writingAnswer ? '思维链完成，正在生成结果' : '模型思考中'}
+                            {progressState.liveThinking.writingAnswer ? '正在生成结果' : '模型思考中'}
                             {' · '}
-                            已输出 {progressState.liveThinking.chars} 字
+                            已输出 {progressState.liveThinking.writingAnswer ? progressState.liveThinking.outputChars ?? 0 : progressState.liveThinking.chars} 字
                             {' · '}
                             {Math.max(1, Math.round(progressState.liveThinking.elapsedMs / 1000))} 秒
                           </span>
@@ -856,19 +886,22 @@ export function AiRecommendPanel({
                 </Badge>
               </div>
 
-              <Progress value={progressState.progress} className="mt-3 h-2 bg-orange-100 [&_[data-slot=progress-indicator]]:bg-orange-500" />
+              {/* 桌面把进度条和步骤并排（原来条在上、步骤在下，白占一行高度）；窄屏保持堆叠。 */}
+              <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(120px,1fr)_2.2fr] sm:items-center">
+              <Progress value={progressState.progress} className="h-2 bg-orange-100 [&_[data-slot=progress-indicator]]:bg-orange-500" />
 
-              <div className="mt-3 grid gap-2 sm:grid-cols-5">
+              {/* 窄屏横排单行：5 个步骤各占一行会把面板撑高三四行，这里改成可横滑的紧凑条。 */}
+              <div className="flex gap-1.5 overflow-x-auto whitespace-nowrap sm:grid sm:grid-cols-5 sm:gap-2 sm:overflow-visible">
                 {progressSteps.map((step, index) => {
-                  const currentIndex = progressSteps.findIndex((item) => item.stage === progressState.stage);
+                  const currentIndex = resolveProgressStepIndex(progressState.stage);
                   const isDone = currentIndex > index || (!loading && progressState.stage === 'completed' && currentIndex >= index);
-                  const isCurrent = progressState.stage === step.stage || (progressState.stage === 'fallback' && index === progressSteps.length - 1);
+                  const isCurrent = resolveProgressStepIndex(progressState.stage) === index || (progressState.stage === 'fallback' && index === progressSteps.length - 1);
 
                   return (
                     <div
                       key={step.stage}
                       className={cn(
-                        'rounded-xl border px-3 py-2 text-xs transition-colors',
+                        'shrink-0 rounded-xl border px-2.5 py-1.5 text-xs transition-colors sm:px-3 sm:py-2',
                         isCurrent
                           ? 'border-orange-200 bg-orange-50 text-stone-950'
                           : isDone
@@ -894,6 +927,7 @@ export function AiRecommendPanel({
                     </div>
                   );
                 })}
+              </div>
               </div>
 
               {progressState.substeps?.length && expandedStage === progressState.stage ? (
@@ -1054,7 +1088,10 @@ export function AiRecommendPanel({
             </div>
           )}
 
-          {messages.length > 1 && (
+          {/* 对话区只在有 assistant 回复可读时才出现。请求进行中只有刚插进去的
+              用户消息，渲染出来就是一条贴着右边、左侧大片空白的孤立气泡，
+              看着像一张空白卡片；此时面板该显示的是进度，不是复读用户输入。 */}
+          {messages.slice(1).some((message) => message.role === 'assistant' && message.content.trim()) && (
             <div
               ref={scrollRef}
               className="max-h-56 space-y-3 overflow-y-auto rounded-2xl border border-stone-200 bg-stone-50/70 p-3"
@@ -1079,6 +1116,7 @@ export function AiRecommendPanel({
             </div>
           )}
 
+          {showComposer ? (
           <form
             className="flex flex-col gap-2 sm:flex-row sm:items-center"
             onSubmit={(event) => {
@@ -1108,6 +1146,7 @@ export function AiRecommendPanel({
               )}
             </Button>
           </form>
+          ) : null}
         </div>
       )}
 

@@ -9247,6 +9247,7 @@ export async function requestAiRecommendations({
     ) => {
       let lastEmitAt = 0;
       let chars = 0;
+      let outputChars = 0;
       let excerpt = '';
       let writingAnswer = false;
       const startedAt = Date.now();
@@ -9255,7 +9256,10 @@ export async function requestAiRecommendations({
           chars += delta.reasoningDelta.length;
           excerpt = [...(excerpt + delta.reasoningDelta)].slice(-AI_STREAM_EXCERPT_CHARS).join('');
         }
-        if (delta.contentDelta) writingAnswer = true;
+        if (delta.contentDelta) {
+          writingAnswer = true;
+          outputChars += delta.contentDelta.length;
+        }
         const now = Date.now();
         if (now - lastEmitAt < AI_STREAM_PROGRESS_EMIT_INTERVAL_MS) return;
         lastEmitAt = now;
@@ -9270,6 +9274,7 @@ export async function requestAiRecommendations({
           liveThinking: {
             model: delta.model,
             chars,
+            outputChars,
             excerpt,
             elapsedMs: now - startedAt,
             writingAnswer,
@@ -9537,6 +9542,18 @@ export async function requestAiRecommendations({
             text,
           );
           const { compliant } = splitByIntentConflicts(audited, effectiveIntent, partialPrimitiveById, corpusVocab);
+          // 一条都没通过校验时不发预览：发出去是「已可先看 0 条」，
+          // 既没有内容可看，又会让面板标题在「已挑出部分线路」和空态之间来回跳。
+          if (compliant.length === 0) {
+            if (partialRevision && partialRevision !== '[]') {
+              partialRevision = '[]';
+              emitProgress(onProgress, {
+                stage: 'ranking', label: 'AI 正在生成推荐',
+                detail: '正在校验后续线路。', progress: 82, partialItems: [],
+              });
+            }
+            return;
+          }
           const revision = JSON.stringify(compliant);
           if (revision !== partialRevision) {
             partialRevision = revision;

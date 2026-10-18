@@ -770,8 +770,11 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     if (resultSourceTours.length === 0) return [];
 
     // 搜索阶段沿用清空前的视图：不按搜索词收窄，也不套用被搜索词带出来的过滤条件。
-    const queryForRanking = isAiSearching ? '' : normalizedSearchQuery;
-    const activeDisplayFilters = isAiSearching ? searchStageFilters : effectiveFilters;
+    // 预览不代表请求完成：首条到达后仍沿用生成前的筛选，避免中途切换列表。
+    // 正式结果落地后恢复页面筛选和长尾相关性排序。
+    const keepSearchStageView = Boolean(aiSearchRequest && !aiRecommendationResult);
+    const queryForRanking = keepSearchStageView ? '' : normalizedSearchQuery;
+    const activeDisplayFilters = keepSearchStageView ? searchStageFilters : effectiveFilters;
     const result = resultSourceTours.filter((tour) => {
       if (!isDisplayableTour(tour)) {
         return false;
@@ -922,6 +925,8 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     return result;
   }, [
     aiRecommendationByTourId,
+    aiSearchRequest,
+    aiRecommendationResult,
     isAiSearchMode,
     isAiSearching,
     searchStageFilters,
@@ -1160,8 +1165,12 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     normalizedSearchQuery,
   ]);
 
+  // 这里只跟随"用户意图"变化，不能跟随"是否已有数据"变化。
+  // 之前用 isAiSearching，而它会在拿到首条流式预览时变 false，于是 key 走了
+  // plain → ai-searching → plain → ai，每变一次下面的 effect 就把 visibleCount
+  // 重置回初始值，列表从顶部重新加载——用户看到的就是"不停刷新闪动"。
   const displayContextKey = [
-    aiRecommendationResult ? 'ai' : isAiSearching ? 'ai-searching' : 'plain',
+    isAiSearchMode || isAiSearching ? 'ai' : 'plain',
     effectiveFilters.destination,
     effectiveFilters.source,
     effectiveFilters.theme,
@@ -1735,7 +1744,10 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
           <a href="#" className="inline-flex min-h-11 items-center gap-1 text-xs text-stone-600 hover:text-orange-800">返回搜索 ↑</a>
         </div>
         {heroDestinations.length > 0 && <div className="sr-only">当前热门目的地：{heroDestinations.join('、')}</div>}
-        {searchQuery && <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-orange-900/10 bg-orange-50/70 px-4 py-3"><p className="min-w-0 break-words text-sm text-orange-950">正在查找：<strong>{searchQuery}</strong></p><Button variant="ghost" className="h-11 shrink-0 rounded-xl text-orange-900" onClick={onClearSearch}><X className="mr-1 h-4 w-4" />清除搜索</Button></div>}
+        {/* AI 模式下这条搜索条是冗余的：AI 面板已经写明本轮问的是什么，清除也在面板的「清空」里。
+            再加一条「正在查找：xxx / 清除搜索」等于同一屏把同一件事说两遍，
+            还把「挑一条心动的线路」标题挤出首屏。 */}
+        {searchQuery && !(isAiSearchMode || isAiSearching) && <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-orange-900/10 bg-orange-50/70 px-4 py-3"><p className="min-w-0 break-words text-sm text-orange-950">正在查找：<strong>{searchQuery}</strong></p><Button variant="ghost" className="h-11 shrink-0 rounded-xl text-orange-900" onClick={onClearSearch}><X className="mr-1 h-4 w-4" />清除搜索</Button></div>}
         {commonFilters}
 
         {!isMobile && showFilters && (

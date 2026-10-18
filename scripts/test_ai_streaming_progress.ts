@@ -160,6 +160,8 @@ try {
 
   console.info(`[1/2] 流式思维链经 onProgress 实时透出（${thinkingEvents.length} 个 liveThinking 事件）通过`);
   console.info('[2/2] 终态清理 + 结果思维链/usage 同口径保留通过');
+  assert.ok(thinkingEvents.some((event) => (event.liveThinking?.outputChars ?? 0) > 0), '正文输出必须独立计数，不能只统计思维链');
+  assert.ok(!progressEvents.some((event) => event.stage === 'streaming-items' && event.partialItems?.length === 0), '空预览不得展示已可先看 0 条');
   const previews = progressEvents.filter((event) => event.partialItems?.length);
   assert.ok(previews.length > 0, 'main pipeline must expose validated partial items, not silently swallow callback errors');
   const firstPreviewIndex = progressEvents.indexOf(previews[0]);
