@@ -112,9 +112,14 @@ const waitForNextPaint = () =>
 // 主线程一次性算完几百毫秒，正好压在点「AI 帮我挑」的那一帧上。这里在浏览器
 // 空闲期逐片预热（每片约 100 条，实测 <10ms），片之间隔一会儿再要下一段空闲：
 // 用户这时候既没点击也没在输入，主线程随时能被他抢回去。
-const WARM_PIECE_GAP_MS = 700;
+//
+// 这里的间隔和截止时间必须让"全部预热完"能在用户真正点击前完成：
+// 之前 700ms × 65 片 ≈ 46s，而截止只有 20s，预热永远只能覆盖 45%，
+// 剩下的 3591 条在点击那一帧冷算（约 350ms），就成了"点 AI 帮我挑卡很久"。
+// 现在每片间隔 16ms（约一帧），65 片约 1.7s 跑完，截止放到 30s 兜底。
+const WARM_PIECE_GAP_MS = 16;
 // 兜底上限：完全抢不到空闲时间时，别把预热任务无限挂着。
-const WARM_DEADLINE_MS = 20_000;
+const WARM_DEADLINE_MS = 30_000;
 const useAiRecommendationWarmup = (candidateTours: AiRecommendationCandidate[]) => {
   useEffect(() => {
     if (candidateTours.length === 0 || isAiRecommendationPoolWarm(candidateTours)) return;
@@ -457,6 +462,22 @@ export function AiRecommendPanel({
     try {
       await waitForNextPaint();
       if (requestVersionRef.current !== requestVersion) return;
+
+      // 用户点得比空闲预热快时（页面刚打开就点），池子可能还没预热完。
+      // 此时进度条已经先画出来了，再一次性把剩下的补完，比让主线程在
+      // 后面的排序/建模里零散地卡顿更好：这一下是可预期的、且已经有反馈在转。
+      if (!isAiRecommendationPoolWarm(tours)) {
+        const pieceCount = Math.ceil(tours.length / AI_RECOMMENDATION_WARM_BATCH_SIZE);
+        for (let pieceIndex = 0; pieceIndex < pieceCount; pieceIndex += 1) {
+          if (requestVersionRef.current !== requestVersion) return;
+          try {
+            warmAiRecommendationBatch(getAiRecommendationWarmPiece(tours, pieceIndex));
+          } catch {
+            // 预热是纯优化，失败就让真正的调用自己算。
+            break;
+          }
+        }
+      }
 
       const nextResult = await requestAiRecommendations({
         conversationId,
