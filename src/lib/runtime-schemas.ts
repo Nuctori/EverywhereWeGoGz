@@ -448,3 +448,27 @@ export const storedAiChatStateSchema = z.object({
   result: aiRecommendationResultSchema.nullish(),
   preferenceMemory: aiPreferenceMemorySchema.nullish(),
 });
+
+// AI 进行中的进度快照：用于另一个标签页/窗口同步"这一轮正在跑到哪"。
+// 与聊天状态分开存，避免两处写同一个键互相覆盖。
+export const storedAiProgressSchema = z.object({
+  /** 发起本轮请求的标签页标识，避免自己读到自己的回声 */
+  ownerId: z.string().optional(),
+  /** 本轮请求的版本号（对应 searchingVersion），用于判定"是不是同一轮" */
+  version: z.number().optional(),
+  /** 进行中的请求描述，另一个标签页据此显示"正在按这句话找团" */
+  prompt: z.string().optional(),
+  /** 本轮开始的绝对时间戳，用来算已经跑了多久、以及判定是否已过期 */
+  startedAt: z.number().optional(),
+  /** 最近一次进度快照 */
+  progress: z
+    .object({
+      stage: z.string(),
+      label: z.string(),
+      detail: z.string(),
+      progress: z.number(),
+    })
+    .optional(),
+  /** 是否仍在进行中；完成后置 false，让别的标签页收起进度条 */
+  running: z.boolean().optional(),
+});

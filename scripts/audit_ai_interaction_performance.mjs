@@ -43,4 +43,27 @@ assert.ok(
   'AI chat storage writes should be scheduled away from the click handler path',
 );
 
+// 相关性排序必须在排序前算一次：塞进比较器会为每条线路重复计算 O(n log n) 次。
+// 6483 条实测 28ms → 143ms，正好压在点搜索那一帧上（用户反馈"点搜索卡几秒"）。
+assert.doesNotMatch(
+  tourListSource,
+  /result\.sort\(\s*\(a, b\) =>\s*getTourSearchRelevance\(/,
+  'relevance sort must precompute scores instead of calling getTourSearchRelevance inside the comparator',
+);
+assert.match(
+  tourListSource,
+  /relevanceByTour/,
+  'relevance sort should keep a precomputed score map keyed by tour',
+);
+
+// 进行中进度要跨标签页可见：写入 storage、监听 storage 事件、结束后撤下。
+assert.ok(
+  aiPanelSource.includes('saveStoredAiProgress') && aiPanelSource.includes('subscribeStoredAiProgress'),
+  'AI progress must be persisted and subscribed so another tab can see an in-flight run',
+);
+assert.ok(
+  /finally \{[\s\S]{0,400}clearStoredAiProgress\(\)/.test(aiPanelSource),
+  'every request exit (success/fallback/superseded) must withdraw the in-flight progress marker',
+);
+
 console.info('AI interaction performance audit passed');

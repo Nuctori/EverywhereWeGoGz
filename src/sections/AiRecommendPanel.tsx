@@ -44,9 +44,14 @@ import {
 } from '@/lib/ai-recommendation';
 import {
   clearStoredAiChatState,
+  clearStoredAiProgress,
   readStoredAiChatState,
+  readStoredAiProgress,
   saveStoredAiChatState,
+  saveStoredAiProgress,
+  subscribeStoredAiProgress,
 } from '@/lib/ai-chat-storage';
+import type { StoredAiProgress } from '@/lib/ai-chat-storage';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import type { AiSearchRequest } from '@/App';
@@ -290,6 +295,10 @@ export function AiRecommendPanel({
   const didRestoreStoredResultRef = useRef(false);
   const requestVersionRef = useRef(0);
   const handledRequestIdRef = useRef<number | null>(null);
+  // 本标签页的标识：用于区分"自己写的进度"和"别的标签页写的进度"，
+  // 避免自己读到自己的回声后覆盖本页真实的进度状态。
+  const tabIdRef = useRef(`tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  const [remoteProgress, setRemoteProgress] = useState<StoredAiProgress | null>(null);
   const conversationId = useMemo(
     () => storedChatState.conversationId || createConversationId(),
     [storedChatState.conversationId],
@@ -326,6 +335,25 @@ export function AiRecommendPanel({
   }, [conversationId, followUpInput, messages, preferenceMemory, result]);
 
   useEffect(() => () => storageSaveCleanupRef.current?.(), []);
+
+  // 跨标签页进度同步：另一个页面发起 AI 时，这里也能看到"正在跑到哪"。
+  // 只认别的标签页写的快照（ownerId 不同于本页），并且过期快照直接忽略。
+  useEffect(() => {
+    const apply = (incoming: StoredAiProgress | null) => {
+      setRemoteProgress(incoming && incoming.ownerId !== tabIdRef.current ? incoming : null);
+    };
+    apply(readStoredAiProgress());
+    return subscribeStoredAiProgress(apply);
+  }, []);
+
+  // 远端进度只在别的标签页写进度时刷新，秒数会停住；这里每秒推一次 tick，
+  // 让"已进行 N 秒"真的在走。没有远端进度时不起定时器。
+  const [remoteTick, setRemoteTick] = useState(0);
+  useEffect(() => {
+    if (!remoteProgress) return;
+    const timer = window.setInterval(() => setRemoteTick((current) => current + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [remoteProgress]);
 
   useEffect(() => {
     if (!detailsOpen) return;
@@ -392,6 +420,21 @@ export function AiRecommendPanel({
       : [createInitialMessage(), userMessage];
     setMessages(nextMessages);
     setLoading(true);
+    const startedAt = Date.now();
+    // 把"这一轮开始了"写进 storage，另一个标签页打开时就知道这边正在跑。
+    saveStoredAiProgress({
+      ownerId: tabIdRef.current,
+      version: requestVersion,
+      prompt,
+      startedAt,
+      progress: {
+        stage: 'queued',
+        label: '已收到需求',
+        detail: '正在开始本次处理。',
+        progress: 8,
+      },
+      running: true,
+    });
     setProgressState({
       stage: 'queued',
       label: '已收到需求',
@@ -427,6 +470,22 @@ export function AiRecommendPanel({
         onProgress: (progress) => {
           if (requestVersionRef.current !== requestVersion) return;
           setProgressState(progress);
+          // 节流后写进 storage：另一个标签页据此实时看到阶段和"已跑多少秒"。
+          // liveThinking 的思维链摘录不跨标签页同步——那是本页的调试信息，
+          // 体积大且频繁变化，会把 storage 写入变成性能问题。
+          saveStoredAiProgress({
+            ownerId: tabIdRef.current,
+            version: requestVersion,
+            prompt,
+            startedAt,
+            progress: {
+              stage: progress.stage,
+              label: progress.label,
+              detail: progress.detail,
+              progress: progress.progress,
+            },
+            running: true,
+          });
         },
       });
       if (requestVersionRef.current !== requestVersion) return;
@@ -441,6 +500,9 @@ export function AiRecommendPanel({
       if (requestVersionRef.current === requestVersion) {
         setLoading(false);
       }
+      // 无论成功、降级还是被新一轮顶掉，都要把"进行中"从 storage 撤下，
+      // 否则另一个标签页会一直显示这边在跑（直到 AI_PROGRESS_STALE_MS 兜底）。
+      clearStoredAiProgress();
     }
   }, [
     activeFilters,
@@ -476,6 +538,7 @@ export function AiRecommendPanel({
     setFollowUpInput('');
     setMessages([createMessage('assistant', '已清空上一轮结果和本地偏好记忆。你可以重新描述这次想怎么出行。')]);
     clearStoredAiChatState();
+    clearStoredAiProgress();
   };
 
 // 保存自定义 AI 接口配置到 localStorage
@@ -504,25 +567,42 @@ export function AiRecommendPanel({
   const searching = Boolean(request);
   const searchingDetail = progressState?.detail || '正在理解这句需求，马上开始筛线路。';
   const recommendedCount = countRecommendedItems(result);
+  // 别的标签页正在跑的那一轮：本页自己没有在进行中的请求时，把它显示出来，
+  // 让人知道"那边正在跑"，而不是看起来什么都没发生。
+  const remoteRunning = !loading && !searching ? remoteProgress : null;
+  // remoteTick 每秒自增，只为让下面的秒数跟着时间重算（它本身不参与计算）。
+  const remoteElapsedSeconds = remoteRunning?.startedAt
+    ? Math.max(0, Math.round((Date.now() - remoteRunning.startedAt) / 1000))
+    : 0;
+  void remoteTick;
   const compactStatusLabel = loading
     ? progressState?.label || '正在筛选'
-    : searching
-      ? '正在按这句话找团'
-      : hasResult
-        ? `已置顶 ${recommendedCount} 条建议`
-        : '描述需求，AI 帮你置顶';
+    : remoteRunning
+      ? remoteRunning.progress?.label || '另一个页面正在找团'
+      : searching
+        ? '正在按这句话找团'
+        : hasResult
+          ? `已置顶 ${recommendedCount} 条建议`
+          : '描述需求，AI 帮你置顶';
   const compactStatusDetail = loading
     ? progressState?.detail || '正在结合班期、预算和线路信息。'
-    : searching
-      ? searchingDetail
-      : hasResult
-        ? result?.summary || resultStatusMeta?.detail || '推荐线路已排到前面。'
-        : '一句话说预算、天数、同行人和偏好就行。';
+    : remoteRunning
+      ? [
+          remoteRunning.prompt ? `另一个页面正在处理：${remoteRunning.prompt}` : '另一个页面正在处理这一轮需求。',
+          remoteElapsedSeconds > 0 ? `已进行 ${remoteElapsedSeconds} 秒` : '',
+        ].filter(Boolean).join(' · ')
+      : searching
+        ? searchingDetail
+        : hasResult
+          ? result?.summary || resultStatusMeta?.detail || '推荐线路已排到前面。'
+          : '一句话说预算、天数、同行人和偏好就行。';
   const followUpPlaceholder = hasResult
     ? '在这里接着细调，比如：预算压到600内，优先海边，别太赶'
     : '补充一点条件也行，比如：带温泉、沙滩，周末短线';
 
-  if (!hasAiActivity && !searching) {
+  // remoteRunning 也要算作"有活动"：否则另一个标签页在跑时，本页会直接渲染 null，
+  // 同步过来的进度根本没有机会显示出来。
+  if (!hasAiActivity && !searching && !remoteRunning) {
     return null;
   }
 
@@ -540,13 +620,13 @@ export function AiRecommendPanel({
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-sm font-semibold text-stone-950">
               <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
-              AI 正在按这句话找团
+              {remoteRunning && !request ? '另一个页面正在按这句话找团' : 'AI 正在按这句话找团'}
             </div>
             <p className="mt-1 line-clamp-2 break-words text-sm leading-6 text-stone-600">
-              {searchingDetail}
+              {remoteRunning && !request ? compactStatusDetail : searchingDetail}
             </p>
             <p className="mt-1 break-words text-xs leading-5 text-stone-500">
-              已记下：<span className="text-stone-700">{request?.prompt}</span>
+              已记下：<span className="text-stone-700">{request?.prompt || remoteRunning?.prompt}</span>
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -607,7 +687,7 @@ export function AiRecommendPanel({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-sm font-semibold text-stone-950">
-              {loading ? (
+              {loading || remoteRunning ? (
                 <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
               ) : searching ? (
                 <Search className="h-4 w-4 text-orange-600" />

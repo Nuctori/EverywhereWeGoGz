@@ -8,7 +8,7 @@ import {
   __aiRecommendationTestHooks,
 } from '../src/lib/ai-recommendation.ts';
 
-const { createAiSseStreamParser, callAiApi, describeAiItemsShapeIssue, requestAiFormatCorrection } = __aiRecommendationTestHooks;
+const { createAiSseStreamParser, callAiApi, describeAiItemsShapeIssue, requestAiFormatCorrection, salvageAiItemsFromResponse } = __aiRecommendationTestHooks;
 
 const encoder = new TextEncoder();
 function sseFrame(payload: string) {
@@ -686,6 +686,68 @@ console.info('[2/11] CRLF 行尾与 DONE 幂等通过');
     assert.equal(failed, null, 'a failed correction must resolve to null instead of throwing');
 
     console.info('[14/14] 受限格式追问（带错误原文 / 预算封顶 / 失败不抛出）通过');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+}
+
+// ====== 15. 合法 JSON 但顶层没有 items（现场 schema_invalid: items missing）======
+// 模型把条目放到别的键下或嵌一层时，内容其实是好的，不该整轮降级到本地补位。
+// 只要能确认"这确实是一组分条目的对象"就认回来；摘要/字符串数组绝不误认。
+{
+  const originalFetch = globalThis.fetch;
+  const sse = (payload: string) => `data: ${payload}\n\n`;
+  const drive = async (content: string) => {
+    const frames = [
+      sse(JSON.stringify({ choices: [{ delta: { content } }] })),
+      sse(JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }] })),
+      sse('[DONE]'),
+    ];
+    globalThis.fetch = (async () => {
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          for (const frame of frames) controller.enqueue(new TextEncoder().encode(frame));
+          controller.close();
+        },
+      });
+      return new Response(stream, { status: 200, headers: { 'content-type': 'text/event-stream' } });
+    }) as typeof fetch;
+    try {
+      const result = await callAiApi({
+        configs: [{ baseUrl: 'https://ai.114124.xyz/v1', model: 'GLM-4.7-Flash', apiKey: 'test-key' }],
+        messages: [{ role: 'user', content: 'q' }],
+        maxTokens: 3600,
+        schema: 'recommendation',
+      });
+      return { items: ((result.parsed as { items?: unknown[] }).items ?? []).length, message: '' };
+    } catch (error) {
+      return { items: -1, message: error instanceof Error ? error.message : String(error) };
+    }
+  };
+
+  try {
+    // 15a：嵌套一层 + 改名的键，都必须认回来。
+    const nested = await drive(JSON.stringify({
+      summary: '摘要',
+      recommendations: { items: [{ tourId: 't1', reason: '好' }, { tourId: 't2' }] },
+    }));
+    assert.equal(nested.items, 2, `nested items must be salvaged, got: ${nested.message}`);
+
+    const renamed = await drive(JSON.stringify({ summary: '摘要', picks: [{ tourId: 't1' }, { tourId: 't2' }] }));
+    assert.equal(renamed.items, 2, `a renamed item list must be salvaged, got: ${renamed.message}`);
+
+    // 15b：真的没有条目时，仍然按原口径报 schema_invalid（不能凭空造候选）。
+    const empty = await drive(JSON.stringify({ summary: '只有摘要，没有条目' }));
+    assert.equal(empty.items, -1, 'a response with no item list must still fail');
+    assert.ok(empty.message.includes('items missing'), `expected items missing, got: ${empty.message}`);
+
+    // 15c：纯文案数组不能被当成候选列表。
+    assert.equal(
+      salvageAiItemsFromResponse({ summary: '这是一段摘要', tradeoffs: ['取舍一', '取舍二'] }),
+      null,
+      'summary/tradeoffs string arrays must never be mistaken for candidate items',
+    );
+    console.info('[15/15] 顶层缺 items 的抢救（嵌套/改名认回，摘要不误认）通过');
   } finally {
     globalThis.fetch = originalFetch;
   }

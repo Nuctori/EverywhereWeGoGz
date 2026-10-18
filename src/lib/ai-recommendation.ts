@@ -6959,6 +6959,49 @@ function looksTruncatedJson(content: string) {
   return inString;
 }
 
+/**
+ * 从"合法 JSON 但顶层没有 items"的响应里找回条目列表。
+ *
+ * 模型偶尔把条目放到别的键下（recommendations / picks / data），或嵌一层
+ * （{result:{items:[...]}}）。这里只在能确认"这确实是一组分条目的对象"时才认：
+ * 数组非空，且多数元素是带 tourId/id/title 这类可识别字段的对象（也接受位置
+ * 数组，交给下游归一化）。绝不把 summary 里的字符串数组误当成候选。
+ * 认不出来就返回 null，调用方照原口径报 schema_invalid。
+ */
+function salvageAiItemsFromResponse(parsed: unknown): unknown[] | null {
+  if (!parsed || typeof parsed !== 'object') return null;
+
+  const looksLikeItem = (value: unknown) => {
+    if (Array.isArray(value)) return value.length > 0 && value.every((cell) => typeof cell !== 'object');
+    if (!value || typeof value !== 'object') return false;
+    const record = value as Record<string, unknown>;
+    return ['tourId', 'id', 'title', 'reason', 'score', 'sf', 'semanticFit'].some(
+      (key) => key in record,
+    );
+  };
+  const looksLikeItemList = (value: unknown) => {
+    if (!Array.isArray(value) || value.length === 0) return false;
+    const matches = value.filter(looksLikeItem).length;
+    return matches > 0 && matches * 2 >= value.length;
+  };
+
+  // 先看嵌套：{result:{items:[...]}} / {recommendations:{items:[...]}}
+  for (const value of Object.values(parsed as Record<string, unknown>)) {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      const nested = salvageAiItemsFromResponse(value);
+      if (nested) return nested;
+    }
+  }
+
+  // 再看本层：取最像条目列表的那个数组（元素最多者优先，其次按出现顺序）
+  let best: unknown[] | null = null;
+  for (const value of Object.values(parsed as Record<string, unknown>)) {
+    if (!looksLikeItemList(value)) continue;
+    if (!best || (value as unknown[]).length > best.length) best = value as unknown[];
+  }
+  return best;
+}
+
 function parseAiProviderResponse(
   data: unknown,
   config: AiProviderConfig,
@@ -7027,6 +7070,15 @@ function parseAiProviderResponse(
       throw new Error(getAiProviderParseErrorLabel(config, 'schema_invalid', 'queries missing'));
     }
   } else if (!Array.isArray(items)) {
+    // 模型经常不把条目放在顶层 items：可能叫 recommendations/picks/data，
+    // 也可能嵌在 {result:{items:[...]}} 里。这类回复内容其实是好的，只是键名
+    // 不对，直接判 schema_invalid 会让整轮降级到本地补位。这里先尝试把"看起来
+    // 像条目列表"的数组认回来，认回来就当正常结果用；认不回来才按原口径报错。
+    const salvaged = salvageAiItemsFromResponse(parsed);
+    if (salvaged) {
+      (parsed as { items: unknown[] }).items = salvaged;
+      return { parsed, reasoningText, usage };
+    }
     // 截断后"合法 JSON 但没有 items"同样属于预算耗尽，走升压重试而不是直接判死。
     throw new Error(getAiProviderParseErrorLabel(
       config,
@@ -7350,6 +7402,7 @@ export const __aiRecommendationTestHooks = {
   buildTourPrimitive,
   callAiApi,
   describeAiItemsShapeIssue,
+  salvageAiItemsFromResponse,
   requestAiFormatCorrection,
   collectAvoidHints,
   collectLiteralAvoidHints,

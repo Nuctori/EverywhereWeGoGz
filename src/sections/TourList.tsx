@@ -869,8 +869,15 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
 
     if (queryForRanking) {
       // AI 模式下长尾也按相关性排序：置顶段之后继续下滑就是“越来越宽”的相关候选。
+      // 相关性必须在排序前算一次：直接塞进比较器会为每条线路重复计算
+      // O(n log n) 次，实测 6483 条从 28ms 涨到 143ms，正好压在点搜索那一帧。
+      const relevanceByTour = new Map<TourCatalogEntry, number>();
+      for (const tour of result) {
+        relevanceByTour.set(tour, getTourSearchRelevance(tour, searchContext));
+      }
+      const relevanceOf = (tour: TourCatalogEntry) => relevanceByTour.get(tour) ?? 0;
       result.sort((a, b) =>
-        getTourSearchRelevance(b, searchContext) - getTourSearchRelevance(a, searchContext) ||
+        relevanceOf(b) - relevanceOf(a) ||
         compareToursBySortMode(filters.sortBy, a, b),
       );
     } else {
