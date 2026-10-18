@@ -8,7 +8,7 @@ import {
   __aiRecommendationTestHooks,
 } from '../src/lib/ai-recommendation.ts';
 
-const { createAiSseStreamParser, callAiApi, describeAiItemsShapeIssue, requestAiFormatCorrection, salvageAiItemsFromResponse } = __aiRecommendationTestHooks;
+const { createAiSseStreamParser, callAiApi, describeAiItemsShapeIssue, requestAiFormatCorrection, salvageAiItemsFromResponse, validateAiItems } = __aiRecommendationTestHooks;
 
 const encoder = new TextEncoder();
 function sseFrame(payload: string) {
@@ -752,5 +752,99 @@ console.info('[2/11] CRLF 行尾与 DONE 幂等通过');
     globalThis.fetch = originalFetch;
   }
 }
+
+// ---------------------------------------------------------------------------
+// 16：列式编码回复（ck 声明列名 + 每行位置数组）。
+// 线上真实事故：模型返回
+//   { "v":"...", "ck":["id","title",...], "pc":[...], "candidates":[["tour_44","标题",...]] }
+// 顶层键叫 candidates、每行是位置数组、且单元格里还有数组（日期列表、星期列表）。
+// 旧实现有两处会崩：
+//   1. looksLikeItem 要求"每个单元格都不是 object"，而 typeof [] === 'object'，
+//      于是含日期数组的行被判成"不像条目"，整份回复认不回来；
+//   2. 就算认回来，行归一化按位置猜列（第一列当标题），真实第一列是 id，
+//      结果一条都匹配不到候选线路，仍判 items_unmapped 降级。
+// 两条都要挡住，否则用户看到的就是"AI 用不了、已切本地推荐"。
+// ---------------------------------------------------------------------------
+async function test16ColumnarReply() {
+  const columnarReply = {
+    v: '2026-10-05-suitability-grade-v4',
+    ck: [
+      'id', 'title', 'destination', 'days', 'price', 'theme', 'source', 'pace', 'hot',
+      'routeGroup', 'dates', 'weekdays', 'night', 'pricePerDay', 'tags', 'highlights',
+      'atoms', 'cats', 'seasonAtoms', 'pricePct', 'priceBand',
+    ],
+    pc: [148, 1899, 3299, 4899, 42399],
+    candidates: [
+      ['tour_44', '梦境黄姚（西溪温泉）动车3天1', '广东', 3, 859, '海岛度假', '假日通', 'easy', 1,
+        '广东 3天 温泉泡汤', ['2026-10-24'], [6], 0, 286, [], [], ['梦境黄姚动车'], ['温泉泡汤'],
+        ['高温天气需取舍：温泉泡汤'], 25, 'lower'],
+      ['tour_24', '三水温泉3天(欧式别墅)', '广东', 3, 499, '海岛度假', '假日通', 'easy', 1,
+        '广东 3天 温泉泡汤/室内度假', ['2026-10-23'], [0, 1, 2], 0, 166, [], [], ['三水温泉'],
+        ['温泉泡汤', '室内度假'], ['高温天气需取舍：温泉泡汤'], 24, 'lower'],
+    ],
+  };
+
+  // 16a：单元格里含数组的行必须仍然被认成条目（线上事故的直接原因）。
+  const salvaged = salvageAiItemsFromResponse(columnarReply);
+  assert.ok(salvaged, 'a columnar reply with array cells must be salvaged, got null');
+  assert.equal(salvaged.length, 2, `expected 2 salvaged rows, got ${salvaged?.length}`);
+
+  // 16b：纯字符串行（无嵌套数组）同样要认。
+  const flat = salvageAiItemsFromResponse({ candidates: [['a', 'b', 'c'], ['d', 'e', 'f']] });
+  assert.equal(flat?.length, 2, 'flat positional rows must be salvaged');
+
+  // 16c：单元格里嵌的是普通对象（不是位置编码）时不能硬认。
+  assert.equal(
+    salvageAiItemsFromResponse({ candidates: [{ nested: { deep: true } }, { more: { x: 1 } }] }),
+    null,
+    'rows of plain nested objects must not be mistaken for positional items',
+  );
+
+  // 16d：ck 列名必须真的被用来映射，否则 id 会被当成标题、一条都匹配不上。
+  // 这里要喂完整的候选字段：buildTourPrimitive 需要 title/destination/价格等，
+  // 只给 id+title 会在提原子那步炸掉，测的就不是本次要守的东西了。
+  const makeTour = (id: string, title: string) => ({
+    id,
+    title,
+    source: '假日通',
+    destination: '广东',
+    duration: 3,
+    price: 499,
+    departureDate: '2026-10-23',
+    departureDates: ['2026-10-23', '2026-10-25'],
+    transportType: 'bus',
+    accommodationLevel: 'comfort',
+    meals: ['breakfast'],
+    highlights: ['温泉'],
+    tags: ['温泉'],
+    isHot: false,
+    theme: '温泉泡汤',
+    suitableFor: ['family'],
+    leisureLevel: 'relaxed',
+    season: 'autumn',
+    rating: 4.5,
+    groupSize: 20,
+    hotDepartureDates: [],
+  });
+  const fakeTours = [
+    makeTour('tour_44', '梦境黄姚（西溪温泉）动车3天1'),
+    makeTour('tour_24', '三水温泉3天(欧式别墅)'),
+  ] as unknown as Parameters<typeof validateAiItems>[1];
+  const validated = validateAiItems(
+    { ...columnarReply, items: salvaged as unknown[] },
+    fakeTours,
+  );
+  assert.equal(
+    validated.length,
+    2,
+    `columnar rows must map through ck to real tour ids, got ${validated.length}`,
+  );
+  assert.equal(validated[0].tourId, 'tour_44', `expected tour_44 first, got ${validated[0].tourId}`);
+  assert.equal(validated[1].tourId, 'tour_24', `expected tour_24 second, got ${validated[1].tourId}`);
+
+  console.info('[16/16] 列式编码回复（ck+位置数组）认回并按列名映射通过');
+}
+
+await test16ColumnarReply();
 
 console.info('AI streaming contract tests passed');

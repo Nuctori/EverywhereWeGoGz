@@ -6972,7 +6972,16 @@ function salvageAiItemsFromResponse(parsed: unknown): unknown[] | null {
   if (!parsed || typeof parsed !== 'object') return null;
 
   const looksLikeItem = (value: unknown) => {
-    if (Array.isArray(value)) return value.length > 0 && value.every((cell) => typeof cell !== 'object');
+    // 位置数组（列式编码）也要认：模型有时把条目压成 ["tour_44","标题",...]。
+    // 注意不能要求"每个元素都不是 object"——真实回复里单元格本身常是数组
+    // （日期列表 ["2026-10-24"]、星期列表 [0,1,2]、标签数组），typeof [] 是
+    // 'object'，用 every(cell => typeof cell !== 'object') 会把整条判成不像条目，
+    // 于是顶层叫 candidates 的正常回复被认不回来、整轮降级到本地补位。
+    // 这里只拒绝"单元格里还嵌着普通对象"的情况（那才不是位置编码）。
+    if (Array.isArray(value)) {
+      if (value.length === 0) return false;
+      return value.every((cell) => !cell || typeof cell !== 'object' || Array.isArray(cell));
+    }
     if (!value || typeof value !== 'object') return false;
     const record = value as Record<string, unknown>;
     return ['tourId', 'id', 'title', 'reason', 'score', 'sf', 'semanticFit'].some(
@@ -7537,11 +7546,25 @@ function resolveAiCandidateTourId(
 // （现场 GLM：[标题, 目的地, 天数, 价格, 主题, 来源, 节奏, 评分, 原子串, 班期, 理由]）。
 // 这里按"是不是对象"分流，不靠猜字段顺序以外的东西：位置数组按固定槽位取值，
 // 取不到 tourId 时后面仍由 resolveAiCandidateTourId 用标题做兜底匹配。
-function normalizeRawAiItem(rawItem: unknown): Record<string, unknown> | null {
+function normalizeRawAiItem(
+  rawItem: unknown,
+  columnKeys?: readonly string[],
+): Record<string, unknown> | null {
   if (rawItem && typeof rawItem === 'object' && !Array.isArray(rawItem)) {
     return rawItem as Record<string, unknown>;
   }
   if (Array.isArray(rawItem)) {
+    // 有 ck（列名表）时按声明的列名映射：模型这类列式回复第一列通常是 id，
+    // 而不是硬编码假设的"第一列是标题"。按位置猜会把 tour_44 当成标题，
+    // 于是每条都匹配不到候选线路，整轮又被判 items_unmapped。
+    if (columnKeys && columnKeys.length > 0) {
+      const record: Record<string, unknown> = {};
+      columnKeys.forEach((key, index) => {
+        if (index < rawItem.length) record[key] = rawItem[index];
+      });
+      // 列式编码只有 id 没有 reason 时，把标题当兜底文案来源交给下游处理。
+      return record;
+    }
     const [
       title,
       ,
@@ -7574,11 +7597,19 @@ function validateAiItems(
   const rawItems = Array.isArray((value as { items?: unknown[] })?.items)
     ? (value as { items: unknown[] }).items
     : [];
+  // 模型可能用列式编码回复（ck 声明列名、每行是位置数组）。列名要透传给行归一化，
+  // 否则按位置猜列会把 id 当标题，导致一条都匹配不上。
+  const declaredColumnKeys = (() => {
+    const keys = (value as { ck?: unknown })?.ck;
+    return Array.isArray(keys) && keys.every((key) => typeof key === 'string')
+      ? (keys as string[])
+      : undefined;
+  })();
   const seenTourIds = new Set<string>();
   const validatedItems: AiRecommendationItem[] = [];
 
   for (const [index, rawItem] of rawItems.entries()) {
-    const normalizedRawItem = normalizeRawAiItem(rawItem);
+    const normalizedRawItem = normalizeRawAiItem(rawItem, declaredColumnKeys);
     if (!normalizedRawItem) continue;
     const item = normalizedRawItem as Partial<AiRecommendationItem> & {
       id?: unknown;
