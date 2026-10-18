@@ -1311,7 +1311,10 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
               const tierDestinations = destinationTiers[tier].slice(0, 6);
               if (tierDestinations.length === 0) return null;
               return (
-                <div key={tier} className="flex min-w-0 items-center gap-2">
+                <div key={tier} className="flex min-w-0 flex-wrap items-center gap-2">
+                  {/* 必须 flex-wrap：子元素都是 shrink-0，默认 nowrap 会让整组按内容
+                      宽度铺开（实测手机单组 1008px，父容器仅 324px），而外层
+                      overflow 是 visible，整排按钮会直接捅出卡片右边界。 */}
                   <span
                     className="shrink-0 rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-500"
                     title={DESTINATION_TIER_META[tier].hint}

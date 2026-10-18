@@ -227,6 +227,32 @@ try {
   assert(pageErrors.length === 0, `页面不应有运行时错误: ${pageErrors.slice(0, 3).join(' | ')}`);
   record('运行时错误', '无');
 
+  // --- 5. 手机窄屏不得横向溢出（标签/按钮捅穿卡片边界）---
+  // 真实事故：筛选区「档位标签 + 最多 6 个目的地」那组用了 flex-nowrap，
+  // 子元素又都是 shrink-0，整组按内容宽度铺开（实测 1008px），
+  // 而外层 overflow 是 visible，整排按钮直接捅出卡片右边缘。
+  // 这里用窄屏断言"文档宽度 == 视口宽度"，任何横向撑宽都会被抓住。
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(800);
+  const metrics = await page.evaluate(() => {
+    const main = document.querySelector('main');
+    return {
+      docScrollW: document.documentElement.scrollWidth,
+      docClientW: document.documentElement.clientWidth,
+      mainScrollW: main?.scrollWidth ?? 0,
+      mainClientW: main?.clientWidth ?? 0,
+    };
+  });
+  assert(
+    metrics.docScrollW <= metrics.docClientW + 1,
+    `手机 390 宽不得横向溢出：文档 scrollWidth=${metrics.docScrollW} 应等于视口 ${metrics.docClientW}`,
+  );
+  assert(
+    metrics.mainScrollW <= metrics.mainClientW + 1,
+    `主内容不得横向溢出：main scrollWidth=${metrics.mainScrollW} 应等于 ${metrics.mainClientW}`,
+  );
+  record('窄屏无横向溢出', `文档 ${metrics.docScrollW}px = 视口 ${metrics.docClientW}px`);
+
   console.info(`\n搜索链路 E2E 通过（${results.length} 项）`);
 } catch (error) {
   console.error(`\n搜索链路 E2E 失败：${error instanceof Error ? error.message : String(error)}`);
