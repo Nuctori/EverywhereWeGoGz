@@ -267,6 +267,10 @@ type RouteAtlas = RouteAtlasGroup[];
 type RecommendationAuditContext = ReturnType<typeof buildRecommendationAuditContext>;
 
 const searchCorpusCache = new WeakMap<AiRecommendationCandidate, string>();
+// 班期窗/未来班期列表按 tour 引用缓存（键里带 today，跨日失效）。这两项原先
+// 每次 scoreTour 都重算一遍，是点击后"到首包前"那段时间的主要本地成本。
+const candidateScheduleWindowsCache = new WeakMap<AiRecommendationCandidate, CandidateScheduleWindow[]>();
+const candidateDepartureDatesCache = new WeakMap<AiRecommendationCandidate, { today: string; dates: string[] }>();
 const atlasRegionsCache = new Map<string, string[]>();
 const primitiveExperienceAtomsCache = new Map<string, string[]>();
 // 原语按 tour id 缓存，而不是按对象引用。TourList 每次渲染都会重建候选对象，
@@ -1294,36 +1298,55 @@ function collectDestinationHints(text: string) {
   return [...specificHints, ...canonicalHints];
 }
 
+// 别名解析与大小写归一只由 hint 决定，原先每次调用都要遍历整张 DESTINATION_ALIASES
+// 并把每个别名重新 toLowerCase——它在 scoreTour 里按全池 × 每轮检索命中。
+const destinationAliasesForHintCache = new Map<string, string[]>();
+const lowercaseCache = new Map<string, string>();
+
+function lowerCached(value: string) {
+  const cached = lowercaseCache.get(value);
+  if (cached !== undefined) return cached;
+  const lowered = value.toLowerCase();
+  lowercaseCache.set(value, lowered);
+  return lowered;
+}
+
 function getDestinationAliasesForHint(hint: string) {
+  const cached = destinationAliasesForHintCache.get(hint);
+  if (cached) return cached;
   const normalizedHint = hint.trim().toLowerCase();
   if (!normalizedHint) return [];
 
   const directAliases = DESTINATION_ALIASES[hint];
-  if (directAliases) return [hint, ...directAliases];
+  if (directAliases) {
+    const resolved = [hint, ...directAliases];
+    destinationAliasesForHintCache.set(hint, resolved);
+    return resolved;
+  }
 
   const aliasEntry = Object.entries(DESTINATION_ALIASES).find(([, aliases]) =>
-    aliases.some((alias) => alias.toLowerCase() === normalizedHint),
+    aliases.some((alias) => lowerCached(alias) === normalizedHint),
   );
 
-  return aliasEntry ? [aliasEntry[0], ...aliasEntry[1]] : [hint];
+  const resolved = aliasEntry ? [aliasEntry[0], ...aliasEntry[1]] : [hint];
+  destinationAliasesForHintCache.set(hint, resolved);
+  return resolved;
 }
 
 function destinationHintsMatchCorpus(destinationHints: string[] | undefined, corpus: string) {
   if (!destinationHints?.length) return true;
-  const normalizedCorpus = corpus.toLowerCase();
+  const normalizedCorpus = lowerCached(corpus);
 
   return destinationHints.some((hint) =>
-    getDestinationAliasesForHint(hint).some((alias) =>
-      (() => {
-        const aliasIndex = normalizedCorpus.indexOf(alias.toLowerCase());
-        if (aliasIndex === -1) return false;
-        // 泛命中路径同样过跨词护栏：hint 本字的字面命中若横跨两个词
-        // （「流溪河源头」contains「河源」）不算命中；别名族命中不受此限。
-        if (alias.toLowerCase() === hint.toLowerCase() &&
-            isCrossWordDestinationMatch(corpus, aliasIndex, alias.length)) return false;
-        return !isBlockedDestinationAliasMatch(hint, alias, corpus, aliasIndex);
-      })(),
-    ),
+    getDestinationAliasesForHint(hint).some((alias) => {
+      const aliasIndex = normalizedCorpus.indexOf(lowerCached(alias));
+      if (aliasIndex === -1) return false;
+      // 泛命中路径同样过跨词护栏：hint 本字的字面命中若横跨两个词
+      // （「流溪河源头」contains「河源」）不算命中；别名族命中不受此限。
+      if (lowerCached(alias) === lowerCached(hint) &&
+          isCrossWordDestinationMatch(corpus, aliasIndex, alias.length)) return false;
+      return !isBlockedDestinationAliasMatch(hint, alias, corpus, aliasIndex);
+    }),
   );
 }
 
@@ -1722,6 +1745,18 @@ function expandAvoidHintsForCorpus(hints: string[]) {
   }));
 }
 
+// 回避词展开结果按 query 对象缓存：scoreTour 对全池每条候选都会问一次，
+// 而展开只由 query.avoidHints 决定。
+const queryAvoidCorpusHintsCache = new WeakMap<object, string[]>();
+
+function getQueryAvoidCorpusHints(query: LocalRecommendationQuery) {
+  const cached = queryAvoidCorpusHintsCache.get(query);
+  if (cached) return cached;
+  const expanded = expandAvoidHintsForCorpus(query.avoidHints);
+  queryAvoidCorpusHintsCache.set(query, expanded);
+  return expanded;
+}
+
 function primitiveMatchesAvoid(primitive: RecommendationPrimitive, avoid: string[] | undefined) {
   if (!avoid?.length) return [];
   const corpus = [
@@ -1876,7 +1911,11 @@ function scoreTour(
     query.departureTimeOfDay ||
     query.duration,
   );
-  if (expandAvoidHintsForCorpus(query.avoidHints).some((hint) => corpus.includes(hint))) {
+  // 回避词展开只取决于 query，却原先在每条候选里重算：canonicalizeCoverageTerm
+  // 内部跑一整套 normalizeSemanticAtom 正则，6483 条 × 多轮检索就是几百万次正则。
+  // 展开结果挂到 query 上（同一 query 对象在整轮 scoreTour 里复用）。
+  const avoidCorpusHints = getQueryAvoidCorpusHints(query);
+  if (avoidCorpusHints.some((hint) => corpus.includes(hint))) {
     return null;
   }
 
@@ -1916,11 +1955,7 @@ function scoreTour(
   // 目的地，如「斯里兰卡」配「广东」）是爬虫富集错误：对泛需求用户是货不对板，
   // 重度降权；词表来自候选语料自身，用户点名该目的地时不受影响。
   if (query.corpusDestinationVocabulary?.length && tour.destination && tour.destination !== '其他' && destinationHintsMatchCorpus(['广东'], tour.destination)) {
-    const normalizedTitle = normalizeText(tour.title);
-    const contradictory = query.corpusDestinationVocabulary.find((value) =>
-      value !== normalizeText(tour.destination) &&
-      !destinationHintsMatchCorpus(['广东'], value) &&
-      normalizedTitle.includes(value));
+    const contradictory = findContradictoryTitleDestination(tour, query.corpusDestinationVocabulary);
     if (contradictory) {
       score -= 24;
       qualityFlag = true;
@@ -2282,7 +2317,19 @@ function isCrossWordDestinationMatch(corpus: string, index: number, hintLength: 
   return isCjk(prevChar) && isCjk(nextChar) && DESTINATION_CONTINUATION_CHARS.has(nextChar);
 }
 
+// 两者都只由标题文本决定，却在每轮词面检索里按全池重跑（含多次正则与归一）。
+const declaredDepartureCityCache = new Map<string, string | null>();
+const titleDayValuesCache = new Map<string, { singles: Set<number>; ranges: Array<[number, number]> }>();
+
 function getDeclaredDepartureCity(title: string) {
+  const cached = declaredDepartureCityCache.get(title);
+  if (cached !== undefined) return cached;
+  const resolved = computeDeclaredDepartureCity(title);
+  declaredDepartureCityCache.set(title, resolved);
+  return resolved;
+}
+
+function computeDeclaredDepartureCity(title: string) {
   // HTML 实体会污染边界字符（"河南&gt;郑州出发"里的 &gt; 不是 >），
   // 先归一再找出发城市声明，否则异地收客团绕过检测。
   const normalizedTitle = normalizeText(title).replace(/&(?:amp|lt|gt|quot|nbsp|#\d+);/gi, '·');
@@ -2301,6 +2348,8 @@ function getDeclaredDepartureCity(title: string) {
 // 标题自述天数集合：6天5晚→{6}；2/3天→{2,3}；3-4天→range{3,4}；两天→{2}。
 // 供 duration 字段矛盾检测用（数据质量门，不是需求解析）。
 function getTitleDayValues(title: string) {
+  const cached = titleDayValuesCache.get(title);
+  if (cached) return cached;
   // 先剥日期形态（10月2日/10月）：「10月2日」的 2 会被当天数收进集合，
   // 恰好撞上字段值就免检——桂林5天团靠标题里的日期逃过矛盾检测。
   const normalized = normalizeChineseNumeralDuration(normalizeText(title))
@@ -2316,7 +2365,43 @@ function getTitleDayValues(title: string) {
     const max = Number(match[2]);
     ranges.push([Math.min(min, max), Math.max(min, max)]);
   }
-  return { singles, ranges };
+  const values = { singles, ranges };
+  titleDayValuesCache.set(title, values);
+  return values;
+}
+
+// 字段/标题目的地矛盾检测：标题归一与"该值是否属广东"都不随查询变化，
+// 只有词表遍历依赖 query.corpusDestinationVocabulary——前两者改按标题/值缓存，
+// 避免每轮检索对全池重跑 normalizeText 与别名族匹配。
+const normalizedTitleCache = new Map<string, string>();
+const excludesGuangdongCache = new Map<string, boolean>();
+
+function normalizedTitleOf(tour: AiRecommendationCandidate) {
+  const cached = normalizedTitleCache.get(tour.title);
+  if (cached !== undefined) return cached;
+  const normalized = normalizeText(tour.title);
+  normalizedTitleCache.set(tour.title, normalized);
+  return normalized;
+}
+
+function excludesGuangdong(value: string) {
+  const cached = excludesGuangdongCache.get(value);
+  if (cached !== undefined) return cached;
+  const result = !destinationHintsMatchCorpus(['广东'], value);
+  excludesGuangdongCache.set(value, result);
+  return result;
+}
+
+function findContradictoryTitleDestination(
+  tour: AiRecommendationCandidate,
+  vocabulary: string[],
+) {
+  const normalizedTitle = normalizedTitleOf(tour);
+  const normalizedDestination = normalizeText(tour.destination);
+  return vocabulary.find((value) =>
+    value !== normalizedDestination &&
+    excludesGuangdong(value) &&
+    normalizedTitle.includes(value));
 }
 
 function localRecommendations(tours: AiRecommendationCandidate[], text: string) {
@@ -2479,11 +2564,17 @@ function getCandidateReturnWeekdays(tour: AiRecommendationCandidate) {
 }
 
 function getCandidateScheduleWindows(tour: AiRecommendationCandidate): CandidateScheduleWindow[] {
+  // 排班窗只由班期日期与天数决定，按引用缓存（同 getCandidateDepartureDates 的理由）。
+  const cached = candidateScheduleWindowsCache.get(tour);
+  if (cached) return cached;
   const dates = getCandidateDepartureDates(tour);
-  if (dates.length === 0) return [];
+  if (dates.length === 0) {
+    candidateScheduleWindowsCache.set(tour, []);
+    return [];
+  }
   const duration = Number.isFinite(tour.duration) && tour.duration > 0 ? tour.duration : 0;
 
-  return dates
+  const windows = dates
     .map((date) => {
       const departure = parseDateString(date);
       if (!departure) return null;
@@ -2497,6 +2588,8 @@ function getCandidateScheduleWindows(tour: AiRecommendationCandidate): Candidate
       } satisfies CandidateScheduleWindow;
     })
     .filter((window): window is CandidateScheduleWindow => Boolean(window));
+  candidateScheduleWindowsCache.set(tour, windows);
+  return windows;
 }
 
 function findMatchingScheduleWindows(
@@ -4819,7 +4912,7 @@ function selectDiversePrimitives(
     selectedIds.add(primitive.id);
   }
 
-  return selected.sort((a, b) => rankPrimitive(b, localItems) - rankPrimitive(a, localItems));
+  return selected.sort((a, b) => rankOf(b) - rankOf(a));
 }
 
 function getPricePercentile(price: number, sortedPrices: number[]) {
@@ -4856,17 +4949,25 @@ function selectPriceBandRepresentatives(
   }
 
   const coverageTerms = extractCandidateCoverageTerms(context?.userText);
+  // rankPrimitive 对每条原语要做一次 O(n) 的 localItems.findIndex，覆盖分也要重算
+  // 一串语料匹配；放进排序比较器就是 O(n log n) 次重复计算（实测占重点层的一大半）。
+  // 这里先按 id 建索引，每条原语只落一次，比较器只读表。
+  const localRankById = new Map<string, number>();
+  localItems.forEach((item, index) => {
+    if (!localRankById.has(item.tourId)) localRankById.set(item.tourId, index);
+  });
+  const rankById = new Map<string, number>();
+  const coverageById = new Map<string, number>();
+  for (const primitive of primitives) {
+    rankById.set(primitive.id, rankPrimitive(primitive, localItems, localRankById));
+    coverageById.set(primitive.id, getPrimitiveCoverageScore(primitive, coverageTerms));
+  }
+  const rankOf = (primitive: RecommendationPrimitive) => rankById.get(primitive.id) ?? 0;
+  const coverageOf = (primitive: RecommendationPrimitive) => coverageById.get(primitive.id) ?? 0;
+
   const groupEntries = [...groups.values()]
-    .map((group) => group
-      .sort((a, b) =>
-        getPrimitiveCoverageScore(b, coverageTerms) -
-          getPrimitiveCoverageScore(a, coverageTerms) ||
-        rankPrimitive(b, localItems) - rankPrimitive(a, localItems),
-      ))
-    .sort((a, b) =>
-      getPrimitiveCoverageScore(b[0], coverageTerms) - getPrimitiveCoverageScore(a[0], coverageTerms) ||
-      rankPrimitive(b[0], localItems) - rankPrimitive(a[0], localItems),
-    );
+    .map((group) => group.sort((a, b) => coverageOf(b) - coverageOf(a) || rankOf(b) - rankOf(a)))
+    .sort((a, b) => coverageOf(b[0]) - coverageOf(a[0]) || rankOf(b[0]) - rankOf(a[0]));
   for (const group of groupEntries) {
     if (selected.length >= limit) break;
     const next = group.find((primitive) => !selectedIds.has(primitive.id));
@@ -4882,10 +4983,7 @@ function selectPriceBandRepresentatives(
     selectedIds.add(primitive.id);
   }
 
-  return selected.sort((a, b) =>
-    getPrimitiveCoverageScore(b, coverageTerms) - getPrimitiveCoverageScore(a, coverageTerms) ||
-    rankPrimitive(b, localItems) - rankPrimitive(a, localItems),
-  );
+  return selected.sort((a, b) => coverageOf(b) - coverageOf(a) || rankOf(b) - rankOf(a));
 }
 
 function annotateCandidatePrimitive(
@@ -5096,11 +5194,68 @@ function normalizeClassifiedDemandSpec(raw: unknown): ClassifiedDemandSpec | nul
   };
 }
 
+// 分类头 + 检索规划合并成一次调用的结果。
+// 两次调用原本串行：分类头 4.5s（prompt 仅 344 token，几乎全是网络往返的
+// 固定开销），检索规划再 2.9s。合并后省掉其中一次完整往返，且两条产物
+// 各自的下游语义不变（spec 只喂覆盖/门控，queries 只喂本地检索）。
+interface ClassifiedIntentPayload {
+  spec: ClassifiedDemandSpec | null;
+  queries: string[];
+  understanding: string;
+}
+
+// 候选池总览（目的地/主题/来源/价格区间 top-N）：给合并调用的检索规划段用。
+type CorpusOverview = ReturnType<typeof buildCandidateCorpusOverview>;
+
+function buildCandidateCorpusOverview(candidatePool: AiRecommendationCandidate[]) {
+  const destinationCounts = new Map<string, number>();
+  const themeCounts = new Map<string, number>();
+  const sourceCounts = new Map<string, number>();
+  let priceMin = Number.POSITIVE_INFINITY;
+  let priceMax = 0;
+  let daysMin = Number.POSITIVE_INFINITY;
+  let daysMax = 0;
+
+  for (const tour of candidatePool) {
+    const destination = String(tour.destination || '').trim();
+    if (destination) destinationCounts.set(destination, (destinationCounts.get(destination) || 0) + 1);
+    const theme = String(tour.theme || '').trim();
+    if (theme) themeCounts.set(theme, (themeCounts.get(theme) || 0) + 1);
+    const source = String(tour.source || '').trim();
+    if (source) sourceCounts.set(source, (sourceCounts.get(source) || 0) + 1);
+    if (Number.isFinite(tour.price) && tour.price > 0) {
+      priceMin = Math.min(priceMin, tour.price);
+      priceMax = Math.max(priceMax, tour.price);
+    }
+    if (Number.isFinite(tour.duration) && tour.duration > 0) {
+      daysMin = Math.min(daysMin, tour.duration);
+      daysMax = Math.max(daysMax, tour.duration);
+    }
+  }
+
+  const top = (map: Map<string, number>, limit: number) =>
+    [...map.entries()].sort((left, right) => right[1] - left[1]).slice(0, limit);
+
+  return {
+    total: candidatePool.length,
+    destinations: top(destinationCounts, 24).map(([name, count]) => `${name}(${count})`),
+    themes: top(themeCounts, 12).map(([name, count]) => `${name}(${count})`),
+    sources: top(sourceCounts, 8).map(([name, count]) => `${name}(${count})`),
+    priceRange: Number.isFinite(priceMin) ? `${Math.round(priceMin)}-${Math.round(priceMax)}元` : '未知',
+    daysRange: Number.isFinite(daysMin) ? `${daysMin}-${daysMax}天` : '未知',
+  };
+}
+
 async function classifyExperienceDemandSpec(params: {
   configs: AiProviderConfig[];
   userText: string;
   previousDemands?: ExperienceDemand[];
-}): Promise<ClassifiedDemandSpec | null> {
+  // 带上候选池总览时，同一次调用顺带产出多轮检索式（合并调用的主路径）。
+  corpusOverview?: CorpusOverview;
+  // 不参与"是否值得解析"的门控，只用于在缺少 queries 时判定降级。
+  expectQueries?: boolean;
+}): Promise<ClassifiedIntentPayload> {
+  const includeQueries = Boolean(params.corpusOverview) && Boolean(params.expectQueries);
   const messages: AiPlanningCallMessages = [
     {
       role: 'system',
@@ -5114,9 +5269,27 @@ async function classifyExperienceDemandSpec(params: {
         '- 金额、天数、出发时段、上车点是结构化约束，不输出。',
         '- 目的地输出到 destinations 字段：用户点名单一城市直接照抄；区域词/复合词用你的世界知识展开成具体城市/目的地（潮汕→潮州、汕头；东北→哈尔滨、雪乡；珠三角→广州、深圳、珠海）。无法展开时输出用户原词。',
         '- 没有可识别的目的地与体验主题时输出 {"demands":[],"avoid":[],"destinations":[]}。',
+        ...(includeQueries
+          ? [
+              '',
+              '另需产出 1-3 条"检索式"，用于在一个固定的候选线路池里做关键词检索（queries 字段）。',
+              '检索式是给本地检索器的中文短语，每条聚焦一个不同角度（如不同目的地组合、不同玩法主题、宽窄不同的价格档），不要重复同一个角度。',
+              '检索式必须守住需求里点名过的体验主题：用户明确要某类体验（如海边沙滩）时，不得产出用户没提主题的检索式（如温泉、城市观光、亲子）；差异化只靠目的地组合、价格档、天数、交通这些角度实现。',
+              '只有需求本身没点名体验主题、或点名了多个主题时，才允许每条检索式各占一个不同主题。',
+              '候选池有限时，宁可宽一点也不要全部挤在同一组热门词上；第二条、第三条检索式应覆盖第一条可能漏掉但同样符合需求的选项。',
+              'understanding 字段写一句中文需求理解。',
+              '完整输出形状：{"demands":[],"avoid":[],"destinations":[],"understanding":"...","queries":["检索式1","检索式2"]}',
+            ]
+          : []),
       ].join('\n'),
     },
-    { role: 'user', content: params.userText },
+    {
+      role: 'user',
+      content: JSON.stringify({
+        q: params.userText,
+        ...(includeQueries && params.corpusOverview ? { corpus: params.corpusOverview } : {}),
+      }),
+    },
   ];
   // 追问槽位规则：带上轮需求规格时追加一条 user 消息，教模型区分
   // 放弃/替换（旧主题入 avoid）、追加（新旧并存）、纯约束补充（沿用旧 demand）。
@@ -5137,13 +5310,28 @@ async function classifyExperienceDemandSpec(params: {
     const aiCall = await callAiApi({
       configs: params.configs,
       messages: messages as ReturnType<typeof buildAiMessages>,
-      maxTokens: 300,
+      // 合并后要同时容纳 demands/destinations/understanding 与 1-3 条检索式，
+      // 300 的旧预算对带 queries 的调用是确定性截断（finish_reason=length
+      // 会整轮判失败），给到 800。不带 queries 时退回 300，不浪费预算。
+      maxTokens: includeQueries ? 800 : 300,
       schema: 'search-plan',
     }) as AiSearchCallResult;
-    return normalizeClassifiedDemandSpec(aiCall.parsed);
+    const spec = normalizeClassifiedDemandSpec(aiCall.parsed);
+    const parsed = aiCall.parsed as { queries?: unknown; understanding?: unknown } | null;
+    const queries = Array.isArray(parsed?.queries)
+      ? parsed.queries
+        .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+        .map((item) => item.trim())
+        .slice(0, 3)
+      : [];
+    return {
+      spec,
+      queries,
+      understanding: typeof parsed?.understanding === 'string' ? parsed.understanding : '',
+    };
   } catch {
     // 分类头失败不阻断主链路：调用方退回词面 fallback。
-    return null;
+    return { spec: null, queries: [], understanding: '' };
   }
 }
 
@@ -5216,9 +5404,29 @@ function corpusHasExperienceAliasHit(corpus: string, alias: string) {
   }
 }
 
-function getPrimitiveCoverageScore(primitive: RecommendationPrimitive, terms: string[]) {
-  if (terms.length === 0) return 0;
-  const coverageEvidenceCorpus = normalizeText([
+// 覆盖证据语料只由原语自身字段决定：原先每次打分都要重新拼串 + normalizeText，
+// 而它在多轮检索里对全池每条原语要跑十几次（实测占点击后本地耗时的两成）。
+const coverageEvidenceCorpusCache = new Map<string, string>();
+const canonicalCoverageTermCache = new Map<string, string>();
+const coverageGroupEvidenceCache = new Map<string, { multiCharAliases: string[]; places: string[] }>();
+
+function getCoverageGroupEvidence(group: { label: string; aliases: readonly string[]; places?: readonly string[] }) {
+  const cached = coverageGroupEvidenceCache.get(group.label);
+  if (cached) return cached;
+  const evidence = {
+    multiCharAliases: group.aliases
+      .map((alias) => normalizeText(alias))
+      .filter((alias) => alias.length > 1),
+    places: (group.places ?? []).map((place) => normalizeText(place)),
+  };
+  coverageGroupEvidenceCache.set(group.label, evidence);
+  return evidence;
+}
+
+function getCoverageEvidenceCorpus(primitive: RecommendationPrimitive) {
+  const cached = coverageEvidenceCorpusCache.get(primitive.id);
+  if (cached !== undefined) return cached;
+  const corpus = normalizeText([
     primitive.title,
     primitive.destination,
     ...primitive.highlights,
@@ -5227,10 +5435,25 @@ function getPrimitiveCoverageScore(primitive: RecommendationPrimitive, terms: st
   ]
     .filter(Boolean)
     .join(' '));
+  coverageEvidenceCorpusCache.set(primitive.id, corpus);
+  return corpus;
+}
+
+function getCanonicalCoverageTerm(term: string) {
+  const cached = canonicalCoverageTermCache.get(term);
+  if (cached !== undefined) return cached;
+  const canonical = canonicalizeCoverageTerm(term);
+  canonicalCoverageTermCache.set(term, canonical);
+  return canonical;
+}
+
+function getPrimitiveCoverageScore(primitive: RecommendationPrimitive, terms: string[]) {
+  if (terms.length === 0) return 0;
+  const coverageEvidenceCorpus = getCoverageEvidenceCorpus(primitive);
   // 体验别名命中护栏：命中位置紧邻场所/器物后缀（「邮轮母港」「潜水艇C-56」）
   // 时，该词是地点/器物名的修饰成分，不是体验本体——多次出现时任一次非场所
   // 命中即算证据。
-  return uniqueStrings(terms.map(canonicalizeCoverageTerm).filter(Boolean)).reduce((score, term) => {
+  return uniqueStrings(terms.map(getCanonicalCoverageTerm).filter(Boolean)).reduce((score, term) => {
     if (corpusHasExperienceAliasHit(coverageEvidenceCorpus, normalizeText(term))) return score + 1;
     const group = COVERAGE_TERM_GROUPS.find((candidate) => candidate.label === term);
     if (!group) return score;
@@ -5238,13 +5461,11 @@ function getPrimitiveCoverageScore(primitive: RecommendationPrimitive, terms: st
     // 单字别名（"湾"）只是必要证据：内陆温泉（山泉湾/富丽湾/聚龙湾）标题都带湾，
     // 单靠它计海滨覆盖会让"海边和温泉都要"被内陆泡汤团伪双贴占满——必须有
     // 同组多字别名或地名证据同现，单字命中本身不作数。
+    // 归一化后的别名/地名按组预计算：原先每条原语、每个词都要重跑一遍 normalizeText。
+    const evidence = getCoverageGroupEvidence(group);
     const multiCharEvidence =
-      group.aliases.some((alias) =>
-        normalizeText(alias).length > 1 && corpusHasExperienceAliasHit(coverageEvidenceCorpus, normalizeText(alias)),
-      ) ||
-      ((group as { places?: readonly string[] }).places ?? []).some((place) =>
-        coverageEvidenceCorpus.includes(normalizeText(place)),
-      );
+      evidence.multiCharAliases.some((alias) => corpusHasExperienceAliasHit(coverageEvidenceCorpus, alias)) ||
+      evidence.places.some((place) => coverageEvidenceCorpus.includes(place));
     if (!multiCharEvidence) return score;
     return score + 1;
   }, 0);
@@ -5457,12 +5678,24 @@ function selectCoverageFocusCompacted(
     .filter((price) => Number.isFinite(price) && price > 0)
     .sort((a, b) => a - b);
   const coverageTerms = extractCandidateCoverageTerms(context?.userText);
+  // 排序两侧都是全池（6k+）重算：覆盖分要扫一遍语料、rankPrimitive 还要做 O(n) 的
+  // findIndex。把这两个键按 id 预计算一次，比较器只读表——结果逐位不变。
+  const coverageScoreById = new Map<string, number>();
+  const localRankById = new Map<string, number>();
+  localItems.forEach((item, index) => {
+    if (!localRankById.has(item.tourId)) localRankById.set(item.tourId, index);
+  });
+  const rankById = new Map<string, number>();
+  for (const primitive of primitives) {
+    coverageScoreById.set(primitive.id, getPrimitiveCoverageScore(primitive, coverageTerms));
+    rankById.set(primitive.id, rankPrimitive(primitive, localItems, localRankById));
+  }
   const coveragePool = coverageTerms.length > 0
     ? [...primitives]
-        .filter((primitive) => getPrimitiveCoverageScore(primitive, coverageTerms) > 0)
+        .filter((primitive) => (coverageScoreById.get(primitive.id) ?? 0) > 0)
         .sort((a, b) =>
-          getPrimitiveCoverageScore(b, coverageTerms) - getPrimitiveCoverageScore(a, coverageTerms) ||
-          rankPrimitive(b, localItems) - rankPrimitive(a, localItems),
+          (coverageScoreById.get(b.id) ?? 0) - (coverageScoreById.get(a.id) ?? 0) ||
+          (rankById.get(b.id) ?? 0) - (rankById.get(a.id) ?? 0),
         )
     : [];
   const coverageMatches = coverageTerms.length > 0
@@ -5958,10 +6191,17 @@ function resolvePromptDateWindow(text: string) {
 
 function getCandidateDepartureDates(tour: AiRecommendationCandidate) {
   const today = getTodayInputValue();
-  return getDepartureDatesWithHotDates(tour)
+  // 按 tour 引用缓存：本函数在点击路径上是全池热点——每轮词面检索 scoreTour、
+  // 排班窗、筛选都要对 6483 条各跑一次「合并+去重+过滤+排序」，而输入只由
+  // tour 的班期字段和"今天"决定。缓存键带上 today，跨日自动失效。
+  const cached = candidateDepartureDatesCache.get(tour);
+  if (cached && cached.today === today) return cached.dates;
+  const dates = getDepartureDatesWithHotDates(tour)
     .filter(Boolean)
     .filter((date) => date >= today)
     .sort();
+  candidateDepartureDatesCache.set(tour, { today, dates });
+  return dates;
 }
 
 function filterPastOnlyCandidatesWhenFutureExists(tours: AiRecommendationCandidate[]) {
@@ -8765,105 +9005,6 @@ type AiSearchCallResult = {
 
 type AiPlanningCallMessages = Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
 
-function buildCandidateCorpusOverview(candidatePool: AiRecommendationCandidate[]) {
-  const destinationCounts = new Map<string, number>();
-  const themeCounts = new Map<string, number>();
-  const sourceCounts = new Map<string, number>();
-  let priceMin = Number.POSITIVE_INFINITY;
-  let priceMax = 0;
-  let daysMin = Number.POSITIVE_INFINITY;
-  let daysMax = 0;
-
-  for (const tour of candidatePool) {
-    const destination = String(tour.destination || '').trim();
-    if (destination) destinationCounts.set(destination, (destinationCounts.get(destination) || 0) + 1);
-    const theme = String(tour.theme || '').trim();
-    if (theme) themeCounts.set(theme, (themeCounts.get(theme) || 0) + 1);
-    const source = String(tour.source || '').trim();
-    if (source) sourceCounts.set(source, (sourceCounts.get(source) || 0) + 1);
-    if (Number.isFinite(tour.price) && tour.price > 0) {
-      priceMin = Math.min(priceMin, tour.price);
-      priceMax = Math.max(priceMax, tour.price);
-    }
-    if (Number.isFinite(tour.duration) && tour.duration > 0) {
-      daysMin = Math.min(daysMin, tour.duration);
-      daysMax = Math.max(daysMax, tour.duration);
-    }
-  }
-
-  const top = (map: Map<string, number>, limit: number) =>
-    [...map.entries()].sort((left, right) => right[1] - left[1]).slice(0, limit);
-
-  return {
-    total: candidatePool.length,
-    destinations: top(destinationCounts, 24).map(([name, count]) => `${name}(${count})`),
-    themes: top(themeCounts, 12).map(([name, count]) => `${name}(${count})`),
-    sources: top(sourceCounts, 8).map(([name, count]) => `${name}(${count})`),
-    priceRange: Number.isFinite(priceMin) ? `${Math.round(priceMin)}-${Math.round(priceMax)}元` : '未知',
-    daysRange: Number.isFinite(daysMin) ? `${daysMin}-${daysMax}天` : '未知',
-  };
-}
-
-async function planAiSearchRounds(params: {
-  configs: AiProviderConfig[];
-  userText: string;
-  searchQuery: string;
-  candidatePool: AiRecommendationCandidate[];
-  intent: AiTravelIntent | null;
-  preferenceMemory: AiPreferenceMemory | null;
-  onStreamDelta?: (delta: AiStreamDelta) => void;
-}): Promise<{ queries: string[]; reasoningText: string; model: string } | null> {
-  const overview = buildCandidateCorpusOverview(params.candidatePool);
-  const messages: AiPlanningCallMessages = [
-    {
-      role: 'system',
-      content: [
-        '你是旅行检索规划师。用户会在下一步给你一条旅行需求，你要把它翻译成 1-3 条"检索式"，用于在一个固定的候选线路池里做关键词检索。',
-        '检索式是给本地检索器的中文短语，每条聚焦一个不同角度（如不同目的地组合、不同玩法主题、宽窄不同的价格档），不要重复同一个角度。',
-        '检索式必须守住需求里点名过的体验主题：用户明确要某类体验（如海边沙滩）时，不得产出用户没提主题的检索式（如温泉、城市观光、亲子）；差异化只靠目的地组合、价格档、天数、交通这些角度实现。',
-        '只有需求本身没点名体验主题、或点名了多个主题时，才允许每条检索式各占一个不同主题。',
-        '候选池有限时，宁可宽一点也不要全部挤在同一组热门词上；第二条、第三条检索式应覆盖第一条可能漏掉但同样符合需求的选项。',
-        '严格输出 JSON：{"understanding":"一句中文需求理解","queries":["检索式1","检索式2"],"refinementMode":"new_search|refine_previous|broaden|replace_destination|null"}',
-      ].join('\n'),
-    },
-    {
-      role: 'user',
-      content: JSON.stringify({
-        q: params.userText,
-        sq: params.searchQuery,
-        pm: compactPreferenceMemoryForPrompt(params.preferenceMemory),
-        it: compactIntentForPrompt(params.intent),
-        corpus: overview,
-      }),
-    },
-  ];
-
-  const aiCall = await callAiApi({
-    configs: params.configs,
-    messages: messages as ReturnType<typeof buildAiMessages>,
-    maxTokens: 1600,
-    schema: 'search-plan',
-    onStreamDelta: params.onStreamDelta,
-  }) as AiSearchCallResult;
-
-  const parsed = aiCall.parsed as { queries?: unknown; understanding?: unknown };
-  const queries = Array.isArray(parsed?.queries)
-    ? parsed.queries
-      .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
-      .map((item) => item.trim())
-      .slice(0, 3)
-    : [];
-  if (queries.length === 0) {
-    throw new Error(getAiProviderParseErrorLabel(
-      { baseUrl: '', model: aiCall.model, apiKey: '' },
-      'schema_invalid',
-      'planning queries missing',
-    ));
-  }
-  void parsed.understanding;
-  return { queries, reasoningText: aiCall.reasoningText, model: aiCall.model };
-}
-
 function executeAiSearchRounds(
   candidatePool: AiRecommendationCandidate[],
   queries: string[],
@@ -9177,13 +9318,24 @@ export async function requestAiRecommendations({
           tours: availableCandidates,
         })
       : Promise.resolve(weatherContextForRankingEarly);
-    const classifiedSpec = await classifyExperienceDemandSpec({
+    // 分类头 + 多轮检索规划：合并为一次模型调用。
+    // 原本是两次串行调用（分类头 4.5s + 检索规划 2.9s），而分类头的 prompt 只有
+    // 344 token，耗时几乎全是网络往返的固定开销——这是"卡在 LLM 调用前"的两个
+    // 串行往返。合并后同一次调用同时产出需求规格（demands/avoid/destinations）
+    // 与检索式（queries），省掉一整次往返。
+    // 门控与原计划调用一致：只有候选超过 MAX_AI_CANDIDATES 才产出 queries
+    // （池子小到单发就能全覆盖时，多轮检索本来就无增量）；spec 始终产出。
+    const planningExpected = availableCandidates.length > MAX_AI_CANDIDATES;
+    const classifiedPayload = await classifyExperienceDemandSpec({
       configs,
       userText: effectiveUserText,
       previousDemands: buildExperienceDemandSpec(previousUserText).length > 0
         ? buildExperienceDemandSpec(previousUserText)
         : undefined,
+      ...(planningExpected ? { corpusOverview: buildCandidateCorpusOverview(availableCandidates) } : {}),
+      expectQueries: planningExpected,
     });
+    const classifiedSpec = classifiedPayload.spec;
     // B6 目的地归一：分类头用模型知识把区域词展开成具体目的地（潮汕→潮州/汕头、
     // 东北→哈尔滨/雪乡），并入本轮意图的目的地提示——下游目的地评分/冲突门/
     // 模型提示词全链路可见。并入在 effectiveIntent 构建之后做原地合并。
@@ -9282,32 +9434,17 @@ export async function requestAiRecommendations({
         });
       };
     };
-    if (availableCandidates.length > MAX_AI_CANDIDATES) {
+    if (classifiedPayload.queries.length > 0) {
       try {
-        const plan = await planAiSearchRounds({
-          configs,
-          userText: effectiveUserText,
-          searchQuery,
-          candidatePool: availableCandidates,
-          intent: effectiveIntent,
-          preferenceMemory: aiContextMemoryForThisTurn,
-          onStreamDelta: createThinkingProgressEmitter(
-            'context',
-            56,
-            withActiveSubstep(
-              [
-                { id: 'weather', label: '补充天气信息' },
-                { id: 'season', label: '结合季节与时令' },
-                { id: 'candidate', label: '汇总候选池特征' },
-              ],
-              'candidate',
-            ),
-            '正在规划检索角度',
-          ),
-        });
-        if (!plan) throw new Error('AI search planning returned no result');
-        searchPlanningReasoning = plan.reasoningText;
-        const executed = executeAiSearchRounds(availableCandidates, plan.queries, effectiveUserText, classifiedSpec ?? undefined);
+        // 检索式已由合并调用产出，这里只做本地执行（全池词面检索 + 贴合度排序），
+        // 不再发起第二次模型调用。
+        searchPlanningReasoning = classifiedPayload.understanding;
+        const executed = executeAiSearchRounds(
+          availableCandidates,
+          classifiedPayload.queries,
+          effectiveUserText,
+          classifiedSpec ?? undefined,
+        );
         searchRounds = executed.rounds;
         if (executed.searchedTours.length > 0) {
           searchedCompacted = annotateSearchedHitCompacted(

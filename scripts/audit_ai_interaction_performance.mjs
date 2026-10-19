@@ -136,7 +136,7 @@ assert.ok(
 {
   const poolAt = recommendSource.indexOf('const stablePool = getStablePromptPool(candidateTours);');
   const classifyAt = recommendSource.indexOf(
-    'const classifiedSpec = await classifyExperienceDemandSpec({',
+    'const classifiedPayload = await classifyExperienceDemandSpec({',
   );
   assert.ok(poolAt > 0 && classifyAt > 0, 'both the pool build and the classifier must stay discoverable');
   assert.ok(
@@ -154,6 +154,63 @@ assert.ok(
     recommendSource,
     /const prewarmMatched = useWeatherResearch === useWeatherResearchEarly;/,
     'the prewarmed weather context must be validated against the post-classifier decision',
+  );
+}
+
+// --- 分类头与检索规划必须共用一次模型调用 ---
+// 线上时序是三次串行 LLM 调用：分类头 4.5s + 检索规划 2.9s + 主推荐 34.7s。
+// 分类头 prompt 只有 344 token，4.5s 几乎全是往返开销；规划再走一次同样的
+// 往返纯属浪费。两者合并成一次调用后，检索式由同一个响应带回、本地执行。
+{
+  assert.ok(
+    !recommendSource.includes('async function planAiSearchRounds'),
+    'search planning must not remain a second serial LLM call; its queries come back ' +
+      'from the merged classifier call (that round-trip was 2.9s of pure latency)',
+  );
+  const classifierBody = recommendSource.slice(
+    recommendSource.indexOf('async function classifyExperienceDemandSpec'),
+    recommendSource.indexOf('function extractCandidateCoverageTerms'),
+  );
+  assert.match(
+    classifierBody,
+    /corpusOverview\?/,
+    'the classifier must accept the corpus overview so one call can also emit retrieval queries',
+  );
+  // 检索规划的门控必须原样保留：候选不超过 MAX_AI_CANDIDATES 时不产出 queries。
+  assert.match(
+    recommendSource,
+    /const planningExpected = availableCandidates\.length > MAX_AI_CANDIDATES;/,
+    'query planning must keep the original pool-size gate',
+  );
+  assert.match(
+    recommendSource,
+    /if \(classifiedPayload\.queries\.length > 0\) \{/,
+    'merged queries must still be executed against the full pool locally',
+  );
+}
+
+// --- 点击路径上的全池热点必须预计算，不能塞进比较器 ---
+// 实测（6483 条候选、预热后）：回避词展开原先在 scoreTour 里按条重算，
+// 单次 localRecommendations 约 899ms；预计算后降到约 53ms。
+{
+  assert.match(
+    recommendSource,
+    /const avoidCorpusHints = getQueryAvoidCorpusHints\(query\);/,
+    'avoid-hint expansion depends only on the query and must be computed once per query, ' +
+      'not once per candidate in scoreTour',
+  );
+  for (const [pattern, label] of [
+    [/getCoverageEvidenceCorpus\(primitive\)/, 'coverage evidence corpus'],
+    [/getQueryAvoidCorpusHints/, 'avoid corpus hints'],
+    [/getTitleDayValues\(tour\.title\)|getTitleDayValues\(title\)/, 'title day values'],
+    [/normalizedTitleOf\(tour\)/, 'normalized title'],
+  ]) {
+    assert.match(recommendSource, pattern, `hot-path helper must stay cached: ${label}`);
+  }
+  assert.doesNotMatch(
+    recommendSource,
+    /rankPrimitive\(b, localItems\) - rankPrimitive\(a, localItems\)/,
+    'rankPrimitive does an O(n) lookup and must never be called inside a sort comparator',
   );
 }
 

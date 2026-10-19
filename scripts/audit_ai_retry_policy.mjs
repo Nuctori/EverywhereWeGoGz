@@ -69,12 +69,14 @@ assert.match(
 }
 
 // --- 5. 分类头必须在超时/失败时不阻断主链路 ---
+// 分类头与检索规划已合并为一次调用：失败时整体退化为"无规格、无检索式"的
+// 空载荷（spec=null），调用方照旧走词面 fallback，而不是把异常抛穿主链路。
 {
   const fn = source.slice(source.indexOf('async function classifyExperienceDemandSpec'));
   const body = fn.slice(0, fn.indexOf('\nfunction extractCandidateCoverageTerms'));
   assert.ok(
-    /catch \{[\s\S]{0,200}return null;/.test(body),
-    'the classifier must degrade to null instead of throwing through the main path',
+    /catch \{[\s\S]{0,300}return \{ spec: null, queries: \[\], understanding: '' \};/.test(body),
+    'the classifier must degrade to a null spec (and no queries) instead of throwing through the main path',
   );
 }
 
