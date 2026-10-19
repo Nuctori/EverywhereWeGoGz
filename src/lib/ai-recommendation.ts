@@ -6723,11 +6723,9 @@ function buildAiMessages(params: {
   intent: AiTravelIntent | null;
   preferenceMemory: AiPreferenceMemory | null;
   allowPublicInterest: boolean;
-  // 并行生成时本路只负责一档：head=详细推荐，tail=简要推荐。
-  // 不传=单次调用，自己出完整两档（保持旧行为）。
-  tier?: 'head' | 'tail';
 }) {
-  const promptPool = [...params.focusFull, ...params.stableCandidates];  const intentCoverage = analyzeIntentCoverage(promptPool, params.intent);
+  const promptPool = [...params.focusFull, ...params.stableCandidates];
+  const intentCoverage = analyzeIntentCoverage(promptPool, params.intent);
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
   const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
   const worldKnowledgeExamples = params.allowPublicInterest
@@ -6831,17 +6829,8 @@ function buildAiMessages(params: {
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
       ...promptPolicy.requestRules,
       [
-        // 并行两路各自只负责一档。tier 由调用方给出，prompt 必须跟着变：
-        // 只切候选池而不切指令，模型仍会按"25 条 15 详细"的目标去写，
-        // 既写不全也白花 token。
-        ...(params.tier === 'head'
-          ? [`这一轮你只负责"最值得细看"的那一档：从这批候选里挑出最贴合的 ${MAX_AI_DETAILED_ITEMS} 条以内，每条都写完整 reason 和 matchedSignals，按推荐度排序。不要再补简要推荐。`]
-          : params.tier === 'tail'
-            ? [`这一轮你只负责"值得顺便比较"的那一档：从这批候选里挑出 ${MAX_AI_BRIEF_ITEMS} 条以内，reason 只写一句话简单介绍（30 字内），matchedSignals 照常写。这些是补充选项，不要重复写详细长评。`]
-            : [
-              `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
-              `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条是最值得细看的详细推荐，后面 ${MAX_AI_BRIEF_ITEMS} 条是值得顺便比较的简要推荐；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
-            ]),
+        `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
+        `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条是最值得细看的详细推荐，后面 ${MAX_AI_BRIEF_ITEMS} 条是值得顺便比较的简要推荐；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
         '可以参考熟悉当地玩法的人来写，避免让所有线路都长得一样；如果某个软条件需要核实，自行判断它是否值得写进这一条。',
         // 输出体积约束：实测主请求在 109 tok/s 下生成 2689 token 要 25s，
         // 而这 2689 token 里绝大部分是把 ck/fk 里的输入列原样抄回来
@@ -7798,7 +7787,6 @@ async function fetchWithTimeout(
 
 export const __aiRecommendationTestHooks = {
   mergeAbortSignals,
-  splitCandidatePoolsForParallelGeneration,
   auditAiRecommendationsStrict,
   auditAiRecommendations,
   buildAiMessages,
@@ -8628,44 +8616,6 @@ function mergeAbortSignals(
   return controller.signal;
 }
 
-/**
- * 把一次大生成拆成两路并行调用时，按候选切分出互不重叠的两份池子。
- *
- * 为什么要切候选而不是只切"要输出几条"：模型必须看到一批候选才能排序，
- * 如果两路看同一份池子、"前半/后半"全靠各自猜，两路会选出重叠的线路，
- * 合并后既有重复又缺档——排序正确性直接崩掉（这正是并行化最容易踩的坑）。
- *
- * 所以按池子切：重点池（focusFull，已按本轮需求排过序）给前段，稳定池
- * （stableCandidates，广度补充）给后段。两路各自从自己的池子里排序挑选，
- * 集合天然不相交，合并后仍是 25 条互不重复的结果。
- *
- * 切分点取 focus 池的前半：既保证前段（要写完整 reason 的详细推荐）
- * 拿到最贴合的候选，也给后段留出足够的池子。
- */
-function splitCandidatePoolsForParallelGeneration(params: {
-  focusFull: Parameters<typeof buildAiMessages>[0]['focusFull'];
-  stableCandidates: Parameters<typeof buildAiMessages>[0]['stableCandidates'];
-  headLimit?: number;
-}) {
-  const { focusFull, stableCandidates, headLimit = MAX_AI_DETAILED_ITEMS } = params;
-  // 前段只负责"详细推荐"那一档，池子按 headLimit 收紧：给模型 1.6 倍的
-  // 候选让它有挑选余地，但不必看完整池子——head 的输出量与它的候选数正相关，
-  // 池子越大它越容易多写几条，首屏反而更晚。
-  //
-  // 切点必须让两路严格不相交：一旦某个 tourId 同时进入两路，合并后就是重复
-  // 推荐（下游审计按先到先得去重，会把后段那条静默丢掉，表现为"少给了几条"，
-  // 不报错、极难发现）。
-  const headPoolSize = Math.max(1, Math.min(focusFull.length, Math.ceil(headLimit * 1.6)));
-  const headFocus = focusFull.slice(0, headPoolSize);
-  const tailFocus = focusFull.slice(headPoolSize);
-  const headIds = new Set(headFocus.map((item) => item.id));
-  const tailStable = stableCandidates.filter((item) => !headIds.has(item.id));
-  return {
-    head: { focusFull: headFocus, stableCandidates: [] as typeof stableCandidates },
-    tail: { focusFull: tailFocus, stableCandidates: tailStable },
-  };
-}
-
 function getProviderTimeoutMs(config: AiProviderConfig, overrideMs?: number) {
   if (overrideMs && overrideMs > 0) return overrideMs;
   const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
@@ -8987,6 +8937,8 @@ async function requestAiFormatCorrection(params: {
   schema: 'recommendation' | 'search-plan';
   issue: string;
   startedAt: number;
+  // 取消信号：它是本轮请求的一部分，必须能被一起掐断。
+  signal?: AbortSignal;
 }) {
   const elapsed = Date.now() - params.startedAt;
   if (elapsed > AI_FORMAT_CORRECTION_BUDGET_MS) return null;
@@ -9007,6 +8959,9 @@ async function requestAiFormatCorrection(params: {
       ] as ReturnType<typeof buildAiMessages>,
       maxTokens: 3600,
       schema: params.schema,
+      // 追问也是本轮的一部分：用户取消时它必须一起停，否则放弃之后
+      // 还会再跑一次 3600 token 的生成。
+      ...(params.signal ? { signal: params.signal } : {}),
     });
     return { call, parsed: call.parsed as { items?: unknown } & Record<string, unknown> };
   } catch {
@@ -9833,54 +9788,36 @@ export async function requestAiRecommendations({
         // 增量展示失败不影响正式结果。
       }
     };
-    // ── 并行两路生成 ────────────────────────────────────────────────────────
-    // 单次调用要等模型把 25 条逐条写完（实测 2689 输出 token / 约 35s），
-    // 用户在这期间什么都看不到。这里把生成拆成两路并行：
-    //   head：从 focus 池前半挑详细推荐（写完整 reason），约 8-10 条；
-    //   tail：从其余候选挑简要推荐（一句话），约 15-17 条。
-    // 两路候选池严格不相交，合并后仍是 25 条互不重复的结果，
-    // 且两路都只是"少写一点"，不是"写差一点"——所有文案仍由模型生成。
-    // head 的输出量明显更小，通常先返回，首屏可见时间因此前移。
-    const splitPools = splitCandidatePoolsForParallelGeneration({
-      focusFull: focusGraded,
-      stableCandidates: stablePool.candidates,
-    });
-    const buildMessagesForPool = (
-      pool: ReturnType<typeof splitCandidatePoolsForParallelGeneration>['head'],
-      tier: 'head' | 'tail',
-    ) =>
-      buildAiMessages({
+    // ── 单次生成 ────────────────────────────────────────────────────────────
+    // 曾经试过把这里拆成两路并行（前段详细 + 后段简要），实测总时长从
+    // 34.7s 降到 20.8s，但首屏一秒都没提前——首屏本来就由流式预览决定
+    // （第 1 条约 2.1s 就能看）。而那 14 秒的代价是并发翻倍：
+    // 免费额度有并发限制，两路 × 最多 3 次重试 = 最多 6 个在途请求，
+    // 手机上必撞 429 并反复 4s 退避，表现为"一直转圈"。
+    // 用稳定性换 14 秒不划算，且用户在第 2 秒就已看到内容，回退单路。
+    let aiCall = await callAiApi({
+      configs,
+      messages: aiMessages,
+      liteMessages: buildLiteAiMessages({
         userText: effectiveUserText,
         messages,
-        stableCandidates: pool.stableCandidates,
-        focusFull: pool.focusFull,
-        routeAtlas: resolvedRouteAtlas,
-        auditContext,
+        stableCandidates: stablePool.candidates,
+        focusFull: focusGraded,
         weatherContext: weatherContextForRanking,
-        destinationWeatherInsights: resolvedFocusWeatherInsights,
         searchQuery,
         intent: effectiveIntent,
         preferenceMemory: aiContextMemoryForThisTurn,
         allowPublicInterest: allowPublicInterestForTurn,
-        tier,
-      });
-    const headMessages = buildMessagesForPool(splitPools.head, 'head');
-    const tailMessages = buildMessagesForPool(splitPools.tail, 'tail');
-    const rankingQualityCheck = (response: unknown) =>
-      getAiResponseIntentQualityIssue({
-        response,
-        candidateTours: aiCandidatePool,
-        intent: effectiveIntent,
-      });
-    const headCallPromise = callAiApi({
-      configs,
-      messages: headMessages,
-      // 前段只出详细推荐（约 10 条 × 完整 reason）。预算按"详细档"给：
-      // 实测整轮 25 条 2689 token，详细部分约占四成 → 1100 足够，且能兜住
-      // 模型偶尔多写几条的情况；超过预算会被截断成不可解析，所以留了余量。
-      maxTokens: 1200,
+      }),
+      maxTokens: 3600,
+      liteMaxTokens: 1500,
       ...(signal ? { signal } : {}),
-      qualityCheck: rankingQualityCheck,
+      qualityCheck: (response) =>
+        getAiResponseIntentQualityIssue({
+          response,
+          candidateTours: aiCandidatePool,
+          intent: effectiveIntent,
+        }),
       onStreamDelta: createThinkingProgressEmitter(
         'ranking',
         82,
@@ -9895,45 +9832,7 @@ export async function requestAiRecommendations({
         'AI 正在思考',
       ),
       onPartialItems: emitPartialPreview,
-    });
-    const tailCallPromise = callAiApi({
-      configs,
-      messages: tailMessages,
-      maxTokens: Math.ceil(3600 * 0.5),
-      ...(signal ? { signal } : {}),
-      qualityCheck: rankingQualityCheck,
-      // 后段不再派发预览：预览条数以 head 为准，两路都发会让标题与条数抖动。
-    });
-    // 两路都失败才算失败；一路失败时用另一路的结果继续（比整体降级到本地好）。
-    const [headOutcome, tailOutcome] = await Promise.allSettled([headCallPromise, tailCallPromise]);
-    const settledCalls = [headOutcome, tailOutcome]
-      .filter((outcome): outcome is PromiseFulfilledResult<Awaited<typeof headCallPromise>> => outcome.status === 'fulfilled');
-    if (settledCalls.length === 0) {
-      const firstFailure = [headOutcome, tailOutcome][0];
-      throw (firstFailure as PromiseRejectedResult).reason;
-    }
-    let aiCall = (() => {
-      const [primary, secondary] = settledCalls.map((outcome) => outcome.value);
-      if (!secondary) return primary;
-      // 合并：head 的条目在前、tail 的条目在后。
-      // head 的顶层字段（intent/summary/intentNotes…）优先——它是看最贴合
-      // 那批候选产出的，摘要口径更准；tail 只贡献 items 与缺失字段。
-      const primaryItems = Array.isArray((primary.parsed as { items?: unknown[] })?.items)
-        ? (primary.parsed as { items: unknown[] }).items
-        : [];
-      const secondaryItems = Array.isArray((secondary.parsed as { items?: unknown[] })?.items)
-        ? (secondary.parsed as { items: unknown[] }).items
-        : [];
-      return {
-        ...secondary,
-        ...primary,
-        parsed: {
-          ...(secondary.parsed as Record<string, unknown>),
-          ...(primary.parsed as Record<string, unknown>),
-          items: [...primaryItems, ...secondaryItems],
-        },
-      } as typeof primary;
-    })() as {
+    }) as {
       parsed: {
         intent?: unknown;
         intentNotes?: unknown;
@@ -9968,6 +9867,7 @@ export async function requestAiRecommendations({
         schema: 'recommendation',
         issue: describeAiItemsShapeIssue(aiResponse),
         startedAt: aiRequestStartedAt,
+        ...(signal ? { signal } : {}),
       });
       if (retried) {
         aiCall = retried.call as typeof aiCall;
