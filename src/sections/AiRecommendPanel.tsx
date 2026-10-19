@@ -90,8 +90,11 @@ const scheduleIdleWork = (callback: () => void) => {
   return () => window.clearTimeout(id);
 };
 
-const waitForNextPaint = () =>
-  new Promise<void>((resolve) => {
+// 页面是否不可见（切后台/被其它应用遮挡）。SSR 与老浏览器按"可见"处理。
+const isPageHidden = () =>
+  typeof document !== 'undefined' && document.visibilityState === 'hidden';
+
+const waitForNextPaint = () =>  new Promise<void>((resolve) => {
     if (typeof window === 'undefined') {
       resolve();
       return;
@@ -134,10 +137,22 @@ const useAiRecommendationWarmup = (candidateTours: AiRecommendationCandidate[]) 
     const startedAt = Date.now();
     const pieceCount = Math.ceil(candidateTours.length / AI_RECOMMENDATION_WARM_BATCH_SIZE);
 
+    const clearPending = () => {
+      stopIdle?.();
+      stopIdle = undefined;
+      if (gapTimer !== undefined) {
+        window.clearTimeout(gapTimer);
+        gapTimer = undefined;
+      }
+    };
+
     const schedulePiece = () => {
       stopIdle = scheduleIdleWork(() => {
         stopIdle = undefined;
         if (cancelled) return;
+        // 页面在后台：不继续算。手机上继续跑只会白烧 CPU/电量，而且后台
+        // 定时器本来就会被冻结，等回到前台再接着走（不丢进度，pieceIndex 保留）。
+        if (isPageHidden()) return;
 
         const piece = getAiRecommendationWarmPiece(candidateTours, pieceIndex);
         pieceIndex += 1;
@@ -157,12 +172,21 @@ const useAiRecommendationWarmup = (candidateTours: AiRecommendationCandidate[]) 
       });
     };
 
-    schedulePiece();
+    // 回到前台且还没预热完时立刻续跑（不必等下一段空闲，用户此刻正看着面板）。
+    const onVisibilityChange = () => {
+      if (cancelled || isPageHidden()) return;
+      if (pieceIndex >= pieceCount) return;
+      if (stopIdle || gapTimer !== undefined) return;
+      schedulePiece();
+    };
+
+    if (!isPageHidden()) schedulePiece();
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       cancelled = true;
-      stopIdle?.();
-      if (gapTimer !== undefined) window.clearTimeout(gapTimer);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      clearPending();
     };
   }, [candidateTours]);
 };
@@ -310,6 +334,10 @@ export function AiRecommendPanel({
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
   const didRestoreStoredResultRef = useRef(false);
   const requestVersionRef = useRef(0);
+  // 本轮在途请求的取消器：取消/重开/卸载时 abort，真正掐断底层 fetch。
+  // 此前只有 requestVersionRef 做"丢弃结果"，请求本身仍在跑完——
+  // 手机上连点几次就是几个 35s 的在途请求叠加，越点越慢。
+  const requestAbortRef = useRef<AbortController | null>(null);
   const handledRequestIdRef = useRef<number | null>(null);
   // 本标签页的标识：用于区分"自己写的进度"和"别的标签页写的进度"，
   // 避免自己读到自己的回声后覆盖本页真实的进度状态。
@@ -443,6 +471,11 @@ export function AiRecommendPanel({
     setMessages(nextMessages);
     setLoading(true);
     onPartialItems?.([]);
+    // 新一轮开始前先掐掉上一轮：用户重开/改成新条件时，旧请求的结果已经无意义，
+    // 让它继续跑只会占连接、烧流量，并在后台继续消耗 Worker 配额。
+    requestAbortRef.current?.abort();
+    const abortController = new AbortController();
+    requestAbortRef.current = abortController;
     const startedAt = Date.now();
     // 把"这一轮开始了"写进 storage，另一个标签页打开时就知道这边正在跑。
     saveStoredAiProgress({
@@ -506,6 +539,7 @@ export function AiRecommendPanel({
         aiConfig,
         preferenceMemory,
         previousResult: preserveResult ? result : null,
+        signal: abortController.signal,
         onProgress: (progress) => {
           if (requestVersionRef.current !== requestVersion) return;
           setProgressState((previous) => {
@@ -552,11 +586,17 @@ export function AiRecommendPanel({
         createMessage('assistant', buildResultAssistantReply(prompt, isFollowUpTurn)),
       ]);
       onFocusResults();
+    } catch (error) {
+      // 取消是正常路径（用户点取消、重开、切页卸载），不是失败：
+      // 不弹错误、不改结果，静默收尾即可。其余异常保持原有冒泡行为。
+      if (!(error instanceof DOMException && error.name === 'AbortError')) throw error;
     } finally {
       if (requestVersionRef.current === requestVersion) {
         setLoading(false);
         onPartialItems?.([]);
       }
+      // 本轮结束（含被取消/顶掉）：释放取消器，避免旧 controller 一直被持有。
+      if (requestAbortRef.current === abortController) requestAbortRef.current = null;
       // 无论成功、降级还是被新一轮顶掉，都要把"进行中"从 storage 撤下，
       // 否则另一个标签页会一直显示这边在跑（直到 AI_PROGRESS_STALE_MS 兜底）。
       clearStoredAiProgress();
@@ -585,8 +625,50 @@ export function AiRecommendPanel({
     void submitPrompt(request.prompt, { preserveResult: false });
   }, [request, submitPrompt, toursReady]);
 
+  // 组件卸载时掐断在途请求：SPA 切页后没有任何消费者，让它跑完纯属浪费。
+  useEffect(() => () => {
+    requestAbortRef.current?.abort();
+    requestAbortRef.current = null;
+  }, []);
+
+  // ── 切后台恢复 ──────────────────────────────────────────────────────────
+  // 手机上切后台后，浏览器会冻结本页的 JS：流还在网络上继续到达，但页面没机会
+  // 消费。切回来时有三种情况，必须分别处理，不能让用户自己去猜、自己重试：
+  //   1) 请求还活着（AbortController 没 abort、结果也没落地）→ 什么都不做，
+  //      读取会在页面恢复后继续，进度条照常推进；
+  //   2) 请求已经被冻结掐断（controller 已无、但 storage 里还写着 running）
+  //      → 用当时记录的 prompt 自动续跑一次，用户不需要重新输入；
+  //   3) 结果其实已经写进 storage（回来得晚，执行早已完成）
+  //      → 由上面的 chat-state 恢复负责，这里不重复发起。
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const resumeIfInterrupted = () => {
+      if (isPageHidden()) return;
+      if (requestAbortRef.current) return;      // 情况 1：还在跑，交给它
+      if (loading) return;                       // 状态机正在推进
+      const stored = readStoredAiProgress();
+      if (!stored?.running || !stored.prompt) return;
+      // 结果已在 storage 落地（执行其实完成了）就不重跑。
+      if (readStoredAiChatState().result) return;
+      // 只有"本页发起的"才恢复：别的标签页的进度由 remoteProgress 呈现，
+      // 在这里替我发一次会变成重复请求。
+      if (stored.ownerId !== tabIdRef.current) return;
+      const prompt = stored.prompt.trim();
+      if (!prompt) return;
+      void submitPrompt(prompt, { preserveResult: false });
+    };
+    document.addEventListener('visibilitychange', resumeIfInterrupted);
+    // 首次挂载也检查一次：页面可能是在后台被打开/恢复的。
+    resumeIfInterrupted();
+    return () => document.removeEventListener('visibilitychange', resumeIfInterrupted);
+  }, [loading, submitPrompt]);
+
   const clearConversation = () => {
     requestVersionRef.current += 1;
+    // 真正掐断在途请求：只重置 React 状态的话，fetch 会一路跑到超时，
+    // 手机上一次点击就能留下一个 35s 的在途请求。
+    requestAbortRef.current?.abort();
+    requestAbortRef.current = null;
     onResultChange(null);
     setPreferenceMemory(null);
     setProgressState(null);

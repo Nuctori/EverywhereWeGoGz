@@ -515,4 +515,7 @@ export interface AiRecommendationRequest {
   preferenceMemory?: AiPreferenceMemory | null;
   previousResult?: AiRecommendationResult | null;
   onProgress?: (progress: AiRecommendationProgress) => void;
+  // 取消信号：面板点「取消这次查找」或组件卸载时 abort，真正掐断底层 fetch。
+  // 不传时行为与既往一致（无法取消，跑到超时/完成）。
+  signal?: AbortSignal;
 }

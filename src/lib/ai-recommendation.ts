@@ -5254,6 +5254,8 @@ async function classifyExperienceDemandSpec(params: {
   corpusOverview?: CorpusOverview;
   // 不参与"是否值得解析"的门控，只用于在缺少 queries 时判定降级。
   expectQueries?: boolean;
+  // 取消信号：面板放弃本轮时掐断底层 fetch，不再白跑一次模型往返。
+  signal?: AbortSignal;
 }): Promise<ClassifiedIntentPayload> {
   const includeQueries = Boolean(params.corpusOverview) && Boolean(params.expectQueries);
   const messages: AiPlanningCallMessages = [
@@ -5315,6 +5317,12 @@ async function classifyExperienceDemandSpec(params: {
       // 会整轮判失败），给到 800。不带 queries 时退回 300，不浪费预算。
       maxTokens: includeQueries ? 800 : 300,
       schema: 'search-plan',
+      ...(params.signal ? { signal: params.signal } : {}),
+      // 分类头是链路里的可选步骤：拿不到结果就退回词面 fallback，主链路照常走。
+      // 但它原先和主调用共用同一套超时预算（前台 75s / 流式 180s），
+      // 网关抖动时用户要白等一分钟才看到第一次降级——可选步骤不该占主调用的预算。
+      // 给一个明显更短的上限：超时按失败处理，直接降到 fallback 继续往下走。
+      timeoutMs: AI_CLASSIFIER_TIMEOUT_MS,
     }) as AiSearchCallResult;
     const spec = normalizeClassifiedDemandSpec(aiCall.parsed);
     const parsed = aiCall.parsed as { queries?: unknown; understanding?: unknown } | null;
@@ -6715,9 +6723,11 @@ function buildAiMessages(params: {
   intent: AiTravelIntent | null;
   preferenceMemory: AiPreferenceMemory | null;
   allowPublicInterest: boolean;
+  // 并行生成时本路只负责一档：head=详细推荐，tail=简要推荐。
+  // 不传=单次调用，自己出完整两档（保持旧行为）。
+  tier?: 'head' | 'tail';
 }) {
-  const promptPool = [...params.focusFull, ...params.stableCandidates];
-  const intentCoverage = analyzeIntentCoverage(promptPool, params.intent);
+  const promptPool = [...params.focusFull, ...params.stableCandidates];  const intentCoverage = analyzeIntentCoverage(promptPool, params.intent);
   const promptPolicy = buildPublicInterestPromptPolicy(params.allowPublicInterest);
   const hasTurnPublicInterestNeed = params.allowPublicInterest && hasPublicInterestNeed(params.intent, params.userText);
   const worldKnowledgeExamples = params.allowPublicInterest
@@ -6821,8 +6831,17 @@ function buildAiMessages(params: {
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
       ...promptPolicy.requestRules,
       [
-        `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
-        `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条是最值得细看的详细推荐，后面 ${MAX_AI_BRIEF_ITEMS} 条是值得顺便比较的简要推荐；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
+        // 并行两路各自只负责一档。tier 由调用方给出，prompt 必须跟着变：
+        // 只切候选池而不切指令，模型仍会按"25 条 15 详细"的目标去写，
+        // 既写不全也白花 token。
+        ...(params.tier === 'head'
+          ? [`这一轮你只负责"最值得细看"的那一档：从这批候选里挑出最贴合的 ${MAX_AI_DETAILED_ITEMS} 条以内，每条都写完整 reason 和 matchedSignals，按推荐度排序。不要再补简要推荐。`]
+          : params.tier === 'tail'
+            ? [`这一轮你只负责"值得顺便比较"的那一档：从这批候选里挑出 ${MAX_AI_BRIEF_ITEMS} 条以内，reason 只写一句话简单介绍（30 字内），matchedSignals 照常写。这些是补充选项，不要重复写详细长评。`]
+            : [
+              `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
+              `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条是最值得细看的详细推荐，后面 ${MAX_AI_BRIEF_ITEMS} 条是值得顺便比较的简要推荐；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
+            ]),
         '可以参考熟悉当地玩法的人来写，避免让所有线路都长得一样；如果某个软条件需要核实，自行判断它是否值得写进这一条。',
         // 输出体积约束：实测主请求在 109 tok/s 下生成 2689 token 要 25s，
         // 而这 2689 token 里绝大部分是把 ck/fk 里的输入列原样抄回来
@@ -7564,6 +7583,10 @@ async function consumeAiStreamingResponse(params: {
   // 增量条目回调：流还没结束时，每凑齐一条完整的 items 元素就回调一次，
   // 让上层先把已生成的推荐摆出来。只是体验优化，失败不影响正式解析。
   onPartialItems?: (items: unknown[]) => void;
+  // 覆盖供应商默认的整请求预算（分类头等可选步骤用短上限，见 getProviderTimeoutMs）。
+  timeoutMs?: number;
+  // 取消信号：用户放弃本轮时停止读流，不再消费后续 chunk。
+  signal?: AbortSignal;
 }) {
   const { response, config } = params;
   const contentType = response.headers?.get?.('content-type') ?? '';
@@ -7596,12 +7619,26 @@ async function consumeAiStreamingResponse(params: {
   const readChunk = (): Promise<ReadableStreamReadResult<Uint8Array>> =>
     new Promise((resolve, reject) => {
       let settled = false;
+      // 用户取消：立刻停读并释放流，不等下一个 chunk 到达（手机上后台冻结时
+      // 可能很久都不来 chunk，靠空闲超时兜底太慢）。
+      const onUserAbort = () => {
+        void reader.cancel().catch(() => undefined);
+        settle(() => reject(new DOMException('AI request cancelled', 'AbortError')));
+      };
       const settle = (fn: () => void) => {
         if (settled) return;
         settled = true;
         if (idleTimer) clearTimeout(idleTimer);
+        // 每次 read 都要撤掉本次注册的取消监听：一次请求会 read 几百个 chunk，
+        // 不清理会让用户 signal 上累积几百个监听器（也是内存泄漏）。
+        params.signal?.removeEventListener('abort', onUserAbort);
         fn();
       };
+      if (params.signal?.aborted) {
+        onUserAbort();
+        return;
+      }
+      params.signal?.addEventListener('abort', onUserAbort, { once: true });
       idleTimer = setTimeout(() => {
         void reader.cancel().catch(() => undefined);
         settle(() => reject(new Error(
@@ -7612,9 +7649,9 @@ async function consumeAiStreamingResponse(params: {
         totalTimer = setTimeout(() => {
           void reader.cancel().catch(() => undefined);
           settle(() => reject(new Error(
-            `AI API timeout [${config.model}] stream exceeded ${getProviderTimeoutMs(config)}ms`,
+            `AI API timeout [${config.model}] stream exceeded ${getProviderTimeoutMs(config, params.timeoutMs)}ms`,
           )));
-        }, getProviderTimeoutMs(config));
+        }, getProviderTimeoutMs(config, params.timeoutMs));
       }
       reader.read().then(
         (result) => settle(() => resolve(result)),
@@ -7760,6 +7797,8 @@ async function fetchWithTimeout(
 }
 
 export const __aiRecommendationTestHooks = {
+  mergeAbortSignals,
+  splitCandidatePoolsForParallelGeneration,
   auditAiRecommendationsStrict,
   auditAiRecommendations,
   buildAiMessages,
@@ -8549,7 +8588,86 @@ function normalizeMessagesForProvider(messages: ReturnType<typeof buildAiMessage
   ];
 }
 
-function getProviderTimeoutMs(config: AiProviderConfig) {
+// 分类头的独立超时上限：它是链路上的可选步骤（失败即退回词面 fallback），
+// 不该沿用主调用的 75s/180s 预算让用户白等。12s 覆盖分类头实测的典型往返
+// （4-8s）并留出抖动余量；超时按失败处理，直接降到 fallback 继续往下走。
+const AI_CLASSIFIER_TIMEOUT_MS = 12000;
+
+/**
+ * 把多个 AbortSignal 并联成一个：任一方 abort，合成的 signal 立即 abort，
+ * 并把原因透传下去。用于"竞速控制器 / 超时计时器"与"用户取消"同时生效的场景——
+ * 早先的写法是直接覆盖 signal，用户点取消后底层 fetch 收不到信号，
+ * 请求会白跑到超时，手机上因此叠加出多个 35s 的在途请求。
+ *
+ * 只有一个信号时直接返回它，不额外造对象（无监听泄漏、无额外开销）。
+ */
+function mergeAbortSignals(
+  ...signals: Array<AbortSignal | undefined | null>
+): AbortSignal | undefined {
+  const active = signals.filter((signal): signal is AbortSignal => Boolean(signal));
+  if (active.length === 0) return undefined;
+  if (active.length === 1) return active[0];
+  if (active.some((signal) => signal.aborted)) {
+    return AbortSignal.abort(active.find((signal) => signal.aborted)?.reason);
+  }
+  // AbortSignal.any 在目标环境缺失时退回手写实现（Safari 17.4 之前没有）。
+  if (typeof AbortSignal.any === 'function') return AbortSignal.any(active);
+
+  const controller = new AbortController();
+  const abort = (event: Event) => {
+    const source = event.target as AbortSignal | null;
+    controller.abort(source?.reason);
+  };
+  for (const signal of active) {
+    signal.addEventListener('abort', abort, { once: true });
+  }
+  // 合成 signal 被 abort 后撤掉监听，避免长时间存活的用户信号累积监听器。
+  controller.signal.addEventListener('abort', () => {
+    for (const signal of active) signal.removeEventListener('abort', abort);
+  }, { once: true });
+  return controller.signal;
+}
+
+/**
+ * 把一次大生成拆成两路并行调用时，按候选切分出互不重叠的两份池子。
+ *
+ * 为什么要切候选而不是只切"要输出几条"：模型必须看到一批候选才能排序，
+ * 如果两路看同一份池子、"前半/后半"全靠各自猜，两路会选出重叠的线路，
+ * 合并后既有重复又缺档——排序正确性直接崩掉（这正是并行化最容易踩的坑）。
+ *
+ * 所以按池子切：重点池（focusFull，已按本轮需求排过序）给前段，稳定池
+ * （stableCandidates，广度补充）给后段。两路各自从自己的池子里排序挑选，
+ * 集合天然不相交，合并后仍是 25 条互不重复的结果。
+ *
+ * 切分点取 focus 池的前半：既保证前段（要写完整 reason 的详细推荐）
+ * 拿到最贴合的候选，也给后段留出足够的池子。
+ */
+function splitCandidatePoolsForParallelGeneration(params: {
+  focusFull: Parameters<typeof buildAiMessages>[0]['focusFull'];
+  stableCandidates: Parameters<typeof buildAiMessages>[0]['stableCandidates'];
+  headLimit?: number;
+}) {
+  const { focusFull, stableCandidates, headLimit = MAX_AI_DETAILED_ITEMS } = params;
+  // 前段只负责"详细推荐"那一档，池子按 headLimit 收紧：给模型 1.6 倍的
+  // 候选让它有挑选余地，但不必看完整池子——head 的输出量与它的候选数正相关，
+  // 池子越大它越容易多写几条，首屏反而更晚。
+  //
+  // 切点必须让两路严格不相交：一旦某个 tourId 同时进入两路，合并后就是重复
+  // 推荐（下游审计按先到先得去重，会把后段那条静默丢掉，表现为"少给了几条"，
+  // 不报错、极难发现）。
+  const headPoolSize = Math.max(1, Math.min(focusFull.length, Math.ceil(headLimit * 1.6)));
+  const headFocus = focusFull.slice(0, headPoolSize);
+  const tailFocus = focusFull.slice(headPoolSize);
+  const headIds = new Set(headFocus.map((item) => item.id));
+  const tailStable = stableCandidates.filter((item) => !headIds.has(item.id));
+  return {
+    head: { focusFull: headFocus, stableCandidates: [] as typeof stableCandidates },
+    tail: { focusFull: tailFocus, stableCandidates: tailStable },
+  };
+}
+
+function getProviderTimeoutMs(config: AiProviderConfig, overrideMs?: number) {
+  if (overrideMs && overrideMs > 0) return overrideMs;
   const providerKey = `${config.baseUrl} ${config.model}`.toLowerCase();
   // Experience note: free models often spend the first visible tokens on hidden
   // reasoning or sit behind a cold router. Keep the free tier patient enough to
@@ -8693,6 +8811,8 @@ async function callSingleAiProvider(params: {
   // 此前规划调用复用主解析、被强制要求 items，导致多轮检索规划对所有供应商 100% 抛
   // schema_invalid，规划功能自上线起从未生效。
   schema?: 'recommendation' | 'search-plan';
+  // 覆盖供应商默认超时预算（见 getProviderTimeoutMs）：分类头等可选步骤用它压短上限。
+  timeoutMs?: number;
   // GLM 主力流式增量回调（仅其 SSE 路径触发）。
   onStreamDelta?: (delta: AiStreamDelta) => void;
   // 流式增量条目回调：用于边生成边展示。
@@ -8726,6 +8846,8 @@ async function callSingleAiProvider(params: {
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     let shouldRetry = attempt < maxAttempts - 1;
     try {
+      // 用户取消后不再重试/升压：那只会把已放弃的请求再发一遍。
+      if (params.signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
       // 每次重试/切换供应商先撤回上一份临时结果，不能混合不同响应。
       params.onPartialItems?.([]);
       const response = await fetchWithTimeout(
@@ -8736,7 +8858,7 @@ async function callSingleAiProvider(params: {
           body: requestBody,
           signal: params.signal,
         },
-        getProviderTimeoutMs(config),
+        getProviderTimeoutMs(config, params.timeoutMs),
       );
 
       if (!response.ok) {
@@ -8779,6 +8901,8 @@ async function callSingleAiProvider(params: {
             schema: params.schema ?? 'recommendation',
             onStreamDelta: params.onStreamDelta,
             onPartialItems: params.onPartialItems,
+            timeoutMs: params.timeoutMs,
+            signal: params.signal,
           })
         // 非流式路径也走带标签的整包解析：网关无视 stream:false 回 SSE 时
         // 不允许炸出绕过错误口径的裸 SyntaxError。
@@ -8903,6 +9027,10 @@ async function callAiApi(params: {
   onStreamDelta?: (delta: AiStreamDelta) => void;
   // 流式增量条目：每凑齐一条完整的 items 元素就回调一次，用于边生成边展示。
   onPartialItems?: (items: unknown[]) => void;
+  // 覆盖供应商默认超时预算（含前台竞速的聚合上限）：分类头等可选步骤用短上限。
+  timeoutMs?: number;
+  // 外部取消信号（用户点取消 / 组件卸载）：真正掐断底层 fetch。
+  signal?: AbortSignal;
 }) {
   const providerErrors: string[] = [];
   const foregroundConfigs = params.configs.filter((config) => !isPaidFallbackProvider(config));
@@ -8914,6 +9042,14 @@ async function callAiApi(params: {
   const nonThinkingForegroundConfigs = foregroundConfigs.filter(
     (config) => !isGlmPrimaryStreamProvider(config),
   );
+
+  // 外部取消信号：与内部竞速控制器并联，任一方 abort 都掐断底层 fetch。
+  // 分类头和主推荐都可能被用户取消，不能让它们在后台白跑完再丢结果。
+  const userSignal = params.signal;
+  const abortIfCancelled = () => {
+    if (userSignal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
+  };
+  abortIfCancelled();
 
   for (const config of thinkingConfigs) {
     try {
@@ -8933,7 +9069,13 @@ async function callAiApi(params: {
     let foregroundTimeoutId: ReturnType<typeof setTimeout> | null = null;
     const foregroundProviderPromise = Promise.any(
       nonThinkingForegroundConfigs.map((config, index) =>
-        callSingleAiProvider({ ...params, config, signal: controllers[index].signal })
+        callSingleAiProvider({
+          ...params,
+          config,
+          // 竞速控制器只负责超时/让位，用户取消必须并联进来——否则用户点取消后
+          // 这些请求还会跑到超时才结束。
+          signal: mergeAbortSignals(controllers[index].signal, userSignal),
+        })
           .catch((error) => {
             const message = error instanceof Error
               ? error.message.replace(/\s+/g, ' ').trim()
@@ -8946,8 +9088,11 @@ async function callAiApi(params: {
     const foregroundTimeoutPromise = new Promise<never>((_, reject) => {
       const timeoutAt = (timeoutMs: number) => {
         foregroundTimeoutId = setTimeout(() => {
+          // 显式覆盖预算（分类头等可选步骤）不做"有 token 信号就放宽"的延期：
+          // 那个机制是为长生成的主调用设计的，可选步骤必须硬性守住短上限。
+          const honorOverride = Boolean(params.timeoutMs);
           const hasActiveTokenSignal = foregroundErrors.some((message) => message.includes('tokens_seen'));
-          if (timeoutMs < AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS && hasActiveTokenSignal) {
+          if (!honorOverride && timeoutMs < AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS && hasActiveTokenSignal) {
             if (foregroundTimeoutId) clearTimeout(foregroundTimeoutId);
             timeoutAt(AI_FREE_PROVIDER_ACTIVE_FOREGROUND_TIMEOUT_MS);
             return;
@@ -8959,7 +9104,7 @@ async function callAiApi(params: {
         }, timeoutMs);
       };
 
-      timeoutAt(AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS);
+      timeoutAt(params.timeoutMs ?? AI_FREE_PROVIDER_FOREGROUND_TIMEOUT_MS);
     });
     try {
       const result = await Promise.race([foregroundProviderPromise, foregroundTimeoutPromise]);
@@ -9108,7 +9253,10 @@ export async function requestAiRecommendations({
   preferenceMemory,
   previousResult,
   onProgress,
+  signal,
 }: AiRecommendationRequest): Promise<AiRecommendationResult> {
+  // 已取消就直接走取消路径，不发起任何请求。
+  if (signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
   emitProgress(onProgress, {
     stage: 'queued',
     label: '已收到需求',
@@ -9334,6 +9482,7 @@ export async function requestAiRecommendations({
         : undefined,
       ...(planningExpected ? { corpusOverview: buildCandidateCorpusOverview(availableCandidates) } : {}),
       expectQueries: planningExpected,
+      ...(signal ? { signal } : {}),
     });
     const classifiedSpec = classifiedPayload.spec;
     // B6 目的地归一：分类头用模型知识把区域词展开成具体目的地（潮汕→潮州/汕头、
@@ -9610,15 +9759,18 @@ export async function requestAiRecommendations({
       ),
     });
     // 提到调用外：格式追问要用同一份 prompt 再追加一条纠正消息重发。
+    // 这两个 await 也在这里收敛成值，供并行两路复用同一份上下文。
+    const resolvedRouteAtlas = await routeAtlasPromise;
+    const resolvedFocusWeatherInsights = await focusWeatherInsightsPromise;
     const aiMessages = buildAiMessages({
       userText: effectiveUserText,
       messages,
       stableCandidates: stablePool.candidates,
       focusFull: focusGraded,
-      routeAtlas: await routeAtlasPromise,
+      routeAtlas: resolvedRouteAtlas,
       auditContext,
       weatherContext: weatherContextForRanking,
-      destinationWeatherInsights: await focusWeatherInsightsPromise,
+      destinationWeatherInsights: resolvedFocusWeatherInsights,
       searchQuery,
       intent: effectiveIntent,
       preferenceMemory: aiContextMemoryForThisTurn,
@@ -9630,28 +9782,105 @@ export async function requestAiRecommendations({
     const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
     const partialPrimitiveById = new Map(compactedCandidateTours.map((candidate) => [candidate.id, buildTourPrimitive(candidate)]));
     let partialRevision = '';
-    let aiCall = await callAiApi({
-      configs,
-      messages: aiMessages,
-      liteMessages: buildLiteAiMessages({
+    // 临时预览：仅派发已闭合、已映射且通过当前意图硬约束的条目。
+    // 最终响应仍会结合完整 intent、天气和覆盖纪律重新装配。
+    // 抽成闭包：并行两路都要用，且必须共享 partialRevision 去重（否则两路
+    // 各发一次同样的预览，面板标题会来回跳）。
+    const emitPartialPreview = (partialItems: unknown[]) => {
+      try {
+        const validatedPartial = validateAiItems(
+          { items: partialItems },
+          compactedCandidateTours,
+        );
+        const audited = keepAiItemsForCompoundExperience(
+          auditAiRecommendationsStrict(validatedPartial, [], compactedCandidateTours, effectiveIntent),
+          compactedCandidateTours,
+          text,
+        );
+        const { compliant } = splitByIntentConflicts(audited, effectiveIntent, partialPrimitiveById, corpusVocab);
+        // 一条都没通过校验时不发预览：发出去是「已可先看 0 条」，
+        // 既没有内容可看，又会让面板标题在「已挑出部分线路」和空态之间来回跳。
+        if (compliant.length === 0) {
+          if (partialRevision && partialRevision !== '[]') {
+            partialRevision = '[]';
+            emitProgress(onProgress, {
+              stage: 'ranking', label: 'AI 正在生成推荐',
+              detail: '正在校验后续线路。', progress: 82, partialItems: [],
+            });
+          }
+          return;
+        }
+        const revision = JSON.stringify(compliant);
+        if (revision !== partialRevision) {
+          partialRevision = revision;
+          emitProgress(onProgress, {
+            stage: 'streaming-items',
+            label: 'AI 已挑出部分线路',
+            detail: `正在逐条生成推荐，已可先看 ${compliant.length} 条。`,
+            progress: 88,
+            substeps: withActiveSubstep(
+              [
+                { id: 'compact', label: '筛出高相关候选' },
+                { id: 'rank', label: '结合偏好做排序' },
+                { id: 'summary', label: '准备推荐摘要' },
+              ],
+              'rank',
+            ),
+            partialItems: compliant,
+          });
+        }
+      } catch {
+        // 增量展示失败不影响正式结果。
+      }
+    };
+    // ── 并行两路生成 ────────────────────────────────────────────────────────
+    // 单次调用要等模型把 25 条逐条写完（实测 2689 输出 token / 约 35s），
+    // 用户在这期间什么都看不到。这里把生成拆成两路并行：
+    //   head：从 focus 池前半挑详细推荐（写完整 reason），约 8-10 条；
+    //   tail：从其余候选挑简要推荐（一句话），约 15-17 条。
+    // 两路候选池严格不相交，合并后仍是 25 条互不重复的结果，
+    // 且两路都只是"少写一点"，不是"写差一点"——所有文案仍由模型生成。
+    // head 的输出量明显更小，通常先返回，首屏可见时间因此前移。
+    const splitPools = splitCandidatePoolsForParallelGeneration({
+      focusFull: focusGraded,
+      stableCandidates: stablePool.candidates,
+    });
+    const buildMessagesForPool = (
+      pool: ReturnType<typeof splitCandidatePoolsForParallelGeneration>['head'],
+      tier: 'head' | 'tail',
+    ) =>
+      buildAiMessages({
         userText: effectiveUserText,
         messages,
-        stableCandidates: stablePool.candidates,
-        focusFull: focusGraded,
+        stableCandidates: pool.stableCandidates,
+        focusFull: pool.focusFull,
+        routeAtlas: resolvedRouteAtlas,
+        auditContext,
         weatherContext: weatherContextForRanking,
+        destinationWeatherInsights: resolvedFocusWeatherInsights,
         searchQuery,
         intent: effectiveIntent,
         preferenceMemory: aiContextMemoryForThisTurn,
         allowPublicInterest: allowPublicInterestForTurn,
-      }),
-      maxTokens: 3600,
-      liteMaxTokens: 1500,
-      qualityCheck: (response) =>
-        getAiResponseIntentQualityIssue({
-          response,
-          candidateTours: aiCandidatePool,
-          intent: effectiveIntent,
-        }),
+        tier,
+      });
+    const headMessages = buildMessagesForPool(splitPools.head, 'head');
+    const tailMessages = buildMessagesForPool(splitPools.tail, 'tail');
+    const rankingQualityCheck = (response: unknown) =>
+      getAiResponseIntentQualityIssue({
+        response,
+        candidateTours: aiCandidatePool,
+        intent: effectiveIntent,
+      });
+    const headCallPromise = callAiApi({
+      configs,
+      messages: headMessages,
+      // 前段只出详细推荐（约 10 条 × 完整 reason）。预算按"详细档"给：
+      // 实测整轮 25 条 2689 token，详细部分约占四成 → 1100 足够，且能兜住
+      // 模型偶尔多写几条的情况；超过预算会被截断成不可解析，所以留了余量。
+      maxTokens: 1200,
+      ...(signal ? { signal } : {}),
+      qualityCheck: rankingQualityCheck,
       onStreamDelta: createThinkingProgressEmitter(
         'ranking',
         82,
@@ -9665,56 +9894,46 @@ export async function requestAiRecommendations({
         ),
         'AI 正在思考',
       ),
-      // 临时预览：仅派发已闭合、已映射且通过当前意图硬约束的条目。
-      // 最终响应仍会结合完整 intent、天气和覆盖纪律重新装配。
-      onPartialItems: (partialItems: unknown[]) => {
-        try {
-          const validatedPartial = validateAiItems(
-            { items: partialItems },
-            compactedCandidateTours,
-          );
-          const audited = keepAiItemsForCompoundExperience(
-            auditAiRecommendationsStrict(validatedPartial, [], compactedCandidateTours, effectiveIntent),
-            compactedCandidateTours,
-            text,
-          );
-          const { compliant } = splitByIntentConflicts(audited, effectiveIntent, partialPrimitiveById, corpusVocab);
-          // 一条都没通过校验时不发预览：发出去是「已可先看 0 条」，
-          // 既没有内容可看，又会让面板标题在「已挑出部分线路」和空态之间来回跳。
-          if (compliant.length === 0) {
-            if (partialRevision && partialRevision !== '[]') {
-              partialRevision = '[]';
-              emitProgress(onProgress, {
-                stage: 'ranking', label: 'AI 正在生成推荐',
-                detail: '正在校验后续线路。', progress: 82, partialItems: [],
-              });
-            }
-            return;
-          }
-          const revision = JSON.stringify(compliant);
-          if (revision !== partialRevision) {
-            partialRevision = revision;
-            emitProgress(onProgress, {
-              stage: 'streaming-items',
-              label: 'AI 已挑出部分线路',
-              detail: `正在逐条生成推荐，已可先看 ${compliant.length} 条。`,
-              progress: 88,
-              substeps: withActiveSubstep(
-                [
-                  { id: 'compact', label: '筛出高相关候选' },
-                  { id: 'rank', label: '结合偏好做排序' },
-                  { id: 'summary', label: '准备推荐摘要' },
-                ],
-                'rank',
-              ),
-              partialItems: compliant,
-            });
-          }
-        } catch {
-          // 增量展示失败不影响正式结果。
-        }
-      },
-    }) as {
+      onPartialItems: emitPartialPreview,
+    });
+    const tailCallPromise = callAiApi({
+      configs,
+      messages: tailMessages,
+      maxTokens: Math.ceil(3600 * 0.5),
+      ...(signal ? { signal } : {}),
+      qualityCheck: rankingQualityCheck,
+      // 后段不再派发预览：预览条数以 head 为准，两路都发会让标题与条数抖动。
+    });
+    // 两路都失败才算失败；一路失败时用另一路的结果继续（比整体降级到本地好）。
+    const [headOutcome, tailOutcome] = await Promise.allSettled([headCallPromise, tailCallPromise]);
+    const settledCalls = [headOutcome, tailOutcome]
+      .filter((outcome): outcome is PromiseFulfilledResult<Awaited<typeof headCallPromise>> => outcome.status === 'fulfilled');
+    if (settledCalls.length === 0) {
+      const firstFailure = [headOutcome, tailOutcome][0];
+      throw (firstFailure as PromiseRejectedResult).reason;
+    }
+    let aiCall = (() => {
+      const [primary, secondary] = settledCalls.map((outcome) => outcome.value);
+      if (!secondary) return primary;
+      // 合并：head 的条目在前、tail 的条目在后。
+      // head 的顶层字段（intent/summary/intentNotes…）优先——它是看最贴合
+      // 那批候选产出的，摘要口径更准；tail 只贡献 items 与缺失字段。
+      const primaryItems = Array.isArray((primary.parsed as { items?: unknown[] })?.items)
+        ? (primary.parsed as { items: unknown[] }).items
+        : [];
+      const secondaryItems = Array.isArray((secondary.parsed as { items?: unknown[] })?.items)
+        ? (secondary.parsed as { items: unknown[] }).items
+        : [];
+      return {
+        ...secondary,
+        ...primary,
+        parsed: {
+          ...(secondary.parsed as Record<string, unknown>),
+          ...(primary.parsed as Record<string, unknown>),
+          items: [...primaryItems, ...secondaryItems],
+        },
+      } as typeof primary;
+    })() as {
       parsed: {
         intent?: unknown;
         intentNotes?: unknown;
@@ -9970,6 +10189,11 @@ export async function requestAiRecommendations({
         : {}),
     };
   } catch (error) {
+    // 用户取消不是失败：不能走本地兜底——放弃之后又冒出一屏"推荐"，
+    // 用户会以为取消没生效。直接把取消信号交给调用方静默收尾。
+    if (signal?.aborted || (error instanceof DOMException && error.name === 'AbortError')) {
+      throw new DOMException('AI request cancelled', 'AbortError');
+    }
     const failureDetail = getAiFailureDetail(error);
     const fallbackPool = runtimeFallbackItems.length > 0 ? runtimeFallbackItems : getMemoryBackedLocalItems();
     // AI 失败时也不能退回“把本地候选全展示出来”。对复合需求，备用路径
