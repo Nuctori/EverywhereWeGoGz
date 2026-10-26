@@ -99,6 +99,7 @@
     "test:calendar-date": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_calendar_date_semantics.mjs",
     "test:ai-chat-storage-roundtrip": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_chat_storage_roundtrip.mjs",
     "test:tour-detail-orchestration": "node scripts/test_tour_detail_orchestration.mjs",
+    "test:ai-request-lifecycle": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_request_lifecycle.mjs",
     "test:ai-parallel-abort": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_parallel_and_abort.mjs"
   },
   "dependencies": {

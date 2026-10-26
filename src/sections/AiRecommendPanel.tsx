@@ -328,6 +328,8 @@ export function AiRecommendPanel({
   const [liveThinkingOpen, setLiveThinkingOpen] = useState(false);
   // 对话记录默认折叠：它只是历史轮次的回执，长期占着 224px 却几乎没人回看。
   const [transcriptOpen, setTranscriptOpen] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
+  const [interruptedPrompt, setInterruptedPrompt] = useState<string | null>(storedChatState.pendingPrompt || null);
   const liveThinkingScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const storageSaveCleanupRef = useRef<ReturnType<typeof scheduleIdleWork>>(undefined);
@@ -366,6 +368,9 @@ export function AiRecommendPanel({
     }
 
     storageSaveCleanupRef.current?.();
+    // The active request owns its synchronous checkpoint; an idle render of
+    // the previous result must not overwrite its prompt or validated preview.
+    if (requestAbortRef.current) return;
     storageSaveCleanupRef.current = scheduleIdleWork(() => {
       saveStoredAiChatState({
         conversationId,
@@ -373,10 +378,11 @@ export function AiRecommendPanel({
         messages,
         result,
         preferenceMemory,
+        pendingPrompt: interruptedPrompt,
       }, MAX_PERSISTED_MESSAGES);
       storageSaveCleanupRef.current = undefined;
     });
-  }, [conversationId, followUpInput, messages, preferenceMemory, result]);
+  }, [conversationId, followUpInput, interruptedPrompt, messages, preferenceMemory, result]);
 
   useEffect(() => () => storageSaveCleanupRef.current?.(), []);
 
@@ -395,7 +401,11 @@ export function AiRecommendPanel({
   const [remoteTick, setRemoteTick] = useState(0);
   useEffect(() => {
     if (!remoteProgress) return;
-    const timer = window.setInterval(() => setRemoteTick((current) => current + 1), 1000);
+    const timer = window.setInterval(() => {
+      setRemoteTick((current) => current + 1);
+      const stored = readStoredAiProgress();
+      setRemoteProgress(stored?.ownerId !== tabIdRef.current ? stored : null);
+    }, 1000);
     return () => window.clearInterval(timer);
   }, [remoteProgress]);
 
@@ -411,7 +421,11 @@ export function AiRecommendPanel({
     if (clearVersion === 0) return;
 
     requestVersionRef.current += 1;
+    requestAbortRef.current?.abort();
+    requestAbortRef.current = null;
+    onPartialItems?.([]);
     setLoading(false);
+    setInterruptedPrompt(null);
     setPreferenceMemory(null);
     setProgressState(null);
     setExpandedStage(null);
@@ -447,7 +461,7 @@ export function AiRecommendPanel({
 
   // 展开「AI 调节」只是看进度，不是追加新的追问，输入框留到收起之后再出现。
   // 手机上它和步骤条、阶段拆解叠在一起，高度会从 216px 涨到 434px。
-  const showComposer = !loading || !detailsOpen;
+  const showComposer = !loading;
 
   useEffect(() => {
     if (!liveThinkingOpen) return;
@@ -455,9 +469,9 @@ export function AiRecommendPanel({
     if (container) container.scrollTop = container.scrollHeight;
   }, [liveThinkingOpen, progressState?.liveThinking?.excerpt]);
 
-  const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean }) => {
+  const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean; replaceRunning?: boolean }) => {
     const prompt = rawPrompt.trim();
-    if (!prompt || loading || !toursReady) return;
+    if (!prompt || (loading && !options?.replaceRunning) || !toursReady || (requestAbortRef.current && !options?.replaceRunning)) return;
     const requestVersion = requestVersionRef.current + 1;
     requestVersionRef.current = requestVersion;
     const preserveResult = options?.preserveResult ?? false;
@@ -470,12 +484,33 @@ export function AiRecommendPanel({
       : [createInitialMessage(), userMessage];
     setMessages(nextMessages);
     setLoading(true);
+    setSummaryOpen(false);
+    setDetailsOpen(false);
     onPartialItems?.([]);
     // 新一轮开始前先掐掉上一轮：用户重开/改成新条件时，旧请求的结果已经无意义，
     // 让它继续跑只会占连接、烧流量，并在后台继续消耗 Worker 配额。
     requestAbortRef.current?.abort();
     const abortController = new AbortController();
     requestAbortRef.current = abortController;
+    setInterruptedPrompt(null);
+    let retainedResult = result;
+    let backgroundInterrupted = false;
+    const persistRequest = (pendingPrompt: string | null) => {
+      storageSaveCleanupRef.current?.();
+      storageSaveCleanupRef.current = undefined;
+      saveStoredAiChatState({ conversationId, messages: nextMessages, result: retainedResult, preferenceMemory, pendingPrompt }, MAX_PERSISTED_MESSAGES);
+    };
+    const suspendRequest = () => {
+      if (requestVersionRef.current !== requestVersion) return;
+      backgroundInterrupted = true;
+      setInterruptedPrompt(prompt);
+      persistRequest(prompt);
+      abortController.abort();
+    };
+    const onVisibility = () => { if (isPageHidden()) suspendRequest(); };
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('pagehide', suspendRequest);
+    persistRequest(prompt);
     const startedAt = Date.now();
     // 把"这一轮开始了"写进 storage，另一个标签页打开时就知道这边正在跑。
     saveStoredAiProgress({
@@ -502,9 +537,7 @@ export function AiRecommendPanel({
         { id: 'prepare', label: '准备需求理解', status: 'pending' },
       ],
     });
-    if (!preserveResult) {
-      onResultChange(null);
-    }
+    // Keep the last readable result until this request has a replacement.
     // 只保留用户已经展开的细节区，不再每次提交都强行展开进度细节：
     // 那样点一次「AI 帮我挑」会在同一屏里展开/收起两套内容（先展开细节，
     // 随后 searchingVersion 又把细节和对话全部重置），看起来像页面在抽动。
@@ -527,6 +560,7 @@ export function AiRecommendPanel({
             // 预热是纯优化，失败就让真正的调用自己算。
             break;
           }
+          await waitForNextPaint();
         }
       }
 
@@ -557,6 +591,14 @@ export function AiRecommendPanel({
           // 只要有一条就先摆出来，后续条数增长时继续刷新。
           if (progress.partialItems) {
             onPartialItems?.(progress.partialItems);
+            if (progress.partialItems.length > 0) {
+              retainedResult = {
+                conversationId, summary: '', items: progress.partialItems,
+                generatedAt: new Date().toISOString(), source: 'ai-api',
+                status: { mode: 'local-only', label: '已保留部分推荐', detail: '这些条目已校验，完整推荐尚未完成。' },
+              };
+              persistRequest(prompt);
+            }
           }
           // 节流后写进 storage：另一个标签页据此实时看到阶段和"已跑多少秒"。
           // liveThinking 的思维链摘录不跨标签页同步——那是本页的调试信息，
@@ -577,7 +619,19 @@ export function AiRecommendPanel({
         },
       });
       if (requestVersionRef.current !== requestVersion) return;
-      onResultChange(nextResult);
+      if (abortController.signal.aborted) return;
+      setInterruptedPrompt(null);
+      // A failed refinement must not overwrite an earlier readable result.
+      if (nextResult.status?.mode === 'fallback') {
+        setInterruptedPrompt(prompt);
+        retainedResult = retainedResult?.items.length ? retainedResult : nextResult;
+        onResultChange(retainedResult);
+        persistRequest(prompt);
+      } else {
+        retainedResult = nextResult;
+        onResultChange(nextResult);
+        persistRequest(null);
+      }
       // 正式结果落地，撤掉流式增量渲染，避免两套数据同时生效。
       onPartialItems?.([]);
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
@@ -589,8 +643,21 @@ export function AiRecommendPanel({
     } catch (error) {
       // 取消是正常路径（用户点取消、重开、切页卸载），不是失败：
       // 不弹错误、不改结果，静默收尾即可。其余异常保持原有冒泡行为。
-      if (!(error instanceof DOMException && error.name === 'AbortError')) throw error;
+      if (requestVersionRef.current === requestVersion && error instanceof DOMException && error.name === 'AbortError' && !backgroundInterrupted) {
+        if (retainedResult) onResultChange(retainedResult);
+        setProgressState({ stage: 'fallback', label: '已取消查找', detail: '已保留现有内容。', progress: 0 });
+        persistRequest(null);
+      }
+      if (requestVersionRef.current === requestVersion && !(error instanceof DOMException && error.name === 'AbortError')) {
+        setProgressState({ stage: 'fallback', label: '本次查找未完成', detail: '请重试，或调整条件后再查找。', progress: 0 });
+      }
     } finally {
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('pagehide', suspendRequest);
+      if (backgroundInterrupted && requestVersionRef.current === requestVersion) {
+        if (retainedResult) onResultChange(retainedResult);
+        setProgressState({ stage: 'fallback', label: '查找已暂停', detail: '已保留现有内容，回到前台后可重试。', progress: 0 });
+      }
       if (requestVersionRef.current === requestVersion) {
         setLoading(false);
         onPartialItems?.([]);
@@ -599,7 +666,10 @@ export function AiRecommendPanel({
       if (requestAbortRef.current === abortController) requestAbortRef.current = null;
       // 无论成功、降级还是被新一轮顶掉，都要把"进行中"从 storage 撤下，
       // 否则另一个标签页会一直显示这边在跑（直到 AI_PROGRESS_STALE_MS 兜底）。
-      clearStoredAiProgress();
+      const storedProgress = readStoredAiProgress();
+      if (storedProgress?.ownerId === tabIdRef.current && storedProgress.version === requestVersion) {
+        clearStoredAiProgress();
+      }
     }
   }, [
     activeFilters,
@@ -609,6 +679,7 @@ export function AiRecommendPanel({
     messages,
     onFocusResults,
     onResultChange,
+    onPartialItems,
     preferenceMemory,
     request,
     result,
@@ -622,7 +693,7 @@ export function AiRecommendPanel({
     if (!toursReady) return;
     handledRequestIdRef.current = request.id;
     // 结果的清空与进度重置由上面的 searchingVersion 统一处理，这里只负责发起请求。
-    void submitPrompt(request.prompt, { preserveResult: false });
+    void submitPrompt(request.prompt, { preserveResult: false, replaceRunning: true });
   }, [request, submitPrompt, toursReady]);
 
   // 组件卸载时掐断在途请求：SPA 切页后没有任何消费者，让它跑完纯属浪费。
@@ -631,37 +702,17 @@ export function AiRecommendPanel({
     requestAbortRef.current = null;
   }, []);
 
-  // ── 切后台恢复 ──────────────────────────────────────────────────────────
-  // 手机上切后台后，浏览器会冻结本页的 JS：流还在网络上继续到达，但页面没机会
-  // 消费。切回来时有三种情况，必须分别处理，不能让用户自己去猜、自己重试：
-  //   1) 请求还活着（AbortController 没 abort、结果也没落地）→ 什么都不做，
-  //      读取会在页面恢复后继续，进度条照常推进；
-  //   2) 请求已经被冻结掐断（controller 已无、但 storage 里还写着 running）
-  //      → 用当时记录的 prompt 自动续跑一次，用户不需要重新输入；
-  //   3) 结果其实已经写进 storage（回来得晚，执行早已完成）
-  //      → 由上面的 chat-state 恢复负责，这里不重复发起。
+  // A suspended network request cannot be resumed reliably by mobile browsers.
+  // Persist its readable content and offer an explicit retry, never duplicate it.
   useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const resumeIfInterrupted = () => {
+    const refreshRemote = () => {
       if (isPageHidden()) return;
-      if (requestAbortRef.current) return;      // 情况 1：还在跑，交给它
-      if (loading) return;                       // 状态机正在推进
       const stored = readStoredAiProgress();
-      if (!stored?.running || !stored.prompt) return;
-      // 结果已在 storage 落地（执行其实完成了）就不重跑。
-      if (readStoredAiChatState().result) return;
-      // 只有"本页发起的"才恢复：别的标签页的进度由 remoteProgress 呈现，
-      // 在这里替我发一次会变成重复请求。
-      if (stored.ownerId !== tabIdRef.current) return;
-      const prompt = stored.prompt.trim();
-      if (!prompt) return;
-      void submitPrompt(prompt, { preserveResult: false });
+      setRemoteProgress(stored?.ownerId !== tabIdRef.current ? stored : null);
     };
-    document.addEventListener('visibilitychange', resumeIfInterrupted);
-    // 首次挂载也检查一次：页面可能是在后台被打开/恢复的。
-    resumeIfInterrupted();
-    return () => document.removeEventListener('visibilitychange', resumeIfInterrupted);
-  }, [loading, submitPrompt]);
+    document.addEventListener('visibilitychange', refreshRemote);
+    return () => document.removeEventListener('visibilitychange', refreshRemote);
+  }, []);
 
   const clearConversation = () => {
     requestVersionRef.current += 1;
@@ -669,6 +720,10 @@ export function AiRecommendPanel({
     // 手机上一次点击就能留下一个 35s 的在途请求。
     requestAbortRef.current?.abort();
     requestAbortRef.current = null;
+    setLoading(false);
+    onPartialItems?.([]);
+    setSummaryOpen(false);
+    setInterruptedPrompt(null);
     onResultChange(null);
     setPreferenceMemory(null);
     setProgressState(null);
@@ -677,7 +732,7 @@ export function AiRecommendPanel({
     setFollowUpInput('');
     setMessages([createMessage('assistant', '已清空上一轮结果和本地偏好记忆。你可以重新描述这次想怎么出行。')]);
     clearStoredAiChatState();
-    clearStoredAiProgress();
+    if (readStoredAiProgress()?.ownerId === tabIdRef.current) clearStoredAiProgress();
   };
 
 // 保存自定义 AI 接口配置到 localStorage
@@ -702,8 +757,8 @@ export function AiRecommendPanel({
     ]);
   };
 
-  const hasAiActivity = Boolean(progressState || resultStatusMeta || messages.length > 1);
-  const searching = Boolean(request);
+  const hasAiActivity = Boolean(interruptedPrompt || progressState || resultStatusMeta || messages.length > 1);
+  const searching = Boolean(request && handledRequestIdRef.current !== request.id);
   const searchingDetail = progressState?.detail || '正在理解这句需求，马上开始筛线路。';
   const recommendedCount = countRecommendedItems(result);
   // 别的标签页正在跑的那一轮：本页自己没有在进行中的请求时，把它显示出来，
@@ -714,7 +769,9 @@ export function AiRecommendPanel({
     ? Math.max(0, Math.round((Date.now() - remoteRunning.startedAt) / 1000))
     : 0;
   void remoteTick;
-  const compactStatusLabel = loading
+  const compactStatusLabel = interruptedPrompt && !loading
+    ? '查找未完成，内容已保留'
+    : loading
     ? progressState?.label || '正在筛选'
     : remoteRunning
       ? remoteRunning.progress?.label || '另一个页面正在找团'
@@ -723,7 +780,9 @@ export function AiRecommendPanel({
         : hasResult
           ? `已置顶 ${recommendedCount} 条建议`
           : '描述需求，AI 帮你置顶';
-  const compactStatusDetail = loading
+  const compactStatusDetail = interruptedPrompt && !loading
+    ? '可继续查看已保留的内容，或重新查找。'
+    : loading
     ? progressState?.detail || '正在结合班期、预算和线路信息。'
     : remoteRunning
       ? [
@@ -769,25 +828,25 @@ export function AiRecommendPanel({
             <p className="mt-1 line-clamp-2 break-words text-sm leading-6 text-stone-600">
               {remoteRunning && !request ? compactStatusDetail : searchingDetail}
             </p>
-            <p className="mt-1 break-words text-xs leading-5 text-stone-500">
-              已记下：<span className="text-stone-700">{request?.prompt || remoteRunning?.prompt}</span>
+            <p className="mt-1 hidden break-words text-xs leading-5 text-stone-500 sm:block">
+              <span className="hidden sm:inline">已记下：</span><span className="text-stone-700">{request?.prompt || remoteRunning?.prompt}</span>
             </p>
           </div>
           <div className="flex items-center gap-2">
             <Button
               type="button"
               variant="ghost"
-              className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
-              onClick={clearConversation}
+              className="h-11 rounded-full px-3 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+              onClick={remoteRunning ? () => setRemoteProgress(null) : clearConversation}
             >
-              取消这次查找
+              {remoteRunning ? '隐藏提示' : '取消这次查找'}
             </Button>
             <Badge className="rounded-full bg-stone-200 px-2.5 py-1 text-[11px] text-stone-800 hover:bg-stone-200">
               找团中
             </Badge>
           </div>
         </div>
-        <p className="mt-2 text-xs leading-5 text-stone-400">
+        <p className="mt-2 hidden text-xs leading-5 text-stone-400 sm:block">
           下面的线路先保持不动，等 AI 选出建议后再置顶；想换条件可以直接取消重来。
         </p>
       </div>
@@ -802,9 +861,9 @@ export function AiRecommendPanel({
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-orange-700 ring-1 ring-orange-200">
               <Sparkles className="h-3.5 w-3.5" />
             </span>
-            AI 优先级助手
+            AI 帮你挑
             {preferenceMemory && (
-              <Badge className="rounded-full border-stone-200 bg-stone-50 px-2 py-0.5 text-[11px] text-stone-600 hover:bg-stone-50">
+              <Badge className="hidden rounded-full border-stone-200 bg-stone-50 px-2 py-0.5 text-[11px] text-stone-600 hover:bg-stone-50 sm:inline-flex">
                 已记住偏好
               </Badge>
             )}
@@ -823,7 +882,7 @@ export function AiRecommendPanel({
         <Button
           type="button"
           variant="outline"
-          className="h-9 rounded-xl border-orange-100 bg-orange-50 px-3 text-xs text-orange-700 hover:border-orange-200 hover:bg-orange-100 hover:text-orange-800"
+          className="h-11 rounded-xl border-orange-100 bg-orange-50 px-3 text-xs text-orange-700 hover:border-orange-200 hover:bg-orange-100 hover:text-orange-800"
           onClick={() => setSettingsOpen(true)}
         >
           <Settings className="h-3.5 w-3.5" />
@@ -846,14 +905,22 @@ export function AiRecommendPanel({
               )}
               {compactStatusLabel}
             </div>
-            <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{compactStatusDetail}</p>
+            <p className={cn('mt-1 break-words text-sm leading-6 text-stone-600', !summaryOpen && 'line-clamp-2')}>{compactStatusDetail}</p>
+            {hasResult && !loading && result?.summary && (
+              <button type="button" className="min-h-11 text-xs text-stone-600 underline underline-offset-4" aria-expanded={summaryOpen} onClick={() => setSummaryOpen((open) => !open)}>
+                {summaryOpen ? '收起摘要' : '展开摘要'}
+              </button>
+            )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {loading && (
+              <Button type="button" variant="ghost" className="h-11 rounded-full px-3 text-xs" onClick={() => requestAbortRef.current?.abort()}>取消这次查找</Button>
+            )}
             {hasResult && (
               <Button
                 type="button"
                 variant="ghost"
-                className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+                className="h-11 rounded-full px-3 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
                 onClick={clearConversation}
                 disabled={loading}
               >
@@ -863,10 +930,12 @@ export function AiRecommendPanel({
             <Button
               type="button"
               variant="ghost"
-              className="h-8 rounded-full px-2 text-xs text-stone-500 hover:bg-orange-50 hover:text-orange-700"
+              className="h-11 rounded-full px-3 text-xs text-stone-500 hover:bg-orange-50 hover:text-orange-700"
+              aria-expanded={detailsOpen}
+              aria-controls="ai-recommendation-details"
               onClick={() => setDetailsOpen((value) => !value)}
             >
-              {detailsOpen ? '收起细节' : 'AI 调节'}
+              {detailsOpen ? '收起详情' : '查看详情'}
             </Button>
             {resultStatusMeta && hasResult && !loading && (
               <Badge
@@ -882,14 +951,42 @@ export function AiRecommendPanel({
             )}
           </div>
         </div>
+        {loading && (
+          <div className="mt-2" role="status" aria-live="polite" aria-atomic="true">
+            <span className="sr-only">{compactStatusLabel}</span>
+            <Progress aria-label="推荐生成进度" value={progressState?.progress ?? 8} className="h-1 bg-orange-100 [&_[data-slot=progress-indicator]]:bg-orange-500" />
+          </div>
+        )}
       </div>
 
+              {!loading && result?.clarification && (
+                <div className="mt-3 rounded-xl border border-orange-200 bg-orange-50/80 px-3 py-3 text-sm text-stone-800">
+                  <div className="mt-1 leading-6">{result.clarification.question}</div>
+                  {result.clarification.reason && (
+                    <div className="mt-1 text-xs leading-5 text-stone-500">{result.clarification.reason}</div>
+                  )}
+                  {result.clarification.options?.length ? (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {result.clarification.options.map((option) => (
+                        <Button key={option} type="button" variant="outline" className="min-h-11 whitespace-normal rounded-xl bg-white text-stone-700" onClick={() => void submitPrompt(option, { preserveResult: true })}>
+                          {option}
+                        </Button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+      {interruptedPrompt && !loading && (
+        <Button type="button" variant="outline" className="mt-3 min-h-11 rounded-xl" onClick={() => void submitPrompt(interruptedPrompt, { preserveResult: true })}>重新查找</Button>
+      )}
+
       {detailsOpen && (
-        <div className="mt-3 space-y-3 rounded-[22px] border border-stone-200 bg-white/80 p-3">
+        <div id="ai-recommendation-details" className="mt-3 space-y-3 rounded-[22px] border border-stone-200 bg-white/80 p-3">
           {/* 还没有结果时这块就是"生成过程"，要露出来；有结果后它只是一次
               已完成的调用回执，默认收着，想看得自己展开。 */}
           {progressState && (!hasResult || loading) && (
-            <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-4">
+            <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-3 sm:p-4">
               {/* 标题卡上已经写着同一句状态时，这里不再重复一遍标题，
                   只留进度条和步骤——展开细节的用途是看"走到哪一步"，不是复读状态。 */}
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -1082,31 +1179,10 @@ export function AiRecommendPanel({
                       resultStatusMeta.mode === 'ai' ? 'bg-stone-900 hover:bg-stone-900' : 'bg-amber-700 hover:bg-amber-700',
                     )}
                   >
-                    建议 {countRecommendedItems(result)}
+                    {countRecommendedItems(result) > 0 ? `建议 ${countRecommendedItems(result)}` : `本地候选 ${result?.items.length ?? 0}`}
                   </Badge>
                 </div>
               </div>
-              <p className="mt-3 rounded-xl bg-white/70 px-3 py-3 text-sm leading-6 text-stone-700">
-                {result?.summary}
-              </p>
-              {result?.clarification && (
-                <div className="mt-3 rounded-xl border border-orange-200 bg-orange-50/80 px-3 py-3 text-sm text-stone-800">
-                  <div className="font-medium">为了把方向排得更准，我想确认一下：</div>
-                  <div className="mt-1 leading-6">{result.clarification.question}</div>
-                  {result.clarification.reason && (
-                    <div className="mt-1 text-xs leading-5 text-stone-500">{result.clarification.reason}</div>
-                  )}
-                  {result.clarification.options?.length ? (
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {result.clarification.options.map((option) => (
-                        <Badge key={option} className="rounded-full bg-white text-stone-700 ring-1 ring-orange-200 hover:bg-white">
-                          {option}
-                        </Badge>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              )}
               {(result?.assumptions?.length || result?.tradeoffs?.length) ? (
                 <div className="mt-3 grid gap-2 text-xs leading-5 text-stone-600 sm:grid-cols-2">
                   {result.assumptions?.length ? (
@@ -1234,15 +1310,19 @@ export function AiRecommendPanel({
             </div>
           )}
 
+        </div>
+      )}
+
           {showComposer ? (
           <form
-            className="flex flex-col gap-2 sm:flex-row sm:items-center"
+            className="mt-3 flex gap-2 sm:items-center"
             onSubmit={(event) => {
               event.preventDefault();
               void submitPrompt(followUpInput, { preserveResult: hasResult });
             }}
           >
             <Input
+              aria-label="补充旅行条件"
               value={followUpInput}
               onChange={(event) => setFollowUpInput(event.target.value)}
               placeholder={followUpPlaceholder}
@@ -1265,8 +1345,6 @@ export function AiRecommendPanel({
             </Button>
           </form>
           ) : null}
-        </div>
-      )}
 
       <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
         <SheetContent side="right" className="w-full gap-0 border-stone-200 bg-stone-50 p-0 sm:max-w-[440px]">

@@ -1258,7 +1258,11 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   const aiCandidatesReady = indexTours.length > 0 || catalogTours.length > 0 || localTours.length >= total;
 
   const focusResults = useCallback(() => {
-    document.getElementById('tour-list')?.scrollIntoView({ behavior: 'smooth' });
+    const list = document.getElementById('tour-list');
+    // Do not pull readers back to the top when streaming finishes.
+    if (list && list.getBoundingClientRect().top > window.innerHeight) {
+      list.scrollIntoView({ behavior: 'smooth' });
+    }
   }, []);
 
   const isBudgetSelected = (min: number, max: number) => {
@@ -1740,7 +1744,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
 
       <div className="mb-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div><p className="mb-2 text-[10px] font-semibold tracking-[0.22em] text-orange-700">广州出发 · 各平台线路</p><h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">挑一条心动的线路</h2><p className="mt-2 text-sm text-stone-500">先看能不能报、哪天走，再看价格和细节。点开任意一条都能看到来源平台的原文。</p></div>
+          <div className={cn((isAiSearchMode || isAiSearching) && "hidden sm:block")}><p className="mb-2 text-[10px] font-semibold tracking-[0.22em] text-orange-700">广州出发 · 各平台线路</p><h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">挑一条心动的线路</h2><p className="mt-2 text-sm text-stone-500">先看能不能报、哪天走，再看价格和细节。点开任意一条都能看到来源平台的原文。</p></div>
           <a href="#" className="inline-flex min-h-11 items-center gap-1 text-xs text-stone-600 hover:text-orange-800">返回搜索 ↑</a>
         </div>
         {heroDestinations.length > 0 && <div className="sr-only">当前热门目的地：{heroDestinations.join('、')}</div>}
@@ -1748,7 +1752,12 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
             再加一条「正在查找：xxx / 清除搜索」等于同一屏把同一件事说两遍，
             还把「挑一条心动的线路」标题挤出首屏。 */}
         {searchQuery && !(isAiSearchMode || isAiSearching) && <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-orange-900/10 bg-orange-50/70 px-4 py-3"><p className="min-w-0 break-words text-sm text-orange-950">正在查找：<strong>{searchQuery}</strong></p><Button variant="ghost" className="h-11 shrink-0 rounded-xl text-orange-900" onClick={onClearSearch}><X className="mr-1 h-4 w-4" />清除搜索</Button></div>}
-        {commonFilters}
+        {isMobile && (isAiSearchMode || isAiSearching || aiStreamingItems.length > 0) ? (
+          <details className="rounded-2xl border border-stone-200 bg-white px-3">
+            <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium text-stone-700">筛选线路{activeFilterCount > 0 ? ` · 已选 ${activeFilterCount} 项` : ''}</summary>
+            {commonFilters}
+          </details>
+        ) : commonFilters}
 
         {!isMobile && showFilters && (
           <div className="mt-4">

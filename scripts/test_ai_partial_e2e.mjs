@@ -55,6 +55,23 @@ try {
   await reason.waitFor({ timeout: 60000 });
   assert.equal(await page.evaluate(() => window.__partialTest.finished), false, 'card must appear while SSE is still open');
   console.log('PASS: SSE 未结束，列表已显示模型生成的首条推荐理由');
+  await page.getByRole('button', { name: '取消这次查找', exact: true }).waitFor();
+  assert.equal(await page.getByRole('progressbar', { name: '推荐生成进度' }).getAttribute('aria-valuenow') !== null, true);
+  await page.evaluate(() => {
+    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
+    document.dispatchEvent(new Event('visibilitychange'));
+  });
+  await page.getByRole('button', { name: '重新查找', exact: true }).waitFor();
+  assert.ok(await reason.isVisible(), 'background interruption must retain the validated preview');
+  const checkpoint = await page.evaluate(() => JSON.parse(localStorage.getItem('travel-ai-chat-state-v2')));
+  assert.ok(checkpoint.pendingPrompt, 'interrupted prompt must be persisted');
+  assert.ok(checkpoint.result.items.some((item) => item.reason === '流式测试专属推荐理由'));
+  await page.reload();
+  await page.getByRole('button', { name: '重新查找', exact: true }).waitFor({ timeout: 30000 });
+  await page.locator('.tour-card').filter({ hasText: '流式测试专属推荐理由' }).first().waitFor();
+  console.log('PASS: 后台中断保留预览与重试入口，重载后仍可读');
+  await page.getByRole('button', { name: '重新查找', exact: true }).click();
+  await page.waitForFunction(() => Boolean(window.__finishPartialTest));
   await page.evaluate(() => window.__finishPartialTest());
   await page.getByText('AI完成', { exact: true }).first().waitFor({ timeout: 30000 });
   assert.deepEqual(errors, []);

@@ -26,7 +26,7 @@ await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const browser = await chromium.launch({ headless: true });
 try {
   // 覆盖竖排（<640）与横排（>=640）两段，543 是用户报障的宽度。
-  for (const width of [390, 543, 640, 1024]) {
+  for (const width of [360, 390, 543, 640, 1024]) {
     const page = await browser.newPage({ viewport: { width, height: 900 } });
     await page.goto(`http://127.0.0.1:${server.address().port}/EverywhereWeGoGz/`);
     await page.getByRole('button', { name: /搜索线路|按需求找团/ }).first().waitFor({ timeout: 60000 });
@@ -40,8 +40,9 @@ try {
     assert.equal(measured.length, 2, `${width}px: hero must keep both action buttons`);
     for (const button of measured) {
       assert.ok(button.height >= 44, `${width}px "${button.label}" collapsed to ${button.height}px (touch target must stay >=44px)`);
-      assert.ok(button.width >= 240, `${width}px "${button.label}" is too narrow: ${button.width}px`);
+      assert.ok(button.width >= 120, `${width}px "${button.label}" is too narrow: ${button.width}px`);
     }
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false, 'no horizontal overflow');
     console.info(`PASS ${width}px: ${measured.map((b) => `${b.label}=${b.height}px`).join(' / ')}`);
     await page.close();
   }

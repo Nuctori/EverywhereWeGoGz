@@ -116,7 +116,7 @@ try {
   );
 
   // 5. 展开细节后整体高度必须收敛（曾达 1046px）。
-  await page.getByRole('button', { name: 'AI 调节' }).first().click();
+  await page.getByRole('button', { name: '查看详情' }).first().click();
   await page.waitForTimeout(600);
   const expanded = await panelHeight();
   assert.ok(expanded !== null && expanded <= 620, `expanded panel is too tall: ${expanded}px (list gets pushed off screen)`);

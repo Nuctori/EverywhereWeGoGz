@@ -25,7 +25,7 @@ await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 // 文字节点可能被拆进多个 span，所以按 textContent 包含匹配而不是整串相等。
 const PANEL_HEIGHT = () => {
   const title = [...document.querySelectorAll('div, span')]
-    .filter((n) => (n.textContent || '').includes('AI 优先级助手'))
+    .filter((n) => (n.textContent || '').includes('AI 帮你挑'))
     .pop();
   if (!title) return null;
   let node = title;
@@ -42,11 +42,25 @@ try {
     const page = await browser.newPage({ viewport: { width: viewport.width, height: viewport.height } });
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
+    await page.addInitScript(() => {
+      const realFetch = window.fetch.bind(window);
+      window.fetch = async (input, init) => {
+        if (!String(input).includes('chat/completions')) return realFetch(input, init);
+        const request = JSON.parse(init?.body || '{}');
+        if (!JSON.stringify(request.messages).includes('rank_5detailed_10brief')) {
+          return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ queries: ['推荐线路'], demands: [], destinations: [] }) } }] }), { headers: { 'content-type': 'application/json' } });
+        }
+        return new Response(new ReadableStream({ start(controller) {
+          controller.enqueue(new TextEncoder().encode(': waiting\n\n'));
+          init?.signal?.addEventListener('abort', () => controller.error(new DOMException('aborted', 'AbortError')), { once: true });
+        } }), { headers: { 'content-type': 'text/event-stream' } });
+      };
+    });
     await page.goto(`http://127.0.0.1:${server.address().port}/EverywhereWeGoGz/`);
     await page.locator('.tour-card h3').first().waitFor({ timeout: 60000 });
     await page.locator('input').first().fill('便宜的奔县游');
     await page.getByRole('button', { name: 'AI 帮我挑' }).first().click();
-    await page.waitForTimeout(2500);
+    await page.getByRole('button', { name: '取消这次查找', exact: true }).waitFor();
 
     const collapsed = await page.evaluate(PANEL_HEIGHT);
     assert.ok(collapsed !== null, `${viewport.label}: panel must render`);
@@ -65,8 +79,8 @@ try {
     );
     assert.equal(strayBubbles, 0, `${viewport.label}: no empty chat box while the request runs`);
 
-    await page.getByRole('button', { name: /AI 调节/ }).first().click();
-    await page.waitForTimeout(700);
+    await page.getByRole('button', { name: /查看详情/ }).first().click();
+    await page.getByText('查看本阶段进度', { exact: true }).waitFor();
     const expanded = await page.evaluate(PANEL_HEIGHT);
     assert.ok(expanded !== null && expanded > collapsed, `${viewport.label}: details must expand`);
     assert.ok(expanded <= 380, `${viewport.label}: expanded panel must stay reasonable, got ${expanded}px`);

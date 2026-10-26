@@ -89,7 +89,7 @@ try {
   });
 
   await page.waitForFunction(() => typeof window.__pushNext === 'function', null, { timeout: 60000 });
-  await page.getByRole('button', { name: 'AI 调节', exact: true }).click();
+  await page.getByRole('button', { name: '查看详情', exact: true }).click();
   const trail = [];
   let previousOutputChars = 0;
   // 逐条推送，观察每次增量到达后的界面状态。

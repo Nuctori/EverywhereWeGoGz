@@ -82,7 +82,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                   aria-describedby="search-help"
                   type="search"
                   enterKeyHint="search"
-                  placeholder="地名直接搜，比如「南昆山」；也可以直说要求，比如「两天内、800 块以内、带温泉」"
+                  placeholder="目的地、预算或想玩的体验"
                   className="h-14 rounded-2xl border-0 bg-stone-50/80 pl-11 pr-11 text-sm shadow-none placeholder:text-stone-500 focus-visible:ring-orange-700/30"
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
@@ -103,7 +103,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
               </div>
               {/* 竖排时 flex-1 作用在交叉轴上等于 auto，按钮高度会塌回文字高度（实测 20px），
                   所以必须自带 shrink-0 和明确的最小高度。 */}
-              <div className="mt-2 flex flex-col gap-2 sm:flex-row [&>button]:shrink-0">
+              <div className="mt-2 flex flex-row gap-2 [&>button]:shrink-0">
                 <Button
                   type="submit"
                   size="lg"
@@ -134,7 +134,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                   <Sparkles className="mr-1 h-4 w-4" />AI 帮我挑
                 </Button>
               </div>
-              <p id="search-help" className="mt-2 px-1 text-xs leading-5 text-stone-500">
+              <p id="search-help" className="mt-2 hidden px-1 text-xs leading-5 text-stone-500 sm:block">
                 写地名就搜索，写清楚预算天数主按钮会变成「按需求找团」；想直接让 AI 挑就点「AI 帮我挑」。
               </p>
             </form>
@@ -159,7 +159,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
             </div>
           </div>
 
-          <aside className="min-w-0 self-stretch lg:flex lg:flex-col lg:justify-center" aria-label="在地图上探索目的地">
+          <aside className="hidden min-w-0 self-stretch sm:block lg:flex lg:flex-col lg:justify-center" aria-label="在地图上探索目的地">
             <div className="mb-3 flex items-center justify-between gap-2 px-1">
               <span className="flex items-center gap-1.5 text-xs font-semibold text-orange-900">
                 <MapPin className="h-3.5 w-3.5" />不知道去哪？看地图挑一片

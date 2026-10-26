@@ -269,7 +269,7 @@ type RecommendationAuditContext = ReturnType<typeof buildRecommendationAuditCont
 const searchCorpusCache = new WeakMap<AiRecommendationCandidate, string>();
 // 班期窗/未来班期列表按 tour 引用缓存（键里带 today，跨日失效）。这两项原先
 // 每次 scoreTour 都重算一遍，是点击后"到首包前"那段时间的主要本地成本。
-const candidateScheduleWindowsCache = new WeakMap<AiRecommendationCandidate, CandidateScheduleWindow[]>();
+const candidateScheduleWindowsCache = new WeakMap<AiRecommendationCandidate, { today: string; windows: CandidateScheduleWindow[] }>();
 const candidateDepartureDatesCache = new WeakMap<AiRecommendationCandidate, { today: string; dates: string[] }>();
 const atlasRegionsCache = new Map<string, string[]>();
 const primitiveExperienceAtomsCache = new Map<string, string[]>();
@@ -2564,12 +2564,13 @@ function getCandidateReturnWeekdays(tour: AiRecommendationCandidate) {
 }
 
 function getCandidateScheduleWindows(tour: AiRecommendationCandidate): CandidateScheduleWindow[] {
-  // 排班窗只由班期日期与天数决定，按引用缓存（同 getCandidateDepartureDates 的理由）。
+  // 未来班期随日期变化，外层窗口缓存必须与日期列表一起跨日失效。
+  const today = getTodayInputValue();
   const cached = candidateScheduleWindowsCache.get(tour);
-  if (cached) return cached;
+  if (cached?.today === today) return cached.windows;
   const dates = getCandidateDepartureDates(tour);
   if (dates.length === 0) {
-    candidateScheduleWindowsCache.set(tour, []);
+    candidateScheduleWindowsCache.set(tour, { today, windows: [] });
     return [];
   }
   const duration = Number.isFinite(tour.duration) && tour.duration > 0 ? tour.duration : 0;
@@ -2588,7 +2589,7 @@ function getCandidateScheduleWindows(tour: AiRecommendationCandidate): Candidate
       } satisfies CandidateScheduleWindow;
     })
     .filter((window): window is CandidateScheduleWindow => Boolean(window));
-  candidateScheduleWindowsCache.set(tour, windows);
+  candidateScheduleWindowsCache.set(tour, { today, windows });
   return windows;
 }
 
@@ -7597,6 +7598,7 @@ async function consumeAiStreamingResponse(params: {
   let finishReason = '';
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let totalTimer: ReturnType<typeof setTimeout> | null = null;
+  const streamDeadline = Date.now() + getProviderTimeoutMs(config, params.timeoutMs);
 
   const clearTimers = () => {
     if (idleTimer) clearTimeout(idleTimer);
@@ -7618,6 +7620,8 @@ async function consumeAiStreamingResponse(params: {
         if (settled) return;
         settled = true;
         if (idleTimer) clearTimeout(idleTimer);
+        if (totalTimer) clearTimeout(totalTimer);
+        totalTimer = null;
         // 每次 read 都要撤掉本次注册的取消监听：一次请求会 read 几百个 chunk，
         // 不清理会让用户 signal 上累积几百个监听器（也是内存泄漏）。
         params.signal?.removeEventListener('abort', onUserAbort);
@@ -7640,7 +7644,7 @@ async function consumeAiStreamingResponse(params: {
           settle(() => reject(new Error(
             `AI API timeout [${config.model}] stream exceeded ${getProviderTimeoutMs(config, params.timeoutMs)}ms`,
           )));
-        }, getProviderTimeoutMs(config, params.timeoutMs));
+        }, Math.max(0, streamDeadline - Date.now()));
       }
       reader.read().then(
         (result) => settle(() => resolve(result)),
@@ -7674,6 +7678,7 @@ async function consumeAiStreamingResponse(params: {
   // SSE 体误判成整包 JSON 炸出裸 SyntaxError。嗅探首块字节按 SSE 语法判定，
   // 不是 SSE 才退回整包 JSON 解析。
   let streamHead = '';
+  try {
   {
     const { done, value } = await readChunk();
     streamHead = done ? '' : decoder.decode(value, { stream: true });
@@ -7689,7 +7694,6 @@ async function consumeAiStreamingResponse(params: {
     }
   }
 
-  try {
     // 首块已在嗅探阶段读出且确认是 SSE，先喂解析器再进入常规读循环。
     const headDelta = handleEvents(parser.push(streamHead), config.model);
     if (headDelta) params.onStreamDelta?.(headDelta);
@@ -7765,6 +7769,17 @@ async function fetchWithTimeout(
   init: RequestInit | undefined,
   timeoutMs: number,
 ) {
+  return consumeWithFetchTimeout(input, init, timeoutMs, async (response) => response);
+}
+
+// Keep cancellation and the deadline alive until the consumer finishes reading
+// the body, not merely until fetch resolves with the response headers.
+async function consumeWithFetchTimeout<T>(
+  input: RequestInfo | URL,
+  init: RequestInit | undefined,
+  timeoutMs: number,
+  consume: (response: Response) => Promise<T>,
+): Promise<T> {
   const controller = new AbortController();
   const upstreamSignal = init?.signal;
   const abortFromUpstream = () => controller.abort(upstreamSignal?.reason);
@@ -7775,10 +7790,10 @@ async function fetchWithTimeout(
   }
   const timeoutId = globalThis.setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(input, {
-      ...init,
-      signal: controller.signal,
-    });
+    const response = await fetch(input, { ...init, signal: controller.signal });
+    const result = await consume(response);
+    if (controller.signal.aborted) throw new DOMException('AI request aborted', 'AbortError');
+    return result;
   } finally {
     globalThis.clearTimeout(timeoutId);
     upstreamSignal?.removeEventListener('abort', abortFromUpstream);
@@ -8800,7 +8815,7 @@ async function callSingleAiProvider(params: {
       if (params.signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
       // 每次重试/切换供应商先撤回上一份临时结果，不能混合不同响应。
       params.onPartialItems?.([]);
-      const response = await fetchWithTimeout(
+      return await consumeWithFetchTimeout(
         url,
         {
           method: 'POST',
@@ -8809,61 +8824,63 @@ async function callSingleAiProvider(params: {
           signal: params.signal,
         },
         getProviderTimeoutMs(config, params.timeoutMs),
-      );
-
-      if (!response.ok) {
-        const errorBody = await response.text();
-        let providerMessage = response.statusText || '';
-        shouldRetry = response.status === 429 || response.status >= 500;
-        // 只有 429（真的被限流）才值得用 4s 长退避等配额恢复。
-        // 5xx（502/503/504 这类网关抖动）不是配额问题，等 4 秒既等不来配额，
-        // 又白白把一次点击拖长 8 秒——实测复测时三连 502 就是这样把
-        // 一个 344 token 的小请求拖到 27s 的。5xx 走短退避尽快重试。
-        lastRateLimitedStatus = shouldRetry && response.status === 429 ? response.status : 0;
-        if (errorBody) {
-          try {
-            const parsed = JSON.parse(errorBody) as {
-              error?: { message?: string; code?: string; type?: string };
-              message?: string;
-            };
-            providerMessage =
-              parsed.error?.message ||
-              parsed.message ||
-              parsed.error?.code ||
-              parsed.error?.type ||
-              providerMessage;
-          } catch {
-            providerMessage = errorBody.slice(0, 180) || providerMessage;
+        async (response) => {
+          if (!response.ok) {
+            const errorBody = await response.text();
+            let providerMessage = response.statusText || '';
+            shouldRetry = response.status === 429 || response.status >= 500;
+            // 只有 429（真的被限流）才值得用 4s 长退避等配额恢复。
+            // 5xx（502/503/504 这类网关抖动）不是配额问题，等 4 秒既等不来配额，
+            // 又白白把一次点击拖长 8 秒——实测复测时三连 502 就是这样把
+            // 一个 344 token 的小请求拖到 27s 的。5xx 走短退避尽快重试。
+            lastRateLimitedStatus = shouldRetry && response.status === 429 ? response.status : 0;
+            if (errorBody) {
+              try {
+                const parsed = JSON.parse(errorBody) as {
+                  error?: { message?: string; code?: string; type?: string };
+                  message?: string;
+                };
+                providerMessage =
+                  parsed.error?.message ||
+                  parsed.message ||
+                  parsed.error?.code ||
+                  parsed.error?.type ||
+                  providerMessage;
+              } catch {
+                providerMessage = errorBody.slice(0, 180) || providerMessage;
+              }
+            }
+            throw new Error(
+              providerMessage
+                ? `AI API failed [${config.model}]: ${response.status} ${providerMessage}`
+                : `AI API failed [${config.model}]: ${response.status}`,
+            );
           }
-        }
-        throw new Error(
-          providerMessage
-            ? `AI API failed [${config.model}]: ${response.status} ${providerMessage}`
-            : `AI API failed [${config.model}]: ${response.status}`,
-        );
-      }
 
-      shouldRetry = false;
-      const outcome = streaming
-        ? await consumeAiStreamingResponse({
-            response,
-            config,
-            schema: params.schema ?? 'recommendation',
-            onStreamDelta: params.onStreamDelta,
-            onPartialItems: params.onPartialItems,
-            timeoutMs: params.timeoutMs,
-            signal: params.signal,
-          })
-        // 非流式路径也走带标签的整包解析：网关无视 stream:false 回 SSE 时
-        // 不允许炸出绕过错误口径的裸 SyntaxError。
-        : await parseWholeJsonBody(response, config, params.schema ?? 'recommendation');
-      const { parsed, reasoningText, usage } = outcome;
-      const qualityIssue = params.qualityCheck?.(parsed, config);
-      if (qualityIssue) {
-        throw new Error(getAiProviderParseErrorLabel(config, 'quality_check_failed', qualityIssue));
-      }
-      return { parsed, reasoningText, usage, model: config.model };
+          shouldRetry = false;
+          const outcome = streaming
+            ? await consumeAiStreamingResponse({
+                response,
+                config,
+                schema: params.schema ?? 'recommendation',
+                onStreamDelta: params.onStreamDelta,
+                onPartialItems: params.onPartialItems,
+                timeoutMs: params.timeoutMs,
+                signal: params.signal,
+              })
+            // 非流式路径也走带标签的整包解析：网关无视 stream:false 回 SSE 时
+            // 不允许炸出绕过错误口径的裸 SyntaxError。
+            : await parseWholeJsonBody(response, config, params.schema ?? 'recommendation');
+          const { parsed, reasoningText, usage } = outcome;
+          const qualityIssue = params.qualityCheck?.(parsed, config);
+          if (qualityIssue) {
+            throw new Error(getAiProviderParseErrorLabel(config, 'quality_check_failed', qualityIssue));
+          }
+          return { parsed, reasoningText, usage, model: config.model };
+        },
+      );
     } catch (error) {
+      if (params.signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
       providerLastError = normalizeAiProviderError(error, config);
       if (providerLastError.message.includes('tokens_seen')) {
         // 升压不能受 attempt 限制：第二、三次尝试发的必须是更大的预算。
@@ -8970,7 +8987,33 @@ async function requestAiFormatCorrection(params: {
   }
 }
 
-async function callAiApi(params: {
+async function callAiApi(params: Parameters<typeof callAiApiWithinBudget>[0]) {
+  if (!params.timeoutMs || params.timeoutMs <= 0) return callAiApiWithinBudget(params);
+  const controller = new AbortController();
+  const upstream = params.signal;
+  const abort = () => controller.abort(upstream?.reason);
+  if (upstream?.aborted) abort();
+  else upstream?.addEventListener('abort', abort, { once: true });
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      controller.abort();
+      reject(new Error(`AI API timeout after ${params.timeoutMs}ms total budget`));
+    }, params.timeoutMs);
+  });
+  try {
+    return await Promise.race([
+      callAiApiWithinBudget({ ...params, signal: controller.signal }),
+      deadline,
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+    upstream?.removeEventListener('abort', abort);
+    controller.abort();
+  }
+}
+
+async function callAiApiWithinBudget(params: {
   configs: AiProviderConfig[];
   messages: ReturnType<typeof buildAiMessages>;
   liteMessages?: ReturnType<typeof buildLiteAiMessages>;
@@ -9007,6 +9050,7 @@ async function callAiApi(params: {
   abortIfCancelled();
 
   for (const config of thinkingConfigs) {
+    abortIfCancelled();
     try {
       return await callSingleAiProvider({ ...params, config });
     } catch (error) {
@@ -9018,6 +9062,7 @@ async function callAiApi(params: {
     }
   }
 
+  abortIfCancelled();
   if (nonThinkingForegroundConfigs.length > 0) {
     const controllers = nonThinkingForegroundConfigs.map(() => new AbortController());
     const foregroundErrors: string[] = [];
@@ -9078,6 +9123,7 @@ async function callAiApi(params: {
   }
 
   for (const config of fallbackConfigs) {
+    abortIfCancelled();
     try {
       return await callSingleAiProvider({ ...params, config });
     } catch (error) {
@@ -9089,6 +9135,7 @@ async function callAiApi(params: {
     }
   }
 
+  abortIfCancelled();
   if (providerErrors.length > 1) {
     throw new Error(providerErrors.join(' | '));
   }

@@ -442,6 +442,7 @@ export const storedAiProviderConfigSchema = z.object({
 });
 
 export const storedAiChatStateSchema = z.object({
+  pendingPrompt: z.string().nullish(),
   conversationId: z.string().optional(),
   input: z.string().optional(),
   messages: z.array(aiRecommendationMessageSchema).optional(),

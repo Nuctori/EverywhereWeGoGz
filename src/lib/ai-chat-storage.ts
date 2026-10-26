@@ -14,6 +14,7 @@ export interface StoredAiChatState {
   messages?: AiRecommendationMessage[];
   result?: AiRecommendationResult | null;
   preferenceMemory?: AiPreferenceMemory | null;
+  pendingPrompt?: string | null;
 }
 
 export function readStoredAiChatState(): StoredAiChatState {
@@ -49,7 +50,11 @@ export function saveStoredAiChatState(
   };
   const parsed = storedAiChatStateSchema.safeParse(normalizedState);
   if (!parsed.success) return;
-  window.localStorage.setItem(AI_CHAT_STORAGE_KEY, JSON.stringify(parsed.data));
+  try {
+    window.localStorage.setItem(AI_CHAT_STORAGE_KEY, JSON.stringify(parsed.data));
+  } catch {
+    // Storage may be unavailable or full; persistence must not break a live request.
+  }
 }
 
 export function clearStoredAiChatState() {
