@@ -6814,7 +6814,7 @@ function buildAiMessages(params: {
           matchedSignals: '每条都需要。2-3 个中文短语，概括这条线的核心看点，要具体，不要重复标题里已有的词，不要写空泛的“适合度假”',
         },
       ],
-      itemCountLimit: MAX_AI_SELECTED_ITEMS,
+      itemCountLimit: 8,
     },
     rq: [
       '按用户原话和上下文理解需求，可返回 intent 修正你的理解；注意调动世界知识处理软语义需求。先做整体体验判断，再做候选排序。',
@@ -6831,7 +6831,7 @@ function buildAiMessages(params: {
       ...promptPolicy.requestRules,
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
-        `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条是最值得细看的详细推荐，后面 ${MAX_AI_BRIEF_ITEMS} 条是值得顺便比较的简要推荐；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
+        '候选池足够时本轮优先返回 6-8 个 items，按推荐度排序；每个返回的 item 都应是用户可能愿意比较的真实选项，存在硬冲突时宁可少返回。先输出顶层 items 数组，再输出 summary，让完整条目能尽早展示。',
         '可以参考熟悉当地玩法的人来写，避免让所有线路都长得一样；如果某个软条件需要核实，自行判断它是否值得写进这一条。',
         // 输出体积约束：实测主请求在 109 tok/s 下生成 2689 token 要 25s，
         // 而这 2689 token 里绝大部分是把 ck/fk 里的输入列原样抄回来
@@ -6912,7 +6912,7 @@ function buildLiteAiMessages(params: {
         sf: `仅前${MAX_AI_PROMPT_REASON_ITEMS}条写完整推荐理由，像熟悉当地玩法的人在种草；第${MAX_AI_DETAILED_ITEMS + 1}条起 sf 写一句话简单介绍（30 字内），不要展开长理由`,
         ss: '每条都需要，最多3个短词，概括核心看点',
       }],
-      itemCountLimit: MAX_AI_SELECTED_ITEMS,
+      itemCountLimit: 8,
     },
     rq: [
       '只输出 JSON，不要 Markdown。',
@@ -6921,7 +6921,7 @@ function buildLiteAiMessages(params: {
       '只允许使用 candidates/fh 中存在的 id。',
       '文案保持具体判断即可，不要为了短而牺牲判断；但每条 sf 控制在 60 字内，确保整个 JSON 不会因为太长而被截断。',
       'candidates（稳定池）是按 id 排序的全池背景候选；fh 是按本轮需求检索/匹配出的重点候选完整档案，优先在 fh 内挑选，再用稳定池补足选择面。',
-      `候选池足够时优先返回 12-${MAX_AI_SELECTED_ITEMS} 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；部分匹配也算可选项，缺少一个软条件应降低排序而不是直接省略；只有候选确实不足或存在明显硬冲突时才少返回。每个返回的 item 都应是用户可能愿意比较的真实选项。`,
+      `候选池足够时本轮优先返回 6-8 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；存在硬冲突时宁可少返回。先输出顶层 items 数组，再输出其余字段，让完整条目能尽早展示。`,
       '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
       `多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮偏好。`,
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
@@ -7680,8 +7680,19 @@ async function consumeAiStreamingResponse(params: {
   let streamHead = '';
   try {
   {
-    const { done, value } = await readChunk();
-    streamHead = done ? '' : decoder.decode(value, { stream: true });
+    // Network chunks do not align with SSE field names (even `data:` may split).
+    // Buffer only while the head is still a possible SSE prefix; JSON falls back immediately.
+    const possibleSseHead = (text: string) => {
+      const head = text.trimStart();
+      return !head || ['data:', 'event:', 'id:', 'retry:', ':'].some((prefix) => prefix.startsWith(head));
+    };
+    for (;;) {
+      const { done, value } = await readChunk();
+      if (done) break;
+      streamHead += decoder.decode(value, { stream: true });
+      if (!possibleSseHead(streamHead)) break;
+      if (/^\s*(?:data|event|id|retry):|^\s*:/.test(streamHead)) break;
+    }
     if (!/^\s*(?:data|event|id|retry):|^\s*:/.test(streamHead)) {
       let wholeJson = streamHead;
       for (;;) {
@@ -8594,7 +8605,7 @@ function normalizeMessagesForProvider(messages: ReturnType<typeof buildAiMessage
 // 分类头的独立超时上限：它是链路上的可选步骤（失败即退回词面 fallback），
 // 不该沿用主调用的 75s/180s 预算让用户白等。12s 覆盖分类头实测的典型往返
 // （4-8s）并留出抖动余量；超时按失败处理，直接降到 fallback 继续往下走。
-const AI_CLASSIFIER_TIMEOUT_MS = 12000;
+const AI_CLASSIFIER_TIMEOUT_MS = 4000;
 
 /**
  * 把多个 AbortSignal 并联成一个：任一方 abort，合成的 signal 立即 abort，
@@ -9245,7 +9256,69 @@ function getAiFailureDetail(error: unknown) {
   return message || 'AI service unavailable';
 }
 
-export async function requestAiRecommendations({
+// One wall-clock budget covers preparation, optional research and every provider retry.
+// Keep the race at the public boundary: transports that ignore abort cannot publish late work.
+export async function requestAiRecommendations(request: AiRecommendationRequest): Promise<AiRecommendationResult> {
+  if (request.signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
+  const budgetMs = Number.isFinite(request.timeoutMs) && (request.timeoutMs ?? 0) > 0
+    ? request.timeoutMs! : 30_000;
+  const deadline = Date.now() + budgetMs;
+  const controller = new AbortController();
+  let active = true;
+  let partialItems: AiRecommendationItem[] = [];
+  let fallbackItems: AiRecommendationItem[] = [];
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let rejectCancelled: ((error: Error) => void) | undefined;
+  const cancel = () => {
+    active = false;
+    controller.abort();
+    rejectCancelled?.(new DOMException('AI request cancelled', 'AbortError'));
+  };
+  const interruptedResult = (): AiRecommendationResult => {
+    const retained = partialItems.length > 0;
+    return {
+      conversationId: request.conversationId, summary: '',
+      items: retained ? partialItems : (fallbackItems ?? []).map((item) => ({ ...item, reason: undefined })),
+      generatedAt: new Date().toISOString(), source: retained ? 'ai-api' : 'local-preview',
+      status: { mode: 'local-only', label: retained ? '已保留部分推荐' : '已返回本地候选',
+        detail: '本轮查询达到时间预算，完整 AI 推荐尚未完成。' },
+    };
+  };
+  const cancelled = new Promise<never>((_, reject) => { rejectCancelled = reject; });
+  request.signal?.addEventListener('abort', cancel, { once: true });
+  const timedOut = new Promise<AiRecommendationResult>((resolve) => {
+    timer = setTimeout(() => {
+      active = false;
+      controller.abort();
+      resolve(interruptedResult());
+    }, budgetMs);
+  });
+  const work = requestAiRecommendationsWithinBudget({
+    ...request, signal: controller.signal,
+    onProgress: (progress) => {
+      if (!active) return;
+      if (progress.partialItems) partialItems = progress.partialItems;
+      request.onProgress?.(progress);
+    },
+  }, deadline, (items) => { fallbackItems = items; });
+  try {
+    const result = await Promise.race([work, timedOut, cancelled]);
+    // A remaining-budget provider timeout can settle just before the outer timer.
+    // Its ordinary local fallback must not discard an already validated preview.
+    if (partialItems.length && result.source !== 'ai-api') return interruptedResult();
+    return result;
+  } catch (error) {
+    if (!request.signal?.aborted && Date.now() >= deadline) return interruptedResult();
+    throw error;
+  } finally {
+    active = false;
+    if (timer) clearTimeout(timer);
+    request.signal?.removeEventListener('abort', cancel);
+    controller.abort();
+  }
+}
+
+async function requestAiRecommendationsWithinBudget({
   conversationId,
   messages,
   candidateTours,
@@ -9256,7 +9329,11 @@ export async function requestAiRecommendations({
   previousResult,
   onProgress,
   signal,
-}: AiRecommendationRequest): Promise<AiRecommendationResult> {
+}: AiRecommendationRequest, deadline: number, onFallbackReady: (items: AiRecommendationItem[]) => void): Promise<AiRecommendationResult> {
+  const remainingBudget = () => {
+    if (signal?.aborted || Date.now() >= deadline) throw new DOMException('AI request cancelled', 'AbortError');
+    return Math.max(1, deadline - Date.now());
+  };
   // 已取消就直接走取消路径，不发起任何请求。
   if (signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
   emitProgress(onProgress, {
@@ -9415,6 +9492,14 @@ export async function requestAiRecommendations({
       candidateTours: availableCandidates,
       userText: effectiveUserText,
     });
+    // Prepare the deadline fallback during normal preparation, never in the timer.
+    // Hard conflicts remain excluded; do not invent AI commentary for local entries.
+    const checkedFallback = auditAiRecommendationsStrict(runtimeFallbackItems, [], availableCandidates, effectiveIntent);
+    onFallbackReady(splitByIntentConflicts(
+      keepAiItemsForCompoundExperience(checkedFallback, availableCandidates, text), effectiveIntent,
+      new Map(availableCandidates.map((tour) => [tour.id, buildTourPrimitive(tour)])), corpusVocab,
+    ).compliant.slice(0, MAX_AI_SELECTED_ITEMS));
+    remainingBudget();
     runtimePreferenceMemory = nextPreferenceMemory;
     const auditContext = buildRecommendationAuditContext(availableCandidates, previousResult, effectiveIntent);
     emitProgress(onProgress, {
@@ -9486,6 +9571,7 @@ export async function requestAiRecommendations({
       expectQueries: planningExpected,
       ...(signal ? { signal } : {}),
     });
+    remainingBudget();
     const classifiedSpec = classifiedPayload.spec;
     // B6 目的地归一：分类头用模型知识把区域词展开成具体目的地（潮汕→潮州/汕头、
     // 东北→哈尔滨/雪乡），并入本轮意图的目的地提示——下游目的地评分/冲突门/
@@ -9856,8 +9942,9 @@ export async function requestAiRecommendations({
         preferenceMemory: aiContextMemoryForThisTurn,
         allowPublicInterest: allowPublicInterestForTurn,
       }),
-      maxTokens: 3600,
+      maxTokens: 2400,
       liteMaxTokens: 1500,
+      timeoutMs: remainingBudget(),
       ...(signal ? { signal } : {}),
       qualityCheck: (response) =>
         getAiResponseIntentQualityIssue({

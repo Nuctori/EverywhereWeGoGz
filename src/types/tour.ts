@@ -506,6 +506,8 @@ export type AiRecommendationCandidate = Pick<
 >;
 
 export interface AiRecommendationRequest {
+  /** Total wall-clock budget, including preparation and all providers. */
+  timeoutMs?: number;
   conversationId: string;
   messages: AiRecommendationMessage[];
   candidateTours: AiRecommendationCandidate[];

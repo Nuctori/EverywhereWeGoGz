@@ -901,4 +901,23 @@ await test16ColumnarReply();
     assert.deepEqual(partials.map((items) => items.length), [0, 1, 2]);
   } finally { globalThis.fetch = originalFetch; }
 }
+// Transport chunk boundaries may split the first SSE field name before its colon.
+{
+  const originalFetch = globalThis.fetch;
+  for (const firstChunk of ['d', 'da', 'dat', 'data', ' ', '\n']) {
+    const partials: unknown[][] = [];
+    const content = '{"items":[{"tourId":"tour_1","score":90,"reason":"offline","matchedSignals":[]}],"summary":"offline"}';
+    const frame = 'data: ' + JSON.stringify({ choices: [{ delta: { content } }] }) + '\n\ndata: [DONE]\n\n';
+    const chunks = firstChunk.trim() ? [firstChunk, frame.slice(firstChunk.length)] : [firstChunk, frame];
+    globalThis.fetch = (async () => new Response(new ReadableStream<Uint8Array>({ start(controller) {
+      for (const chunk of chunks) controller.enqueue(encoder.encode(chunk));
+      controller.close();
+    } }), { headers: { 'content-type': 'text/event-stream' } })) as typeof fetch;
+    try {
+      await callAiApi({ configs: [{ baseUrl: 'https://api.z.ai/api/paas/v4', model: 'GLM-4.7-Flash', apiKey: 'test' }],
+        messages: [{ role: 'user', content: 'offline' }], onPartialItems: (items) => partials.push(items) });
+      assert.equal(partials.at(-1)?.length, 1, `split prefix ${JSON.stringify(firstChunk)} must stream`);
+    } finally { globalThis.fetch = originalFetch; }
+  }
+}
 console.info('AI streaming contract tests passed');

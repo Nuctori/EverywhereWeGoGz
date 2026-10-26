@@ -15,6 +15,7 @@ export interface StoredAiChatState {
   result?: AiRecommendationResult | null;
   preferenceMemory?: AiPreferenceMemory | null;
   pendingPrompt?: string | null;
+  autoResumeRemaining?: number;
 }
 
 export function readStoredAiChatState(): StoredAiChatState {

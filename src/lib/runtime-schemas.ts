@@ -443,6 +443,7 @@ export const storedAiProviderConfigSchema = z.object({
 
 export const storedAiChatStateSchema = z.object({
   pendingPrompt: z.string().nullish(),
+  autoResumeRemaining: z.number().int().min(0).max(2).optional(),
   conversationId: z.string().optional(),
   input: z.string().optional(),
   messages: z.array(aiRecommendationMessageSchema).optional(),

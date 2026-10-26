@@ -102,7 +102,7 @@ const { mergeAbortSignals } = hooks;
   // 主调用仍带 signal 透传
   check(
     'form: 主调用透传取消信号',
-    /maxTokens: 3600,[\s\S]{0,200}\.\.\.\(signal \? \{ signal \} : \{\}\),/.test(source),
+    /maxTokens: 2400,[\s\S]{0,250}\.\.\.\(signal \? \{ signal \} : \{\}\),/.test(source),
   );
 }
 

@@ -330,6 +330,8 @@ export function AiRecommendPanel({
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [interruptedPrompt, setInterruptedPrompt] = useState<string | null>(storedChatState.pendingPrompt || null);
+  const autoResumeRemainingRef = useRef(storedChatState.autoResumeRemaining ?? 0);
+  const [resumeTick, setResumeTick] = useState(0);
   const liveThinkingScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const storageSaveCleanupRef = useRef<ReturnType<typeof scheduleIdleWork>>(undefined);
@@ -343,7 +345,14 @@ export function AiRecommendPanel({
   const handledRequestIdRef = useRef<number | null>(null);
   // 本标签页的标识：用于区分"自己写的进度"和"别的标签页写的进度"，
   // 避免自己读到自己的回声后覆盖本页真实的进度状态。
-  const tabIdRef = useRef(`tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
+  const tabIdRef = useRef('');
+  if (!tabIdRef.current) {
+    const freshId = `tab-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    try {
+      tabIdRef.current = sessionStorage.getItem('travel-ai-tab-id') || freshId;
+      sessionStorage.setItem('travel-ai-tab-id', tabIdRef.current);
+    } catch { tabIdRef.current = freshId; }
+  }
   const [remoteProgress, setRemoteProgress] = useState<StoredAiProgress | null>(null);
   const conversationId = useMemo(
     () => storedChatState.conversationId || createConversationId(),
@@ -379,6 +388,7 @@ export function AiRecommendPanel({
         result,
         preferenceMemory,
         pendingPrompt: interruptedPrompt,
+        autoResumeRemaining: autoResumeRemainingRef.current,
       }, MAX_PERSISTED_MESSAGES);
       storageSaveCleanupRef.current = undefined;
     });
@@ -403,6 +413,7 @@ export function AiRecommendPanel({
     if (!remoteProgress) return;
     const timer = window.setInterval(() => {
       setRemoteTick((current) => current + 1);
+      setResumeTick((tick) => tick + 1);
       const stored = readStoredAiProgress();
       setRemoteProgress(stored?.ownerId !== tabIdRef.current ? stored : null);
     }, 1000);
@@ -426,6 +437,7 @@ export function AiRecommendPanel({
     onPartialItems?.([]);
     setLoading(false);
     setInterruptedPrompt(null);
+    autoResumeRemainingRef.current = 0;
     setPreferenceMemory(null);
     setProgressState(null);
     setExpandedStage(null);
@@ -469,17 +481,21 @@ export function AiRecommendPanel({
     if (container) container.scrollTop = container.scrollHeight;
   }, [liveThinkingOpen, progressState?.liveThinking?.excerpt]);
 
-  const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean; replaceRunning?: boolean }) => {
+  const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean; replaceRunning?: boolean; automatic?: boolean }) => {
     const prompt = rawPrompt.trim();
     if (!prompt || (loading && !options?.replaceRunning) || !toursReady || (requestAbortRef.current && !options?.replaceRunning)) return;
+    if (!options?.automatic) autoResumeRemainingRef.current = 2;
     const requestVersion = requestVersionRef.current + 1;
     requestVersionRef.current = requestVersion;
     const preserveResult = options?.preserveResult ?? false;
     // 与 ai-recommendation 的 isFollowUpConversation 同口径：本轮之前已有用户提问即为追问轮。
     const isFollowUpTurn = messages.some((message) => message.role === 'user');
 
+    const submittedAt = Date.now();
     const userMessage = createMessage('user', prompt);
-    const nextMessages = preserveResult
+    const nextMessages = options?.automatic && messages.at(-1)?.role === 'user' && messages.at(-1)?.content === prompt
+      ? messages
+      : preserveResult
       ? [...messages, userMessage]
       : [createInitialMessage(), userMessage];
     setMessages(nextMessages);
@@ -498,10 +514,11 @@ export function AiRecommendPanel({
     const persistRequest = (pendingPrompt: string | null) => {
       storageSaveCleanupRef.current?.();
       storageSaveCleanupRef.current = undefined;
-      saveStoredAiChatState({ conversationId, messages: nextMessages, result: retainedResult, preferenceMemory, pendingPrompt }, MAX_PERSISTED_MESSAGES);
+      saveStoredAiChatState({ conversationId, messages: nextMessages, result: retainedResult, preferenceMemory, pendingPrompt, autoResumeRemaining: autoResumeRemainingRef.current }, MAX_PERSISTED_MESSAGES);
     };
     const suspendRequest = () => {
       if (requestVersionRef.current !== requestVersion) return;
+      if (abortController.signal.aborted) return;
       backgroundInterrupted = true;
       setInterruptedPrompt(prompt);
       persistRequest(prompt);
@@ -553,7 +570,8 @@ export function AiRecommendPanel({
       if (!isAiRecommendationPoolWarm(tours)) {
         const pieceCount = Math.ceil(tours.length / AI_RECOMMENDATION_WARM_BATCH_SIZE);
         for (let pieceIndex = 0; pieceIndex < pieceCount; pieceIndex += 1) {
-          if (requestVersionRef.current !== requestVersion) return;
+          if (requestVersionRef.current !== requestVersion || abortController.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
+          if (Date.now() - submittedAt >= 1500) break;
           try {
             warmAiRecommendationBatch(getAiRecommendationWarmPiece(tours, pieceIndex));
           } catch {
@@ -564,7 +582,10 @@ export function AiRecommendPanel({
         }
       }
 
+      if (abortController.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
       const nextResult = await requestAiRecommendations({
+        // Reserve two seconds for result persistence, React commit and rendering.
+        timeoutMs: Math.max(1, 28000 - (Date.now() - submittedAt)),
         conversationId,
         messages: nextMessages,
         candidateTours: tours,
@@ -621,8 +642,9 @@ export function AiRecommendPanel({
       if (requestVersionRef.current !== requestVersion) return;
       if (abortController.signal.aborted) return;
       setInterruptedPrompt(null);
+      autoResumeRemainingRef.current = 0;
       // A failed refinement must not overwrite an earlier readable result.
-      if (nextResult.status?.mode === 'fallback') {
+      if (nextResult.status?.mode !== 'ai') {
         setInterruptedPrompt(prompt);
         retainedResult = retainedResult?.items.length ? retainedResult : nextResult;
         onResultChange(retainedResult);
@@ -635,10 +657,14 @@ export function AiRecommendPanel({
       // 正式结果落地，撤掉流式增量渲染，避免两套数据同时生效。
       onPartialItems?.([]);
       setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
-      setMessages((current) => [
-        ...current,
-        createMessage('assistant', buildResultAssistantReply(prompt, isFollowUpTurn)),
-      ]);
+      if (nextResult.status?.mode === 'ai') {
+        setMessages((current) => [
+          ...current,
+          createMessage('assistant', buildResultAssistantReply(prompt, isFollowUpTurn)),
+        ]);
+      } else {
+        setProgressState({ stage: 'fallback', label: nextResult.status?.label || '本轮查找已结束', detail: nextResult.status?.detail || '已保留当前可查看的内容。', progress: 100 });
+      }
       onFocusResults();
     } catch (error) {
       // 取消是正常路径（用户点取消、重开、切页卸载），不是失败：
@@ -646,6 +672,8 @@ export function AiRecommendPanel({
       if (requestVersionRef.current === requestVersion && error instanceof DOMException && error.name === 'AbortError' && !backgroundInterrupted) {
         if (retainedResult) onResultChange(retainedResult);
         setProgressState({ stage: 'fallback', label: '已取消查找', detail: '已保留现有内容。', progress: 0 });
+        autoResumeRemainingRef.current = 0;
+        setInterruptedPrompt(null);
         persistRequest(null);
       }
       if (requestVersionRef.current === requestVersion && !(error instanceof DOMException && error.name === 'AbortError')) {
@@ -656,7 +684,7 @@ export function AiRecommendPanel({
       window.removeEventListener('pagehide', suspendRequest);
       if (backgroundInterrupted && requestVersionRef.current === requestVersion) {
         if (retainedResult) onResultChange(retainedResult);
-        setProgressState({ stage: 'fallback', label: '查找已暂停', detail: '已保留现有内容，回到前台后可重试。', progress: 0 });
+        setProgressState({ stage: 'fallback', label: '查找已暂停', detail: '已保留现有内容，回到前台后将自动继续。', progress: 0 });
       }
       if (requestVersionRef.current === requestVersion) {
         setLoading(false);
@@ -702,17 +730,29 @@ export function AiRecommendPanel({
     requestAbortRef.current = null;
   }, []);
 
-  // A suspended network request cannot be resumed reliably by mobile browsers.
-  // Persist its readable content and offer an explicit retry, never duplicate it.
+  // Resume only after the old attempt has settled. Persist the allowance before
+  // dispatch so reload/visibility bursts cannot create an unbounded retry loop.
   useEffect(() => {
     const refreshRemote = () => {
       if (isPageHidden()) return;
+      setResumeTick((tick) => tick + 1);
       const stored = readStoredAiProgress();
       setRemoteProgress(stored?.ownerId !== tabIdRef.current ? stored : null);
     };
     document.addEventListener('visibilitychange', refreshRemote);
-    return () => document.removeEventListener('visibilitychange', refreshRemote);
+    window.addEventListener('pageshow', refreshRemote);
+    return () => { document.removeEventListener('visibilitychange', refreshRemote); window.removeEventListener('pageshow', refreshRemote); };
   }, []);
+
+  useEffect(() => {
+    if (!interruptedPrompt || loading || !toursReady || isPageHidden() || requestAbortRef.current || autoResumeRemainingRef.current <= 0) return;
+    const remote = readStoredAiProgress();
+    if (remote?.running && remote.ownerId !== tabIdRef.current) return;
+    autoResumeRemainingRef.current -= 1;
+    const state = readStoredAiChatState();
+    saveStoredAiChatState({ ...state, pendingPrompt: interruptedPrompt, autoResumeRemaining: autoResumeRemainingRef.current }, MAX_PERSISTED_MESSAGES);
+    void submitPrompt(interruptedPrompt, { preserveResult: true, automatic: true });
+  }, [interruptedPrompt, loading, toursReady, resumeTick, submitPrompt]);
 
   const clearConversation = () => {
     requestVersionRef.current += 1;
@@ -724,6 +764,7 @@ export function AiRecommendPanel({
     onPartialItems?.([]);
     setSummaryOpen(false);
     setInterruptedPrompt(null);
+    autoResumeRemainingRef.current = 0;
     onResultChange(null);
     setPreferenceMemory(null);
     setProgressState(null);
@@ -913,6 +954,9 @@ export function AiRecommendPanel({
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {loading && Boolean(progressState?.partialItems?.length) && (
+              <Button type="button" className="h-11 rounded-full px-3 text-xs" onClick={onFocusResults}>先看 {progressState?.partialItems?.length} 条</Button>
+            )}
             {loading && (
               <Button type="button" variant="ghost" className="h-11 rounded-full px-3 text-xs" onClick={() => requestAbortRef.current?.abort()}>取消这次查找</Button>
             )}
