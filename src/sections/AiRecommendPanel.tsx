@@ -70,7 +70,7 @@ interface AiRecommendPanelProps {
   onResultChange: (result: AiRecommendationResult | null) => void;
   onFocusResults: () => void;
   // 流式增量：模型还在生成时把已完整的条目回传给列表先渲染。
-  onPartialItems?: (items: AiRecommendationItem[]) => void;
+  onPartialItems?: (items: AiRecommendationItem[], kind?: AiRecommendationProgress['previewKind']) => void;
 }
 
 // 首屏「AI 正在找团」占位卡片，列表相关滚动定位也认这个 id。
@@ -473,7 +473,7 @@ export function AiRecommendPanel({
 
   // 展开「AI 调节」只是看进度，不是追加新的追问，输入框留到收起之后再出现。
   // 手机上它和步骤条、阶段拆解叠在一起，高度会从 216px 涨到 434px。
-  const showComposer = !loading;
+  const showComposer = true;
 
   useEffect(() => {
     if (!liveThinkingOpen) return;
@@ -491,7 +491,7 @@ export function AiRecommendPanel({
     // 与 ai-recommendation 的 isFollowUpConversation 同口径：本轮之前已有用户提问即为追问轮。
     const isFollowUpTurn = messages.some((message) => message.role === 'user');
 
-    const submittedAt = Date.now();
+    const preparationStartedAt = Date.now();
     const userMessage = createMessage('user', prompt);
     const nextMessages = options?.automatic && messages.at(-1)?.role === 'user' && messages.at(-1)?.content === prompt
       ? messages
@@ -571,7 +571,7 @@ export function AiRecommendPanel({
         const pieceCount = Math.ceil(tours.length / AI_RECOMMENDATION_WARM_BATCH_SIZE);
         for (let pieceIndex = 0; pieceIndex < pieceCount; pieceIndex += 1) {
           if (requestVersionRef.current !== requestVersion || abortController.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
-          if (Date.now() - submittedAt >= 1500) break;
+          if (Date.now() - preparationStartedAt >= 1500) break;
           try {
             warmAiRecommendationBatch(getAiRecommendationWarmPiece(tours, pieceIndex));
           } catch {
@@ -584,8 +584,6 @@ export function AiRecommendPanel({
 
       if (abortController.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
       const nextResult = await requestAiRecommendations({
-        // Reserve two seconds for result persistence, React commit and rendering.
-        timeoutMs: Math.max(1, 28000 - (Date.now() - submittedAt)),
         conversationId,
         messages: nextMessages,
         candidateTours: tours,
@@ -594,13 +592,14 @@ export function AiRecommendPanel({
         aiConfig,
         preferenceMemory,
         previousResult: preserveResult ? result : null,
+        resumeInterrupted: Boolean(options?.automatic),
         signal: abortController.signal,
         onProgress: (progress) => {
           if (requestVersionRef.current !== requestVersion) return;
           setProgressState((previous) => {
             // 正文增量与推荐条目来自两路回调，不能互相覆盖：否则状态标题
             // 在「思考」/「已挑出」之间跳动，输出统计也每出一条就消失。
-            if (previous?.stage === 'streaming-items' && progress.stage === 'ranking' && !progress.partialItems) {
+            if (previous?.partialItems?.length && progress.stage === 'ranking' && !progress.partialItems) {
               return { ...previous, liveThinking: progress.liveThinking ?? previous.liveThinking };
             }
             if (progress.stage === 'streaming-items') {
@@ -611,12 +610,14 @@ export function AiRecommendPanel({
           // 流式增量：模型还在逐条写 items 时，把已完整的部分交给列表先渲染。
           // 只要有一条就先摆出来，后续条数增长时继续刷新。
           if (progress.partialItems) {
-            onPartialItems?.(progress.partialItems);
-            if (progress.partialItems.length > 0) {
+            if (progress.previewKind !== 'candidates' || !retainedResult?.items.length) {
+              onPartialItems?.(progress.partialItems, progress.previewKind);
+            }
+            if (progress.partialItems.length > 0 && (progress.previewKind !== 'candidates' || !retainedResult?.items.length)) {
               retainedResult = {
                 conversationId, summary: '', items: progress.partialItems,
-                generatedAt: new Date().toISOString(), source: 'ai-api',
-                status: { mode: 'local-only', label: '已保留部分推荐', detail: '这些条目已校验，完整推荐尚未完成。' },
+                generatedAt: new Date().toISOString(), source: progress.previewKind === 'candidates' ? 'local-preview' : 'ai-api',
+                status: { mode: 'local-only', label: progress.previewKind === 'candidates' ? '候选线路已就绪' : '推荐顺序已就绪', detail: '可先查看线路，AI 正在继续完善。' },
               };
               persistRequest(prompt);
             }
@@ -665,7 +666,7 @@ export function AiRecommendPanel({
       } else {
         setProgressState({ stage: 'fallback', label: nextResult.status?.label || '本轮查找已结束', detail: nextResult.status?.detail || '已保留当前可查看的内容。', progress: 100 });
       }
-      onFocusResults();
+      // Progressive content is already readable; completion must not move the reader.
     } catch (error) {
       // 取消是正常路径（用户点取消、重开、切页卸载），不是失败：
       // 不弹错误、不改结果，静默收尾即可。其余异常保持原有冒泡行为。
@@ -954,11 +955,11 @@ export function AiRecommendPanel({
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {loading && Boolean(progressState?.partialItems?.length) && (
-              <Button type="button" className="h-11 rounded-full px-3 text-xs" onClick={onFocusResults}>先看 {progressState?.partialItems?.length} 条</Button>
+            {Boolean(progressState?.partialItems?.length) && loading && (
+              <Button type="button" className="h-11 rounded-full px-3 text-xs" onClick={onFocusResults}>{progressState?.previewKind === 'candidates' ? '查看候选' : `先看 ${progressState?.partialItems?.length} 条`}</Button>
             )}
             {loading && (
-              <Button type="button" variant="ghost" className="h-11 rounded-full px-3 text-xs" onClick={() => requestAbortRef.current?.abort()}>取消这次查找</Button>
+              <Button type="button" variant="ghost" className="h-11 rounded-full px-3 text-xs" onClick={() => requestAbortRef.current?.abort()}>停止完善</Button>
             )}
             {hasResult && (
               <Button
@@ -966,7 +967,6 @@ export function AiRecommendPanel({
                 variant="ghost"
                 className="h-11 rounded-full px-3 text-xs text-stone-500 hover:bg-stone-100 hover:text-stone-900"
                 onClick={clearConversation}
-                disabled={loading}
               >
                 清空
               </Button>
@@ -990,7 +990,7 @@ export function AiRecommendPanel({
                     : 'bg-amber-100 text-amber-800 hover:bg-amber-100',
                 )}
               >
-                {resultStatusMeta.mode === 'ai' ? 'AI完成' : '备用推荐'}
+                {resultStatusMeta.mode === 'ai' ? 'AI完成' : result?.source === 'ai-api' ? '已保留推荐顺序' : '本地候选'}
               </Badge>
             )}
           </div>
@@ -1362,7 +1362,7 @@ export function AiRecommendPanel({
             className="mt-3 flex gap-2 sm:items-center"
             onSubmit={(event) => {
               event.preventDefault();
-              void submitPrompt(followUpInput, { preserveResult: hasResult });
+              void submitPrompt(followUpInput, { preserveResult: hasResult, replaceRunning: true });
             }}
           >
             <Input
@@ -1371,21 +1371,15 @@ export function AiRecommendPanel({
               onChange={(event) => setFollowUpInput(event.target.value)}
               placeholder={followUpPlaceholder}
               className="h-11 flex-1 rounded-xl border-stone-200 bg-stone-50 text-sm"
-              disabled={loading || !toursReady}
+              disabled={!toursReady}
             />
             <Button
               type="submit"
               className="h-11 rounded-xl bg-stone-900 px-4 text-sm hover:bg-stone-800 sm:min-w-[104px]"
-              disabled={loading || !followUpInput.trim() || !toursReady}
+              disabled={!followUpInput.trim() || !toursReady}
             >
-              {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <Sparkles className="mr-1.5 h-4 w-4" />
-                  继续细调
-                </>
-              )}
+              <Sparkles className="mr-1.5 h-4 w-4" />
+              继续细调
             </Button>
           </form>
           ) : null}

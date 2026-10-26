@@ -537,6 +537,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   // 流式增量推荐：模型还在逐条生成时，先把已写完整的那部分摆出来。
   // 与 aiRecommendationResult 分开存，避免半成品覆盖正式结果（正式结果一到
   // 就清空它）。只在"正在搜索、还没有正式结果"时接管列表。
+  const [aiPreviewKind, setAiPreviewKind] = useState<'candidates' | 'ranking' | 'reasons' | undefined>();
   const [aiStreamingItems, setAiStreamingItems] = useState<AiRecommendationItem[]>([]);
   const previousAiSearchRequestIdRef = useRef<number | null>(null);
   // 全量语料池：优先用 tours-index.json 膨胀出的全量语料（4034 条、约 5MB），
@@ -1739,7 +1740,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         searchingVersion={aiSearchRequest?.id ?? 0}
         onResultChange={setAiRecommendationResult}
         onFocusResults={focusResults}
-        onPartialItems={setAiStreamingItems}
+        onPartialItems={(items, kind) => { setAiStreamingItems(items); setAiPreviewKind(kind); }}
       />
 
       <div className="mb-6">
@@ -1854,7 +1855,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
           {aiRecommendationResult && aiRecommendationResult.items.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 shadow-sm">
               <Sparkles className="h-4 w-4 text-stone-500" />
-              <span>AI 已置顶 {aiRecommendedCount} 条建议</span>
+              <span>{aiStreamingItems.length ? (aiPreviewKind === 'candidates' ? `已筛出 ${aiStreamingItems.length} 条候选` : `推荐顺序已就绪 · ${aiStreamingItems.length} 条`) : `AI 已置顶 ${aiRecommendedCount} 条建议`}</span>
               {hiddenAiRecommendationCount > 0 && (
                 <span className="text-xs text-stone-500">
                   {hiddenAiRecommendationCount} 条被当前筛选隐藏
@@ -1989,6 +1990,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
                   tour={tour}
                   onClick={() => handleCardClick(tour)}
                   recommendationReason={recommendation?.reason}
+                  recommendationPending={Boolean(recommendation && aiStreamingItems.length && aiPreviewKind !== 'candidates' && !recommendation.reason)}
                   recommendationRank={recommendation?.rank}
                   recommendationTier={recommendation?.recommendationTier}
                   recommendationSignals={recommendation?.matchedSignals}

@@ -921,3 +921,14 @@ await test16ColumnarReply();
   }
 }
 console.info('AI streaming contract tests passed');
+
+
+// Closed order is available before reasons; fragmented/escaped JSON is never guessed.
+{
+  const extract = __aiRecommendationTestHooks.extractCompletedStreamItems;
+  assert.equal(extract('{"order":["a",', 'order'), null);
+  assert.deepEqual(extract('{"summary":"order: [fake]", "order":["a]b","c"],"items":[', 'order'), ['a]b', 'c']);
+  assert.deepEqual(extract('{"metadata":{"order":["wrong"]},"order":["right"]', 'order'), ['right']);
+  assert.equal(extract('{"order":["broken",]}', 'order'), null);
+  console.log('PASS closed top-level order extraction is chunk-safe and string-aware');
+}

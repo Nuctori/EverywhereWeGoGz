@@ -6831,7 +6831,7 @@ function buildAiMessages(params: {
       ...promptPolicy.requestRules,
       [
         `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
-        '候选池足够时本轮优先返回 6-8 个 items，按推荐度排序；每个返回的 item 都应是用户可能愿意比较的真实选项，存在硬冲突时宁可少返回。先输出顶层 items 数组，再输出 summary，让完整条目能尽早展示。',
+        '按需求和候选质量合理选择推荐数量，最多 25 条，存在硬冲突时宁可少返回。先输出完整顶层 order:[tourId,...] 推荐顺序，再输出同一批线路的 items 理由，最后输出 summary；items 可以按生成顺序写，但 order 一旦输出不可更改。',
         '可以参考熟悉当地玩法的人来写，避免让所有线路都长得一样；如果某个软条件需要核实，自行判断它是否值得写进这一条。',
         // 输出体积约束：实测主请求在 109 tok/s 下生成 2689 token 要 25s，
         // 而这 2689 token 里绝大部分是把 ck/fk 里的输入列原样抄回来
@@ -6921,7 +6921,7 @@ function buildLiteAiMessages(params: {
       '只允许使用 candidates/fh 中存在的 id。',
       '文案保持具体判断即可，不要为了短而牺牲判断；但每条 sf 控制在 60 字内，确保整个 JSON 不会因为太长而被截断。',
       'candidates（稳定池）是按 id 排序的全池背景候选；fh 是按本轮需求检索/匹配出的重点候选完整档案，优先在 fh 内挑选，再用稳定池补足选择面。',
-      `候选池足够时本轮优先返回 6-8 个 items，按推荐度排序：前 ${MAX_AI_DETAILED_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；存在硬冲突时宁可少返回。先输出顶层 items 数组，再输出其余字段，让完整条目能尽早展示。`,
+      `按需求和候选质量合理选择推荐数量，最多 ${MAX_AI_SELECTED_ITEMS} 条：前 ${MAX_AI_DETAILED_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；存在硬冲突时宁可少返回。先输出完整顶层 order:[tourId,...] 推荐顺序，再输出同一批线路的 items 理由，最后输出 summary；order 一旦输出不可更改。`,
       '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
       `多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮偏好。`,
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
@@ -7236,7 +7236,7 @@ function looksTruncatedJson(content: string) {
  * - 元素必须能被 JSON.parse，没闭合的半个元素留到下一轮。
  * 解析失败返回 null，绝不抛错——这是尽力而为的体验优化，不能影响正式解析。
  */
-function extractCompletedStreamItems(rawText: string): unknown[] | null {
+function extractCompletedStreamItems(rawText: string, field: 'items' | 'order' = 'items'): unknown[] | null {
   if (!rawText) return null;
   // 先定位顶层 "items" 键。列式回复（candidates）也一并认，保持与
   // salvageAiItemsFromResponse 同一口径。
@@ -7256,7 +7256,7 @@ function extractCompletedStreamItems(rawText: string): unknown[] | null {
       if (objectDepth === 1) {
         let key: unknown;
         try { key = JSON.parse(rawText.slice(tokenStart, i + 1)); } catch { continue; }
-        if (key === 'items') {
+        if (key === field) {
           const suffix = /^\s*:\s*\[/.exec(rawText.slice(i + 1));
           if (suffix) { start = i + 1 + suffix[0].length; break; }
         }
@@ -7266,6 +7266,25 @@ function extractCompletedStreamItems(rawText: string): unknown[] | null {
   }
   // 列式 candidates 需要 ck 映射；等正式解析，不能猜列含义提前显示。
   if (start < 0) return null;
+  if (field === 'order') {
+    let quoted = false;
+    let escaped = false;
+    for (let i = start; i < rawText.length; i += 1) {
+      const char = rawText[i];
+      if (quoted) {
+        if (escaped) escaped = false;
+        else if (char === '\\') escaped = true;
+        else if (char === '"') quoted = false;
+      } else if (char === '"') quoted = true;
+      else if (char === ']') {
+        try {
+          const order: unknown = JSON.parse(rawText.slice(start - 1, i + 1));
+          return Array.isArray(order) ? order : null;
+        } catch { return null; }
+      }
+    }
+    return null;
+  }
   const items: unknown[] = [];
   let depth = 0;
   let inString = false;
@@ -7572,7 +7591,7 @@ async function consumeAiStreamingResponse(params: {
   onStreamDelta?: (delta: AiStreamDelta) => void;
   // 增量条目回调：流还没结束时，每凑齐一条完整的 items 元素就回调一次，
   // 让上层先把已生成的推荐摆出来。只是体验优化，失败不影响正式解析。
-  onPartialItems?: (items: unknown[]) => void;
+  onPartialItems?: (items: unknown[], order?: unknown[]) => void;
   // 覆盖供应商默认的整请求预算（分类头等可选步骤用短上限，见 getProviderTimeoutMs）。
   timeoutMs?: number;
   // 取消信号：用户放弃本轮时停止读流，不再消费后续 chunk。
@@ -7709,18 +7728,25 @@ async function consumeAiStreamingResponse(params: {
     const headDelta = handleEvents(parser.push(streamHead), config.model);
     if (headDelta) params.onStreamDelta?.(headDelta);
     // 只在元素可能闭合时扫描，避免每个 token 都重扫累积正文。
-    let emittedCount = 0;
+    let emittedRevision = '';
     let inspectedLength = 0;
     const flushPartialItems = () => {
       if (!params.onPartialItems || !contentText) return;
       const addedText = contentText.slice(inspectedLength);
       inspectedLength = contentText.length;
       if (!addedText.includes('}') && !addedText.includes(']')) return;
-      const items = extractCompletedStreamItems(contentText);
-      if (!items || items.length <= emittedCount) return;
-      emittedCount = items.length;
+      const order = extractCompletedStreamItems(contentText, 'order');
+      const reasons = extractCompletedStreamItems(contentText) ?? [];
+      // A closed order can be shown before any explanation exists. Repeated snapshots
+      // retain every ranked id while newly closed reason objects replace placeholders.
+      const items = order
+        ? [...order.map((tourId) => ({ tourId })), ...reasons]
+        : reasons;
+      const revision = JSON.stringify(items);
+      if (!items.length || revision === emittedRevision) return;
+      emittedRevision = revision;
       try {
-        params.onPartialItems(items);
+        params.onPartialItems(reasons.length ? reasons : items, order ?? undefined);
       } catch {
         // 展示层的问题不能反过来打断正式解析。
       }
@@ -8792,7 +8818,7 @@ async function callSingleAiProvider(params: {
   // GLM 主力流式增量回调（仅其 SSE 路径触发）。
   onStreamDelta?: (delta: AiStreamDelta) => void;
   // 流式增量条目回调：用于边生成边展示。
-  onPartialItems?: (items: unknown[]) => void;
+  onPartialItems?: (items: unknown[], order?: unknown[]) => void;
 }) {
   const { config } = params;
   const url = getChatCompletionsUrl(config.baseUrl);
@@ -9035,7 +9061,7 @@ async function callAiApiWithinBudget(params: {
   // 仅 GLM 主力供应商（SSE 流式路径）触发；竞速/兜底的整包路径不会回调。
   onStreamDelta?: (delta: AiStreamDelta) => void;
   // 流式增量条目：每凑齐一条完整的 items 元素就回调一次，用于边生成边展示。
-  onPartialItems?: (items: unknown[]) => void;
+  onPartialItems?: (items: unknown[], order?: unknown[]) => void;
   // 覆盖供应商默认超时预算（含前台竞速的聚合上限）：分类头等可选步骤用短上限。
   timeoutMs?: number;
   // 外部取消信号（用户点取消 / 组件卸载）：真正掐断底层 fetch。
@@ -9261,12 +9287,13 @@ function getAiFailureDetail(error: unknown) {
 export async function requestAiRecommendations(request: AiRecommendationRequest): Promise<AiRecommendationResult> {
   if (request.signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
   const budgetMs = Number.isFinite(request.timeoutMs) && (request.timeoutMs ?? 0) > 0
-    ? request.timeoutMs! : 30_000;
+    ? request.timeoutMs! : Infinity;
   const deadline = Date.now() + budgetMs;
   const controller = new AbortController();
   let active = true;
   let partialItems: AiRecommendationItem[] = [];
   let fallbackItems: AiRecommendationItem[] = [];
+  let hasAiPreview = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let rejectCancelled: ((error: Error) => void) | undefined;
   const cancel = () => {
@@ -9275,18 +9302,19 @@ export async function requestAiRecommendations(request: AiRecommendationRequest)
     rejectCancelled?.(new DOMException('AI request cancelled', 'AbortError'));
   };
   const interruptedResult = (): AiRecommendationResult => {
-    const retained = partialItems.length > 0;
+    const retained = hasAiPreview && partialItems.length > 0;
     return {
       conversationId: request.conversationId, summary: '',
       items: retained ? partialItems : (fallbackItems ?? []).map((item) => ({ ...item, reason: undefined })),
       generatedAt: new Date().toISOString(), source: retained ? 'ai-api' : 'local-preview',
       status: { mode: 'local-only', label: retained ? '已保留部分推荐' : '已返回本地候选',
-        detail: '本轮查询达到时间预算，完整 AI 推荐尚未完成。' },
+        detail: Date.now() >= deadline ? '本轮查询达到时间预算，完整 AI 推荐尚未完成。' : 'AI 连接未完成，已保留当前可用结果。' },
     };
   };
   const cancelled = new Promise<never>((_, reject) => { rejectCancelled = reject; });
   request.signal?.addEventListener('abort', cancel, { once: true });
   const timedOut = new Promise<AiRecommendationResult>((resolve) => {
+    if (!Number.isFinite(budgetMs)) return;
     timer = setTimeout(() => {
       active = false;
       controller.abort();
@@ -9297,15 +9325,27 @@ export async function requestAiRecommendations(request: AiRecommendationRequest)
     ...request, signal: controller.signal,
     onProgress: (progress) => {
       if (!active) return;
-      if (progress.partialItems) partialItems = progress.partialItems;
+      if (progress.partialItems) {
+        partialItems = progress.partialItems;
+        if (progress.previewKind !== 'candidates' && progress.partialItems.length) hasAiPreview = true;
+      }
       request.onProgress?.(progress);
     },
-  }, deadline, (items) => { fallbackItems = items; });
+  }, deadline, (items) => {
+    if (!active) return;
+    fallbackItems = items.map((item) => ({ ...item, reason: undefined, reasonSource: 'fallback' }));
+    if (request.resumeInterrupted && request.previousResult?.source === 'ai-api'
+      && request.previousResult.status?.mode === 'local-only') return;
+    request.onProgress?.({ stage: 'ranking', label: '本地候选已就绪',
+      detail: '可先浏览候选线路，AI 正在比较推荐顺序。', progress: 54,
+      previewKind: 'candidates', partialItems: fallbackItems });
+  });
   try {
     const result = await Promise.race([work, timedOut, cancelled]);
     // A remaining-budget provider timeout can settle just before the outer timer.
     // Its ordinary local fallback must not discard an already validated preview.
-    if (partialItems.length && result.source !== 'ai-api') return interruptedResult();
+    if (hasAiPreview && partialItems.length && result.source !== 'ai-api') return interruptedResult();
+    if (result.source !== 'ai-api' && fallbackItems.length) return { ...result, items: fallbackItems };
     return result;
   } catch (error) {
     if (!request.signal?.aborted && Date.now() >= deadline) return interruptedResult();
@@ -9327,12 +9367,13 @@ async function requestAiRecommendationsWithinBudget({
   aiConfig,
   preferenceMemory,
   previousResult,
+  resumeInterrupted,
   onProgress,
   signal,
 }: AiRecommendationRequest, deadline: number, onFallbackReady: (items: AiRecommendationItem[]) => void): Promise<AiRecommendationResult> {
   const remainingBudget = () => {
     if (signal?.aborted || Date.now() >= deadline) throw new DOMException('AI request cancelled', 'AbortError');
-    return Math.max(1, deadline - Date.now());
+    return Number.isFinite(deadline) ? Math.max(1, deadline - Date.now()) : undefined;
   };
   // 已取消就直接走取消路径，不发起任何请求。
   if (signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
@@ -9870,14 +9911,18 @@ async function requestAiRecommendationsWithinBudget({
     const compactedCandidateTours = availableCandidates.filter((candidate) => compactedCandidateIds.has(candidate.id));
     const partialPrimitiveById = new Map(compactedCandidateTours.map((candidate) => [candidate.id, buildTourPrimitive(candidate)]));
     let partialRevision = '';
+    let fixedOrder: string[] | undefined;
+    const partialById = new Map<string, AiRecommendationItem>();
     // 临时预览：仅派发已闭合、已映射且通过当前意图硬约束的条目。
     // 最终响应仍会结合完整 intent、天气和覆盖纪律重新装配。
     // 抽成闭包：并行两路都要用，且必须共享 partialRevision 去重（否则两路
     // 各发一次同样的预览，面板标题会来回跳）。
-    const emitPartialPreview = (partialItems: unknown[]) => {
+    const emitPartialPreview = (partialItems: unknown[], order?: unknown[]) => {
       try {
+        const orderItems = order?.filter((id): id is string => typeof id === 'string' && compactedCandidateIds.has(id))
+          .map((tourId) => ({ tourId }));
         const validatedPartial = validateAiItems(
-          { items: partialItems },
+          { items: orderItems?.length ? orderItems : partialItems },
           compactedCandidateTours,
         );
         const audited = keepAiItemsForCompoundExperience(
@@ -9886,19 +9931,19 @@ async function requestAiRecommendationsWithinBudget({
           text,
         );
         const { compliant } = splitByIntentConflicts(audited, effectiveIntent, partialPrimitiveById, corpusVocab);
-        // 一条都没通过校验时不发预览：发出去是「已可先看 0 条」，
-        // 既没有内容可看，又会让面板标题在「已挑出部分线路」和空态之间来回跳。
-        if (compliant.length === 0) {
-          if (partialRevision && partialRevision !== '[]') {
-            partialRevision = '[]';
-            emitProgress(onProgress, {
-              stage: 'ranking', label: 'AI 正在生成推荐',
-              detail: '正在校验后续线路。', progress: 82, partialItems: [],
-            });
+        if (!compliant.length) return; // Retry resets must never clear useful progress.
+        if (!fixedOrder && orderItems?.length) fixedOrder = compliant.map((item) => item.tourId);
+        const checkedReasons = validateAiItems({ items: partialItems }, compactedCandidateTours);
+        for (const item of checkedReasons) {
+          if (fixedOrder?.includes(item.tourId) || compliant.some((entry) => entry.tourId === item.tourId)) {
+            const previous = partialById.get(item.tourId);
+            partialById.set(item.tourId, item.reason || !previous?.reason ? item : previous);
           }
-          return;
         }
-        const revision = JSON.stringify(compliant);
+        const visible = fixedOrder
+          ? fixedOrder.map((tourId) => partialById.get(tourId) ?? { tourId, score: 80, matchedSignals: [] })
+          : compliant;
+        const revision = JSON.stringify(visible);
         if (revision !== partialRevision) {
           partialRevision = revision;
           emitProgress(onProgress, {
@@ -9914,13 +9959,21 @@ async function requestAiRecommendationsWithinBudget({
               ],
               'rank',
             ),
-            partialItems: compliant,
+            previewKind: visible.some((item) => item.reason) ? 'reasons' : 'ranking',
+            partialItems: visible,
           });
         }
       } catch {
         // 增量展示失败不影响正式结果。
       }
     };
+    if (resumeInterrupted && previousResult?.source === 'ai-api' && previousResult.status?.mode === 'local-only') {
+      // Explicit same-turn checkpoints only: re-run current mapping and hard constraints.
+      emitPartialPreview(previousResult.items, previousResult.items.map((item) => item.tourId));
+      if (fixedOrder?.length) {
+        aiMessages.push({ role: 'user', content: `本轮中断后继续：order 固定为 ${JSON.stringify(fixedOrder)}，不可重新筛选或重排。已有解释 ${JSON.stringify([...partialById.values()].filter((item) => item.reason))}。先原样输出 order，再在 items 中补齐尚无解释的线路，最后给出 summary。` });
+      }
+    }
     // ── 单次生成 ────────────────────────────────────────────────────────────
     // 曾经试过把这里拆成两路并行（前段详细 + 后段简要），实测总时长从
     // 34.7s 降到 20.8s，但首屏一秒都没提前——首屏本来就由流式预览决定
@@ -9941,7 +9994,7 @@ async function requestAiRecommendationsWithinBudget({
         intent: effectiveIntent,
         preferenceMemory: aiContextMemoryForThisTurn,
         allowPublicInterest: allowPublicInterestForTurn,
-      }),
+      }).concat(resumeInterrupted && fixedOrder?.length ? [{ role: 'user' as const, content: aiMessages.at(-1)!.content }] : []),
       maxTokens: 2400,
       liteMaxTokens: 1500,
       timeoutMs: remainingBudget(),
@@ -9968,6 +10021,7 @@ async function requestAiRecommendationsWithinBudget({
       onPartialItems: emitPartialPreview,
     }) as {
       parsed: {
+        order?: unknown;
         intent?: unknown;
         intentNotes?: unknown;
         summary?: unknown;
@@ -9994,7 +10048,7 @@ async function requestAiRecommendationsWithinBudget({
     // 只在零可用条目时问；凡是能救回任何条目的都不问（有结果就直接用，不让用户
     // 干等一轮生成）。总时长由 requestAiFormatCorrection 内的硬预算兜住。
     let aiResponse = aiCall.parsed;
-    if (validateAiItems(aiResponse, compactedCandidateTours).length === 0 && Array.isArray(aiResponse.items)) {
+    if (!fixedOrder?.length && validateAiItems(aiResponse, compactedCandidateTours).length === 0 && Array.isArray(aiResponse.items)) {
       const retried = await requestAiFormatCorrection({
         configs,
         messages: aiMessages,
@@ -10008,6 +10062,8 @@ async function requestAiRecommendationsWithinBudget({
         aiResponse = retried.parsed as typeof aiResponse;
       }
     }
+    // Whole-JSON providers use the same validated order contract as SSE.
+    if (Array.isArray(aiResponse.order)) emitPartialPreview(validateAiItems(aiResponse, compactedCandidateTours), aiResponse.order);
     const rawSemanticNotes = normalizeAiSemanticNotes(aiResponse.intentNotes);
     const normalizedAiIntent = sanitizeAiBudgetBoundsForTurn(
       normalizeIntent(aiResponse.intent),
@@ -10050,7 +10106,14 @@ async function requestAiRecommendationsWithinBudget({
       ),
     );
     const finalEffectiveUserText = buildEffectiveUserText(text, finalPreferenceMemory);
-    const validatedAiItems = validateAiItems(aiResponse, compactedCandidateTours);
+    const responseItems = validateAiItems(aiResponse, compactedCandidateTours);
+    const responseById = new Map(responseItems.map((item) => [item.tourId, item]));
+    const validatedAiItems = fixedOrder
+      ? fixedOrder.map((tourId) => {
+        const item = responseById.get(tourId);
+        return item?.reason ? item : partialById.get(tourId) ?? item ?? { tourId, score: 80, matchedSignals: [] };
+      })
+      : responseItems;
     if (validatedAiItems.length === 0 && Array.isArray(aiResponse.items)) {
       throw new Error('AI API unusable items_unmapped: returned tourIds did not match current candidates');
     }
@@ -10150,11 +10213,29 @@ async function requestAiRecommendationsWithinBudget({
       },
     ).slice(0, aiItems.length > 0 ? MAX_AI_SELECTED_ITEMS : MAX_AI_RANKED_ITEMS);
     // 最终可见序列统一施加核心体验覆盖纪律（AI 项 + 本地补位同一比较器）。
-    const disciplinedItems = enforceCoreCoverageDiscipline(mergedItems, {
+    const coverageItems = enforceCoreCoverageDiscipline(mergedItems, {
       candidateTours: availableCandidates,
       userText: finalEffectiveUserText,
       demandSpec: classifiedSpec ?? undefined,
     });
+    const finalById = new Map(coverageItems.map((item) => [item.tourId, item]));
+    // Once AI order is visible, reasons and final assembly may remove hard conflicts
+    // but may not reorder the surviving ids. Local minimum-count padding stays last.
+    const orderedFinalIds = fixedOrder?.filter((id) => compliantAiItems.some((item) => item.tourId === id)) ?? [];
+    const disciplinedItems = fixedOrder
+      ? [...orderedFinalIds.map((id) => finalById.get(id) ?? compliantAiItems.find((item) => item.tourId === id)!),
+          ...coverageItems.filter((item) => !orderedFinalIds.includes(item.tourId))]
+      : coverageItems;
+    const explanationsIncomplete = Boolean(fixedOrder?.length && orderedFinalIds.some((id) => !validatedAiItems.find((item) => item.tourId === id)?.reason));
+    if (explanationsIncomplete) {
+      emitProgress(onProgress, { stage: 'streaming-items', label: '已保留 AI 推荐顺序',
+        detail: '部分推荐理由尚未生成，可继续补充。', progress: 88,
+        previewKind: disciplinedItems.some((item) => item.reason) ? 'reasons' : 'ranking', partialItems: disciplinedItems });
+      return { conversationId, summary: typeof aiResponse.summary === 'string' ? aiResponse.summary : '',
+        items: disciplinedItems, generatedAt: new Date().toISOString(), source: 'ai-api',
+        status: { mode: 'local-only', label: '推荐理由尚未完成', detail: '已保留 AI 推荐顺序和现有理由，可继续补充。' },
+        ...(finalPreferenceMemory ? { preferenceMemory: finalPreferenceMemory } : {}) };
+    }
     emitProgress(onProgress, {
       stage: 'completed',
       label: '推荐结果已生成',

@@ -38,6 +38,7 @@ interface TourCardProps {
   tour: Tour;
   onClick: () => void;
   recommendationReason?: string;
+  recommendationPending?: boolean;
   recommendationRank?: number;
   recommendationTier?: 'ai-detailed' | 'ai-brief' | 'local-supplement';
   recommendationSignals?: string[];
@@ -57,6 +58,7 @@ export const TourCard = memo(function TourCard({
   tour,
   onClick,
   recommendationReason,
+  recommendationPending = false,
   recommendationTier,
   recommendationSignals,
   isFavorite = false,
@@ -201,9 +203,12 @@ export const TourCard = memo(function TourCard({
           </div>
         )}
 
+        {recommendationPending && !recommendationReason && (
+          <div className="mt-3 min-h-[84px] rounded-2xl border border-orange-100 bg-orange-50/40 px-3 py-2 text-xs leading-5 text-stone-400" aria-label="推荐理由正在完善">理由正在完善，可先查看线路</div>
+        )}
         {/* 简要推荐位：一句话简单介绍 + 看点短语，轻量展示 */}
         {recommendationTier === 'ai-brief' && (recommendationReason || (recommendationSignals || []).length > 0) && (
-          <div className="mt-3 rounded-2xl border border-orange-100 bg-orange-50/60 px-3 py-2 text-xs leading-5 text-stone-700">
+          <div className="mt-3 min-h-[84px] rounded-2xl border border-orange-100 bg-orange-50/60 px-3 py-2 text-xs leading-5 text-stone-700">
             <p className="line-clamp-2">{recommendationReason}</p>
             {(recommendationSignals || []).length > 0 && (
               <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -220,7 +225,7 @@ export const TourCard = memo(function TourCard({
         {/* AI 详细推荐理由，来自 AiRecommendPanel 结果（简要位走上面的轻量样式） */}
         {recommendationReason && recommendationTier !== 'ai-brief' && (
           <div
-            className="mt-3 rounded-2xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs leading-5 text-orange-800"
+            className="mt-3 min-h-[84px] rounded-2xl border border-orange-200 bg-orange-50 px-3 py-2 text-xs leading-5 text-orange-800"
             title={recommendationReason}
           >
             <p className="line-clamp-3">

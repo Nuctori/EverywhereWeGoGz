@@ -60,7 +60,7 @@ try {
     await page.locator('.tour-card h3').first().waitFor({ timeout: 60000 });
     await page.locator('input').first().fill('便宜的奔县游');
     await page.getByRole('button', { name: 'AI 帮我挑' }).first().click();
-    await page.getByRole('button', { name: '取消这次查找', exact: true }).waitFor();
+    await page.getByRole('button', { name: '停止完善', exact: true }).waitFor();
 
     const collapsed = await page.evaluate(PANEL_HEIGHT);
     assert.ok(collapsed !== null, `${viewport.label}: panel must render`);
@@ -83,7 +83,8 @@ try {
     await page.getByText('查看本阶段进度', { exact: true }).waitFor();
     const expanded = await page.evaluate(PANEL_HEIGHT);
     assert.ok(expanded !== null && expanded > collapsed, `${viewport.label}: details must expand`);
-    assert.ok(expanded <= 380, `${viewport.label}: expanded panel must stay reasonable, got ${expanded}px`);
+    // The always-available refinement composer adds one 56px row during enrichment.
+    assert.ok(expanded <= 436, `${viewport.label}: expanded panel must stay reasonable, got ${expanded}px`);
 
     // 5 个步骤必须落在同一行（横向可滑动），而不是各占一行把面板撑高。
     const rows = await page.evaluate(() => {

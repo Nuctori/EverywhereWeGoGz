@@ -29,7 +29,6 @@ try {
       if (!prompt.includes('rank_5detailed_10brief')) {
         return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ queries: ['推荐线路'], demands: [], destinations: [] }) } }] }), { headers: { 'content-type': 'application/json' } });
       }
-      if (window.__hangRecommendation) return new Response(new ReadableStream(), { headers: { 'content-type': 'text/event-stream' } });
       const index = await (await realFetch('/EverywhereWeGoGz/data/tours-index.json')).json();
       const ids = new Set([...prompt.matchAll(/tour_\d+/g)].map(m => m[0]));
       const tour = index.find(t => ids.has(t.id) && t.price > 0);
@@ -39,7 +38,9 @@ try {
       const encoder = new TextEncoder();
       const frame = content => encoder.encode('data: ' + JSON.stringify({ choices: [{ delta: { content } }] }) + '\n\n');
       return new Response(new ReadableStream({ start(controller) {
-        controller.enqueue(frame('{"items":[' + JSON.stringify({ tourId: tour.id, score: 95, reason: '流式测试专属推荐理由', matchedSignals: ['行程体验'] })));
+        controller.enqueue(frame('{"order":' + JSON.stringify([tour.id]) + ',"items":['));
+        window.__addPartialReason = () => controller.enqueue(frame(JSON.stringify({ tourId: tour.id, score: 95, reason: '流式测试专属推荐理由', matchedSignals: ['行程体验'] })));
+        if (!window.__holdReasons) window.__addPartialReason();
         window.__finishPartialTest = () => {
           controller.enqueue(frame('],"summary":"模型推荐摘要"}'));
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
@@ -57,7 +58,7 @@ try {
   await reason.waitFor({ timeout: 60000 });
   assert.equal(await page.evaluate(() => window.__partialTest.finished), false, 'card must appear while SSE is still open');
   console.log('PASS: SSE 未结束，列表已显示模型生成的首条推荐理由');
-  await page.getByRole('button', { name: '取消这次查找', exact: true }).waitFor();
+  await page.getByRole('button', { name: '停止完善', exact: true }).waitFor();
   assert.equal(await page.getByRole('progressbar', { name: '推荐生成进度' }).getAttribute('aria-valuenow') !== null, true);
   await page.evaluate(() => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
@@ -97,8 +98,8 @@ try {
   assert.equal(await page.evaluate(() => window.__partialAttempts), 1, 'automatic retries must be bounded across reload');
   await page.getByRole('button', { name: '重新查找', exact: true }).click();
   await page.waitForFunction(() => window.__partialAttempts === 2);
-  await page.getByRole('button', { name: '取消这次查找', exact: true }).click();
-  await page.getByRole('button', { name: '取消这次查找', exact: true }).waitFor({ state: 'hidden' });
+  await page.getByRole('button', { name: '停止完善', exact: true }).click();
+  await page.getByRole('button', { name: '停止完善', exact: true }).waitFor({ state: 'hidden' });
   await page.evaluate(() => { document.dispatchEvent(new Event('visibilitychange')); window.dispatchEvent(new Event('pageshow')); });
   await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => window.__partialAttempts), 2, 'explicit cancellation must not auto-resume');
@@ -111,19 +112,22 @@ try {
   await page.getByText('AI完成', { exact: true }).first().waitFor({ timeout: 30000 });
   assert.deepEqual(errors, []);
   console.log('PASS: SSE 结束后进入完成态，无运行时错误');
-  await page.waitForFunction(() => JSON.parse(localStorage.getItem('travel-ai-chat-state-v2')).messages.some(m => m.role === 'assistant' && m.content.includes('排好')));
-  const assistantsBefore = await page.evaluate(() => JSON.parse(localStorage.getItem('travel-ai-chat-state-v2')).messages.filter(m => m.role === 'assistant').length);
-  await page.evaluate(() => { window.__hangRecommendation = true; });
-  const began = Date.now();
-  await page.getByRole('textbox', { name: '补充旅行条件' }).fill('预算再降低一点');
+  // On the next turn, rank arrives first while all reason text is held back.
+  await page.evaluate(() => { window.__holdReasons = true; });
+  await page.getByRole('textbox', { name: '补充旅行条件' }).fill('再帮我比较一下');
   await page.getByRole('button', { name: '继续细调', exact: true }).click();
-  await page.getByRole('button', { name: '取消这次查找', exact: true }).waitFor();
-  await page.getByRole('button', { name: '取消这次查找', exact: true }).waitFor({ state: 'hidden', timeout: 33000 });
-  assert.ok(Date.now() - began < 33000, 'whole UI request must stop near 30s');
-  assert.ok(await reason.isVisible(), 'deadline without new partial must preserve prior AI result');
-  assert.equal(await page.getByText('AI完成', { exact: true }).count(), 1, 'prior result remains identifiable');
-  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('travel-ai-chat-state-v2')).messages.filter(m => m.role === 'assistant').length), assistantsBefore, 'deadline must not add a success receipt');
-  console.log(`PASS: 无新partial的细调在 ${Date.now() - began}ms 停止并保留旧AI结果`);
+  await page.getByLabel('推荐理由正在完善').first().waitFor();
+  const card = page.locator('.tour-card').filter({ has: page.getByLabel('推荐理由正在完善') }).first();
+  const topBefore = await card.evaluate(el => el.getBoundingClientRect().top + window.scrollY);
+  const scrollBefore = await page.evaluate(() => window.scrollY);
+  await page.evaluate(() => window.__addPartialReason());
+  await reason.waitFor();
+  const topAfter = await reason.evaluate(el => el.getBoundingClientRect().top + window.scrollY);
+  assert.ok(Math.abs(topAfter - topBefore) < 2, 'adding reason must not move the ranked card');
+  assert.ok(Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore) < 2, 'reason must not force-scroll');
+  await page.evaluate(() => window.__finishPartialTest());
+  await page.getByRole('button', { name: '停止完善', exact: true }).waitFor({ state: 'hidden' });
+  console.log('PASS: 先显示推荐顺序再补理由，卡片位置与阅读位置不跳动');
   await page.getByRole('button', { name: '清空', exact: true }).click();
   assert.equal(await page.locator('.tour-card').filter({ hasText: '流式测试专属推荐理由' }).count(), 0, 'clear must remove preview and final recommendations');
   console.log('PASS: 清空 AI 后不残留增量推荐');
