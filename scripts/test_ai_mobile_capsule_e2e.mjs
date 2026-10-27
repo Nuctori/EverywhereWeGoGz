@@ -69,10 +69,13 @@ try {
   assert.equal(await page.evaluate(() => window.__partialAttempts), 1, 'closing must not cancel/restart stream');
   assert.equal(await page.evaluate(() => window.__streamAborts || 0), 0, 'opening/closing must not abort transport');
   await page.evaluate(() => window.__finishPartialTest());
+  const statusPill = page.getByText(/^(AI 已置顶 \d+ 条建议|已筛出 \d+ 条候选|推荐顺序已就绪 · \d+ 条)$/);
+  await statusPill.waitFor();
+  assert.ok((await statusPill.locator('..').boundingBox()).height <= 64, 'AI status must not shrink into a vertical column');
+  assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'AI results must not widen the page');
   await capsule.waitFor();
   assert.equal(await page.getByRole('dialog').count(), 0, 'completion must not auto-open');
-  await page.getByText('筛选线路', { exact: true }).click();
-  await page.getByRole('button', { name: '更多筛选', exact: true }).click();
+  await page.getByRole('button', { name: /^筛选(?: · \d+)?$/ }).click();
   await page.getByRole('dialog').waitFor();
   assert.equal(await capsule.count(), 0, 'filter dialog must hide capsule');
   await page.keyboard.press('Escape');

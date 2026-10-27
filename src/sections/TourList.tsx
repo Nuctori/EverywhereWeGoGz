@@ -1281,7 +1281,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
 
   const commonFilters = (
     <div className="surface-panel rounded-[24px] border border-stone-200/80 bg-white/92 p-4 sm:rounded-[28px] sm:p-6">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3 sm:mb-5 sm:gap-4">
+      <div className={cn("mb-4 flex flex-wrap items-start justify-between gap-3 sm:mb-5 sm:gap-4", isMobile && "hidden")}>
         <div>
           <h3 className="text-base font-semibold text-stone-900">按你的节奏选</h3>
           <p className="mt-1 text-xs text-stone-500">筛选即时生效，无需再次搜索</p>
@@ -1728,7 +1728,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   );
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+    <section data-testid="tour-results" className="mx-auto max-w-7xl px-4 py-3 sm:px-6 sm:py-8 lg:px-8">
       <AiRecommendPanel
         tours={aiCandidateTours}
         toursLoading={loading || !aiCandidatesReady}
@@ -1745,21 +1745,26 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
       />
 
       <div className="mb-6">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div className={cn((isAiSearchMode || isAiSearching) && "hidden sm:block")}><p className="mb-2 text-[10px] font-semibold tracking-[0.22em] text-orange-700">广州出发 · 各平台线路</p><h2 className="text-2xl font-semibold tracking-tight text-stone-950 sm:text-3xl">挑一条心动的线路</h2><p className="mt-2 text-sm text-stone-500">先看能不能报、哪天走，再看价格和细节。点开任意一条都能看到来源平台的原文。</p></div>
-          <a href="#" className="inline-flex min-h-11 items-center gap-1 text-xs text-stone-600 hover:text-orange-800">返回搜索 ↑</a>
-        </div>
+        {isMobile ? (
+          <div data-testid="mobile-route-header" className="flex min-h-11 items-center justify-between gap-3">
+            <h2 className="text-base font-semibold tracking-tight text-stone-950">挑一条心动的线路</h2>
+            <Button variant="outline" className="h-11 shrink-0 gap-1.5 rounded-full border-stone-200 bg-white px-3 text-xs"
+              aria-expanded={showFilters} aria-haspopup="dialog" onClick={() => setShowFilters(true)}>
+              <SlidersHorizontal className="h-3.5 w-3.5" />筛选{activeFilterCount > 0 ? ` · ${activeFilterCount}` : ''}
+            </Button>
+          </div>
+        ) : (
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+            <div><p className="mb-2 text-[10px] font-semibold tracking-[0.22em] text-orange-700">广州出发 · 各平台线路</p><h2 className="text-3xl font-semibold tracking-tight text-stone-950">挑一条心动的线路</h2><p className="mt-2 text-sm text-stone-500">先看能不能报、哪天走，再看价格和细节。点开任意一条都能看到来源平台的原文。</p></div>
+            <a href="#" className="inline-flex min-h-11 items-center gap-1 text-xs text-stone-600 hover:text-orange-800">返回搜索 ↑</a>
+          </div>
+        )}
         {heroDestinations.length > 0 && <div className="sr-only">当前热门目的地：{heroDestinations.join('、')}</div>}
         {/* AI 模式下这条搜索条是冗余的：AI 面板已经写明本轮问的是什么，清除也在面板的「清空」里。
             再加一条「正在查找：xxx / 清除搜索」等于同一屏把同一件事说两遍，
             还把「挑一条心动的线路」标题挤出首屏。 */}
         {searchQuery && !(isAiSearchMode || isAiSearching) && <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-orange-900/10 bg-orange-50/70 px-4 py-3"><p className="min-w-0 break-words text-sm text-orange-950">正在查找：<strong>{searchQuery}</strong></p><Button variant="ghost" className="h-11 shrink-0 rounded-xl text-orange-900" onClick={onClearSearch}><X className="mr-1 h-4 w-4" />清除搜索</Button></div>}
-        {isMobile && (isAiSearchMode || isAiSearching || aiStreamingItems.length > 0) ? (
-          <details className="rounded-2xl border border-stone-200 bg-white px-3">
-            <summary className="min-h-11 cursor-pointer py-3 text-sm font-medium text-stone-700">筛选线路{activeFilterCount > 0 ? ` · 已选 ${activeFilterCount} 项` : ''}</summary>
-            {commonFilters}
-          </details>
-        ) : commonFilters}
+        {!isMobile && commonFilters}
 
         {!isMobile && showFilters && (
           <div className="mt-4">
@@ -1777,11 +1782,12 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
                   更多筛选
                 </SheetTitle>
                 <SheetDescription className="pr-8 leading-5">
-                  常用筛选已经放在首屏，这里保留更细的条件
+                  按需调整目的地、时间和预算，筛选即时生效
                 </SheetDescription>
               </SheetHeader>
               <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-4 [-webkit-overflow-scrolling:touch]">
-                {advancedFilters}
+                {commonFilters}
+                <div className="mt-4">{advancedFilters}</div>
               </div>
               <div className="flex gap-3 border-t border-stone-200 bg-white px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3">
                 <Button variant="outline" className="h-11 flex-1 rounded-2xl border-stone-200 bg-white" onClick={resetFilters}>
@@ -1798,7 +1804,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
           </Sheet>
         )}
 
-        <div className="mt-5 mobile-chip-scroll -mx-4 flex items-center gap-2 overflow-x-auto bg-transparent px-4 sm:mx-0 sm:flex-wrap sm:items-start sm:justify-between sm:gap-3 sm:overflow-visible sm:px-0 max-sm:sticky max-sm:top-[64px] max-sm:z-30 max-sm:-mb-1 max-sm:py-2 max-sm:bg-[rgba(247,246,243,0.94)] max-sm:backdrop-blur-xl">
+        <div className="mt-2 sm:mt-5 mobile-chip-scroll -mx-4 flex items-center gap-2 overflow-x-auto bg-transparent px-4 sm:mx-0 sm:flex-wrap sm:items-start sm:justify-between sm:gap-3 sm:overflow-visible sm:px-0 max-sm:sticky max-sm:top-[64px] max-sm:z-30 max-sm:-mb-1 max-sm:py-2 max-sm:bg-[rgba(247,246,243,0.94)] max-sm:backdrop-blur-xl">
           <div className="flex shrink-0 items-center gap-2 sm:flex-wrap">
             <ArrowUpDown className="w-4 h-4 shrink-0 text-stone-500" />
             <Select
@@ -1854,7 +1860,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
           </div>
 
           {aiRecommendationResult && aiRecommendationResult.items.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 shadow-sm">
+            <div className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 shadow-sm sm:flex-wrap">
               <Sparkles className="h-4 w-4 text-stone-500" />
               <span>{aiStreamingItems.length ? (aiPreviewKind === 'candidates' ? `已筛出 ${aiStreamingItems.length} 条候选` : `推荐顺序已就绪 · ${aiStreamingItems.length} 条`) : `AI 已置顶 ${aiRecommendedCount} 条建议`}</span>
               {hiddenAiRecommendationCount > 0 && (
@@ -1879,7 +1885,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
           )}
 
           {activeFilterCount > 0 && (
-            <div className="flex shrink-0 flex-wrap items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2 whitespace-nowrap sm:flex-wrap">
               <span className="text-sm text-stone-500">当前已选：</span>
               {filters.destination && (
                 <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
