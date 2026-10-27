@@ -2679,7 +2679,7 @@ function buildHardIntentFromText(text: string): AiTravelIntent | null {
   // 经验：本地只提取可审计约束。扶贫/公益/研学/贫穷地方等软语义不要在这里做词表规则，
   // 页面筛选器也不注入硬意图；它只作为 UI 上下文和展示筛选，避免规则器和智能互相打架。
   const normalizedIntent = normalizeBudgetPriorityByUserText(normalizeIntent(intent), text);
-  return getHardIntentSignalCount(normalizedIntent) > 0 ? normalizedIntent : null;
+  return getHardIntentSignalCount(normalizedIntent) > 0 || normalizedIntent?.budgetPriority ? normalizedIntent : null;
 }
 
 function getHardIntentSignalCount(intent: AiTravelIntent | null) {
@@ -3582,6 +3582,48 @@ function recommendationSectionRank(item: AiRecommendationItem) {
   if (item.recommendationTier === 'ai-detailed') return 0;
   if (item.recommendationTier === 'ai-brief') return 1;
   return 2;
+}
+
+// low 是相对价格偏好，不推断金额上限。首个可见 order 与终态共用事实键，
+// 模型的分数、文案和推荐分段不能压过同等相关/约束下的真实低价。
+function enforceLowPricePreference(
+  items: AiRecommendationItem[],
+  candidateTours: AiRecommendationCandidate[],
+  intent: AiTravelIntent | null,
+  userText: string,
+  demandSpec?: ClassifiedDemandSpec,
+  includePool = false,
+) {
+  if (intent?.budgetPriority !== 'low' || items.length === 0) return items;
+  const byId = new Map(candidateTours.map((tour) => [tour.id, buildTourPrimitive(tour)]));
+  const selectedIds = new Set(items.map((item) => item.tourId));
+  const pool = includePool
+    ? [...items, ...candidateTours.filter((tour) => !selectedIds.has(tour.id) &&
+      getPrimitiveConflictReasons(intent, byId.get(tour.id)!).length === 0)
+      .map((tour) => ({ tourId: tour.id, score: 80, matchedSignals: [], recommendationTier: 'local-supplement' } as AiRecommendationItem))]
+    : items;
+  const demands = demandSpec?.demands ?? buildExperienceDemandSpec(userText);
+  const mode = demandSpec?.source === 'classifier' ? 'profile' : 'lexical';
+  const coverageTerms = getCoverageTermsForQuality(userText);
+  return pool.map((item, index) => {
+    const primitive = byId.get(item.tourId);
+    const conflicts = primitive ? getPrimitiveConflictReasons(intent, primitive) : ['unknown'];
+    const relevance = getRecommendationRelevanceMetrics(item, primitive, { intent, coverageTerms, conflictReasons: conflicts });
+    return { item, index, keys: [
+      -conflicts.length,
+      primitive ? getDemandSatisfiedCount(demands, primitive, mode) : 0,
+      primitive ? getMatchedDestinationHints(intent, primitive).length : 0,
+      relevance.coverageCount,
+      relevance.scheduleCoverageCount,
+      relevance.budgetFitTier,
+    ], price: primitive && Number.isFinite(primitive.price) && primitive.price > 0 ? primitive.price : Number.POSITIVE_INFINITY };
+  }).sort((left, right) => {
+    for (let i = 0; i < left.keys.length; i += 1) {
+      const gap = right.keys[i] - left.keys[i];
+      if (gap) return gap;
+    }
+    return (left.price < right.price ? -1 : left.price > right.price ? 1 : 0) || left.index - right.index;
+  }).slice(0, includePool ? MAX_AI_SELECTED_ITEMS : items.length).map(({ item }) => item);
 }
 
 function prioritizeRecommendationItems(
@@ -4917,7 +4959,7 @@ function selectDiversePrimitives(
 }
 
 function getPricePercentile(price: number, sortedPrices: number[]) {
-  if (!Number.isFinite(price) || sortedPrices.length === 0) return null;
+  if (!Number.isFinite(price) || price <= 0 || sortedPrices.length === 0) return null;
   const cheaperOrEqualCount = sortedPrices.filter((value) => value <= price).length;
   return Math.round((cheaperOrEqualCount / sortedPrices.length) * 100);
 }
@@ -6924,7 +6966,7 @@ function buildLiteAiMessages(params: {
       `按需求和候选质量合理选择推荐数量，最多 ${MAX_AI_SELECTED_ITEMS} 条：前 ${MAX_AI_DETAILED_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；存在硬冲突时宁可少返回。先输出完整顶层 order:[tourId,...] 推荐顺序，再输出同一批线路的 items 理由，最后输出 summary；order 一旦输出不可更改。`,
       '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
       `多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮偏好。`,
-      '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
+      '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。it.bp=low 时，在需求覆盖和硬约束同等满足的候选中按已知正价格从低到高选择并输出 order，不能用高分或更长理由把高价项放前；价格未知不算便宜，不从 low 推断金额上限。用户原话中的未知地名或表达保留原样，不自行改写为其他目的地。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，优先按 sg 去理解这类软语义；它是理解镜头，不是硬过滤规则。']
         : ['像带老人、怕热、想放松这类软语义，要借助世界知识理解节奏、气候和体验差异。']),
@@ -7839,6 +7881,8 @@ async function consumeWithFetchTimeout<T>(
 
 export const __aiRecommendationTestHooks = {
   mergeAbortSignals,
+  enforceLowPricePreference,
+  getPricePercentile,
   auditAiRecommendationsStrict,
   auditAiRecommendations,
   buildAiMessages,
@@ -9327,7 +9371,7 @@ export async function requestAiRecommendations(request: AiRecommendationRequest)
       if (!active) return;
       if (progress.partialItems) {
         partialItems = progress.partialItems;
-        if (progress.previewKind !== 'candidates' && progress.partialItems.length) hasAiPreview = true;
+        hasAiPreview = progress.previewKind !== 'candidates' && progress.partialItems.some((item) => item.recommendationTier !== 'local-supplement');
       }
       request.onProgress?.(progress);
     },
@@ -9345,7 +9389,7 @@ export async function requestAiRecommendations(request: AiRecommendationRequest)
     // A remaining-budget provider timeout can settle just before the outer timer.
     // Its ordinary local fallback must not discard an already validated preview.
     if (hasAiPreview && partialItems.length && result.source !== 'ai-api') return interruptedResult();
-    if (result.source !== 'ai-api' && fallbackItems.length) return { ...result, items: fallbackItems };
+    if (result.source !== 'ai-api' && fallbackItems.length && result.status?.mode !== 'local-only') return { ...result, items: fallbackItems };
     return result;
   } catch (error) {
     if (!request.signal?.aborted && Date.now() >= deadline) return interruptedResult();
@@ -9912,6 +9956,7 @@ async function requestAiRecommendationsWithinBudget({
     const partialPrimitiveById = new Map(compactedCandidateTours.map((candidate) => [candidate.id, buildTourPrimitive(candidate)]));
     let partialRevision = '';
     let fixedOrder: string[] | undefined;
+    const fixedLocalIds = new Set<string>();
     const partialById = new Map<string, AiRecommendationItem>();
     // 临时预览：仅派发已闭合、已映射且通过当前意图硬约束的条目。
     // 最终响应仍会结合完整 intent、天气和覆盖纪律重新装配。
@@ -9932,7 +9977,13 @@ async function requestAiRecommendationsWithinBudget({
         );
         const { compliant } = splitByIntentConflicts(audited, effectiveIntent, partialPrimitiveById, corpusVocab);
         if (!compliant.length) return; // Retry resets must never clear useful progress.
-        if (!fixedOrder && orderItems?.length) fixedOrder = compliant.map((item) => item.tourId);
+        if (!fixedOrder && orderItems?.length) {
+          const ordered = enforceLowPricePreference(compliant, compactedCandidateTours, effectiveIntent, effectiveUserText, classifiedSpec ?? undefined, true);
+          fixedOrder = ordered.map((item) => item.tourId);
+          for (const item of ordered) {
+            if (item.recommendationTier === 'local-supplement') fixedLocalIds.add(item.tourId);
+          }
+        }
         const checkedReasons = validateAiItems({ items: partialItems }, compactedCandidateTours);
         for (const item of checkedReasons) {
           if (fixedOrder?.includes(item.tourId) || compliant.some((entry) => entry.tourId === item.tourId)) {
@@ -9941,8 +9992,10 @@ async function requestAiRecommendationsWithinBudget({
           }
         }
         const visible = fixedOrder
-          ? fixedOrder.map((tourId) => partialById.get(tourId) ?? { tourId, score: 80, matchedSignals: [] })
-          : compliant;
+          ? fixedOrder.map((tourId) => fixedLocalIds.has(tourId)
+            ? { tourId, score: 80, matchedSignals: [], recommendationTier: 'local-supplement' as const }
+            : partialById.get(tourId) ?? { tourId, score: 80, matchedSignals: [] })
+          : enforceLowPricePreference(compliant, compactedCandidateTours, effectiveIntent, effectiveUserText, classifiedSpec ?? undefined, true);
         const revision = JSON.stringify(visible);
         if (revision !== partialRevision) {
           partialRevision = revision;
@@ -9959,7 +10012,8 @@ async function requestAiRecommendationsWithinBudget({
               ],
               'rank',
             ),
-            previewKind: visible.some((item) => item.reason) ? 'reasons' : 'ranking',
+            previewKind: visible.every((item) => item.recommendationTier === 'local-supplement')
+              ? 'candidates' : visible.some((item) => item.reason) ? 'reasons' : 'ranking',
             partialItems: visible,
           });
         }
@@ -10109,12 +10163,12 @@ async function requestAiRecommendationsWithinBudget({
     const responseItems = validateAiItems(aiResponse, compactedCandidateTours);
     const responseById = new Map(responseItems.map((item) => [item.tourId, item]));
     const validatedAiItems = fixedOrder
-      ? fixedOrder.map((tourId) => {
+      ? fixedOrder.filter((id) => !fixedLocalIds.has(id)).map((tourId) => {
         const item = responseById.get(tourId);
         return item?.reason ? item : partialById.get(tourId) ?? item ?? { tourId, score: 80, matchedSignals: [] };
       })
       : responseItems;
-    if (validatedAiItems.length === 0 && Array.isArray(aiResponse.items)) {
+    if (validatedAiItems.length === 0 && fixedLocalIds.size === 0 && Array.isArray(aiResponse.items)) {
       throw new Error('AI API unusable items_unmapped: returned tourIds did not match current candidates');
     }
     const aiItems = keepAiItemsForCompoundExperience(
@@ -10221,12 +10275,30 @@ async function requestAiRecommendationsWithinBudget({
     const finalById = new Map(coverageItems.map((item) => [item.tourId, item]));
     // Once AI order is visible, reasons and final assembly may remove hard conflicts
     // but may not reorder the surviving ids. Local minimum-count padding stays last.
-    const orderedFinalIds = fixedOrder?.filter((id) => compliantAiItems.some((item) => item.tourId === id)) ?? [];
+    for (const id of fixedLocalIds) {
+      const primitive = finalPrimitiveByTourId.get(id);
+      if (primitive && getPrimitiveConflictReasons(finalIntent, primitive, corpusVocab).length === 0) {
+        finalById.set(id, { tourId: id, score: 80, matchedSignals: [], recommendationTier: 'local-supplement' });
+      }
+    }
+    const orderedFinalIds = fixedOrder?.filter((id) => fixedLocalIds.has(id)
+      ? finalById.has(id)
+      : compliantAiItems.some((item) => item.tourId === id)) ?? [];
     const disciplinedItems = fixedOrder
       ? [...orderedFinalIds.map((id) => finalById.get(id) ?? compliantAiItems.find((item) => item.tourId === id)!),
           ...coverageItems.filter((item) => !orderedFinalIds.includes(item.tourId))]
-      : coverageItems;
-    const explanationsIncomplete = Boolean(fixedOrder?.length && orderedFinalIds.some((id) => !validatedAiItems.find((item) => item.tourId === id)?.reason));
+      : enforceLowPricePreference(coverageItems, compactedCandidateTours, finalIntent, finalEffectiveUserText, classifiedSpec ?? undefined, true);
+    if (finalIntent?.budgetPriority === 'low' && disciplinedItems.length > 0 &&
+      disciplinedItems.every((item) => item.recommendationTier === 'local-supplement')) {
+      emitProgress(onProgress, { stage: 'fallback', label: '已按省钱偏好展示本地候选',
+        detail: '模型选择未进入当前低价优先列表，以下为本地候选事实，尚无模型推荐理由。', progress: 100 });
+      return { conversationId, summary: '', items: disciplinedItems,
+        generatedAt: new Date().toISOString(), source: 'local-preview',
+        status: { mode: 'local-only', label: '低价优先的本地候选',
+          detail: '模型选择未进入当前低价优先列表，以下为本地候选事实，尚无模型推荐理由。' },
+        ...(finalPreferenceMemory ? { preferenceMemory: finalPreferenceMemory } : {}) };
+    }
+    const explanationsIncomplete = Boolean(fixedOrder?.length && orderedFinalIds.some((id) => !fixedLocalIds.has(id) && !validatedAiItems.find((item) => item.tourId === id)?.reason));
     if (explanationsIncomplete) {
       emitProgress(onProgress, { stage: 'streaming-items', label: '已保留 AI 推荐顺序',
         detail: '部分推荐理由尚未生成，可继续补充。', progress: 88,
