@@ -61,6 +61,10 @@ jobs:
           npm run test:runtime-tour-schemas
           npm run test:ai-streaming
           npm run test:ai-streaming-progress
+          npm run test:demand-classifier
+          npm run test:ai-low-price
+          npm run test:ai-model-price-intent
+          npm run test:ai-request-lifecycle
           python scripts/test_geo_schema_guard.py
 
       - name: Build

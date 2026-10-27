@@ -5245,6 +5245,8 @@ interface ClassifiedIntentPayload {
   spec: ClassifiedDemandSpec | null;
   queries: string[];
   understanding: string;
+  // Missing/invalid means lexical degradation; none explicitly clears, unchanged inherits.
+  pricePreference?: 'low' | 'premium' | 'none' | 'unchanged';
 }
 
 // 候选池总览（目的地/主题/来源/价格区间 top-N）：给合并调用的检索规划段用。
@@ -5293,6 +5295,7 @@ async function classifyExperienceDemandSpec(params: {
   configs: AiProviderConfig[];
   userText: string;
   previousDemands?: ExperienceDemand[];
+  previousPricePreference?: AiTravelIntent['budgetPriority'];
   // 带上候选池总览时，同一次调用顺带产出多轮检索式（合并调用的主路径）。
   corpusOverview?: CorpusOverview;
   // 不参与"是否值得解析"的门控，只用于在缺少 queries 时判定降级。
@@ -5311,9 +5314,11 @@ async function classifyExperienceDemandSpec(params: {
         '- 每个被点名的体验主题归到对应原语；并列默认各自独立一条 demand（relation="and"）。',
         '- 「或/或者/都行/任选」连接的主题合并为一条 demand（relation="or"）。',
         '- 「不要/不想/避开/免了/没有…也行」的主题放进 avoid（原语标签）。',
-        '- 金额、天数、出发时段、上车点是结构化约束，不输出。',
+        '- 数字金额、天数、出发时段、上车点由其他结构化约束处理，不输出；不得从价格偏好推算数字预算。',
+        '- 必须输出 pricePreference：low（倾向降低花费）、premium（明确优先高端品质/愿意多花）、none（本轮明确不再按价格取舍，清除旧偏好）、unchanged（本轮没改变价格偏好，沿用上一轮）。根据本轮语义而非固定词面判断，不要把没有提价钱等同于明确清除。',
+        '- 例如「比上轮节省开支」是 low；「现在不必顾价格」是 none 而不是 premium；只补充目的地/天数是 unchanged。旧偏好仅供理解上下文，本轮明确修改优先。',
         '- 目的地输出到 destinations 字段：用户点名单一城市直接照抄；区域词/复合词用你的世界知识展开成具体城市/目的地（潮汕→潮州、汕头；东北→哈尔滨、雪乡；珠三角→广州、深圳、珠海）。无法展开时输出用户原词。',
-        '- 没有可识别的目的地与体验主题时输出 {"demands":[],"avoid":[],"destinations":[]}。',
+        '- 完整输出必须包含 demands、avoid、destinations、pricePreference、queries（不需要检索式时为 []）；没有体验/目的地时这三个数组为空，仍须输出价格规格。',
         ...(includeQueries
           ? [
               '',
@@ -5323,7 +5328,7 @@ async function classifyExperienceDemandSpec(params: {
               '只有需求本身没点名体验主题、或点名了多个主题时，才允许每条检索式各占一个不同主题。',
               '候选池有限时，宁可宽一点也不要全部挤在同一组热门词上；第二条、第三条检索式应覆盖第一条可能漏掉但同样符合需求的选项。',
               'understanding 字段写一句中文需求理解。',
-              '完整输出形状：{"demands":[],"avoid":[],"destinations":[],"understanding":"...","queries":["检索式1","检索式2"]}',
+              '完整输出形状：{"demands":[],"avoid":[],"destinations":[],"pricePreference":"unchanged","understanding":"...","queries":["检索式1","检索式2"]}',
             ]
           : []),
       ].join('\n'),
@@ -5332,6 +5337,7 @@ async function classifyExperienceDemandSpec(params: {
       role: 'user',
       content: JSON.stringify({
         q: params.userText,
+        previousPricePreference: params.previousPricePreference ?? null,
         ...(includeQueries && params.corpusOverview ? { corpus: params.corpusOverview } : {}),
       }),
     },
@@ -5368,7 +5374,7 @@ async function classifyExperienceDemandSpec(params: {
       timeoutMs: AI_CLASSIFIER_TIMEOUT_MS,
     }) as AiSearchCallResult;
     const spec = normalizeClassifiedDemandSpec(aiCall.parsed);
-    const parsed = aiCall.parsed as { queries?: unknown; understanding?: unknown } | null;
+    const parsed = aiCall.parsed as { queries?: unknown; understanding?: unknown; pricePreference?: unknown } | null;
     const queries = Array.isArray(parsed?.queries)
       ? parsed.queries
         .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
@@ -5379,6 +5385,9 @@ async function classifyExperienceDemandSpec(params: {
       spec,
       queries,
       understanding: typeof parsed?.understanding === 'string' ? parsed.understanding : '',
+      ...(['low', 'premium', 'none', 'unchanged'].includes(String(parsed?.pricePreference))
+        ? { pricePreference: parsed!.pricePreference as ClassifiedIntentPayload['pricePreference'] }
+        : {}),
     };
   } catch {
     // 分类头失败不阻断主链路：调用方退回词面 fallback。
@@ -7482,7 +7491,7 @@ function parseAiProviderResponse(
   const items = (parsed as { items?: unknown })?.items;
   if (schema === 'search-plan') {
     const queries = (parsed as { queries?: unknown })?.queries;
-    if (!Array.isArray(queries)) {
+    if (!Array.isArray(queries) && !['low', 'premium', 'none', 'unchanged'].includes(String((parsed as { pricePreference?: unknown })?.pricePreference))) {
       throw new Error(getAiProviderParseErrorLabel(config, 'schema_invalid', 'queries missing'));
     }
   } else if (!Array.isArray(items)) {
@@ -9554,39 +9563,14 @@ async function requestAiRecommendationsWithinBudget({
   try {
     const intent = baseHardIntent;
     const allowPublicInterestForTurn = allowPublicInterestForCurrentTurn;
-    const nextPreferenceMemory = normalizePreferenceMemory(mergePreferenceMemory(memoryForThisTurn, intent));
+    let nextPreferenceMemory = normalizePreferenceMemory(mergePreferenceMemory(memoryForThisTurn, intent));
     const effectiveIntent = attachTurnSemanticContext(
       mergeIntentWithMemory(intent, nextPreferenceMemory),
       text,
       { allowPublicInterest: allowPublicInterestForTurn },
     );
-    const effectiveUserText = buildEffectiveUserText(text, nextPreferenceMemory);
+    let effectiveUserText = buildEffectiveUserText(text, nextPreferenceMemory);
     const availableCandidates = candidatePool;
-    const localItems = buildIntentLocalRecommendations(availableCandidates, effectiveIntent);
-    const strictLocalItems = localItems.length > 0
-      ? localItems
-      : localRecommendations(availableCandidates, effectiveUserText);
-    const localItemsForMerge = buildPaddedRecommendationItems(
-      strictLocalItems,
-      fallbackRecommendations(availableCandidates),
-      );
-    // AI 全挂的 fallback 页同样施加核心体验纪律：否则意图路径的打分没有
-    // 主题覆盖排序，「阳江海陵岛海边度假酒店」的 fallback 页曾被温泉货霸屏
-    // （judge 1/1/1 实锤）。需求规格从 effectiveUserText 词面派生。
-    runtimeFallbackItems = enforceCoreCoverageDiscipline(localItemsForMerge, {
-      candidateTours: availableCandidates,
-      userText: effectiveUserText,
-    });
-    // Prepare the deadline fallback during normal preparation, never in the timer.
-    // Hard conflicts remain excluded; do not invent AI commentary for local entries.
-    const checkedFallback = auditAiRecommendationsStrict(runtimeFallbackItems, [], availableCandidates, effectiveIntent);
-    onFallbackReady(splitByIntentConflicts(
-      keepAiItemsForCompoundExperience(checkedFallback, availableCandidates, text), effectiveIntent,
-      new Map(availableCandidates.map((tour) => [tour.id, buildTourPrimitive(tour)])), corpusVocab,
-    ).compliant.slice(0, MAX_AI_SELECTED_ITEMS));
-    remainingBudget();
-    runtimePreferenceMemory = nextPreferenceMemory;
-    const auditContext = buildRecommendationAuditContext(availableCandidates, previousResult, effectiveIntent);
     emitProgress(onProgress, {
       stage: 'context',
       label: '正在补充行程上下文',
@@ -9648,7 +9632,8 @@ async function requestAiRecommendationsWithinBudget({
     const planningExpected = availableCandidates.length > MAX_AI_CANDIDATES;
     const classifiedPayload = await classifyExperienceDemandSpec({
       configs,
-      userText: effectiveUserText,
+      userText: text,
+      previousPricePreference: memoryForThisTurn?.budgetPriority,
       previousDemands: buildExperienceDemandSpec(previousUserText).length > 0
         ? buildExperienceDemandSpec(previousUserText)
         : undefined,
@@ -9658,6 +9643,46 @@ async function requestAiRecommendationsWithinBudget({
     });
     remainingBudget();
     const classifiedSpec = classifiedPayload.spec;
+    // The merged classifier owns price semantics. balanced is the existing persisted
+    // neutral value: unlike null (inherit), it survives memory merges as an explicit clear.
+    const classifiedPrice = classifiedPayload.pricePreference;
+    const authoritativePrice = classifiedPrice === 'none' ? 'balanced'
+      : classifiedPrice === 'unchanged' ? memoryForThisTurn?.budgetPriority ?? 'balanced'
+      : classifiedPrice;
+    if (authoritativePrice && effectiveIntent) {
+      effectiveIntent.budgetPriority = authoritativePrice;
+      nextPreferenceMemory = normalizePreferenceMemory({
+        ...mergePreferenceMemory(memoryForThisTurn, effectiveIntent),
+        budgetPriority: authoritativePrice,
+      });
+      effectiveUserText = buildEffectiveUserText(text, nextPreferenceMemory);
+    }
+    const localItems = buildIntentLocalRecommendations(availableCandidates, effectiveIntent);
+    const strictLocalItems = localItems.length > 0
+      ? localItems
+      : localRecommendations(availableCandidates, effectiveUserText);
+    const localItemsForMerge = buildPaddedRecommendationItems(
+      strictLocalItems,
+      fallbackRecommendations(availableCandidates),
+      );
+    // AI 全挂的 fallback 页同样施加核心体验纪律：否则意图路径的打分没有
+    // 主题覆盖排序，「阳江海陵岛海边度假酒店」的 fallback 页曾被温泉货霸屏
+    // （judge 1/1/1 实锤）。需求规格从 effectiveUserText 词面派生。
+    runtimeFallbackItems = enforceCoreCoverageDiscipline(localItemsForMerge, {
+      candidateTours: availableCandidates,
+      userText: effectiveUserText,
+    });
+    // Prepare the deadline fallback during normal preparation, never in the timer.
+    // Hard conflicts remain excluded; do not invent AI commentary for local entries.
+    const checkedFallback = auditAiRecommendationsStrict(runtimeFallbackItems, [], availableCandidates, effectiveIntent);
+    onFallbackReady(splitByIntentConflicts(
+      keepAiItemsForCompoundExperience(checkedFallback, availableCandidates, text), effectiveIntent,
+      new Map(availableCandidates.map((tour) => [tour.id, buildTourPrimitive(tour)])), corpusVocab,
+    ).compliant.slice(0, MAX_AI_SELECTED_ITEMS));
+    remainingBudget();
+    runtimePreferenceMemory = nextPreferenceMemory;
+    const auditContext = buildRecommendationAuditContext(availableCandidates, previousResult, effectiveIntent);
+
     // B6 目的地归一：分类头用模型知识把区域词展开成具体目的地（潮汕→潮州/汕头、
     // 东北→哈尔滨/雪乡），并入本轮意图的目的地提示——下游目的地评分/冲突门/
     // 模型提示词全链路可见。并入在 effectiveIntent 构建之后做原地合并。
@@ -10143,6 +10168,9 @@ async function requestAiRecommendationsWithinBudget({
       text,
       { allowPublicInterest: allowPublicInterestForTurn },
     );
+    // Do not let the final recommendation model or lexical sanitizers overturn
+    // the already grounded classifier decision used for compaction and first order.
+    if (authoritativePrice && finalIntent) finalIntent.budgetPriority = authoritativePrice;
     const semanticNotes = sanitizeAiSemanticNotesForTurn(rawSemanticNotes, {
       userText: text,
       hardIntent: intent,
