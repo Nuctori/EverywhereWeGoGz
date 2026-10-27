@@ -55,6 +55,7 @@ import {
 import type { StoredAiProgress } from '@/lib/ai-chat-storage';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { AiSearchRequest } from '@/App';
 
 interface AiRecommendPanelProps {
@@ -67,6 +68,7 @@ interface AiRecommendPanelProps {
   clearVersion: number;
   // 搜索阶段（请求已发出、首条结果还没落地）的轮次 id：每轮换新，用来清掉上一轮的进度与对话。
   searchingVersion: number;
+  mobileOverlayActive?: boolean;
   onResultChange: (result: AiRecommendationResult | null) => void;
   onFocusResults: () => void;
   // 流式增量：模型还在生成时把已完整的条目回传给列表先渲染。
@@ -302,12 +304,28 @@ export function AiRecommendPanel({
   request,
   clearVersion,
   searchingVersion,
+  mobileOverlayActive = false,
   onResultChange,
   onFocusResults,
   onPartialItems,
 }: AiRecommendPanelProps) {
   const storedChatState = useMemo(() => readStoredAiChatState(), []);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const isMobile = useIsMobile();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const capsuleRef = useRef<HTMLButtonElement>(null);
+  const mobileContentRef = useRef<HTMLDivElement>(null);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    const update = () => setKeyboardOpen(Boolean(viewport && window.innerHeight - viewport.height > 150));
+    viewport?.addEventListener('resize', update);
+    update();
+    return () => viewport?.removeEventListener('resize', update);
+  }, []);
+  useEffect(() => {
+    if (mobileOverlayActive || !isMobile) setMobileOpen(false);
+  }, [mobileOverlayActive, isMobile]);
   const [showApiKey, setShowApiKey] = useState(false);
   const [aiConfig, setAiConfig] = useState<Partial<AiProviderConfig>>(() => getStoredAiProviderConfig());
   const [useCustomAiConfig, setUseCustomAiConfig] = useState(
@@ -430,6 +448,7 @@ export function AiRecommendPanel({
 
   useEffect(() => {
     if (clearVersion === 0) return;
+    setMobileOpen(false);
 
     requestVersionRef.current += 1;
     requestAbortRef.current?.abort();
@@ -756,6 +775,7 @@ export function AiRecommendPanel({
   }, [interruptedPrompt, loading, toursReady, resumeTick, submitPrompt]);
 
   const clearConversation = () => {
+    setMobileOpen(false);
     requestVersionRef.current += 1;
     // 真正掐断在途请求：只重置 React 状态的话，fetch 会一路跑到超时，
     // 手机上一次点击就能留下一个 35s 的在途请求。
@@ -847,6 +867,34 @@ export function AiRecommendPanel({
 
   // remoteRunning 也要算作"有活动"：否则另一个标签页在跑时，本页会直接渲染 null，
   // 同步过来的进度根本没有机会显示出来。
+  const renderPanel = (content: React.ReactNode) => {
+    if (!isMobile) return content;
+    return <>
+      {!mobileOverlayActive && !keyboardOpen && !mobileOpen && (
+        <button ref={capsuleRef} type="button" aria-label={`打开 AI 面板：${compactStatusLabel}`} aria-haspopup="dialog" aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen(true)}
+          className="fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-40 flex min-h-12 max-w-[calc(100vw-2rem)] items-center gap-2 rounded-full border border-orange-200 bg-white px-4 py-3 text-sm text-stone-800 shadow-lg">
+          {loading || searching ? <Loader2 className="h-4 w-4 shrink-0 animate-spin text-orange-600" /> : <Sparkles className="h-4 w-4 shrink-0 text-orange-600" />}
+          <span className="max-w-[220px] truncate">{compactStatusLabel}</span>
+          <ChevronUp className="h-4 w-4 shrink-0" />
+        </button>
+      )}
+      <Sheet open={mobileOpen && !mobileOverlayActive} onOpenChange={setMobileOpen}>
+        <SheetContent side="bottom" ref={mobileContentRef} tabIndex={-1}
+          onOpenAutoFocus={(event) => { event.preventDefault(); mobileContentRef.current?.focus(); }}
+          onCloseAutoFocus={(event) => { event.preventDefault(); capsuleRef.current?.focus({ preventScroll: true }); }}
+          className="max-h-[85dvh] gap-0 rounded-t-3xl pb-[env(safe-area-inset-bottom)]">
+          <SheetHeader className="shrink-0 pr-12">
+            <SheetTitle>AI 帮你挑</SheetTitle>
+            <SheetDescription>收起面板不会停止完善，线路仍可继续浏览。</SheetDescription>
+          </SheetHeader>
+          <div className="overflow-y-auto overscroll-contain px-3 pb-4">{content}</div>
+          <Button variant="ghost" className="mx-3 mb-2 h-11 shrink-0" onClick={() => { setMobileOpen(false); onFocusResults(); }}>收起并查看线路</Button>
+        </SheetContent>
+      </Sheet>
+    </>;
+  };
+
   if (!hasAiActivity && !searching && !remoteRunning) {
     return null;
   }
@@ -854,7 +902,7 @@ export function AiRecommendPanel({
   if (!hasAiActivity) {
     // 搜索阶段先给一张轻量占位卡：列表保持原样、不清空，等首条进度/结果落地后再换成完整面板，
     // 避免「点了 AI 找团之后一片空白」。
-    return (
+    return renderPanel(
       <div
         id={AI_PENDING_CARD_ID}
         role="status"
@@ -895,7 +943,7 @@ export function AiRecommendPanel({
     );
   }
 
-  return (
+  return renderPanel(
     <div className="mb-4 rounded-[24px] border border-orange-100/80 bg-white/90 p-3 shadow-[0_16px_40px_rgba(28,25,23,0.05)] backdrop-blur sm:p-4">
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>

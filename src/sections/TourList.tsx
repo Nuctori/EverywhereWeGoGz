@@ -1738,6 +1738,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         request={aiSearchRequest}
         clearVersion={aiClearVersion}
         searchingVersion={aiSearchRequest?.id ?? 0}
+        mobileOverlayActive={Boolean(selectedSummaryTour) || (isMobile && showFilters)}
         onResultChange={setAiRecommendationResult}
         onFocusResults={focusResults}
         onPartialItems={(items, kind) => { setAiStreamingItems(items); setAiPreviewKind(kind); }}
