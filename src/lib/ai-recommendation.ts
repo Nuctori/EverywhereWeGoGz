@@ -6876,7 +6876,7 @@ function buildAiMessages(params: {
         ? ['如果 sg 存在，先按 sg 解释这类软语义，再结合 candidates 里的事实做排序；sg 是理解镜头，不是目的地白名单。']
         : []),
       '推荐时充分使用你的主观判断和世界知识。请像真正去过或熟悉当地的人一样，自己决定每条线路最值得说的地方；可以写具体画面、气质、玩法、适合谁，以及和其他线路相比的取舍。不要把这些要求理解成固定格式。',
-      '如果价格并不便宜，就不要写预算友好、性价比高、符合预算；只说参考价和取舍。',
+      'price 是人民币每人整段行程起价，低价偏好比较总价，不是 pricePerDay。pricePerDay 只是总价除以天数的估算，不是每天实际支出，也不代表费用全包；不能因为摊到每天变小就宣称便宜或性价比高。不得推断未提供的单房差、自费、签证等费用已包含。高价线路只能如实说明总价和取舍。',
       '如果用户关心的体验条件无法从候选事实确认，不要硬凑完整匹配；可以结合目的地世界知识给出“更值得查哪一类地方/为什么”，并在 tradeoffs 或 intentNotes.cannotAssert 中把它标成判断或待核实项。',
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
       ...promptPolicy.requestRules,
@@ -6979,6 +6979,7 @@ function buildLiteAiMessages(params: {
       ...(hasTurnPublicInterestNeed
         ? ['如果 sg 存在，优先按 sg 去理解这类软语义；它是理解镜头，不是硬过滤规则。']
         : ['像带老人、怕热、想放松这类软语义，要借助世界知识理解节奏、气候和体验差异。']),
+      'price 是人民币每人整段行程起价，低价偏好比较总价，不是 pricePerDay；后者只是总价除以天数的估算，不是每日实际支出或全包费用。不能用日均摊薄高总价后宣称便宜、性价比高，也不能推断未提供的单房差、自费、签证已包含。',
       'sf 不要写命中、对题、候选、标签、软语义、预算友好这类系统化说法。',
       ...promptPolicy.liteRules,
     ],
@@ -10314,7 +10315,8 @@ async function requestAiRecommendationsWithinBudget({
       : compliantAiItems.some((item) => item.tourId === id)) ?? [];
     const disciplinedItems = fixedOrder
       ? [...orderedFinalIds.map((id) => finalById.get(id) ?? compliantAiItems.find((item) => item.tourId === id)!),
-          ...coverageItems.filter((item) => !orderedFinalIds.includes(item.tourId))]
+          ...coverageItems.filter((item) => !orderedFinalIds.includes(item.tourId) &&
+            (finalIntent?.budgetPriority !== 'low' || fixedOrder?.includes(item.tourId)))]
       : enforceLowPricePreference(coverageItems, compactedCandidateTours, finalIntent, finalEffectiveUserText, classifiedSpec ?? undefined, true);
     if (finalIntent?.budgetPriority === 'low' && disciplinedItems.length > 0 &&
       disciplinedItems.every((item) => item.recommendationTier === 'local-supplement')) {

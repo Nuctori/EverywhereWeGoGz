@@ -77,6 +77,23 @@ try {
   assert.ok(!events.some((e) => e.stage === 'completed'));
   assert.ok(events.filter((e) => e.partialItems?.length && e.partialItems.every((i) => i.recommendationTier === 'local-supplement')).every((e) => e.previewKind === 'candidates'));
   assert.equal(local.items[0].tourId, 't1');
+  assert.ok(!local.items.some((item) => item.tourId === 't0'), 'final assembly must not append expensive AI rejects behind the fixed low-price selection');
+  assert.ok(local.items.length <= 25, 'fixed low-price selection must not grow again during final assembly');
   console.log('PASS 30-candidate all-local top25 is local-preview/local-only, empty summary, no AI completed event');
+  // A real AI reason survives for a cheap item, but expensive rejects must not
+  // sneak back into a mixed AI/local final result after its streaming order froze.
+  const mixedTours = [...crowded, candidate('russia', 8999, { title: '金秋俄罗斯9天', duration: 9 }), candidate('turkey', 16499, { title: '璀璨绿宝石土耳其10天7晚', duration: 10 })];
+  const mixedEvents = [];
+  globalThis.fetch = async (_url, init) => {
+    const payload = JSON.parse(init.body);
+    const content = payload.max_tokens <= 800 ? '{"demands":[],"avoid":[],"destinations":[],"pricePreference":"low","queries":[]}'
+      : JSON.stringify({ order: ['t1', 'russia', 'turkey'], items: [{ tourId: 't1', score: 80, reason: '模型生成的低价线路理由' }, { tourId: 'russia', score: 99, reason: '日均不到1000元，性价比很高' }, { tourId: 'turkey', score: 99, reason: '日均不到1650元，性价比很高' }] });
+    return new Response(JSON.stringify({ choices: [{ message: { content } }] }), { headers: { 'content-type': 'application/json' } });
+  };
+  const mixed = await requestAiRecommendations({ conversationId: 'mixed-low', messages: [{ role: 'user', content: text }], candidateTours: mixedTours, activeFilters: {}, searchQuery: '', aiConfig: { baseUrl: 'https://api.z.ai/api/paas/v4', model: 'mock', apiKey: 'fake' }, onProgress: p => mixedEvents.push(p) });
+  assert.ok(mixed.items.some(i => i.tourId === 't1' && i.reason?.startsWith('模型生成的低价线路理由')), JSON.stringify(mixed));
+  assert.ok(!mixed.items.some(i => ['russia', 'turkey'].includes(i.tourId)), 'rejected screenshot-price items cannot return during mixed final assembly');
+  assert.ok(mixed.items.length <= 25);
+  console.log('PASS mixed AI/local selection excludes screenshot high-price rejects without rewriting model reasons');
 } finally { globalThis.fetch = nativeFetch; }
 console.log('PASS all low-price offline regressions; no real AI calls');
