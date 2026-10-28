@@ -67,6 +67,7 @@ jobs:
           npm run test:ai-low-price
           npm run test:ai-model-price-intent
           npm run test:ai-request-lifecycle
+          npm run test:ai-chat-storage-roundtrip
           python scripts/test_geo_schema_guard.py
 
       - name: Build
@@ -80,6 +81,12 @@ jobs:
           VITE_AI_DEFAULT_BASE_URL: https://ai.114124.xyz/v1
           VITE_AI_DEFAULT_MODEL: GLM-4.7-Flash
           VITE_AI_DEFAULT_API_KEY: ewg-proxy（非机密占位，Worker 只校验 Origin）
+
+      - name: Verify mobile AI recovery against built artifact
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:ai-mobile-recovery-e2e
+          npm run test:ai-mobile-capsule-e2e
 
       - name: Publish build artifacts to CDN branch
         shell: bash

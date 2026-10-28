@@ -52,7 +52,7 @@ import {
   saveStoredAiProgress,
   subscribeStoredAiProgress,
 } from '@/lib/ai-chat-storage';
-import type { StoredAiProgress } from '@/lib/ai-chat-storage';
+import type { PendingAiRequest, StoredAiProgress } from '@/lib/ai-chat-storage';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -348,7 +348,9 @@ export function AiRecommendPanel({
   const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [interruptedPrompt, setInterruptedPrompt] = useState<string | null>(storedChatState.pendingPrompt || null);
+  const pendingContextRef = useRef<PendingAiRequest | null>(storedChatState.pendingContext ?? null);
   const autoResumeRemainingRef = useRef(storedChatState.autoResumeRemaining ?? 0);
+  const [networkOnline, setNetworkOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const [resumeTick, setResumeTick] = useState(0);
   const liveThinkingScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -378,7 +380,9 @@ export function AiRecommendPanel({
   );
   const hasResult = Boolean(result && result.items.length > 0);
   const toursReady = !toursLoading && tours.length > 0;
-  const resultStatusMeta = getResultStatusMeta(result);
+  const showingPreviousResult = Boolean((loading || interruptedPrompt) && result && result.generatedAt !== pendingContextRef.current?.checkpoint?.generatedAt);
+  const baseResultStatusMeta = getResultStatusMeta(result);
+  const resultStatusMeta = showingPreviousResult && baseResultStatusMeta ? { ...baseResultStatusMeta, label: '上一轮结果', detail: '以下内容来自上一轮；本轮尚未完成。' } : baseResultStatusMeta;
   // 挂在所有渲染分支之前：空闲预热是纯优化，且不受下面任何条件渲染影响。
   useAiRecommendationWarmup(tours);
   useEffect(() => {
@@ -406,6 +410,7 @@ export function AiRecommendPanel({
         result,
         preferenceMemory,
         pendingPrompt: interruptedPrompt,
+        pendingContext: pendingContextRef.current,
         autoResumeRemaining: autoResumeRemainingRef.current,
       }, MAX_PERSISTED_MESSAGES);
       storageSaveCleanupRef.current = undefined;
@@ -456,6 +461,7 @@ export function AiRecommendPanel({
     onPartialItems?.([]);
     setLoading(false);
     setInterruptedPrompt(null);
+    pendingContextRef.current = null;
     autoResumeRemainingRef.current = 0;
     setPreferenceMemory(null);
     setProgressState(null);
@@ -500,23 +506,33 @@ export function AiRecommendPanel({
     if (container) container.scrollTop = container.scrollHeight;
   }, [liveThinkingOpen, progressState?.liveThinking?.excerpt]);
 
-  const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean; replaceRunning?: boolean; automatic?: boolean }) => {
+  const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean; replaceRunning?: boolean; automatic?: boolean; resume?: boolean }) => {
     const prompt = rawPrompt.trim();
     if (!prompt || (loading && !options?.replaceRunning) || !toursReady || (requestAbortRef.current && !options?.replaceRunning)) return;
+    const resuming = Boolean(options?.resume || options?.automatic);
     if (!options?.automatic) autoResumeRemainingRef.current = 2;
     const requestVersion = requestVersionRef.current + 1;
     requestVersionRef.current = requestVersion;
     const preserveResult = options?.preserveResult ?? false;
-    // 与 ai-recommendation 的 isFollowUpConversation 同口径：本轮之前已有用户提问即为追问轮。
-    const isFollowUpTurn = messages.some((message) => message.role === 'user');
-
     const preparationStartedAt = Date.now();
-    const userMessage = createMessage('user', prompt);
-    const nextMessages = options?.automatic && messages.at(-1)?.role === 'user' && messages.at(-1)?.content === prompt
-      ? messages
-      : preserveResult
-      ? [...messages, userMessage]
-      : [createInitialMessage(), userMessage];
+    // New turns start without a checkpoint. Legacy v2 has no proven context:
+    // rerun its prompt safely, without trusting the displayed old result.
+    const existing = resuming ? pendingContextRef.current : null;
+    const nextMessages = existing?.messages ?? (resuming
+      ? (messages.at(-1)?.role === 'user' && messages.at(-1)?.content === prompt
+        ? messages : [...messages, createMessage('user', prompt)])
+      : preserveResult ? [...messages, createMessage('user', prompt)]
+      : [createInitialMessage(), createMessage('user', prompt)]);
+    const context: PendingAiRequest = existing ?? {
+      turnId: createConversationId(), prompt, activeFilters: { ...activeFilters },
+      searchQuery: !resuming && !preserveResult ? request?.searchQuery ?? searchQuery : searchQuery,
+      messages: nextMessages, preferenceMemory: resuming ? null : preferenceMemory,
+      previousResult: !resuming && preserveResult && result?.status?.mode === 'ai' ? result : null,
+      checkpoint: null, recoveryState: 'running',
+    };
+    pendingContextRef.current = context;
+    context.recoveryState = 'running';
+    const isFollowUpTurn = nextMessages.filter((message) => message.role === 'user').length > 1;
     setMessages(nextMessages);
     setLoading(true);
     setSummaryOpen(false);
@@ -528,24 +544,30 @@ export function AiRecommendPanel({
     const abortController = new AbortController();
     requestAbortRef.current = abortController;
     setInterruptedPrompt(null);
-    let retainedResult = result;
+    let retainedResult = context.checkpoint ?? result;
+    let persistedMemory = context.preferenceMemory;
+    let persistedMessages = nextMessages;
     let backgroundInterrupted = false;
     const persistRequest = (pendingPrompt: string | null) => {
       storageSaveCleanupRef.current?.();
       storageSaveCleanupRef.current = undefined;
-      saveStoredAiChatState({ conversationId, messages: nextMessages, result: retainedResult, preferenceMemory, pendingPrompt, autoResumeRemaining: autoResumeRemainingRef.current }, MAX_PERSISTED_MESSAGES);
+      saveStoredAiChatState({ conversationId, messages: persistedMessages, result: retainedResult, preferenceMemory: persistedMemory, pendingPrompt, pendingContext: pendingPrompt ? context : null, autoResumeRemaining: autoResumeRemainingRef.current }, MAX_PERSISTED_MESSAGES);
     };
-    const suspendRequest = () => {
+    const suspendRequest = (reason: 'background' | 'offline' = 'background') => {
       if (requestVersionRef.current !== requestVersion) return;
       if (abortController.signal.aborted) return;
       backgroundInterrupted = true;
+      context.recoveryState = reason;
       setInterruptedPrompt(prompt);
       persistRequest(prompt);
       abortController.abort();
     };
     const onVisibility = () => { if (isPageHidden()) suspendRequest(); };
+    const onPageHide = () => suspendRequest();
+    const onOffline = () => { setNetworkOnline(false); suspendRequest('offline'); };
     document.addEventListener('visibilitychange', onVisibility);
-    window.addEventListener('pagehide', suspendRequest);
+    window.addEventListener('pagehide', onPageHide);
+    window.addEventListener('offline', onOffline);
     persistRequest(prompt);
     const startedAt = Date.now();
     // 把"这一轮开始了"写进 storage，另一个标签页打开时就知道这边正在跑。
@@ -580,6 +602,7 @@ export function AiRecommendPanel({
     setFollowUpInput('');
 
     try {
+      if (!navigator.onLine) { onOffline(); throw new DOMException('Offline', 'AbortError'); }
       await waitForNextPaint();
       if (requestVersionRef.current !== requestVersion) return;
 
@@ -606,12 +629,12 @@ export function AiRecommendPanel({
         conversationId,
         messages: nextMessages,
         candidateTours: tours,
-        activeFilters,
-        searchQuery: request?.searchQuery || searchQuery,
+        activeFilters: context.activeFilters,
+        searchQuery: context.searchQuery,
         aiConfig,
-        preferenceMemory,
-        previousResult: preserveResult ? result : null,
-        resumeInterrupted: Boolean(options?.automatic),
+        preferenceMemory: context.preferenceMemory,
+        previousResult: resuming ? context.checkpoint ?? context.previousResult : context.previousResult,
+        resumeInterrupted: resuming,
         signal: abortController.signal,
         onProgress: (progress) => {
           if (requestVersionRef.current !== requestVersion) return;
@@ -638,6 +661,14 @@ export function AiRecommendPanel({
                 generatedAt: new Date().toISOString(), source: progress.previewKind === 'candidates' ? 'local-preview' : 'ai-api',
                 status: { mode: 'local-only', label: progress.previewKind === 'candidates' ? '候选线路已就绪' : '推荐顺序已就绪', detail: '可先查看线路，AI 正在继续完善。' },
               };
+              if (progress.previewKind !== 'candidates') {
+                // The first proven order is the same-turn anchor. Later reason
+                // enrichment may update it only without changing that order.
+                const checkpoint = context.checkpoint;
+                if (!checkpoint || checkpoint.items.map((item) => item.tourId).join('|') === retainedResult.items.map((item) => item.tourId).join('|')) {
+                  context.checkpoint = retainedResult;
+                }
+              }
               persistRequest(prompt);
             }
           }
@@ -661,50 +692,56 @@ export function AiRecommendPanel({
       });
       if (requestVersionRef.current !== requestVersion) return;
       if (abortController.signal.aborted) return;
-      setInterruptedPrompt(null);
-      autoResumeRemainingRef.current = 0;
-      // A failed refinement must not overwrite an earlier readable result.
-      if (nextResult.status?.mode !== 'ai') {
+      const completed = nextResult.status?.mode === 'ai';
+      persistedMemory = completed ? nextResult.preferenceMemory ?? context.preferenceMemory : preferenceMemory;
+      if (completed) {
+        retainedResult = nextResult;
+        persistedMessages = [...nextMessages, createMessage('assistant', buildResultAssistantReply(prompt, isFollowUpTurn))];
+        autoResumeRemainingRef.current = 0;
+        pendingContextRef.current = null;
+        setInterruptedPrompt(null);
+        setMessages(persistedMessages);
+        setPreferenceMemory(persistedMemory);
+        // Commit result, memory, transcript and cleared pending atomically, before
+        // publishing React state; idle work cannot resurrect the old attempt.
+        persistRequest(null);
+        onResultChange(nextResult);
+      } else {
+        context.recoveryState = navigator.onLine ? 'failed' : 'offline';
+        if (!navigator.onLine) setNetworkOnline(false);
         setInterruptedPrompt(prompt);
         retainedResult = retainedResult?.items.length ? retainedResult : nextResult;
         onResultChange(retainedResult);
         persistRequest(prompt);
-      } else {
-        retainedResult = nextResult;
-        onResultChange(nextResult);
-        persistRequest(null);
+        setProgressState({ stage: 'fallback', label: nextResult.status?.label || '本轮查找未完成', detail: nextResult.status?.detail || '已保留当前可查看的内容。', progress: 0 });
       }
-      // 正式结果落地，撤掉流式增量渲染，避免两套数据同时生效。
       onPartialItems?.([]);
-      setPreferenceMemory(nextResult.preferenceMemory || preferenceMemory);
-      if (nextResult.status?.mode === 'ai') {
-        setMessages((current) => [
-          ...current,
-          createMessage('assistant', buildResultAssistantReply(prompt, isFollowUpTurn)),
-        ]);
-      } else {
-        setProgressState({ stage: 'fallback', label: nextResult.status?.label || '本轮查找已结束', detail: nextResult.status?.detail || '已保留当前可查看的内容。', progress: 100 });
-      }
       // Progressive content is already readable; completion must not move the reader.
     } catch (error) {
       // 取消是正常路径（用户点取消、重开、切页卸载），不是失败：
       // 不弹错误、不改结果，静默收尾即可。其余异常保持原有冒泡行为。
       if (requestVersionRef.current === requestVersion && error instanceof DOMException && error.name === 'AbortError' && !backgroundInterrupted) {
         if (retainedResult) onResultChange(retainedResult);
-        setProgressState({ stage: 'fallback', label: '已取消查找', detail: '已保留现有内容。', progress: 0 });
+        context.recoveryState = 'paused';
         autoResumeRemainingRef.current = 0;
-        setInterruptedPrompt(null);
-        persistRequest(null);
+        setInterruptedPrompt(prompt);
+        setProgressState({ stage: 'fallback', label: '完善已暂停', detail: '已保留本轮检查点，可手动继续本轮。', progress: 0 });
+        persistRequest(prompt);
       }
       if (requestVersionRef.current === requestVersion && !(error instanceof DOMException && error.name === 'AbortError')) {
-        setProgressState({ stage: 'fallback', label: '本次查找未完成', detail: '请重试，或调整条件后再查找。', progress: 0 });
+        context.recoveryState = navigator.onLine ? 'failed' : 'offline';
+        if (!navigator.onLine) setNetworkOnline(false);
+        setInterruptedPrompt(prompt);
+        persistRequest(prompt);
+        setProgressState({ stage: 'fallback', label: '本次查找未完成', detail: '可手动继续本轮，或调整条件后再查找。', progress: 0 });
       }
     } finally {
       document.removeEventListener('visibilitychange', onVisibility);
-      window.removeEventListener('pagehide', suspendRequest);
+      window.removeEventListener('pagehide', onPageHide);
+      window.removeEventListener('offline', onOffline);
       if (backgroundInterrupted && requestVersionRef.current === requestVersion) {
         if (retainedResult) onResultChange(retainedResult);
-        setProgressState({ stage: 'fallback', label: '查找已暂停', detail: '已保留现有内容，回到前台后将自动继续。', progress: 0 });
+        setProgressState({ stage: 'fallback', label: '查找已暂停', detail: context.recoveryState === 'offline' ? '已保留现有内容，等待网络恢复。' : autoResumeRemainingRef.current > 0 ? '已保留现有内容，回到前台后将自动继续。' : '自动恢复预算已耗尽，可手动继续本轮。', progress: 0 });
       }
       if (requestVersionRef.current === requestVersion) {
         setLoading(false);
@@ -746,6 +783,8 @@ export function AiRecommendPanel({
 
   // 组件卸载时掐断在途请求：SPA 切页后没有任何消费者，让它跑完纯属浪费。
   useEffect(() => () => {
+    // Leave the synchronous running context recoverable when this consumer goes away.
+    requestVersionRef.current += 1;
     requestAbortRef.current?.abort();
     requestAbortRef.current = null;
   }, []);
@@ -759,20 +798,26 @@ export function AiRecommendPanel({
       const stored = readStoredAiProgress();
       setRemoteProgress(stored?.ownerId !== tabIdRef.current ? stored : null);
     };
+    const onOnline = () => { setNetworkOnline(true); refreshRemote(); };
+    const onOffline = () => { setNetworkOnline(false); setResumeTick((tick) => tick + 1); };
     document.addEventListener('visibilitychange', refreshRemote);
     window.addEventListener('pageshow', refreshRemote);
-    return () => { document.removeEventListener('visibilitychange', refreshRemote); window.removeEventListener('pageshow', refreshRemote); };
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => { document.removeEventListener('visibilitychange', refreshRemote); window.removeEventListener('pageshow', refreshRemote); window.removeEventListener('online', onOnline); window.removeEventListener('offline', onOffline); };
   }, []);
 
   useEffect(() => {
-    if (!interruptedPrompt || loading || !toursReady || isPageHidden() || requestAbortRef.current || autoResumeRemainingRef.current <= 0) return;
+    if (!interruptedPrompt || loading || !toursReady || isPageHidden() || !networkOnline || !navigator.onLine || requestAbortRef.current || autoResumeRemainingRef.current <= 0) return;
+    const recovery = pendingContextRef.current?.recoveryState;
+    if (recovery === 'failed' || recovery === 'paused') return;
     const remote = readStoredAiProgress();
     if (remote?.running && remote.ownerId !== tabIdRef.current) return;
     autoResumeRemainingRef.current -= 1;
     const state = readStoredAiChatState();
     saveStoredAiChatState({ ...state, pendingPrompt: interruptedPrompt, autoResumeRemaining: autoResumeRemainingRef.current }, MAX_PERSISTED_MESSAGES);
     void submitPrompt(interruptedPrompt, { preserveResult: true, automatic: true });
-  }, [interruptedPrompt, loading, toursReady, resumeTick, submitPrompt]);
+  }, [interruptedPrompt, loading, toursReady, resumeTick, networkOnline, submitPrompt]);
 
   const clearConversation = () => {
     setMobileOpen(false);
@@ -785,6 +830,7 @@ export function AiRecommendPanel({
     onPartialItems?.([]);
     setSummaryOpen(false);
     setInterruptedPrompt(null);
+    pendingContextRef.current = null;
     autoResumeRemainingRef.current = 0;
     onResultChange(null);
     setPreferenceMemory(null);
@@ -831,8 +877,11 @@ export function AiRecommendPanel({
     ? Math.max(0, Math.round((Date.now() - remoteRunning.startedAt) / 1000))
     : 0;
   void remoteTick;
+  const recoveryBudgetExhausted = autoResumeRemainingRef.current <= 0
+    && pendingContextRef.current?.recoveryState !== 'failed'
+    && pendingContextRef.current?.recoveryState !== 'paused';
   const compactStatusLabel = interruptedPrompt && !loading
-    ? '查找未完成，内容已保留'
+    ? !networkOnline ? recoveryBudgetExhausted ? '等待网络恢复，自动恢复预算已耗尽' : '等待网络恢复' : recoveryBudgetExhausted ? '查找已暂停，自动恢复预算已耗尽' : '查找未完成，内容已保留'
     : loading
     ? progressState?.label || '正在筛选'
     : remoteRunning
@@ -843,7 +892,7 @@ export function AiRecommendPanel({
           ? `已置顶 ${recommendedCount} 条建议`
           : '描述需求，AI 帮你置顶';
   const compactStatusDetail = interruptedPrompt && !loading
-    ? '可继续查看已保留的内容，或重新查找。'
+    ? !networkOnline ? recoveryBudgetExhausted ? '已保留本轮上下文；自动恢复预算已耗尽，联网后可手动继续本轮。' : '已保留本轮上下文，网络恢复后在剩余预算内继续。' : recoveryBudgetExhausted ? '自动恢复预算已耗尽，可手动继续本轮。' : '可继续查看已保留的内容，或手动继续本轮。'
     : loading
     ? progressState?.detail || '正在结合班期、预算和线路信息。'
     : remoteRunning
@@ -1038,7 +1087,7 @@ export function AiRecommendPanel({
                     : 'bg-amber-100 text-amber-800 hover:bg-amber-100',
                 )}
               >
-                {resultStatusMeta.mode === 'ai' ? 'AI完成' : result?.source === 'ai-api' ? '已保留推荐顺序' : '本地候选'}
+                {showingPreviousResult ? '上一轮结果' : resultStatusMeta.mode === 'ai' ? 'AI完成' : result?.source === 'ai-api' ? '已保留推荐顺序' : '本地候选'}
               </Badge>
             )}
           </div>
@@ -1070,7 +1119,7 @@ export function AiRecommendPanel({
               )}
 
       {interruptedPrompt && !loading && (
-        <Button type="button" variant="outline" className="mt-3 min-h-11 rounded-xl" onClick={() => void submitPrompt(interruptedPrompt, { preserveResult: true })}>重新查找</Button>
+        <Button type="button" variant="outline" className="mt-3 min-h-11 rounded-xl" onClick={() => void submitPrompt(interruptedPrompt, { preserveResult: true, resume: true })}>继续本轮</Button>
       )}
 
       {detailsOpen && (

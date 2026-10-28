@@ -441,7 +441,25 @@ export const storedAiProviderConfigSchema = z.object({
   model: z.string().optional(),
 });
 
+export const pendingAiRequestSchema = z.object({
+  turnId: z.string().min(1),
+  prompt: z.string().min(1),
+  activeFilters: z.object({
+    destination: z.string(), minPrice: z.number().nullable(), maxPrice: z.number().nullable(),
+    duration: z.number().nullable(), source: z.string(), departureDate: z.string(),
+    departureDateStart: z.string(), departureDateEnd: z.string(), theme: z.string(),
+    sortBy: z.enum(['price_asc', 'price_desc', 'hot', 'new', 'soon']), hideExpired: z.boolean(),
+  }),
+  searchQuery: z.string(),
+  messages: z.array(aiRecommendationMessageSchema).min(1),
+  preferenceMemory: aiPreferenceMemorySchema.nullable(),
+  previousResult: aiRecommendationResultSchema.nullable(),
+  checkpoint: aiRecommendationResultSchema.nullable(),
+  recoveryState: z.enum(['running', 'background', 'offline', 'failed', 'paused']),
+});
+
 export const storedAiChatStateSchema = z.object({
+  pendingContext: pendingAiRequestSchema.nullish(),
   pendingPrompt: z.string().nullish(),
   autoResumeRemaining: z.number().int().min(0).max(2).optional(),
   conversationId: z.string().optional(),

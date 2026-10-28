@@ -75,4 +75,31 @@ storage.clear();
 storage.set(AI_CHAT_STORAGE_KEY, JSON.stringify({ result: { conversationId: 'x', items: 'not-an-array' } }));
 assert.deepEqual(readStoredAiChatState(), {});
 
+// A pending turn has an immutable request snapshot and its own checkpoint.
+// The independently readable prior result must not silently become that checkpoint.
+const pendingContext = {
+  turnId: 'turn-recovery', prompt: '继续这轮需求',
+  activeFilters: { destination: '云南', minPrice: 300, maxPrice: 1500, duration: 3,
+    source: '', departureDate: '', departureDateStart: '2026-11-01', departureDateEnd: '2026-11-08',
+    theme: '', sortBy: 'hot', hideExpired: true },
+  searchQuery: '原始搜索上下文', messages: [message('1')], preferenceMemory: null,
+  previousResult: result, checkpoint: null, recoveryState: 'offline',
+};
+storage.clear();
+saveStoredAiChatState({ conversationId: 'roundtrip', messages: [message('1')], result,
+  pendingPrompt: pendingContext.prompt, pendingContext, autoResumeRemaining: 2 }, 40);
+assert.deepEqual(readStoredAiChatState().pendingContext, pendingContext,
+  'pending context, filters, identity and null checkpoint must round-trip');
+saveStoredAiChatState({ ...readStoredAiChatState(), pendingContext: { ...pendingContext, checkpoint: result, recoveryState: 'background' } });
+assert.deepEqual(readStoredAiChatState().pendingContext.checkpoint, result);
+saveStoredAiChatState({ ...readStoredAiChatState(), pendingPrompt: null, pendingContext: null, autoResumeRemaining: 0 });
+assert.equal(readStoredAiChatState().pendingContext, null, 'completed turns clear recovery atomically');
+assert.equal(readStoredAiChatState().pendingPrompt, null);
+assert.deepEqual(readStoredAiChatState().result, result, 'completion retains the readable result');
+
+// Legacy v2 snapshots still load, without inventing checkpoint ownership.
+storage.set(AI_CHAT_STORAGE_KEY, JSON.stringify({ messages: [message('1')], result, pendingPrompt: '旧请求', autoResumeRemaining: 1 }));
+assert.equal(readStoredAiChatState().pendingPrompt, '旧请求');
+assert.equal(readStoredAiChatState().pendingContext, undefined);
+
 console.info('AI chat storage round-trip tests passed');

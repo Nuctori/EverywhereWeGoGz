@@ -3,12 +3,28 @@ import type {
   AiPreferenceMemory,
   AiRecommendationMessage,
   AiRecommendationResult,
+  FilterState,
 } from '@/types/tour';
 import { storedAiChatStateSchema, storedAiProgressSchema } from '@/lib/runtime-schemas';
 
 export const AI_CHAT_STORAGE_KEY = 'travel-ai-chat-state-v2';
 
+// Only checkpoint belongs to turnId. result remains independently readable and
+// previousResult is conversation context, never a same-turn checkpoint.
+export interface PendingAiRequest {
+  turnId: string;
+  prompt: string;
+  activeFilters: FilterState;
+  searchQuery: string;
+  messages: AiRecommendationMessage[];
+  preferenceMemory: AiPreferenceMemory | null;
+  previousResult: AiRecommendationResult | null;
+  checkpoint: AiRecommendationResult | null;
+  recoveryState: 'running' | 'background' | 'offline' | 'failed' | 'paused';
+}
+
 export interface StoredAiChatState {
+  pendingContext?: PendingAiRequest | null;
   conversationId?: string;
   input?: string;
   messages?: AiRecommendationMessage[];
