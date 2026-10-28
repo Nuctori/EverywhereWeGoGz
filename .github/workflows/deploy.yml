@@ -57,6 +57,8 @@ jobs:
 
       - name: Data & deeplink guards (shipped artifact gates)
         run: |
+          node scripts/test_cdn_worker.mjs
+          node scripts/test_static_asset_fallback.mjs
           npm run test:source-detail-url
           npm run test:runtime-tour-schemas
           npm run test:ai-streaming

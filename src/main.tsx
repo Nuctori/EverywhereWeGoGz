@@ -31,7 +31,7 @@ async function registerStaticAssetServiceWorker() {
       scope: baseUrl,
       updateViaCache: 'none',
     });
-    await navigator.serviceWorker.ready;
+    // Registration is best-effort: never hold the first render on worker activation.
   } catch (error) {
     // Static resources remain available from GitHub Pages when SW registration fails.
     console.warn('[sw] static asset fallback unavailable:', error);
@@ -39,7 +39,9 @@ async function registerStaticAssetServiceWorker() {
 }
 
 async function bootstrap() {
-  try { await registerStaticAssetServiceWorker(); } catch (error) { console.warn('[sw] bootstrap sw failed', error); }
+  const registration = registerStaticAssetServiceWorker().catch((error) => console.warn('[sw] bootstrap sw failed', error));
+  // Only local cleanup must precede data requests; production registration cannot block UI.
+  if (['localhost', '127.0.0.1', '::1'].includes(window.location.hostname)) await registration;
   try {
   createRoot(document.getElementById('root')!).render(
     <App />,

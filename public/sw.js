@@ -67,7 +67,7 @@ function relativePublicPath(url) {
 function validOrigin(value) {
   try {
     const url = new URL(value);
-    return url.protocol === 'https:' && url.pathname === '';
+    return url.protocol === 'https:' && url.pathname === '/' && !url.search && !url.hash && !url.username && !url.password;
   } catch {
     return false;
   }
@@ -96,7 +96,7 @@ function normalizePool(value) {
 
 async function loadPool() {
   try {
-    const response = await fetch(scopedUrl('cdn-pool.json'), {
+    const response = await fetchWithTimeout(scopedUrl('cdn-pool.json'), {
       cache: 'no-store',
       credentials: 'same-origin',
     });
@@ -249,6 +249,8 @@ async function probeCandidate(candidate, originMeta, probeImage) {
 
 async function selectBestCandidate(cache, poolWithProbe) {
   const { pool, probeImage } = poolWithProbe;
+  // Start mirror probes alongside origin validation, not after a slow origin timeout.
+  const probes = pool.map((candidate) => probeCandidate(candidate, null, probeImage));
   let originMeta = await readOriginMeta();
   if (!originMeta) {
     // 源站不可达（弱网/被墙）时退回上次记录的 generatedAt：
@@ -261,9 +263,9 @@ async function selectBestCandidate(cache, poolWithProbe) {
       // 没有历史记录就维持放行行为
     }
   }
-  const results = await Promise.all(pool.map((candidate) => probeCandidate(candidate, originMeta, probeImage)));
+  const results = await Promise.all(probes);
   const healthy = results
-    .filter(Boolean)
+    .filter((candidate) => candidate && isFreshEnough(candidate, originMeta))
     .sort((left, right) => Number(left.fallback) - Number(right.fallback) || left.latencyMs - right.latencyMs);
 
   if (healthy.length === 0) {
@@ -343,6 +345,8 @@ async function fetchFromPoolOrOrigin(request, cache, cacheMode = 'no-store') {
   }
 
   // JSON 且无 winner/已过期：同源立即服务，选择放后台——请求路径不背探测延迟。
+  // A fresh negative result is a real cached decision, not a reason to probe again.
+  if (!state && !stale) return fetch(request);
   void ensureSelection(cache, poolWithProbe).catch(() => {});
   if (!isStrippedAsset) return fetch(request);
 

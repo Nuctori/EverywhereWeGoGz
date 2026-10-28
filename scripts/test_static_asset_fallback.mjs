@@ -15,7 +15,8 @@ assert.doesNotMatch(worker, /https:\/\/fastly\.jsdelivr\.net/);
 assert.match(worker, /EverywhereWeGoGz@cdn-assets/);
 assert.match(worker, /pathPrefix/);
 assert.match(worker, /text\/html/);
-assert.match(worker, /Promise\.all\(pool\.map\(\(candidate\) => probeCandidate\(candidate, originMeta, probeImage\)\)\)/);
+assert.match(worker, /pool\.map\(\(candidate\) => probeCandidate\(candidate, null, probeImage\)\)/);
+assert.match(worker, /candidate && isFreshEnough\(candidate, originMeta\)/);
 assert.match(worker, /probeUrl\(candidate\)/);
 assert.match(worker, /acceptableImageResponse\(imageResponse, candidate\)/);
 assert.match(worker, /DEFAULT_PROBE_IMAGE/);
@@ -39,7 +40,7 @@ assert.doesNotMatch(
 );
 assert.match(worker, /scope/);
 assert.match(entry, /serviceWorker\.register/);
-assert.match(entry, /serviceWorker\.ready/);
+assert.doesNotMatch(entry, /await navigator\.serviceWorker\.ready/);
 assert.match(entry, /updateViaCache: 'none'/);
 
 // image-cache 已从 Pages 产物剥离（deploy.yml 1GB 上限），图库只在 cdn-assets。

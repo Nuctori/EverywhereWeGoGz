@@ -14,6 +14,11 @@ function candidateUrl(candidate, path) {
   return `${origin}${prefix || `/gh/Nuctori/EverywhereWeGoGz@cdn-assets`}/${path}`;
 }
 
+const originResponse = await fetch('https://nuctori.github.io/EverywhereWeGoGz/data/tours-meta.json', { signal: AbortSignal.timeout(10000), cache: 'no-store' });
+assert.ok(originResponse.ok, 'Cannot validate CDN freshness without origin metadata');
+const originMeta = await originResponse.json();
+assert.ok(originMeta.generatedAt, 'Origin metadata needs generatedAt');
+
 const results = await Promise.all(config.origins.map(async (candidate) => {
   const url = `${candidateUrl(candidate, probePath)}?ci_probe=1`;
   const started = Date.now();
@@ -41,11 +46,14 @@ const results = await Promise.all(config.origins.map(async (candidate) => {
       status: response.status,
       latencyMs: Date.now() - started,
       totalRecords: Number(body?.totalRecords || 0),
+      generatedAt: body?.generatedAt || null,
+      fresh: Boolean(body?.generatedAt && String(body.generatedAt) >= String(originMeta.generatedAt)),
       firstTourId: first?.id || null,
       firstMealCounts: mealCounts || null,
       imageDirect,
       // valid = 全绿；imageDirect=false 的源 SW 会拒绝，CI 也不该放行
-      valid: response.ok && body && Number(body.totalRecords) > 0 && validPage && imageDirect,
+      valid: response.ok && body && Number(body.totalRecords) > 0 && validPage && imageDirect
+        && Boolean(body.generatedAt && String(body.generatedAt) >= String(originMeta.generatedAt)),
     };
   } catch (error) {
     return { id: candidate.id, status: 0, latencyMs: Date.now() - started, valid: false, error: String(error) };
