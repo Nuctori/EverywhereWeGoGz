@@ -456,6 +456,7 @@ export const pendingAiRequestSchema = z.object({
   previousResult: aiRecommendationResultSchema.nullable(),
   checkpoint: aiRecommendationResultSchema.nullable(),
   recoveryState: z.enum(['running', 'background', 'offline', 'failed', 'paused']),
+  lastFailure: z.object({ label: z.string(), detail: z.string() }).nullish(),
 });
 
 export const storedAiChatStateSchema = z.object({

@@ -87,6 +87,7 @@ jobs:
           npx playwright install --with-deps chromium
           npm run test:ai-mobile-recovery-e2e
           npm run test:ai-mobile-capsule-e2e
+          npm run test:ai-failure-reason-e2e
 
       - name: Publish build artifacts to CDN branch
         shell: bash

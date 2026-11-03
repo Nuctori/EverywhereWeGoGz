@@ -295,6 +295,22 @@ function getResultStatusMeta(result: AiRecommendationResult | null) {
   };
 }
 
+// 中断原因归类：状态胶囊此前对超时、接口报错、切后台、断网只显示同一句
+// “查找未完成，内容已保留”，用户无法判断该重试、该等，还是该改配置。
+// 这里只做归类，原始错误文本仍保留在 detail 里供排查。
+function summarizeLookupFailure(error: unknown) {
+  const message = (error instanceof Error ? `${error.name} ${error.message}` : String(error ?? ''))
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (/timeout|timed out|超时/i.test(message)) return 'AI 接口超时';
+  if (/429|rate.?limit|too many requests/i.test(message)) return 'AI 接口限流';
+  if (/40[13]|unauthorized|forbidden|invalid api key|api key/i.test(message)) return 'AI Key 或权限被拒绝';
+  if (/\b5\d\d\b|bad gateway|service unavailable|internal server error/i.test(message)) return 'AI 接口服务异常';
+  if (/failed to fetch|networkerror|network error|load failed|offline/i.test(message)) return '网络请求失败';
+  if (/no valid tour ids/i.test(message)) return 'AI 排序结果无法匹配候选';
+  return 'AI 调用失败';
+}
+
 export function AiRecommendPanel({
   tours,
   toursLoading,
@@ -709,11 +725,19 @@ export function AiRecommendPanel({
       } else {
         context.recoveryState = navigator.onLine ? 'failed' : 'offline';
         if (!navigator.onLine) setNetworkOnline(false);
+        // AI 降级到本地候选时，真实原因在 status.label/detail 里（detail 甚至带着
+        // 接口返回的原始错误）。它必须跟着本轮状态一起留下来——否则重载后
+        // 只剩一句“查找未完成”，用户永远不知道这轮为什么降级。
+        const failureReason = {
+          label: nextResult.status?.label || '本轮查找未完成',
+          detail: nextResult.status?.detail || '已保留当前可查看的内容。',
+        };
+        context.lastFailure = failureReason;
         setInterruptedPrompt(prompt);
         retainedResult = retainedResult?.items.length ? retainedResult : nextResult;
         onResultChange(retainedResult);
         persistRequest(prompt);
-        setProgressState({ stage: 'fallback', label: nextResult.status?.label || '本轮查找未完成', detail: nextResult.status?.detail || '已保留当前可查看的内容。', progress: 0 });
+        setProgressState({ stage: 'fallback', label: failureReason.label, detail: failureReason.detail, progress: 0 });
       }
       onPartialItems?.([]);
       // Progressive content is already readable; completion must not move the reader.
@@ -724,24 +748,53 @@ export function AiRecommendPanel({
         if (retainedResult) onResultChange(retainedResult);
         context.recoveryState = 'paused';
         autoResumeRemainingRef.current = 0;
+        const pauseReason = { label: '完善已暂停', detail: '已保留本轮检查点，可手动继续本轮。' };
+        context.lastFailure = pauseReason;
         setInterruptedPrompt(prompt);
-        setProgressState({ stage: 'fallback', label: '完善已暂停', detail: '已保留本轮检查点，可手动继续本轮。', progress: 0 });
+        setProgressState({ stage: 'fallback', label: pauseReason.label, detail: pauseReason.detail, progress: 0 });
         persistRequest(prompt);
       }
       if (requestVersionRef.current === requestVersion && !(error instanceof DOMException && error.name === 'AbortError')) {
         context.recoveryState = navigator.onLine ? 'failed' : 'offline';
         if (!navigator.onLine) setNetworkOnline(false);
+        // 异常路径此前只留一句“本次查找未完成”，移动端看不到控制台，用户就
+        // 永远不知道是超时、限流、Key 失效还是断网。原因与原始错误都写进状态。
+        const rawMessage = error instanceof Error ? error.message.replace(/\s+/g, ' ').trim() : '';
+        const failureReason = {
+          label: rawMessage ? `本次查找未完成：${summarizeLookupFailure(error)}` : '本次查找未完成',
+          detail: rawMessage
+            ? `可手动继续本轮，或调整条件后再查找。（${rawMessage.slice(0, 240)}）`
+            : '可手动继续本轮，或调整条件后再查找。',
+        };
+        context.lastFailure = failureReason;
         setInterruptedPrompt(prompt);
+        setProgressState({ stage: 'fallback', label: failureReason.label, detail: failureReason.detail, progress: 0 });
         persistRequest(prompt);
-        setProgressState({ stage: 'fallback', label: '本次查找未完成', detail: '可手动继续本轮，或调整条件后再查找。', progress: 0 });
       }
     } finally {
+      // 本轮已结束：先撤掉"进行中"标记，否则另一个标签页会一直以为这边还在跑。
+      const storedProgress = readStoredAiProgress();
+      if (storedProgress?.ownerId === tabIdRef.current && storedProgress.version === requestVersion) {
+        clearStoredAiProgress();
+      }
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pagehide', onPageHide);
       window.removeEventListener('offline', onOffline);
       if (backgroundInterrupted && requestVersionRef.current === requestVersion) {
         if (retainedResult) onResultChange(retainedResult);
-        setProgressState({ stage: 'fallback', label: '查找已暂停', detail: context.recoveryState === 'offline' ? '已保留现有内容，等待网络恢复。' : autoResumeRemainingRef.current > 0 ? '已保留现有内容，回到前台后将自动继续。' : '自动恢复预算已耗尽，可手动继续本轮。', progress: 0 });
+        // 切后台/锁屏是移动端最常见的打断来源，原因要跟着状态一起留下来：
+        // 否则回到前台只会看到一句“查找未完成”，分不清是被系统打断还是接口失败。
+        const pauseReason = {
+          label: context.recoveryState === 'offline' ? '网络断开，本轮已保留' : '生成推荐被中断（切到后台或锁屏）',
+          detail: context.recoveryState === 'offline'
+            ? '已保留现有内容，等待网络恢复。'
+            : autoResumeRemainingRef.current > 0
+              ? '已保留现有内容，回到前台后将自动继续。'
+              : '自动恢复预算已耗尽，可手动继续本轮。',
+        };
+        context.lastFailure = pauseReason;
+        persistRequest(prompt);
+        setProgressState({ stage: 'fallback', label: pauseReason.label, detail: pauseReason.detail, progress: 0 });
       }
       if (requestVersionRef.current === requestVersion) {
         setLoading(false);
@@ -749,12 +802,6 @@ export function AiRecommendPanel({
       }
       // 本轮结束（含被取消/顶掉）：释放取消器，避免旧 controller 一直被持有。
       if (requestAbortRef.current === abortController) requestAbortRef.current = null;
-      // 无论成功、降级还是被新一轮顶掉，都要把"进行中"从 storage 撤下，
-      // 否则另一个标签页会一直显示这边在跑（直到 AI_PROGRESS_STALE_MS 兜底）。
-      const storedProgress = readStoredAiProgress();
-      if (storedProgress?.ownerId === tabIdRef.current && storedProgress.version === requestVersion) {
-        clearStoredAiProgress();
-      }
     }
   }, [
     activeFilters,
@@ -877,11 +924,21 @@ export function AiRecommendPanel({
     ? Math.max(0, Math.round((Date.now() - remoteRunning.startedAt) / 1000))
     : 0;
   void remoteTick;
+  // 中断的真实原因：优先用本轮进度里的 fallback 文案（含接口错误原文），
+  // 其次用持久化下来的上一次失败原因——移动端被系统回收重载后进度已丢，
+  // 只剩恢复状态可读，那时也该说清楚是超时、断网还是被切后台打断。
+  const interruptedReason = interruptedPrompt && !loading
+    ? (progressState?.stage === 'fallback' ? progressState : null) ?? pendingContextRef.current?.lastFailure ?? null
+    : null;
   const recoveryBudgetExhausted = autoResumeRemainingRef.current <= 0
     && pendingContextRef.current?.recoveryState !== 'failed'
     && pendingContextRef.current?.recoveryState !== 'paused';
   const compactStatusLabel = interruptedPrompt && !loading
-    ? !networkOnline ? recoveryBudgetExhausted ? '等待网络恢复，自动恢复预算已耗尽' : '等待网络恢复' : recoveryBudgetExhausted ? '查找已暂停，自动恢复预算已耗尽' : '查找未完成，内容已保留'
+    ? !networkOnline
+      ? recoveryBudgetExhausted ? '等待网络恢复，自动恢复预算已耗尽' : '等待网络恢复'
+      // 预算耗尽时标题先说"要手动继续"（那是可操作的动作），原因放在下面那行；
+      // 其余情况标题直接给原因——降级/超时/被打断本该一眼能分辨。
+      : recoveryBudgetExhausted ? '查找已暂停，自动恢复预算已耗尽' : interruptedReason?.label || '查找未完成，内容已保留'
     : loading
     ? progressState?.label || '正在筛选'
     : remoteRunning
@@ -892,7 +949,9 @@ export function AiRecommendPanel({
           ? `已置顶 ${recommendedCount} 条建议`
           : '描述需求，AI 帮你置顶';
   const compactStatusDetail = interruptedPrompt && !loading
-    ? !networkOnline ? recoveryBudgetExhausted ? '已保留本轮上下文；自动恢复预算已耗尽，联网后可手动继续本轮。' : '已保留本轮上下文，网络恢复后在剩余预算内继续。' : recoveryBudgetExhausted ? '自动恢复预算已耗尽，可手动继续本轮。' : '可继续查看已保留的内容，或手动继续本轮。'
+    ? !networkOnline
+      ? recoveryBudgetExhausted ? '已保留本轮上下文；自动恢复预算已耗尽，联网后可手动继续本轮。' : '已保留本轮上下文，网络恢复后在剩余预算内继续。'
+      : interruptedReason?.detail || (recoveryBudgetExhausted ? '自动恢复预算已耗尽，可手动继续本轮。' : '可继续查看已保留的内容，或手动继续本轮。')
     : loading
     ? progressState?.detail || '正在结合班期、预算和线路信息。'
     : remoteRunning
@@ -1037,6 +1096,10 @@ export function AiRecommendPanel({
                 <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
               ) : searching ? (
                 <Search className="h-4 w-4 text-orange-600" />
+              ) : interruptedPrompt ? (
+                // 中断（降级/暂停）时不能再用“已完成”的对勾：内容虽然保留着，
+                // 但这一轮没有完成，图标得和文字说同一件事。
+                <TriangleAlert className="h-4 w-4 text-amber-600" />
               ) : hasResult ? (
                 <CheckCircle2 className="h-4 w-4 text-orange-600" />
               ) : (
@@ -1044,7 +1107,9 @@ export function AiRecommendPanel({
               )}
               {compactStatusLabel}
             </div>
-            <p className={cn('mt-1 break-words text-sm leading-6 text-stone-600', !summaryOpen && 'line-clamp-2')}>{compactStatusDetail}</p>
+            {/* 中断时这里就是"为什么没完成"的正文：先给三行可读原因，
+                完整原文（含接口报错）在「查看详情」里。 */}
+            <p className={cn('mt-1 break-words text-sm leading-6 text-stone-600', !summaryOpen && (interruptedPrompt ? 'line-clamp-3' : 'line-clamp-2'))}>{compactStatusDetail}</p>
             {hasResult && !loading && result?.summary && (
               <button type="button" className="min-h-11 text-xs text-stone-600 underline underline-offset-4" aria-expanded={summaryOpen} onClick={() => setSummaryOpen((open) => !open)}>
                 {summaryOpen ? '收起摘要' : '展开摘要'}
@@ -1125,8 +1190,9 @@ export function AiRecommendPanel({
       {detailsOpen && (
         <div id="ai-recommendation-details" className="mt-3 space-y-3 rounded-[22px] border border-stone-200 bg-white/80 p-3">
           {/* 还没有结果时这块就是"生成过程"，要露出来；有结果后它只是一次
-              已完成的调用回执，默认收着，想看得自己展开。 */}
-          {progressState && (!hasResult || loading) && (
+              已完成的调用回执，默认收着，想看得自己展开。中断（降级/暂停）时
+              例外：这时它是唯一能说明"为什么没完成"的地方，必须可展开。 */}
+          {progressState && (!hasResult || loading || Boolean(interruptedPrompt)) && (
             <div className="rounded-2xl border border-stone-200 bg-stone-50/70 p-3 sm:p-4">
               {/* 标题卡上已经写着同一句状态时，这里不再重复一遍标题，
                   只留进度条和步骤——展开细节的用途是看"走到哪一步"，不是复读状态。 */}
@@ -1145,9 +1211,9 @@ export function AiRecommendPanel({
                   {/* 结果已落地后，这句 detail（"已生成 N 条建议，并展示 M 条线路"）
                       是生成过程回执，摘要本身在下面的结果卡里。 */}
                   {progressState.detail &&
-                  !hasResult &&
-                  progressState.detail.trim() !== compactStatusDetail.trim() ? (
-                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-stone-600">{progressState.detail}</p>
+                  (!hasResult || Boolean(interruptedPrompt)) &&
+                  (Boolean(interruptedPrompt) || progressState.detail.trim() !== compactStatusDetail.trim()) ? (
+                    <p className="mt-1 text-sm leading-6 text-stone-600">{progressState.detail}</p>
                   ) : null}
                   {progressState.liveThinking ? (
                     <div className="mt-2 rounded-xl border border-orange-100 bg-orange-50/60 px-3 py-2">

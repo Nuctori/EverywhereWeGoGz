@@ -21,6 +21,9 @@ export interface PendingAiRequest {
   previousResult: AiRecommendationResult | null;
   checkpoint: AiRecommendationResult | null;
   recoveryState: 'running' | 'background' | 'offline' | 'failed' | 'paused';
+  // 本轮被中断/降级时的可读原因（含接口错误原文）。重载或被系统回收后
+  // progressState 已经丢失，只有它能继续回答“这轮为什么没完成”。
+  lastFailure?: { label: string; detail: string } | null;
 }
 
 export interface StoredAiChatState {
