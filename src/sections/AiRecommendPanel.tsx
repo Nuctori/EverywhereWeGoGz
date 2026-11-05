@@ -96,6 +96,13 @@ const scheduleIdleWork = (callback: () => void) => {
 const isPageHidden = () =>
   typeof document !== 'undefined' && document.visibilityState === 'hidden';
 
+// 页面在后台被系统掐断 fetch 时，请求层看到的是传输层文案（Failed to fetch /
+// Load failed / timeout），而不是 4xx/5xx。只有这类失败才值得"回到前台自动续跑"；
+// 真正的 502/429 仍按接口失败展示，不能被一句"被中断"盖过去。
+const isTransientTransportFailure = (detail: string | undefined) =>
+  typeof detail === 'string' &&
+  /failed to fetch|load failed|network\s*error|networkerror|timeout|aborted|abort|连接未完成/i.test(detail);
+
 const waitForNextPaint = () =>  new Promise<void>((resolve) => {
     if (typeof window === 'undefined') {
       resolve();
@@ -374,6 +381,13 @@ export function AiRecommendPanel({
   const skipInitialSaveRef = useRef(Boolean(storedChatState.result));
   const didRestoreStoredResultRef = useRef(false);
   const requestVersionRef = useRef(0);
+  // 最后一次真正到达的阶段。fallback 时步骤条用它标出"停在哪一步"，
+  // 而不是把最后一步「已完成」点亮——中断看起来像跑完了，比不显示更糟。
+  const lastStageRef = useRef<AiRecommendationProgress['stage']>('queued');
+  // pagehide 之后必须先收到一次"回到前台"信号才允许自动续跑：
+  // 页面正在离开时的可见性可能还是 visible，直接按 interruptedPrompt 续跑
+  // 会在后台入口处立刻发起第二个请求，把恢复预算烧在一次没意义的重启上。
+  const awaitingForegroundRef = useRef(false);
   // 本轮在途请求的取消器：取消/重开/卸载时 abort，真正掐断底层 fetch。
   // 此前只有 requestVersionRef 做"丢弃结果"，请求本身仍在跑完——
   // 手机上连点几次就是几个 35s 的在途请求叠加，越点越慢。
@@ -560,10 +574,14 @@ export function AiRecommendPanel({
     const abortController = new AbortController();
     requestAbortRef.current = abortController;
     setInterruptedPrompt(null);
+    awaitingForegroundRef.current = false;
     let retainedResult = context.checkpoint ?? result;
     let persistedMemory = context.preferenceMemory;
     let persistedMessages = nextMessages;
     let backgroundInterrupted = false;
+    // 本轮请求期间是否在后台待过：系统在后台掐断 fetch 时，请求层只会拿到
+    // 一句传输层失败（Failed to fetch），靠它才能把"被系统打断"与接口真坏分开。
+    let sawHidden = isPageHidden();
     const persistRequest = (pendingPrompt: string | null) => {
       storageSaveCleanupRef.current?.();
       storageSaveCleanupRef.current = undefined;
@@ -578,8 +596,21 @@ export function AiRecommendPanel({
       persistRequest(prompt);
       abortController.abort();
     };
-    const onVisibility = () => { if (isPageHidden()) suspendRequest(); };
-    const onPageHide = () => suspendRequest();
+    // 切后台不 abort：桌面切标签、最小化、锁屏都会触发 visibilitychange，
+    // 而一次 40-80s 的模型生成很可能正跑到一半。掐掉再从头恢复，既浪费已生成
+    // 的 token，也把自动恢复预算烧在"刚回来又切走"的空转上（三次切标签就能
+    // 耗尽两次预算，面板停在"查找已暂停"）。后台标签页的 fetch 会继续跑，
+    // 真正需要收尾的是离开页面（pagehide）和断网；被系统杀掉的请求由下面
+    // 结果层的 sawHidden 归类为可恢复中断。
+    const onVisibility = () => {
+      if (isPageHidden()) sawHidden = true;
+      else awaitingForegroundRef.current = false;
+    };
+    const onPageHide = () => {
+      // 页面正在离开（导航/后台入口）：等一次真正的 pageshow/可见再续跑。
+      awaitingForegroundRef.current = true;
+      suspendRequest();
+    };
     const onOffline = () => { setNetworkOnline(false); suspendRequest('offline'); };
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('pagehide', onPageHide);
@@ -600,6 +631,7 @@ export function AiRecommendPanel({
       },
       running: true,
     });
+    lastStageRef.current = 'queued';
     setProgressState({
       stage: 'queued',
       label: '已收到需求',
@@ -654,6 +686,7 @@ export function AiRecommendPanel({
         signal: abortController.signal,
         onProgress: (progress) => {
           if (requestVersionRef.current !== requestVersion) return;
+          if (progress.stage !== 'fallback') lastStageRef.current = progress.stage;
           setProgressState((previous) => {
             // 正文增量与推荐条目来自两路回调，不能互相覆盖：否则状态标题
             // 在「思考」/「已挑出」之间跳动，输出统计也每出一条就消失。
@@ -723,21 +756,37 @@ export function AiRecommendPanel({
         persistRequest(null);
         onResultChange(nextResult);
       } else {
-        context.recoveryState = navigator.onLine ? 'failed' : 'offline';
-        if (!navigator.onLine) setNetworkOnline(false);
-        // AI 降级到本地候选时，真实原因在 status.label/detail 里（detail 甚至带着
-        // 接口返回的原始错误）。它必须跟着本轮状态一起留下来——否则重载后
-        // 只剩一句“查找未完成”，用户永远不知道这轮为什么降级。
-        const failureReason = {
-          label: nextResult.status?.label || '本轮查找未完成',
-          detail: nextResult.status?.detail || '已保留当前可查看的内容。',
-        };
-        context.lastFailure = failureReason;
-        setInterruptedPrompt(prompt);
-        retainedResult = retainedResult?.items.length ? retainedResult : nextResult;
-        onResultChange(retainedResult);
-        persistRequest(prompt);
-        setProgressState({ stage: 'fallback', label: failureReason.label, detail: failureReason.detail, progress: 0 });
+        // 页面在后台时被系统掐断 fetch：请求层会按"AI 未完成"降级返回，但这
+        // 只是可恢复的中断，不是接口坏了。回到前台自动续跑，而不是让用户
+        // 看到"AI 接口不可用"——锁一次屏就判死，比慢更伤人。
+        // 只有传输层失败才走这条；502/429 等仍按接口失败如实展示。
+        const interruptedInBackground = sawHidden
+          && navigator.onLine
+          && isTransientTransportFailure(nextResult.status?.detail);
+        if (interruptedInBackground) {
+          backgroundInterrupted = true;
+          context.recoveryState = 'background';
+          setInterruptedPrompt(prompt);
+          retainedResult = retainedResult?.items.length ? retainedResult : nextResult;
+          onResultChange(retainedResult);
+          persistRequest(prompt);
+        } else {
+          context.recoveryState = navigator.onLine ? 'failed' : 'offline';
+          if (!navigator.onLine) setNetworkOnline(false);
+          // AI 降级到本地候选时，真实原因在 status.label/detail 里（detail 甚至带着
+          // 接口返回的原始错误）。它必须跟着本轮状态一起留下来——否则重载后
+          // 只剩一句“查找未完成”，用户永远不知道这轮为什么降级。
+          const failureReason = {
+            label: nextResult.status?.label || '本轮查找未完成',
+            detail: nextResult.status?.detail || '已保留当前可查看的内容。',
+          };
+          context.lastFailure = failureReason;
+          setInterruptedPrompt(prompt);
+          retainedResult = retainedResult?.items.length ? retainedResult : nextResult;
+          onResultChange(retainedResult);
+          persistRequest(prompt);
+          setProgressState({ stage: 'fallback', label: failureReason.label, detail: failureReason.detail, progress: 0 });
+        }
       }
       onPartialItems?.([]);
       // Progressive content is already readable; completion must not move the reader.
@@ -754,7 +803,7 @@ export function AiRecommendPanel({
         setProgressState({ stage: 'fallback', label: pauseReason.label, detail: pauseReason.detail, progress: 0 });
         persistRequest(prompt);
       }
-      if (requestVersionRef.current === requestVersion && !(error instanceof DOMException && error.name === 'AbortError')) {
+      if (requestVersionRef.current === requestVersion && !backgroundInterrupted && !(error instanceof DOMException && error.name === 'AbortError')) {
         context.recoveryState = navigator.onLine ? 'failed' : 'offline';
         if (!navigator.onLine) setNetworkOnline(false);
         // 异常路径此前只留一句“本次查找未完成”，移动端看不到控制台，用户就
@@ -841,6 +890,8 @@ export function AiRecommendPanel({
   useEffect(() => {
     const refreshRemote = () => {
       if (isPageHidden()) return;
+      // 只有真正回到前台（可见/pageshow/online）才允许自动续跑。
+      awaitingForegroundRef.current = false;
       setResumeTick((tick) => tick + 1);
       const stored = readStoredAiProgress();
       setRemoteProgress(stored?.ownerId !== tabIdRef.current ? stored : null);
@@ -855,7 +906,7 @@ export function AiRecommendPanel({
   }, []);
 
   useEffect(() => {
-    if (!interruptedPrompt || loading || !toursReady || isPageHidden() || !networkOnline || !navigator.onLine || requestAbortRef.current || autoResumeRemainingRef.current <= 0) return;
+    if (!interruptedPrompt || loading || !toursReady || isPageHidden() || awaitingForegroundRef.current || !networkOnline || !navigator.onLine || requestAbortRef.current || autoResumeRemainingRef.current <= 0) return;
     const recovery = pendingContextRef.current?.recoveryState;
     if (recovery === 'failed' || recovery === 'paused') return;
     const remote = readStoredAiProgress();
@@ -1291,20 +1342,26 @@ export function AiRecommendPanel({
               {/* 窄屏横排单行：5 个步骤各占一行会把面板撑高三四行，这里改成可横滑的紧凑条。 */}
               <div className="flex gap-1.5 overflow-x-auto whitespace-nowrap sm:grid sm:grid-cols-5 sm:gap-2 sm:overflow-visible">
                 {progressSteps.map((step, index) => {
-                  const currentIndex = resolveProgressStepIndex(progressState.stage);
-                  const isDone = currentIndex > index || (!loading && progressState.stage === 'completed' && currentIndex >= index);
-                  const isCurrent = resolveProgressStepIndex(progressState.stage) === index || (progressState.stage === 'fallback' && index === progressSteps.length - 1);
+                  // fallback 没有"当前阶段"：用最后真实到达的阶段标出停在哪一步，
+                  // 而不是把第 5 步「已完成」点亮——中断看起来像跑完了，比不显示更糟。
+                  const interrupted = progressState.stage === 'fallback';
+                  const activeStage = interrupted ? lastStageRef.current : progressState.stage;
+                  const currentIndex = resolveProgressStepIndex(activeStage);
+                  const isDone = index < currentIndex || (!loading && progressState.stage === 'completed');
+                  const isCurrent = index === currentIndex;
 
                   return (
                     <div
                       key={step.stage}
                       className={cn(
                         'shrink-0 rounded-xl border px-2.5 py-1.5 text-xs transition-colors sm:px-3 sm:py-2',
-                        isCurrent
-                          ? 'border-orange-200 bg-orange-50 text-stone-950'
-                          : isDone
-                            ? 'border-orange-100 bg-white text-stone-700'
-                            : 'border-stone-200/80 bg-white text-stone-400',
+                        isCurrent && interrupted
+                          ? 'border-amber-200 bg-amber-50 text-stone-900'
+                          : isCurrent
+                            ? 'border-orange-200 bg-orange-50 text-stone-950'
+                            : isDone
+                              ? 'border-orange-100 bg-white text-stone-700'
+                              : 'border-stone-200/80 bg-white text-stone-400',
                       )}
                     >
                       <div className="flex items-center gap-2 font-medium">
@@ -1312,7 +1369,7 @@ export function AiRecommendPanel({
                           className={cn(
                             'inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px]',
                             isCurrent
-                              ? 'bg-orange-600 text-white'
+                              ? interrupted ? 'bg-amber-600 text-white' : 'bg-orange-600 text-white'
                               : isDone
                                 ? 'bg-orange-400 text-white'
                                 : 'bg-stone-100 text-stone-500',

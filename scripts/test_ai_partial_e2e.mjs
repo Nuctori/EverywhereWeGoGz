@@ -60,11 +60,17 @@ try {
   console.log('PASS: SSE 未结束，列表已显示模型生成的首条推荐理由');
   await page.getByRole('button', { name: '停止完善', exact: true }).waitFor();
   assert.equal(await page.getByRole('progressbar', { name: '推荐生成进度' }).getAttribute('aria-valuenow') !== null, true);
+  // 切标签只改可见性：请求必须继续跑，不能被 abort。
   await page.evaluate(() => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
     document.dispatchEvent(new Event('visibilitychange'));
   });
-  await page.getByRole('button', { name: '重新查找', exact: true }).waitFor();
+  await page.waitForTimeout(400);
+  assert.ok(await page.getByRole('button', { name: '停止完善', exact: true }).isVisible(), 'hidden tab must keep the request alive');
+  assert.ok(await reason.isVisible(), 'background tab must retain the validated preview');
+  // 真正离开页面（pagehide）才中断并保留检查点。
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  await page.getByRole('button', { name: '继续本轮', exact: true }).waitFor();
   assert.ok(await reason.isVisible(), 'background interruption must retain the validated preview');
   const checkpoint = await page.evaluate(() => JSON.parse(localStorage.getItem('travel-ai-chat-state-v2')));
   assert.ok(checkpoint.pendingPrompt, 'interrupted prompt must be persisted');
@@ -85,25 +91,26 @@ try {
   console.log('PASS: 前台事件去重自动重试，重载自动恢复，先看N条可点击');
   // Both persisted recovery allowances are now consumed. Another interruption
   // must retain content without silently starting a fourth request.
-  await page.evaluate(() => {
-    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
-    document.dispatchEvent(new Event('visibilitychange'));
-  });
-  await page.getByRole('button', { name: '重新查找', exact: true }).waitFor();
+  await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
+  await page.getByRole('button', { name: '继续本轮', exact: true }).waitFor();
   await page.evaluate(() => {
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
     document.dispatchEvent(new Event('visibilitychange'));
   });
   await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => window.__partialAttempts), 1, 'automatic retries must be bounded across reload');
-  await page.getByRole('button', { name: '重新查找', exact: true }).click();
+  await page.getByRole('button', { name: '继续本轮', exact: true }).click();
   await page.waitForFunction(() => window.__partialAttempts === 2);
   await page.getByRole('button', { name: '停止完善', exact: true }).click();
   await page.getByRole('button', { name: '停止完善', exact: true }).waitFor({ state: 'hidden' });
   await page.evaluate(() => { document.dispatchEvent(new Event('visibilitychange')); window.dispatchEvent(new Event('pageshow')); });
   await page.waitForTimeout(300);
   assert.equal(await page.evaluate(() => window.__partialAttempts), 2, 'explicit cancellation must not auto-resume');
-  assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('travel-ai-chat-state-v2')).pendingPrompt), null);
+  // 主动取消不是失败：保留检查点供手动继续，但状态必须是 paused——
+  // 自动恢复只认 background/offline/running，paused 永不被自动重启。
+  const paused = await page.evaluate(() => JSON.parse(localStorage.getItem('travel-ai-chat-state-v2')));
+  assert.equal(paused.pendingContext?.recoveryState, 'paused', 'explicit cancellation must persist a non-resumable paused turn');
+  assert.ok(paused.pendingPrompt, 'paused turn keeps its checkpoint for manual resume');
   console.log('PASS: 自动恢复额度跨刷新保留，主动取消不重启');
   await page.getByRole('textbox', { name: '补充旅行条件' }).fill('帮我挑一些线路');
   await page.getByRole('button', { name: '继续细调', exact: true }).click();

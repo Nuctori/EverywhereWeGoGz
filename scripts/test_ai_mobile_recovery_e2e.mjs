@@ -53,6 +53,8 @@ async function fixture(entry, mode = 'partial') {
       Object.defineProperty(document, 'hidden', { configurable: true, value: state === 'hidden' });
       document.dispatchEvent(new Event('visibilitychange'));
     };
+    // 真正离开页面的信号：只有 pagehide 该中断本轮；可见性变化必须让请求继续跑。
+    window.__setPageHide = () => window.dispatchEvent(new Event('pagehide'));
     window.__setOnline = online => {
       Object.defineProperty(navigator, 'onLine', { configurable: true, value: online });
       window.dispatchEvent(new Event(online ? 'online' : 'offline'));
@@ -141,7 +143,11 @@ async function openPanel(page) {
   return panel;
 }
 async function interrupt(page) {
-  await page.evaluate(() => window.__setVisibility('hidden'));
+  // 真实的离开顺序：先 hidden，再 pagehide。切标签只改可见性，不再算中断。
+  await page.evaluate(() => {
+    window.__setVisibility('hidden');
+    window.__setPageHide();
+  });
   await page.waitForFunction(key => !localStorage.getItem(key), progressKey);
   return waitState(page, state => !!state.pendingContext && state.pendingContext.recoveryState === 'background');
 }
@@ -223,6 +229,21 @@ try {
       assert.deepEqual(JSON.parse(fixed[1]), order, 'automatic and manual resumes pin exactly this turn checkpoint');
     }
     evidence.ranking = ranking;
+    evidence.completed = await finish(page);
+  });
+  await run('hidden tab keeps the running request instead of aborting it', 'partial', async (page, evidence) => {
+    const prompt = '帮我挑一些线路';
+    await search(page, prompt);
+    await waitState(page, state => !!state.pendingContext?.checkpoint?.items?.length);
+    await page.evaluate(() => window.__setVisibility('hidden'));
+    await page.waitForTimeout(800);
+    const background = await snapshot(page);
+    assert.equal(background.state.pendingContext?.recoveryState, 'running', 'visibility change must not suspend the turn');
+    assert.ok(background.progress, 'in-flight progress must survive a background tab');
+    assert.equal(background.state.autoResumeRemaining, 2, 'a background tab must not spend the auto-resume budget');
+    assert.equal(background.state.pendingPrompt, prompt, 'the turn stays pending while it runs');
+    evidence.background = background;
+    await page.evaluate(() => window.__setVisibility('visible'));
     evidence.completed = await finish(page);
   });
   await run('new turn without partial cannot inherit old checkpoint', 'partial', async (page, evidence) => {
