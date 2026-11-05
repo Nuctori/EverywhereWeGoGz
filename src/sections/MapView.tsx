@@ -321,7 +321,15 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     const provider = MAP_TILE_PROVIDERS[providerIndex];
     tileLoadCountRef.current = 0;
     tileErrorCountRef.current = 0;
-    const tileLayer = L.tileLayer(provider.url, { attribution: provider.attribution, maxZoom: MAP_MAX_ZOOM, subdomains: provider.subdomains });
+    // 只有声明了 subdomains 的供应商才覆盖 Leaflet 默认值。显式传 undefined 会把
+    // TileLayer 默认的 'abc' 覆盖掉，而 getTileUrl 每次都会调 _getSubdomain——
+    // 切到无子域名的 OSM 镜像时就会抛 "Cannot read properties of undefined (reading 'length')"，
+    // 整个地图层在 onAdd 阶段炸掉。
+    const tileLayer = L.tileLayer(provider.url, {
+      attribution: provider.attribution,
+      maxZoom: MAP_MAX_ZOOM,
+      ...(provider.subdomains ? { subdomains: provider.subdomains } : {}),
+    });
     let active = true;
     let switched = false;
     const moveToNextProvider = () => {
