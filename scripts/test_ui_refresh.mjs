@@ -15,9 +15,10 @@ try {
     await page.locator('.tour-card').first().waitFor();
     const search = page.getByRole('searchbox', { name: '目的地或旅行需求' });
     await assert.doesNotReject(() => search.waitFor());
-    assert.equal(await page.getByRole('button', { name: 'AI 找团', exact: true }).isDisabled(), true);
+    assert.equal(await page.getByRole('button', { name: 'AI 帮我挑', exact: true }).isDisabled(), true);
     assert.equal(await page.getByText('来源平台', { exact: true }).isVisible(), false, 'advanced filters collapsed by default');
-    const more = page.getByRole('button', { name: '更多筛选', exact: true });
+    // 桌面是「更多筛选」开关，手机是打开筛选抽屉的「筛选」。
+    const more = page.getByRole('button', { name: viewport.width < 768 ? '筛选' : '更多筛选', exact: true });
     await more.click();
     await page.getByText('来源平台', { exact: true }).waitFor();
     if (viewport.width < 768) {

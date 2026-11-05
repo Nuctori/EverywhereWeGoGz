@@ -82,36 +82,40 @@ try {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage({ viewport: { width: 1440, height: 1200 } });
 
-  await page.goto(server.url, { waitUntil: 'domcontentloaded' });
-  await page.getByPlaceholder('例如：帮我找同时带温泉和沙滩的团，预算800内').waitFor({ state: 'visible' });
-
-  const input = page.getByPlaceholder('例如：帮我找同时带温泉和沙滩的团，预算800内');
-  const plainSearchButton = page.getByRole('button', { name: '搜索', exact: true });
-  const aiSearchButton = page.getByRole('button', { name: 'AI 找团', exact: true });
-  const aiPanelTitle = page.getByText('AI 优先级助手');
+  // 冷启动的 Vite 优化器要把 2852 个模块按需编译一遍，实测 DCL 可到 17-25s；
+  // 30s 的默认预算在 CI 慢机上会偶发超时，且这里等的是编译而不是产品行为。
+  await page.goto(server.url, { waitUntil: 'domcontentloaded', timeout: 90000 });
+  const input = page.getByLabel('目的地或旅行需求');
+  await input.waitFor({ state: 'visible' });
+  // 主按钮会随输入在「搜索线路 / 按需求找团」之间切换，按 role+type 取，不锁文案。
+  const primarySearchButton = page.locator('form[role="search"] button[type="submit"]');
+  const aiSearchButton = page.getByRole('button', { name: 'AI 帮我挑', exact: true });
+  // 面板标题所在行还挂着「已记住偏好 / 推荐结果会置顶显示」等子节点，
+  // 整行文本不严格等于标题，用包含匹配定位这一行。
+  const aiPanelTitle = page.getByText('AI 帮你挑');
 
   await input.fill('沙扒湾');
-  await plainSearchButton.click();
+  await primarySearchButton.click();
   await page.waitForTimeout(1200);
   assert.equal(await aiPanelTitle.count(), 0, 'simple destination search should not open AI panel');
 
   await input.fill('帮我找沙扒湾');
-  await plainSearchButton.click();
+  await primarySearchButton.click();
   await page.waitForTimeout(1200);
   assert.equal(await aiPanelTitle.count(), 0, 'request phrase plus destination should stay in plain search');
 
   await input.fill('预算3000内');
-  await plainSearchButton.click();
+  await primarySearchButton.click();
   await aiPanelTitle.waitFor({ state: 'visible', timeout: 30000 });
   assert.ok((await aiPanelTitle.count()) >= 1, 'structured budget-only query should open AI panel');
 
   await input.fill('帮我找沙扒湾');
-  await plainSearchButton.click();
+  await primarySearchButton.click();
   await aiPanelTitle.waitFor({ state: 'hidden', timeout: 30000 });
   assert.equal(await aiPanelTitle.count(), 0, 'plain destination search should clear previous AI panel');
 
   await input.fill('帮我找同时带温泉和沙滩，预算800内，最好2天游');
-  await plainSearchButton.click();
+  await primarySearchButton.click();
   await aiPanelTitle.waitFor({ state: 'visible', timeout: 30000 });
   assert.ok((await aiPanelTitle.count()) >= 1, 'complex query search should open AI panel');
 
@@ -120,7 +124,7 @@ try {
   await aiPanelTitle.waitFor({ state: 'visible', timeout: 30000 });
   assert.ok((await aiPanelTitle.count()) >= 1, 'explicit AI button should open AI panel');
 
-  await plainSearchButton.click();
+  await primarySearchButton.click();
   await aiPanelTitle.waitFor({ state: 'hidden', timeout: 30000 });
   assert.equal(await aiPanelTitle.count(), 0, 'plain search should clear AI panel');
 

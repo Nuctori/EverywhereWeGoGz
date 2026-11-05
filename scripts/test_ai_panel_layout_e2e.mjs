@@ -60,6 +60,10 @@ try {
     await page.locator('.tour-card h3').first().waitFor({ timeout: 60000 });
     await page.locator('input').first().fill('便宜的奔县游');
     await page.getByRole('button', { name: 'AI 帮我挑' }).first().click();
+    // 手机上面板收在底部胶囊里：先点开，才谈得上量面板高度。
+    if (viewport.label === '手机') {
+      await page.getByRole('button', { name: /^打开 AI 面板/ }).click();
+    }
     await page.getByRole('button', { name: '停止完善', exact: true }).waitFor();
 
     const collapsed = await page.evaluate(PANEL_HEIGHT);
