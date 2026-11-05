@@ -99,9 +99,11 @@ jobs:
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
         run: |
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-          if [ "$CRAWL_OUTCOME" != "success" ]; then
-            echo "⚠️ JRT365 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CRAWL_OUTCOME" = "success" ] && [ -s src/data/raw_jrt365_full.json ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ JRT365 爬取失败或未产出 raw（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Upload JRT365 raw data
@@ -151,9 +153,11 @@ jobs:
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
         run: |
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-          if [ "$CRAWL_OUTCOME" != "success" ]; then
-            echo "⚠️ Saihuitong 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CRAWL_OUTCOME" = "success" ] && [ -s src/data/raw_saihuitong_full.json ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Saihuitong 爬取失败或未产出 raw（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
           fi
 
 
@@ -209,9 +213,11 @@ jobs:
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
         run: |
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-          if [ "$CRAWL_OUTCOME" != "success" ]; then
-            echo "⚠️ Kanghui 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CRAWL_OUTCOME" = "success" ] && [ -s src/data/raw_kanghui_cct.json ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Kanghui 爬取失败或未产出 raw（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
           fi
 
 
@@ -254,9 +260,11 @@ jobs:
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
         run: |
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-          if [ "$CRAWL_OUTCOME" != "success" ]; then
-            echo "⚠️ Pintu 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CRAWL_OUTCOME" = "success" ] && [ -s src/data/raw_pintu_full.json ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Pintu 爬取失败或未产出 raw（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
           fi
 
 
@@ -300,9 +308,11 @@ jobs:
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
         run: |
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-          if [ "$CRAWL_OUTCOME" != "success" ]; then
-            echo "⚠️ GZL API 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CRAWL_OUTCOME" = "success" ] && [ -s src/data/raw_gzl_api.json ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ GZL API 爬取失败或未产出 raw（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
           fi
 
 
@@ -345,9 +355,11 @@ jobs:
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
         run: |
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-          if [ "$CRAWL_OUTCOME" != "success" ]; then
-            echo "⚠️ Outdoors 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CRAWL_OUTCOME" = "success" ] && [ -s src/data/raw_outdoors_full.json ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Outdoors 爬取失败或未产出 raw（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
           fi
 
 
@@ -390,9 +402,11 @@ jobs:
         env:
           CRAWL_OUTCOME: ${{ steps.crawl.outcome }}
         run: |
-          echo "ok=true" >> "$GITHUB_OUTPUT"
-          if [ "$CRAWL_OUTCOME" != "success" ]; then
-            echo "⚠️ HTTP aggregate 爬取失败（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$CRAWL_OUTCOME" = "success" ] && [ -s src/data/raw_http_full.json ]; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ HTTP aggregate 爬取失败或未产出 raw（outcome=$CRAWL_OUTCOME），本轮沿用上一轮数据" >> "$GITHUB_STEP_SUMMARY"
           fi
 
   # 单渠道爬取失败已由各 crawl job 内部降级（continue-on-error + job 级 ok 输出）：
@@ -479,49 +493,49 @@ jobs:
         run: npm ci
 
       - name: Download JRT365 raw data
-        if: (!cancelled() && needs.crawl-jrt365.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
+        if: (!cancelled() && needs.crawl-jrt365.result == 'success' && needs.crawl-jrt365.outputs.ok == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-jrt365
           path: src/data
 
       - name: Download Saihuitong raw data
-        if: (!cancelled() && needs.crawl-saihuitong.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
+        if: (!cancelled() && needs.crawl-saihuitong.result == 'success' && needs.crawl-saihuitong.outputs.ok == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-saihuitong
           path: src/data
 
       - name: Download Kanghui raw data
-        if: (!cancelled() && needs.crawl-kanghui.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
+        if: (!cancelled() && needs.crawl-kanghui.result == 'success' && needs.crawl-kanghui.outputs.ok == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-kanghui
           path: src/data
 
       - name: Download Pintu raw data
-        if: (!cancelled() && needs.crawl-pintu.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
+        if: (!cancelled() && needs.crawl-pintu.result == 'success' && needs.crawl-pintu.outputs.ok == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-pintu
           path: src/data
 
       - name: Download GZL raw data
-        if: (!cancelled() && needs.crawl-gzl-api.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
+        if: (!cancelled() && needs.crawl-gzl-api.result == 'success' && needs.crawl-gzl-api.outputs.ok == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-gzl-api
           path: src/data
 
       - name: Download Outdoors raw data
-        if: (!cancelled() && needs.crawl-outdoors.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
+        if: (!cancelled() && needs.crawl-outdoors.result == 'success' && needs.crawl-outdoors.outputs.ok == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-outdoors
           path: src/data
 
       - name: Download HTTP aggregate raw data
-        if: (!cancelled() && needs.crawl-http-aggregate.result == 'success' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
+        if: (!cancelled() && needs.crawl-http-aggregate.result == 'success' && needs.crawl-http-aggregate.outputs.ok == 'true' && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_crawls != 'true'))
         uses: actions/download-artifact@v4
         with:
           name: raw-http
@@ -580,13 +594,13 @@ jobs:
         # 这里把真正产出新数据的源写进标记文件，审计据此跳过陈旧源。
         run: |
           fresh=""
-          [ "${{ needs.crawl-jrt365.result }}" = "success" ] && fresh="$fresh 假日通"
-          [ "${{ needs.crawl-saihuitong.result }}" = "success" ] && fresh="$fresh 赛会通"
-          [ "${{ needs.crawl-kanghui.result }}" = "success" ] && fresh="$fresh 康辉"
-          [ "${{ needs.crawl-pintu.result }}" = "success" ] && fresh="$fresh 品途"
-          [ "${{ needs.crawl-gzl-api.result }}" = "success" ] && fresh="$fresh 广之旅"
-          [ "${{ needs.crawl-outdoors.result }}" = "success" ] && fresh="$fresh 天涯户外"
-          [ "${{ needs.crawl-http-aggregate.result }}" = "success" ] && fresh="$fresh 广东中旅"
+          [ "${{ needs.crawl-jrt365.outputs.ok }}" = "true" ] && fresh="$fresh 假日通"
+          [ "${{ needs.crawl-saihuitong.outputs.ok }}" = "true" ] && fresh="$fresh 赛会通"
+          [ "${{ needs.crawl-kanghui.outputs.ok }}" = "true" ] && fresh="$fresh 康辉"
+          [ "${{ needs.crawl-pintu.outputs.ok }}" = "true" ] && fresh="$fresh 品途"
+          [ "${{ needs.crawl-gzl-api.outputs.ok }}" = "true" ] && fresh="$fresh 广之旅"
+          [ "${{ needs.crawl-outdoors.outputs.ok }}" = "true" ] && fresh="$fresh 天涯户外"
+          [ "${{ needs.crawl-http-aggregate.outputs.ok }}" = "true" ] && fresh="$fresh 广东中旅"
           echo "fresh crawls:${fresh:- (none)}"
           printf '%s\n'$fresh > .fresh-sources
 

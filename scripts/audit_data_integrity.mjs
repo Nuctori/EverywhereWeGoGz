@@ -36,7 +36,10 @@ const sourceRules = {
   // Records without a source/title duration are excluded by merge_data.py.
   // 2026-09-19 重建升级：康辉 cct.cn 深度挖掘成功接入全量高速 API，
   // 优质可用产品达 3,000+ 条，基线相应提高到 2,000+ 条。
-  '康辉': { min: 2000, ratio: 0.7, allowMissing: true},
+  // 2026-10 上游批量下架：cct.cn 详情页大面积 404，raw 从 ~2,800 掉到 ~2,424、
+  // 产出稳定在 1,944；min 仍按 2,000 卡等于要求 82% 留存率，与 ratio 0.7 的
+  // 承诺相冲突。按当前稳定基线重新校准到 1,850（仍能拦住真正的塌方）。
+  '康辉': { min: 1850, ratio: 0.7, allowMissing: true},
   '广东中旅': { min: 400, ratio: 0.75, allowMissing: true},
   '品途': { min: 0, ratio: 0.0, allowMissing: true },
   // 360jlb 为按期活动制：旧活动过期即从列表消失，产出随轮换波动，基线留余量。

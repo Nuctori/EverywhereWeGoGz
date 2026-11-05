@@ -22,8 +22,14 @@ assert.equal(
 
 assert.equal(
   computeRequiredOutputCount({ min: 35, ratio: 0.75 }, 34),
-  34,
-  'required count should not exceed the raw unique count',
+  25,
+  'raw below the absolute minimum must fall back to the ratio floor instead of demanding 100% retention',
+);
+
+assert.equal(
+  computeRequiredOutputCount({ min: 180, ratio: 0.6 }, 174),
+  104,
+  'a source that shrank below its configured minimum must stay passable at the declared ratio',
 );
 
 assert.equal(

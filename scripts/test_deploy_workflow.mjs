@@ -23,6 +23,18 @@ mustInclude('cp -a dist/.', 'expected built dist directory to be published to CD
 mustInclude('uses: actions/setup-python@v5', 'expected Python runtime for structured data audits');
 mustInclude('python -m pip install requests beautifulsoup4 lxml', 'expected dependencies for structured data audits');
 
+// 数据管线用 GITHUB_TOKEN push，不会触发 push 事件；必须由 workflow_run 把
+// 自动落库的数据带到 cdn-assets，否则线上数据只会在人工 push 时前进一格。
+mustInclude('workflow_run:', 'expected deploy workflow to react to data pipeline completions');
+mustInclude(
+  'workflows: ["Update Tour Data", "Refresh Availability Cache"]',
+  'expected deploy workflow to watch both data pipelines',
+);
+mustInclude(
+  'github.event.workflow_run.conclusion == \'success\'',
+  'expected workflow_run deploys to require a successful data pipeline',
+);
+
 assert.ok(
   workflow.indexOf('- name: Verify deploy workflow contract') < workflow.indexOf('- name: Install dependencies'),
   'expected deploy workflow self-check to run before dependency install',

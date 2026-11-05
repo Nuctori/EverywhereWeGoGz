@@ -3,6 +3,13 @@ name: Deploy GitHub Pages
 on:
   push:
     branches: [master, main]
+  # 数据管线（update-data / refresh-availability-cache）用 GITHUB_TOKEN 提交并 push，
+  # 这类提交不会触发 push 事件。少了这条，bot 落库的 tour data 和可用性缓存永远
+  # 发布不到 cdn-assets——站上数据会停在最后一次人工 push 的快照（2026-10 就是这样
+  # 卡在 10-12 的数据上）。workflow_run 在管线收尾后从 main HEAD 重建，把提交带上站。
+  workflow_run:
+    workflows: ["Update Tour Data", "Refresh Availability Cache"]
+    types: [completed]
   workflow_dispatch:
 
 env:
@@ -20,6 +27,8 @@ concurrency:
 jobs:
   deploy:
     name: github-pages
+    # workflow_run 只在数据管线成功收尾后发布；失败轮次不覆盖线上现有产物。
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     # 无 job 级超时时 GitHub 默认给 360 分钟：构建/发布挂住会烧满 6 小时才被收掉。
     timeout-minutes: 60
