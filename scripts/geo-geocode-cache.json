@@ -5878,5 +5878,575 @@
     "address": {
       "formatted": "丽呈朗誉酒店, 黄塘路, 康乐社区, 城西街道, 端州区, 肇庆市, 广东省, 526040, 中国"
     }
+  },
+  "南浔希尔顿酒店": {
+    "query": "南浔希尔顿酒店",
+    "provider": "nominatim",
+    "latitude": 30.8496807,
+    "longitude": 120.4182512,
+    "displayName": "希尔顿酒店, 18, 万顺路, 东迁街道, 南浔区, 湖州市, 浙江省, 313009, 中国",
+    "level": "poi",
+    "locality": "东迁街道",
+    "providerScore": 80,
+    "address": {
+      "formatted": "希尔顿酒店, 18, 万顺路, 东迁街道, 南浔区, 湖州市, 浙江省, 313009, 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "湖州市",
+      "district": "南浔镇",
+      "street": "联谊路",
+      "postalCode": "313009"
+    }
+  },
+  "龙山 新兴 广东 中国": {
+    "query": "龙山 新兴 广东 中国",
+    "provider": "photon",
+    "latitude": 22.5909812,
+    "longitude": 112.2303233,
+    "displayName": "龙山   六祖镇 新兴县 广东省 中国",
+    "level": "poi",
+    "locality": "六祖镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "龙山   六祖镇 新兴县 广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "六祖镇",
+      "district": "新兴县",
+      "postalCode": "527400"
+    },
+    "precision": "approximate"
+  },
+  "三清山风景区 江西 中国": {
+    "query": "三清山风景区 江西 中国",
+    "provider": "photon",
+    "latitude": 28.9090099,
+    "longitude": 118.0719177,
+    "displayName": "三清山风景区   三清乡 玉山县 江西省 中国",
+    "level": "poi",
+    "locality": "三清乡",
+    "providerScore": 80,
+    "address": {
+      "formatted": "三清山风景区   三清乡 玉山县 江西省 中国",
+      "country": "中国",
+      "province": "江西省",
+      "city": "三清乡",
+      "district": "玉山县"
+    }
+  },
+  "神农架木鱼镇酒店 湖北 中国": {
+    "query": "神农架木鱼镇酒店 湖北 中国",
+    "provider": "arcgis",
+    "latitude": 31.47202,
+    "longitude": 110.38717,
+    "displayName": "湖北神农架木鱼镇",
+    "level": "town",
+    "locality": "湖北神农架木鱼镇",
+    "providerScore": 92.4,
+    "address": {
+      "formatted": "湖北神农架木鱼镇"
+    }
+  },
+  "乌镇东栅景区 浙江 中国": {
+    "query": "乌镇东栅景区 浙江 中国",
+    "provider": "photon",
+    "latitude": 30.7420667,
+    "longitude": 120.4935593,
+    "displayName": "乌镇东栅景区 甘泉中路 乌镇镇 嘉兴市  浙江省 中国",
+    "level": "poi",
+    "locality": "唐家埭",
+    "providerScore": 80,
+    "address": {
+      "formatted": "乌镇东栅景区 甘泉中路 乌镇镇 嘉兴市  浙江省 中国",
+      "country": "中国",
+      "province": "浙江省",
+      "city": "嘉兴市",
+      "district": "乌镇镇",
+      "locality": "唐家埭",
+      "street": "甘泉中路",
+      "postalCode": "314501"
+    }
+  },
+  "泰山风景区 山东 中国": {
+    "query": "泰山风景区 山东 中国",
+    "provider": "arcgis",
+    "latitude": 36.1930772,
+    "longitude": 117.1289741,
+    "displayName": "山东省泰安市泰山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "山东省泰安市泰山"
+    }
+  },
+  "峨眉山景区 四川 中国": {
+    "query": "峨眉山景区 四川 中国",
+    "provider": "arcgis",
+    "latitude": 29.601729999,
+    "longitude": 103.48222,
+    "displayName": "四川省乐山市峨眉山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "四川省乐山市峨眉山"
+    }
+  },
+  "台山富丽湾": {
+    "query": "台山富丽湾",
+    "provider": "nominatim",
+    "latitude": 22.091716,
+    "longitude": 112.9536822,
+    "displayName": "富丽湾旅游度假区, 西部沿海高速, 三林南, 都斛镇, 台山市, 江门市, 广东省, 中国",
+    "level": "poi",
+    "locality": "都斛镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "富丽湾旅游度假区, 西部沿海高速, 三林南, 都斛镇, 台山市, 江门市, 广东省, 中国"
+    }
+  },
+  "聚龙湾 佛冈 广东 中国": {
+    "query": "聚龙湾 佛冈 广东 中国",
+    "provider": "photon",
+    "latitude": 23.7447557,
+    "longitude": 113.4811623,
+    "displayName": "聚龙湾  佛冈县 清远市  广东省 中国",
+    "level": "poi",
+    "locality": "清远市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "聚龙湾  佛冈县 清远市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "清远市",
+      "district": "佛冈县"
+    }
+  },
+  "泉州洛伽寺": {
+    "query": "泉州洛伽寺",
+    "provider": "nominatim",
+    "latitude": 24.6762788,
+    "longitude": 118.7080767,
+    "displayName": "洛伽寺, 红塔湾旅游公路, 永宁镇, 石狮市, 泉州市, 福建省, 中国",
+    "level": "poi",
+    "locality": "永宁镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "洛伽寺, 红塔湾旅游公路, 永宁镇, 石狮市, 泉州市, 福建省, 中国"
+    }
+  },
+  "贺州温泉 广西 中国": {
+    "query": "贺州温泉 广西 中国",
+    "provider": "photon",
+    "latitude": 24.5354229,
+    "longitude": 111.6142857,
+    "displayName": "贺州温泉   路花 平桂区 广西壮族自治区 中国",
+    "level": "poi",
+    "locality": "路花",
+    "providerScore": 80,
+    "address": {
+      "formatted": "贺州温泉   路花 平桂区 广西壮族自治区 中国",
+      "country": "中国",
+      "province": "广西壮族自治区",
+      "city": "路花",
+      "district": "平桂区"
+    }
+  },
+  "喀纳斯景区 新疆 中国": {
+    "query": "喀纳斯景区 新疆 中国",
+    "provider": "arcgis",
+    "latitude": 48.6912931,
+    "longitude": 87.0300192,
+    "displayName": "新疆维吾尔自治区阿勒泰地区布尔津县喀纳斯",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "新疆维吾尔自治区阿勒泰地区布尔津县喀纳斯"
+    }
+  },
+  "喀纳斯湖 新疆 中国": {
+    "query": "喀纳斯湖 新疆 中国",
+    "provider": "nominatim",
+    "latitude": 48.7995143,
+    "longitude": 87.0272937,
+    "displayName": "喀纳斯湖, 禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ, 布尔津县, 阿勒泰地区, 新疆维吾尔自治区, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "喀纳斯湖, 禾木哈纳斯蒙古民族乡 قومقاناس موڭعۇل ۇلتتىق اۋىلى ᠬᠣᠮ ᠬᠠᠨᠠᠰ ᠮᠣᠩᠭᠣᠯ ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠦ ᠰᠢᠶᠠᠩ, 布尔津县, 阿勒泰地区, 新疆维吾尔自治区, 中国"
+    }
+  },
+  "九寨沟景区 四川 中国": {
+    "query": "九寨沟景区 四川 中国",
+    "provider": "arcgis",
+    "latitude": 33.2616591,
+    "longitude": 104.2355319,
+    "displayName": "四川省阿坝藏族羌族自治州九寨沟",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "四川省阿坝藏族羌族自治州九寨沟"
+    }
+  },
+  "古镇 南浔 浙江 中国": {
+    "query": "古镇 南浔 浙江 中国",
+    "provider": "nominatim",
+    "latitude": 30.8718979,
+    "longitude": 120.424047,
+    "displayName": "南浔古镇景区, 嘉业路, 南浔镇, 南浔区, 湖州市, 浙江省, 313009, 中国",
+    "level": "poi",
+    "locality": "南浔镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "南浔古镇景区, 嘉业路, 南浔镇, 南浔区, 湖州市, 浙江省, 313009, 中国"
+    }
+  },
+  "神农架酒店 湖北 中国": {
+    "query": "神农架酒店 湖北 中国",
+    "provider": "arcgis",
+    "latitude": 31.7426228,
+    "longitude": 110.681307,
+    "displayName": "湖北省神农架",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "湖北省神农架"
+    }
+  },
+  "庐山景区 江西 中国": {
+    "query": "庐山景区 江西 中国",
+    "provider": "arcgis",
+    "latitude": 29.4505923,
+    "longitude": 116.0396561,
+    "displayName": "江西省九江市庐山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 89.1,
+    "address": {
+      "formatted": "江西省九江市庐山"
+    }
+  },
+  "七星岩景区 广东 中国": {
+    "query": "七星岩景区 广东 中国",
+    "provider": "photon",
+    "latitude": 23.0805699,
+    "longitude": 112.4727006,
+    "displayName": "七星岩景区  城东街道 肇庆市  广东省 中国",
+    "level": "poi",
+    "locality": "肇庆市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "七星岩景区  城东街道 肇庆市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "肇庆市",
+      "district": "城东街道"
+    }
+  },
+  "河源万绿湖美思威尔顿酒店 广东 中国": {
+    "query": "河源万绿湖美思威尔顿酒店 广东 中国",
+    "provider": "photon",
+    "latitude": 23.7890102,
+    "longitude": 114.6338843,
+    "displayName": "河源万绿湖美思威尔顿酒店 153县道  新港镇 东源县 广东省 中国",
+    "level": "poi",
+    "locality": "新港镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "河源万绿湖美思威尔顿酒店 153县道  新港镇 东源县 广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "新港镇",
+      "district": "东源县",
+      "street": "153县道"
+    }
+  },
+  "肇庆七星岩温德姆至尊酒店": {
+    "query": "肇庆七星岩温德姆至尊酒店",
+    "provider": "photon",
+    "latitude": 23.0777492,
+    "longitude": 112.4850207,
+    "displayName": "肇庆市七星岩温德姆至尊酒店 星湖大道 黄岗街道 肇庆市  广东省 中国",
+    "level": "poi",
+    "locality": "嘉湖社区",
+    "providerScore": 80,
+    "address": {
+      "formatted": "肇庆市七星岩温德姆至尊酒店 星湖大道 黄岗街道 肇庆市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "肇庆市",
+      "district": "黄岗街道",
+      "locality": "嘉湖社区",
+      "street": "星湖大道",
+      "houseNumber": "13",
+      "postalCode": "526060"
+    }
+  },
+  "五台山风景区 山西 中国": {
+    "query": "五台山风景区 山西 中国",
+    "provider": "nominatim",
+    "latitude": 38.9421207,
+    "longitude": 113.6277294,
+    "displayName": "五台山, 金岗库乡, 五台山风景名胜区, 五台县, 忻州市, 山西省, 035514, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "五台山, 金岗库乡, 五台山风景名胜区, 五台县, 忻州市, 山西省, 035514, 中国"
+    }
+  },
+  "五台山酒店": {
+    "query": "五台山酒店",
+    "provider": "nominatim",
+    "latitude": 38.8610589,
+    "longitude": 113.7037464,
+    "displayName": "金莲花禅文化主题酒店, 砂石线, 小古计沟, 蛤蟆石村, 石咀镇, 五台山风景名胜区, 五台县, 忻州市, 山西省, 035514, 中国",
+    "level": "poi",
+    "locality": "石咀镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "金莲花禅文化主题酒店, 砂石线, 小古计沟, 蛤蟆石村, 石咀镇, 五台山风景名胜区, 五台县, 忻州市, 山西省, 035514, 中国"
+    }
+  },
+  "神农架天燕景区": {
+    "query": "神农架天燕景区",
+    "provider": "nominatim",
+    "latitude": 31.7262919,
+    "longitude": 110.4688543,
+    "displayName": "天燕景区售票处, S284, 神农架林区, 湖北省, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "天燕景区售票处, S284, 神农架林区, 湖北省, 中国"
+    }
+  },
+  "黄龙风景区 四川 中国": {
+    "query": "黄龙风景区 四川 中国",
+    "provider": "arcgis",
+    "latitude": 31.3224627,
+    "longitude": 107.3338334,
+    "displayName": "四川省达州市通川区黄龙",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "四川省达州市通川区黄龙"
+    }
+  },
+  "青澳湾 汕头 广东 中国": {
+    "query": "青澳湾 汕头 广东 中国",
+    "provider": "photon",
+    "latitude": 23.4380861,
+    "longitude": 117.1356857,
+    "displayName": "青澳湾  南澳县 汕头市  广东省 中国",
+    "level": "poi",
+    "locality": "汕头市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "青澳湾  南澳县 汕头市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "汕头市",
+      "district": "南澳县"
+    }
+  },
+  "黄龙景区 四川 中国": {
+    "query": "黄龙景区 四川 中国",
+    "provider": "arcgis",
+    "latitude": 31.3224627,
+    "longitude": 107.3338334,
+    "displayName": "四川省达州市通川区黄龙",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 89.1,
+    "address": {
+      "formatted": "四川省达州市通川区黄龙"
+    }
+  },
+  "九寨沟风景区 四川 中国": {
+    "query": "九寨沟风景区 四川 中国",
+    "provider": "arcgis",
+    "latitude": 33.2616591,
+    "longitude": 104.2355319,
+    "displayName": "四川省阿坝藏族羌族自治州九寨沟",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 87.12,
+    "address": {
+      "formatted": "四川省阿坝藏族羌族自治州九寨沟"
+    }
+  },
+  "武夷山风景区 福建 中国": {
+    "query": "武夷山风景区 福建 中国",
+    "provider": "arcgis",
+    "latitude": 27.75995,
+    "longitude": 118.03066,
+    "displayName": "福建南平武夷山",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 87.12,
+    "address": {
+      "formatted": "福建南平武夷山"
+    }
+  },
+  "呼伦贝尔 内蒙古 中国": {
+    "query": "呼伦贝尔 内蒙古 中国",
+    "provider": "nominatim",
+    "latitude": 49.2125235,
+    "longitude": 119.7370167,
+    "displayName": "呼伦贝尔市, 内蒙古自治区, 中国",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 80,
+    "address": {
+      "formatted": "呼伦贝尔市, 内蒙古自治区, 中国"
+    }
+  },
+  "神农架康帝君兰酒店": {
+    "query": "神农架康帝君兰酒店",
+    "provider": "nominatim",
+    "latitude": 31.4691816,
+    "longitude": 110.3908477,
+    "displayName": "康帝君兰酒店, 木鱼路, 木鱼镇, 神农架林区, 湖北省, 中国",
+    "level": "poi",
+    "locality": "木鱼镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "康帝君兰酒店, 木鱼路, 木鱼镇, 神农架林区, 湖北省, 中国"
+    }
+  },
+  "海螺沟景区 四川 中国": {
+    "query": "海螺沟景区 四川 中国",
+    "provider": "arcgis",
+    "latitude": 32.20003,
+    "longitude": 106.07009,
+    "displayName": "四川广元海螺沟",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "四川广元海螺沟"
+    }
+  },
+  "杭州西湖景区 浙江 中国": {
+    "query": "杭州西湖景区 浙江 中国",
+    "provider": "arcgis",
+    "latitude": 30.261695799,
+    "longitude": 120.1256628,
+    "displayName": "浙江省杭州西湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.16,
+    "address": {
+      "formatted": "浙江省杭州西湖"
+    }
+  },
+  "四姑娘山双桥沟景区 四川 中国": {
+    "query": "四姑娘山双桥沟景区 四川 中国",
+    "provider": "photon",
+    "latitude": 31.1166664,
+    "longitude": 102.7681237,
+    "displayName": "四姑娘山双桥沟景区   人参果坪 小金县 བཙན་ལྷ་རྫོང། 四川省 中国",
+    "level": "poi",
+    "locality": "人参果坪",
+    "providerScore": 80,
+    "address": {
+      "formatted": "四姑娘山双桥沟景区   人参果坪 小金县 བཙན་ལྷ་རྫོང། 四川省 中国",
+      "country": "中国",
+      "province": "四川省",
+      "city": "人参果坪",
+      "district": "小金县 བཙན་ལྷ་རྫོང།",
+      "postalCode": "624200"
+    }
+  },
+  "聚龙湾镇 佛冈 广东 中国": {
+    "query": "聚龙湾镇 佛冈 广东 中国",
+    "provider": "photon",
+    "latitude": 23.7447557,
+    "longitude": 113.4811623,
+    "displayName": "聚龙湾  佛冈县 清远市  广东省 中国",
+    "level": "poi",
+    "locality": "清远市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "聚龙湾  佛冈县 清远市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "清远市",
+      "district": "佛冈县"
+    },
+    "precision": "approximate"
+  },
+  "周庄风景区 江苏 中国": {
+    "query": "周庄风景区 江苏 中国",
+    "provider": "arcgis",
+    "latitude": 31.5037165,
+    "longitude": 120.10538,
+    "displayName": "江苏省常州市武进区周庄",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.8,
+    "address": {
+      "formatted": "江苏省常州市武进区周庄"
+    }
+  },
+  "万绿湖镇 河源 广东 中国": {
+    "query": "万绿湖镇 河源 广东 中国",
+    "provider": "nominatim",
+    "latitude": 23.7788721,
+    "longitude": 114.6268816,
+    "displayName": "万绿湖风景区售票处, 万绿湖大道, 新港镇, 东源县, 河源市, 广东省, 中国",
+    "level": "poi",
+    "locality": "新港镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "万绿湖风景区售票处, 万绿湖大道, 新港镇, 东源县, 河源市, 广东省, 中国"
+    },
+    "precision": "approximate"
+  },
+  "禾木村景区 新疆 中国": {
+    "query": "禾木村景区 新疆 中国",
+    "provider": "arcgis",
+    "latitude": 48.5692063,
+    "longitude": 87.4303716,
+    "displayName": "新疆维吾尔自治区阿勒泰地区布尔津县禾木村",
+    "level": "town",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "新疆维吾尔自治区阿勒泰地区布尔津县禾木村"
+    }
+  },
+  "吴哥窟景区 柬埔寨": {
+    "query": "吴哥窟景区 柬埔寨",
+    "provider": "arcgis",
+    "latitude": 13.41237,
+    "longitude": 103.86661,
+    "displayName": "吴哥窟",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 85.25,
+    "address": {
+      "formatted": "吴哥窟"
+    }
+  },
+  "婺源篁岭古村 江西 中国": {
+    "query": "婺源篁岭古村 江西 中国",
+    "provider": "arcgis",
+    "latitude": 29.3235898,
+    "longitude": 118.1132609,
+    "displayName": "江西省上饶市婺源篁岭",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 83.16,
+    "address": {
+      "formatted": "江西省上饶市婺源篁岭"
+    }
   }
 }

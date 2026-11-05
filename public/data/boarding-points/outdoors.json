@@ -1,10 +1,2396 @@
 {
  "stats": {
-  "total": 254,
-  "with_points": 186,
+  "total": 159,
+  "with_points": 109,
   "skipped_intl": 0
  },
  "items": {
+  "https://www.outdoors.com.cn/route/linedetail/id/5888/did/189434.html": {
+   "title": "【阳山梅子坪古道1日】徒步千年古道，打卡广东墨石公园",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/香雪F口/珠江新城B2",
+   "summary": "龙溪A口、香雪F口、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5895/did/192845.html": {
+   "title": "【万绿湖徒步1日】打卡人间瑶池河源万绿湖｜广东版“千岛湖”徒步12公里",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/香雪F口/珠江新城B2",
+   "summary": "龙溪A口、香雪F口、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/777/did/193960.html": {
+   "title": "【金秋桐子坳2日】行摄中国银杏第一村，邂逅风车云海~云冰山，入住零陵古城，感受千年古城魅力",
+   "points": [
+    {
+     "name": "珠江新城A1口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": "7:40"
+    }
+   ],
+   "raw": "7：40珠江新城A1口",
+   "summary": "珠江新城A1口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6157/did/194392.html": {
+   "title": "【深圳大鹏半岛捕鱼1日】豪华游艇出海捕鱼，品海鲜大餐，大鹏古城+较场尾民宿小镇",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "无领队签到，上车后前往珠江新城汇合，找对应领队签到。活动前一天18:30会有车牌号相关通知。 \r\n 07:40珠江新城B2出口集合，请主动找领队签到。 \r\n （请调好闹钟，做好计划；记得吃早餐）。 \r\n 08:00准时出发（车上领队介绍行程，注意事项）。 \r\n \r\n 11:30 大澳湾，当地渔民带领大家出海捕鱼。 \r\n 13:00 前往海鲜餐厅加工海鲜、午餐。 \r\n 14:00 -16:00 午饭后打卡大鹏古城、较场尾沙滩。可体验赶海。（由于时间安排，不能下海游泳） \r\n 16:00 集合回程，预计20点到达珠江新城地铁站解散。 \r\n \r\n 注：部分活动为户外运动路线，一些景区、当地天气、交通状况等可能会出现始料未及的状况，以上行程时间仅供参考，具体行程可能会根据实际情况稍作调整，但原则一定是让小伙伴们安全、省钱、尽兴。登山活动请做好夜路和晚回程的心理准备，希望各位小伙伴给予理解和配合，谢谢！ \n \n \n \n \n 三餐 \n 早餐：不含 午餐：自理 晚餐：自理 \n \n \n \n \n \n 住宿 \n 车上 \n \n \n \n *以上行程仅供参考，最终行程可能会根据实际情况进行微调，敬请以出团通知为准。",
+   "summary": "龙溪A、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4126/did/192908.html": {
+   "title": "【惠东大南山1日】徒步穿越广东最美高山草原-惠州“小武功山”精华线",
+   "points": [
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2",
+   "summary": "珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5921/did/194091.html": {
+   "title": "【赤坎古镇2日】沉浸式体验赤坎古镇、百年火秀烟花秀、共赏百年好戏、畅玩黑沙滩、浮月村、都斛海鲜街品海鲜",
+   "points": [
+    {
+     "name": "广州塔A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "佛山桂城D1口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "广州塔A口/佛山桂城D1口",
+   "summary": "广州塔A口、佛山桂城D1口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4131/did/191877.html": {
+   "title": "【惠东黑排角1日】翻越山丘，攀礁石，漫步沙滩，徒步穿越惠东最美海岸线10公里",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/香雪F口/珠江新城B2",
+   "summary": "龙溪A口、香雪F口、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/298/did/194390.html": {
+   "title": "【浪漫惠州2日】入住一线海景房，打卡广东马尔代夫的神秘海边，皮划艇，浮潜、冲浪、浆板、赶海，满足你对海边所有幻想",
+   "points": [
+    {
+     "name": "龙溪地铁",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "广州塔A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪地铁/广州塔A口",
+   "summary": "龙溪地铁、广州塔A口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6203/did/192929.html": {
+   "title": "【从化鹧鸪山1日】打卡增城与从化的界峰——鹧鸪山，上罗村邂逅金黄柿子林",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/香雪F口/珠江新城B2",
+   "summary": "龙溪A口、香雪F口、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6207/did/192968.html": {
+   "title": "【走进岭南6天5晚】赴一场山野之约，探洞、看千里江山、见地表裂缝、赏丹霞世遗",
+   "points": [
+    {
+     "name": "广州市区酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "广州市区酒店",
+   "summary": "广州市区酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6208/did/192986.html": {
+   "title": "【走进岭南5天4晚】赴一场山野徒步广州后花园，从化星溪线、梅子坪古道，英西峰林、笔架山",
+   "points": [
+    {
+     "name": "广州市区酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "广州市区酒店",
+   "summary": "广州市区酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6214/did/193239.html": {
+   "title": "【翁源荞麦花+岭南红叶世界1日】翁源百亩荞麦花盛开，漫步广东“小香格里拉”、畅游岭南红叶世界，赏醉美红枫、打卡高山牧场",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F/珠江新城B2口",
+   "summary": "龙溪A、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5703/did/193947.html": {
+   "title": "【特种兵之夜登江西齐云山】周六晚上出发赣南第一高峰——齐云山日出云海大草坡",
+   "points": [
+    {
+     "name": "客村B出口集合",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "客村B出口集合",
+   "summary": "客村B出口集合"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4680/did/191903.html": {
+   "title": "【从化桂峰山1日】从化十登之桂峰山，轻松打卡千米高峰",
+   "points": [
+    {
+     "name": "珠江新城B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "只接不送） \r\n 07:45 珠江新城B2 口 集合（请调好闹钟，做好计划，记得吃早餐哦） \r\n \r\n \r\n 08 : 00 准时出发。车上领队介绍路线、行程安排、注意事项，组织大家互相认识 \r\n \r\n \r\n 10 : 00 到达桂峰村，热身后开始徒步。 \r\n \r\n \r\n 10 : 30 到达果园，这里是红灯笼的世界，枝头挂满了红澄澄的柿子，娇艳欲滴，自由拍照赏柿子（预计10月底—11月份才能看到红柿子）。 \r\n \r\n \r\n 11 : 00 继续出发桂峰山，沿着上山小路，找到田园的感觉，一段时间后，我们可以俯瞰整个村庄 \r\n \r\n \r\n 12 : 30 觅一稍微平整处，解决午餐（无分享不户外，可以多带一点干粮一起分享） \r\n \r\n \r\n 13 : 00 午餐后继续穿越丛林，建议穿长袖衣裤、戴遮阳帽、戴手套。 \r\n \r\n \r\n 14 : 00 登顶桂峰山，各种拍照装逼，稍作休整。 \r\n \r\n \r\n 14 : 30 开始下山 \r\n \r\n \r\n 17 : 00 到达山脚，集合上车回程。 \r\n \r\n \r\n \r\n \r\n \r\n 19:30 到达珠江新城地铁站，结束行程。",
+   "summary": "珠江新城B2出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6218/did/194395.html": {
+   "title": "【肇庆交床古道1日】打卡肇庆版墨石公园，重走千年怀梧古道，穿越千年的历史记忆",
+   "points": [
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2",
+   "summary": "珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6219/did/193581.html": {
+   "title": "【金秋台山1日】台山花园式侨村——浮月村 ，都斛海鲜街，实现“海鲜自由” ，走进《狂飙》电影取景地——梅家大院，台山金秋稻田拍大片",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F/珠江新城B2口",
+   "summary": "龙溪A、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6224/did/194095.html": {
+   "title": "【蓝眼泪1日】广东版的绝美“蓝眼泪”，清远石角芦苇花开，北江大堤佛山版阿勒泰",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F/珠江新城B2口",
+   "summary": "龙溪A、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4691/did/194266.html": {
+   "title": "【从化秋色1日】上罗千亩柿子海+艾米稻香小镇+罗洞工匠小镇",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F口/珠江新城B2",
+   "summary": "龙溪A、香雪F口、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6229/did/194420.html": {
+   "title": "【江门圭峰红枫+落羽杉1日】江门“小九寨”石涧公园赏落羽杉，广东十大名山圭峰山赏红枫，玉台寺祈福",
+   "points": [
+    {
+     "name": "龙溪C",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪C/香雪F/珠江新城B2口",
+   "summary": "龙溪C、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5466/did/194460.html": {
+   "title": "【黄姚恭城大巴2日】柿子红了，一起行摄恭城红岩村、黄姚古镇，感受广西的秋色",
+   "points": [
+    {
+     "name": "珠江新城B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2出口",
+   "summary": "珠江新城B2出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/3937/did/192010.html": {
+   "title": "【从化千泷沟瀑布1日】打卡亚洲第一宽瀑布，探访溪头古村，行摄竹海大观",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/香雪F口/珠江新城B2",
+   "summary": "龙溪A口、香雪F口、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4197/did/192055.html": {
+   "title": "【秦汉古道1日】徒步探秘“最有内涵的古道”-清远阳山千年秦汉古道10公里",
+   "points": [
+    {
+     "name": "珠江新城B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2出口",
+   "summary": "珠江新城B2出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/367/did/191988.html": {
+   "title": "【星溪徒步1日】广州美丽乡村从化星溪线，赏竹海+溪头村",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/香雪F口/珠江新城B2",
+   "summary": "龙溪A口、香雪F口、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4209/did/192112.html": {
+   "title": "【行摄莫六公1日】登顶阳山莫六公瞰清远最美山脊一天8公里徒步",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/香雪F口/珠江新城B2",
+   "summary": "龙溪A口、香雪F口、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/3957/did/193951.html": {
+   "title": "【轻奢赏秋2日】南雄银杏之乡，网红打卡时光隧道，南华寺祈福，入住韶关汤溪温泉酒店",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/珠江新城B2",
+   "summary": "龙溪A、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4763/did/194435.html": {
+   "title": "【韶关巴寨1日】深入中国红石公园 登丹霞之巅巴寨峰 领略岭南第一奇山",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F/珠江新城B2口",
+   "summary": "龙溪A、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5800/did/192207.html": {
+   "title": "【郴州瑶峰夜爬】特种兵系列，徒步湖南醉美金色高山草荀，赏星空、日出、云海一日一夜",
+   "points": [
+    {
+     "name": "魁奇路B",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "客村B",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "魁奇路B/客村B",
+   "summary": "魁奇路B、客村B"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4523/did/194108.html": {
+   "title": "【中山灯笼坑+狮头山1日】打卡中山“蓝眼泪”灯笼坑 登中山狮头山俯瞰中山“千岛湖”",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F/珠江新城B2口",
+   "summary": "龙溪A、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/3761/did/191851.html": {
+   "title": "【深圳山海径1日】徒步海角山脉，醉美海岸线，登顶大雁顶，打卡《美人鱼》拍摄地~",
+   "points": [
+    {
+     "name": "珠江新城B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "龙溪地铁口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2出口/龙溪地铁口",
+   "summary": "珠江新城B2出口、龙溪地铁口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5297/did/192085.html": {
+   "title": "【西樵山探洞1日】佛山西樵山探洞，追一场耶稣光盛宴",
+   "points": [
+    {
+     "name": "珠江新城B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2出口",
+   "summary": "珠江新城B2出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4794/did/191922.html": {
+   "title": "【英西峰林徒步1日】广东十大徒步圣地-行摄英西峰林精华段，饱览“广东小桂林”喀斯特奇境，品尝清远走地鸡",
+   "points": [
+    {
+     "name": "珠江新城地铁B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城地铁B2出口",
+   "summary": "珠江新城地铁B2出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5068/did/193957.html": {
+   "title": "【千亩枫叶+桐子坳2日】行摄中国银杏第一村，漫步湘江大峡谷十万株枫叶林，入住零陵古城，感受千年古城魅力",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "广州塔A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/广州塔A口",
+   "summary": "龙溪A口、广州塔A口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5840/did/194413.html": {
+   "title": "【英德仙湖五彩田园1日】清远茶庄里的浪漫：北江畔狗尾巴草盛放，水墨梦境情人桥同心岛",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F/珠江新城B2口",
+   "summary": "龙溪A、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/725/did/191821.html": {
+   "title": "【深圳东西冲穿越1日】中国十大美丽海岸线之一，百走不厌+醉美天文台打卡",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/香雪F口/珠江新城B2口",
+   "summary": "龙溪A口、香雪F口、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4056/did/191727.html": {
+   "title": "【增城牛牯嶂1日】 登高望远，勇登增城最高峰—牛牯嶂,行走广州顶级登山线",
+   "points": [
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": "07:45"
+    }
+   ],
+   "raw": "07:45 珠江新城B2口",
+   "summary": "珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/3808/did/192138.html": {
+   "title": "【天堂顶1日，特价78元】登从化天堂顶，问鼎羊城之巅",
+   "points": [
+    {
+     "name": "龙溪A口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A口/香雪F口/珠江新城B2",
+   "summary": "龙溪A口、香雪F口、珠江新城B2"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/740/did/190898.html": {
+   "title": "【武功山高铁3日】自营2-12人小团 日出云海，星空草甸等你来战，颁发电子纪念证书",
+   "points": [
+    {
+     "name": "地铁\u00000\u0000体育西路C出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "原体育中心C出口集合",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "变更为天河城购物广场-南门（地铁1/3号线体育西路C出口） \n \n \n \n 重要通知：大巴集合点变更为天河城购物广场-南门（地铁1/3号线体育西路C出口） \n \n \n \n 原体育中心C出口集合改为天河城购物广场-南门（体育西路C出口）集合。 \n 23828次 2019-12-24 \n \n \n \n \n 2019-09-04 \n 2019年国庆节活动，国庆旅游去哪儿？2019年国庆节旅游推荐 \n \n \n \n 2019年国庆节活动，国庆旅游去哪儿？2019年国庆节旅游推荐 \n \n \n \n 国庆节活动推荐 \n 41601次 2019-09-04 \n \n \n \n \n 2019-09-02 \n 2019年中秋节活动推荐，中秋节户外活动推荐 \n \n \n \n 2019年中秋节活动推荐，中秋节户外活动推荐 \n \n \n \n 天涯户外中秋节短线活动推荐 \n 23738次 2019-09-02 \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n \n 定制游 想你所想，私人定制 更多定制游>> \n \n \n 优秀定制案例 \n 定制方案详情 \n \n \n \n \n \n \n \n 01: 填写定制资料 \n \n \n \n 02: 制定定制方案 \n \n \n \n 03: 签约付款 \n \n \n \n 04: 体验行程 \n \n \n \n 立即定制 \n \n \n \n \n \n \n \n \n 32508次 \n 定制达人：天涯小恋 \n \n \n \n 1 天 \n 广州从化 \n 秋收的季节里一家几口割稻谷、辨识农具、种菜、摘菜、挖番薯、小溪竹笼捕鱼、泥潭捉泥鳅、梅花阵大比拼、稻草人射箭、磨豆浆、DIY稻草人等，让孩子玩中学，学中玩，在促进孩子综合发展的同时又可以增进亲子关系，相信这是每一位家长喜闻乐见的事情！跟着天涯户外一起，让我们回归自然，全家总动员，体验趣味农场活动，见证童年成长的快乐。 \n \n \n \n \n \n \n 29938次 \n 定制达人：天涯小恋 \n \n \n \n 1 天 \n 佛山 \n 采拾落叶，收集鲜花，穿越到蔡伦时代，用最古老的造纸方式，制作精美的花草纸，体验感受古人的智慧，亲手制作花草纸，和爸爸妈妈共同见证一张纸的诞生。我们在田间垒土窑，煨番薯，放飞风筝，寻踪觅影，辨认各种植物的树叶，寻找秋天的印记。 \n \n \n \n \n \n \n 31990次 \n 定制达人：天涯小恋 \n \n \n \n 1 天 \n 广州从化温泉镇 \n 在金黄色的一片稻田里体验割稻子，稻田里充满着家长忙碌的身影、孩子悦耳的笑声。带上你家宝贝，跟随天涯户外的脚步一起走进田间，亲近土地，感受传统农耕文化，一起收获这个秋天最美的自然馈赠吧！ \n \n \n \n \n \n \n \n \n 01: 填写定制资料 \n \n \n \n 02: 制定定制方案 \n \n \n \n 03: 签约付款 \n \n \n \n 04: 体验行程 \n \n \n \n 立即定制",
+   "summary": "地铁\u00000\u0000体育西路C出口、原体育中心C出口集合"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4845/did/190560.html": {
+   "title": "【网红潮汕2日】寻味美食聚集地潮州古城，美拍《四海》取景地南澳岛，畅玩“东方夏威夷”青澳湾",
+   "points": [
+    {
+     "name": "珠江新城B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2出口",
+   "summary": "珠江新城B2出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4085/did/193214.html": {
+   "title": "【中山岐澳古道1日】中山古道徒步，品尝地道美味乳鸽",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F/珠江新城B2口",
+   "summary": "龙溪A、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4815/did/190720.html": {
+   "title": "【高铁魅力郴州3日】小东江+高椅岭+仰天湖+秘境竹筏九龙水寨+白廊+长卷+裕后街+马皇丘/瓦窑坪",
+   "points": [],
+   "raw": "郴州集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5961/did/179339.html": {
+   "title": "【漓江徒步5天】十大经典徒步漓江徒步，探秘原生态喀斯特溶洞，步入现实版的千里江山图",
+   "points": [],
+   "raw": "桂林市酒店集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6058/did/185048.html": {
+   "title": "【2人成团， 4天3晚桂林集散】桂岭晴岚+大圩古镇+遇龙河竹筏漂流+如意峰俯瞰千里峰林、银子岩溶洞奇观+兴坪古镇",
+   "points": [
+    {
+     "name": "桂林北站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "桂林西站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "桂林站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "桂林两江国际机场",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "桂林北站／桂林西站／桂林站／桂林两江国际机场",
+   "summary": "桂林北站、桂林西站、桂林站 等4个上车点"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4110/did/190782.html": {
+   "title": "【阳朔深度游，周五晚】拍黄姚夜色、观遇龙河，徒步漓江，登相公山，行摄遇龙河古桥，体验手撑竹筏，骑行十里画廊",
+   "points": [
+    {
+     "name": "杨箕地铁站E1出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "杨箕地铁站E1出口",
+   "summary": "杨箕地铁站E1出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6046/did/185016.html": {
+   "title": "【2人成团】桂林山水三天两晚阳朔漓江精华游/相公山+兴坪古镇+遇龙河竹筏",
+   "points": [
+    {
+     "name": "桂林北站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "桂林西站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "桂林站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "桂林两江国际机场",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "阳朔站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "桂林北站／桂林西站／桂林站／桂林两江国际机场／阳朔站",
+   "summary": "桂林北站、桂林西站、桂林站 等5个上车点"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4827/did/179370.html": {
+   "title": "【中国大陆最南端，湛江高铁3日】广东省内游、住南极村、行摄菠萝的海，探访硇洲岛、打卡湖光岩、赤坎老街、灯楼角",
+   "points": [
+    {
+     "name": "大部分是广州白云站发车",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点和时间（注意，如一定要广州南站车票请报名时备注，因广州南现在车次较少，大部分是广州白云站发车）： \r\n广州南：G6925（8:41-11:53） \r\n广州白云-湛江北：G5185（9:22-11:28）G5187（9:38-11:56） \r\n（深圳北站请乘车到广州南站中转高铁，车程约0.5小时，参考车次：G6072、G6226） \r\n \r\n \r\n \r\n \r\n \r\n \r\n 11：50集合乘车前往赤坎老街解决午餐，车程约半小时。 \r\n【赤坎老街】旧称法国大马路，仅长400多米，却有着近百年的商业历史。如今步行街集合了众多特色小铺，吸引了很多游客前来购物。大家可以自由闲逛，探访旧广州湾商会，明德古钱庄等，寻找历史的痕迹，在咖啡店聊聊天看看书，享受旅行慢时光。 \r\n13：40 集合出发东海岛码头，乘船到硇洲岛。 \r\n15：15 到过码头，过渡硇洲岛，然后安排乘坐电瓶车观光以及讲解，费用都已包含。\r\n \r\n \r\n \r\n \r\n \r\n 【硇洲岛】，古称硭，是一个大约20—50万年前由海底火山爆发形成的海岛，是中国第一大火山岛屿，也是“湛江八景”之一，美曰：“硇洲古韵”。岛上名胜古迹众多，并且曾是南宋末代王朝两个“真龙天子”避元军追赶的逃难地。一个驾崩，葬于硇洲；一个登基，建都硇洲，见证了南宋王朝的覆灭，在中国历史记下宋元两朝交替最后一笔。 \r\n \r\n \r\n 【硇洲灯塔】，在海拔81.6米的马鞍山上，1898年法国殖民者建起这座灯塔，是世界目前仅有的两座水晶磨镜灯塔之一，也是与伦敦灯塔、好望角灯塔齐名的世界三大灯塔之一。硇洲灯塔高23米，底宽5米，顶宽4米，整个塔由麻石砌成。说“砌”，其实是不用泥浆，完全一块块叠起来的，石块与石块之间非常吻合，浑然一体。 \r\n \r\n \r\n 【火山岩黑石滩】，硇洲岛主要的看点是火山岩奇观，从灯塔出来后，走一条小路，从崖壁缝隙处下去，直接走到海滩边可以看到火山岩黑石滩。火山岩非常奇特，崖壁地势非常陡峭，这些大型柱状玄武岩也是世界上迄今发现最为典型的火山玄武岩。崖壁下面是火山喷发熔浆流淌后凝固的形状。沙滩上布满大大小小的火山喷发出来的黑色火山石，与大海里翻滚的海浪，崖顶布满仙人掌和其它绿色植被，构成一幅神奇的自然景观。 \r\n \r\n \r\n 【海龟城】，这里同时也是“广东省野生水生动物救护中心”，渔民们打捞到的国家保护动物大多会送过来这里，这儿有几百斤、几百岁的老海龟，还有红绿海龟、大洋丽龟、圆尾鲎、大龙虾、玳瑁等，大小朋友们都可以体验到喂海龟，和海龟开心的互动，摸摸海龟的壳哦（红海龟脾气不太好，注意）。 \r\n \r\n \r\n \r\n \r\n \r\n 18：00\r\n前往硇洲岛码头乘船返回东海岛码头，乘车出发东海岛上最好的酒店，安排房间入住后可自由活动，晚餐可享用当地新鲜海鲜，自由用餐。 \r\n \n \n \n \n \n 三餐 \n 早餐：自理 午餐：自理 晚餐：自理",
+   "summary": "大部分是广州白云站发车"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5116/did/193422.html": {
+   "title": "【恭城+海洋乡大巴2日】大小桐木湾赏银杏，红岩村探秘万亩柿林，行摄黄姚古镇，2天2夜",
+   "points": [
+    {
+     "name": "杨箕地铁站E1出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "杨箕地铁站E1出口",
+   "summary": "杨箕地铁站E1出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4113/did/194400.html": {
+   "title": "【牛湖线1日】牛气冲天~穿越绝美阳山喀斯特地貌牛湖线~探秘天坑古洞",
+   "points": [
+    {
+     "name": "珠江新城B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2出口",
+   "summary": "珠江新城B2出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/797/did/193556.html": {
+   "title": "【咸台港1日】徒步小众原始海岸线，攀爬礁石，听海拾贝，捉螃蟹、抓海胆",
+   "points": [
+    {
+     "name": "珠江新城B2",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2/龙溪A/香雪F",
+   "summary": "珠江新城B2、龙溪A、香雪F"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6230/did/194429.html": {
+   "title": "【阳山小江银杏1日】阳山银杏村赏千年银杏 深山乡村慢行摄影 打卡百亩银杏园",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F/珠江新城B2口",
+   "summary": "龙溪A、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4732/did/194123.html": {
+   "title": "【清远禾仓古道1日】徒步百年禾仓古道，欣赏自然风光，探秘千年岩洞",
+   "points": [
+    {
+     "name": "龙溪A",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "香雪F",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠江新城B2口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "龙溪A/香雪F/珠江新城B2口",
+   "summary": "龙溪A、香雪F、珠江新城B2口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/651/did/193374.html": {
+   "title": "【雪域衡山高铁2日游】自营2-12人小团，南岳衡山独如飞,徒步朝圣天路,走进白色梦幻世界",
+   "points": [
+    {
+     "name": "衡山西站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "衡山西站",
+   "summary": "衡山西站"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6235/did/194494.html": {
+   "title": "【2026秋游-高铁游】玩转桂林4天3晚 触摸山水、阳朔遇龙河、漓江竹筏、银子岩、世外桃源、象鼻山、海洋乡银杏",
+   "points": [
+    {
+     "name": "中山",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "广州南/深圳北/中山/虎门/桂林北",
+   "summary": "中山"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6234/did/194491.html": {
+   "title": "【高铁梵净山4日】2026秋游 登梵净山 探铜仁大峡谷4天高铁团",
+   "points": [],
+   "raw": "铜仁/深圳北/广州南",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/120/did/179391.html": {
+   "title": "【广西猫儿山+湖南崀山高铁4日】赏中国丹霞+花岗岩地质之美，山海经第一山，登上华南之巅+八角寨看日出日落、俱有华山之险、黄山之奇、红霞云海、原始森林，夫夷江观景漂流",
+   "points": [
+    {
+     "name": "广州南站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "广州南站",
+   "summary": "广州南站"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6225/did/194155.html": {
+   "title": "【广100第四站·叶落柿红赏秋】11月22日100公里系列赛—徒步穿越从化醉美乡村、竹林、大岭头、柿子林，亲子体验组8km，挑战组15km",
+   "points": [
+    {
+     "name": "广州塔丨番禺广场丨花都清塘丨嘉禾望岗",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "佛山",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "千灯湖地铁出口",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "中山",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "三乡文化广场丨兴中体育馆",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "深圳",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "六约丨莲花北丨宝安中心地铁口",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "东莞",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    },
+    {
+     "name": "长安美汇丨虎威加油站丨厚街丨市民中心",
+     "district": null,
+     "quota": null,
+     "city": "广州",
+     "time": null
+    }
+   ],
+   "raw": "广州 广州塔丨番禺广场丨花都清塘丨嘉禾望岗 \r\n佛山 千灯湖地铁出口 \r\n中山 三乡文化广场丨兴中体育馆 \r\n深圳 六约丨莲花北丨宝安中心地铁口 \r\n东莞 长安美汇丨虎威加油站丨厚街丨市民中心 \r\n \r\n（具体集合地址以出发前一天通知为准，如未收到短信通知，请及时联系客服18824719451） \r\n07:40 指定上车地点找领队签到集合 \r\n08:00 准时出发，陆续前往活动现场； \r\n温馨提醒：根据赛事调控和部分集合点距离较远，因此出发时间每台车会略有不同，具体集合点及时间以活动出发前一天通知为准。 \r\n10:30-11:30 到达起点签到，根据指引开始徒步。 \r\n11:30 徒步正式开始，沿着路线指引，请大家按照自己的节奏行进，沿途均有路标丝带，签到点可补水，途中请注意环保！留下的是您的脚步，带走的是您的美好活动体验！ \r\n16:30 开始陆续抵达终点，领取徒步纪念奖牌。 \r\n17:00 分批乘车回程，所有参加徒步的伙伴们，必须在17点前到上车返程。",
+   "summary": "广州塔丨番禺广场丨花都清塘丨嘉禾望岗、佛山、千灯湖地铁出口 等9个上车点"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6212/did/193135.html": {
+   "title": "绝色新疆·雪遇北疆9日 | 2-6人团 喀纳斯 禾木 将军山夜滑 魔鬼城 伊宁赛里木湖 航拍北疆",
+   "points": [
+    {
+     "name": "乌鲁木齐",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "乌鲁木齐",
+   "summary": "乌鲁木齐"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6215/did/193401.html": {
+   "title": "【绝色新疆-冰雪阿勒泰8日】2-6人团 喀纳斯 禾木 将军山夜滑 魔鬼城 赛里木湖 航拍冰雪北疆之旅",
+   "points": [
+    {
+     "name": "乌鲁木齐",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "乌鲁木齐",
+   "summary": "乌鲁木齐"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5058/did/192625.html": {
+   "title": "【东北漠河+雪乡7日】2-8人小团 从漠河到雪乡，一场美妙的北国极寒发现之旅！",
+   "points": [
+    {
+     "name": "哈尔滨",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "哈尔滨",
+   "summary": "哈尔滨"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5643/did/180017.html": {
+   "title": "【大美稻亚·7日】稻城亚丁+四姑娘山双桥沟+墨石公园+理塘+甲居藏寨+折多山+贡嘎雪山经 典川西大环线/四川",
+   "points": [
+    {
+     "name": "成都",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "成都",
+   "summary": "成都"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6159/did/189271.html": {
+   "title": "【极边之秋7日】云南大理红水杉林-芒市金银塔-边境瑞丽-腾冲江东银杏村-和顺-热海景区-高黎贡轻徒步-保山咖啡手作-诺邓古村边境秋色游",
+   "points": [
+    {
+     "name": "点】大理古城指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "解散地点】大理火车站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "大理机场",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】大理古城指定酒店 \r\n【解散地点】大理火车站/大理机场",
+   "summary": "点】大理古城指定酒店、解散地点】大理火车站、大理机场"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/3349/did/180195.html": {
+   "title": "【大美四川5日】2-8人小团 · 峨眉山+乐山大佛+三星堆+都江堰+熊猫基地+武侯祠5日游/四川",
+   "points": [
+    {
+     "name": "点】成都市区指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】成都市区指定酒店； \r\n \r\n \r\n 【适合人群】3-70周岁身体健康，无三高及心脑血管疾病人员(18岁以下需家长陪同，55周岁以上需去医院做身体检查，以确保身体健康)； \r\n \r\n \r\n 【成团说明】独立成团； \r\n \r\n \r\n 【出团通知】关于出团的相关事项，我社在出团前会进行两次通知； \r\n \r\n \r\n 第1次短信通知，在出团前1-3天，由我社客服进行通知，通知内容为：成都集合酒店名称、时间、地址、电话等相关信息，并提醒队员所需装备，请保持手机畅通；队员抵达集合酒店后报“大美四川+姓名“拿房。房费已付，队员自己支付押金。对于拼房的队员，工作人员会将拼房队员的电话互换； \r\n \r\n \r\n 第2次微信通知，在集合日当天（",
+   "summary": "点】成都市区指定酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5655/did/191384.html": {
+   "title": "【西藏越野珠峰8日】2-4人小团 拉萨 羊湖 卡若拉冰川 珠峰大本营 珠峰东坡 纳木错",
+   "points": [
+    {
+     "name": "拉萨",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "拉萨",
+   "summary": "拉萨"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/3611/did/176768.html": {
+   "title": "【一路向北7日】大理双廊、仙境白水台、喜洲、磻溪 “S弯”、洱海旅拍、沙溪、虎跳峡、纳帕海、普达措、松赞林寺、风情泸沽湖-云南",
+   "points": [
+    {
+     "name": "昆明",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "昆明",
+   "summary": "昆明"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4897/did/193332.html": {
+   "title": "【雨崩+南极洛徒步5日】神瀑线、冰湖线、梅里雪山、南极洛，解锁滇西秘境/云南",
+   "points": [],
+   "raw": "丽江集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6177/did/190663.html": {
+   "title": "【漫游滇西5日】2-8人小团 <腾冲-芒市-瑞丽>和顺古镇-银杏村-热海景区-坝派巨泉-一寨两国-勐焕大金塔-银塔-莫里热带雨林-绮罗古镇休闲游/云南",
+   "points": [],
+   "raw": "保山/芒市",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6179/did/190688.html": {
+   "title": "【穿越丙察察|察墨公路11日】大理-老姆登-独龙江-怒江-丙中洛-察瓦龙-察墨公路-墨脱-林芝-思金拉措-贡德林草原-羊卓雍措-卡若拉冰川-拉萨11日游 云南/西藏",
+   "points": [],
+   "raw": "大理集合，拉萨解散",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5413/did/189383.html": {
+   "title": "【秋醉神武6日】2-8人小团 从神农架到武当山 一场贯穿双遗的秋日盛宴/湖北",
+   "points": [],
+   "raw": "宜昌",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5160/did/190840.html": {
+   "title": "【秘境佤乡7日·2-14人团】哀牢山-沧源翁丁村-西盟龙摩爷-孟连娜允古镇-景迈山-翁基古寨-古茶林-糯干古寨-老达保-石门峡-金山原始森林-佤山云海-西双版纳/云南",
+   "points": [
+    {
+     "name": "昆明",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "昆明",
+   "summary": "昆明"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6190/did/191237.html": {
+   "title": "【版纳+普洱+景迈山5日】2-8人团 太阳河森林公园-咖啡庄园-景迈山糯干&翁基千年古寨-古茶林-般若寺-基诺山雨林/云南",
+   "points": [],
+   "raw": "景洪",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4655/did/189409.html": {
+   "title": "【三峡徒步5日】红叶染秋，徒步三峡之巅，赏三峡层峦叠嶂盛开的红叶/湖北",
+   "points": [],
+   "raw": "宜昌",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6193/did/191352.html": {
+   "title": "【崇左北海7日】2-8人小团 南宁 明仕田园 德天瀑布 北海银滩 涠洲岛边陲山海记/广西",
+   "points": [
+    {
+     "name": "南宁",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "南宁",
+   "summary": "南宁"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5685/did/186362.html": {
+   "title": "【山风旷野7日】仙境老药山-经典虎跳峡高路-隐世尼汝-秘境翁水三措-碧茸大峡谷-秘境阿布吉措-香格里拉-白水台-滇西北徒步/云南",
+   "points": [
+    {
+     "name": "丽江",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "丽江",
+   "summary": "丽江"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6198/did/192618.html": {
+   "title": "【婺源寻秋·仙山瓷都5日】自营2-8人小团 南昌＋夜游葛仙山＋婺源婺女洲＋篁岭晒秋＋景德镇/江西",
+   "points": [
+    {
+     "name": "点】南昌指定酒店全天集合",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "出发前三天短信通知集合酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "汇合，需要客人自行做好相应调整，我方会尽力帮忙协调，但不承担因此而增加的费用，因行程耽误而没有参加的景区、活动、住宿费用无法退还。若我方提供后续集合方案，但客人自愿放弃行程，则按\"退订活动\"相关退款政策扣除费用。\r\n \r\n \r\n * 目的地发生的不可抗力包括但不仅限于：目的地景区关闭，旅游路线途中发生地震、洪水、台风等自然灾害，目的地发生大规模传染病等。\r\n \r\n \r\n * 第三方原因包括但不限于：航班满员、停运、国家政策限制等。\r\n \r\n \r\n \r\n \r\n \r\n 【注意事项】 \r\n \r\n \r\n 1、本产品不安排陌生人拼房，1大1小报名，2人均为占床价，12岁以上儿童必须占床。如一大一小（单独带孩子出行），不论多大儿童，必须占床，全程使用1间房。请让客人按实际出行人数进行预订。 \r\n \r\n \r\n 2、因旺季酒店房间紧张，不提供标间加床以及酒店代订服务。 \r\n \r\n \r\n 3、行程默认安排双床标间。若您需要安排“大床房”，请您在线上订单备注，将酌情为您贴心安排，因酒店大床房数量有限，以实际安排为准。 \r\n \r\n \r\n 4、本线路有最低成团人数要求，购买机票前务必联系客服确认是否成团。 \r\n \r\n \r\n 5、 此行程为长途户外旅行，有一定强度： \r\n \r\n \r\n ①有心脏病、三高（高血压、高血脂、高血糖）、肺部等呼吸系统疾病史的队友，报名前请务必提前告知，若因故意隐瞒自身的慢性基础疾病所引起的意外，保险无法正常理赔！如行程当中涉及，骑马、水上运动、滑雪等高危刺激运动项目不建议参加。 \r\n \r\n \r\n ②行程有一定强度：孕妇、70周岁及以上老人等其他特殊身体情况人员不接受报名。 \r\n \r\n \r\n ③不接受65周岁及以上老人单独带孩子出行。\r\n④60-70周岁老年人参团，须有直系亲属陪同，没有做过大手术，且无⾼⾎压、⼼脏病、哮喘病等病史，现场签订免责协议可正常出游；65-70周岁以下老人身体健康可正常参加，但需提供出发前3个月以内的体检报告。 \r\n \r\n \r\n 6、如因天气原因、自然灾害、景区临时政策、交通堵塞、封路等不可抗力因素，活动执行方可根据情况调整行程，并不接受投诉。 \r\n \r\n \r\n 7、 特别说明：本产品有一定活动强度，60周岁及以上老人参团必须签署免责协议，并如实告知身体状况，尽请理解！\r\n \r\n \r\n \r\n \r\n \r\n 特别说明：文案照片仅供参考，具体以实际为准。主办方有权根据天气等不可抗力原因适当调整行程。为记录活动精彩瞬间，我们将拍摄活动照片用于后续宣传。若您的影像被选用，我们将奉上每张10元的特别感谢，以表达对您支持的心意。报名即视为同意授权我们使用相关影像资料，您的参与将帮助我们更好地推广活动。感谢您的理解与支持。",
+   "summary": "点】南昌指定酒店全天集合、出发前三天短信通知集合酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5954/did/194463.html": {
+   "title": "【漓江徒步2天1晚】漓江精华段18KM徒步新玩法：推窗见九马画山，追相公山日出，赏千里江山图日落",
+   "points": [
+    {
+     "name": "珠江新城地铁B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城地铁B2出口",
+   "summary": "珠江新城地铁B2出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6216/did/193440.html": {
+   "title": "绝色新疆·奢享阿勒泰7日 | 2-6人团 喀纳斯 禾木 将军山滑雪 阿勒泰小龙虾冰浮 冰雪北疆之旅",
+   "points": [
+    {
+     "name": "点】阿勒泰市指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】阿勒泰市指定酒店，请报“绝色新疆”+姓名拿房，酒店入住时间14:00后，提前抵达可将行李寄存在酒店前台；\r\n \r\n \r\n 【适合人群】4周岁-70周岁身体健康，持有二代居民身份证，无三高及心脑血管疾病人员，敬请谅解！(18岁以下需家长陪同，70周岁以上需出具医院的身体状况证明)；\r\n \r\n \r\n 【出团通知】出发前3-4天我司工作人员会将出团信息发至您手机短信，如集合日前未收到请及时与客服联系，司机会在集合日22点前与您联系（新疆与内地有2小时时差）",
+   "summary": "点】阿勒泰市指定酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6220/did/193608.html": {
+   "title": "【全景东北10日】私家小团，吉林-长白山-镜泊湖-雪乡-哈尔滨-漠河， 滑雪+温泉+冬捕+驯鹿+雾凇+冰瀑+登上北国列车，冬季漠河找北之旅",
+   "points": [],
+   "raw": "吉林进，哈尔滨出",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6222/did/193835.html": {
+   "title": "【嬉雪东北7日】私家小团，吉林-长白山-延吉-雪乡-亚布力-哈尔滨 滑雪+温泉+雾凇+漂流+冰雪大世界+雪地越野",
+   "points": [],
+   "raw": "吉林进，哈尔滨出",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6223/did/193966.html": {
+   "title": "【梦幻小兴安岭6日】私家小团，哈尔滨-伊春-铁力 五营国家森林公团+激情滑雪+红星火山地质公园+金山鹿苑",
+   "points": [
+    {
+     "name": "哈尔滨",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "哈尔滨",
+   "summary": "哈尔滨"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4950/did/177379.html": {
+   "title": "【贵州屋脊7日】 乌蒙山脊+乌蒙东坡+韭菜坪+阿西里西秘境+小韭菜坪徒步7日",
+   "points": [
+    {
+     "name": "贵阳",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "贵阳",
+   "summary": "贵阳"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5719/did/184748.html": {
+   "title": "【相约滇藏丨探秘墨脱11日】纳帕海-梅里雪山-然乌湖-来古冰川-墨脱-岗云杉-巴松措-羊卓雍措-普莫雍错-拉萨/西藏/云南",
+   "points": [
+    {
+     "name": "丽江",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "丽江",
+   "summary": "丽江"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4725/did/175044.html": {
+   "title": "【三江秘境7日】2-8人小团 德贡公路-怒江大峡谷-梅里雪山-香格里拉-白水台-虎跳峡-丙中洛-独龙江纹面/云南私家小团",
+   "points": [
+    {
+     "name": "大理",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "大理",
+   "summary": "大理"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5756/did/189396.html": {
+   "title": "【神农架徒步5日】深入神农架原始森林核心，赏老君山斑斓秋景/湖北",
+   "points": [],
+   "raw": "宜昌",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5245/did/180080.html": {
+   "title": "【醉长安5日】兵马俑-大唐不夜城-华山-明城墙-大明宫-回民街-乾陵-袁家村5日轻奢游/大西北西安",
+   "points": [
+    {
+     "name": "西安",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "西安",
+   "summary": "西安"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5501/did/193469.html": {
+   "title": "【绝色新疆-瑞雪南疆6日】塔县 红旗拉普 瓦罕走廊 红山野狼谷 中国西极 慕士塔格 木吉火山口 班迪尔湖 喀什古城人文之旅6日游",
+   "points": [],
+   "raw": "喀什",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4222/did/191302.html": {
+   "title": "【秘境怒江7日】怒江骑行 独龙江 老姆登 丙中洛 孔雀山徒步/云南",
+   "points": [],
+   "raw": "保山",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4735/did/176631.html": {
+   "title": "【秘境沧源8日】哀牢山-金山原始森林-沧源-翁丁村-崖画-景迈山-糯干古寨-版纳-中科院-野象谷-傣族园-总佛寺/云南",
+   "points": [
+    {
+     "name": "昆明",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "昆明",
+   "summary": "昆明"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4997/did/189401.html": {
+   "title": "【秋醉三峡5日】 行至三峡云起处，满船红叶入诗来/湖北赏秋",
+   "points": [],
+   "raw": "宜昌",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6023/did/182978.html": {
+   "title": "【行走·阿尼玛卿大环】8日 | 集自然奇观、英雄史诗与心灵修行于一体的神圣旅程/四川",
+   "points": [],
+   "raw": "玛沁",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5513/did/191013.html": {
+   "title": "徽州秋色5日 | 黄山、宏村、塔川、婺源篁岭、婺源石城、菊径、瑶里古镇 江西落地散拼",
+   "points": [
+    {
+     "name": "出发前三天短信通知酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】黄山市黎阳老街，出发前三天短信通知酒店\r\n \r\n \r\n 【返程与解散】解散日预计下午14:30左右抵达黄山市内，建议购买15:30以后或次日返程票。\r\n \r\n \r\n \r\n \r\n \r\n 2-8人私家团随时出发\r\n \r\n \r\n \r\n \n\n \n \n \n 行程 \n \n 沿途景点",
+   "summary": "出发前三天短信通知酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5779/did/189390.html": {
+   "title": "【秋醉神农架5日】神农坛 金猴岭原始森林 大九湖晨雾 穿越神农架原始森林×俯视千层红/湖北",
+   "points": [],
+   "raw": "宜昌",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5526/did/192239.html": {
+   "title": "【雪国列车5日 SUV小团】漠河 北极村+北红村+圣诞村+龙江第一湾+中国最北点+马拉爬犁+驯鹿+滑雪/东北",
+   "points": [],
+   "raw": "哈尔滨火车站集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5783/did/189372.html": {
+   "title": "【秋醉神峡6日】2-8人团 枕神农架大九湖雾色·揽三峡之巅红涛/湖北",
+   "points": [],
+   "raw": "宜昌",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5788/did/177816.html": {
+   "title": "【古蕴神武峡7日】2-8人团 襄阳古城 武当山 神农架 大九湖 三峡之颠 景观人文大环线/湖北",
+   "points": [
+    {
+     "name": "武汉",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "武汉",
+   "summary": "武汉"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4809/did/175767.html": {
+   "title": "【秘境滇东南8日】 元阳梯田-普者黑-世外桃源坝美-东川红土地-元谋土林-弥勒东风韵-建水古城-蒙自碧色寨/云南",
+   "points": [],
+   "raw": "昆明集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5581/did/177896.html": {
+   "title": "【全景恩施5日】2-14人团 寻访鄂西山水秘境，穿行于亿年石林峡谷，邂逅土家烟火人间 /湖北",
+   "points": [],
+   "raw": "恩施",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5582/did/177855.html": {
+   "title": "【全景巴楚7日】2-14人团 屏山峡谷 恩施女儿城 三峡之巅 神农架大九湖 解锁荆楚山水的史诗级漫游/湖北",
+   "points": [],
+   "raw": "恩施",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5583/did/177937.html": {
+   "title": "【恩施徒步4日】2-16人团 峡谷秘行 立体穿行恩施徒步探秘亿年地质史诗/湖北",
+   "points": [],
+   "raw": "恩施",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6100/did/186663.html": {
+   "title": "【长穿党岭4日徒步】 探寻阿坝州国家地理秘境 四川",
+   "points": [
+    {
+     "name": "成都",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "成都",
+   "summary": "成都"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5335/did/181316.html": {
+   "title": "【圆梦北京5日】天安门+故宫+八达岭长城+圆明园+天坛公园经典游",
+   "points": [
+    {
+     "name": "北京",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "北京",
+   "summary": "北京"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5343/did/182440.html": {
+   "title": "【大美滇东南5日】2-8人小团 普者黑/元阳梯田-弥勒东风韵-建水古城-蒙自碧色寨-朱家花园-抚仙湖/云南",
+   "points": [
+    {
+     "name": "昆明",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "昆明",
+   "summary": "昆明"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5856/did/176543.html": {
+   "title": "【版纳时光5日】2-8人团 中科院植物园-望天树-野象谷-傣族园-曼掌村-曼听公园-总佛寺-告庄夜市-曼远村-傣乡水城-曼丢古寨-般若寺 /云南",
+   "points": [],
+   "raw": "西双版纳",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6112/did/187061.html": {
+   "title": "【极致滇西北7日】丽江-虎跳峡-白水台-纳帕海-普达措-梅里雪山-傈僳同乐村-滇金丝猴-格拉丹-束河-泸沽湖云南",
+   "points": [],
+   "raw": "丽江集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5863/did/186395.html": {
+   "title": "【云巅牧歌5日】2-8人小团 从“川西独库公路”到牛背山，一场雪山与人文的双重朝圣/四川私家小团",
+   "points": [
+    {
+     "name": "成都",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "成都",
+   "summary": "成都"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5869/did/193182.html": {
+   "title": "绝色新疆·冰雪伊犁7日| 2-6人团 安集海大峡谷 冰雪赛里木湖 天马踏雪 天鹅泉 雾凇 库尔德宁 那拉提",
+   "points": [
+    {
+     "name": "乌鲁木齐",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "乌鲁木齐",
+   "summary": "乌鲁木齐"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4345/did/187200.html": {
+   "title": "【大美九黄动车3日】2-8人团 九寨沟·童话世界+黄龙·人间瑶池+中查沟·草甸秘境动车往返 四川",
+   "points": [],
+   "raw": "黄龙九寨",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4858/did/182203.html": {
+   "title": "【大美色稻8日】2-8人小团 色达+稻城亚丁+四姑娘山双桥沟+中路藏寨+理塘勒通古镇+龙灯草原+海子山+红海子+S434雪山彩虹路 /四川私家小团",
+   "points": [
+    {
+     "name": "点】成都市区指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】成都市区指定酒店；\r\n \r\n \r\n 【适合人群】12周岁-69周岁身体健康，无三高及心脑血管疾病人员，因政策所限，此线路仅限大陆户籍和港澳公民前往，敬请谅解！(18岁以下需家长陪同，55周岁以上需去医院做身体检查，以确保身体健康)；\r\n \r\n \r\n 【成团说明】2人成行，8人封队，全程司机兼向导；\r\n \r\n \r\n 【出团通知】关于出团的相关事项，我社在出团前会进行两次通知；\r\n第1次短信通知，在出团前1-3天，由我社客服进行通知，通知内容为：成都集合酒店名称、时间、地址、电话等相关信息，并提醒队员所需装备，请保持手机畅通；队员抵达集合酒店后报“大美色稻+姓名“拿房。房费已付，队员自己支付押金。对于拼房的队员，工作人员会将拼房队员的电话互换；\r\n第2次微信通知，在集合日当天（",
+   "summary": "点】成都市区指定酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6160/did/189285.html": {
+   "title": "【乌蒙寻秋8日】昆明-昭通大山包-甘杉彩林-黄连河-盐津-宜宾-李庄古镇-蜀南竹海大熊猫-小草坝-赤水大瀑布-丙安古镇-遵义会址-滇黔川三省环游/云南",
+   "points": [
+    {
+     "name": "点】昆明市指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "集合、解散地点】贵阳东站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "贵阳机场解散",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】昆明市指定酒店 \r\n【集合、解散地点】贵阳东站/贵阳机场解散",
+   "summary": "点】昆明市指定酒店、集合、解散地点】贵阳东站、贵阳机场解散"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4280/did/193249.html": {
+   "title": "雨崩徒步4日（2-14人团）：西当乘车进村，徒步冰湖线+神瀑线，梅里雪山 /云南",
+   "points": [],
+   "raw": "丽江集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5830/did/190990.html": {
+   "title": "【梦幻之秋7日】婺源、三清山、望仙谷、德兴铜矿 摄影团/江西",
+   "points": [],
+   "raw": "江西省婺源县",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5831/did/190984.html": {
+   "title": "【梦幻之秋婺源5日】江西婺源、江岭、篁岭、对冲、月亮湾、樟村摄影团/江西",
+   "points": [],
+   "raw": "江西省婺源县",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5218/did/176946.html": {
+   "title": "【秘境湘西6日 】丹霞探幽.洞穴穿行.绝壁攀越.瀑布古镇小环线/湖南",
+   "points": [
+    {
+     "name": "长沙",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "长沙",
+   "summary": "长沙"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5537/did/177236.html": {
+   "title": "【无限黔徒6日】贵州羊皮洞瀑布+大圣之眼+夜郎天路+关岭冰臼/花江峡谷大桥+云峰屯堡徒步/贵州",
+   "points": [
+    {
+     "name": "贵阳",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "贵阳",
+   "summary": "贵阳"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6195/did/191409.html": {
+   "title": "【冰浮阿勒泰 5日】丨私家团丨阿勒泰-冰浮俱乐部-禾木/骑马观景/围炉煮茶/篝火晚会/轻旅拍/雪地火锅-喀纳斯 阿勒泰起止/绝色新疆",
+   "points": [],
+   "raw": "阿勒泰",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6196/did/191546.html": {
+   "title": "【冰火西域5日】丨私家团丨乌鲁木齐-天山天池-江布拉克-库木塔格沙漠-吐峪沟-火焰山-乌鲁木齐/绝色新疆",
+   "points": [
+    {
+     "name": "乌鲁木齐",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "乌鲁木齐",
+   "summary": "乌鲁木齐"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6213/did/193202.html": {
+   "title": "【桂林赏秋徒步大会5日】徒步穿越看海洋乡满山金黄银杏、赏恭城一树通红柿子，漫步漓江山水画卷，探秘神秘地心之旅/广西",
+   "points": [],
+   "raw": "桂林集散",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5461/did/194225.html": {
+   "title": "【东北雪乡+漠河7日】神州北极2-8人小团 · 童话雪乡 中国版 “挪威特罗姆瑟”寻北游",
+   "points": [
+    {
+     "name": "哈尔滨",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "哈尔滨",
+   "summary": "哈尔滨"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5555/did/177335.html": {
+   "title": "【旷野贵州5日】 荔波茂兰漏斗森林+四洞天穿越+猴子沟+螺丝壳轻徒步/贵州",
+   "points": [],
+   "raw": "贵阳集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/3772/did/179480.html": {
+   "title": "【印象重庆休闲5日】武隆 天生三桥 仙女山 武陵山大裂谷 李子坝轻轨/四川",
+   "points": [
+    {
+     "name": "重庆",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "重庆",
+   "summary": "重庆"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5322/did/193350.html": {
+   "title": "【南极洛徒步5日】南极洛+阿布吉措的秘境之旅/云南",
+   "points": [
+    {
+     "name": "丽江",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "丽江",
+   "summary": "丽江"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6118/did/187507.html": {
+   "title": "【霞客之路 】 花江大桥/北盘江+龙头大山+清水河+坡毛山/万峰林徒步5日",
+   "points": [
+    {
+     "name": "贵阳指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "贵阳指定酒店",
+   "summary": "贵阳指定酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6191/did/191275.html": {
+   "title": "【滇藏秋颂9日】2-7人小团梅里雪山-墨脱秘境-丙察察秋色-金沙江大拐弯-怒江大峡谷-德贡公路秋色-怒江丙中洛-茶马古道-鲁朗小镇-色季拉山-羊湖鲁日拉-日托寺-拉萨/云南西藏",
+   "points": [],
+   "raw": "丽江集合，拉萨解散",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5825/did/181347.html": {
+   "title": "【徒步广西4/5天】徒步打卡剑龙山-浩坤湖-天坑地心穿越-游鹅泉田园风光-赏德天跨国瀑布",
+   "points": [],
+   "raw": "南宁集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6154/did/189206.html": {
+   "title": "【秘境太行7日】 全景太行 南太行&西太行 7日行程",
+   "points": [],
+   "raw": "郑州",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6018/did/182747.html": {
+   "title": "【贡嘎西南坡5日】2-12人小团 轻徒步|一程山水，360°朝圣蜀山之王",
+   "points": [
+    {
+     "name": "成都",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "成都",
+   "summary": "成都"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5264/did/179890.html": {
+   "title": "【大美九寨6日】8人小团 九寨沟+黄龙+四姑娘山双桥沟+理小路+卧龙中华大熊猫苑+松潘古城 轻奢慢游/四川",
+   "points": [
+    {
+     "name": "成都",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "成都",
+   "summary": "成都"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5043/did/187737.html": {
+   "title": "【大美秋季九寨6日】川西北彩林盛宴 九寨沟+黄龙+黑水彩林+毕棚沟+达古冰川+羊茸哈德 四川",
+   "points": [
+    {
+     "name": "点】成都市区指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】成都市区指定酒店/",
+   "summary": "点】成都市区指定酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5304/did/190831.html": {
+   "title": "【大美稻亚·6日】2-8人小团 稻城亚丁+海螺沟冰川+墨石公园+理塘勒通古镇+红海子+木雅大寺+S434雪山彩虹路 自然人文探索/四川",
+   "points": [
+    {
+     "name": "成都",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "成都",
+   "summary": "成都"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5820/did/193037.html": {
+   "title": "【行走·雅拉党岭5日徒步】尽揽雅拉的雪山圣湖与党岭的原始秘境/四川",
+   "points": [
+    {
+     "name": "成都",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "成都",
+   "summary": "成都"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4571/did/184008.html": {
+   "title": "【贡嘎大环线7日徒步】穿越贡嘎大环线，尽览蜀山之王雄奇盛景",
+   "points": [],
+   "raw": "四川成都集合酒店",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5624/did/194498.html": {
+   "title": "【武功山大巴】赏云海 向云端高山金草甸~精华穿越2天3晚汽车团（沈子村+景区+东江村上山）",
+   "points": [
+    {
+     "name": "珠江新城B2出口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "珠江新城B2出口",
+   "summary": "珠江新城B2出口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5434/did/177264.html": {
+   "title": "【初见贵州5日】 2-7人小团 贵阳 黄果树 青岩古镇 荔波小七孔 西江千户苗寨小环线",
+   "points": [
+    {
+     "name": "贵阳",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "贵阳",
+   "summary": "贵阳"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4169/did/194278.html": {
+   "title": "【冬韵阿尔山7日 】私家独立团 海拉尔 莫日格勒河 冰雪那达慕 越野车冰湖穿越 雾凇漂流/东北",
+   "points": [
+    {
+     "name": "海拉尔",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "海拉尔",
+   "summary": "海拉尔"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5890/did/192722.html": {
+   "title": "【冰雪梦幻B线5日】2-8人小团 横跨东北两省+亚雪公路+童话雪乡+滑雪3小时+冰雪画廊轻徒步+长白山+延吉打卡朝鲜民俗园/东北",
+   "points": [],
+   "raw": "哈尔滨市",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5042/did/192308.html": {
+   "title": "【冰雪梦幻A线7日】2-8人小团丨哈尔滨 亚雪公路 梦幻雪山 延吉 长白山 吉林雾凇长廊/东北",
+   "points": [],
+   "raw": "黑龙江省哈尔滨市",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6233/did/194488.html": {
+   "title": "【大美黄山高铁5日】2026秋游 黄山、打卡西递、塔川、宏村、徽州古城",
+   "points": [],
+   "raw": "集合，切勿迟到，以免耽误其他游客行程。若因迟到导致无法随车游览，责任自负，敬请谅解。 \r\n \r\n \r\n 4、入住酒店的客人必须携带好有效证件，海外游客必须携带好有效护照及其他有效证件。 \r\n \r\n \r\n 5、如遇天气原因导致的索道临时关闭，请在购买黄山景区门票时询问详情，选择合适的上山途径。 \r\n \r\n \r\n 6、出行期间请随身携带本人的有效身份证原件，未满16周岁者请携带户口本原件；超过16周岁的游客若没有办理身份证，请在户口所在地开出相关身份证明，以免影响酒店入住。出行前请务必检查自己证件的有效期。 \r\n \r\n \r\n 7、如遇路况原因等突发情况需要变更各集合时间的，届时以导游或随车人员公布为准。 \r\n \r\n \r\n 8、如遇天气原因导致的索道临时关闭，导游会办理相应的退费手续，行程会有相应调整。 \r\n \r\n \r\n 9、持老年证、军官证、学生证等优惠证件的游客可享受景区门票优惠政策，具体以出行当日景区公布政策为准。具备条件的游客请在下单时备注相关信息并在出行时携带好优惠证件，届时由导游统一安排，按打包行程中客人已享的优惠价格，现场退还差价。 \r\n \r\n \r\n 10、因当地经济条件有限，交通、酒店服务及设施、餐饮等方面与发达城市相比会有一定的差距，敬请谅解。 \r\n \r\n \r\n 11、黄山山上气候变化较大，时晴时雨，反复无常。登山时应备雨衣，刮风下雨，不宜打伞。雷雨时不要攀登高峰，特别是天都、莲花二峰，不要用手扶铁链，亦不宜在树下避雨，以防雷击。（仅供黄山产品参考） \r\n \r\n \r\n 12、黄山山高，多台阶，登山以穿登山鞋、布鞋、球鞋为宜。皮鞋和塑料底鞋容易滑跌。为安全考虑，登山时可买一竹棍或手杖。不建议携带拉杆箱等大件行李登山，以双肩包。（仅供黄山产品参考） \r\n \r\n \r\n 13、黄山山高路陡，游山时以缓步为宜，不可过速。要做到“走路不看景，看景不走路”。在险峻山峰上照相时，摄影者选好角度后就不要移动，特别注意不要后退，以防不测。（仅供黄山产品参考） \r\n \r\n \r\n 14、为了您人身、财产的安全，请您避免在公开场合暴露贵重物品及大量现金。上街时需时刻看管好首饰、相机等随身物品。 \r\n \r\n \r\n \r\n \r\n \r\n \r\n 【关注我们】 \r\n 天涯户外网：天涯户外.com \r\n 公众号：tyhw2002 \r\n 抖音号：天涯户外 \r\n 视频号：天涯户外 \r\n 小红书：出发地天涯户外旅行 \r\n 客服电话：020-87591660 \r\n 18824719451（短线） \r\n 13903014965（长线） \r\n 13903014964（团队定制） \r\n 旅行社业务经营许可证：L-GD01867 \r\n \r\n \n\n \n\n \n\n \n \n 评 价 \n 该路线预定完成出行之后，才能评价 \n \n\n 没有评价 \n \n\n \n \n \n .number-pages a,.number-",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5455/did/191262.html": {
+   "title": "【云南滇西秋色 7天】2-8人团 腾冲银杏村-无量山冬樱花-瑞丽-芒市-诺邓古村-巍山古城（全程四钻酒店+柏联温泉+银杏村古装）/云南",
+   "points": [],
+   "raw": "大理集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6228/did/194384.html": {
+   "title": "【2026秋游桂西南4日】高铁游中越边境德天瀑布 通灵大峡谷 峒那屿湾 明仕田园 三门海",
+   "points": [
+    {
+     "name": "中山",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "珠海",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "广州南/深圳北/虎门/中山/珠海",
+   "summary": "中山、珠海"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6009/did/182107.html": {
+   "title": "【璀璨湘南5日】湖南长沙，南岳衡山，莽山五指峰，郴州九龙水寨，高椅岭，小东江5天4晚",
+   "points": [
+    {
+     "name": "长沙",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "长沙",
+   "summary": "长沙"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5891/did/193081.html": {
+   "title": "【梦幻韩潮4日】2-8人团 延吉-长白山丨长白山+冬日温泉+滑雪+雪地徒步+雪地漂流+冰封玫瑰+云顶天宫+恩都里/东北",
+   "points": [],
+   "raw": "延吉",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6147/did/189005.html": {
+   "title": "【金秋花事7日】无量山樱花谷-腾冲银杏村-诺邓古村-瑞丽一寨两国-芒市金塔银塔-奇幻热海-和顺古镇-滇西抗战纪念馆-巍山古城/云南",
+   "points": [
+    {
+     "name": "昆明",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "大理",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "昆明/大理",
+   "summary": "昆明、大理"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6149/did/189029.html": {
+   "title": "【滇西秘境10日】云南腾冲银杏-芒市金塔银塔-和顺-热海滚锅-怒江大峡谷-双虹桥-丙中洛-独龙江-秘境神田-雾里村-老姆登-巍山-南涧土林-无量山樱花谷/云南",
+   "points": [
+    {
+     "name": "点】大理市指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】大理市指定酒店 \r\n【解散地点】昆明市解散 \r\n【升级2+1车】满16人升级2+1陆地头等舱大巴车，旅途轻松舒适！ \r\n【航拍体验】特别指定5个团期，满11人或以上领队带无人机航拍体验：11.21/11.25/12.4/12.6 /12.8。 \r\n第01期：2026年11月21日（大理集合）——11月30日（昆明解散）（满11人，赠送航拍） \r\n第02期：2026年11月23日（大理集合）——12月02日（昆明解散） \r\n第03期：2026年11月25日（大理集合）——12月04日（昆明解散）（满11人，赠送航拍） \r\n第04期：2026年11月28日（大理集合）——12月07日（昆明解散） \r\n第05期：2026年11月30日（大理集合）——12月09日（昆明解散） \r\n第06期：2026年12月02日（大理集合）——12月11日（昆明解散） \r\n第07期：2026年12月04日（大理集合）——12月13日（昆明解散）（满11人，赠送航拍） \r\n第08期：2026年12月06日（大理集合）——12月15日（昆明解散）（满11人，赠送航拍） \r\n第09期：2026年12月08日（大理集合）——12月17日（昆明解散）（满11人，赠送航拍） \r\n——最美秋景价格：成人：4180元/人，儿童：2980元/人（不含门票不占床），单房差1100元/人——\r\n \r\n \r\n \r\n \n\n \n \n \n 行程 \n \n 沿途景点",
+   "summary": "点】大理市指定酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6164/did/189507.html": {
+   "title": "【滇西全景11日】2-8人小团 大理-芒市金银塔-边境瑞丽-腾冲-银杏村-和顺古镇-热海-怒江大峡谷-丙中洛-独龙江纹面女-梅里雪山-沙溪-南涧土林-无量山樱花谷2/云南",
+   "points": [
+    {
+     "name": "点】大理古城指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "解散地点】大理火车站+大理机场",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】大理古城指定酒店 \r\n【解散地点】大理火车站+大理机场 \r\n【适合人群】6周岁-69周岁身体健康深度游爱好者（儿童、老人须有直系亲属，或者是成年人陪同方可报名） \r\n【航拍体验】每期满6人，司机带无人机航拍体验",
+   "summary": "点】大理古城指定酒店、解散地点】大理火车站+大理机场"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6165/did/189514.html": {
+   "title": "【滇西南环线10日】2-8人小团 昆明-无量山樱花-腾冲银杏村-和顺-热海-瑞丽-芒市-沧源翁丁村-千年崖画-西盟龙摩爷-景迈山-普洱咖啡庄园-哀牢山-巍山/云南",
+   "points": [
+    {
+     "name": "点】昆明集合酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "解散地点】大理祥云站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】昆明集合酒店 \r\n【解散地点】大理祥云站/昆明市 \r\n【适合人群】6周岁-69周岁身体健康深度游爱好者（儿童、老人须有直系亲属，或者是成年人陪同方可报名） \r\n【航拍体验】每期满6人，司机带无人机航拍体验 \r\n第01期：2026年11月21日——11月30日 \r\n第02期：2026年11月23日——12月02日 \r\n第03期：2026年11月26日——12月05日 \r\n第04期：2026年11月28日——12月07日 \r\n第05期：2026年12月01日——12月10日 \r\n第06期：2026年12月03日——12月12日 \r\n第07期：2026年12月05日——12月14日 \r\n \r\n——第01-07期：成人 5380元/人，儿童：3680 元/人（小孩不占床位和门票），单房差1100元——\r\n \r\n \r\n \r\n \n\n \n \n \n 行程 \n \n 沿途景点",
+   "summary": "点】昆明集合酒店、解散地点】大理祥云站"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5952/did/192981.html": {
+   "title": "【江南秘境5日】走进浙江丽水，缙云仙都、古堰画乡、徒步松阳古村、探访云和梯田",
+   "points": [],
+   "raw": "温州集合",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4458/did/193588.html": {
+   "title": "【雪漫兴安岭6日】2-10人小团 伊春 -五营-汤旺河 -库尔滨 - 金山鹿苑 /东北",
+   "points": [],
+   "raw": "伊春",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/4988/did/192996.html": {
+   "title": "【春华秋实 7日】腾冲银杏村-无量山冬樱花-边陲小城瑞丽-傣家风情芒市-和顺古镇-热海大滚锅-巍山古城-诺邓古村-潞江坝/云南",
+   "points": [
+    {
+     "name": "昆明",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "大理",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "昆明/大理",
+   "summary": "昆明、大理"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5462/did/194162.html": {
+   "title": "【雪遇盛筵7日】2-8人团 吉林雾凇长廊 长白山 镜泊湖冬捕 中国雪乡 亚雪公路 哈尔滨东北深度游",
+   "points": [],
+   "raw": "吉林",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6210/did/193002.html": {
+   "title": "【金陵姑苏5天4晚】江苏南京醉美江南秋色 栖霞山 明孝陵 美龄宫 燕子矶 天平山 池杉湖 深度摄影游",
+   "points": [],
+   "raw": "南京",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5606/did/178802.html": {
+   "title": "【嗨腾格里4天3晚】经典腾格里沙漠“五湖徒步”52KM徒步活动-宁夏",
+   "points": [],
+   "raw": "银川",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5848/did/194147.html": {
+   "title": "【冰雪太行徒步 4日】穿行冰蘑菇奇境 峡谷冰瀑 走进崖上古村",
+   "points": [],
+   "raw": "郑州",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6231/did/194450.html": {
+   "title": "【云南虫谷8日】哀牢山秘境-无量山樱花谷-翁丁原始村落-千年崖画-西盟龙摩爷-老达保音乐村寨-世界遗产景迈山茶园-普洱咖啡庄园-版纳8日",
+   "points": [],
+   "raw": "昆明集合，景洪解散",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5114/did/193488.html": {
+   "title": "【乌兰布统·冰雪狂欢3日】湖面冬捕 越野车穿越暖水河 魔界日出 透风沟 塞北雪乡 鹰窝沟日落",
+   "points": [
+    {
+     "name": "点】北京地铁5号",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "0号线惠新西街南口C口",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】北京地铁5号/10号线惠新西街南口C口\r\n \r\n \r\n \r\n \r\n \r\n 28人品质团·2026-2027年团期\r\n \r\n \r\n 第 01 期：2026.12.18-2026.12.20\r\n \r\n \r\n 第 02 期：2026.12.25-2026.12.27\r\n \r\n \r\n 第 03 期：2027.01.01-2027.01.03\r\n \r\n \r\n 第 04 期：2027.01.08-2027.01.10\r\n \r\n \r\n 第 05 期：2027.01.15-2027.01.17\r\n \r\n \r\n 第 06 期：2027.01.22-2027.01.24\r\n \r\n \r\n 第 07 期：2027.01.29-2027.01.31\r\n \r\n \r\n 以上团期： 1480元/成人；1280元/儿童\r\n \r\n \r\n \r\n \r\n \r\n 第 08 期：2027.02.06-2027.02.08\r\n \r\n \r\n 第 09 期：2027.02.07-2027.02.09\r\n \r\n \r\n 第 10 期：2027.02.08-2027.02.10\r\n \r\n \r\n 第 11 期：2027.02.09-2027.02.11\r\n \r\n \r\n 第 12 期：2027.02.10-2027.02.12\r\n \r\n \r\n 以上团期： 1680元/成人；1380元/儿童\r\n \r\n \r\n \r\n \r\n \r\n 第 13 期：2027.02.19-2027.02.21\r\n \r\n \r\n 以上团期： 1480元/成人；1280元/儿童",
+   "summary": "点】北京地铁5号、0号线惠新西街南口C口"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6217/did/193521.html": {
+   "title": "【去野内蒙·冰雪越野7日】2-4人团 冬季热阿线 黄岗梁 达达线 塞罕坝 乌兰布统全天越野穿越",
+   "points": [
+    {
+     "name": "北京",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "北京",
+   "summary": "北京"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5475/did/193501.html": {
+   "title": "【乌兰布统·冰雪狂欢5日】林海雪原漫步 鄂温克族驯鹿 越野穿越暖水河 透风沟 塞北雪乡 湖面冬捕 云佛山滑雪",
+   "points": [
+    {
+     "name": "第一站14：30草桥地铁站B口：近大兴机场",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "北京南站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "第二站15：20芍药居地铁站E口：近首都机场",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "北京站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】北京指定地点集合\r\n \r\n \r\n 第一站14：30草桥地铁站B口：近大兴机场、北京南站\r\n \r\n \r\n 第二站15：20芍药居地铁站E口：近首都机场、北京站\r\n \r\n \r\n \r\n \r\n \r\n 28人品质团·2026-2027年团期\r\n \r\n \r\n 第 01 期：2026.12.19-2026.12.23\r\n \r\n \r\n 第 02 期：2026.12.26-2026.12.30\r\n \r\n \r\n 第 03 期：2026.12.30-2027.01.03\r\n \r\n \r\n 第 04 期：2027.01.01-2027.01.05\r\n \r\n \r\n 第 05 期：2027.01.06-2027.01.10\r\n \r\n \r\n 第 06 期：2027.01.09-2027.01.13\r\n \r\n \r\n 第 07 期：2027.01.13-2027.01.17\r\n \r\n \r\n 第 08 期：2027.01.16-2027.01.20\r\n \r\n \r\n 第 09 期：2027.01.20-2027.01.24\r\n \r\n \r\n 第 10 期：2027.01.23-2027.01.27\r\n \r\n \r\n 第 11 期：2027.01.27-2027.01.31\r\n \r\n \r\n 以上团期： 2680元/成人；2280元/儿童\r\n \r\n \r\n \r\n \r\n \r\n 第 12 期：2027.02.05-2027.02.09\r\n \r\n \r\n 第 13 期：2027.02.06-2027.02.10\r\n \r\n \r\n 第 14 期：2027.02.07-2027.02.11\r\n \r\n \r\n 第 15 期：2027.02.08-2027.02.12\r\n \r\n \r\n 第 16 期：2027.02.09-2027.02.13\r\n \r\n \r\n 第 17 期：2027.02.10-2027.02.14\r\n \r\n \r\n 以上团期： 2980元/成人；2380元/儿童\r\n \r\n \r\n \r\n \r\n \r\n 第 18 期：2027.02.17-2027.02.21\r\n \r\n \r\n 以上团期： 2680元/成人；2280元/儿童",
+   "summary": "第一站14：30草桥地铁站B口：近大兴机场、北京南站、第二站15：20芍药居地铁站E口：近首都机场 等4个上车点"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6232/did/194469.html": {
+   "title": "【云境滇中7日】哀牢迷雾森林-元阳镜面梯田-谷堆山脊-秘乐谷丹霞-建水古城-滇越米轨｜滇中首届徒步大会 7 日山野行",
+   "points": [],
+   "raw": "昆明集散",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/6226/did/194271.html": {
+   "title": "【东北亲子5日】长白奇遇记 · 长白山冬日5日亲子之旅",
+   "points": [
+    {
+     "name": "〖 〗：吉林省长白山机场",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    },
+    {
+     "name": "长白山西站",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点〗：吉林省延吉市\r\n \r\n \r\n 〖散团地点〗：吉林省长白山机场，长白山西站\r\n \r\n \r\n 〖领队通知〗：亲子领队将在团期日前1天19点前联系您，请您保持报名时预留号码通讯畅通。\r\n \r\n \r\n 〖出行攻略〗：团期日即为全天集合日，无任何集体活动，因此建议您选择团期日的航班班次即可、团期日前3天您将接收到出团短信告知酒店、导游与质检信息，团期日前1天接机人员短信联系您说明接机事宜，接机人员于您飞机落地时联系您；散团时间约为第5日15:00，建议您购买当天16:00以后的飞机或16:00火车回程。\r\n \r\n \r\n \r\n \r\n \r\n 平季团期\r\n \r\n \r\n 成人：3999/人 儿童：3199/人 单房差800元\r\n \r\n \r\n 第一期：2027年1月09日--1月13日\r\n \r\n \r\n 第二期：2027年1月16日--1月20日\r\n \r\n \r\n 第三期：2027年1月23日--1月27日\r\n \r\n \r\n 第四期：2027年1月30日--2月03日\r\n \r\n \r\n 第六期：2027年2月13日--2月17日\r\n \r\n \r\n 第七期：2027年2月20日--2月24日\r\n \r\n \r\n \r\n \r\n \r\n 春节团期（大年初二）\r\n \r\n \r\n 成人：4499/人 儿童：3399/人 单房差1100元\r\n \r\n \r\n 第五期：2027年2月7日--2月11日\r\n \n\n \n \n \n 行程 \n \n 沿途景点",
+   "summary": "〖 〗：吉林省长白山机场、长白山西站"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5824/did/193460.html": {
+   "title": "与疆童行·冰雪阿勒泰6日2-6人团 喀纳斯 禾木 将军山滑雪 阿勒泰博物馆 冰雪北疆之旅/绝色新疆",
+   "points": [
+    {
+     "name": "点】阿勒泰市指定酒店",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "点】阿勒泰市指定酒店，请报“绝色新疆”+姓名拿房，酒店入住时间14:00后，提前抵达可将行李寄存在酒店前台； \r\n【适合人群】4周岁-70周岁身体健康，持有二代居民身份证，无三高及心脑血管疾病人员，敬请谅解！(18岁以下需家长陪同，70周岁以上需出具医院的身体状况证明)； \r\n【出团通知】出发前3-4天我司工作人员会将出团信息发至您手机短信，如集合日前未收到请及时与客服联系，司机会在集合日22点前与您联系（新疆与内地有2小时时差） \r\n \r\n【退团说明】 \r\n旅游者在行程开始前7日以内提出解除合同，按下列标准扣除必要的费用： \r\n行程开始前6日至4日，按旅游费用总额的20% \r\n行程开始前3日至1日，按旅游费用总额的40%； \r\n行程开始当日，按旅游费用总额的60%。 \r\n如按上述比例支付的业务损失费不足以赔偿组团社的实际损失，旅游者应当按实际损失对组团社予以赔偿，但最高额不应当超过旅游费用总额。 \r\n \r\n \r\n旅行须知 \r\n \r\n【注意事项】 \r\n1. 出发时在统一地点集合，行程出发前2天-4天内有专人通知，请保持手机畅通，方便联系。若出发前2天还未收到集合短信，请主动与客服联系。 \r\n2. 请游客随身携带有效身份证件原件，无证件儿童需携带户口本原件，以备沿路检查。 \r\n3. 由于新疆地域特殊，政策变动大。港澳台、外宾报名前，需提前主动说明，如未提前说明，损失游客自行承担。 \r\n4. 因长时间行车，途中车辆负荷较重，如发生汽车抛锚或临时故障等非人为操作因素并影响行程的情况，我方会积极落实情况快速处理，保障游客的安全和行程，客人不得以此索取补偿金或要求退款。 \r\n5. 旅行中出现问题，及时反馈，双方良好沟通协商立求现场解决好，下车后无法核实真实性，故不接受任何回程以后的投诉，敬请理解，谢谢。 \r\n6. 因不可抗力因素（如遇塌方、泥石流、雪崩、洪水等自然现象）或航空公司航班延误取消等原因造成的增加费用或无法按照正常行程游览，根据旅游相关规定，我公司将给与积极的协调配合不予承担相应赔偿责任，增加费用旅游者自理。 \r\n \r\n【特殊人群限制】 \r\n· 病患者、孕妇及行动不便者 \r\n1. 为了确保旅游顺利出行，防止旅途中发生人身意外伤害事故，请旅游者在出行前做一次必要的身体检查，如存在下列情况，因服务能力所限无法接待： \r\n（1）传染性疾病患者，如传染性肝炎、活动期肺结核、伤寒等传染病人； \r\n（2）心血管疾病患者，如严重高血压、心功能不全、心肌缺氧、心肌梗塞等病人； \r\n（3）脑血管疾病患者，如脑栓塞、脑出血、脑肿瘤等病人； \r\n（4）呼吸系统疾病患者，如肺气肿、肺心病等病人； \r\n（5）精神病患者，如癫痫及各种精神病人； \r\n（6）严重贫血病患者，如血红蛋白量水平在50克/升以下的病人； \r\n（7）大中型手术的恢复期病患者； \r\n（8）孕妇及行动不便者。 \r\n·",
+   "summary": "点】阿勒泰市指定酒店"
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/5476/did/193606.html": {
+   "title": "【甘南晒大佛8日】仅此一期 2-8人团 麦积山石窟 官鹅沟 扎尕那 赛赤晒佛节 酥油花灯会/大西北",
+   "points": [],
+   "raw": "天水",
+   "summary": ""
+  },
+  "https://www.outdoors.com.cn/route/linedetail/id/3429/did/194156.html": {
+   "title": "【甘南晒大佛6日】2-8人团 仅此一期 米拉日巴佛阁-郎木寺-西仓寺亮宝节-酥油灯法会/大西北",
+   "points": [
+    {
+     "name": "兰州",
+     "district": null,
+     "quota": null,
+     "city": null,
+     "time": null
+    }
+   ],
+   "raw": "兰州",
+   "summary": "兰州"
+  },
   "https://www.outdoors.com.cn/route/linedetail/id/6170/did/190124.html": {
    "title": "【黄腾峡漂流1日】深圳/东莞出发“漂流之王”黄腾峡漂流！天门玻璃悬廊+沉浸式战场体验",
    "points": [
@@ -1615,20 +4001,6 @@
    ],
    "raw": "乌鲁木齐",
    "summary": "乌鲁木齐"
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/5058/did/192625.html": {
-   "title": "【特价东北雪乡+漠河7日】2-8人小团 从漠河到雪乡，一场美妙的北国极寒发现之旅！",
-   "points": [
-    {
-     "name": "哈尔滨",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    }
-   ],
-   "raw": "哈尔滨",
-   "summary": "哈尔滨"
   },
   "https://www.outdoors.com.cn/route/linedetail/id/6161/did/189292.html": {
    "title": "【梅里转山节6日】60KM徒步朝圣｜第九届梅里雪山雨崩转山节-云南",
@@ -3430,167 +5802,6 @@
    "points": [],
    "raw": "哈尔滨火车站集合",
    "summary": ""
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/6159/did/189271.html": {
-   "title": "【极边之秋7日】云南大理红水杉林-芒市金银塔-边境瑞丽-腾冲江东银杏村-和顺-热海景区-高黎贡轻徒步-保山咖啡手作-诺邓古村边境秋色游",
-   "points": [
-    {
-     "name": "点】大理古城指定酒店",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    },
-    {
-     "name": "解散地点】大理火车站",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    },
-    {
-     "name": "大理机场",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    }
-   ],
-   "raw": "点】大理古城指定酒店 \r\n【解散地点】大理火车站/大理机场",
-   "summary": "点】大理古城指定酒店、解散地点】大理火车站、大理机场"
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/6177/did/190663.html": {
-   "title": "【漫游滇西5日】2-8人小团 <腾冲-芒市-瑞丽>和顺古镇-银杏村-热海景区-坝派巨泉-一寨两国-勐焕大金塔-银塔-莫里热带雨林-绮罗古镇休闲游/云南",
-   "points": [],
-   "raw": "保山/芒市",
-   "summary": ""
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/5830/did/190990.html": {
-   "title": "【梦幻之秋7日】婺源、三清山、望仙谷、德兴铜矿 摄影团/江西",
-   "points": [],
-   "raw": "江西省婺源县",
-   "summary": ""
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/5831/did/190984.html": {
-   "title": "【梦幻之秋婺源5日】江西婺源、江岭、篁岭、对冲、月亮湾、樟村摄影团/江西",
-   "points": [],
-   "raw": "江西省婺源县",
-   "summary": ""
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/6195/did/191409.html": {
-   "title": "【冰浮阿勒泰 5日】丨私家团丨阿勒泰-冰浮俱乐部-禾木/骑马观景/围炉煮茶/篝火晚会/轻旅拍/雪地火锅-喀纳斯 阿勒泰起止/绝色新疆",
-   "points": [],
-   "raw": "阿勒泰",
-   "summary": ""
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/6196/did/191546.html": {
-   "title": "【冰火西域5日】丨私家团丨乌鲁木齐-天山天池-江布拉克-库木塔格沙漠-吐峪沟-火焰山-乌鲁木齐/绝色新疆",
-   "points": [
-    {
-     "name": "乌鲁木齐",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    }
-   ],
-   "raw": "乌鲁木齐",
-   "summary": "乌鲁木齐"
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/5890/did/192722.html": {
-   "title": "【冰雪梦幻B线5日】2-8人小团 横跨东北两省+亚雪公路+童话雪乡+滑雪3小时+冰雪画廊轻徒步+长白山+延吉打卡朝鲜民俗园/东北",
-   "points": [],
-   "raw": "哈尔滨市",
-   "summary": ""
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/5042/did/192308.html": {
-   "title": "【冰雪梦幻A线7日】2-8人小团丨哈尔滨 亚雪公路 梦幻雪山 延吉 长白山 吉林雾凇长廊/东北",
-   "points": [],
-   "raw": "黑龙江省哈尔滨市",
-   "summary": ""
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/5455/did/191262.html": {
-   "title": "【云南滇西秋色 7天】2-8人团 腾冲银杏村-无量山冬樱花-瑞丽-芒市-诺邓古村-巍山古城（全程四钻酒店+柏联温泉+银杏村古装）/云南",
-   "points": [],
-   "raw": "大理集合",
-   "summary": ""
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/6147/did/189005.html": {
-   "title": "【金秋花事7日】无量山樱花谷-腾冲银杏村-诺邓古村-瑞丽一寨两国-芒市金塔银塔-奇幻热海-和顺古镇-滇西抗战纪念馆-巍山古城/云南",
-   "points": [
-    {
-     "name": "昆明",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    },
-    {
-     "name": "大理",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    }
-   ],
-   "raw": "昆明/大理",
-   "summary": "昆明、大理"
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/6149/did/189029.html": {
-   "title": "【滇西秘境10日】云南腾冲银杏-芒市金塔银塔-和顺-热海滚锅-怒江大峡谷-双虹桥-丙中洛-独龙江-秘境神田-雾里村-老姆登-巍山-南涧土林-无量山樱花谷/云南",
-   "points": [
-    {
-     "name": "点】大理市指定酒店",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    }
-   ],
-   "raw": "点】大理市指定酒店 \r\n【解散地点】昆明市解散 \r\n【升级2+1车】满16人升级2+1陆地头等舱大巴车，旅途轻松舒适！ \r\n【航拍体验】特别指定5个团期，满11人或以上领队带无人机航拍体验：11.21/11.25/12.4/12.6 /12.8。 \r\n第01期：2026年11月21日（大理集合）——11月30日（昆明解散）（满11人，赠送航拍） \r\n第02期：2026年11月23日（大理集合）——12月02日（昆明解散） \r\n第03期：2026年11月25日（大理集合）——12月04日（昆明解散）（满11人，赠送航拍） \r\n第04期：2026年11月28日（大理集合）——12月07日（昆明解散） \r\n第05期：2026年11月30日（大理集合）——12月09日（昆明解散） \r\n第06期：2026年12月02日（大理集合）——12月11日（昆明解散） \r\n第07期：2026年12月04日（大理集合）——12月13日（昆明解散）（满11人，赠送航拍） \r\n第08期：2026年12月06日（大理集合）——12月15日（昆明解散）（满11人，赠送航拍） \r\n第09期：2026年12月08日（大理集合）——12月17日（昆明解散）（满11人，赠送航拍） \r\n——最美秋景价格：成人：4180元/人，儿童：2980元/人（不含门票不占床），单房差1100元/人——\r\n \r\n \r\n \r\n \n\n \n \n \n 行程 \n \n 沿途景点",
-   "summary": "点】大理市指定酒店"
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/6164/did/189507.html": {
-   "title": "【滇西全景11日】2-8人小团 大理-芒市金银塔-边境瑞丽-腾冲-银杏村-和顺古镇-热海-怒江大峡谷-丙中洛-独龙江纹面女-梅里雪山-沙溪-南涧土林-无量山樱花谷2/云南",
-   "points": [
-    {
-     "name": "点】大理古城指定酒店",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    },
-    {
-     "name": "解散地点】大理火车站+大理机场",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    }
-   ],
-   "raw": "点】大理古城指定酒店 \r\n【解散地点】大理火车站+大理机场 \r\n【适合人群】6周岁-69周岁身体健康深度游爱好者（儿童、老人须有直系亲属，或者是成年人陪同方可报名） \r\n【航拍体验】每期满6人，司机带无人机航拍体验",
-   "summary": "点】大理古城指定酒店、解散地点】大理火车站+大理机场"
-  },
-  "https://www.outdoors.com.cn/route/linedetail/id/6165/did/189514.html": {
-   "title": "【滇西南环线10日】2-8人小团 昆明-无量山樱花-腾冲银杏村-和顺-热海-瑞丽-芒市-沧源翁丁村-千年崖画-西盟龙摩爷-景迈山-普洱咖啡庄园-哀牢山-巍山/云南",
-   "points": [
-    {
-     "name": "点】昆明集合酒店",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    },
-    {
-     "name": "解散地点】大理祥云站",
-     "district": null,
-     "quota": null,
-     "city": null,
-     "time": null
-    }
-   ],
-   "raw": "点】昆明集合酒店 \r\n【解散地点】大理祥云站/昆明市 \r\n【适合人群】6周岁-69周岁身体健康深度游爱好者（儿童、老人须有直系亲属，或者是成年人陪同方可报名） \r\n【航拍体验】每期满6人，司机带无人机航拍体验 \r\n第01期：2026年11月21日——11月30日 \r\n第02期：2026年11月23日——12月02日 \r\n第03期：2026年11月26日——12月05日 \r\n第04期：2026年11月28日——12月07日 \r\n第05期：2026年12月01日——12月10日 \r\n第06期：2026年12月03日——12月12日 \r\n第07期：2026年12月05日——12月14日 \r\n \r\n——第01-07期：成人 5380元/人，儿童：3680 元/人（小孩不占床位和门票），单房差1100元——\r\n \r\n \r\n \r\n \n\n \n \n \n 行程 \n \n 沿途景点",
-   "summary": "点】昆明集合酒店、解散地点】大理祥云站"
   },
   "https://www.outdoors.com.cn/route/linedetail/id/4815/did/183406.html": {
    "title": "【高铁魅力郴州3日】小东江+高椅岭+仰天湖+秘境竹筏九龙水寨+白廊+长卷+裕后街+马皇丘/瓦窑坪",
