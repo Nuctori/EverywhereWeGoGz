@@ -34,6 +34,7 @@ import type {
   FilterState,
 } from '@/types/tour';
 import {
+  AI_BASE_DETAILED_REASON_ITEMS,
   AI_RECOMMENDATION_WARM_BATCH_SIZE,
   clearAiProviderConfig,
   getAiRecommendationWarmPiece,
@@ -711,6 +712,22 @@ export function AiRecommendPanel({
         resumePreparation: resuming ? readAiPreparation(context.turnId) : null,
         onPreparationReady: (preparation) => {
           saveAiPreparation(context.turnId, preparation);
+        },
+        // 首轮 25 条/排序已定就先展示并落盘；第 9-15 条详细理由由补全请求继续写。
+        // 补全期间锁屏/离开，恢复时直接用这份 checkpoint 走快速通道。
+        onBaseResult: (base) => {
+          if (requestVersionRef.current !== requestVersion || abortController.signal.aborted) return;
+          retainedResult = base;
+          context.checkpoint = base;
+          onResultChange(base);
+          persistRequest(prompt);
+          setProgressState({
+            stage: 'ranking',
+            label: `前 ${AI_BASE_DETAILED_REASON_ITEMS} 条已就绪`,
+            detail: '剩余详细理由正在补全，可先查看。',
+            progress: 92,
+            partialItems: base.items,
+          });
         },
         signal: abortController.signal,
         onProgress: (progress) => {

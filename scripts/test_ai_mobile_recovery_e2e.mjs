@@ -66,10 +66,25 @@ async function fixture(entry, mode = 'partial') {
       const request = JSON.parse(init?.body || '{}');
       const prompt = JSON.stringify(request.messages);
       const ranking = prompt.includes('rank_5detailed_10brief');
-      const call = { ranking, messages: request.messages, mode: window.__recoveryMode };
+      // 首轮 8 条详细理由之后的补全请求：不是分类头，也不是排序，单独记录。
+      const upgrade = !ranking && prompt.includes('补写完整推荐理由');
+      const call = { ranking, upgrade, messages: request.messages, mode: window.__recoveryMode };
       window.__recoveryCalls.push(call);
       sessionStorage.setItem('recovery-test-calls', JSON.stringify(window.__recoveryCalls));
       if (window.__recoveryMode === 'offline') throw new TypeError('Failed to fetch (offline recovery fixture)');
+      if (upgrade) {
+        const upgradeIds = [...new Set([...prompt.matchAll(/tour_\d+/g)].map(match => match[0]))].slice(0, 7);
+        const content = JSON.stringify({
+          order: upgradeIds,
+          items: upgradeIds.map(id => ({ tourId: id, reason: '补全详细理由专属文案，具体到玩法、画面和取舍。', matchedSignals: ['行程体验'] })),
+        });
+        const encoder = new TextEncoder();
+        return new Response(new ReadableStream({ start(controller) {
+          controller.enqueue(encoder.encode('data: ' + JSON.stringify({ choices: [{ delta: { content } }] }) + '\n\n'));
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        } }), { headers: { 'content-type': 'text/event-stream' } });
+      }
       if (!ranking) return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ queries: ['推荐线路'], demands: [], destinations: [] }) } }] }), { headers: { 'content-type': 'application/json' } });
       const index = await (await realFetch('/EverywhereWeGoGz/data/tours-index.json')).json();
       const ids = new Set([...prompt.matchAll(/tour_\d+/g)].map(match => match[0]));
@@ -211,7 +226,7 @@ try {
       await waitState(page, state => state.pendingContext?.recoveryState === 'running' && !!state.pendingContext.checkpoint?.items?.length);
     }
     const ranking = (await snapshot(page)).calls.filter(call => call.ranking);
-    const classifierCalls = (await snapshot(page)).calls.filter(call => !call.ranking).length;
+    const classifierCalls = (await snapshot(page)).calls.filter(call => !call.ranking && !call.upgrade).length;
     assert.equal(classifierCalls, 1, 'resumes must reuse the classified preparation instead of re-running it');
     for (const call of ranking.slice(1)) {
       assert.match(resumeText(call), /本轮中断后继续/, 'every foreground return must resume with a continuation instruction');

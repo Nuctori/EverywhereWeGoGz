@@ -428,6 +428,7 @@ export const aiRecommendationResultSchema = z.object({
   usage: aiRecommendationUsageSchema.optional(),
   refinementMode: z.string().optional(),
   status: aiRecommendationStatusSchema.optional(),
+  reasonPhase: z.enum(['base', 'full']).optional(),
   preferenceMemory: aiPreferenceMemorySchema.optional(),
   semanticNotes: aiRecommendationSemanticNotesSchema.optional(),
   clarification: aiRecommendationClarificationSchema.optional(),

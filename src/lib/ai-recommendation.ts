@@ -40,7 +40,13 @@ const MAX_AI_COMMENTARY_ITEMS = 25;
 const MAX_AI_DETAILED_ITEMS = 15;
 const MAX_AI_BRIEF_ITEMS = 10;
 const MAX_AI_SELECTED_ITEMS = MAX_AI_DETAILED_ITEMS + MAX_AI_BRIEF_ITEMS;
-const MAX_AI_PROMPT_REASON_ITEMS = MAX_AI_DETAILED_ITEMS;
+// 首轮只让模型写前 8 条完整理由（其余先给一句话），把一次生成的尾巴缩短；
+// 结果一到就先展示/落盘，再由 upgradeDeferredReasons 补第 9-15 条详细理由。
+// 展示分层仍按 15 条切：第 9-15 条在首轮是"详细位 + 一句话理由"，补全后替换。
+const AI_PROMPT_DETAILED_ITEMS = 8;
+const MAX_AI_PROMPT_REASON_ITEMS = AI_PROMPT_DETAILED_ITEMS;
+// 面板文案要显示"前 N 条已就绪"，与 prompt 的实际首轮条数保持同一来源。
+export const AI_BASE_DETAILED_REASON_ITEMS = AI_PROMPT_DETAILED_ITEMS;
 // 主调用前预取团期天气的重点候选目的地数（dw 字段），与调用后为排序补抓共享快照缓存。
 const MAX_AI_PROMPT_WEATHER_INSIGHTS = 8;
 const MAX_AI_RANKED_ITEMS = 25;
@@ -6863,7 +6869,7 @@ function buildAiMessages(params: {
         {
           tourId: '候选 id',
           score: '0-100 number',
-          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条（详细推荐位）写完整推荐理由：画面、气质、玩法或取舍，长度和写法由你决定。第 ${MAX_AI_DETAILED_ITEMS + 1}-${MAX_AI_SELECTED_ITEMS} 条（简要推荐位）写一句话简单介绍，30 字内说清这条线是什么、最值得去的一点，不要展开成长理由`,
+          reason: `仅前 ${MAX_AI_PROMPT_REASON_ITEMS} 条（详细推荐位）写完整推荐理由：画面、气质、玩法或取舍，长度和写法由你决定。第 ${MAX_AI_PROMPT_REASON_ITEMS + 1}-${MAX_AI_SELECTED_ITEMS} 条（简要推荐位）写一句话简单介绍，30 字内说清这条线是什么、最值得去的一点，不要展开成长理由`,
           matchedSignals: '每条都需要。2-3 个中文短语，概括这条线的核心看点，要具体，不要重复标题里已有的词，不要写空泛的“适合度假”',
         },
       ],
@@ -6883,7 +6889,7 @@ function buildAiMessages(params: {
       '只有当一个追问能明显改变推荐方向时才返回 clarification；不要为了收集字段而机械追问。',
       ...promptPolicy.requestRules,
       [
-        `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_DETAILED_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
+        `只给前 ${MAX_AI_PROMPT_REASON_ITEMS} 个 items 写完整 reason；第 ${MAX_AI_PROMPT_REASON_ITEMS + 1} 条起 reason 换成一句话简单介绍（30 字内）并照常写 matchedSignals；`,
         '按需求和候选质量合理选择推荐数量，最多 25 条，存在硬冲突时宁可少返回。先输出完整顶层 order:[tourId,...] 推荐顺序，再输出同一批线路的 items 理由，最后输出 summary；items 可以按生成顺序写，但 order 一旦输出不可更改。',
         '可以参考熟悉当地玩法的人来写，避免让所有线路都长得一样；如果某个软条件需要核实，自行判断它是否值得写进这一条。',
         // 输出体积约束：实测主请求在 109 tok/s 下生成 2689 token 要 25s，
@@ -6962,7 +6968,7 @@ function buildLiteAiMessages(params: {
       items: [{
         tourId: '候选 id',
         score: '0-100 number',
-        sf: `仅前${MAX_AI_PROMPT_REASON_ITEMS}条写完整推荐理由，像熟悉当地玩法的人在种草；第${MAX_AI_DETAILED_ITEMS + 1}条起 sf 写一句话简单介绍（30 字内），不要展开长理由`,
+        sf: `仅前${MAX_AI_PROMPT_REASON_ITEMS}条写完整推荐理由，像熟悉当地玩法的人在种草；第${MAX_AI_PROMPT_REASON_ITEMS + 1}条起 sf 写一句话简单介绍（30 字内），不要展开长理由`,
         ss: '每条都需要，最多3个短词，概括核心看点',
       }],
       itemCountLimit: 8,
@@ -6974,7 +6980,7 @@ function buildLiteAiMessages(params: {
       '只允许使用 candidates/fh 中存在的 id。',
       '文案保持具体判断即可，不要为了短而牺牲判断；但每条 sf 控制在 60 字内，确保整个 JSON 不会因为太长而被截断。',
       'candidates（稳定池）是按 id 排序的全池背景候选；fh 是按本轮需求检索/匹配出的重点候选完整档案，优先在 fh 内挑选，再用稳定池补足选择面。',
-      `按需求和候选质量合理选择推荐数量，最多 ${MAX_AI_SELECTED_ITEMS} 条：前 ${MAX_AI_DETAILED_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；存在硬冲突时宁可少返回。先输出完整顶层 order:[tourId,...] 推荐顺序，再输出同一批线路的 items 理由，最后输出 summary；order 一旦输出不可更改。`,
+      `按需求和候选质量合理选择推荐数量，最多 ${MAX_AI_SELECTED_ITEMS} 条：前 ${MAX_AI_PROMPT_REASON_ITEMS} 条写完整 sf，其余条目 sf 写一句话简单介绍（30 字内）并照常写 ss；存在硬冲突时宁可少返回。先输出完整顶层 order:[tourId,...] 推荐顺序，再输出同一批线路的 items 理由，最后输出 summary；order 一旦输出不可更改。`,
       '可以参考熟悉当地玩法的人来写，充分使用你的主观判断和世界知识；不要把推荐文案写成固定格式。',
       `多轮时由你判断 q 是新搜索、追问纠偏、扩展范围还是替换目的地；用 intent.refinementMode 和 intent.destinationHints 表达判断，pm 只是上一轮记忆不是硬过滤。多轮短句默认是在上一轮需求上追加条件，除非用户明确换目的地或重开搜索，应继承上一轮偏好。`,
       '先按整体旅行体验比较，再结合 q、it、wx、sg、atoms/cats、pricePct/priceBand、termCoverage/termHits 和 conflict 排序；预算优先但不要把候选池理解成预算硬截断。it.bp=low 时，在需求覆盖和硬约束同等满足的候选中按已知正价格从低到高选择并输出 order，不能用高分或更长理由把高价项放前；价格未知不算便宜，不从 low 推断金额上限。用户原话中的未知地名或表达保留原样，不自行改写为其他目的地。文案要写出具体旅行画面，调动世界知识判断节奏和气质，但不能把未提供的交通/服务写成事实。',
@@ -9338,9 +9344,119 @@ function getAiFailureDetail(error: unknown) {
   return message || 'AI service unavailable';
 }
 
+// 首轮只写前 8 条详细理由，剩下的第 9-15 条先给一句话；结果先落盘，
+// 再用这个小请求补全。补全失败就保留一句话理由，不影响排序和条目。
+const AI_REASON_UPGRADE_TIMEOUT_MS = 20_000;
+const AI_REASON_UPGRADE_MIN_CHARS = 60;
+
+function getDeferredReasonTargets(result: AiRecommendationResult) {
+  return result.items
+    .filter((item) => item.recommendationTier === 'ai-detailed')
+    .slice(MAX_AI_PROMPT_REASON_ITEMS, MAX_AI_DETAILED_ITEMS)
+    .filter((item) => !item.reason || item.reason.trim().length < AI_REASON_UPGRADE_MIN_CHARS);
+}
+
+async function upgradeDeferredReasons(params: {
+  configs: AiProviderConfig[];
+  result: AiRecommendationResult;
+  candidateTours: AiRecommendationCandidate[];
+  userText: string;
+  signal?: AbortSignal;
+  timeoutMs?: number;
+}): Promise<AiRecommendationResult> {
+  const targets = getDeferredReasonTargets(params.result);
+  if (targets.length === 0 || params.configs.length === 0) {
+    return { ...params.result, reasonPhase: 'full' };
+  }
+  const tourById = new Map(params.candidateTours.map((tour) => [tour.id, tour]));
+  const lines = targets.map((item) => {
+    const tour = tourById.get(item.tourId);
+    const existing = item.reason ? `｜现有简介：${item.reason}` : '';
+    return tour
+      ? `- ${tour.id}｜${tour.title}｜¥${tour.price}${existing}`
+      : `- ${item.tourId}${existing}`;
+  });
+  // 只发一个 user 消息：补写任务不需要完整 system prompt，小请求更快。
+  const messages = [{
+    role: 'user' as const,
+    content:
+      '你是旅行推荐文案编辑。只补写指定线路的详细推荐理由，不改顺序、评分和条目选择。' +
+      '理由要具体、有画面感，像熟悉当地玩法的人在种草，写出玩法、气质或取舍，不要模板句。只输出 JSON。\n\n' +
+      `用户需求：${params.userText}\n\n本轮摘要：${params.result.summary}\n\n` +
+      `请只为下列 ${targets.length} 条线路补写完整推荐理由（每条 40-90 字）：\n${lines.join('\n')}\n\n` +
+      '输出格式：{"order":["id",...],"items":[{"tourId":"id","reason":"...","matchedSignals":["..."]}]}',
+  }];
+  try {
+    const response = (await callAiApi({
+      configs: params.configs,
+      messages,
+      maxTokens: 1000,
+      timeoutMs: params.timeoutMs ?? AI_REASON_UPGRADE_TIMEOUT_MS,
+      ...(params.signal ? { signal: params.signal } : {}),
+    })) as { parsed?: { items?: unknown } };
+    const reasonById = new Map<string, { reason: string; matchedSignals?: string[] }>();
+    if (response.parsed && Array.isArray(response.parsed.items)) {
+      for (const raw of response.parsed.items) {
+        if (!raw || typeof raw !== 'object') continue;
+        const item = raw as { tourId?: unknown; reason?: unknown; matchedSignals?: unknown };
+        if (typeof item.tourId !== 'string' || typeof item.reason !== 'string') continue;
+        const reason = item.reason.trim();
+        if (!reason) continue;
+        const matchedSignals = Array.isArray(item.matchedSignals)
+          ? item.matchedSignals.filter((signal): signal is string => typeof signal === 'string').slice(0, 3)
+          : undefined;
+        reasonById.set(item.tourId, { reason, ...(matchedSignals?.length ? { matchedSignals } : {}) });
+      }
+    }
+    let upgraded = 0;
+    const items = params.result.items.map((item) => {
+      const next = reasonById.get(item.tourId);
+      if (!next || next.reason.length <= (item.reason?.length ?? 0)) return item;
+      upgraded += 1;
+      return {
+        ...item,
+        reason: next.reason,
+        ...(next.matchedSignals ? { matchedSignals: next.matchedSignals } : {}),
+      };
+    });
+    return { ...params.result, items, reasonPhase: upgraded === targets.length ? 'full' : 'base' };
+  } catch (error) {
+    // 用户取消不能被吞成"补全失败"：面板要靠 AbortError 走静默暂停。
+    if (params.signal?.aborted) throw error;
+    // 补全失败不是失败：首轮结果已经是完整可用的，只是这 7 条理由短一点。
+    return { ...params.result, reasonPhase: 'base' };
+  }
+}
+
 // One wall-clock budget covers preparation, optional research and every provider retry.
 // Keep the race at the public boundary: transports that ignore abort cannot publish late work.
 export async function requestAiRecommendations(request: AiRecommendationRequest): Promise<AiRecommendationResult> {
+  if (request.signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
+  // 上一轮的首轮结果已经完整（25 条、顺序已定），恢复时不再重跑生成，
+  // 只补第 9-15 条详细理由：锁屏回来后通常 10s 内就能拿到最终结果。
+  if (
+    request.resumeInterrupted &&
+    request.previousResult?.reasonPhase === 'base' &&
+    request.previousResult.status?.mode === 'ai'
+  ) {
+    const configs = getResolvedAiConfigs(request.aiConfig);
+    if (configs.length === 0) return request.previousResult;
+    request.onProgress?.({
+      stage: 'ranking',
+      label: '已恢复上一轮完整结果',
+      detail: '正在补全剩余详细理由，排序和条目保持不变。',
+      progress: 92,
+    });
+    const userText = [...request.messages].reverse().find((message) => message.role === 'user')?.content ?? '';
+    return upgradeDeferredReasons({
+      configs,
+      result: request.previousResult,
+      candidateTours: request.candidateTours,
+      userText,
+      ...(request.signal ? { signal: request.signal } : {}),
+      ...(Number.isFinite(request.timeoutMs) && request.timeoutMs ? { timeoutMs: request.timeoutMs } : {}),
+    });
+  }
   if (request.signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
   const budgetMs = Number.isFinite(request.timeoutMs) && (request.timeoutMs ?? 0) > 0
     ? request.timeoutMs! : Infinity;
@@ -9426,6 +9542,7 @@ async function requestAiRecommendationsWithinBudget({
   resumeInterrupted,
   resumePreparation,
   onPreparationReady,
+  onBaseResult,
   onProgress,
   signal,
 }: AiRecommendationRequest, deadline: number, onFallbackReady: (items: AiRecommendationItem[]) => void): Promise<AiRecommendationResult> {
@@ -10356,22 +10473,7 @@ async function requestAiRecommendationsWithinBudget({
         status: { mode: 'local-only', label: '推荐理由尚未完成', detail: '已保留 AI 推荐顺序和现有理由，可继续补充。' },
         ...(finalPreferenceMemory ? { preferenceMemory: finalPreferenceMemory } : {}) };
     }
-    emitProgress(onProgress, {
-      stage: 'completed',
-      label: '推荐结果已生成',
-      detail: `已完成排序，给出 ${countCommentaryItems(disciplinedItems)} 条建议，并展示 ${disciplinedItems.length} 条匹配线路。`,
-      progress: 100,
-      substeps: withActiveSubstep(
-        [
-          { id: 'ranked', label: '排序结果已完成' },
-          { id: 'top', label: '置顶建议线路' },
-          { id: 'ready', label: '返回推荐摘要' },
-        ],
-        'ready',
-      ),
-    });
-
-    return {
+    const baseResult: AiRecommendationResult = {
       conversationId,
       summary: finalizeRecommendationSummary({
         aiSummary: typeof aiResponse.summary === 'string' ? aiResponse.summary : '',
@@ -10423,6 +10525,52 @@ async function requestAiRecommendationsWithinBudget({
           }
         : {}),
     };
+    // 首轮结果已经是完整的 25 条/排序：先交给页面落盘，再补第 9-15 条详细理由。
+    // 补全失败就保留一句话理由；补全期间锁屏也不会丢掉已展示的结果。
+    const deferredTargets = getDeferredReasonTargets(baseResult);
+    let finalResult: AiRecommendationResult;
+    if (deferredTargets.length > 0) {
+      baseResult.reasonPhase = 'base';
+      onBaseResult?.({ ...baseResult });
+      emitProgress(onProgress, {
+        stage: 'ranking',
+        label: `前 ${MAX_AI_PROMPT_REASON_ITEMS} 条已就绪`,
+        detail: `剩余 ${deferredTargets.length} 条详细理由正在补全，可先查看。`,
+        progress: 92,
+      });
+      let upgradeBudget = AI_REASON_UPGRADE_TIMEOUT_MS;
+      try {
+        upgradeBudget = Math.min(AI_REASON_UPGRADE_TIMEOUT_MS, remainingBudget() ?? AI_REASON_UPGRADE_TIMEOUT_MS);
+      } catch {
+        upgradeBudget = 1;
+      }
+      finalResult = await upgradeDeferredReasons({
+        configs,
+        result: baseResult,
+        candidateTours: mergedCandidateTours,
+        userText: finalEffectiveUserText,
+        ...(signal ? { signal } : {}),
+        timeoutMs: upgradeBudget,
+      });
+    } else {
+      baseResult.reasonPhase = 'full';
+      finalResult = baseResult;
+    }
+    emitProgress(onProgress, {
+      stage: 'completed',
+      label: '推荐结果已生成',
+      detail: `已完成排序，给出 ${countCommentaryItems(finalResult.items)} 条建议，并展示 ${finalResult.items.length} 条匹配线路。`,
+      progress: 100,
+      substeps: withActiveSubstep(
+        [
+          { id: 'ranked', label: '排序结果已完成' },
+          { id: 'top', label: '置顶建议线路' },
+          { id: 'ready', label: '返回推荐摘要' },
+        ],
+        'ready',
+      ),
+    });
+    return finalResult;
   } catch (error) {
     // 用户取消不是失败：不能走本地兜底——放弃之后又冒出一屏"推荐"，
     // 用户会以为取消没生效。直接把取消信号交给调用方静默收尾。

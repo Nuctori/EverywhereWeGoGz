@@ -425,6 +425,11 @@ export interface AiRecommendationResult {
   refinementMode?: string;
   source: 'local-preview' | 'ai-api';
   status?: AiRecommendationStatus;
+  /**
+   * 理由补全阶段：base = 排序/条目已定、第 9-15 条详细理由还在补；
+   * full = 全部详细理由已就绪。旧数据没有这个字段，视同 full。
+   */
+  reasonPhase?: 'base' | 'full';
   preferenceMemory?: AiPreferenceMemory;
   semanticNotes?: AiRecommendationSemanticNotes;
   clarification?: AiRecommendationClarification;
@@ -540,6 +545,11 @@ export interface AiRecommendationRequest {
   resumePreparation?: AiRecommendationPreparation | null;
   /** 分类头结果就绪时回调一次；面板据此落盘，供中断恢复复用。 */
   onPreparationReady?: (preparation: AiRecommendationPreparation) => void;
+  /**
+   * 首轮结果（25 条、排序已定，前 8 条详细、其余一句话）已就绪时回调一次。
+   * 面板先把这份结果展示/落盘，补全第 9-15 条详细理由不会白丢。
+   */
+  onBaseResult?: (result: AiRecommendationResult) => void;
   onProgress?: (progress: AiRecommendationProgress) => void;
   // 取消信号：面板点「取消这次查找」或组件卸载时 abort，真正掐断底层 fetch。
   // 不传时行为与既往一致（无法取消，跑到超时/完成）。
