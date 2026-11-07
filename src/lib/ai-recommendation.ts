@@ -9424,6 +9424,8 @@ async function requestAiRecommendationsWithinBudget({
   preferenceMemory,
   previousResult,
   resumeInterrupted,
+  resumePreparation,
+  onPreparationReady,
   onProgress,
   signal,
 }: AiRecommendationRequest, deadline: number, onFallbackReady: (items: AiRecommendationItem[]) => void): Promise<AiRecommendationResult> {
@@ -9633,17 +9635,31 @@ async function requestAiRecommendationsWithinBudget({
     // 门控与原计划调用一致：只有候选超过 MAX_AI_CANDIDATES 才产出 queries
     // （池子小到单发就能全覆盖时，多轮检索本来就无增量）；spec 始终产出。
     const planningExpected = availableCandidates.length > MAX_AI_CANDIDATES;
-    const classifiedPayload = await classifyExperienceDemandSpec({
-      configs,
-      userText: text,
-      previousPricePreference: memoryForThisTurn?.budgetPriority,
-      previousDemands: buildExperienceDemandSpec(previousUserText).length > 0
-        ? buildExperienceDemandSpec(previousUserText)
-        : undefined,
-      ...(planningExpected ? { corpusOverview: buildCandidateCorpusOverview(availableCandidates) } : {}),
-      expectQueries: planningExpected,
-      ...(signal ? { signal } : {}),
-    });
+    // 恢复同一轮时直接复用上一轮已经拿到的分类头结果：省掉一次 4s 往返，
+    // 也避免重新规划出不同的检索式，导致恢复后的候选跟第一次不一致。
+    // 分类头失败/无配置时返回空 payload，下游走词面 fallback，不会阻断主链路。
+    let classifiedPayload: ClassifiedIntentPayload;
+    if (resumePreparation) {
+      classifiedPayload = {
+        spec: resumePreparation.spec,
+        queries: resumePreparation.queries,
+        understanding: resumePreparation.understanding,
+        pricePreference: resumePreparation.pricePreference,
+      };
+    } else {
+      classifiedPayload = await classifyExperienceDemandSpec({
+        configs,
+        userText: text,
+        previousPricePreference: memoryForThisTurn?.budgetPriority,
+        previousDemands: buildExperienceDemandSpec(previousUserText).length > 0
+          ? buildExperienceDemandSpec(previousUserText)
+          : undefined,
+        ...(planningExpected ? { corpusOverview: buildCandidateCorpusOverview(availableCandidates) } : {}),
+        expectQueries: planningExpected,
+        ...(signal ? { signal } : {}),
+      });
+      onPreparationReady?.(classifiedPayload);
+    }
     remainingBudget();
     const classifiedSpec = classifiedPayload.spec;
     // The merged classifier owns price semantics. balanced is the existing persisted

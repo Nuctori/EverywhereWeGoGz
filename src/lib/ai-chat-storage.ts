@@ -2,6 +2,7 @@
 import type {
   AiPreferenceMemory,
   AiRecommendationMessage,
+  AiRecommendationPreparation,
   AiRecommendationResult,
   FilterState,
 } from '@/types/tour';
@@ -156,4 +157,60 @@ export function subscribeStoredAiProgress(
   };
   window.addEventListener('storage', handler);
   return () => window.removeEventListener('storage', handler);
+}
+
+// ====== 分类头结果暂存：同一轮恢复时跳过 4s 分类头，且检索式保持一致 ======
+// 单独一个 key，避免把结构复杂的 preparation 塞进主状态 schema——主 schema
+// 一次校验失败会把整份聊天状态丢掉，代价太大。这里坏了最多退回重跑分类头。
+export const AI_PREPARATION_STORAGE_KEY = 'travel-ai-preparation-v1';
+
+interface StoredAiPreparation {
+  turnId: string;
+  preparation: AiRecommendationPreparation;
+}
+
+export function saveAiPreparation(turnId: string, preparation: AiRecommendationPreparation) {
+  if (typeof window === 'undefined' || !turnId) return;
+  try {
+    const value: StoredAiPreparation = { turnId, preparation };
+    window.localStorage.setItem(AI_PREPARATION_STORAGE_KEY, JSON.stringify(value));
+  } catch {
+    // 存储不可用只是少一次优化，不能影响主流程。
+  }
+}
+
+export function readAiPreparation(turnId: string): AiRecommendationPreparation | null {
+  if (typeof window === 'undefined' || !turnId) return null;
+  try {
+    const raw = window.localStorage.getItem(AI_PREPARATION_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<StoredAiPreparation> | null;
+    if (!parsed || parsed.turnId !== turnId || !parsed.preparation) return null;
+    const preparation = parsed.preparation;
+    if (!Array.isArray(preparation.queries) || typeof preparation.understanding !== 'string') return null;
+    if (preparation.spec !== null) {
+      if (!preparation.spec || !Array.isArray(preparation.spec.demands) || !Array.isArray(preparation.spec.avoid)) {
+        return null;
+      }
+    }
+    return preparation;
+  } catch {
+    return null;
+  }
+}
+
+export function clearAiPreparation(turnId?: string) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (!turnId) {
+      window.localStorage.removeItem(AI_PREPARATION_STORAGE_KEY);
+      return;
+    }
+    const raw = window.localStorage.getItem(AI_PREPARATION_STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as Partial<StoredAiPreparation> | null;
+    if (parsed?.turnId === turnId) window.localStorage.removeItem(AI_PREPARATION_STORAGE_KEY);
+  } catch {
+    // 同上。
+  }
 }

@@ -507,6 +507,19 @@ export type AiRecommendationCandidate = Pick<
   | 'geo'
 >;
 
+export interface AiRecommendationPreparation {
+  spec: {
+    demands: Array<{ terms: string[]; relation: 'and' | 'or' }>;
+    avoid: string[];
+    /** 模型知识展开后的具体目的地（区域词归一）。 */
+    destinations?: string[];
+    source: 'classifier' | 'lexical';
+  } | null;
+  queries: string[];
+  understanding: string;
+  pricePreference?: 'low' | 'premium' | 'none' | 'unchanged';
+}
+
 export interface AiRecommendationRequest {
   /** Optional caller deadline; omitted for progressive enrichment. Provider timeouts still apply. */
   timeoutMs?: number;
@@ -520,6 +533,13 @@ export interface AiRecommendationRequest {
   previousResult?: AiRecommendationResult | null;
   /** Only the caller that owns a suspended attempt may request same-turn resume. */
   resumeInterrupted?: boolean;
+  /**
+   * 上一轮已经拿到的分类头结果。恢复同一轮时传回来，跳过 4s 的分类头调用，
+   * 也避免重新规划出不同的检索式（恢复后结果跟第一次不一致）。
+   */
+  resumePreparation?: AiRecommendationPreparation | null;
+  /** 分类头结果就绪时回调一次；面板据此落盘，供中断恢复复用。 */
+  onPreparationReady?: (preparation: AiRecommendationPreparation) => void;
   onProgress?: (progress: AiRecommendationProgress) => void;
   // 取消信号：面板点「取消这次查找」或组件卸载时 abort，真正掐断底层 fetch。
   // 不传时行为与既往一致（无法取消，跑到超时/完成）。

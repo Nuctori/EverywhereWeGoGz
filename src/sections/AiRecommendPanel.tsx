@@ -44,10 +44,13 @@ import {
   warmAiRecommendationBatch,
 } from '@/lib/ai-recommendation';
 import {
+  clearAiPreparation,
   clearStoredAiChatState,
   clearStoredAiProgress,
+  readAiPreparation,
   readStoredAiChatState,
   readStoredAiProgress,
+  saveAiPreparation,
   saveStoredAiChatState,
   saveStoredAiProgress,
   subscribeStoredAiProgress,
@@ -576,6 +579,8 @@ export function AiRecommendPanel({
     };
     pendingContextRef.current = context;
     context.recoveryState = 'running';
+    // 新的一轮不复用上一轮分类头；本轮结果就绪后会覆盖这份暂存。
+    if (!resuming) clearAiPreparation();
     const isFollowUpTurn = nextMessages.filter((message) => message.role === 'user').length > 1;
     setMessages(nextMessages);
     setLoading(true);
@@ -702,6 +707,11 @@ export function AiRecommendPanel({
         preferenceMemory: context.preferenceMemory,
         previousResult: resuming ? context.checkpoint ?? context.previousResult : context.previousResult,
         resumeInterrupted: resuming,
+        // 同一轮恢复：复用上一轮分类头结果，省掉 4s 往返并保持检索式一致。
+        resumePreparation: resuming ? readAiPreparation(context.turnId) : null,
+        onPreparationReady: (preparation) => {
+          saveAiPreparation(context.turnId, preparation);
+        },
         signal: abortController.signal,
         onProgress: (progress) => {
           if (requestVersionRef.current !== requestVersion) return;
@@ -767,6 +777,7 @@ export function AiRecommendPanel({
         persistedMessages = [...nextMessages, createMessage('assistant', buildResultAssistantReply(prompt, isFollowUpTurn))];
         autoResumeRemainingRef.current = 0;
         pendingContextRef.current = null;
+        clearAiPreparation(context.turnId);
         setInterruptedPrompt(null);
         setMessages(persistedMessages);
         setPreferenceMemory(persistedMemory);
@@ -973,6 +984,7 @@ export function AiRecommendPanel({
     setInterruptedPrompt(null);
     pendingContextRef.current = null;
     autoResumeRemainingRef.current = 0;
+    clearAiPreparation();
     onResultChange(null);
     setPreferenceMemory(null);
     setProgressState(null);

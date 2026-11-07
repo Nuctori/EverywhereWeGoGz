@@ -135,9 +135,10 @@ assert.ok(
 // 稳定池构建与天气抓取必须已经在跑，不能串行排队。
 {
   const poolAt = recommendSource.indexOf('const stablePool = getStablePromptPool(candidateTours);');
-  const classifyAt = recommendSource.indexOf(
-    'const classifiedPayload = await classifyExperienceDemandSpec({',
-  );
+  // 恢复同一轮时可以复用上一步的分类头结果，因此调用不再固定写成
+  // `const classifiedPayload = await ...`；这里只校验"真正 await 分类头"
+  // 仍然发生在稳定池/天气预热之后。
+  const classifyAt = recommendSource.indexOf('await classifyExperienceDemandSpec({');
   assert.ok(poolAt > 0 && classifyAt > 0, 'both the pool build and the classifier must stay discoverable');
   assert.ok(
     poolAt < classifyAt,

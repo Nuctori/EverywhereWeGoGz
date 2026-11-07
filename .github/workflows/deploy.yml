@@ -76,6 +76,7 @@ jobs:
           npm run test:ai-low-price
           npm run test:ai-model-price-intent
           npm run test:ai-request-lifecycle
+          npm run test:ai-preparation-reuse
           npm run test:ai-chat-storage-roundtrip
           python scripts/test_geo_schema_guard.py
 

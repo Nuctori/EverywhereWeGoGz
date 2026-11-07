@@ -105,7 +105,8 @@
     "test:ai-mobile-recovery-e2e": "node scripts/test_ai_mobile_recovery_e2e.mjs",
     "test:ai-failure-reason-e2e": "node scripts/test_ai_failure_reason_e2e.mjs",
     "test:ai-request-lifecycle": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_request_lifecycle.mjs",
-    "test:ai-parallel-abort": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_parallel_and_abort.mjs"
+    "test:ai-parallel-abort": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_parallel_and_abort.mjs",
+    "test:ai-preparation-reuse": "node --no-warnings --experimental-strip-types --loader ./scripts/ts-alias-loader.mjs scripts/test_ai_preparation_reuse.mjs"
   },
   "dependencies": {
     "@radix-ui/react-accordion": "^1.2.12",

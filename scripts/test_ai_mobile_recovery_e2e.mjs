@@ -211,6 +211,8 @@ try {
       await waitState(page, state => state.pendingContext?.recoveryState === 'running' && !!state.pendingContext.checkpoint?.items?.length);
     }
     const ranking = (await snapshot(page)).calls.filter(call => call.ranking);
+    const classifierCalls = (await snapshot(page)).calls.filter(call => !call.ranking).length;
+    assert.equal(classifierCalls, 1, 'resumes must reuse the classified preparation instead of re-running it');
     for (const call of ranking.slice(1)) {
       assert.match(resumeText(call), /本轮中断后继续/, 'every foreground return must resume with a continuation instruction');
       const instruction = call.messages.find(message => message.content.includes('本轮中断后继续'))?.content;
