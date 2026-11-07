@@ -79,6 +79,10 @@ interface AiRecommendPanelProps {
 export const AI_PENDING_CARD_ID = 'ai-pending-card';
 
 const MAX_PERSISTED_MESSAGES = 40;
+// 用户锁屏/切后台等待是正常用法：每次真正回到前台都补满一轮自动恢复额度。
+// 额度只在前台信号（可见、pageshow）时补充，后台不会自己续跑，因此不会形成
+// 无人值守的重试循环；多次锁屏也能一次次推进，而不是停在"查找已暂停"。
+const AUTO_RESUME_PER_FOREGROUND = 2;
 const scheduleIdleWork = (callback: () => void) => {
   if (typeof window === 'undefined') return undefined;
 
@@ -372,7 +376,14 @@ export function AiRecommendPanel({
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [interruptedPrompt, setInterruptedPrompt] = useState<string | null>(storedChatState.pendingPrompt || null);
   const pendingContextRef = useRef<PendingAiRequest | null>(storedChatState.pendingContext ?? null);
-  const autoResumeRemainingRef = useRef(storedChatState.autoResumeRemaining ?? 0);
+  // 锁屏/后台被系统回收后重载：待恢复的本轮仍然有效，挂载即补一轮前台额度，
+  // 否则上轮消耗完的预算会把"重新打开页面"也卡在暂停态。
+  const restoredRecovery = storedChatState.pendingContext?.recoveryState;
+  const autoResumeRemainingRef = useRef(
+    storedChatState.pendingPrompt && restoredRecovery !== 'failed' && restoredRecovery !== 'paused'
+      ? Math.max(storedChatState.autoResumeRemaining ?? 0, AUTO_RESUME_PER_FOREGROUND)
+      : storedChatState.autoResumeRemaining ?? 0,
+  );
   const [networkOnline, setNetworkOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
   const [resumeTick, setResumeTick] = useState(0);
   const liveThinkingScrollRef = useRef<HTMLDivElement>(null);
@@ -388,6 +399,9 @@ export function AiRecommendPanel({
   // 页面正在离开时的可见性可能还是 visible，直接按 interruptedPrompt 续跑
   // 会在后台入口处立刻发起第二个请求，把恢复预算烧在一次没意义的重启上。
   const awaitingForegroundRef = useRef(false);
+  // 是否经历了一次后台/离开页面：回到前台时据此补满自动恢复额度。
+  // 只用"隐藏→可见"这类真实前后台切换触发，普通重渲染不会补额度。
+  const wentBackgroundRef = useRef(false);
   // 本轮在途请求的取消器：取消/重开/卸载时 abort，真正掐断底层 fetch。
   // 此前只有 requestVersionRef 做"丢弃结果"，请求本身仍在跑完——
   // 手机上连点几次就是几个 35s 的在途请求叠加，越点越慢。
@@ -603,12 +617,17 @@ export function AiRecommendPanel({
     // 真正需要收尾的是离开页面（pagehide）和断网；被系统杀掉的请求由下面
     // 结果层的 sawHidden 归类为可恢复中断。
     const onVisibility = () => {
-      if (isPageHidden()) sawHidden = true;
-      else awaitingForegroundRef.current = false;
+      if (isPageHidden()) {
+        sawHidden = true;
+        wentBackgroundRef.current = true;
+      } else {
+        awaitingForegroundRef.current = false;
+      }
     };
     const onPageHide = () => {
       // 页面正在离开（导航/后台入口）：等一次真正的 pageshow/可见再续跑。
       awaitingForegroundRef.current = true;
+      wentBackgroundRef.current = true;
       suspendRequest();
     };
     const onOffline = () => { setNetworkOnline(false); suspendRequest('offline'); };
@@ -837,7 +856,9 @@ export function AiRecommendPanel({
           label: context.recoveryState === 'offline' ? '网络断开，本轮已保留' : '生成推荐被中断（切到后台或锁屏）',
           detail: context.recoveryState === 'offline'
             ? '已保留现有内容，等待网络恢复。'
-            : autoResumeRemainingRef.current > 0
+            // 后台中断会在回到前台时补满额度；当前额度是否用光不影响
+            // "回前台会继续"这件事，别把耗尽文案写在用户还会回来的场景里。
+            : context.recoveryState === 'background' || autoResumeRemainingRef.current > 0
               ? '已保留现有内容，回到前台后将自动继续。'
               : '自动恢复预算已耗尽，可手动继续本轮。',
         };
@@ -885,11 +906,31 @@ export function AiRecommendPanel({
     requestAbortRef.current = null;
   }, []);
 
-  // Resume only after the old attempt has settled. Persist the allowance before
-  // dispatch so reload/visibility bursts cannot create an unbounded retry loop.
+  // 前台信号触发续跑；派发前先把额度落盘，避免同一前台事件在重载/重复事件里
+  // 被重复消费（额度只在前台信号补充，后台不会自行续跑）。
   useEffect(() => {
     const refreshRemote = () => {
-      if (isPageHidden()) return;
+      if (isPageHidden()) {
+        wentBackgroundRef.current = true;
+        return;
+      }
+      // 真正回到前台（可见/pageshow）：锁屏、切标签可以发生很多次，
+      // 每次都补满自动恢复额度，让本轮继续推进而不是累计耗尽。
+      // 只有经历过后台才补——普通渲染/在线恢复不会凭空发请求。
+      if (wentBackgroundRef.current || awaitingForegroundRef.current) {
+        wentBackgroundRef.current = false;
+        autoResumeRemainingRef.current = Math.max(
+          autoResumeRemainingRef.current,
+          AUTO_RESUME_PER_FOREGROUND,
+        );
+        const storedState = readStoredAiChatState();
+        if (storedState.pendingPrompt) {
+          saveStoredAiChatState(
+            { ...storedState, autoResumeRemaining: autoResumeRemainingRef.current },
+            MAX_PERSISTED_MESSAGES,
+          );
+        }
+      }
       // 只有真正回到前台（可见/pageshow/online）才允许自动续跑。
       awaitingForegroundRef.current = false;
       setResumeTick((tick) => tick + 1);
@@ -900,9 +941,11 @@ export function AiRecommendPanel({
     const onOffline = () => { setNetworkOnline(false); setResumeTick((tick) => tick + 1); };
     document.addEventListener('visibilitychange', refreshRemote);
     window.addEventListener('pageshow', refreshRemote);
+    // 少数 webview/桌面壳只发 focus，不发 visibility/pageshow；补一条前台信号。
+    window.addEventListener('focus', refreshRemote);
     window.addEventListener('online', onOnline);
     window.addEventListener('offline', onOffline);
-    return () => { document.removeEventListener('visibilitychange', refreshRemote); window.removeEventListener('pageshow', refreshRemote); window.removeEventListener('online', onOnline); window.removeEventListener('offline', onOffline); };
+    return () => { document.removeEventListener('visibilitychange', refreshRemote); window.removeEventListener('pageshow', refreshRemote); window.removeEventListener('focus', refreshRemote); window.removeEventListener('online', onOnline); window.removeEventListener('offline', onOffline); };
   }, []);
 
   useEffect(() => {

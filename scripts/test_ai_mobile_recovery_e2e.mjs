@@ -192,7 +192,7 @@ try {
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve); });
   origin = 'http://127.0.0.1:' + server.address().port;
   browser = await chromium.launch({ headless: true });
-  await run('same-turn automatic/manual resume keeps user and checkpoint', 'partial', async (page, evidence) => {
+  await run('repeated lock/unlock keeps auto-advancing the same turn', 'partial', async (page, evidence) => {
     const prompt = '帮我挑一些线路';
     await search(page, prompt);
     const initial = await waitState(page, state => !!state.pendingContext?.checkpoint?.items?.length);
@@ -200,33 +200,23 @@ try {
     const order = initial.pendingContext.checkpoint.items.map(item => item.tourId);
     assert.ok(turnId);
     evidence.initial = initial;
-    for (let cycle = 0; cycle < 3; cycle++) {
+    // 用户锁屏等待、反复解锁：每一次回到前台都必须自动续跑，不需要手动点继续。
+    for (let cycle = 0; cycle < 4; cycle += 1) {
       const paused = await interrupt(page);
       assertOneUser(paused, prompt);
       assert.equal(paused.pendingContext.turnId, turnId);
       assert.deepEqual(paused.pendingContext.checkpoint.items.map(item => item.tourId), order);
-      if (cycle < 2) {
-        await page.evaluate(() => window.__setVisibility('visible'));
-        await rankCount(page, cycle + 2);
-        await waitState(page, state => state.pendingContext?.recoveryState === 'running' && !!state.pendingContext.checkpoint?.items?.length);
-      }
+      await page.evaluate(() => window.__setVisibility('visible'));
+      await rankCount(page, cycle + 2);
+      await waitState(page, state => state.pendingContext?.recoveryState === 'running' && !!state.pendingContext.checkpoint?.items?.length);
     }
-    const paused = (await snapshot(page)).state;
-    assert.equal(paused.autoResumeRemaining, 0);
-    await page.evaluate(() => window.__setVisibility('visible'));
-    await openPanel(page);
-    await page.getByRole('button', { name: '继续本轮', exact: true }).click();
-    await rankCount(page, 4);
-    const resumed = await waitState(page, state => state.pendingContext?.recoveryState === 'running');
-    assertOneUser(resumed, prompt);
-    assert.equal(resumed.pendingContext.turnId, turnId);
     const ranking = (await snapshot(page)).calls.filter(call => call.ranking);
     for (const call of ranking.slice(1)) {
-      assert.match(resumeText(call), /本轮中断后继续/, 'automatic and manual retries must both use continuation instruction');
+      assert.match(resumeText(call), /本轮中断后继续/, 'every foreground return must resume with a continuation instruction');
       const instruction = call.messages.find(message => message.content.includes('本轮中断后继续'))?.content;
       const fixed = instruction?.match(/order 固定为 (\[[^\]]*\])/);
       assert.ok(fixed, 'resume instruction must explicitly pin checkpoint order');
-      assert.deepEqual(JSON.parse(fixed[1]), order, 'automatic and manual resumes pin exactly this turn checkpoint');
+      assert.deepEqual(JSON.parse(fixed[1]), order, 'resumes pin exactly this turn checkpoint');
     }
     evidence.ranking = ranking;
     evidence.completed = await finish(page);

@@ -89,16 +89,12 @@ try {
   await page.waitForFunction(() => window.__partialAttempts === 1);
   await page.getByRole('button', { name: '先看 1 条', exact: true }).waitFor();
   console.log('PASS: 前台事件去重自动重试，重载自动恢复，先看N条可点击');
-  // Both persisted recovery allowances are now consumed. Another interruption
-  // must retain content without silently starting a fourth request.
+  // 页面离开但还没回到前台：不允许静默重试，先保留检查点。
   await page.evaluate(() => window.dispatchEvent(new Event('pagehide')));
   await page.getByRole('button', { name: '继续本轮', exact: true }).waitFor();
-  await page.evaluate(() => {
-    Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
-    document.dispatchEvent(new Event('visibilitychange'));
-  });
   await page.waitForTimeout(300);
-  assert.equal(await page.evaluate(() => window.__partialAttempts), 1, 'automatic retries must be bounded across reload');
+  assert.equal(await page.evaluate(() => window.__partialAttempts), 1, 'no retry while the page is still away');
+  // 手动继续始终可用（回到前台时会自动续跑，这里验证手动路径）。
   await page.getByRole('button', { name: '继续本轮', exact: true }).click();
   await page.waitForFunction(() => window.__partialAttempts === 2);
   await page.getByRole('button', { name: '停止完善', exact: true }).click();
