@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-05T22:47:13.129Z",
-  "latestUpdatedAt": "2026-11-05T19:10:42.861592",
-  "totalRecords": 6012,
-  "listRecords": 6012,
-  "detailFiles": 6012,
+  "generatedAt": "2026-11-07T11:33:29.178Z",
+  "latestUpdatedAt": "2026-11-07T11:33:14.394717",
+  "totalRecords": 5889,
+  "listRecords": 5889,
+  "detailFiles": 5889,
   "sourceStats": {
-    "假日通": 321,
+    "假日通": 198,
     "广东中旅": 1440,
     "康辉": 2114,
     "广州去旅行": 31,
@@ -13,29 +13,29 @@
     "天涯户外": 162
   },
   "destinationStats": {
-    "广东": 1458,
-    "广西": 41,
-    "华东": 121,
-    "其他": 967,
-    "江西": 38,
-    "河南": 19,
-    "山东": 42,
-    "湖南": 28,
-    "三亚": 113,
-    "张家界": 44,
-    "厦门": 36,
-    "湖北": 64,
-    "贵州": 50,
-    "北京": 148,
-    "四川": 99,
-    "重庆": 58,
-    "福建": 14,
+    "广东": 1397,
+    "广西": 42,
+    "华东": 110,
+    "江西": 34,
+    "其他": 953,
+    "河南": 18,
+    "山东": 32,
+    "厦门": 35,
+    "张家界": 43,
+    "贵州": 49,
+    "福建": 13,
+    "湖南": 23,
     "云南": 200,
     "桂林": 63,
+    "湖北": 62,
+    "三亚": 110,
     "西安": 84,
+    "四川": 97,
+    "北京": 142,
     "新疆": 144,
     "港澳": 68,
     "内蒙古": 27,
+    "重庆": 57,
     "青甘": 41,
     "西藏": 43,
     "拉萨": 9,
@@ -709,32 +709,32 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 113784442
+      "size": 109339713
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 31868778
+      "size": 30624107
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 84792715
+      "size": 81279783
     },
     "geoPlaces": {
       "path": "data/geo-places.json",
-      "size": 332130
+      "size": 195921
     },
     "mapIndex": {
       "path": "data/tour-map-index.json",
-      "size": 574987
+      "size": 543758
     },
     "mapCards": {
       "path": "data/tour-map-cards.json",
-      "size": 2470295
+      "size": 2430619
     },
     "mapPlaceCards": {
       "path": "data/tour-map-place-cards/",
-      "files": 491,
-      "chunks": 598
+      "files": 278,
+      "chunks": 382
     }
   }
 }
