@@ -6448,5 +6448,47 @@
     "address": {
       "formatted": "江西省上饶市婺源篁岭"
     }
+  },
+  "黄果树景区 贵州 中国": {
+    "query": "黄果树景区 贵州 中国",
+    "provider": "arcgis",
+    "latitude": 26.218,
+    "longitude": 105.064,
+    "displayName": "贵州六盘水黄果树",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 90.2,
+    "address": {
+      "formatted": "贵州六盘水黄果树"
+    }
+  },
+  "稻城亚丁风景区 四川 中国": {
+    "query": "稻城亚丁风景区 四川 中国",
+    "provider": "arcgis",
+    "latitude": 28.4577693,
+    "longitude": 100.3388197,
+    "displayName": "四川省甘孜藏族自治州稻城亚丁",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 81.0,
+    "address": {
+      "formatted": "四川省甘孜藏族自治州稻城亚丁"
+    }
+  },
+  "羚羊峡古栈道森林公园 广东 中国": {
+    "query": "羚羊峡古栈道森林公园 广东 中国",
+    "provider": "photon",
+    "latitude": 23.105569,
+    "longitude": 112.5473181,
+    "displayName": "羚羊峡古栈道森林公园   肇庆市  广东省 中国",
+    "level": "poi",
+    "locality": "肇庆市",
+    "providerScore": 80,
+    "address": {
+      "formatted": "羚羊峡古栈道森林公园   肇庆市  广东省 中国",
+      "country": "中国",
+      "province": "广东省",
+      "city": "肇庆市"
+    }
   }
 }
