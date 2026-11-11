@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-09T15:54:53.561Z",
-  "latestUpdatedAt": "2026-11-09T12:11:57.889198",
-  "totalRecords": 6055,
-  "listRecords": 6055,
-  "detailFiles": 6055,
+  "generatedAt": "2026-11-11T12:27:32.895Z",
+  "latestUpdatedAt": "2026-11-11T12:27:21.114271",
+  "totalRecords": 5938,
+  "listRecords": 5938,
+  "detailFiles": 5938,
   "sourceStats": {
-    "假日通": 321,
+    "假日通": 204,
     "广东中旅": 1479,
     "康辉": 2125,
     "广州去旅行": 18,
@@ -13,30 +13,30 @@
     "天涯户外": 162
   },
   "destinationStats": {
-    "广东": 1490,
-    "广西": 47,
-    "其他": 982,
-    "华东": 121,
-    "河南": 20,
-    "山东": 39,
-    "湖南": 29,
-    "厦门": 38,
-    "江西": 38,
-    "张家界": 44,
-    "贵州": 51,
-    "福建": 16,
-    "三亚": 112,
-    "湖北": 61,
-    "四川": 99,
-    "重庆": 54,
-    "桂林": 60,
+    "广东": 1436,
+    "广西": 43,
+    "其他": 965,
+    "华东": 112,
+    "河南": 19,
+    "山东": 35,
+    "湖南": 23,
+    "桂林": 59,
+    "贵州": 50,
     "北京": 144,
+    "湖北": 60,
     "云南": 200,
+    "三亚": 109,
+    "厦门": 36,
     "西安": 87,
+    "四川": 98,
     "新疆": 146,
     "港澳": 65,
     "内蒙古": 28,
+    "福建": 13,
+    "张家界": 41,
     "青甘": 41,
+    "重庆": 53,
+    "江西": 32,
     "西藏": 42,
     "拉萨": 9,
     "皮克顿": 1,
@@ -713,32 +713,32 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 115788272
+      "size": 111620869
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 32113319
+      "size": 30929398
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 86576540
+      "size": 83277489
     },
     "geoPlaces": {
       "path": "data/geo-places.json",
-      "size": 334854
+      "size": 195778
     },
     "mapIndex": {
       "path": "data/tour-map-index.json",
-      "size": 578902
+      "size": 547975
     },
     "mapCards": {
       "path": "data/tour-map-cards.json",
-      "size": 2481878
+      "size": 2444156
     },
     "mapPlaceCards": {
       "path": "data/tour-map-place-cards/",
-      "files": 496,
-      "chunks": 604
+      "files": 278,
+      "chunks": 386
     }
   }
 }
