@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-11T12:27:32.895Z",
-  "latestUpdatedAt": "2026-11-11T12:27:21.114271",
-  "totalRecords": 5938,
-  "listRecords": 5938,
-  "detailFiles": 5938,
+  "generatedAt": "2026-11-14T12:00:57.845Z",
+  "latestUpdatedAt": "2026-11-14T12:00:48.285146",
+  "totalRecords": 5872,
+  "listRecords": 5872,
+  "detailFiles": 5872,
   "sourceStats": {
-    "假日通": 204,
+    "假日通": 138,
     "广东中旅": 1479,
     "康辉": 2125,
     "广州去旅行": 18,
@@ -13,26 +13,26 @@
     "天涯户外": 162
   },
   "destinationStats": {
-    "广东": 1436,
+    "广东": 1416,
     "广西": 43,
-    "其他": 965,
-    "华东": 112,
-    "河南": 19,
-    "山东": 35,
+    "其他": 942,
+    "华东": 109,
+    "河南": 15,
     "湖南": 23,
     "桂林": 59,
     "贵州": 50,
-    "北京": 144,
-    "湖北": 60,
-    "云南": 200,
-    "三亚": 109,
+    "云南": 199,
+    "湖北": 58,
     "厦门": 36,
     "西安": 87,
-    "四川": 98,
+    "北京": 142,
+    "山东": 28,
     "新疆": 146,
     "港澳": 65,
     "内蒙古": 28,
+    "四川": 97,
     "福建": 13,
+    "三亚": 106,
     "张家界": 41,
     "青甘": 41,
     "重庆": 53,
@@ -713,32 +713,32 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 111620869
+      "size": 109583579
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 30929398
+      "size": 30420399
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 83277489
+      "size": 81727894
     },
     "geoPlaces": {
       "path": "data/geo-places.json",
-      "size": 195778
+      "size": 194744
     },
     "mapIndex": {
       "path": "data/tour-map-index.json",
-      "size": 547975
+      "size": 542781
     },
     "mapCards": {
       "path": "data/tour-map-cards.json",
-      "size": 2444156
+      "size": 2422764
     },
     "mapPlaceCards": {
       "path": "data/tour-map-place-cards/",
-      "files": 278,
-      "chunks": 386
+      "files": 277,
+      "chunks": 382
     }
   }
 }
