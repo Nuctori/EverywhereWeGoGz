@@ -297,22 +297,15 @@
   },
   "广州南沙 广东 中国": {
     "query": "广州南沙 广东 中国",
-    "provider": "photon",
-    "latitude": 22.7004839,
-    "longitude": 113.5528338,
-    "displayName": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
+    "provider": "arcgis",
+    "latitude": 22.804391301,
+    "longitude": 113.5198188,
+    "displayName": "广东省广州南沙",
     "level": "poi",
-    "locality": "福生社区",
-    "providerScore": 80,
+    "locality": "",
+    "providerScore": 100.0,
     "address": {
-      "formatted": "广州南沙 同安东围路 珠江街道 广州市  广东省 中国",
-      "country": "中国",
-      "province": "广东省",
-      "city": "广州市",
-      "district": "珠江街道",
-      "locality": "福生社区",
-      "street": "同安东围路",
-      "postalCode": "511462"
+      "formatted": "广东省广州南沙"
     }
   },
   "三岔河风景区 中国": {
@@ -6489,6 +6482,19 @@
       "country": "中国",
       "province": "广东省",
       "city": "肇庆市"
+    }
+  },
+  "珠海酒店 广东 中国": {
+    "query": "珠海酒店 广东 中国",
+    "provider": "arcgis",
+    "latitude": 22.273734001,
+    "longitude": 113.5721327,
+    "displayName": "广东省珠海",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 89.1,
+    "address": {
+      "formatted": "广东省珠海"
     }
   }
 }
