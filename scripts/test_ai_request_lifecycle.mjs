@@ -1,6 +1,5 @@
 // Offline behavior regressions: shared deadline, body cancellation and daily windows.
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import { __aiRecommendationTestHooks as h, requestAiRecommendations } from '../src/lib/ai-recommendation.ts';
 import { toursListSchema } from '../src/lib/runtime-schemas.ts';
 
@@ -67,7 +66,23 @@ try {
   await rejected;
   console.log('PASS late JSON success is rejected after cancellation');
 
-  const base = toursListSchema.parse(JSON.parse(fs.readFileSync(new URL('../public/data/tours-list.json', import.meta.url), 'utf8')))[0];
+  // 固定合成 fixture，不读 tours-list.json：数据管线每天重写该文件，取样 [0] 会随
+  // 远端数据漂移（2026-11-19 部署就因 scoreTour 返回 null 而红）。这里只保留
+  // 稳定字段，测试语义（deadline/partial/窗口失效）与数据内容无关。
+  const base = toursListSchema.parse([{
+    id: 'lifecycle-fixture',
+    title: '广州周边3天',
+    source: 'local',
+    destination: '广东',
+    duration: 3,
+    price: 880,
+    priceUnit: '人',
+    departureDate: '2099-01-01',
+    departureDates: ['2099-01-01'],
+    hotDepartureDates: [],
+    highlights: ['广州出发', '周末休闲'],
+    tags: ['周末'],
+  }])[0];
   const candidate = { ...base, departureDate: '2099-01-01', departureDates: ['2099-01-01'], hotDepartureDates: [] };
   const args = { conversationId: 'deadline-test', messages: [{ role: 'user', content: '推荐线路' }],
     candidateTours: [candidate], activeFilters: {}, searchQuery: '', aiConfig: primary, timeoutMs: 30 };
@@ -101,7 +116,9 @@ try {
       init.signal.addEventListener('abort', () => c.error(new DOMException('aborted', 'AbortError')), { once: true });
     } }), { headers: { 'content-type': 'text/event-stream' } });
   };
-  const partialResult = await requestAiRecommendations({ ...args, timeoutMs: 30 });
+  // 300ms 仍远小于"流永久挂起"的收敛时间：deadline 必然触发；给足调度抖动余量，
+  // 避免 30ms 在负载高的机器上偶发地在 partial 到达前超时（本机 8 次跑挂 2 次）。
+  const partialResult = await requestAiRecommendations({ ...args, timeoutMs: 300 });
   assert.equal(partialResult.source, 'ai-api', 'checked preview must survive whole deadline');
   assert.equal(partialResult.items[0]?.tourId, candidate.id);
   assert.notEqual(partialResult.status.mode, 'ai', 'partial is not a completed AI recommendation');
