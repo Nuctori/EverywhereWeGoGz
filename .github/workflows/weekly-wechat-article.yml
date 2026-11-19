@@ -13,8 +13,41 @@ env:
   WECHAT_CONTENT_SOURCE_URL: https://nuctori.github.io/EverywhereWeGoGz/
 
 jobs:
-  generate-and-publish:
+  credentials:
+    # 调度源失败时不必再预检；凭证坏 → 开/更新追踪 issue → 本轮整体绿灯跳过。
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      # check_wechat_credentials.mjs 会创建 label、开关 issue；缺 write 权限时
+      # 2026-11-16 的 403 让追踪 issue 根本没建出来。
+      issues: write
+    outputs:
+      ok: ${{ steps.check.outputs.ok }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify WeChat credentials
+        id: check
+        env:
+          WECHAT_APP_ID: ${{ secrets.WECHAT_APP_ID }}
+          WECHAT_APP_SECRET: ${{ secrets.WECHAT_APP_SECRET }}
+          GH_TOKEN: ${{ github.token }}
+        # 用 if/else 把脚本 exit 1 吸收成 ok=false：旧写法在后续步步跑，
+        # 坏凭证时仍会去装 aider（2026-11-16 就是这样红的）。
+        run: |
+          if node scripts/check_wechat_credentials.mjs; then
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "凭证失效，已触发/更新追踪 issue；本轮整体跳过（绿灯），修复后自动恢复。"
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  generate-and-publish:
+    needs: credentials
+    if: needs.credentials.outputs.ok == 'true'
     runs-on: ubuntu-latest
     # LLM 生成 + SSH 发布全流程；挂住时兜底，避免烧满 runner 默认的 360 分钟。
     timeout-minutes: 60
@@ -23,22 +56,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Verify WeChat credentials (skip run if broken)
-        id: credentials
-        # 凭证坏 → 去重开 issue → 本轮绿灯跳过，省下 DeepSeek/Aider token。
-        continue-on-error: true
-        env:
-          WECHAT_APP_ID: ${{ secrets.WECHAT_APP_ID }}
-          WECHAT_APP_SECRET: ${{ secrets.WECHAT_APP_SECRET }}
-          GH_TOKEN: ${{ github.token }}
-        run: node scripts/check_wechat_credentials.mjs
-
-      - name: Stop if credentials are broken
-        if: steps.credentials.outcome == 'failure'
-        run: |
-          echo "WeChat credentials invalid — 已开/更新追踪 issue，本轮跳过（绿灯）。修复凭证后自动恢复。"
-          exit 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -49,9 +66,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          # aider-chat 锁 numpy==1.24.3，只有 ≤3.11 有 wheel；runner 自带 3.12+
+          # 会走源码构建，挂在 pkgutil.ImpImporter（2026-11-16 的红）。
+          python-version: "3.11"
+
       - name: Install Aider
         run: |
-          python3 -m pip install --user aider-chat
+          python -m pip install --user aider-chat
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Choose run date
@@ -59,11 +83,12 @@ jobs:
 
       - name: Verify weekly article tests
         run: |
+          npm run test:weekly-wechat-workflow
           npm run test:weekly-wechat-article
           npm run test:weekly-wechat-agent-cli
           npm run test:wechat-publish
           npm run test:wechat-publish-bundle
-          python3 scripts/test_deploy_remote_wechat_publish.py
+          python scripts/test_deploy_remote_wechat_publish.py
 
       - name: Verify DeepSeek token
         env:
@@ -111,7 +136,7 @@ jobs:
           WECHAT_PUBLISH_SSH_TARGET: ${{ secrets.WECHAT_PUBLISH_SSH_TARGET }}
           WECHAT_PUBLISH_REMOTE_DIR: ${{ secrets.WECHAT_PUBLISH_REMOTE_DIR }}
         run: |
-          python3 scripts/deploy_remote_wechat_publish.py \
+          python scripts/deploy_remote_wechat_publish.py \
             --host "$WECHAT_PUBLISH_SSH_TARGET" \
             --remote-dir "$WECHAT_PUBLISH_REMOTE_DIR/$RUN_DATE" \
             --bundle-path "weekly-wechat-posts/$RUN_DATE/publish-bundle.json" \
