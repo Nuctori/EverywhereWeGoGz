@@ -5,7 +5,7 @@ import {
   destinationHintsMatchCorpus,
   resolveTourDestination,
 } from '../src/lib/destination-resolver.ts';
-import { decideSearchAction, getPrimarySearchAction } from '../src/lib/search-routing.ts';
+import { decideSearchAction } from '../src/lib/search-routing.ts';
 
 const hints = collectDestinationHints('沙扒湾');
 assert.ok(hints.includes('广东'), `expected 沙扒湾 to resolve to 广东, got ${JSON.stringify(hints)}`);
@@ -22,24 +22,24 @@ assert.equal(resolveTourDestination(testTour), '广东');
 assert.match(buildTourDestinationSearchCorpus(testTour), /广东/);
 assert.match(buildTourDestinationSearchCorpus(testTour), /阳江沙扒湾海边亲子团/);
 
-assert.equal(decideSearchAction('三亚').reason, 'destination_only');
-assert.equal(getPrimarySearchAction('三亚'), 'plain');
-assert.equal(decideSearchAction('沙扒湾').reason, 'destination_only');
-assert.equal(getPrimarySearchAction('沙扒湾'), 'plain');
-assert.equal(decideSearchAction('帮我找沙扒湾').reason, 'destination_only');
-assert.equal(getPrimarySearchAction('帮我找沙扒湾'), 'plain');
-assert.equal(decideSearchAction('香港').reason, 'destination_only');
-assert.equal(getPrimarySearchAction('香港'), 'plain');
-assert.equal(decideSearchAction('三亚亲子').reason, 'destination_only');
-assert.equal(getPrimarySearchAction('三亚亲子'), 'plain');
-assert.equal(decideSearchAction('预算3000内').reason, 'hard_constraints');
-assert.equal(getPrimarySearchAction('预算3000内'), 'ai');
-assert.equal(decideSearchAction('想去海边').reason, 'plain');
-assert.equal(getPrimarySearchAction('想去海边'), 'plain');
-assert.equal(decideSearchAction('帮我找同时带温泉和沙滩，预算800内，最好2天游').reason, 'hard_constraints');
-assert.equal(getPrimarySearchAction('帮我找同时带温泉和沙滩，预算800内，最好2天游'), 'ai');
-assert.equal(decideSearchAction('广州出发，国庆后，爸妈同行，想轻松一点，最好5-7天，预算3000左右').reason, 'hard_constraints');
-assert.equal(getPrimarySearchAction('广州出发，国庆后，爸妈同行，想轻松一点，最好5-7天，预算3000左右'), 'ai');
+assert.equal((await decideSearchAction('三亚')).reason, 'destination_only');
+assert.equal((await decideSearchAction('三亚')).action, 'plain');
+assert.equal((await decideSearchAction('沙扒湾')).reason, 'destination_only');
+assert.equal((await decideSearchAction('沙扒湾')).action, 'plain');
+assert.equal((await decideSearchAction('帮我找沙扒湾')).reason, 'destination_only');
+assert.equal((await decideSearchAction('帮我找沙扒湾')).action, 'plain');
+assert.equal((await decideSearchAction('香港')).reason, 'destination_only');
+assert.equal((await decideSearchAction('香港')).action, 'plain');
+assert.equal((await decideSearchAction('三亚亲子')).reason, 'destination_only');
+assert.equal((await decideSearchAction('三亚亲子')).action, 'plain');
+assert.equal((await decideSearchAction('预算3000内')).reason, 'hard_constraints');
+assert.equal((await decideSearchAction('预算3000内')).action, 'ai');
+assert.equal((await decideSearchAction('想去海边')).reason, 'plain');
+assert.equal((await decideSearchAction('想去海边')).action, 'plain');
+assert.equal((await decideSearchAction('帮我找同时带温泉和沙滩，预算800内，最好2天游')).reason, 'hard_constraints');
+assert.equal((await decideSearchAction('帮我找同时带温泉和沙滩，预算800内，最好2天游')).action, 'ai');
+assert.equal((await decideSearchAction('广州出发，国庆后，爸妈同行，想轻松一点，最好5-7天，预算3000左右')).reason, 'hard_constraints');
+assert.equal((await decideSearchAction('广州出发，国庆后，爸妈同行，想轻松一点，最好5-7天，预算3000左右')).action, 'ai');
 assert.ok(collectDestinationHints('香港').includes('港澳'));
 assert.ok(collectDestinationHints('澳门').includes('港澳'));
 

@@ -66,9 +66,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { zhCN } from 'date-fns/locale';
 
 // 数据加载核心 hook：index 负责筛选与全量语料，chunk 负责展示，全量列表仅在分片加载失败时兜底。
+const EMPTY_INDEX: TourIndexEntry[] = [];
+
 function useToursData(urgentIndex: boolean) {
   const [tours, setTours] = useState<TourSummary[]>([]);
-  const [indexTours, setIndexTours] = useState<TourIndexEntry[]>([]);
+  const [rawIndexTours, setIndexTours] = useState<TourIndexEntry[]>([]);
+  const [indexMayStart, allowBackgroundIndex] = useState(false);
   const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
   const [initialStatus, setInitialStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [initialAttempt, setInitialAttempt] = useState(0);
@@ -186,11 +189,11 @@ function useToursData(urgentIndex: boolean) {
     if (indexRequested || catalogTours.length) return;
     if (urgentIndex || initialStatus === 'error') {
       setIndexRequested(true);
-    } else if (initialStatus === 'ready') {
+    } else if (indexMayStart) {
       const timer = window.setTimeout(() => setIndexRequested(true), 100);
       return () => window.clearTimeout(timer);
     }
-  }, [urgentIndex, initialStatus, indexRequested, catalogTours.length]);
+  }, [urgentIndex, initialStatus, indexMayStart, indexRequested, catalogTours.length]);
   useEffect(() => {
     if (!indexRequested || catalogTours.length) return;
     const controller = new AbortController();
@@ -261,11 +264,18 @@ function useToursData(urgentIndex: boolean) {
     }
   }, [syncLoadingMoreState]);
 
+  // A syntactically valid array can still be a partial CDN response. Wait for
+  // the page's declared total before publishing it as the complete directory.
+  const validatedIndexStatus = indexStatus !== 'ready' ? indexStatus
+    : initialStatus !== 'ready' ? 'loading'
+    : rawIndexTours.length === total ? 'ready' : 'error';
+  const indexTours = catalogTours.length > 0 || validatedIndexStatus === 'ready' ? rawIndexTours : EMPTY_INDEX;
   return {
     tours,
     indexTours,
     catalogTours,
-    indexStatus,
+    indexStatus: validatedIndexStatus,
+    allowBackgroundIndex,
     retryIndex,
     initialStatus,
     retryInitialLoad,
@@ -522,6 +532,7 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
     indexTours,
     catalogTours,
     indexStatus,
+    allowBackgroundIndex,
     retryIndex,
     initialStatus,
     retryInitialLoad,
@@ -606,13 +617,12 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
     const entries = catalogTours.length > 0 ? catalogTours : localTours;
     return new Map(entries.map((tour) => [tour.id, tour]));
   }, [catalogTours, localTours]);
-  const deepLinkResolution = useMemo(
-    () =>
-      deepLinkTarget
-        ? findTourDeepLinkResolution(deepLinkTarget, [localTours, catalogTours], indexTours)
-        : null,
-    [catalogTours, deepLinkTarget, indexTours, localTours],
-  );
+  const deepLinkResolution = useMemo(() => {
+    if (!deepLinkTarget) return null;
+    const resolution = findTourDeepLinkResolution(deepLinkTarget, [localTours, catalogTours], indexTours);
+    if (deepLinkTarget.sourceId && resolution?.matchedBy === 'tourId' && indexStatus !== 'ready' && !catalogTours.length) return null;
+    return resolution;
+  }, [catalogTours, deepLinkTarget, indexStatus, indexTours, localTours]);
   const deepLinkIndexTour = useMemo(() => {
     if (!deepLinkResolution) return null;
     return indexTours.find((tour) => tour.id === deepLinkResolution.tourId) ?? null;
@@ -1063,6 +1073,12 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
   const autoCheckMorePages = canCheckMorePages && loadedPageCount < 4;
   const browsingCheckInterrupted = initialStatus === 'ready' && isEmptyBrowsing &&
     !hasPageChunks && loadedPageCount < totalPageCount && catalogTours.length === 0;
+  // The effect runs after cards commit, or after bounded browsing has no card to show.
+  useEffect(() => {
+    if (initialStatus === 'ready' && (waterfallTours.length > 0 || !autoCheckMorePages)) {
+      allowBackgroundIndex(true);
+    }
+  }, [initialStatus, waterfallTours.length, autoCheckMorePages, allowBackgroundIndex]);
   const checkNextPage = useCallback(() => {
     if (!loadingMore) void loadMorePages(nextPageRef.current);
   }, [loadMorePages, loadingMore, nextPageRef]);

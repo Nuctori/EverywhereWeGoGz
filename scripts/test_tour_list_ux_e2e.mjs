@@ -119,6 +119,25 @@ test('首片失败时保留全量目录兜底，以及真正的搜索空态', as
   assert.deepEqual(errors, []);
 });
 
+for (const fault of ['503', 'empty', 'truncated']) {
+  test(`目录索引 ${fault} 不误报零结果并可恢复`, async t => {
+    let broken = true;
+    const isIndex = pathname => pathname.endsWith('/tours-index.json');
+    const index = JSON.parse(fs.readFileSync(path.join(root, 'data/tours-index.json'), 'utf8'));
+    const { page, list } = await fixture(t, 390,
+      pathname => broken && fault === '503' && isIndex(pathname),
+      pathname => broken && isIndex(pathname) ? (fault === 'empty' ? [] : index.slice(0, 1)) : null);
+    await expect(list.locator('.tour-card h3').first()).toBeVisible();
+    await page.getByRole('searchbox').fill('zzqvx');
+    await page.getByRole('button', { name: '搜索线路', exact: true }).click();
+    await expect(list.getByRole('alert')).toContainText('暂时无法加载完整目录');
+    await expect(list.getByText('没有找到直接匹配的旅行团')).toHaveCount(0);
+    broken = false;
+    await list.getByRole('button', { name: '重试加载目录' }).click();
+    await expect(list.getByText('没有找到直接匹配的旅行团')).toBeVisible();
+  });
+}
+
 function stalePageFixture(root) {
   const page0 = JSON.parse(fs.readFileSync(path.join(root, 'data/tours-page-0.json'), 'utf8'));
   return (n, totalPages, available = false) => {
@@ -129,6 +148,30 @@ function stalePageFixture(root) {
     return { meta: { page: n, pageSize: 24, total: totalPages * 24 }, items };
   };
 }
+
+test('前片无可用线路时优先下一片，不抢跑索引', async t => {
+  const buildPage = stalePageFixture(root);
+  let release;
+  const delayedPage = new Promise(resolve => { release = () => resolve(buildPage(1, 2, true)); });
+  t.after(release);
+  let nextRequested = false;
+  let indexRequested = false;
+  const { list } = await fixture(t, 390, pathname => {
+    if (pathname.endsWith('/tours-index.json')) indexRequested = true;
+    return false;
+  }, pathname => {
+    if (pathname.endsWith('/tours-page-0.json')) return buildPage(0, 2);
+    if (pathname.endsWith('/tours-page-1.json')) { nextRequested = true; return delayedPage; }
+    return null;
+  });
+  await expect.poll(() => nextRequested).toBe(true);
+  // Hold the next shard beyond the old 100 ms timer.
+  await new Promise(resolve => setTimeout(resolve, 300));
+  assert.equal(indexRequested, false);
+  release();
+  await expect(list.locator('.tour-card h3').first()).toBeVisible();
+  await expect.poll(() => indexRequested).toBe(true);
+});
 
 for (const withAvailable of [true, false]) {
   test(`前两片全过期后${withAvailable ? '显示第三片可用线路' : '耗尽后显示真空态'}`, async t => {
@@ -181,6 +224,23 @@ test('自动检查有上限，后续分片失败时可重试', async t => {
   await expect(list.locator('.tour-card h3').first()).toHaveText('测试旅行团');
   assert.deepEqual(requested, [0, 1, 2, 3, 4, 0, 1, 2, 3, 4]);
   assert.deepEqual(errors, []);
+});
+
+test('慢索引的冲突深链不会打开首片里的旧 ID', async t => {
+  const index = JSON.parse(fs.readFileSync(path.join(root, 'data/tours-index.json'), 'utf8'));
+  const first = index.find(tour => tour.page === 0 && tour.sourceId);
+  const target = index.find(tour => tour.page > 0 && tour.sourceId && tour.sourceId !== first.sourceId);
+  assert.ok(first && target);
+  let release;
+  const held = new Promise(resolve => { release = () => resolve(index); });
+  t.after(release);
+  const query = new URLSearchParams({ tour: first.id, sourceId: target.sourceId });
+  const { page, list } = await fixture(t, 1440, undefined,
+    pathname => pathname.endsWith('/tours-index.json') ? held : null, undefined, `?${query}`);
+  await expect(list.locator('.tour-card h3').first()).toBeVisible();
+  await expect(page.getByRole('dialog', { name: first.title, exact: true })).toHaveCount(0);
+  release();
+  await expect(page.getByRole('dialog', { name: target.title, exact: true })).toBeVisible({ timeout: 20000 });
 });
 
 for (const width of [390, 1440]) {
