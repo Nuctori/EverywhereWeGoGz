@@ -1,9 +1,9 @@
 import { ArrowRight, CalendarDays, MapPin, Search, Sparkles, X } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { getPrimarySearchAction, decideSearchAction } from '@/lib/search-routing';
+import { decideSearchAction, type SearchAction } from '@/lib/search-routing';
 
 // 主按钮判定等用户停手再切，避免打字途中按钮身份来回跳。
 const HERO_ROUTE_DEBOUNCE_MS = 350;
@@ -29,25 +29,39 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
   // 直接把按钮语义写出来，并让主按钮自动切换成对应动作。
   // 只在停顿后判定（防抖）：逐字判定会让主按钮在打字途中反复改名、并在"搜索线路/AI
   // 搜索"之间来回跳，顺手把第二个按钮禁用掉——用户还没打完，两个按钮已经换了两次身份。
-  const [settledQuery, setSettledQuery] = useState(searchQuery);
+  const [route, setRoute] = useState<{ query: string; action: SearchAction }>();
+  const [routing, setRouting] = useState(false);
+  const draftRef = useRef(searchQuery);
+  draftRef.current = searchQuery;
+  const submitId = useRef(0);
   useEffect(() => {
-    const timer = window.setTimeout(() => setSettledQuery(searchQuery), HERO_ROUTE_DEBOUNCE_MS);
-    return () => window.clearTimeout(timer);
+    if (!searchQuery.trim()) return;
+    let current = true;
+    const timer = window.setTimeout(() => {
+      void decideSearchAction(searchQuery).then(({ action }) => {
+        if (current) setRoute({ query: searchQuery, action });
+      }).catch(() => {});
+    }, HERO_ROUTE_DEBOUNCE_MS);
+    return () => { current = false; window.clearTimeout(timer); };
   }, [searchQuery]);
-  const route = useMemo(() => decideSearchAction(settledQuery), [settledQuery]);
-  const primaryIsAi = route.action === 'ai';
+  const primaryIsAi = route?.query === searchQuery && route.action === 'ai';
   const trimmed = searchQuery.trim();
   // 第二个按钮不再因为"主按钮已经会走 AI"就被禁用：两个按钮都能点，
   // 只是主按钮会根据这句话自动变成更合适的那个动作。
   const aiButtonDisabled = !trimmed;
 
-  const handlePrimarySearch = () => {
-    const action = getPrimarySearchAction(searchQuery);
-    if (action === 'ai') {
-      onAiSearch(searchQuery);
-      return;
-    }
-    onSearch(searchQuery);
+  const supersedePrimary = () => { submitId.current += 1; setRouting(false); };
+  const handlePrimarySearch = async () => {
+    const query = searchQuery;
+    const id = ++submitId.current;
+    setRouting(true);
+    const action = route?.query === query ? route.action
+      : await decideSearchAction(query).then(decision => decision.action).catch(() => 'plain' as const);
+    if (submitId.current !== id) return;
+    setRouting(false);
+    if (draftRef.current !== query) return;
+    if (action === 'ai') onAiSearch(query);
+    else onSearch(query);
   };
 
   return (
@@ -85,7 +99,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                   placeholder="目的地、预算或想玩的体验"
                   className="h-14 rounded-2xl border-0 bg-stone-50/80 pl-11 pr-11 text-sm shadow-none placeholder:text-stone-500 focus-visible:ring-orange-700/30"
                   value={searchQuery}
-                  onChange={(e) => onSearchChange(e.target.value)}
+                  onChange={(e) => { supersedePrimary(); onSearchChange(e.target.value); }}
                 />
                 {searchQuery && (
                   <button
@@ -93,6 +107,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                     aria-label="清空搜索"
                     className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-xl text-stone-500 hover:bg-stone-200/60"
                     onClick={() => {
+                      supersedePrimary();
                       onSearchChange('');
                       inputRef.current?.focus();
                     }}
@@ -106,6 +121,8 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
               <div className="mt-2 flex flex-row gap-2 [&>button]:shrink-0">
                 <Button
                   type="submit"
+                  aria-busy={routing}
+                  disabled={routing}
                   size="lg"
                   className={cn(
                     'h-12 min-h-12 flex-1 rounded-[15px] shadow-none',
@@ -114,7 +131,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                       : 'bg-stone-900 text-white hover:bg-stone-800',
                   )}
                 >
-                  {primaryIsAi ? (
+                  {routing ? '正在准备搜索…' : primaryIsAi ? (
                     <>
                       <Sparkles className="mr-1 h-4 w-4" />按需求找团
                     </>
@@ -129,7 +146,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                   size="lg"
                   disabled={aiButtonDisabled}
                   className="h-12 min-h-12 flex-1 rounded-[15px] border border-orange-200 bg-orange-50 text-orange-900 shadow-none hover:bg-orange-100 disabled:opacity-50"
-                  onClick={() => onAiSearch(searchQuery)}
+                  onClick={() => { supersedePrimary(); onAiSearch(searchQuery); }}
                 >
                   <Sparkles className="mr-1 h-4 w-4" />AI 帮我挑
                 </Button>
@@ -147,6 +164,7 @@ export function Hero({ searchQuery, onSearchChange, onSearch, onAiSearch, quickI
                   type="button"
                   title={intent.detail}
                   onClick={() => {
+                    supersedePrimary();
                     onSearchChange(intent.query);
                     onSearch(intent.query);
                   }}

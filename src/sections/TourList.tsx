@@ -11,13 +11,13 @@ import type {
 } from '@/types/tour';
 import { TourCard } from './TourCard';
 import { TourDetailModal } from './TourDetailModal';
-import { AiRecommendPanel } from './AiRecommendPanel';
+import type { AiRecommendPanel } from './AiRecommendPanel';
 import type { AiSearchRequest } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { cn, getDataUrl } from '@/lib/utils';
-import { clearStoredAiChatState } from '@/lib/ai-chat-storage';
+import { clearStoredAiChatState, readStoredAiChatState, readStoredAiProgress, subscribeStoredAiProgress } from '@/lib/ai-chat-storage';
 import { toursIndexSchema, toursListSchema, toursPageSchema } from '@/lib/runtime-schemas';
 import { isDisplayableTour } from '@/lib/tour-filter';
 import { compareRecommended, getEffectiveDepartureDates, getUpcomingDates } from '@/lib/tour-recommendation';
@@ -66,7 +66,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { zhCN } from 'date-fns/locale';
 
 // 数据加载核心 hook：index 负责筛选与全量语料，chunk 负责展示，全量列表仅在分片加载失败时兜底。
-function useToursData() {
+function useToursData(urgentIndex: boolean) {
   const [tours, setTours] = useState<TourSummary[]>([]);
   const [indexTours, setIndexTours] = useState<TourIndexEntry[]>([]);
   const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
@@ -102,21 +102,6 @@ function useToursData() {
 
     async function loadInitial() {
       try {
-        const indexPromise = fetch(getDataUrl('tours-index.json'))
-          .then(async (indexRes) => {
-            if (!indexRes.ok) {
-              throw new Error(`Failed to load tours index: ${indexRes.status}`);
-            }
-            return toursIndexSchema.parse(await indexRes.json());
-          })
-          .catch(() => [] as TourIndexEntry[]);
-
-        void indexPromise.then((indexData) => {
-          if (cancelled || indexData.length === 0) return;
-          setIndexTours(indexData);
-          setTotal(indexData.length);
-        });
-
         const pageRes = await fetch(getDataUrl('tours-page-0.json'));
         if (cancelled) return;
         if (!pageRes.ok) {
@@ -193,6 +178,35 @@ function useToursData() {
     return () => { cancelled = true; };
   }, [initialAttempt]);
 
+  const [indexStatus, setIndexStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [indexAttempt, setIndexAttempt] = useState(0);
+  const retryIndex = () => setIndexAttempt(attempt => attempt + 1);
+  const [indexRequested, setIndexRequested] = useState(false);
+  useEffect(() => {
+    if (indexRequested || catalogTours.length) return;
+    if (urgentIndex || initialStatus === 'error') {
+      setIndexRequested(true);
+    } else if (initialStatus === 'ready') {
+      const timer = window.setTimeout(() => setIndexRequested(true), 100);
+      return () => window.clearTimeout(timer);
+    }
+  }, [urgentIndex, initialStatus, indexRequested, catalogTours.length]);
+  useEffect(() => {
+    if (!indexRequested || catalogTours.length) return;
+    const controller = new AbortController();
+    setIndexStatus('loading');
+    void fetch(getDataUrl('tours-index.json'), { signal: controller.signal })
+      .then(async response => {
+        if (!response.ok) throw new Error('Directory index unavailable');
+        const entries = toursIndexSchema.parse(await response.json());
+        if (!controller.signal.aborted) {
+          setIndexTours(entries);
+          setIndexStatus('ready');
+        }
+      }).catch(() => { if (!controller.signal.aborted) setIndexStatus('error'); });
+    return () => controller.abort();
+  }, [indexRequested, indexAttempt, catalogTours.length]);
+
   // 返回值 = 本次是否真的发起了分片请求（false 表示空转：已加载/加载中/越界）。
   // 底部哨兵据此判断"链是否还在推进"，避免空转时仍然拉动 visibleCount 造成贴底转圈。
   const loadMorePages = useCallback(async (neededPage: number): Promise<boolean> => {
@@ -251,6 +265,8 @@ function useToursData() {
     tours,
     indexTours,
     catalogTours,
+    indexStatus,
+    retryIndex,
     initialStatus,
     retryInitialLoad,
     loadingMore,
@@ -492,10 +508,21 @@ interface TourListProps {
 }
 
 export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiModeStart, onClearSearch }: TourListProps) {
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
+  const deepLinkTarget = useMemo(() => typeof window === 'undefined' ? null : readTourDeepLink(window.location.search), []);
+  const [hasAiSession, setHasAiSession] = useState(() => {
+    const state = readStoredAiChatState();
+    return Boolean(state.result || state.pendingPrompt || (state.messages?.length ?? 0) > 1 || readStoredAiProgress());
+  });
+  const needsAiPanel = hasAiSession || Boolean(aiSearchRequest);
+  const urgentIndex = Boolean(searchQuery.trim() || deepLinkTarget || needsAiPanel || showFilters || filters !== DEFAULT_FILTERS);
   const {
     tours: localTours,
     indexTours,
     catalogTours,
+    indexStatus,
+    retryIndex,
     initialStatus,
     retryInitialLoad,
     loadingMore,
@@ -506,7 +533,7 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
     totalPageCount,
     hasPageChunks,
     hasPageChunksRef,
-  } = useToursData();
+  } = useToursData(urgentIndex);
   const loading = initialStatus === 'loading';
   const initialLoadFailed = initialStatus === 'error';
   const sortTriggerRef = useRef<HTMLButtonElement>(null);
@@ -520,7 +547,6 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
     selectTour,
     clearSelectedTour,
   } = useTourDetail();
-  const [showFilters, setShowFilters] = useState(false);
   const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_COUNT);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [dateRangeOpen, setDateRangeOpen] = useState(false);
@@ -532,12 +558,28 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
   const sentinelNoopStrikesRef = useRef(0);
   const [sentinelStalled, setSentinelStalled] = useState(false);
 // filters 为主控筛选状态；activeFilters 同步已激活条件，供 AI 面板使用
-  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('tour-favorites') || '[]')); } catch { return new Set(); }
   });
   const [sliderValues, setSliderValues] = useState<number[]>(DEFAULT_SLIDER_VALUES);
   const [aiClearVersion, setAiClearVersion] = useState(0);
+  const [AiPanel, setAiPanel] = useState<typeof AiRecommendPanel>();
+  const [aiModuleFailed, setAiModuleFailed] = useState(false);
+  useEffect(() => subscribeStoredAiProgress(progress => {
+    if (progress) setHasAiSession(true);
+  }), []);
+  useEffect(() => {
+    if (!needsAiPanel || AiPanel) return;
+    let current = true;
+    setAiModuleFailed(false);
+    void import('./AiRecommendPanel').then(({ AiRecommendPanel }) => {
+      if (current) {
+        setHasAiSession(true);
+        setAiPanel(() => AiRecommendPanel);
+      }
+    }).catch(() => { if (current) setAiModuleFailed(true); });
+    return () => { current = false; };
+  }, [needsAiPanel, AiPanel]);
   const [aiRecommendationResult, setAiRecommendationResult] =
     useState<AiRecommendationResult | null>(null);
   // 流式增量推荐：模型还在逐条生成时，先把已写完整的那部分摆出来。
@@ -564,10 +606,6 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
     const entries = catalogTours.length > 0 ? catalogTours : localTours;
     return new Map(entries.map((tour) => [tour.id, tour]));
   }, [catalogTours, localTours]);
-  const deepLinkTarget = useMemo(() => {
-    if (typeof window === 'undefined') return null;
-    return readTourDeepLink(window.location.search);
-  }, []);
   const deepLinkResolution = useMemo(
     () =>
       deepLinkTarget
@@ -747,6 +785,8 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
     aiSearchRequest && !aiRecommendationResult && !isStreamingAiPartials,
   );
   const isIndexDrivenView = Boolean(normalizedSearchQuery) || activeFilterCount > 0 || isAiSearchMode || isAiSearching;
+  const fullDirectoryReady = indexStatus === 'ready' || catalogTours.length > 0 || (!loading && !initialLoadFailed && localTours.length >= total);
+  const needsCompleteResults = isIndexDrivenView && !isAiSearching && !fullDirectoryReady;
   const resultSourceTours = isIndexDrivenView ? catalogSourceTours : localTours;
   // 搜索阶段沿用清空搜索前的视图：不按搜索词收窄，也不套用被搜索词带出来的过滤条件。
   const searchStageFilters = useMemo<FilterState>(
@@ -1275,7 +1315,8 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
       })),
     [catalogSourceTours],
   );
-  const aiCandidatesReady = indexTours.length > 0 || catalogTours.length > 0 || localTours.length >= total;
+  const aiCandidatesReady = fullDirectoryReady;
+  const directoryUnavailable = (needsCompleteResults || (isAiSearching && !fullDirectoryReady)) && indexStatus === 'error';
 
   const focusResults = useCallback(() => {
     const list = document.getElementById('tour-list');
@@ -1748,7 +1789,7 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
 
   return (
     <section data-testid="tour-results" className="mx-auto max-w-7xl px-4 py-3 sm:px-6 sm:py-8 lg:px-8">
-      <AiRecommendPanel
+      {needsAiPanel && (AiPanel ? <AiPanel
         tours={aiCandidateTours}
         toursLoading={loading || !aiCandidatesReady}
         activeFilters={effectiveFilters}
@@ -1763,7 +1804,13 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
         onResultChange={setAiRecommendationResult}
         onFocusResults={focusResults}
         onPartialItems={(items, kind) => { setAiStreamingItems(items); setAiPreviewKind(kind); }}
-      />
+      /> : (
+        <div id="ai-pending-card" className="mb-4 rounded-2xl bg-orange-50 p-4 text-sm text-stone-800">
+          {aiModuleFailed ? <><p role="alert">AI 功能暂时无法加载，仍可普通找团。</p>
+            <Button variant="outline" className="mt-2" onClick={() => window.location.reload()}>刷新页面重试</Button>
+          </> : <p role="status">正在准备 AI 找团…</p>}
+        </div>
+      ))}
 
       <div className="mb-6">
         {isMobile ? (
@@ -1923,7 +1970,7 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
         </div>
       </div>
 
-      {initialStatus === 'ready' && displayTours.length > 0 && displayResultCount > 0 && (
+      {initialStatus === 'ready' && !needsCompleteResults && displayTours.length > 0 && displayResultCount > 0 && (
         <div role="status" aria-live="polite" aria-atomic="true" className="mb-5 flex items-center justify-between text-sm text-stone-500">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">共 {displayResultCount.toLocaleString()} 条<div className="sr-only">结果</div>{departureHealth.bookable > 0 && (<><span className="text-stone-300">·</span><span className="text-stone-600">{departureHealth.bookable.toLocaleString()} 条有未来班期</span></>)}{departureHealth.expired > 0 && (<><span className="text-stone-300">·</span><span className="text-amber-700">{departureHealth.expired.toLocaleString()} 条班期已结束</span></>)}{!filters.hideExpired && departureHealth.expired > 0 && (<span className="text-xs text-stone-400">（已包含已过期班期）</span>)}</span>
           {shouldRenderLoadMore && (
@@ -1946,6 +1993,13 @@ export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiM
         <div role="status" className="py-20 text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-stone-700" />
           <p className="text-stone-500">加载旅行数据中...</p>
+        </div>
+      ) : directoryUnavailable || needsCompleteResults ? (
+        <div className="surface-panel rounded-[28px] px-5 py-12 text-center text-sm text-stone-600">
+          {directoryUnavailable ? <>
+            <p role="alert">暂时无法加载完整目录，搜索和筛选条件已保留。</p>
+            <Button className="mt-4" onClick={retryIndex}>重试加载目录</Button>
+          </> : <p role="status">正在准备完整目录…</p>}
         </div>
       ) : canCheckMorePages || browsingCheckInterrupted ? (
         <div className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/90 px-5 py-12 text-center">

@@ -1,4 +1,5 @@
-import { getSearchRouteMeta } from '@/lib/ai-recommendation';
+// Keep the intent engine outside the cold-start dependency graph.
+const loadRouteMeta = () => import('@/lib/ai-recommendation');
 
 export type SearchAction = 'plain' | 'ai';
 
@@ -13,11 +14,9 @@ function normalizeQuery(query: string) {
   return query.replace(/\s+/g, '').trim();
 }
 
-export function decideSearchAction(query: string): SearchRouteDecision {
+export async function decideSearchAction(query: string): Promise<SearchRouteDecision> {
   const normalizedQuery = normalizeQuery(query);
+  if (!normalizedQuery) return { action: 'plain', reason: 'empty', hardConstraintCount: 0, destinationHintCount: 0 };
+  const { getSearchRouteMeta } = await loadRouteMeta();
   return getSearchRouteMeta(normalizedQuery);
-}
-
-export function getPrimarySearchAction(query: string): SearchAction {
-  return decideSearchAction(query).action;
 }

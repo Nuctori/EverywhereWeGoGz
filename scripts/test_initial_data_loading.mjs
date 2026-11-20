@@ -26,7 +26,7 @@ function assert(condition, message) {
 }
 
 assert(
-  tourList.includes("fetch(getDataUrl('tours-index.json'))"),
+  tourList.includes("fetch(getDataUrl('tours-index.json'),"),
   'Initial data load must fetch tours-index.json for filtering.',
 );
 
@@ -36,8 +36,8 @@ assert(
 );
 
 assert(
-  tourList.includes('void indexPromise.then') && !tourList.includes('const indexData = await indexPromise;'),
-  'TourList should publish index data as soon as it arrives instead of waiting for the first page chunk.',
+  tourList.includes('if (urgentIndex') && tourList.includes('setIndexTours(entries)'),
+  'Explicit catalog demand should start the index independently of the first page.',
 );
 
 assert(

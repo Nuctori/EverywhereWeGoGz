@@ -43,16 +43,50 @@ async function fixture(t, width, fail = () => false, intercept = () => null, see
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
-  await context.route('**/*', route => {
+  await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     if (url.origin !== origin) return route.abort();
     if (fail(url.pathname)) return route.fulfill({ status: 503, json: { error: 'temporarily unavailable' } });
-    const response = intercept(url.pathname);
+    const response = await intercept(url.pathname);
     return response ? route.fulfill({ json: response }) : route.continue();
   });
   await page.goto(origin + base + query, { waitUntil: 'domcontentloaded' });
   return { page, list: page.locator('#tour-list'), errors };
 }
+
+test('冷启动首片优先且不请求 AI 分包，早搜等待完整目录', async t => {
+  const requests = [];
+  let release;
+  const indexBlocked = new Promise(resolve => { release = resolve; });
+  t.after(release);
+  const { page, list } = await fixture(t, 390, pathname => {
+    requests.push(pathname);
+    return false;
+  }, pathname => pathname.endsWith('/tours-index.json') ? indexBlocked : null);
+  const search = page.getByRole('searchbox', { name: '目的地或旅行需求' });
+  await expect(list.locator('.tour-card h3').first()).toBeVisible();
+  assert.ok(!requests.some(p => /AiRecommendPanel|ai-recommendation/.test(p)));
+  await expect.poll(() => requests.findIndex(p => p.endsWith('/tours-index.json'))).toBeGreaterThan(requests.findIndex(p => p.endsWith('/tours-page-0.json')));
+  await search.fill('zzqvx');
+  await page.getByRole('button', { name: '搜索线路', exact: true }).click();
+  await expect(list.getByText('正在准备完整目录…')).toBeVisible();
+  await expect(list.getByText('没有找到直接匹配的旅行团')).toHaveCount(0);
+  release();
+  await expect(list.getByText('没有找到直接匹配的旅行团')).toBeVisible({ timeout: 20000 });
+});
+
+test('AI 分包加载失败不影响普通浏览和搜索', async t => {
+  const { page, list, errors } = await fixture(t, 390, pathname => /\/(AiRecommendPanel|ai-recommendation)-.*\.js$/.test(pathname));
+  await expect(list.locator('.tour-card h3').first()).toBeVisible();
+  const search = page.getByRole('searchbox', { name: '目的地或旅行需求' });
+  await search.fill('zzqvx');
+  await page.getByRole('button', { name: 'AI 帮我挑' }).click();
+  await expect(list.getByText('AI 功能暂时无法加载，仍可普通找团。')).toBeVisible();
+  await expect(list.locator('.tour-card h3').first()).toBeVisible();
+  await page.getByRole('button', { name: '搜索线路', exact: true }).click();
+  await expect(list.getByText('没有找到直接匹配的旅行团')).toBeVisible();
+  assert.deepEqual(errors, []);
+});
 
 for (const withIndex of [true, false]) {
   test(`目录双源故障显示重试并在恢复后返回结果（索引${withIndex ? '成功' : '失败'}）`, async t => {
