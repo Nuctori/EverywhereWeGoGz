@@ -7,7 +7,19 @@ const base = appBase ? `/${appBase.replace(/^\/+|\/+$/g, '')}/` : '/'
 
 // https://vite.dev/config/
 export default defineConfig(async () => {
-  const plugins = [react()];
+  const dataVersion = process.env.GITHUB_SHA ?? process.env.GITHUB_RUN_ID ?? Date.now().toString();
+  const plugins = [react(), {
+    name: 'preload-first-tour-page',
+    apply: 'build' as const,
+    transformIndexHtml: {
+      order: 'post' as const,
+      handler: () => [{
+        tag: 'link',
+        attrs: { rel: 'preload', as: 'fetch', crossorigin: 'anonymous', href: `${base}data/tours-page-0.json?v=${encodeURIComponent(dataVersion)}` },
+        injectTo: 'head-prepend' as const,
+      }],
+    },
+  }];
 
   if (process.env.ENABLE_REACT_INSPECT === '1') {
     try {
@@ -23,9 +35,7 @@ export default defineConfig(async () => {
     base,
     plugins,
     define: {
-      __DATA_VERSION__: JSON.stringify(
-        process.env.GITHUB_SHA ?? process.env.GITHUB_RUN_ID ?? Date.now().toString(),
-      ),
+      __DATA_VERSION__: JSON.stringify(dataVersion),
     },
     server: {
       port: 3000,

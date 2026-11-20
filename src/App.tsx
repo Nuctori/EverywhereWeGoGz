@@ -1,9 +1,9 @@
-import { lazy, Suspense, useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Header } from './sections/Header';
 import { Hero } from './sections/Hero';
 import type { QuickIntent } from './sections/Hero';
 import { TourList } from './sections/TourList';
-const MapView = lazy(() => import('./sections/MapView').then((module) => ({ default: module.MapView })));
+import type { MapView } from './sections/MapView';
 
 // Hero 的快捷入口换成"一句需求"而不是裸地名：点“广东”只会落一个地名筛选，
 // 点“周末去广东泡温泉”能直接走需求解析，才符合搜索框的双动作设计。
@@ -29,6 +29,38 @@ function App() {
   const [preferTextSearch, setPreferTextSearch] = useState(false);
   const startAiMode = useCallback(() => setPreferTextSearch(false), []);
   const [mapExpanded, setMapExpanded] = useState(false);
+  const [mapRequested, setMapRequested] = useState(false);
+  const [MapComponent, setMapComponent] = useState<typeof MapView>();
+  const [mapLoadFailed, setMapLoadFailed] = useState(false);
+  const mapSlot = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const slot = mapSlot.current;
+    if (!slot || mapRequested) return;
+    // The slot is display:none below the desktop breakpoint; it cannot intersect.
+    if (typeof IntersectionObserver !== 'undefined') {
+      const observer = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting && entry.intersectionRect.width > 0)) setMapRequested(true);
+      });
+      observer.observe(slot);
+      return () => observer.disconnect();
+    }
+    if (slot.getClientRects().length) setMapRequested(true);
+  }, [mapRequested]);
+
+  useEffect(() => {
+    if (!mapRequested) return;
+    let current = true;
+    void import('./sections/MapView').then(({ MapView }) => {
+      if (current) setMapComponent(() => MapView);
+    }).catch(() => { if (current) setMapLoadFailed(true); });
+    return () => { current = false; };
+  }, [mapRequested]);
+
+  const openMap = () => {
+    setMapRequested(true);
+    setMapExpanded(true);
+  };
 
   // handleSearch 全文检索文本匹配；handleAiSearch 触发 AI 推荐→无结果时自动回退 handleSearch
   const handleSearch = (nextQuery?: string) => {
@@ -72,7 +104,7 @@ function App() {
     <div className="min-h-screen text-slate-900">
       <a href="#tour-list" className="skip-link">跳到线路列表</a>
       <div className="relative min-h-screen">
-        <Header onOpenMap={() => setMapExpanded(true)} />
+        <Header onOpenMap={openMap} />
 
         <main id="main-content" className="pb-16">
           <Hero
@@ -81,8 +113,15 @@ function App() {
             onSearch={handleSearch}
             onAiSearch={handleAiSearch}
             quickIntents={QUICK_INTENTS}
-            map={<Suspense fallback={<div className="hidden sm:block h-[280px] rounded-[22px] bg-stone-100" aria-hidden="true" />}><MapView embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} /></Suspense>}
+            map={MapComponent ? <MapComponent embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} />
+              : <div ref={mapSlot} className="h-[280px] rounded-[22px] bg-stone-100" aria-hidden="true" />}
           />
+          {mapExpanded && !MapComponent && (
+            <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-2 text-sm text-stone-700">
+              <p role={mapLoadFailed ? 'alert' : 'status'}>{mapLoadFailed ? '地图暂时无法加载' : '正在加载地图…'}</p>
+              <button type="button" className="min-h-11 px-3" onClick={() => setMapExpanded(false)}>取消打开地图</button>
+            </div>
+          )}
           <div id="tour-list" tabIndex={-1} className="scroll-mt-24 outline-none">
             <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} preferTextSearch={preferTextSearch} onAiModeStart={startAiMode} onClearSearch={() => { setDraftSearchQuery(''); setSubmittedSearchQuery(''); setAiSearchRequest(null); setPreferTextSearch(true); }} />
           </div>

@@ -54,6 +54,34 @@ async function fixture(t, width, fail = () => false, intercept = () => null, see
   return { page, list: page.locator('#tour-list'), errors };
 }
 
+test('手机首片由 HTML 预加载并复用，地图点击才下载', async t => {
+  const requests = [];
+  const { page, list } = await fixture(t, 390, pathname => { requests.push(pathname); return false; });
+  const preload = page.locator('link[rel="preload"][as="fetch"][href*="tours-page-0.json"]');
+  await expect(preload).toHaveCount(1);
+  await expect(preload).toHaveAttribute('href', `${base}data/tours-page-0.json?v=${fixtureVersion}`);
+  await expect(list.locator('.tour-card h3').first()).toBeVisible();
+  assert.equal(requests.filter(url => url.endsWith('/tours-page-0.json')).length, 1);
+  assert.ok(!requests.some(url => /\/MapView-/.test(url)));
+  await page.getByRole('button', { name: '打开目的地地图' }).click();
+  await expect(page.getByRole('button', { name: '关闭地图' })).toBeVisible();
+  assert.ok(requests.some(url => /\/MapView-.*\.js$/.test(url)));
+});
+
+test('桌面进入视口后加载内嵌地图', async t => {
+  const { page } = await fixture(t, 1440);
+  await expect(page.getByRole('complementary', { name: '在地图上探索目的地' }).getByRole('button', { name: '放大', exact: true })).toBeVisible();
+});
+
+test('地图分包失败仍可浏览线路', async t => {
+  const { page, list, errors } = await fixture(t, 390, pathname => /\/MapView-.*\.js$/.test(pathname));
+  await expect(list.locator('.tour-card h3').first()).toBeVisible();
+  await page.getByRole('button', { name: '打开目的地地图' }).click();
+  await expect(page.getByText('地图暂时无法加载')).toBeVisible();
+  await expect(list.locator('.tour-card h3').first()).toBeVisible();
+  assert.deepEqual(errors, []);
+});
+
 test('冷启动首片优先且不请求 AI 分包，早搜等待完整目录', async t => {
   const requests = [];
   let release;
