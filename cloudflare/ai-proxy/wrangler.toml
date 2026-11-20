@@ -1,6 +1,7 @@
 name = "ewg-ai-proxy"
 main = "ai-worker/worker.ts"
 compatibility_date = "2026-09-01"
+compatibility_flags = ["enable_request_signal"]
 
 # 自定义域：workers.dev 在大陆被墙，必须走自有域名（114124.xyz 已托管在本 CF 账户）。
 # wrangler deploy 会自动创建 DNS 记录与证书。

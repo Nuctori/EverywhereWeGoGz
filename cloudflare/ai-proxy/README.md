@@ -4,6 +4,18 @@
 实现"客户端不明文"。Worker 内置整条供应商链（bigmodel GLM → SiliconFlow Qwen →
 OpenRouter :free），按序重试，带 Origin 白名单 + 每 IP 限速。
 
+## Kilo 免 Key 备用线路（默认关闭）
+
+启用 `ENABLE_KILO_FREE=1` 后，智谱未成功时依次尝试 Dots3 Note Preview 和 ERNIE 5.5 Flash Preview 的固定免费型号，再回到原有备用链。Kilo 不接收浏览器鉴权头；每个模型最多等 6 秒获得有效正文，并受整条链 25 秒预算约束；一旦开始转发响应，不拼接另一模型的流。
+
+仅在实际 Worker 出口验证中文需求解析、完整排序流和故障切换后开启。这两个模型共享 Kilo 网关和出口限额，并非两个独立供应商。移除开关或设为 `0` 可恢复旧链。OpenCode 免费聊天模型仅限官方客户端，不接入。
+
+## 被动健康路由
+
+每个 Worker 实例按上游候选和 JSON/SSE 模式记录冷却；失败后跳过，冷却到期只放行一条真实请求试探。429/503 有有效 `Retry-After` 时按它冷却，默认 30 秒。所有候选暂不可用且本次未发上游请求时，返回 503 和 `Retry-After`。已转发的响应不会与其他上游拼接。
+
+通过 Worker 实时日志查看 `ai_upstream` 的跳过、试探、首个有效正文判定和耗时；不记录用户正文或 Key。流式成功仅代表已出现有效正文，不代表后续流完整。明确的 Kilo 全网关限流跨两个模型和 JSON/SSE 共享冷却；其他 429 只影响当前上游与模式。健康状态不会跨实例共享，且没有定时探测。
+
 ## 布署
 
 ```bash
@@ -12,17 +24,15 @@ npx wrangler secret put BIGMODEL_API_KEY_2    # 智谱第二账号 key（可选�
 npx wrangler secret put SILICONFLOW_API_KEY   # 硅基流动 key（新 key 只进这里，不进前端）
 npx wrangler secret put OPENROUTER_API_KEY    # OpenRouter key
 npx wrangler secret put OPENROUTER_API_KEY_2  # OpenRouter 第二把 key（双把轮换免费日额度）
-npx wrangler deploy
+npx wrangler deploy --keep-vars --var ENABLE_KILO_FREE:1
 ```
 
-（src/worker.ts 因 Mimosa 对代理形态的 SSRF 误报无法由 agent 写入，需手动创建，
-代码见会话记录；wrangler.toml 已指向 src/worker.ts。）
+从 `cloudflare/ai-proxy` 目录执行。现有前端继续使用 `https://ai.114124.xyz/v1`，不需要重新发布前端。
 
-部署后把输出的 `https://ewg-ai-proxy.<子域>.workers.dev` 填进
-`deploy.yml` / `.env.local` 的 `VITE_AI_DEFAULT_BASE_URL`（加 `/v1` 后缀）。
+故障优先切换可用候选；仅智谱明确返回 1305 且没有 `Retry-After` 时，首次请求在预算内短等 800 毫秒再试一次。请求级 400、413、422 不触发冷却；持续推理帧延长空闲窗口，但不突破整条链预算。
 
 ## 注意
 
 - 免费版 Workers 无持久化存储，限速是每 isolate 内存近似值，防脚本小子足够，
   防不了分布式；上游仍有各自的硬限额兜底。
-- 上游模型/顺序改动直接改 `src/index.js` 的 `UPSTREAMS`。
+- 上游、免费模型白名单和路由顺序由 `ai-worker/worker.ts` 固定。
