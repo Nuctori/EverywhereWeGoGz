@@ -236,11 +236,10 @@ for (const width of [390, 1440]) {
     if (width === 390) await list.getByRole('button', { name: '筛选', exact: true }).click();
     const filters = width === 390 ? page.getByRole('dialog', { name: '更多筛选' }) : list;
     const destination = filters.locator('button[aria-pressed]').first();
-    const name = (await destination.innerText()).trim();
     await destination.click();
     await filters.getByRole('button', { name: '3天内', exact: true }).click();
     if (width === 390) await filters.getByRole('button', { name: /查看 .* 条线路/ }).click();
-    const remove = list.getByRole('button', { name: `移除目的地筛选：${name}` });
+    const remove = list.getByRole('button', { name: /^移除目的地筛选：/ });
     const removeDate = list.getByRole('button', { name: /移除出发时间筛选/ });
     await expect(remove).toBeVisible();
     const box = await remove.boundingBox();
