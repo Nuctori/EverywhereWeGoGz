@@ -1,0 +1,173 @@
+// Run against a Pages build: node scripts/test_tour_list_ux_e2e.mjs [dist-dir]
+import { test, before, after } from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import http from 'node:http';
+import path from 'node:path';
+import { chromium, expect } from '@playwright/test';
+
+const root = path.resolve(process.argv[2] || 'dist');
+const base = '/EverywhereWeGoGz/';
+const mime = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.webp': 'image/webp' };
+const server = http.createServer((req, res) => {
+  const url = new URL(req.url, 'http://localhost');
+  const relative = url.pathname.startsWith(base) ? url.pathname.slice(base.length) : url.pathname.slice(1);
+  const file = path.resolve(root, relative || 'index.html');
+  if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
+    res.writeHead(404).end();
+    return;
+  }
+  res.setHeader('Content-Type', mime[path.extname(file)] || 'application/octet-stream');
+  fs.createReadStream(file).on('error', () => res.destroy()).pipe(res);
+});
+let origin;
+let browser;
+before(async () => {
+  assert.ok(fs.existsSync(path.join(root, 'index.html')), `Build the site first: ${root}`);
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  origin = `http://127.0.0.1:${server.address().port}`;
+  browser = await chromium.launch();
+});
+after(async () => {
+  await browser?.close();
+  if (server.listening) await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+});
+
+async function fixture(t, width, fail = () => false, intercept = () => null) {
+  const context = await browser.newContext({ viewport: { width, height: 844 }, serviceWorkers: 'block' });
+  t.after(() => context.close());
+  const page = await context.newPage();
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await context.route('**/*', route => {
+    const url = new URL(route.request().url());
+    if (url.origin !== origin) return route.abort();
+    if (fail(url.pathname)) return route.fulfill({ status: 503, json: { error: 'temporarily unavailable' } });
+    const response = intercept(url.pathname);
+    return response ? route.fulfill({ json: response }) : route.continue();
+  });
+  await page.goto(origin + base, { waitUntil: 'domcontentloaded' });
+  return { page, list: page.locator('#tour-list'), errors };
+}
+
+for (const withIndex of [true, false]) {
+  test(`目录双源故障显示重试并在恢复后返回结果（索引${withIndex ? '成功' : '失败'}）`, async t => {
+    let failed = true;
+    const { list, errors } = await fixture(t, 390, pathname => failed && (
+      /\/tours-(page-\d+|list)\.json$/.test(pathname) || (!withIndex && pathname.endsWith('/tours-index.json'))
+    ));
+    await expect(list.getByRole('alert').getByText('暂时无法加载旅行线路')).toBeVisible();
+    await expect(list.getByText(/没有找到|^共\s/)).toHaveCount(0);
+    const retry = list.getByRole('button', { name: '重试加载线路' });
+    await retry.click();
+    await expect(retry).toBeVisible();
+    failed = false;
+    await retry.click();
+    await expect(list.locator('.tour-card h3').first()).toBeVisible({ timeout: 20000 });
+    await expect(list.getByRole('alert')).toHaveCount(0);
+    assert.deepEqual(errors, []);
+  });
+}
+
+test('首片失败时保留全量目录兜底，以及真正的搜索空态', async t => {
+  const { page, list, errors } = await fixture(t, 1440, pathname => pathname.endsWith('/tours-page-0.json'));
+  await expect(list.locator('.tour-card h3').first()).toBeVisible({ timeout: 20000 });
+  await expect(list.getByRole('alert')).toHaveCount(0);
+  const search = page.getByRole('searchbox', { name: '目的地或旅行需求' });
+  await search.fill('zzqvx');
+  await page.getByRole('button', { name: '搜索线路', exact: true }).click();
+  await expect(list.getByText('没有找到直接匹配的旅行团')).toBeVisible();
+  await expect(list.getByRole('alert')).toHaveCount(0);
+  assert.deepEqual(errors, []);
+});
+
+function stalePageFixture(root) {
+  const page0 = JSON.parse(fs.readFileSync(path.join(root, 'data/tours-page-0.json'), 'utf8'));
+  return (n, totalPages, available = false) => {
+    const date = available ? '2099-12-20' : '2000-01-01';
+    const items = page0.items.map((tour, i) => ({
+      ...tour, title: '测试旅行团', id: `ux_${n}_${i}`, departureDate: date, departureDates: [date], hotDepartureDates: [date],
+    }));
+    return { meta: { page: n, pageSize: 24, total: totalPages * 24 }, items };
+  };
+}
+
+for (const withAvailable of [true, false]) {
+  test(`前两片全过期后${withAvailable ? '显示第三片可用线路' : '耗尽后显示真空态'}`, async t => {
+    const requested = [];
+    const buildPage = stalePageFixture(root);
+    const { list, errors } = await fixture(t, 390, pathname => pathname.endsWith('/tours-index.json'), pathname => {
+      const match = pathname.match(/\/tours-page-(\d+)\.json$/);
+      if (!match) return null;
+      const n = Number(match[1]);
+      requested.push(n);
+      return buildPage(n, 3, n === 2 && withAvailable);
+    });
+    if (withAvailable) {
+      await expect(list.locator('.tour-card h3').first()).toHaveText('测试旅行团');
+      await expect(list.getByText('没有找到符合条件的旅行团')).toHaveCount(0);
+    } else {
+      await expect.poll(() => requested).toEqual([0, 1, 2]);
+      await expect(list.getByText('没有找到符合条件的旅行团')).toBeVisible();
+    }
+    assert.deepEqual(requested, [0, 1, 2]);
+    assert.deepEqual(errors, []);
+  });
+}
+
+test('自动检查有上限，后续分片失败时可重试', async t => {
+  const requested = [];
+  let laterPageFailed = true;
+  const buildPage = stalePageFixture(root);
+  const { list, errors } = await fixture(t, 390, pathname => {
+    if (laterPageFailed && pathname.endsWith('/tours-page-4.json')) {
+      requested.push(4);
+      return true;
+    }
+    return false;
+  }, pathname => {
+    const match = pathname.match(/\/tours-page-(\d+)\.json$/);
+    if (!match) return null;
+    const n = Number(match[1]);
+    requested.push(n);
+    return buildPage(n, 5, n === 4);
+  });
+  const more = list.getByRole('button', { name: '继续查看线路' });
+  await expect(more).toBeEnabled();
+  assert.deepEqual(requested, [0, 1, 2, 3]);
+  await more.click();
+  await expect(list.getByText('后续线路暂时无法加载。')).toBeVisible();
+  laterPageFailed = false;
+  await list.getByRole('button', { name: '重试加载线路' }).click();
+  await more.click();
+  await expect(list.locator('.tour-card h3').first()).toHaveText('测试旅行团');
+  assert.deepEqual(requested, [0, 1, 2, 3, 4, 0, 1, 2, 3, 4]);
+  assert.deepEqual(errors, []);
+});
+
+for (const width of [390, 1440]) {
+  test(`${width}px 已选筛选可以用键盘移除并保留焦点`, async t => {
+    const { page, list, errors } = await fixture(t, width);
+    await expect(list.locator('.tour-card h3').first()).toBeVisible({ timeout: 20000 });
+    if (width === 390) await list.getByRole('button', { name: '筛选', exact: true }).click();
+    const filters = width === 390 ? page.getByRole('dialog', { name: '更多筛选' }) : list;
+    const destination = filters.locator('button[aria-pressed]').first();
+    const name = (await destination.innerText()).trim();
+    await destination.click();
+    await filters.getByRole('button', { name: '3天内', exact: true }).click();
+    if (width === 390) await filters.getByRole('button', { name: /查看 .* 条线路/ }).click();
+    const remove = list.getByRole('button', { name: `移除目的地筛选：${name}` });
+    const removeDate = list.getByRole('button', { name: /移除出发时间筛选/ });
+    await expect(remove).toBeVisible();
+    const box = await remove.boundingBox();
+    assert.ok(box.width >= 44 && box.height >= 44, `touch target too small: ${JSON.stringify(box)}`);
+    await remove.focus();
+    await page.keyboard.press('Enter');
+    await expect(remove).toHaveCount(0);
+    await expect(removeDate).toBeFocused();
+    await page.keyboard.press('Space');
+    await expect(removeDate).toHaveCount(0);
+    await expect(list.getByRole('combobox', { name: '线路排序' })).toBeFocused();
+    assert.deepEqual(errors, []);
+  });
+}

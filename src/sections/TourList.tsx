@@ -1,6 +1,6 @@
-// 数据加载链：loadInitial（分页首屏）→ loadMorePages（滚动懒加载）；分片失败时才回退 loadCatalog 全量列表
+// 数据加载链：loadInitial（分页首屏）→ loadMorePages（滚动懒加载）；首片失败时才回退全量列表
 // 筛选/排序/瀑布流、AI 推荐叠加、滚动监听加载更多
-import { useState, useMemo, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, useEffect, useLayoutEffect, useRef, useCallback, type MouseEvent, type ReactNode } from 'react';
 import type {
   AiRecommendationCandidate,
   AiRecommendationItem,
@@ -70,7 +70,12 @@ function useToursData() {
   const [tours, setTours] = useState<TourSummary[]>([]);
   const [indexTours, setIndexTours] = useState<TourIndexEntry[]>([]);
   const [catalogTours, setCatalogTours] = useState<TourSummary[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [initialStatus, setInitialStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [initialAttempt, setInitialAttempt] = useState(0);
+  const retryInitialLoad = useCallback(() => {
+    setInitialStatus('loading');
+    setInitialAttempt((attempt) => attempt + 1);
+  }, []);
   const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
   const [hasPageChunks, setHasPageChunks] = useState(true);
@@ -87,46 +92,9 @@ function useToursData() {
   const zeroAddStrikesRef = useRef(0);
   const seenTourIdsRef = useRef<Set<string>>(new Set());
   const hasPageChunksRef = useRef(true);
-  const catalogLoadedRef = useRef(false);
-  const catalogRequestRef = useRef<Promise<void> | null>(null);
-  const mountedRef = useRef(false);
 
   const syncLoadingMoreState = useCallback(() => {
     setLoadingMore(inFlightPagesRef.current.size > 0);
-  }, []);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
-  const loadCatalog = useCallback(() => {
-    if (catalogLoadedRef.current) return Promise.resolve();
-    if (catalogRequestRef.current) return catalogRequestRef.current;
-
-    catalogRequestRef.current = (async () => {
-      try {
-        const listRes = await fetch(getDataUrl('tours-list.json'));
-        if (!listRes.ok) {
-          throw new Error(`Failed to load tours catalog: ${listRes.status}`);
-        }
-        const data = toursListSchema.parse(await listRes.json());
-        if (!mountedRef.current) return;
-        catalogLoadedRef.current = true;
-        setCatalogTours(data);
-        setTotal(data.length);
-      } catch {
-        if (mountedRef.current) {
-          setCatalogTours([]);
-        }
-      } finally {
-        catalogRequestRef.current = null;
-      }
-    })();
-
-    return catalogRequestRef.current;
   }, []);
 
   useEffect(() => {
@@ -158,7 +126,7 @@ function useToursData() {
         if (cancelled) return;
         setTours(pageData.items);
         setTotal(pageData.meta.total);
-        loadedPagesRef.current.add(0);
+        loadedPagesRef.current = new Set([0]);
         seenTourIdsRef.current = new Set(pageData.items.map((tour: TourSummary) => tour.id));
         nextPageRef.current = 1;
         totalPagesRef.current = Math.ceil(pageData.meta.total / PAGE_SIZE);
@@ -167,14 +135,16 @@ function useToursData() {
         zeroAddStrikesRef.current = 0;
         hasPageChunksRef.current = true;
         setHasPageChunks(true);
-        setLoading(false);
+        setInitialStatus('ready');
       } catch {
         try {
           const fallbackRes = await fetch(getDataUrl('tours-list.json'));
           if (cancelled) return;
+          if (!fallbackRes.ok) {
+            throw new Error(`Failed to load tours catalog: ${fallbackRes.status}`);
+          }
           const data = toursListSchema.parse(await fallbackRes.json());
           if (cancelled) return;
-          catalogLoadedRef.current = true;
           setIndexTours(data.map((tour, index) => ({
             id: tour.id,
             title: tour.title,
@@ -209,19 +179,19 @@ function useToursData() {
           seenTourIdsRef.current = new Set(data.map((tour) => tour.id));
           hasPageChunksRef.current = false;
           setHasPageChunks(false);
-          setLoading(false);
+          setInitialStatus('ready');
         } catch {
           if (!cancelled) {
             setTours([]);
             setCatalogTours([]);
-            setLoading(false);
+            setInitialStatus('error');
           }
         }
       }
     }
     loadInitial();
     return () => { cancelled = true; };
-  }, [loadCatalog]);
+  }, [initialAttempt]);
 
   // 返回值 = 本次是否真的发起了分片请求（false 表示空转：已加载/加载中/越界）。
   // 底部哨兵据此判断"链是否还在推进"，避免空转时仍然拉动 visibleCount 造成贴底转圈。
@@ -251,8 +221,8 @@ function useToursData() {
       const nextItems = pageData.items.filter((tour: TourSummary) => !seenIds.has(tour.id));
       for (const tour of nextItems) seenIds.add(tour.id);
       setTours((prev) => prev.concat(nextItems));
-      if (neededPage >= nextPageRef.current) {
-        nextPageRef.current = neededPage + 1;
+      while (loadedPagesRef.current.has(nextPageRef.current)) {
+        nextPageRef.current += 1;
       }
 
       // 分片与索引不一致（重复/空片）时零新增是常态信号：连续多片零新增
@@ -281,7 +251,8 @@ function useToursData() {
     tours,
     indexTours,
     catalogTours,
-    loading,
+    initialStatus,
+    retryInitialLoad,
     loadingMore,
     total,
     loadMorePages,
@@ -483,6 +454,35 @@ function getSourceOptions(tours: TourCatalogEntry[]) {
   return Array.from(sourceMeta.values()).sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
 }
 
+function AppliedFilterButton({ label, onRemove, fallbackFocus, children }: {
+  label: string;
+  onRemove: () => void;
+  fallbackFocus: () => void;
+  children: ReactNode;
+}) {
+  function remove(event: MouseEvent<HTMLButtonElement>) {
+    const button = event.currentTarget;
+    if (document.activeElement === button) {
+      const neighbor = button.nextElementSibling ?? button.previousElementSibling;
+      if (neighbor instanceof HTMLButtonElement) neighbor.focus();
+      else fallbackFocus();
+    }
+    onRemove();
+  }
+
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={remove}
+      className="inline-flex min-h-11 min-w-11 shrink-0 items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 text-xs font-medium text-stone-700 hover:border-orange-700 hover:text-orange-900 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-orange-700"
+    >
+      {children}
+      <X aria-hidden="true" className="h-4 w-4" />
+    </button>
+  );
+}
+
 interface TourListProps {
   searchQuery: string;
   aiSearchRequest: AiSearchRequest | null;
@@ -494,7 +494,8 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     tours: localTours,
     indexTours,
     catalogTours,
-    loading,
+    initialStatus,
+    retryInitialLoad,
     loadingMore,
     total,
     loadMorePages,
@@ -504,6 +505,9 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     hasPageChunks,
     hasPageChunksRef,
   } = useToursData();
+  const loading = initialStatus === 'loading';
+  const initialLoadFailed = initialStatus === 'error';
+  const sortTriggerRef = useRef<HTMLButtonElement>(null);
   const isMobile = useIsMobile();
   const {
     selectedSummaryTour,
@@ -712,6 +716,19 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     filters.departureDateStart,
     today,
   ]);
+
+  const appliedFilters = [
+    { kind: '目的地', value: filters.destination, onRemove: () => setFilters((current) => ({ ...current, destination: '' })) },
+    { kind: '主题', value: filters.theme, onRemove: () => setFilters((current) => ({ ...current, theme: '' })) },
+    { kind: '预算', value: hasPriceFilter ? `${priceRange[0].toLocaleString()}-${priceRange[1].toLocaleString()} 元` : '', onRemove: () => setSliderValues(DEFAULT_SLIDER_VALUES) },
+    {
+      kind: '出发时间',
+      value: dateRangeLabel || formatDateLabel(filters.departureDate, today),
+      onRemove: () => setFilters((current) => ({ ...current, departureDate: '', departureDateStart: '', departureDateEnd: '' })),
+    },
+    { kind: '天数', value: filters.duration === LONG_TRIP_DURATION_VALUE ? '10天以上' : filters.duration ? `${filters.duration}天` : '', onRemove: () => setFilters((current) => ({ ...current, duration: null })) },
+    { kind: '来源', value: filters.source, onRemove: () => setFilters((current) => ({ ...current, source: '' })) },
+  ].filter(({ value }) => Boolean(value));
 
   const normalizedSearchQuery = searchQuery.trim().toLowerCase();
   const searchContext = useMemo(() => extractQueryContext(searchQuery), [searchQuery]);
@@ -1011,9 +1028,21 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     !sentinelStalled &&
     loadedPageCount < totalPageCount;
   const shouldRenderLoadMore = hasMoreLoadedResults || hasMoreRemotePages;
+  const isEmptyBrowsing = !isIndexDrivenView && displayTours.length === 0;
+  const canCheckMorePages = initialStatus === 'ready' && isEmptyBrowsing && hasMoreRemotePages;
+  // 自动跳过少量过期分片；目录很大时，由用户决定是否继续，不能误报为零结果。
+  const autoCheckMorePages = canCheckMorePages && loadedPageCount < 4;
+  const browsingCheckInterrupted = initialStatus === 'ready' && isEmptyBrowsing &&
+    !hasPageChunks && loadedPageCount < totalPageCount && catalogTours.length === 0;
+  const checkNextPage = useCallback(() => {
+    if (!loadingMore) void loadMorePages(nextPageRef.current);
+  }, [loadMorePages, loadingMore, nextPageRef]);
+  useEffect(() => {
+    if (autoCheckMorePages) checkNextPage();
+  }, [autoCheckMorePages, checkNextPage]);
 
   useEffect(() => {
-    if (!hasPageChunks || catalogTours.length > 0) return;
+    if (initialStatus !== 'ready' || !hasPageChunks || catalogTours.length > 0) return;
 
     const missingPages = new Set<number>();
     for (const tour of visibleDisplayCandidates) {
@@ -1029,6 +1058,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   }, [
     catalogTours.length,
     hasPageChunks,
+    initialStatus,
     loadMorePages,
     loadedTourById,
     visibleDisplayCandidates,
@@ -1045,11 +1075,11 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
       }
     }
 
-    if (targetPage !== null && deepLinkRequestedPageRef.current !== targetPage) {
+    if (initialStatus === 'ready' && targetPage !== null && deepLinkRequestedPageRef.current !== targetPage) {
       deepLinkRequestedPageRef.current = targetPage;
       void loadMorePages(targetPage);
     }
-  }, [deepLinkResolution, deepLinkTarget, deepLinkTour, loadMorePages, selectTour, selectedSummaryTour]);
+  }, [deepLinkResolution, deepLinkTarget, deepLinkTour, initialStatus, loadMorePages, selectTour, selectedSummaryTour]);
   const emptyStateTitle = normalizedSearchQuery && !isAiSearchMode
     ? hasNaturalLanguageQuery
       ? '这句需求没有直接卡死结果'
@@ -1822,7 +1852,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
                 })
               }
             >
-              <SelectTrigger className="h-10 w-[148px] shrink-0 rounded-full border-stone-200 bg-white sm:w-[170px]">
+              <SelectTrigger ref={sortTriggerRef} aria-label="线路排序" className="h-10 w-[148px] shrink-0 rounded-full border-stone-200 bg-white sm:w-[170px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -1887,77 +1917,22 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
           {activeFilterCount > 0 && (
             <div className="flex shrink-0 items-center gap-2 whitespace-nowrap sm:flex-wrap">
               <span className="text-sm text-stone-500">当前已选：</span>
-              {filters.destination && (
-                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
-                  <MapPin className="w-3 h-3" />
-                  {filters.destination}
-                  <X
-                    className="w-3 h-3 cursor-pointer"
-                    onClick={() => setFilters({ ...filters, destination: '' })}
-                  />
-                </Badge>
-              )}
-              {filters.theme && (
-                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
-                  {filters.theme}
-                  <X
-                    className="w-3 h-3 cursor-pointer"
-                    onClick={() => setFilters({ ...filters, theme: '' })}
-                  />
-                </Badge>
-              )}
-              {hasPriceFilter && (
-                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
-                  {priceRange[0].toLocaleString()}-{priceRange[1].toLocaleString()} 元
-                  <X
-                    className="w-3 h-3 cursor-pointer"
-                    onClick={() => setSliderValues([0, 100])}
-                  />
-                </Badge>
-              )}
-              {(filters.departureDate || filters.departureDateStart || filters.departureDateEnd) && (
-                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
-                  <Calendar className="w-3 h-3" />
-                  {filters.departureDateStart || filters.departureDateEnd
-                    ? dateRangeLabel
-                    : formatDateLabel(filters.departureDate, today)}
-                  <X
-                    className="w-3 h-3 cursor-pointer"
-                    onClick={() =>
-                      setFilters({
-                        ...filters,
-                        departureDate: '',
-                        departureDateStart: '',
-                        departureDateEnd: '',
-                      })
-                    }
-                  />
-                </Badge>
-              )}
-              {filters.duration && (
-                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
-                  {filters.duration === LONG_TRIP_DURATION_VALUE ? '10天以上' : `${filters.duration}天`}
-                  <X
-                    className="w-3 h-3 cursor-pointer"
-                    onClick={() => setFilters({ ...filters, duration: null })}
-                  />
-                </Badge>
-              )}
-              {filters.source && (
-                <Badge variant="outline" className="gap-1 rounded-full border-stone-200 bg-white px-3 py-1 text-stone-700">
-                  {filters.source}
-                  <X
-                    className="w-3 h-3 cursor-pointer"
-                    onClick={() => setFilters({ ...filters, source: '' })}
-                  />
-                </Badge>
-              )}
+              {appliedFilters.map(({ kind, value, onRemove }) => (
+                <AppliedFilterButton
+                  key={kind}
+                  label={`移除${kind}筛选：${value}`}
+                  onRemove={onRemove}
+                  fallbackFocus={() => sortTriggerRef.current?.focus()}
+                >
+                  {value}
+                </AppliedFilterButton>
+              ))}
             </div>
           )}
         </div>
       </div>
 
-      {displayResultCount > 0 && (
+      {initialStatus === 'ready' && displayTours.length > 0 && displayResultCount > 0 && (
         <div role="status" aria-live="polite" aria-atomic="true" className="mb-5 flex items-center justify-between text-sm text-stone-500">
           <span className="flex flex-wrap items-center gap-x-2 gap-y-1">共 {displayResultCount.toLocaleString()} 条<div className="sr-only">结果</div>{departureHealth.bookable > 0 && (<><span className="text-stone-300">·</span><span className="text-stone-600">{departureHealth.bookable.toLocaleString()} 条有未来班期</span></>)}{departureHealth.expired > 0 && (<><span className="text-stone-300">·</span><span className="text-amber-700">{departureHealth.expired.toLocaleString()} 条班期已结束</span></>)}{!filters.hideExpired && departureHealth.expired > 0 && (<span className="text-xs text-stone-400">（已包含已过期班期）</span>)}</span>
           {shouldRenderLoadMore && (
@@ -1968,10 +1943,29 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         </div>
       )}
 
-      {loading ? (
-        <div className="py-20 text-center">
+      {initialLoadFailed ? (
+        <div className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/90 px-5 py-16 text-center">
+          <div role="alert">
+            <h3 className="mb-2 text-lg font-semibold text-stone-700">暂时无法加载旅行线路</h3>
+            <p className="text-sm leading-7 text-stone-500">请检查网络连接后重试，已选的搜索和筛选条件会保留。</p>
+          </div>
+          <Button className="mt-6 h-11 rounded-xl" onClick={retryInitialLoad}>重试加载线路</Button>
+        </div>
+      ) : loading ? (
+        <div role="status" className="py-20 text-center">
           <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-stone-700" />
           <p className="text-stone-500">加载旅行数据中...</p>
+        </div>
+      ) : canCheckMorePages || browsingCheckInterrupted ? (
+        <div className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/90 px-5 py-12 text-center">
+          <p role="status" className="text-sm text-stone-600">
+            {browsingCheckInterrupted ? '后续线路暂时无法加载。' : autoCheckMorePages || loadingMore ? '正在查找更多旅行线路…' : '已查看的线路没有符合条件的结果，还可以继续查看。'}
+          </p>
+          {browsingCheckInterrupted ? (
+            <Button className="mt-4 h-11 rounded-xl" onClick={retryInitialLoad}>重试加载线路</Button>
+          ) : !autoCheckMorePages && (
+            <Button className="mt-4 h-11 rounded-xl" disabled={loadingMore} onClick={checkNextPage}>继续查看线路</Button>
+          )}
         </div>
       ) : displayTours.length === 0 ? (
         <div role="status" className="surface-panel rounded-[28px] border border-stone-200/80 bg-white/90 px-5 py-16 text-center">

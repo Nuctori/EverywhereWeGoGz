@@ -92,9 +92,10 @@ jobs:
           VITE_AI_DEFAULT_MODEL: GLM-4.7-Flash
           VITE_AI_DEFAULT_API_KEY: ewg-proxy（非机密占位，Worker 只校验 Origin）
 
-      - name: Verify mobile AI recovery against built artifact
+      - name: Verify user paths against built artifact
         run: |
           npx playwright install --with-deps chromium
+          node scripts/test_tour_list_ux_e2e.mjs
           npm run test:ai-mobile-recovery-e2e
           npm run test:ai-mobile-capsule-e2e
           npm run test:ai-failure-reason-e2e
