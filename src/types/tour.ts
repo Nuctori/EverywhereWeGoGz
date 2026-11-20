@@ -538,6 +538,8 @@ export interface AiRecommendationRequest {
   previousResult?: AiRecommendationResult | null;
   /** Only the caller that owns a suspended attempt may request same-turn resume. */
   resumeInterrupted?: boolean;
+  /** Validated result from this exact turn, never a previous conversation result. */
+  resumeCheckpoint?: AiRecommendationResult | null;
   /**
    * 上一轮已经拿到的分类头结果。恢复同一轮时传回来，跳过 4s 的分类头调用，
    * 也避免重新规划出不同的检索式（恢复后结果跟第一次不一致）。

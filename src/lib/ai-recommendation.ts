@@ -9365,9 +9365,8 @@ async function upgradeDeferredReasons(params: {
   timeoutMs?: number;
 }): Promise<AiRecommendationResult> {
   const targets = getDeferredReasonTargets(params.result);
-  if (targets.length === 0 || params.configs.length === 0) {
-    return { ...params.result, reasonPhase: 'full' };
-  }
+  if (targets.length === 0) return { ...params.result, reasonPhase: 'full' };
+  if (params.configs.length === 0) return params.result;
   const tourById = new Map(params.candidateTours.map((tour) => [tour.id, tour]));
   const lines = targets.map((item) => {
     const tour = tourById.get(item.tourId);
@@ -9408,18 +9407,18 @@ async function upgradeDeferredReasons(params: {
         reasonById.set(item.tourId, { reason, ...(matchedSignals?.length ? { matchedSignals } : {}) });
       }
     }
-    let upgraded = 0;
+    const targetIds = new Set(targets.map(item => item.tourId));
     const items = params.result.items.map((item) => {
       const next = reasonById.get(item.tourId);
-      if (!next || next.reason.length <= (item.reason?.length ?? 0)) return item;
-      upgraded += 1;
+      if (!targetIds.has(item.tourId) || !next || next.reason.length <= (item.reason?.length ?? 0)) return item;
       return {
         ...item,
         reason: next.reason,
         ...(next.matchedSignals ? { matchedSignals: next.matchedSignals } : {}),
       };
     });
-    return { ...params.result, items, reasonPhase: upgraded === targets.length ? 'full' : 'base' };
+    const result = { ...params.result, items };
+    return { ...result, reasonPhase: getDeferredReasonTargets(result).length === 0 ? 'full' : 'base' };
   } catch (error) {
     // 用户取消不能被吞成"补全失败"：面板要靠 AbortError 走静默暂停。
     if (params.signal?.aborted) throw error;
@@ -9432,15 +9431,11 @@ async function upgradeDeferredReasons(params: {
 // Keep the race at the public boundary: transports that ignore abort cannot publish late work.
 export async function requestAiRecommendations(request: AiRecommendationRequest): Promise<AiRecommendationResult> {
   if (request.signal?.aborted) throw new DOMException('AI request cancelled', 'AbortError');
-  // 上一轮的首轮结果已经完整（25 条、顺序已定），恢复时不再重跑生成，
-  // 只补第 9-15 条详细理由：锁屏回来后通常 10s 内就能拿到最终结果。
-  if (
-    request.resumeInterrupted &&
-    request.previousResult?.reasonPhase === 'base' &&
-    request.previousResult.status?.mode === 'ai'
-  ) {
+  // 本轮排序已确认时，只补尚未完成的理由，不重跑分类或排序。
+  const checkpoint = request.resumeInterrupted ? request.resumeCheckpoint : null;
+  if (checkpoint?.reasonPhase === 'base' && checkpoint.status?.mode === 'ai') {
     const configs = getResolvedAiConfigs(request.aiConfig);
-    if (configs.length === 0) return request.previousResult;
+    if (configs.length === 0) return checkpoint;
     request.onProgress?.({
       stage: 'ranking',
       label: '已恢复上一轮完整结果',
@@ -9450,7 +9445,7 @@ export async function requestAiRecommendations(request: AiRecommendationRequest)
     const userText = [...request.messages].reverse().find((message) => message.role === 'user')?.content ?? '';
     return upgradeDeferredReasons({
       configs,
-      result: request.previousResult,
+      result: checkpoint,
       candidateTours: request.candidateTours,
       userText,
       ...(request.signal ? { signal: request.signal } : {}),
@@ -9495,6 +9490,9 @@ export async function requestAiRecommendations(request: AiRecommendationRequest)
   });
   const work = requestAiRecommendationsWithinBudget({
     ...request, signal: controller.signal,
+    onPreparationReady: (preparation) => {
+      if (active && !controller.signal.aborted && Date.now() < deadline) request.onPreparationReady?.(preparation);
+    },
     onProgress: (progress) => {
       if (!active) return;
       if (progress.partialItems) {
@@ -9506,8 +9504,8 @@ export async function requestAiRecommendations(request: AiRecommendationRequest)
   }, deadline, (items) => {
     if (!active) return;
     fallbackItems = items.map((item) => ({ ...item, reason: undefined, reasonSource: 'fallback' }));
-    if (request.resumeInterrupted && request.previousResult?.source === 'ai-api'
-      && request.previousResult.status?.mode === 'local-only') return;
+    if (request.resumeInterrupted && checkpoint?.source === 'ai-api'
+      && checkpoint.status?.mode === 'local-only') return;
     request.onProgress?.({ stage: 'ranking', label: '本地候选已就绪',
       detail: '可先浏览候选线路，AI 正在比较推荐顺序。', progress: 54,
       previewKind: 'candidates', partialItems: fallbackItems });
@@ -9539,6 +9537,7 @@ async function requestAiRecommendationsWithinBudget({
   aiConfig,
   preferenceMemory,
   previousResult,
+  resumeCheckpoint,
   resumeInterrupted,
   resumePreparation,
   onPreparationReady,
@@ -10182,9 +10181,9 @@ async function requestAiRecommendationsWithinBudget({
         // 增量展示失败不影响正式结果。
       }
     };
-    if (resumeInterrupted && previousResult?.source === 'ai-api' && previousResult.status?.mode === 'local-only') {
+    if (resumeInterrupted && resumeCheckpoint?.source === 'ai-api' && resumeCheckpoint.status?.mode === 'local-only') {
       // Explicit same-turn checkpoints only: re-run current mapping and hard constraints.
-      emitPartialPreview(previousResult.items, previousResult.items.map((item) => item.tourId));
+      emitPartialPreview(resumeCheckpoint.items, resumeCheckpoint.items.map((item) => item.tourId));
       if (fixedOrder?.length) {
         aiMessages.push({ role: 'user', content: `本轮中断后继续：order 固定为 ${JSON.stringify(fixedOrder)}，不可重新筛选或重排。已有解释 ${JSON.stringify([...partialById.values()].filter((item) => item.reason))}。先原样输出 order，再在 items 中补齐尚无解释的线路，最后给出 summary。` });
       }
@@ -10556,6 +10555,7 @@ async function requestAiRecommendationsWithinBudget({
       baseResult.reasonPhase = 'full';
       finalResult = baseResult;
     }
+    if (finalResult.reasonPhase === 'base') return finalResult;
     emitProgress(onProgress, {
       stage: 'completed',
       label: '推荐结果已生成',

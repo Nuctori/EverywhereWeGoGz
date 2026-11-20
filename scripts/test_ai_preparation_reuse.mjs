@@ -66,6 +66,8 @@ function makeRequest(overrides = {}) {
 const originalFetch = globalThis.fetch;
 try {
   const calls = [];
+  let upgradeMode = 'full';
+  let requestedReasonIds = [];
   globalThis.fetch = async (_url, init) => {
     const body = JSON.parse(init?.body || '{}');
     const prompt = JSON.stringify(body.messages || []);
@@ -74,12 +76,13 @@ try {
     calls.push(isUpgrade ? 'upgrade' : isRanking ? 'ranking' : 'classifier');
     if (isUpgrade) {
       // 只给请求里点名的 7 条补写；客户端必须按 tourId 合并，不能整条替换。
-      const ids = [...new Set([...prompt.matchAll(/tour_\d+/g)].map((match) => match[0]))].slice(0, 7);
+      requestedReasonIds = [...new Set([...prompt.matchAll(/tour_\d+/g)].map((match) => match[0]))].slice(0, 7);
+      const ids = upgradeMode === 'partial' ? requestedReasonIds.slice(0, 1) : requestedReasonIds;
       const content = JSON.stringify({
         order: ids,
         items: ids.map((id) => ({
           tourId: id,
-          reason: '补全后的详细理由，具体到玩法、画面和取舍，帮助用户判断这条线路适合谁。',
+          reason: '补全后的详细理由，具体到玩法、画面和取舍，帮助用户判断这条线路适合谁。同行的人如果想放慢脚步，可以先看行程留给自由活动和休息的时间，再决定是否适合报名。',
           matchedSignals: ['补全'],
         })),
       });
@@ -117,7 +120,7 @@ try {
   calls.length = 0;
   const fast = await requestAiRecommendations(makeRequest({
     resumeInterrupted: true,
-    previousResult: baseCaptured,
+    resumeCheckpoint: baseCaptured,
   }));
   assert.deepEqual(calls, ['upgrade'], 'base checkpoint resume must skip classifier and ranking');
   assert.ok(fast.items.some((item) => (item.reason || '').startsWith('补全后的详细理由')));
@@ -134,7 +137,25 @@ try {
   calls.length = 0;
   await requestAiRecommendations(makeRequest({ resumeInterrupted: true, resumePreparation: null }));
   assert.deepEqual(calls, ['classifier', 'ranking', 'upgrade'], 'missing preparation falls back to the classifier');
-  console.log('AI preparation reuse regression passed');
+  calls.length = 0;
+  await requestAiRecommendations(makeRequest({ resumeInterrupted: true, previousResult: baseCaptured }));
+  assert.deepEqual(calls, ['classifier', 'ranking', 'upgrade'], 'previous-turn base is not a recovery checkpoint');
+
+  upgradeMode = 'partial';
+  const stages = [];
+  const partial = await requestAiRecommendations(makeRequest({ onProgress: progress => stages.push(progress.stage) }));
+  assert.ok(!stages.includes('completed'), 'partial upgrade cannot emit completed progress');
+  const initiallyRequested = requestedReasonIds;
+  assert.ok(initiallyRequested.length > 1);
+  assert.equal(partial.reasonPhase, 'base');
+  assert.deepEqual(partial.items.map(item => item.tourId), baseCaptured.items.map(item => item.tourId));
+  upgradeMode = 'full';
+  calls.length = 0;
+  const filled = await requestAiRecommendations(makeRequest({ resumeInterrupted: true, resumeCheckpoint: partial }));
+  assert.deepEqual(calls, ['upgrade']);
+  assert.deepEqual(requestedReasonIds, initiallyRequested.slice(1), 'retry requests only unresolved reasons');
+  assert.equal(filled.reasonPhase, 'full');
+  console.log('AI preparation reuse and deferred reasons regression passed');
 } finally {
   globalThis.fetch = originalFetch;
 }

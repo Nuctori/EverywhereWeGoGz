@@ -565,7 +565,7 @@ export function AiRecommendPanel({
     if (container) container.scrollTop = container.scrollHeight;
   }, [liveThinkingOpen, progressState?.liveThinking?.excerpt]);
 
-  const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean; replaceRunning?: boolean; automatic?: boolean; resume?: boolean }) => {
+  const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean; replaceRunning?: boolean; automatic?: boolean; resume?: boolean; displayedBase?: AiRecommendationResult }) => {
     const prompt = rawPrompt.trim();
     if (!prompt || (loading && !options?.replaceRunning) || !toursReady || (requestAbortRef.current && !options?.replaceRunning)) return;
     if (!options?.automatic) onAiModeStart();
@@ -578,7 +578,7 @@ export function AiRecommendPanel({
     // New turns start without a checkpoint. Legacy v2 has no proven context:
     // rerun its prompt safely, without trusting the displayed old result.
     const existing = resuming ? pendingContextRef.current : null;
-    const nextMessages = existing?.messages ?? (resuming
+    const nextMessages = existing?.messages ?? (options?.displayedBase ? messages : resuming
       ? (messages.at(-1)?.role === 'user' && messages.at(-1)?.content === prompt
         ? messages : [...messages, createMessage('user', prompt)])
       : preserveResult ? [...messages, createMessage('user', prompt)]
@@ -586,9 +586,9 @@ export function AiRecommendPanel({
     const context: PendingAiRequest = existing ?? {
       turnId: createConversationId(), prompt, activeFilters: { ...activeFilters },
       searchQuery: !resuming && !preserveResult ? request?.searchQuery ?? searchQuery : searchQuery,
-      messages: nextMessages, preferenceMemory: resuming ? null : preferenceMemory,
+      messages: nextMessages, preferenceMemory: resuming && !options?.displayedBase ? null : preferenceMemory,
       previousResult: !resuming && preserveResult && result?.status?.mode === 'ai' ? result : null,
-      checkpoint: null, recoveryState: 'running',
+      checkpoint: options?.displayedBase ?? null, recoveryState: 'running',
     };
     pendingContextRef.current = context;
     context.recoveryState = 'running';
@@ -718,11 +718,13 @@ export function AiRecommendPanel({
         searchQuery: context.searchQuery,
         aiConfig,
         preferenceMemory: context.preferenceMemory,
-        previousResult: resuming ? context.checkpoint ?? context.previousResult : context.previousResult,
+        previousResult: context.previousResult,
+        resumeCheckpoint: resuming ? context.checkpoint : null,
         resumeInterrupted: resuming,
         // 同一轮恢复：复用上一轮分类头结果，省掉 4s 往返并保持检索式一致。
         resumePreparation: resuming ? readAiPreparation(context.turnId) : null,
         onPreparationReady: (preparation) => {
+          if (requestVersionRef.current !== requestVersion || abortController.signal.aborted) return;
           saveAiPreparation(context.turnId, preparation);
         },
         // 首轮 25 条/排序已定就先展示并落盘；第 9-15 条详细理由由补全请求继续写。
@@ -801,7 +803,17 @@ export function AiRecommendPanel({
       if (abortController.signal.aborted) return;
       const completed = nextResult.status?.mode === 'ai';
       persistedMemory = completed ? nextResult.preferenceMemory ?? context.preferenceMemory : preferenceMemory;
-      if (completed) {
+      if (completed && nextResult.reasonPhase === 'base') {
+        retainedResult = nextResult;
+        context.checkpoint = nextResult;
+        context.recoveryState = 'paused';
+        context.lastFailure = null;
+        autoResumeRemainingRef.current = 0;
+        setInterruptedPrompt(prompt);
+        setPreferenceMemory(persistedMemory);
+        persistRequest(prompt);
+        onResultChange(nextResult);
+      } else if (completed) {
         retainedResult = nextResult;
         persistedMessages = [...nextMessages, createMessage('assistant', buildResultAssistantReply(prompt, isFollowUpTurn))];
         autoResumeRemainingRef.current = 0;
@@ -1069,7 +1081,13 @@ export function AiRecommendPanel({
   const recoveryBudgetExhausted = autoResumeRemainingRef.current <= 0
     && pendingContextRef.current?.recoveryState !== 'failed'
     && pendingContextRef.current?.recoveryState !== 'paused';
-  const compactStatusLabel = interruptedPrompt && !loading
+  const reasonsPending = !loading && (interruptedPrompt
+    ? pendingContextRef.current?.checkpoint?.reasonPhase === 'base'
+    : result?.status?.mode === 'ai' && result.reasonPhase === 'base');
+  const reasonPrompt = interruptedPrompt || [...messages].reverse().find((message) => message.role === 'user')?.content;
+  const compactStatusLabel = reasonsPending
+    ? '排序已完成，部分理由待补'
+    : interruptedPrompt && !loading
     ? !networkOnline
       ? recoveryBudgetExhausted ? '等待网络恢复，自动恢复预算已耗尽' : '等待网络恢复'
       // 预算耗尽时标题先说"要手动继续"（那是可操作的动作），原因放在下面那行；
@@ -1084,7 +1102,9 @@ export function AiRecommendPanel({
         : hasResult
           ? textSearchActive ? '上一轮 AI 推荐（未应用到搜索）' : `已置顶 ${recommendedCount} 条建议`
           : '描述需求，AI 帮你置顶';
-  const compactStatusDetail = interruptedPrompt && !loading
+  const compactStatusDetail = reasonsPending
+    ? '已保留本轮排序和已有理由，只补写剩余理由，不会重新排序。'
+    : interruptedPrompt && !loading
     ? !networkOnline
       ? recoveryBudgetExhausted ? '已保留本轮上下文；自动恢复预算已耗尽，联网后可手动继续本轮。' : '已保留本轮上下文，网络恢复后在剩余预算内继续。'
       : interruptedReason?.detail || (recoveryBudgetExhausted ? '自动恢复预算已耗尽，可手动继续本轮。' : '可继续查看已保留的内容，或手动继续本轮。')
@@ -1319,7 +1339,12 @@ export function AiRecommendPanel({
                 </div>
               )}
 
-      {interruptedPrompt && !loading && (
+      {reasonsPending && reasonPrompt ? (
+        <Button type="button" variant="outline" className="mt-3 min-h-11 rounded-xl" disabled={!toursReady || !networkOnline}
+          onClick={() => void submitPrompt(reasonPrompt, { preserveResult: true, resume: true, displayedBase: interruptedPrompt ? undefined : result ?? undefined })}>
+          补齐剩余理由
+        </Button>
+      ) : interruptedPrompt && !loading && (
         <Button type="button" variant="outline" className="mt-3 min-h-11 rounded-xl" onClick={() => void submitPrompt(interruptedPrompt, { preserveResult: true, resume: true })}>继续本轮</Button>
       )}
 

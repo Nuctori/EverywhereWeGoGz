@@ -93,7 +93,9 @@ try {
   });
   const progress = [];
   const startWhole = performance.now();
-  const deadlineResult = await requestAiRecommendations({ ...args, onProgress: (p) => progress.push(p) });
+  const latePreparations = [];
+  const deadlineResult = await requestAiRecommendations({ ...args, onProgress: (p) => progress.push(p),
+    onPreparationReady: (preparation) => latePreparations.push(preparation) });
   assert.ok(performance.now() - startWhole < 600, 'whole request must settle at its 30ms test budget');
   assert.equal(deadlineResult.source, 'local-preview');
   assert.notEqual(deadlineResult.status.mode, 'ai');
@@ -102,6 +104,7 @@ try {
   const countAtDeadline = progress.length;
   await wait(20);
   assert.equal(progress.length, countAtDeadline, 'no late progress after deadline');
+  assert.deepEqual(latePreparations, [], 'timed-out classifier cannot publish a preparation for persistence');
   console.log('PASS whole recommendation 30ms deadline includes classifier and suppresses late progress');
 
   // Classifier completes; main SSE publishes a checked item then deliberately stalls.
@@ -192,8 +195,11 @@ try {
     const content = JSON.stringify({ order: [candidate.id, rankedCandidates[1].id], items: [{ tourId: candidate.id, reason: '恢复后新增理由' }], summary: '恢复摘要' });
     return new Response(JSON.stringify({ choices: [{ message: { content } }] }), { headers: { 'content-type': 'application/json' } });
   };
+  await requestAiRecommendations({ ...args, timeoutMs: undefined, candidateTours: rankedCandidates,
+    previousResult: checkpoint, resumeInterrupted: true });
+  assert.doesNotMatch(resumePrompt, /order 固定为/, 'previous-turn history cannot pin current recovery order');
   const resumed = await requestAiRecommendations({ ...args, timeoutMs: undefined, candidateTours: rankedCandidates,
-    previousResult: checkpoint, resumeInterrupted: true, onProgress: (p) => { if (p.previewKind) resumeProgress.push(p); } });
+    resumeCheckpoint: checkpoint, resumeInterrupted: true, onProgress: (p) => { if (p.previewKind) resumeProgress.push(p); } });
   assert.match(resumePrompt, /order 固定为/);
   assert.deepEqual(resumeProgress[0].partialItems.map((i) => i.tourId), checkpoint.items.map((i) => i.tourId));
   assert.ok(resumeProgress.every((p) => p.previewKind !== 'candidates'), 'same-turn resume must not flash local ordering');

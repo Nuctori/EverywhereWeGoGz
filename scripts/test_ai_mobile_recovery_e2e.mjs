@@ -73,10 +73,11 @@ async function fixture(entry, mode = 'partial') {
       sessionStorage.setItem('recovery-test-calls', JSON.stringify(window.__recoveryCalls));
       if (window.__recoveryMode === 'offline') throw new TypeError('Failed to fetch (offline recovery fixture)');
       if (upgrade) {
+        if (window.__recoveryMode === 'emptyUpgrade') return new Response(JSON.stringify({ choices: [{ message: { content: '{"items":[]}' } }] }), { headers: { 'content-type': 'application/json' } });
         const upgradeIds = [...new Set([...prompt.matchAll(/tour_\d+/g)].map(match => match[0]))].slice(0, 7);
         const content = JSON.stringify({
           order: upgradeIds,
-          items: upgradeIds.map(id => ({ tourId: id, reason: '补全详细理由专属文案，具体到玩法、画面和取舍。', matchedSignals: ['行程体验'] })),
+          items: upgradeIds.map(id => ({ tourId: id, reason: '补全详细理由专属文案，具体到玩法、画面和取舍。如果更想放慢脚步，可以先核对每一天的自由活动时间、集合地点与返程安排，再决定是否报名。', matchedSignals: ['行程体验'] })),
         });
         const encoder = new TextEncoder();
         return new Response(new ReadableStream({ start(controller) {
@@ -305,6 +306,46 @@ try {
     evidence.paused = await snapshot(page);
     assert.equal(evidence.paused.state.result.status.mode, 'ai', 'previous readable result is retained independently');
     assert.equal(evidence.paused.state.pendingContext.checkpoint, null);
+  });
+  await run('incomplete reasons stay retryable after reload without reranking', 'noPartial', async page => {
+    await page.waitForFunction(() => performance.getEntriesByType('resource').some(entry => entry.name.includes('/data/tours-index.json?v=')));
+    const seed = await page.evaluate(async () => {
+      const index = await (await fetch('/EverywhereWeGoGz/data/tours-index.json')).json();
+      const ids = index.slice(0, 10).map(tour => tour.id);
+      const catalogVersion = new URL(performance.getEntriesByType('resource').find(entry => entry.name.includes('/data/tours-index.json?v=')).name).searchParams.get('v');
+      return { catalogVersion, conversationId: 'reason-retry',
+        messages: [{ id: 'user', role: 'user', content: '帮我挑一些线路', createdAt: new Date().toISOString() }],
+        result: { conversationId: 'reason-retry', summary: '已排序', generatedAt: new Date().toISOString(), source: 'ai-api', reasonPhase: 'base',
+          status: { mode: 'ai', label: '已排序', detail: '已排序' }, items: ids.map(tourId => ({ tourId, reason: '简介', score: 90, matchedSignals: [], recommendationTier: 'ai-detailed' })) },
+        pendingContext: null, pendingPrompt: null };
+    });
+    await page.addInitScript(({ key, seed }) => {
+      if (sessionStorage.getItem('seed-reason-test')) return;
+      sessionStorage.setItem('seed-reason-test', '1');
+      sessionStorage.setItem('recovery-test-mode', 'emptyUpgrade');
+      localStorage.setItem(key, JSON.stringify(seed));
+    }, { key: stateKey, seed });
+    await page.reload();
+    await page.locator('.tour-card h3').first().waitFor();
+    const panel = await openPanel(page);
+    const retry = panel.getByRole('button', { name: '补齐剩余理由' });
+    await retry.waitFor();
+    const order = (await snapshot(page)).state.result.items.map(item => item.tourId);
+    await page.evaluate(() => window.__setRecoveryMode('emptyUpgrade'));
+    await retry.click();
+    await page.waitForFunction(() => window.__recoveryCalls.some(call => call.upgrade));
+    const paused = await waitState(page, state => state.pendingContext?.recoveryState === 'paused' && state.result?.reasonPhase === 'base');
+    assert.deepEqual(paused.result.items.map(item => item.tourId), order);
+    await page.reload();
+    const restoredPanel = await openPanel(page);
+    const restoredRetry = restoredPanel.getByRole('button', { name: '补齐剩余理由' });
+    await restoredRetry.waitFor();
+    await page.evaluate(() => window.__setRecoveryMode('complete'));
+    await restoredRetry.click();
+    const completed = await waitState(page, state => state.result?.reasonPhase === 'full' && !state.pendingContext && !state.pendingPrompt);
+    assert.deepEqual(completed.result.items.map(item => item.tourId), order);
+    assert.equal((await snapshot(page)).calls.filter(call => !call.upgrade).length, 0);
+    await retry.waitFor({ state: 'hidden' });
   });
   await run('reload persists pending context then completion clears it', 'partial', async (page, evidence) => {
     await search(page);
