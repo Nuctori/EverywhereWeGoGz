@@ -41,7 +41,7 @@ function corsHeaders(origin: string) {
 
 // 上游目标硬白名单：协议必须 https、主机必须在枚举内。
 // api.z.ai 曾尝试接入：key 有效但 Workers 出口被 WAF 拦成 405 HTML，不列入。
-const UPSTREAM_HOSTS = new Set(['open.bigmodel.cn', 'api.siliconflow.cn', 'openrouter.ai', 'ai-gateway.kilo.ai']);
+const UPSTREAM_HOSTS = new Set(['open.bigmodel.cn', 'api.siliconflow.cn', 'openrouter.ai', 'ai-gateway.kilo.ai', 'text.pollinations.ai', 'oai.aihorde.net']);
 const KILO_FREE_MODELS = [
   ['dots', 'dots-studio/dots-3-note-preview:free'],
   ['ernie', 'baidu/ernie-5.5-flash-preview:free'],
@@ -149,6 +149,15 @@ export default {
       [env.OPENROUTER_API_KEY, env.OPENROUTER_API_KEY_2], standard);
 
     const mode = forwarded.stream === true ? 'sse' : 'json';
+    const maxTokens = forwarded.max_tokens;
+    if (env.ENABLE_POLLINATIONS_CLASSIC === '1' && mode === 'json' && typeof maxTokens === 'number' && maxTokens > 0 && maxTokens <= 768) {
+      candidates.push({ label: 'pollinations', url: 'https://text.pollinations.ai/openai', model: 'openai', payload: kiloBody, timeout: 5000 });
+    }
+    const hordeModel = (mode === 'sse' ? env.AI_HORDE_SSE_MODEL : env.AI_HORDE_JSON_MODEL)?.trim();
+    if (hordeModel) {
+      candidates.push({ label: 'aihorde', url: 'https://oai.aihorde.net/v1/chat/completions', model: hordeModel,
+        payload: { ...kiloBody, horde: { availability_mode: 'fail_fast', context_fit: 'reject', trusted_workers: true } }, timeout: 5500 });
+    }
     const deadline = Date.now() + HEADER_BUDGET_MS;
     const failures: string[] = [];
     let retryIn = Infinity;
@@ -223,7 +232,7 @@ export default {
             ...cors, 'Content-Type': type, 'X-EWG-Upstream': item.label,
           } });
         }
-        if (result.status === 429 || result.status === 503) {
+        if (result.status === 429 || result.status === 503 || (result.status === 402 && item.label === 'pollinations')) {
           cooldown = retryAfterMs(result.headers.get('Retry-After'), Date.now());
         }
         if (result.status === 429 && item.label.startsWith('kilo:') && result.body) {
