@@ -28,6 +28,7 @@ export interface PendingAiRequest {
 }
 
 export interface StoredAiChatState {
+  catalogVersion?: string;
   pendingContext?: PendingAiRequest | null;
   conversationId?: string;
   input?: string;

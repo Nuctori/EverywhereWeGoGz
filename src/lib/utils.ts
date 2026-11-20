@@ -28,9 +28,10 @@ export function resolveAssetUrl(path: string) {
 }
 // 附加缓存版本号 __DATA_VERSION__，确保静态站点更新后浏览器不缓存旧数据
 declare const __DATA_VERSION__: string;
+export const DATA_VERSION = typeof __DATA_VERSION__ === 'string' ? __DATA_VERSION__ : '';
 
 export function getDataUrl(path: string) {
   const baseUrl = import.meta.env.BASE_URL || '/';
   const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
-  return `${normalizedBaseUrl}data/${path}?v=${encodeURIComponent(__DATA_VERSION__ || Date.now().toString())}`;
+  return `${normalizedBaseUrl}data/${path}?v=${encodeURIComponent(DATA_VERSION || Date.now().toString())}`;
 }

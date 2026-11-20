@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense, useCallback, useState } from 'react';
 import { Header } from './sections/Header';
 import { Hero } from './sections/Hero';
 import type { QuickIntent } from './sections/Hero';
@@ -26,6 +26,8 @@ function App() {
   const [draftSearchQuery, setDraftSearchQuery] = useState('');
   const [submittedSearchQuery, setSubmittedSearchQuery] = useState('');
   const [aiSearchRequest, setAiSearchRequest] = useState<AiSearchRequest | null>(null);
+  const [preferTextSearch, setPreferTextSearch] = useState(false);
+  const startAiMode = useCallback(() => setPreferTextSearch(false), []);
   const [mapExpanded, setMapExpanded] = useState(false);
 
   // handleSearch 全文检索文本匹配；handleAiSearch 触发 AI 推荐→无结果时自动回退 handleSearch
@@ -35,6 +37,7 @@ function App() {
       setDraftSearchQuery(nextQuery);
     }
     setAiSearchRequest(null);
+    setPreferTextSearch(true);
     setSubmittedSearchQuery(query);
 
     const listEl = document.getElementById('tour-list');
@@ -51,6 +54,7 @@ function App() {
       return;
     }
 
+    setPreferTextSearch(false);
     setAiSearchRequest({
       id: Date.now(),
       prompt,
@@ -80,7 +84,7 @@ function App() {
             map={<Suspense fallback={<div className="hidden sm:block h-[280px] rounded-[22px] bg-stone-100" aria-hidden="true" />}><MapView embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} /></Suspense>}
           />
           <div id="tour-list" tabIndex={-1} className="scroll-mt-24 outline-none">
-            <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} onClearSearch={() => { setDraftSearchQuery(''); setSubmittedSearchQuery(''); setAiSearchRequest(null); }} />
+            <TourList searchQuery={submittedSearchQuery} aiSearchRequest={aiSearchRequest} preferTextSearch={preferTextSearch} onAiModeStart={startAiMode} onClearSearch={() => { setDraftSearchQuery(''); setSubmittedSearchQuery(''); setAiSearchRequest(null); setPreferTextSearch(true); }} />
           </div>
         </main>
 

@@ -486,10 +486,12 @@ function AppliedFilterButton({ label, onRemove, fallbackFocus, children }: {
 interface TourListProps {
   searchQuery: string;
   aiSearchRequest: AiSearchRequest | null;
+  preferTextSearch: boolean;
+  onAiModeStart: () => void;
   onClearSearch: () => void;
 }
 
-export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourListProps) {
+export function TourList({ searchQuery, aiSearchRequest, preferTextSearch, onAiModeStart, onClearSearch }: TourListProps) {
   const {
     tours: localTours,
     indexTours,
@@ -543,7 +545,6 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   // 就清空它）。只在"正在搜索、还没有正式结果"时接管列表。
   const [aiPreviewKind, setAiPreviewKind] = useState<'candidates' | 'ranking' | 'reasons' | undefined>();
   const [aiStreamingItems, setAiStreamingItems] = useState<AiRecommendationItem[]>([]);
-  const previousAiSearchRequestIdRef = useRef<number | null>(null);
   // 全量语料池：优先用 tours-index.json 膨胀出的全量语料（4034 条、约 5MB），
   // 避免为搜索/筛选/AI 下载 20MB 的 tours-list.json；分片失败兜底时才落到 catalogTours/localTours。
   // 膨胀时保留 page 字段，waterfall 的分片懒加载依赖它定位候选所在分页。
@@ -734,7 +735,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
   const searchContext = useMemo(() => extractQueryContext(searchQuery), [searchQuery]);
   const hasNaturalLanguageQuery =
     normalizedSearchQuery.length >= 8 || searchContext.concepts.length + searchContext.residues.length >= 2;
-  const isAiSearchMode = Boolean(aiRecommendationResult) || aiStreamingItems.length > 0;
+  const isAiSearchMode = !preferTextSearch && (Boolean(aiRecommendationResult) || aiStreamingItems.length > 0);
   // 流式增量生效中：还没有正式结果，但模型已经吐出若干条完整推荐。
   // 这时候不再算"搜索中"，直接按已有条目切到置顶长尾视图，
   // 让用户第一时间看到模型挑出来的线路。
@@ -777,12 +778,12 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
       new Map(
         // 流式增量期间用已生成的部分排序；正式结果一到就换成完整结果
         // （此时 aiStreamingItems 已被清空）。
-        (aiStreamingItems.length > 0 ? aiStreamingItems : aiRecommendationResult?.items ?? []).map((item, index) => [
+        (preferTextSearch ? [] : aiStreamingItems.length > 0 ? aiStreamingItems : aiRecommendationResult?.items ?? []).map((item, index) => [
           item.tourId,
           { ...item, rank: index + 1 },
         ]),
       ),
-    [aiRecommendationResult, aiStreamingItems],
+    [aiRecommendationResult, aiStreamingItems, preferTextSearch],
   );
   const displayTours = useMemo(() => {
     if (resultSourceTours.length === 0) return [];
@@ -973,18 +974,6 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
     setAiStreamingItems([]);
     setAiClearVersion((current) => current + 1);
   }, []);
-
-  useEffect(() => {
-    if (aiSearchRequest) {
-      previousAiSearchRequestIdRef.current = aiSearchRequest.id;
-      return;
-    }
-
-    if (previousAiSearchRequestIdRef.current !== null) {
-      previousAiSearchRequestIdRef.current = null;
-      clearAiRecommendation();
-    }
-  }, [aiSearchRequest, clearAiRecommendation]);
 
   const visibleDisplayCandidates = useMemo(
     () => displayTours.slice(0, visibleCount),
@@ -1765,6 +1754,8 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
         activeFilters={effectiveFilters}
         searchQuery={searchQuery}
         result={aiRecommendationResult}
+        textSearchActive={preferTextSearch}
+        onAiModeStart={onAiModeStart}
         request={aiSearchRequest}
         clearVersion={aiClearVersion}
         searchingVersion={aiSearchRequest?.id ?? 0}
@@ -1889,7 +1880,7 @@ export function TourList({ searchQuery, aiSearchRequest, onClearSearch }: TourLi
             </label>
           </div>
 
-          {aiRecommendationResult && aiRecommendationResult.items.length > 0 && (
+          {isAiSearchMode && aiRecommendationResult && aiRecommendationResult.items.length > 0 && (
             <div className="flex shrink-0 items-center gap-2 whitespace-nowrap rounded-full border border-stone-200 bg-white px-3 py-2 text-sm text-stone-700 shadow-sm sm:flex-wrap">
               <Sparkles className="h-4 w-4 text-stone-500" />
               <span>{aiStreamingItems.length ? (aiPreviewKind === 'candidates' ? `已筛出 ${aiStreamingItems.length} 条候选` : `推荐顺序已就绪 · ${aiStreamingItems.length} 条`) : `AI 已置顶 ${aiRecommendedCount} 条建议`}</span>

@@ -57,7 +57,7 @@ import {
   subscribeStoredAiProgress,
 } from '@/lib/ai-chat-storage';
 import type { PendingAiRequest, StoredAiProgress } from '@/lib/ai-chat-storage';
-import { cn } from '@/lib/utils';
+import { cn, DATA_VERSION } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { AiSearchRequest } from '@/App';
@@ -68,6 +68,8 @@ interface AiRecommendPanelProps {
   activeFilters: FilterState;
   searchQuery: string;
   result: AiRecommendationResult | null;
+  textSearchActive: boolean;
+  onAiModeStart: () => void;
   request: AiSearchRequest | null;
   clearVersion: number;
   // 搜索阶段（请求已发出、首条结果还没落地）的轮次 id：每轮换新，用来清掉上一轮的进度与对话。
@@ -333,6 +335,8 @@ export function AiRecommendPanel({
   searchQuery,
   result,
   request,
+  textSearchActive,
+  onAiModeStart,
   clearVersion,
   searchingVersion,
   mobileOverlayActive = false,
@@ -340,7 +344,13 @@ export function AiRecommendPanel({
   onFocusResults,
   onPartialItems,
 }: AiRecommendPanelProps) {
-  const storedChatState = useMemo(() => readStoredAiChatState(), []);
+  const storedChatState = useMemo(() => {
+    const state = readStoredAiChatState();
+    if (DATA_VERSION && state.catalogVersion === DATA_VERSION) return state;
+    // tour_N is only an identity within one catalogue release. Keep history,
+    // but never reuse the result or its in-flight checkpoints across releases.
+    return { ...state, result: null, pendingContext: null, pendingPrompt: null, autoResumeRemaining: 0 };
+  }, []);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -452,6 +462,7 @@ export function AiRecommendPanel({
     if (requestAbortRef.current) return;
     storageSaveCleanupRef.current = scheduleIdleWork(() => {
       saveStoredAiChatState({
+        catalogVersion: DATA_VERSION,
         conversationId,
         input: followUpInput,
         messages,
@@ -557,6 +568,7 @@ export function AiRecommendPanel({
   const submitPrompt = useCallback(async (rawPrompt: string, options?: { preserveResult?: boolean; replaceRunning?: boolean; automatic?: boolean; resume?: boolean }) => {
     const prompt = rawPrompt.trim();
     if (!prompt || (loading && !options?.replaceRunning) || !toursReady || (requestAbortRef.current && !options?.replaceRunning)) return;
+    if (!options?.automatic) onAiModeStart();
     const resuming = Boolean(options?.resume || options?.automatic);
     if (!options?.automatic) autoResumeRemainingRef.current = 2;
     const requestVersion = requestVersionRef.current + 1;
@@ -605,7 +617,7 @@ export function AiRecommendPanel({
     const persistRequest = (pendingPrompt: string | null) => {
       storageSaveCleanupRef.current?.();
       storageSaveCleanupRef.current = undefined;
-      saveStoredAiChatState({ conversationId, messages: persistedMessages, result: retainedResult, preferenceMemory: persistedMemory, pendingPrompt, pendingContext: pendingPrompt ? context : null, autoResumeRemaining: autoResumeRemainingRef.current }, MAX_PERSISTED_MESSAGES);
+      saveStoredAiChatState({ catalogVersion: DATA_VERSION, conversationId, messages: persistedMessages, result: retainedResult, preferenceMemory: persistedMemory, pendingPrompt, pendingContext: pendingPrompt ? context : null, autoResumeRemaining: autoResumeRemainingRef.current }, MAX_PERSISTED_MESSAGES);
     };
     const suspendRequest = (reason: 'background' | 'offline' = 'background') => {
       if (requestVersionRef.current !== requestVersion) return;
@@ -908,6 +920,7 @@ export function AiRecommendPanel({
     loading,
     messages,
     onFocusResults,
+    onAiModeStart,
     onResultChange,
     onPartialItems,
     preferenceMemory,
@@ -977,7 +990,7 @@ export function AiRecommendPanel({
   }, []);
 
   useEffect(() => {
-    if (!interruptedPrompt || loading || !toursReady || isPageHidden() || awaitingForegroundRef.current || !networkOnline || !navigator.onLine || requestAbortRef.current || autoResumeRemainingRef.current <= 0) return;
+    if (textSearchActive || !interruptedPrompt || loading || !toursReady || isPageHidden() || awaitingForegroundRef.current || !networkOnline || !navigator.onLine || requestAbortRef.current || autoResumeRemainingRef.current <= 0) return;
     const recovery = pendingContextRef.current?.recoveryState;
     if (recovery === 'failed' || recovery === 'paused') return;
     const remote = readStoredAiProgress();
@@ -986,7 +999,7 @@ export function AiRecommendPanel({
     const state = readStoredAiChatState();
     saveStoredAiChatState({ ...state, pendingPrompt: interruptedPrompt, autoResumeRemaining: autoResumeRemainingRef.current }, MAX_PERSISTED_MESSAGES);
     void submitPrompt(interruptedPrompt, { preserveResult: true, automatic: true });
-  }, [interruptedPrompt, loading, toursReady, resumeTick, networkOnline, submitPrompt]);
+  }, [textSearchActive, interruptedPrompt, loading, toursReady, resumeTick, networkOnline, submitPrompt]);
 
   const clearConversation = () => {
     setMobileOpen(false);
@@ -1069,7 +1082,7 @@ export function AiRecommendPanel({
       : searching
         ? '正在按这句话找团'
         : hasResult
-          ? `已置顶 ${recommendedCount} 条建议`
+          ? textSearchActive ? '上一轮 AI 推荐（未应用到搜索）' : `已置顶 ${recommendedCount} 条建议`
           : '描述需求，AI 帮你置顶';
   const compactStatusDetail = interruptedPrompt && !loading
     ? !networkOnline
@@ -1085,7 +1098,7 @@ export function AiRecommendPanel({
       : searching
         ? searchingDetail
         : hasResult
-          ? result?.summary || resultStatusMeta?.detail || '推荐线路已排到前面。'
+          ? result?.summary || (textSearchActive ? '当前列表只显示普通搜索结果。' : resultStatusMeta?.detail || '推荐线路已排到前面。')
           : '一句话说预算、天数、同行人和偏好就行。';
   // 对话记录去掉首条欢迎语：它不是一轮真实对话，只是初始引导。
   // 也要过滤掉没有 assistant 内容的半截状态（请求进行中只插了用户消息）。

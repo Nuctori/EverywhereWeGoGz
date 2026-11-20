@@ -461,6 +461,7 @@ export const pendingAiRequestSchema = z.object({
 });
 
 export const storedAiChatStateSchema = z.object({
+  catalogVersion: z.string().optional(),
   pendingContext: pendingAiRequestSchema.nullish(),
   pendingPrompt: z.string().nullish(),
   autoResumeRemaining: z.number().int().min(0).max(2).optional(),

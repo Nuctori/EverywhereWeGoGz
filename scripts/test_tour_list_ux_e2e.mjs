@@ -8,6 +8,7 @@ import { chromium, expect } from '@playwright/test';
 
 const root = path.resolve(process.argv[2] || 'dist');
 const base = '/EverywhereWeGoGz/';
+const fixtureVersion = process.env.GITHUB_SHA || 'ux-e2e';
 const mime = { '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.webp': 'image/webp' };
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
@@ -33,9 +34,12 @@ after(async () => {
   if (server.listening) await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
 });
 
-async function fixture(t, width, fail = () => false, intercept = () => null) {
+async function fixture(t, width, fail = () => false, intercept = () => null, seed, query = '') {
   const context = await browser.newContext({ viewport: { width, height: 844 }, serviceWorkers: 'block' });
   t.after(() => context.close());
+  if (seed) await context.addInitScript(state => {
+    localStorage.setItem('travel-ai-chat-state-v2', JSON.stringify(state));
+  }, seed);
   const page = await context.newPage();
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -46,7 +50,7 @@ async function fixture(t, width, fail = () => false, intercept = () => null) {
     const response = intercept(url.pathname);
     return response ? route.fulfill({ json: response }) : route.continue();
   });
-  await page.goto(origin + base, { waitUntil: 'domcontentloaded' });
+  await page.goto(origin + base + query, { waitUntil: 'domcontentloaded' });
   return { page, list: page.locator('#tour-list'), errors };
 }
 
@@ -144,6 +148,52 @@ test('自动检查有上限，后续分片失败时可重试', async t => {
   assert.deepEqual(requested, [0, 1, 2, 3, 4, 0, 1, 2, 3, 4]);
   assert.deepEqual(errors, []);
 });
+
+for (const width of [390, 1440]) {
+  test(`${width}px 保留首片以外的详情分享链接`, async t => {
+    const index = JSON.parse(fs.readFileSync(path.join(root, 'data/tours-index.json'), 'utf8'));
+    const target = index.find(tour => tour.page > 0 && tour.sourceId && tour.title);
+    assert.ok(target);
+    const query = width === 390
+      ? new URLSearchParams({ tour: target.id })
+      : new URLSearchParams({ tour: index[0].id, sourceId: target.sourceId });
+    const { page, errors } = await fixture(t, width, undefined, undefined, undefined, `?${query}`);
+    const dialog = page.getByRole('dialog', { name: target.title, exact: true });
+    await expect(dialog).toBeVisible({ timeout: 20000 });
+    await expect(dialog.getByRole('button', { name: '分享线路' })).toBeVisible();
+    assert.deepEqual(errors, []);
+  });
+}
+
+for (const version of [fixtureVersion, 'obsolete-release', undefined]) {
+  test(`普通搜索独立于已恢复的 AI 推荐（${version ?? '无版本'}）`, async t => {
+    const page0 = JSON.parse(fs.readFileSync(path.join(root, 'data/tours-page-0.json'), 'utf8'));
+    assert.ok(page0.items[0]?.id);
+    const generatedAt = new Date().toISOString();
+    const reason = '这条旧推荐不应该覆盖普通搜索';
+    const { page, list, errors } = await fixture(t, 1440, undefined, undefined, {
+      catalogVersion: version,
+      input: '历史草稿',
+      result: {
+        conversationId: 'ux-prior-ai', summary: reason, generatedAt, source: 'ai-api',
+        items: [{ tourId: page0.items[0].id, score: 95, reason, matchedSignals: [] }],
+      },
+    });
+    await expect(list.locator('.tour-card h3').first()).toBeVisible({ timeout: 20000 });
+    const recommendation = list.locator('.tour-card').getByText(reason, { exact: false });
+    if (version === fixtureVersion) await expect(recommendation).toBeVisible();
+    else {
+      await expect(list.getByText(reason, { exact: false })).toHaveCount(0);
+      await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('travel-ai-chat-state-v2')).input)).toBe('历史草稿');
+    }
+    const search = page.getByRole('searchbox', { name: '目的地或旅行需求' });
+    await search.fill('zzqvx');
+    await page.getByRole('button', { name: '搜索线路', exact: true }).click();
+    await expect(list.getByText('没有找到直接匹配的旅行团')).toBeVisible();
+    await expect(recommendation).toHaveCount(0);
+    assert.deepEqual(errors, []);
+  });
+}
 
 for (const width of [390, 1440]) {
   test(`${width}px 已选筛选可以用键盘移除并保留焦点`, async t => {
