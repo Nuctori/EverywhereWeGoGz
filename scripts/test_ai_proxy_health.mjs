@@ -5,8 +5,8 @@ const realNow = Date.now;
 let now = realNow(), phase = 'failed', release, entered;
 const calls = [];
 const env = { ENABLE_KILO_FREE: '1' };
-const dots = 'dots-studio/dots-3-note-preview:free';
-const ernie = 'baidu/ernie-5.5-flash-preview:free';
+const dots = 'reflection/beam-free';
+const ernie = 'nvidia/nemotron-3.5-super-vl:free';
 let ip = 0;
 function run(stream = false, signal) {
   return worker.fetch(new Request('https://ai.114124.xyz/v1/chat/completions', {
@@ -24,21 +24,21 @@ try {
     if (phase === 'all-failed') return new Response('{}', { status: 429, headers: { 'Retry-After': '5' } });
     return stream ? new Response('data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n', { headers: { 'Content-Type': 'text/event-stream' } }) : Response.json({ choices: [{ message: { content: 'ok' } }] });
   };
-  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:ernie');
+  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:nemotron-vl');
   now += 2999;
   calls.length = 0;
-  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:ernie');
+  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:nemotron-vl');
   assert.deepEqual(calls, [[ernie, false]], 'skip the recently rate-limited model');
-  assert.equal((await run(true)).headers.get('x-ewg-upstream'), 'kilo:dots', 'SSE health is independent');
+  assert.equal((await run(true)).headers.get('x-ewg-upstream'), 'kilo:beam', 'SSE health is independent');
   now += 1;
   phase = 'half-open';
   const started = new Promise(resolve => { entered = resolve; });
   const probe = run();
   await started;
-  try { assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:ernie', 'only one half-open request'); } finally { release(); }
-  assert.equal((await probe).headers.get('x-ewg-upstream'), 'kilo:dots');
+  try { assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:nemotron-vl', 'only one half-open request'); } finally { release(); }
+  assert.equal((await probe).headers.get('x-ewg-upstream'), 'kilo:beam');
   phase = 'ok';
-  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:dots');
+  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:beam');
   phase = 'all-failed';
   await run();
   calls.length = 0;
@@ -56,7 +56,7 @@ try {
   release();
   assert.equal((await abortedProbe).status, 499);
   phase = 'ok';
-  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:dots', 'cancelled probe must not lock or penalize the upstream');
+  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:beam', 'cancelled probe must not lock or penalize the upstream');
   // A request from the healthy period can fail while a newer probe is in flight.
   const held = [];
   globalThis.fetch = async (_url, init) => {
@@ -81,6 +81,6 @@ try {
   await halfOpen;
   now += 1000;
   globalThis.fetch = async () => Response.json({ choices: [{ message: { content: 'ok' } }] });
-  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:dots', 'late failure must not leave half-open locked');
+  assert.equal((await run()).headers.get('x-ewg-upstream'), 'kilo:beam', 'late failure must not leave half-open locked');
   console.log('PASS cooldown, mode isolation, half-open recovery, cancellation and fast 503');
 } finally { globalThis.fetch = realFetch; Date.now = realNow; }

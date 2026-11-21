@@ -6,9 +6,25 @@ OpenRouter :free），按序重试，带 Origin 白名单 + 每 IP 限速。
 
 ## Kilo 免 Key 备用线路（默认关闭）
 
-启用 `ENABLE_KILO_FREE=1` 后，智谱未成功时依次尝试 Dots3 Note Preview 和 ERNIE 5.5 Flash Preview 的固定免费型号，再回到原有备用链。Kilo 不接收浏览器鉴权头；每个模型最多等 6 秒获得有效正文，并受整条链 25 秒预算约束；一旦开始转发响应，不拼接另一模型的流。
+启用 `ENABLE_KILO_FREE=1` 后，智谱未成功时依次尝试 `reflection/beam-free` 和 `nvidia/nemotron-3.5-super-vl:free` 两个固定免费 id，再回到原有备用链。2026-11-21 原 `dots-studio/dots-3-note-preview:free`、`baidu/ernie-5.5-flash-preview:free` 已在网关 404，换成同网关实测 200 的两个 id。Kilo 不接收浏览器鉴权头；每个模型最多等 6 秒获得有效正文，并受整条链 25 秒预算约束；一旦开始转发响应，不拼接另一模型的流。
 
-仅在实际 Worker 出口验证中文需求解析、完整排序流和故障切换后开启。这两个模型共享 Kilo 网关和出口限额，并非两个独立供应商。移除开关或设为 `0` 可恢复旧链。OpenCode 免费聊天模型仅限官方客户端，不接入。
+仅在实际 Worker 出口验证中文需求解析、完整排序流和故障切换后开启。这两个模型共享 Kilo 网关和出口限额，并非两个独立供应商。移除开关或设为 `0` 可恢复旧链。Kilo 免费池轮换很快，`/api/gateway/models` 里标 `:free` 的 id 才可用。
+
+## 新增免费线路（默认关闭）
+
+`ENABLE_EXTRA_KEYLESS=1`：按 BlockRun → LLM7 → OVHcloud 顺序尝试境外匿名线路，全部不带 key、不转发客户端鉴权。顺序来自 2026-11-21 的真实中文 JSON 抽取压测（BlockRun 1.5s 且字段最全，OVH 质量好但只有 2 RPM/IP，放最后）。
+
+- BlockRun `https://blockrun.ai/api/v1`，默认 `poolside/laguna-xs-2.1`（`BLOCKRUN_MODEL` 可换），30 RPM / 300 req/h per IP；网关可能替换模型，不要假设模型身份。
+- LLM7 `https://api.llm7.io/v1`，默认 `gpt-oss:20b`（`LLM7_MODEL` 可换），有免费 token 时放 `LLM7_TOKEN`。
+- OVHcloud `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`，默认 `Qwen3.8-27B`（`OVH_MODEL` 可换），匿名 2 RPM/IP/模型。
+
+2026-11-21 家宽出口实测三条均返回正常正文；Worker 是共享出口，限流表现会明显更差，开启前必须在隔离 Worker 里跑通中文需求解析与排序流。匿名不等于保密：这三家会看到用户需求原文，且可能用于训练。
+
+`ENABLE_OPENCODE_ZEN=1`：OpenCode Zen 免费额度。按 `sst/opencode` 的 `session/llm/request.ts` 复刻客户端指纹（`User-Agent: opencode/<版本>` + `x-opencode-session` / `x-opencode-request` / `x-opencode-client`，配置了 `OPENCODE_PROJECT_ID` 才带 `x-opencode-project`），端点 `https://opencode.ai/inference/openai/v1`，鉴权默认 `Bearer public`（`OPENCODE_ZEN_KEY` 可覆盖），模型默认 `big-pickle`（`OPENCODE_ZEN_MODEL` 可换）。
+
+2026-11-21 实测：Zen 的 `/v1/models` 列出 12 个 $0 模型，但 `/chat/completions` 带不带 opencode 头都返回 429 `FreeUsageLimitError`（官方文档同样写明免费额度需要 OpenCode 客户端）。头是必要条件而非充分条件，且第三方报告称 Zen 封 Cloudflare Worker 出口 IP。因此该线路只作 best-effort 保留，默认关闭；配额判定条件变化前不要依赖它。
+
+完整调研（各供应商 base URL、免费额度、实测证据、已下架名单）见 [`docs/free-llm-pool-survey.md`](docs/free-llm-pool-survey.md)。
 
 ## 额外匿名兜底（默认关闭）
 
@@ -33,6 +49,8 @@ npx wrangler secret put OPENROUTER_API_KEY    # OpenRouter key
 npx wrangler secret put OPENROUTER_API_KEY_2  # OpenRouter 第二把 key（双把轮换免费日额度）
 npx wrangler deploy --keep-vars --var ENABLE_KILO_FREE:1
 ```
+
+可选开关（同样走 `--var`）：`ENABLE_EXTRA_KEYLESS=1`、`ENABLE_OPENCODE_ZEN=1`；可选覆盖 `OVH_MODEL` / `LLM7_MODEL` / `LLM7_TOKEN` / `BLOCKRUN_MODEL` / `OPENCODE_ZEN_MODEL` / `OPENCODE_ZEN_KEY` / `OPENCODE_VERSION` / `OPENCODE_CLIENT` / `OPENCODE_PROJECT_ID`。
 
 从 `cloudflare/ai-proxy` 目录执行。现有前端继续使用 `https://ai.114124.xyz/v1`，不需要重新发布前端。
 

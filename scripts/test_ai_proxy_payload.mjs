@@ -6,15 +6,15 @@ const req = (stream) => new Request('https://ai.114124.xyz/v1/chat/completions',
 const call = (stream) => worker.fetch(req(stream),{ENABLE_KILO_FREE:'1',SILICONFLOW_API_KEY:'test-key'});
 const seen=[];
 try {
- globalThis.fetch = async (_url, init) => { const {model}=JSON.parse(init.body); seen.push(model); return new Response(model.includes('dots')?'data: [DONE]\n\n':good,{headers:{'Content-Type':'text/event-stream'}}); };
+ globalThis.fetch = async (_url, init) => { const {model}=JSON.parse(init.body); seen.push(model); return new Response(model.includes('beam')?'data: [DONE]\n\n':good,{headers:{'Content-Type':'text/event-stream'}}); };
  assert.equal(await (await call(true)).text(),good);
  assert.equal(await (await call(true)).text(),good);
- assert.equal(seen.filter(m=>m.includes('dots')).length,1);
+ assert.equal(seen.filter(m=>m.includes('beam')).length,1);
  seen.length=0;
- globalThis.fetch = async (_url, init) => { const {model,stream}=JSON.parse(init.body); seen.push(model); return model.includes('dots')?Response.json({error:{message:'Rate limit exceeded for free models'}},{status:429,headers:{'Retry-After':'60'}}):stream?new Response(good,{headers:{'Content-Type':'text/event-stream'}}):Response.json({choices:[{message:{content:'ok'}}]}); };
+ globalThis.fetch = async (_url, init) => { const {model,stream}=JSON.parse(init.body); seen.push(model); return model.includes('beam')?Response.json({error:{message:'Rate limit exceeded for free models'}},{status:429,headers:{'Retry-After':'60'}}):stream?new Response(good,{headers:{'Content-Type':'text/event-stream'}}):Response.json({choices:[{message:{content:'ok'}}]}); };
  assert.equal((await call(false)).headers.get('x-ewg-upstream'),'siliconflow');
  assert.equal((await call(true)).headers.get('x-ewg-upstream'),'siliconflow');
- assert.deepEqual(seen,['dots-studio/dots-3-note-preview:free','Qwen/Qwen3.5-4B','Qwen/Qwen3.5-4B']);
+ assert.deepEqual(seen,['reflection/beam-free','Qwen/Qwen3.5-4B','Qwen/Qwen3.5-4B']);
  console.log('PASS empty SSE fallback and shared Kilo rate-limit cooldown');
  const keyed = { BIGMODEL_API_KEY:'glm-only', ENABLE_KILO_FREE:'1', SILICONFLOW_API_KEY:'qwen-only', OPENROUTER_API_KEY:'router-only' };
  const hops = [];

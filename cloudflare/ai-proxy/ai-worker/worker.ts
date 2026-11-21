@@ -41,11 +41,31 @@ function corsHeaders(origin: string) {
 
 // 上游目标硬白名单：协议必须 https、主机必须在枚举内。
 // api.z.ai 曾尝试接入：key 有效但 Workers 出口被 WAF 拦成 405 HTML，不列入。
-const UPSTREAM_HOSTS = new Set(['open.bigmodel.cn', 'api.siliconflow.cn', 'openrouter.ai', 'ai-gateway.kilo.ai', 'text.pollinations.ai', 'oai.aihorde.net']);
+const UPSTREAM_HOSTS = new Set([
+  'open.bigmodel.cn', 'api.siliconflow.cn', 'openrouter.ai', 'ai-gateway.kilo.ai',
+  'text.pollinations.ai', 'oai.aihorde.net',
+  // 2026-11-21 实测可用的公开免费线路（默认关闭，见 README「新增免费线路」）。
+  'opencode.ai', 'oai.endpoints.kepler.ai.cloud.ovh.net', 'api.llm7.io', 'blockrun.ai',
+]);
+// 2026-11-21 实测：dots / ernie 在 Kilo 网关已 404（旧 id 下架），下列两个仍 200。
 const KILO_FREE_MODELS = [
-  ['dots', 'dots-studio/dots-3-note-preview:free'],
-  ['ernie', 'baidu/ernie-5.5-flash-preview:free'],
+  ['beam', 'reflection/beam-free'],
+  ['nemotron-vl', 'nvidia/nemotron-3.5-super-vl:free'],
 ] as const;
+
+// OpenCode 官方 CLI 的请求指纹（sst/opencode: packages/opencode/src/session/llm/request.ts）。
+// User-Agent 固定 `opencode/<version>`；opencode 自家 provider 另带 x-opencode-* 四个头，
+// 其他 provider 走 x-session-affinity。只在需要「官方客户端」身份的上游启用。
+function opencodeClientHeaders(env: Record<string, string>, sessionID: string): Record<string, string> {
+  const version = (env.OPENCODE_VERSION || '1.0.0').trim();
+  return {
+    'User-Agent': `opencode/${version}`,
+    'x-opencode-session': sessionID,
+    'x-opencode-request': `${sessionID}-msg`,
+    'x-opencode-client': (env.OPENCODE_CLIENT || 'cli').trim(),
+    ...(env.OPENCODE_PROJECT_ID ? { 'x-opencode-project': env.OPENCODE_PROJECT_ID.trim() } : {}),
+  };
+}
 
 
 function assertSafeUpstreamUrl(url: string): string {
@@ -129,6 +149,7 @@ export default {
     const candidates: Array<{
       label: string; url: string; model: string; key?: string;
       payload: Record<string, unknown>; timeout: number;
+      headers?: Record<string, string>;
     }> = [];
     const addKeys = (label: string, url: string, model: string, keys: Array<string | undefined>, payload: Record<string, unknown>) => {
       const configured = keys.filter(Boolean).length;
@@ -147,6 +168,31 @@ export default {
     const openRouterModel = 'poolside/laguna-xs-2.1:free';
     if (openRouterModel.endsWith(':free')) addKeys('openrouter', 'https://openrouter.ai/api/v1/chat/completions', openRouterModel,
       [env.OPENROUTER_API_KEY, env.OPENROUTER_API_KEY_2], standard);
+
+    // OpenCode Zen（默认关闭）。官方免费额度只对 OpenCode 客户端放行，2026-11-21 实测
+    // 匿名调用被 429 FreeUsageLimitError 拦下，纯头部伪装不构成充分条件，只作尽力而为候选。
+    if (env.ENABLE_OPENCODE_ZEN === '1') {
+      candidates.push({
+        label: 'opencode-zen',
+        url: 'https://opencode.ai/inference/openai/v1/chat/completions',
+        model: (env.OPENCODE_ZEN_MODEL || 'big-pickle').trim(),
+        key: (env.OPENCODE_ZEN_KEY || 'public').trim(),
+        payload: standard,
+        timeout: 6000,
+        headers: opencodeClientHeaders(env, crypto.randomUUID()),
+      });
+    }
+    // 境外匿名免费线路（默认关闭）：不带 key、不转发客户端鉴权。顺序按 2026-11-21 中文 JSON
+    // 压测定序：BlockRun 1.5s 且字段更全 → LLM7 3.3s → OVH 质量最好但只有 2 RPM/IP，放最后。
+    if (env.ENABLE_EXTRA_KEYLESS === '1') {
+      candidates.push({ label: 'blockrun', url: 'https://blockrun.ai/api/v1/chat/completions',
+        model: (env.BLOCKRUN_MODEL || 'poolside/laguna-xs-2.1').trim(), payload: standard, timeout: 7000 });
+      const llm7Token = env.LLM7_TOKEN?.trim();
+      candidates.push({ label: 'llm7', url: 'https://api.llm7.io/v1/chat/completions',
+        model: (env.LLM7_MODEL || 'gpt-oss:20b').trim(), ...(llm7Token ? { key: llm7Token } : {}), payload: standard, timeout: 7000 });
+      candidates.push({ label: 'ovh', url: 'https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',
+        model: (env.OVH_MODEL || 'Qwen3.8-27B').trim(), payload: standard, timeout: 7000 });
+    }
 
     const mode = forwarded.stream === true ? 'sse' : 'json';
     const maxTokens = forwarded.max_tokens;
@@ -195,7 +241,7 @@ export default {
       let accepted = false;
       const signal = AbortSignal.any([request.signal, controller.signal]);
       try {
-        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(item.headers || {}) };
         if (item.key) headers.Authorization = `Bearer ${item.key}`;
         if (item.label.startsWith('openrouter')) {
           headers['HTTP-Referer'] = 'https://nuctori.github.io/EverywhereWeGoGz/';

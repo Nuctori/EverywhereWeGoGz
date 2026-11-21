@@ -25,11 +25,12 @@ try {
   assert.deepEqual(calls, []);
   let reply = await worker.fetch(request(), { ENABLE_KILO_FREE: '1' });
   assert.equal(reply.status, 200);
-  assert.deepEqual(calls, ['dots-studio/dots-3-note-preview:free']);
+  assert.deepEqual(calls, ['reflection/beam-free']);
   calls.length = 0; fail = true; stream = true;
   reply = await worker.fetch(request(), { ENABLE_KILO_FREE: '1' });
-  assert.equal(reply.headers.get('x-ewg-upstream'), 'kilo:ernie');
+  assert.equal(reply.headers.get('x-ewg-upstream'), 'kilo:nemotron-vl');
   assert.equal(await reply.text(), 'data: {"choices":[{"delta":{"content":"ok"}}]}\n\ndata: [DONE]\n\n');
-  assert.deepEqual(calls, ['dots-studio/dots-3-note-preview:free','baidu/ernie-5.5-flash-preview:free']);
+  assert.deepEqual(calls, ['reflection/beam-free','nvidia/nemotron-3.5-super-vl:free']);
   console.log('PASS opt-in, fixed free models, no credential forwarding, 429 fallback and SSE pass-through');
 } finally { globalThis.fetch = original; }
+
