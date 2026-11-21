@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-18T13:44:51.503Z",
-  "latestUpdatedAt": "2026-11-18T13:44:37.621742",
-  "totalRecords": 5879,
-  "listRecords": 5879,
-  "detailFiles": 5879,
+  "generatedAt": "2026-11-21T13:18:20.150Z",
+  "latestUpdatedAt": "2026-11-21T13:18:06.859258",
+  "totalRecords": 5807,
+  "listRecords": 5807,
+  "detailFiles": 5807,
   "sourceStats": {
-    "假日通": 206,
+    "假日通": 134,
     "广东中旅": 1548,
     "康辉": 2010,
     "广州去旅行": 18,
@@ -13,31 +13,31 @@
     "天涯户外": 150
   },
   "destinationStats": {
-    "其他": 973,
+    "其他": 945,
     "广西": 39,
-    "广东": 1467,
-    "河南": 17,
-    "湖南": 23,
-    "华东": 106,
+    "广东": 1446,
+    "河南": 16,
+    "湖南": 22,
+    "华东": 103,
     "福建": 18,
-    "云南": 200,
-    "山东": 34,
-    "北京": 139,
-    "湖北": 59,
-    "三亚": 113,
-    "江西": 36,
-    "桂林": 58,
-    "贵州": 48,
-    "重庆": 50,
+    "云南": 198,
+    "三亚": 111,
     "西安": 88,
     "四川": 102,
+    "山东": 29,
+    "湖北": 57,
+    "江西": 35,
     "新疆": 149,
+    "北京": 137,
     "港澳": 75,
     "内蒙古": 27,
     "厦门": 36,
     "西藏": 44,
+    "桂林": 57,
     "张家界": 35,
     "青甘": 41,
+    "贵州": 46,
+    "重庆": 49,
     "拉萨": 8,
     "云台山、焦作": 1,
     "洛阳、登封": 7,
@@ -688,32 +688,32 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 111293987
+      "size": 109174360
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 30652628
+      "size": 30118152
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 83199773
+      "size": 81591914
     },
     "geoPlaces": {
       "path": "data/geo-places.json",
-      "size": 194396
+      "size": 192959
     },
     "mapIndex": {
       "path": "data/tour-map-index.json",
-      "size": 541842
+      "size": 536292
     },
     "mapCards": {
       "path": "data/tour-map-cards.json",
-      "size": 2414286
+      "size": 2390880
     },
     "mapPlaceCards": {
       "path": "data/tour-map-place-cards/",
-      "files": 277,
-      "chunks": 381
+      "files": 276,
+      "chunks": 380
     }
   }
 }
