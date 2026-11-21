@@ -165,7 +165,9 @@ export default {
       }
     }
     addKeys('siliconflow', 'https://api.siliconflow.cn/v1/chat/completions', 'Qwen/Qwen3.5-4B', [env.SILICONFLOW_API_KEY], standard);
-    const openRouterModel = 'poolside/laguna-xs-2.1:free';
+    // 2026-11-21：poolside/laguna-xs-2.1:free 已从 OpenRouter 目录整体下架（/models 里
+    // 已无任何 poolside 条目），换成本次仍在售的零价 id；OPENROUTER_MODEL 可覆盖。
+    const openRouterModel = (env.OPENROUTER_MODEL || 'google/gemma-4-26b-a4b-it:free').trim();
     if (openRouterModel.endsWith(':free')) addKeys('openrouter', 'https://openrouter.ai/api/v1/chat/completions', openRouterModel,
       [env.OPENROUTER_API_KEY, env.OPENROUTER_API_KEY_2], standard);
 

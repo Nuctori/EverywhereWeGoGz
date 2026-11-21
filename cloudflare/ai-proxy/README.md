@@ -50,7 +50,9 @@ npx wrangler secret put OPENROUTER_API_KEY_2  # OpenRouter 第二把 key（双�
 npx wrangler deploy --keep-vars --var ENABLE_KILO_FREE:1
 ```
 
-可选开关（同样走 `--var`）：`ENABLE_EXTRA_KEYLESS=1`、`ENABLE_OPENCODE_ZEN=1`；可选覆盖 `OVH_MODEL` / `LLM7_MODEL` / `LLM7_TOKEN` / `BLOCKRUN_MODEL` / `OPENCODE_ZEN_MODEL` / `OPENCODE_ZEN_KEY` / `OPENCODE_VERSION` / `OPENCODE_CLIENT` / `OPENCODE_PROJECT_ID`。
+可选开关（同样走 `--var`）：`ENABLE_EXTRA_KEYLESS=1`、`ENABLE_OPENCODE_ZEN=1`；可选覆盖 `OVH_MODEL` / `LLM7_MODEL` / `LLM7_TOKEN` / `BLOCKRUN_MODEL` / `OPENCODE_ZEN_MODEL` / `OPENCODE_ZEN_KEY` / `OPENCODE_VERSION` / `OPENCODE_CLIENT` / `OPENCODE_PROJECT_ID` / `OPENROUTER_MODEL`。
+
+OpenRouter 线路的默认免费 id 为 `google/gemma-4-26b-a4b-it:free`。2026-11-21 原来的 `poolside/laguna-xs-2.1:free` 已从 OpenRouter 目录整体下架（`/api/v1/models` 里已无任何 poolside 条目），换 id 前保持 `:free` 后缀，否则该候选会被 `endsWith(':free')` 判断直接跳过。
 
 从 `cloudflare/ai-proxy` 目录执行。现有前端继续使用 `https://ai.114124.xyz/v1`，不需要重新发布前端。
 

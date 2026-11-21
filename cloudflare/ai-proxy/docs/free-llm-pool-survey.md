@@ -7,6 +7,7 @@
 | 结论 | 依据 |
 | --- | --- |
 | 现号池里 Kilo 的两条免费 id 已经失效（404） | 2026-11-21 实测 `dots-studio/dots-3-note-preview:free`、`baidu/ernie-5.5-flash-preview:free` 均 404；同一网关的 `reflection/beam-free`、`nvidia/nemotron-3.5-super-vl:free` 仍 200 |
+| OpenRouter 的 `poolside/laguna-xs-2.1:free` 同样已下架 | 公开 `/api/v1/models` 返回 476 个模型、11 个 `:free`，**无任何 poolside 条目**；已换成 `google/gemma-4-26b-a4b-it:free` |
 | 免 key 线路里最值得先开的是 BlockRun，OVH 只能垫底 | 同一句中文需求：BlockRun 1.5s 且字段最全；OVH 首次 0.9s 正确但 2 RPM/IP，第二次就 429 |
 | OpenCode Zen 免费额度**不能**靠改请求头拿到 | 官方文档写明"Free-tier chat models require OpenCode"；实测带头/不带头都是 429 `FreeUsageLimitError` |
 | 免费 key 里质量最高的是 Google AI Studio Gemini | 免费档、OpenAI 兼容、中文最强；限额不再公开，只能登录 AI Studio 看 |

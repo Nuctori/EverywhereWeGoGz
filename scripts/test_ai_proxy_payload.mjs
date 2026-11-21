@@ -18,16 +18,22 @@ try {
  console.log('PASS empty SSE fallback and shared Kilo rate-limit cooldown');
  const keyed = { BIGMODEL_API_KEY:'glm-only', ENABLE_KILO_FREE:'1', SILICONFLOW_API_KEY:'qwen-only', OPENROUTER_API_KEY:'router-only' };
  const hops = [];
+ const models = [];
  globalThis.fetch = async (url, init) => {
    const host = new URL(url).hostname;
    const auth = new Headers(init.headers).get('authorization');
    hops.push([host, auth]);
+   models.push([host, JSON.parse(init.body).model]);
    if (host === 'api.siliconflow.cn') return Response.json({choices:[]}); // HTTP 200, no usable JSON content
    if (host === 'openrouter.ai') return Response.json({choices:[{message:{content:'ok'}}]});
    return new Response(null,{status:503});
  };
  assert.equal((await worker.fetch(req(false),keyed)).headers.get('x-ewg-upstream'),'openrouter');
  assert.deepEqual(hops,[['open.bigmodel.cn','Bearer glm-only'],['api.siliconflow.cn','Bearer qwen-only'],['openrouter.ai','Bearer router-only']]);
+ // The :free id must be one OpenRouter still serves; poolside/laguna-xs-2.1:free was delisted.
+ const openrouterModel = models.find(([host]) => host === 'openrouter.ai')?.[1];
+ assert.equal(openrouterModel, 'google/gemma-4-26b-a4b-it:free');
+ assert.ok(openrouterModel.endsWith(':free'), 'OpenRouter lane must stay on a zero-priced id');
  let streamCalls = 0, streamController;
  const firstFrame = 'data: {"choices":[{"delta":{"content":"正文"}}]}\n\n';
  globalThis.fetch = async () => {
