@@ -178,6 +178,22 @@ try {
 	const searchedCard = page.locator("div", { hasText: "线路详情" }).last();
 	await searchedCard.waitFor({ state: "visible", timeout: 6000 });
 	assert((await searchedCard.innerText()).includes("永汉"), "the picked line card must name the searched stop");
+	assert((await searchedCard.innerText()).includes("渠道"), "the line card must show which channel sells it");
+
+	// 点一个被多条线路共用的站点：卡片要聚合"这个站有哪些车、几点走"。
+	await searchBox.fill("白云机场T2");
+	await page.waitForTimeout(900);
+	await panelAside.locator("button", { hasText: "白云机场" }).first().click();
+	await page.waitForTimeout(2200);
+	const sharedStop = map.locator('path[data-stop-name="白云机场T2航站楼"]').first();
+	assert((await sharedStop.count()) > 0, "the shared stop must be drawn on the map");
+	await sharedStop.dispatchEvent("click");
+	await page.waitForTimeout(1200);
+	const stopCard = page.locator("div", { hasText: "站点详情" }).last();
+	await stopCard.waitFor({ state: "visible", timeout: 6000 });
+	const stopText = await stopCard.innerText();
+	assert(/\d+ 条线路/.test(stopText), `the stop card must aggregate lines, got ${stopText.slice(0, 60)}`);
+	assert(/\d+ 个班次/.test(stopText), "the stop card must count departures");
 
 	mkdirSync("tmp", { recursive: true });
 	await page.screenshot({ path: screenshotPath });

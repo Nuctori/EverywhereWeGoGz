@@ -507,6 +507,8 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
   const [tourLayerEnabled, setTourLayerEnabled] = useState(true);
   const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
   const [selectedBusLine, setSelectedBusLine] = useState<BusLine | null>(null);
+  // 点一个站点时，用户真正想知道的是"我在这儿能坐哪些车、几点走"，所以要按站点聚合线路。
+  const [selectedStop, setSelectedStop] = useState<{ name: string; lines: BusLine[] } | null>(null);
   const [busLayerEnabled, setBusLayerEnabled] = useState(false);
   const [selectedBusRoute, setSelectedBusRoute] = useState<BusRoute | null>(null);
   const { data: busData, loading: busLoading, error: busError, retry: retryBusRoutes } = useBusRoutes(busLayerEnabled);
@@ -752,7 +754,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     // 285 条线路 × 近 4000 个站点一次性画满既卡又糊，看不清任何一条。
     const zoom = map.getZoom();
     const showDetailLines = zoom >= 9;
-    const showDetailStops = zoom >= 12;
+    const showDetailStops = zoom >= 10;
     // 中倍只看"线网"，压低视觉权重；高倍才按正常粗细画。
     const detailWeight = zoom >= 11 ? 2.8 : 1.4;
     const detailOpacity = zoom >= 11 ? 0.9 : 0.42;
@@ -987,9 +989,20 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           + `${approximate ? ' · 区县级定位' : ''}`,
           { direction: 'top', offset: [0, -6] },
         );
-        stopMarker.on('click', selectLine);
+        // 点站点的语义是"我在这儿能坐哪些车"：把这个站经过的所有线路汇总出来。
+        stopMarker.on('click', () => {
+          const matched = (busLineData?.routes ?? []).filter((candidate) => (
+            candidate.stops.some((entry) => entry.name === stop.name)
+          ));
+          setSelectedPlace(null);
+          setClusterPlaces([]);
+          setSelectedBusRoute(null);
+          setSelectedBusLine(null);
+          setSelectedStop({ name: stop.name, lines: matched });
+        });
         stopMarker.addTo(layer);
         stopMarker.getElement()?.setAttribute('data-line-role', stop.role);
+        stopMarker.getElement()?.setAttribute('data-stop-name', stop.name);
         if (approximate) stopMarker.getElement()?.setAttribute('data-stop-precision', stop.precision ?? 'county');
       });
     }
@@ -1130,8 +1143,53 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           </button>
         )}
       </div>
-      {selectedBusLine && (
-        <div className="absolute bottom-3 left-3 z-[1002] w-[268px] rounded-2xl border border-sky-200 bg-white/95 p-3 shadow-lg backdrop-blur">
+      {selectedStop ? (
+        <div className="absolute bottom-3 left-3 z-[1002] w-[304px] max-h-[48%] overflow-y-auto rounded-2xl border border-emerald-200 bg-white/95 p-3 shadow-lg backdrop-blur">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-emerald-600">站点详情</p>
+              <h4 className="mt-0.5 text-sm font-semibold text-stone-900">{selectedStop.name}</h4>
+              <p className="mt-0.5 text-[11px] text-stone-500">
+                {selectedStop.lines.length} 条线路
+                {` · ${selectedStop.lines.reduce((sum, line) => sum + line.departTimes.length, 0)} 个班次`}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedStop(null)}
+              aria-label="关闭站点详情"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div className="mt-2 space-y-1.5">
+            {selectedStop.lines.slice(0, 12).map((line) => (
+              <button
+                key={line.id}
+                type="button"
+                onClick={() => focusBusLine(line)}
+                className="w-full rounded-xl border border-stone-200 bg-white px-2.5 py-2 text-left transition-colors hover:border-sky-300 hover:bg-sky-50/60"
+              >
+                <span className="block truncate text-xs font-medium text-stone-800">{line.name}</span>
+                <span className="mt-0.5 block truncate text-[10px] text-stone-500">
+                  {line.departTimes.length > 0 ? line.departTimes.slice(0, 6).join(' / ') : '班次未提供'}
+                  {line.departTimes.length > 6 ? ` …共 ${line.departTimes.length} 班` : ''}
+                </span>
+                <span className="mt-0.5 block truncate text-[10px] text-stone-400">
+                  {line.id.startsWith('qbs-') ? '乔巴士' : '滴滴站点巴士'}
+                  {line.carrier ? ` · ${line.carrier}` : ''}
+                  {line.priceFen ? ` · ¥${Math.round(line.priceFen / 100)}` : ''}
+                </span>
+              </button>
+            ))}
+            {selectedStop.lines.length > 12 && (
+              <p className="px-1 text-[10px] text-stone-400">还有 {selectedStop.lines.length - 12} 条线路未列出</p>
+            )}
+          </div>
+        </div>
+      ) : selectedBusLine && (
+        <div className="absolute bottom-3 left-3 z-[1002] w-[280px] rounded-2xl border border-sky-200 bg-white/95 p-3 shadow-lg backdrop-blur">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-sky-600">线路详情</p>
@@ -1142,15 +1200,28 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
                 {` · 上车 ${selectedBusLine.stops.filter((stop) => stop.role === 'board').length}`}
                 {` / 下车 ${selectedBusLine.stops.filter((stop) => stop.role === 'alight').length}`}
               </p>
-              {selectedBusLine.departTimes.length > 0 && (
-                <p className="mt-1 text-[10px] leading-4 text-stone-400">
-                  首班 {selectedBusLine.departTimes[0]} · 末班 {selectedBusLine.departTimes[selectedBusLine.departTimes.length - 1]}
-                </p>
-              )}
+              <p className="mt-0.5 text-[10px] text-stone-400">
+                渠道：{selectedBusLine.id.startsWith('qbs-') ? '乔巴士' : '滴滴站点巴士'}
+                {selectedBusLine.carrier ? ` · 承运 ${selectedBusLine.carrier}` : ''}
+              </p>
               {selectedBusLine.originCity && selectedBusLine.destinationCity && (
                 <p className="mt-0.5 text-[10px] text-stone-400">
                   {selectedBusLine.originCity} → {selectedBusLine.destinationCity}
                 </p>
+              )}
+              {selectedBusLine.departTimes.length > 0 && (
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  {selectedBusLine.departTimes.slice(0, 8).map((time) => (
+                    <span key={time} className="rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-medium text-sky-700">
+                      {time}
+                    </span>
+                  ))}
+                  {selectedBusLine.departTimes.length > 8 && (
+                    <span className="px-1 py-0.5 text-[10px] text-stone-400">
+                      +{selectedBusLine.departTimes.length - 8} 班
+                    </span>
+                  )}
+                </div>
               )}
             </div>
             <button
