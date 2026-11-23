@@ -157,10 +157,11 @@ try {
 	// 选中线路要把视野收到这条线：全省视图最多 z7，海岸线太粗，分不清半岛和海湾。
 	const selectedZoom = Number(await map.getAttribute("data-bus-zoom"));
 	assert(selectedZoom >= 8, `selecting a route must zoom in for detail, got z${selectedZoom}`);
-	// 城市名要常驻在点旁边，否则用户只看到一个孤零零的圆点。
-	assert(
-		(await page.locator(".bus-city-label").count()) === 2,
-		"the selected route must label both cities",
+	// 城市名要常驻在点旁边，否则用户只看到一个孤零零的圆点（图层重绘有延迟，等它出来）。
+	await page.waitForFunction(
+		() => document.querySelectorAll(".bus-city-label").length === 2,
+		null,
+		{ timeout: 8000 },
 	);
 
 	// 用户视角：带着"广州去龙门县永汉"来，搜索框要能直接找到经过永汉的线路。

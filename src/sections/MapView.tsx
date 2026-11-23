@@ -10,7 +10,7 @@ import { useTourDetail } from '@/hooks/use-tour-detail';
 import { TourDetailModal } from './TourDetailModal';
 import { MAP_TILE_PROVIDERS, wgs84ToGcj02, type MapTileProvider } from '@/lib/map-tile-pool';
 import { busPointForProvider, wgs84PointForProvider } from '@/lib/bus-route-geometry';
-import type { BusLine, BusOriginCity, BusRoute, BusStation } from '@/types/bus';
+import type { BusLine, BusLineStop, BusOriginCity, BusRoute, BusStation } from '@/types/bus';
 import type { TourSummary } from '@/types/tour';
 
 const DEFAULT_CENTER: L.LatLngExpression = [23.5, 113.5];
@@ -748,13 +748,19 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       }
     }
 
-    // 缩放分级：低倍只留城市级汇总，中倍出线路，高倍才出站点点位。
-    // 285 条线路 × 近 4000 个站点一次性画满会卡，也看不清。
+    // 缩放分级：低倍只留城市级汇总，中倍出线路（限数量、淡一点），高倍才出站点点位。
+    // 285 条线路 × 近 4000 个站点一次性画满既卡又糊，看不清任何一条。
     const zoom = map.getZoom();
-    const showDetailLines = zoom >= 8;
-    const showDetailStops = zoom >= 10;
+    const showDetailLines = zoom >= 9;
+    const showDetailStops = zoom >= 12;
+    // 中倍只看"线网"，压低视觉权重；高倍才按正常粗细画。
+    const detailWeight = zoom >= 11 ? 2.8 : 1.4;
+    const detailOpacity = zoom >= 11 ? 0.9 : 0.42;
+    const maxDetailLines = zoom >= 11 ? Number.POSITIVE_INFINITY : 80;
+    const dimOthers = Boolean(selectedBusLine);
     const viewport = map.getBounds().pad(0.12);
     const inView = (lat: number, lng: number) => viewport.contains([lat, lng]);
+    const mapCenter = map.getCenter();
 
     // 站点是这一层的主要信息：开关一开就能看到所有上下车点，放大后自然散开。
     if (showDetailStops) {
@@ -765,7 +771,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           weight: 1,
           color: '#ffffff',
           fillColor: role === 'pickup' ? '#1dcc8c' : '#ff754b',
-          fillOpacity: 0.9,
+          fillOpacity: dimOthers ? 0.12 : 0.9,
           className: 'bus-station-dot',
         });
         dot.bindTooltip(`${role === 'pickup' ? '上车点' : '下车点'} · ${station.name}`, { direction: 'top', offset: [0, -4] });
@@ -811,7 +817,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       const restStyle: L.PolylineOptions = {
         color: accent,
         weight: crossBorder ? 1.3 : selected ? 3.2 : 1.6,
-        opacity: selected ? 0.95 : crossBorder ? 0.75 : 0.5,
+        opacity: dimOthers && !selected ? 0.08 : selected ? 0.95 : crossBorder ? 0.75 : 0.5,
         ...(crossBorder ? { dashArray: '6 6' } : {}),
       };
       // 目前只有「出发城市 → 目的城市」这一层数据，同一对城市其实有多条线路，
@@ -895,22 +901,52 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
 
     // 真实线路（乔巴士）：每条线路是一串有序站点，连线按"上车站 → 下车站"依次穿过它们。
     // 这与城市对汇总线不同——同一对城市会有好几条线，各自的站点并不相同。
-    for (const line of busLineData?.routes ?? []) {
-      const points = line.stops.map((stop) => (
-        line.coordinateSystem === 'wgs84'
-          ? wgs84PointForProvider(stop, provider)
-          : busPointForProvider(stop, provider)
-      ));
-      if (points.length < 2) continue;
+    // 中倍只画离视野中心最近的若干条：285 条一起画就是一团糊线。
+    const detailCandidates = (busLineData?.routes ?? [])
+      .map((line) => ({
+        line,
+        points: line.stops.map((stop) => (
+          line.coordinateSystem === 'wgs84'
+            ? wgs84PointForProvider(stop, provider)
+            : busPointForProvider(stop, provider)
+        )),
+      }))
+      .filter(({ line, points }) => points.length >= 2 && (
+        selectedBusLine?.id === line.id
+        || (showDetailLines && line.stops.some((stop) => inView(stop.lat, stop.lng)))
+      ))
+      .sort((left, right) => {
+        if (selectedBusLine?.id === left.line.id) return -1;
+        if (selectedBusLine?.id === right.line.id) return 1;
+        const anchor = (candidate: { line: BusLine }) => candidate.line.stops[0];
+        const leftStop = anchor(left);
+        const rightStop = anchor(right);
+        const distance = (stop: BusLineStop) => Math.abs(stop.lat - mapCenter.lat) + Math.abs(stop.lng - mapCenter.lng);
+        return distance(leftStop) - distance(rightStop);
+      });
+
+    const visibleDetailLines = maxDetailLines === Number.POSITIVE_INFINITY
+      ? detailCandidates
+      : detailCandidates.slice(0, maxDetailLines);
+
+    for (const { line, points } of visibleDetailLines) {
       const isSelectedLine = selectedBusLine?.id === line.id;
-      // 低倍不画、以及画不到视口里的线路直接跳过：285 条全画会卡，也看不清。
-      if (!showDetailLines && !isSelectedLine) continue;
-      if (!isSelectedLine && !line.stops.some((stop) => inView(stop.lat, stop.lng))) continue;
+      // 选中一条线时，其它线全部压成背景（否则"高亮"淹没在同色线网里等于没有）。
+      const isBackground = dimOthers && !isSelectedLine;
       const price = line.priceFen ? `¥${Math.round(line.priceFen / 100)}` : '票价未提供';
+      if (isSelectedLine) {
+        // 白色描边打底，保证选中线压在所有点位和线上面都看得清。
+        L.polyline(points, {
+          color: '#ffffff',
+          weight: 9,
+          opacity: 0.9,
+          className: 'bus-line-casing',
+        }).addTo(layer).getElement()?.setAttribute('data-bus-line', line.name);
+      }
       const detailLine = L.polyline(points, {
         color: isSelectedLine ? '#1d4ed8' : line.provinceCode === '44' ? '#0284c7' : '#94a3b8',
-        weight: isSelectedLine ? 4.5 : 2.8,
-        opacity: isSelectedLine ? 1 : 0.9,
+        weight: isSelectedLine ? 5 : isBackground ? 1 : detailWeight,
+        opacity: isSelectedLine ? 1 : isBackground ? 0.06 : detailOpacity,
         ...(line.provinceCode === '44' ? {} : { dashArray: '6 6' }),
         className: 'bus-line-detail',
       });
