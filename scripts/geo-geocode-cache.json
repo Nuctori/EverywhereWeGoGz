@@ -6496,5 +6496,44 @@
     "address": {
       "formatted": "广东省珠海"
     }
+  },
+  "神农架九湖 湖北 中国": {
+    "query": "神农架九湖 湖北 中国",
+    "provider": "arcgis",
+    "latitude": 31.46348,
+    "longitude": 110.09846,
+    "displayName": "湖北神农架九湖",
+    "level": "poi",
+    "locality": "",
+    "providerScore": 100.0,
+    "address": {
+      "formatted": "湖北神农架九湖"
+    }
+  },
+  "神农架盛景怡家酒店": {
+    "query": "神农架盛景怡家酒店",
+    "provider": "nominatim",
+    "latitude": 31.4718213,
+    "longitude": 110.3890851,
+    "displayName": "盛景怡家酒店, 大柳树街, 木鱼镇, 神农架林区, 湖北省, 中国",
+    "level": "poi",
+    "locality": "木鱼镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "盛景怡家酒店, 大柳树街, 木鱼镇, 神农架林区, 湖北省, 中国"
+    }
+  },
+  "新兴天露山": {
+    "query": "新兴天露山",
+    "provider": "nominatim",
+    "latitude": 22.4887595,
+    "longitude": 112.226438,
+    "displayName": "天露山旅游度假区, Y295, 庄谷坪, 田排, 里洞镇, 新兴县, 云浮市, 广东省, 中国",
+    "level": "poi",
+    "locality": "里洞镇",
+    "providerScore": 80,
+    "address": {
+      "formatted": "天露山旅游度假区, Y295, 庄谷坪, 田排, 里洞镇, 新兴县, 云浮市, 广东省, 中国"
+    }
   }
 }
