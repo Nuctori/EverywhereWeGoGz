@@ -10,7 +10,7 @@ import { useTourDetail } from '@/hooks/use-tour-detail';
 import { TourDetailModal } from './TourDetailModal';
 import { MAP_TILE_PROVIDERS, wgs84ToGcj02, type MapTileProvider } from '@/lib/map-tile-pool';
 import { busPointForProvider, wgs84PointForProvider } from '@/lib/bus-route-geometry';
-import type { BusOriginCity, BusRoute, BusStation } from '@/types/bus';
+import type { BusLine, BusOriginCity, BusRoute, BusStation } from '@/types/bus';
 import type { TourSummary } from '@/types/tour';
 
 const DEFAULT_CENTER: L.LatLngExpression = [23.5, 113.5];
@@ -246,18 +246,24 @@ function PlaceClusterPanel({
 function BusRoutePanel({
   origins,
   routes,
+  detailLines,
   selectedRoute,
   onSelect,
+  onSelectLine,
   onClose,
   expanded,
 }: {
   origins: BusOriginCity[];
   routes: BusRoute[];
+  detailLines: BusLine[];
   selectedRoute: BusRoute | null;
   onSelect: (route: BusRoute | null) => void;
+  onSelectLine: (line: BusLine) => void;
   onClose: () => void;
   expanded: boolean;
 }) {
+  const [query, setQuery] = useState('');
+  const trimmedQuery = query.trim();
   // 注意：文件顶部从 lucide-react 引入了 Map 图标，这里不能用 `new Map()`
   // （会解析成图标组件）。城市索引按 cityId 存成普通对象即可。
   const originById = useMemo(() => {
@@ -286,6 +292,25 @@ function BusRoutePanel({
     [routes],
   );
   const selectedCrossBorder = selectedRoute ? selectedRoute.destination.provinceCode !== '44' : false;
+
+  // 用户是带着"从哪到哪"来的：按城市名 / 县镇名 / 站点名 / 线路名搜，比如「永汉」。
+  const cityPairMatches = useMemo(() => {
+    if (!trimmedQuery) return [];
+    return routes.filter((route) => {
+      const origin = originById[route.originCityId];
+      return (origin?.name ?? '').includes(trimmedQuery) || route.destination.name.includes(trimmedQuery);
+    });
+  }, [trimmedQuery, routes, originById]);
+
+  const lineMatches = useMemo(() => {
+    if (!trimmedQuery) return [];
+    return detailLines.filter((line) => (
+      line.name.includes(trimmedQuery)
+      || (line.originCity ?? '').includes(trimmedQuery)
+      || (line.destinationCity ?? '').includes(trimmedQuery)
+      || line.stops.some((stop) => stop.name.includes(trimmedQuery))
+    )).slice(0, 60);
+  }, [trimmedQuery, detailLines]);
 
   if (routes.length === 0) return null;
 
@@ -327,8 +352,80 @@ function BusRoutePanel({
         )}
       </div>
 
+      <div className="shrink-0 px-3 pb-2">
+        <label className="relative block">
+          <span className="sr-only">搜索目的地、县镇或站点</span>
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="搜目的地 / 县镇 / 站点，如 永汉"
+            className="w-full rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs text-stone-800 placeholder:text-stone-400 focus:border-sky-300 focus:outline-none"
+          />
+        </label>
+      </div>
+
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
-        {selectedRoute ? (
+        {trimmedQuery ? (
+          <div className="space-y-3">
+            <section>
+              <p className="px-1 text-[11px] font-medium text-stone-500">
+                城市对 · {cityPairMatches.length} 条
+              </p>
+              <div className="mt-1.5 space-y-1.5">
+                {cityPairMatches.slice(0, 20).map((route) => (
+                  <button
+                    key={route.id}
+                    type="button"
+                    onClick={() => onSelect(route)}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white px-3 py-2 text-left transition-colors hover:border-sky-300 hover:bg-sky-50/60"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-stone-800">
+                        {originById[route.originCityId]?.name ?? '出发城市'} → {route.destination.name}
+                      </span>
+                      <span className="mt-0.5 block truncate text-[11px] text-stone-400">
+                        {route.destination.stationCount} 个到达站
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-[11px] font-medium text-sky-700">看站点</span>
+                  </button>
+                ))}
+                {cityPairMatches.length === 0 && (
+                  <p className="px-1 text-[11px] text-stone-400">没有匹配的城市对</p>
+                )}
+              </div>
+            </section>
+            <section>
+              <p className="px-1 text-[11px] font-medium text-stone-500">
+                具体线路 · {lineMatches.length} 条
+              </p>
+              <div className="mt-1.5 space-y-1.5">
+                {lineMatches.map((line) => (
+                  <button
+                    key={line.id}
+                    type="button"
+                    onClick={() => onSelectLine(line)}
+                    className="flex w-full items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white px-3 py-2 text-left transition-colors hover:border-sky-300 hover:bg-sky-50/60"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-medium text-stone-800">{line.name}</span>
+                      <span className="mt-0.5 block truncate text-[11px] text-stone-400">
+                        {line.stops.filter((stop) => stop.role === 'board').length} 上车 ·{' '}
+                        {line.stops.filter((stop) => stop.role === 'alight').length} 下车
+                        {line.departTimes.length > 0 ? ` · ${line.departTimes.length} 班` : ''}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-[11px] font-medium text-sky-700">看线路</span>
+                  </button>
+                ))}
+                {lineMatches.length === 0 && (
+                  <p className="px-1 text-[11px] text-stone-400">没有经过「{trimmedQuery}」的具体线路</p>
+                )}
+              </div>
+            </section>
+          </div>
+        ) : selectedRoute ? (
           <ol className="space-y-1.5">
             {selectedRoute.stations.slice(0, 80).map((station, index) => (
               <li key={station.id} className="flex items-start gap-2 rounded-xl border border-stone-200 bg-white px-2.5 py-1.5">
@@ -408,6 +505,8 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
   const [selectedPlace, setSelectedPlace] = useState<MapTourLocation | null>(null);
   const [clusterPlaces, setClusterPlaces] = useState<MapTourLocation[]>([]);
   const [tourLayerEnabled, setTourLayerEnabled] = useState(true);
+  const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
+  const [selectedBusLine, setSelectedBusLine] = useState<BusLine | null>(null);
   const [busLayerEnabled, setBusLayerEnabled] = useState(false);
   const [selectedBusRoute, setSelectedBusRoute] = useState<BusRoute | null>(null);
   const { data: busData, loading: busLoading, error: busError, retry: retryBusRoutes } = useBusRoutes(busLayerEnabled);
@@ -471,8 +570,12 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     const map = L.map(mapElementRef.current, { maxZoom: MAP_MAX_ZOOM, zoomControl: true, scrollWheelZoom: true, attributionControl: true });
     map.setView(DEFAULT_CENTER, DEFAULT_ZOOM);
     mapRef.current = map;
+    // 缩放层级决定站点巴士的地图表现：低倍只给汇总，近了才逐条画线、再近了才画站点。
+    const syncZoom = () => setMapZoom(map.getZoom());
+    map.on('zoomend', syncZoom);
     const resizeFrame = window.requestAnimationFrame(() => map.invalidateSize());
     return () => {
+      map.off('zoomend', syncZoom);
       window.cancelAnimationFrame(resizeFrame);
       map.remove();
       mapRef.current = null;
@@ -645,20 +748,31 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       }
     }
 
+    // 缩放分级：低倍只留城市级汇总，中倍出线路，高倍才出站点点位。
+    // 285 条线路 × 近 4000 个站点一次性画满会卡，也看不清。
+    const zoom = map.getZoom();
+    const showDetailLines = zoom >= 8;
+    const showDetailStops = zoom >= 10;
+    const viewport = map.getBounds().pad(0.12);
+    const inView = (lat: number, lng: number) => viewport.contains([lat, lng]);
+
     // 站点是这一层的主要信息：开关一开就能看到所有上下车点，放大后自然散开。
-    busStationPoints.forEach(({ station, role }) => {
-      const dot = L.circleMarker(busPointForProvider(station, provider), {
-        radius: 2.8,
-        weight: 1,
-        color: '#ffffff',
-        fillColor: role === 'pickup' ? '#1dcc8c' : '#ff754b',
-        fillOpacity: 0.9,
-        className: 'bus-station-dot',
+    if (showDetailStops) {
+      busStationPoints.forEach(({ station, role }) => {
+        if (!inView(station.lat, station.lng)) return;
+        const dot = L.circleMarker(busPointForProvider(station, provider), {
+          radius: 2.8,
+          weight: 1,
+          color: '#ffffff',
+          fillColor: role === 'pickup' ? '#1dcc8c' : '#ff754b',
+          fillOpacity: 0.9,
+          className: 'bus-station-dot',
+        });
+        dot.bindTooltip(`${role === 'pickup' ? '上车点' : '下车点'} · ${station.name}`, { direction: 'top', offset: [0, -4] });
+        dot.addTo(layer);
+        dot.getElement()?.setAttribute('data-station-role', role);
       });
-      dot.bindTooltip(`${role === 'pickup' ? '上车点' : '下车点'} · ${station.name}`, { direction: 'top', offset: [0, -4] });
-      dot.addTo(layer);
-      dot.getElement()?.setAttribute('data-station-role', role);
-    });
+    }
 
     busData.origins.forEach((origin) => {
       const point = busPointForProvider(origin, provider);
@@ -788,11 +902,15 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           : busPointForProvider(stop, provider)
       ));
       if (points.length < 2) continue;
+      const isSelectedLine = selectedBusLine?.id === line.id;
+      // 低倍不画、以及画不到视口里的线路直接跳过：285 条全画会卡，也看不清。
+      if (!showDetailLines && !isSelectedLine) continue;
+      if (!isSelectedLine && !line.stops.some((stop) => inView(stop.lat, stop.lng))) continue;
       const price = line.priceFen ? `¥${Math.round(line.priceFen / 100)}` : '票价未提供';
       const detailLine = L.polyline(points, {
-        color: line.provinceCode === '44' ? '#0284c7' : '#94a3b8',
-        weight: 2.8,
-        opacity: 0.9,
+        color: isSelectedLine ? '#1d4ed8' : line.provinceCode === '44' ? '#0284c7' : '#94a3b8',
+        weight: isSelectedLine ? 4.5 : 2.8,
+        opacity: isSelectedLine ? 1 : 0.9,
         ...(line.provinceCode === '44' ? {} : { dashArray: '6 6' }),
         className: 'bus-line-detail',
       });
@@ -800,10 +918,23 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         `${line.name} · ${line.departTimes.length} 班 · ${price}${line.carrier ? ` · ${line.carrier}` : ''}`,
         { sticky: true },
       );
+      // 点线路（或它的站点）就选中它：高亮、并把这趟车的范围拉进视野。
+      const selectLine = () => {
+        setSelectedPlace(null);
+        setClusterPlaces([]);
+        setSelectedBusRoute(null);
+        setSelectedBusLine(line);
+        const bounds = L.latLngBounds(points);
+        if (bounds.isValid()) map.fitBounds(bounds.pad(0.2), { maxZoom: 12, animate: false });
+      };
+      detailLine.on('click', selectLine);
       detailLine.addTo(layer);
       detailLine.getElement()?.setAttribute('data-bus-line', line.name);
 
       line.stops.forEach((stop, index) => {
+        // 站点在更高倍才画；选中的线路无论如何都画，否则点开了却看不到站。
+        if (!showDetailStops && !isSelectedLine) return;
+        if (!isSelectedLine && !inView(stop.lat, stop.lng)) return;
         // 县级定位的站点画成空心：位置是区县中心，不是门口那个点，别让它看起来一样精确。
         const approximate = (stop.precision ?? 'node') !== 'node';
         const stopMarker = L.circleMarker(points[index], {
@@ -820,6 +951,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           + `${approximate ? ' · 区县级定位' : ''}`,
           { direction: 'top', offset: [0, -6] },
         );
+        stopMarker.on('click', selectLine);
         stopMarker.addTo(layer);
         stopMarker.getElement()?.setAttribute('data-line-role', stop.role);
         if (approximate) stopMarker.getElement()?.setAttribute('data-stop-precision', stop.precision ?? 'county');
@@ -829,7 +961,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     return () => {
       layer.remove();
     };
-  }, [busData, busLineData, busLayerEnabled, busStationPoints, expanded, providerIndex, selectedBusRoute]);
+  }, [busData, busLineData, busLayerEnabled, busStationPoints, expanded, mapZoom, providerIndex, selectedBusLine, selectedBusRoute]);
 
   // 打开巴士图层时把视野对准全部线路。展开弹窗时容器尺寸会变，fitBounds 必须等
   // 布局稳定后再来一次，否则会停在比数据范围大一倍的低缩放上。
@@ -881,6 +1013,25 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     map.fitBounds(bounds.pad(0.12), { maxZoom: 10, animate: false });
     mapElementRef.current?.setAttribute('data-bus-zoom', String(map.getZoom()));
   }, [busData, busLayerEnabled, expanded, providerIndex, selectedBusRoute]);
+
+  // 从搜索结果里点一条具体线路：选中它、把视野收到这条线，并弹出线路详情。
+  const focusBusLine = (line: BusLine) => {
+    setSelectedPlace(null);
+    setClusterPlaces([]);
+    setSelectedBusRoute(null);
+    setSelectedBusLine(line);
+    const map = mapRef.current;
+    if (!map) return;
+    const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
+    const points = line.stops.map((stop) => (
+      line.coordinateSystem === 'wgs84'
+        ? wgs84PointForProvider(stop, provider)
+        : busPointForProvider(stop, provider)
+    ));
+    if (points.length < 2) return;
+    const bounds = L.latLngBounds(points);
+    if (bounds.isValid()) map.fitBounds(bounds.pad(0.2), { maxZoom: 12, animate: false });
+  };
 
   const toggleBusLayer = () => {
     if (busLayerEnabled) {
@@ -943,6 +1094,40 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           </button>
         )}
       </div>
+      {selectedBusLine && (
+        <div className="absolute bottom-3 left-3 z-[1002] w-[268px] rounded-2xl border border-sky-200 bg-white/95 p-3 shadow-lg backdrop-blur">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-sky-600">线路详情</p>
+              <h4 className="mt-0.5 truncate text-sm font-semibold text-stone-900">{selectedBusLine.name}</h4>
+              <p className="mt-0.5 text-[11px] text-stone-500">
+                {selectedBusLine.departTimes.length > 0 ? `${selectedBusLine.departTimes.length} 班` : '班次未提供'}
+                {selectedBusLine.priceFen ? ` · ¥${Math.round(selectedBusLine.priceFen / 100)}` : ''}
+                {` · 上车 ${selectedBusLine.stops.filter((stop) => stop.role === 'board').length}`}
+                {` / 下车 ${selectedBusLine.stops.filter((stop) => stop.role === 'alight').length}`}
+              </p>
+              {selectedBusLine.departTimes.length > 0 && (
+                <p className="mt-1 text-[10px] leading-4 text-stone-400">
+                  首班 {selectedBusLine.departTimes[0]} · 末班 {selectedBusLine.departTimes[selectedBusLine.departTimes.length - 1]}
+                </p>
+              )}
+              {selectedBusLine.originCity && selectedBusLine.destinationCity && (
+                <p className="mt-0.5 text-[10px] text-stone-400">
+                  {selectedBusLine.originCity} → {selectedBusLine.destinationCity}
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedBusLine(null)}
+              aria-label="关闭线路详情"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
       {tileError && (
         <div className="absolute inset-0 z-[1002] flex items-center justify-center bg-[#f4f0e8]/95 p-6 text-center">
           <div className="max-w-xs">
@@ -979,12 +1164,15 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         <BusRoutePanel
           origins={busData.origins}
           routes={busData.routes}
+          detailLines={busLineData?.routes ?? []}
           selectedRoute={selectedBusRoute}
           onSelect={(route) => {
             setSelectedPlace(null);
             setClusterPlaces([]);
+            setSelectedBusLine(null);
             setSelectedBusRoute(route);
           }}
+          onSelectLine={focusBusLine}
           onClose={() => setSelectedBusRoute(null)}
           expanded={expanded}
         />

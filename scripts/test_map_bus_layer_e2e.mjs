@@ -73,11 +73,16 @@ try {
 	assert(busRequests.length === 1, `expected exactly one bus-routes request, got ${busRequests.length}`);
 	assert((await toggle.getAttribute("aria-pressed")) === "true", "the toggle must report the layer as on");
 
-	// 线路级数据（乔巴士/滴滴每条线路的逐站连线）
+	// 缩放分级：省级视野只留汇总线，线路明细要放大到 z8 才出现。
 	const detailLines = map.locator("path.bus-line-detail");
 	const detailStops = map.locator("path.bus-line-stop");
-	assert((await detailLines.count()) >= 200, `expected hundreds of real lines, got ${await detailLines.count()}`);
-	assert((await detailStops.count()) >= 1000, `expected thousands of stops, got ${await detailStops.count()}`);
+	const embeddedZoom = Number(await map.getAttribute("data-map-zoom") ?? "0");
+	if (embeddedZoom < 8) {
+		assert(
+			(await detailLines.count()) === 0,
+			"detail lines must stay hidden at province zoom to keep the map responsive",
+		);
+	}
 
 	// 关掉再打开：连线消失，且不重复请求数据。
 	await toggle.click();
@@ -103,6 +108,21 @@ try {
 	// 放大到全屏地图（同一个实例），点开一条线路看站点。
 	await page.getByRole("button", { name: /放大/ }).first().click();
 	await page.locator('[role="dialog"]').waitFor({ state: "visible" });
+
+	// 缩放到 z8 以上：逐站线路出现；点一条线应该弹出线路详情（班次/票价/上下车点数）。
+	const box = await map.boundingBox();
+	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+	await page.mouse.wheel(0, -260);
+	await page.waitForTimeout(1500);
+	assert((await detailLines.count()) > 0, "zooming in must reveal the individual lines");
+
+	await detailLines.first().dispatchEvent("click");
+	const lineCard = page.locator("div", { hasText: "线路详情" }).last();
+	await lineCard.waitFor({ state: "visible", timeout: 5000 });
+	const cardText = await lineCard.innerText();
+	assert(/上车 \d+/.test(cardText), `line card must show pickup/dropoff counts, got ${cardText.slice(0, 80)}`);
+	await page.getByRole("button", { name: "关闭线路详情" }).click();
+
 	await lines.first().waitFor({ state: "attached", timeout: 15000 });
 	await lines.first().dispatchEvent("click");
 
@@ -114,18 +134,15 @@ try {
 	assert(panelText.includes("具体线路"), "the panel must distinguish real lines from city-pair summaries");
 	assert(panelText.includes("灰虚线"), "the panel legend must explain the dashed cross-border style");
 
-	// 站点是这一层的主要信息：不选线路也该看到全部上下车点。
+	// 站点按缩放分级：省级视野一个都不画，放大了才出现（否则近 5000 个点会把地图拖卡）。
 	const stationDots = map.locator("path.bus-station-dot");
+	const currentZoom = Number(await map.getAttribute("data-map-zoom") ?? "0");
 	const stationDotCount = await stationDots.count();
-	assert(stationDotCount > 400, `expected the full station layer, got ${stationDotCount}`);
-	assert(
-		(await map.locator('path[data-station-role="pickup"]').count()) > 0,
-		"pickup points must be drawn",
-	);
-	assert(
-		(await map.locator('path[data-station-role="dropoff"]').count()) > 0,
-		"dropoff points must be drawn",
-	);
+	if (currentZoom >= 10) {
+		assert(stationDotCount > 0, "station dots must appear at high zoom");
+	} else {
+		assert(stationDotCount === 0, `station dots must stay hidden below z10, got ${stationDotCount} at z${currentZoom}`);
+	}
 
 	// 选中后高亮这条线的两组站点：到达站数量与面板列表一致。
 	const highlightDropoff = map.locator("path.bus-station-highlight[data-station-role='dropoff']");
@@ -145,6 +162,21 @@ try {
 		(await page.locator(".bus-city-label").count()) === 2,
 		"the selected route must label both cities",
 	);
+
+	// 用户视角：带着"广州去龙门县永汉"来，搜索框要能直接找到经过永汉的线路。
+	const searchBox = page.locator('aside input[type="search"]').first();
+	await searchBox.fill("永汉");
+	await page.waitForTimeout(900);
+	const panelAside = page.locator('aside[aria-label^="站点巴士线路"]').first();
+	const searchText = await panelAside.innerText();
+	assert(/具体线路 · \d+ 条/.test(searchText), `searching a county/town must list real lines, got ${searchText.slice(0, 60)}`);
+	const lineHits = Number((searchText.match(/具体线路 · (\d+) 条/) ?? [])[1] ?? "0");
+	assert(lineHits > 0, `searching 永汉 must find lines, got ${lineHits}`);
+	await panelAside.locator("button", { hasText: "永汉" }).last().click();
+	await page.waitForTimeout(1500);
+	const searchedCard = page.locator("div", { hasText: "线路详情" }).last();
+	await searchedCard.waitFor({ state: "visible", timeout: 6000 });
+	assert((await searchedCard.innerText()).includes("永汉"), "the picked line card must name the searched stop");
 
 	mkdirSync("tmp", { recursive: true });
 	await page.screenshot({ path: screenshotPath });
