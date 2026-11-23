@@ -78,3 +78,24 @@ export function wgs84ToGcj02(latitude: number, longitude: number): LatLngExpress
     longitude + (deltaLongitude * 180) / (AXIS / sqrtMagic * Math.cos(radLatitude) * PI),
   ];
 }
+
+/**
+ * GCJ-02 → WGS-84 的逆变换（迭代逼近）。
+ *
+ * 滴滴这类国内数据源给的都是 GCJ-02；切到 OSM 这种 WGS-84 底图时如果原样画上去，
+ * 整层点位会偏到隔壁街区。正变换没有解析逆，六次迭代足够把误差压到亚米级。
+ */
+export function gcj02ToWgs84(latitude: number, longitude: number): [number, number] {
+  if (longitude < 72.004 || longitude > 137.8347 || latitude < 0.8293 || latitude > 55.8271) {
+    return [latitude, longitude];
+  }
+
+  let wgsLatitude = latitude;
+  let wgsLongitude = longitude;
+  for (let iteration = 0; iteration < 6; iteration += 1) {
+    const [gcjLatitude, gcjLongitude] = wgs84ToGcj02(wgsLatitude, wgsLongitude) as [number, number];
+    wgsLatitude += latitude - gcjLatitude;
+    wgsLongitude += longitude - gcjLongitude;
+  }
+  return [wgsLatitude, wgsLongitude];
+}

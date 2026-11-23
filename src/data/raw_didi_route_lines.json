@@ -1,0 +1,37 @@
+{
+ "source": "滴滴站点巴士",
+ "pulled_at": "2026-11-23",
+ "route_count": 1,
+ "routes": [
+  {
+   "route_id": "201474",
+   "name": "广州白云客运站 → 中山市汽车总站",
+   "from_city": "广州市",
+   "to_city": "中山市",
+   "stations": [
+    {
+     "station_id": 3011,
+     "name": "广州白云客运站（K出口旁进白云客运站过安检乘车）",
+     "lng": 113.246637,
+     "lat": 23.191292,
+     "type": 1,
+     "city": "广州市",
+     "city_id": 3,
+     "county_id": 440111
+    },
+    {
+     "station_id": 4480,
+     "name": "中山市汽车总站",
+     "lng": 113.342603,
+     "lat": 22.52196,
+     "type": 2,
+     "city": "中山市",
+     "city_id": 132,
+     "county_id": 442000
+    }
+   ],
+   "source": "didi.pGetSelectStationPointPageInfo",
+   "note": "route_id 取自本机小程序日志；token 过期仍可调此接口"
+  }
+ ]
+}

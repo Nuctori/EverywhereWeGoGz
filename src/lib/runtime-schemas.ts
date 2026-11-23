@@ -495,3 +495,84 @@ export const storedAiProgressSchema = z.object({
   /** 是否仍在进行中；完成后置 false，让别的标签页收起进度条 */
   running: z.boolean().optional(),
 });
+
+// 站点巴士图层：生成物由 scripts/build_bus_routes.mjs 产出，坐标必须是 GCJ-02。
+// 这里只校验"能不能安全画到地图上"，雨量/班次之类的业务字段不在这个文件里。
+const busCoordinate = z.coerce.number().finite();
+const busStationSchema = z.object({
+  id: z.coerce.number().int().positive(),
+  name: z.string().min(1),
+  lat: busCoordinate.gte(-90).lte(90),
+  lng: busCoordinate.gte(-180).lte(180),
+  county: z.string().optional().default(''),
+});
+
+export const busRouteDataSchema = z.object({
+  generatedAt: z.string().min(1),
+  coordinateSystem: z.literal('gcj02'),
+  source: z.object({
+    provider: z.string().min(1),
+    api: z.string(),
+    pulledAt: z.string(),
+    note: z.string(),
+  }),
+  origins: z.array(
+    z.object({
+      cityId: z.coerce.number().int().positive(),
+      name: z.string().min(1),
+      lat: busCoordinate.gte(-90).lte(90),
+      lng: busCoordinate.gte(-180).lte(180),
+      stations: z.array(busStationSchema),
+    }),
+  ).min(1),
+  routes: z.array(
+    z.object({
+      id: z.string().min(1),
+      originCityId: z.coerce.number().int().positive(),
+      destination: z.object({
+        cityId: z.coerce.number().int().positive(),
+        name: z.string().min(1),
+        lat: busCoordinate.gte(-90).lte(90),
+        lng: busCoordinate.gte(-180).lte(180),
+        stationCount: z.coerce.number().int().nonnegative(),
+        // 44 广东 / 45 广西 / 81 香港；'unknown' 表示拿不到区县代码，按非广东处理。
+        provinceCode: z.string().min(2),
+      }),
+      stations: z.array(busStationSchema).min(1),
+    }),
+  ).min(1),
+});
+
+const busLineStopSchema = z.object({
+  name: z.string().min(1),
+  lat: busCoordinate.gte(-90).lte(90),
+  lng: busCoordinate.gte(-180).lte(180),
+  role: z.enum(['board', 'alight']),
+  precision: z.enum(['node', 'county', 'city']).optional().default('node'),
+  arriveTime: z.string().optional().default(''),
+  adcode: z.string().optional().default(''),
+});
+
+export const busLineDataSchema = z.object({
+  generatedAt: z.string().min(1),
+  source: z.object({
+    providers: z.array(z.string()).min(1),
+    raw: z.array(z.string()).optional(),
+  }),
+  routes: z.array(
+    z.object({
+      id: z.string().min(1),
+      name: z.string().min(1),
+      // 每条线路带自己的坐标系：乔巴士 WGS-84、滴滴 GCJ-02。
+      coordinateSystem: z.enum(['wgs84', 'gcj02']),
+      date: z.string().optional().default(''),
+      originCity: z.string().optional().default(''),
+      destinationCity: z.string().optional().default(''),
+      departTimes: z.array(z.string()).default([]),
+      priceFen: z.coerce.number().nullable().optional().default(null),
+      carrier: z.string().optional().default(''),
+      provinceCode: z.string().optional().default('unknown'),
+      stops: z.array(busLineStopSchema).min(2),
+    }),
+  ).min(1),
+});

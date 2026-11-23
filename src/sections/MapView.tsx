@@ -2,11 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { ArrowUpRight, Map, MapPinned, RefreshCw, X } from 'lucide-react';
+import { ArrowUpRight, Bus, Map, MapPinned, RefreshCw, X } from 'lucide-react';
 import { useMapTours, type MapTourLocation } from '@/hooks/use-map-tours';
+import { useBusRoutes } from '@/hooks/use-bus-routes';
+import { useBusLines } from '@/hooks/use-bus-lines';
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { TourDetailModal } from './TourDetailModal';
 import { MAP_TILE_PROVIDERS, wgs84ToGcj02, type MapTileProvider } from '@/lib/map-tile-pool';
+import { busPointForProvider, wgs84PointForProvider } from '@/lib/bus-route-geometry';
+import type { BusOriginCity, BusRoute, BusStation } from '@/types/bus';
 import type { TourSummary } from '@/types/tour';
 
 const DEFAULT_CENTER: L.LatLngExpression = [23.5, 113.5];
@@ -239,6 +243,152 @@ function PlaceClusterPanel({
   );
 }
 
+function BusRoutePanel({
+  origins,
+  routes,
+  selectedRoute,
+  onSelect,
+  onClose,
+  expanded,
+}: {
+  origins: BusOriginCity[];
+  routes: BusRoute[];
+  selectedRoute: BusRoute | null;
+  onSelect: (route: BusRoute | null) => void;
+  onClose: () => void;
+  expanded: boolean;
+}) {
+  // 注意：文件顶部从 lucide-react 引入了 Map 图标，这里不能用 `new Map()`
+  // （会解析成图标组件）。城市索引按 cityId 存成普通对象即可。
+  const originById = useMemo(() => {
+    const index: Record<number, BusOriginCity> = {};
+    origins.forEach((origin) => {
+      index[origin.cityId] = origin;
+    });
+    return index;
+  }, [origins]);
+  const selectedOrigin = selectedRoute ? originById[selectedRoute.originCityId] : undefined;
+  const grouped = useMemo(
+    () => origins.map((origin) => ({
+      origin,
+      routes: routes.filter((route) => route.originCityId === origin.cityId),
+    })),
+    [origins, routes],
+  );
+  const crossBorderCount = useMemo(
+    () => routes.filter((route) => route.destination.provinceCode !== '44').length,
+    [routes],
+  );
+  const crossBorderNames = useMemo(
+    () => [...new Set(routes
+      .filter((route) => route.destination.provinceCode !== '44')
+      .map((route) => route.destination.name))],
+    [routes],
+  );
+  const selectedCrossBorder = selectedRoute ? selectedRoute.destination.provinceCode !== '44' : false;
+
+  if (routes.length === 0) return null;
+
+  return (
+    <aside
+      className={expanded
+        ? 'absolute inset-x-3 bottom-3 z-[1001] flex max-h-[45%] flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-xl backdrop-blur sm:inset-x-auto sm:right-4 sm:top-4 sm:bottom-4 sm:w-[min(360px,38%)] sm:max-h-none'
+        : 'absolute inset-x-3 bottom-3 z-[1001] flex max-h-[72%] flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white/95 shadow-xl backdrop-blur sm:bottom-4 sm:left-auto sm:right-4 sm:w-[min(280px,calc(100%_-_1.5rem))] sm:max-h-[calc(100%-2rem)]'}
+      aria-label={selectedRoute ? `站点巴士线路：${selectedRoute.destination.name}` : '站点巴士线路列表'}
+    >
+      <div className="flex shrink-0 items-start justify-between gap-3 px-3 pb-2 pt-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-sky-600">站点巴士</p>
+          <h3 className="mt-0.5 truncate text-base font-semibold text-stone-950">
+            {selectedRoute
+              ? `${selectedOrigin?.name ?? '出发城市'} → ${selectedRoute.destination.name}`
+              : `${routes.length} 条可达线路`}
+          </h3>
+          <p className="mt-0.5 text-xs text-stone-500">
+            {selectedRoute
+              ? `${selectedRoute.destination.stationCount} 个到达站 · ${selectedOrigin?.stations.length ?? 0} 个出发站`
+              : `广东省内 ${routes.length - crossBorderCount} 条 · 跨境/跨省 ${crossBorderCount} 条（灰虚线）`}
+          </p>
+          {selectedCrossBorder && (
+            <span className="mt-1 inline-flex items-center rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-medium text-stone-600">
+              跨境/跨省线路 · 非广东省内
+            </span>
+          )}
+        </div>
+        {selectedRoute && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="返回线路列表"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100 hover:text-stone-900"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
+        {selectedRoute ? (
+          <ol className="space-y-1.5">
+            {selectedRoute.stations.slice(0, 80).map((station, index) => (
+              <li key={station.id} className="flex items-start gap-2 rounded-xl border border-stone-200 bg-white px-2.5 py-1.5">
+                <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-sky-50 text-[10px] font-semibold text-sky-700">
+                  {index + 1}
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-xs font-medium text-stone-800">{station.name}</span>
+                  {station.county && <span className="mt-0.5 block truncate text-[10px] text-stone-400">{station.county}</span>}
+                </span>
+              </li>
+            ))}
+            {selectedRoute.stations.length > 80 && (
+              <li className="px-1 text-[11px] text-stone-400">仅展示前 80 个到达站，共 {selectedRoute.stations.length} 个。</li>
+            )}
+          </ol>
+        ) : (
+          <div className="space-y-3">
+            {grouped.map(({ origin, routes: originRoutes }) => (
+              <section key={origin.cityId}>
+                <p className="px-1 text-[11px] font-medium text-stone-500">
+                  {origin.name}出发 · {originRoutes.length} 条 · {origin.stations.length} 个上车点
+                </p>
+                <div className="mt-1.5 space-y-1.5">
+                  {originRoutes.map((route) => (
+                    <button
+                      key={route.id}
+                      type="button"
+                      onClick={() => onSelect(route)}
+                      className="flex w-full items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white px-3 py-2 text-left transition-colors hover:border-sky-300 hover:bg-sky-50/60"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium text-stone-800">
+                          {route.destination.name}
+                          {route.destination.provinceCode !== '44' && (
+                            <span className="ml-1.5 rounded-full bg-stone-100 px-1.5 py-0.5 align-middle text-[10px] font-normal text-stone-500">跨境/跨省</span>
+                          )}
+                        </span>
+                        <span className="mt-0.5 block truncate text-[11px] text-stone-400">{route.destination.stationCount} 个上下车点</span>
+                      </span>
+                      <span className="shrink-0 text-[11px] font-medium text-sky-700">看站点</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <p className="shrink-0 border-t border-stone-100 px-3 py-2 text-[10px] leading-4 text-stone-400">
+        粗蓝线=具体线路（乔巴士，按上车站→下车站逐站串起来）；细蓝线=城市对汇总（滴滴）；灰虚线=跨境/跨省
+        {crossBorderNames.length > 0 ? `（${crossBorderNames.join('、')}）` : ''}。
+        地图上：<span className="text-[#1dcc8c]">绿点=上车点</span>、<span className="text-[#ff754b]">橙点=下车点</span>。
+        站点坐标来自对应数据源，底图切换时已做坐标系换算。
+      </p>
+    </aside>
+  );
+}
+
 export function MapView({ expanded, onExpandedChange, embedded = false }: MapViewProps) {
   const {
     places,
@@ -257,6 +407,27 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
   const [providerIndex, setProviderIndex] = useState(0);
   const [selectedPlace, setSelectedPlace] = useState<MapTourLocation | null>(null);
   const [clusterPlaces, setClusterPlaces] = useState<MapTourLocation[]>([]);
+  const [tourLayerEnabled, setTourLayerEnabled] = useState(true);
+  const [busLayerEnabled, setBusLayerEnabled] = useState(false);
+  const [selectedBusRoute, setSelectedBusRoute] = useState<BusRoute | null>(null);
+  const { data: busData, loading: busLoading, error: busError, retry: retryBusRoutes } = useBusRoutes(busLayerEnabled);
+  const { data: busLineData } = useBusLines(busLayerEnabled);
+
+  // 全部站点按角色去重：同一个站点会在多条线路里重复出现（清远、佛山同时被广州和江门覆盖），
+  // 只画一次。既当上车点又当目的地的城市（广州/江门）按上车点算，避免同一点出现两种颜色。
+  // 注意：文件顶部的 Map 是 lucide 图标，这里用普通对象做索引，不能写 new Map()。
+  const busStationPoints = useMemo(() => {
+    const byId: Record<number, { station: BusStation; role: 'pickup' | 'dropoff' }> = {};
+    for (const origin of busData?.origins ?? []) {
+      for (const station of origin.stations) byId[station.id] = { station, role: 'pickup' };
+    }
+    for (const route of busData?.routes ?? []) {
+      for (const station of route.stations) {
+        if (!byId[station.id]) byId[station.id] = { station, role: 'dropoff' };
+      }
+    }
+    return Object.values(byId);
+  }, [busData]);
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -356,11 +527,14 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
+    // 旅行团和站点巴士是两个独立图层，可以同时开；只有各自的开关关掉时才不画。
+    if (!tourLayerEnabled) return;
     const markers = L.layerGroup().addTo(map);
     const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
     const viewportPlaces = provider.coordinateSystem === 'gcj02' ? visiblePlaces.filter(isWithinChinaCoverage) : visiblePlaces;
     const viewportBounds = L.latLngBounds(viewportPlaces.map((place) => pointForProvider(place, provider)));
-    if (viewportBounds.isValid()) {
+    // 巴士图层开着时视野由它负责（全国旅行团点位会让画面缩得太远），这里只渲染不抢镜头。
+    if (viewportBounds.isValid() && !busLayerEnabled) {
       map.setMinZoom(3);
       map.fitBounds(viewportBounds.pad(0.12), { maxZoom: expanded ? 7 : 6 });
       // AMap's public raster endpoint returns blank tiles at z2; keep the preview on a usable zoom.
@@ -450,7 +624,273 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       map.off('zoomend moveend', renderMarkers);
       markers.remove();
     };
-  }, [expanded, providerIndex, visiblePlaces]);
+  }, [busLayerEnabled, expanded, providerIndex, tourLayerEnabled, visiblePlaces]);
+
+  // 站点巴士图层：两城之间的弧线 + 城市端点。开关关闭时不创建任何图层。
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !busLayerEnabled || !busData) return;
+    const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
+    const layer = L.layerGroup().addTo(map);
+    const originById: Record<number, BusOriginCity> = {};
+    busData.origins.forEach((origin) => {
+      originById[origin.cityId] = origin;
+    });
+
+    // 已经有明细线路的城市对，就不再画"城市对汇总线"，避免同一对城市出现两层线。
+    const detailedPairs = new Set<string>();
+    for (const line of busLineData?.routes ?? []) {
+      if (line.originCity && line.destinationCity) {
+        detailedPairs.add(`${line.originCity}→${line.destinationCity}`);
+      }
+    }
+
+    // 站点是这一层的主要信息：开关一开就能看到所有上下车点，放大后自然散开。
+    busStationPoints.forEach(({ station, role }) => {
+      const dot = L.circleMarker(busPointForProvider(station, provider), {
+        radius: 2.8,
+        weight: 1,
+        color: '#ffffff',
+        fillColor: role === 'pickup' ? '#1dcc8c' : '#ff754b',
+        fillOpacity: 0.9,
+        className: 'bus-station-dot',
+      });
+      dot.bindTooltip(`${role === 'pickup' ? '上车点' : '下车点'} · ${station.name}`, { direction: 'top', offset: [0, -4] });
+      dot.addTo(layer);
+      dot.getElement()?.setAttribute('data-station-role', role);
+    });
+
+    busData.origins.forEach((origin) => {
+      const point = busPointForProvider(origin, provider);
+      const marker = L.circleMarker(point, {
+        radius: 6,
+        weight: 2,
+        color: '#ffffff',
+        fillColor: '#0284c7',
+        fillOpacity: 1,
+        className: 'bus-city-origin',
+      });
+      marker.bindTooltip(`${origin.name}出发 · ${origin.stations.length} 个上车点`, { direction: 'top', offset: [0, -8] });
+      marker.on('click', () => {
+        setSelectedPlace(null);
+        setClusterPlaces([]);
+        setSelectedBusRoute(null);
+      });
+      marker.addTo(layer);
+      marker.getElement()?.setAttribute('data-bus-city', `${origin.name}（出发）`);
+    });
+
+    busData.routes.forEach((route) => {
+      const origin = originById[route.originCityId];
+      if (!origin) return;
+      // 这一对城市已经有明细线路（乔巴士），汇总线就不画了。
+      if (detailedPairs.has(`${origin.name}→${route.destination.name}`)) return;
+      const from = busPointForProvider(origin, provider);
+      const to = busPointForProvider(route.destination, provider);
+      const selected = selectedBusRoute?.id === route.id;
+      // 香港(81)/广西梧州(45) 是接口真实返回的跨境、跨省线路：保留，但用灰色虚线区分，
+      // 免得和广东省内线路混在一起，看着像"广东巴士开出国"。
+      const crossBorder = route.destination.provinceCode !== '44';
+      const accent = crossBorder
+        ? (selected ? '#475569' : '#94a3b8')
+        : (selected ? '#0369a1' : '#0ea5e9');
+      const restStyle: L.PolylineOptions = {
+        color: accent,
+        weight: crossBorder ? 1.3 : selected ? 3.2 : 1.6,
+        opacity: selected ? 0.95 : crossBorder ? 0.75 : 0.5,
+        ...(crossBorder ? { dashArray: '6 6' } : {}),
+      };
+      // 目前只有「出发城市 → 目的城市」这一层数据，同一对城市其实有多条线路，
+      // 所以这里只画一段城市对之间的连线（不串站点，避免假装成某一条线路的走向）；
+      // 真实线路（route_id + 有序站点）要等线路级数据接进来再按线画。
+      const line = L.polyline([[from[0], from[1]], [to[0], to[1]]], {
+        ...restStyle,
+        className: `bus-route-line${crossBorder ? ' bus-route-cross-border' : ''}`,
+      });
+      line.bindTooltip(
+        `${origin.name} → ${route.destination.name} · ${route.destination.stationCount} 个上下车点${crossBorder ? ' · 跨境/跨省' : ''}`,
+        { sticky: true },
+      );
+      line.on('mouseover', () => line.setStyle({ weight: crossBorder ? 2.2 : 2.8, opacity: 0.95 }));
+      line.on('mouseout', () => line.setStyle(restStyle));
+      line.on('click', () => {
+        setSelectedPlace(null);
+        setClusterPlaces([]);
+        setSelectedBusRoute(route);
+      });
+      line.addTo(layer);
+      line.getElement()?.setAttribute('data-bus-route', `${origin.name}→${route.destination.name}`);
+
+      const endpoint = L.circleMarker(to, {
+        radius: selected ? 5.5 : 3.4,
+        weight: 1.5,
+        color: '#ffffff',
+        fillColor: accent,
+        fillOpacity: 1,
+        className: 'bus-city-endpoint',
+      });
+      endpoint.bindTooltip(
+        `${route.destination.name} · ${route.destination.stationCount} 个上下车点${crossBorder ? ' · 跨境/跨省' : ''}`,
+        { direction: 'top', offset: [0, -6] },
+      );
+      endpoint.on('click', () => {
+        setSelectedPlace(null);
+        setClusterPlaces([]);
+        setSelectedBusRoute(route);
+      });
+      endpoint.addTo(layer);
+      // 给端点和起点打上城市标记，测试和排查都能直接对上"这个点在画哪座城"。
+      endpoint.getElement()?.setAttribute('data-bus-city', route.destination.name);
+      endpoint.getElement()?.setAttribute('data-bus-province', route.destination.provinceCode);
+
+      if (!selected) return;
+
+      // 选中的线路把两组站点放大突出（底层已经画过全部站点，这里只是加一圈高亮）。
+      const highlightStations = (stations: typeof origin.stations, kind: 'pickup' | 'dropoff') => {
+        stations.forEach((station) => {
+          const highlight = L.circleMarker(busPointForProvider(station, provider), {
+            radius: 6,
+            weight: 2,
+            color: kind === 'pickup' ? '#1dcc8c' : '#ff754b',
+            fillColor: '#ffffff',
+            fillOpacity: 1,
+            className: 'bus-station-highlight',
+          });
+          highlight.bindTooltip(
+            `${kind === 'pickup' ? '上车点' : '下车点'} · ${station.name}`,
+            { direction: 'top', offset: [0, -8] },
+          );
+          highlight.addTo(layer);
+          highlight.getElement()?.setAttribute('data-station-role', kind);
+        });
+      };
+
+      highlightStations(origin.stations, 'pickup');
+      highlightStations(route.stations, 'dropoff');
+
+      // 城市名常驻在点旁边：低缩放下海岸线被栅格瓦片简化，只有一个圆点没人分得清是哪。
+      L.tooltip({ direction: 'right', offset: [8, 0], className: 'bus-city-label' })
+        .setLatLng(from)
+        .setContent(`${origin.name} · ${origin.stations.length} 个上车点`)
+        .addTo(layer);
+      L.tooltip({ direction: 'right', offset: [8, 0], className: 'bus-city-label' })
+        .setLatLng(to)
+        .setContent(`${route.destination.name} · ${route.destination.stationCount} 个上下车点`)
+        .addTo(layer);
+    });
+
+    // 真实线路（乔巴士）：每条线路是一串有序站点，连线按"上车站 → 下车站"依次穿过它们。
+    // 这与城市对汇总线不同——同一对城市会有好几条线，各自的站点并不相同。
+    for (const line of busLineData?.routes ?? []) {
+      const points = line.stops.map((stop) => (
+        line.coordinateSystem === 'wgs84'
+          ? wgs84PointForProvider(stop, provider)
+          : busPointForProvider(stop, provider)
+      ));
+      if (points.length < 2) continue;
+      const price = line.priceFen ? `¥${Math.round(line.priceFen / 100)}` : '票价未提供';
+      const detailLine = L.polyline(points, {
+        color: line.provinceCode === '44' ? '#0284c7' : '#94a3b8',
+        weight: 2.8,
+        opacity: 0.9,
+        ...(line.provinceCode === '44' ? {} : { dashArray: '6 6' }),
+        className: 'bus-line-detail',
+      });
+      detailLine.bindTooltip(
+        `${line.name} · ${line.departTimes.length} 班 · ${price}${line.carrier ? ` · ${line.carrier}` : ''}`,
+        { sticky: true },
+      );
+      detailLine.addTo(layer);
+      detailLine.getElement()?.setAttribute('data-bus-line', line.name);
+
+      line.stops.forEach((stop, index) => {
+        // 县级定位的站点画成空心：位置是区县中心，不是门口那个点，别让它看起来一样精确。
+        const approximate = (stop.precision ?? 'node') !== 'node';
+        const stopMarker = L.circleMarker(points[index], {
+          radius: stop.role === 'board' ? 4.6 : 3.6,
+          weight: approximate ? 1.8 : 1.5,
+          color: '#ffffff',
+          fillColor: stop.role === 'board' ? '#1dcc8c' : '#ff754b',
+          fillOpacity: approximate ? 0.35 : 1,
+          className: 'bus-line-stop',
+        });
+        stopMarker.bindTooltip(
+          `${stop.role === 'board' ? '上车' : '下车'} · ${stop.name}`
+          + `${stop.arriveTime ? ` · ${stop.arriveTime}` : ''}`
+          + `${approximate ? ' · 区县级定位' : ''}`,
+          { direction: 'top', offset: [0, -6] },
+        );
+        stopMarker.addTo(layer);
+        stopMarker.getElement()?.setAttribute('data-line-role', stop.role);
+        if (approximate) stopMarker.getElement()?.setAttribute('data-stop-precision', stop.precision ?? 'county');
+      });
+    }
+
+    return () => {
+      layer.remove();
+    };
+  }, [busData, busLineData, busLayerEnabled, busStationPoints, expanded, providerIndex, selectedBusRoute]);
+
+  // 打开巴士图层时把视野对准全部线路。展开弹窗时容器尺寸会变，fitBounds 必须等
+  // 布局稳定后再来一次，否则会停在比数据范围大一倍的低缩放上。
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !busLayerEnabled || !busData) return;
+    // 选中线路时视野交给下面那个"收到单条线路"的 effect，避免两个 fit 互相打架。
+    if (selectedBusRoute) return;
+
+    const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
+    const bounds = L.latLngBounds([
+      ...busData.origins.map((origin) => busPointForProvider(origin, provider)),
+      ...busData.routes.map((route) => busPointForProvider(route.destination, provider)),
+    ]);
+    if (!bounds.isValid()) return;
+
+    const fit = () => {
+      map.invalidateSize();
+      map.fitBounds(bounds.pad(0.02), { maxZoom: 8, animate: false });
+      mapElementRef.current?.setAttribute('data-bus-zoom', String(map.getZoom()));
+    };
+    fit();
+    // 弹窗是从小到大展开的：只在挂载时 fit 会停在动画中途的尺寸上，
+    // 缩放比数据范围大一倍，海岸线缩成一条线，湛江、香港看着就像落在海里。
+    // 用 ResizeObserver 跟着容器真实尺寸重新对焦，动画结束那一帧也会触发。
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => fit()) : null;
+    observer?.observe(map.getContainer());
+    return () => {
+      observer?.disconnect();
+    };
+  }, [busData, busLayerEnabled, expanded, providerIndex, selectedBusRoute]);
+
+  // 选中线路后把视野收到这条线：整个省的范围（湛江↔汕头约 6.5 度）在 1126px 宽里
+  // 最多只能到 z7，海岸线是粗的；近看才能分清雷州半岛和北部湾，也才看得清上下车点。
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !busLayerEnabled || !busData || !selectedBusRoute) return;
+    const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
+    const origin = busData.origins.find((entry) => entry.cityId === selectedBusRoute.originCityId);
+    const bounds = L.latLngBounds([
+      ...(origin ? [busPointForProvider(origin, provider)] : []),
+      ...(origin?.stations ?? []).map((station) => busPointForProvider(station, provider)),
+      ...selectedBusRoute.stations.map((station) => busPointForProvider(station, provider)),
+      busPointForProvider(selectedBusRoute.destination, provider),
+    ]);
+    if (!bounds.isValid()) return;
+    map.invalidateSize();
+    // 刚重建的图层还没定位，带动画缩放会让 Leaflet 读 _leaflet_pos 时报错，这里直接跳。
+    map.fitBounds(bounds.pad(0.12), { maxZoom: 10, animate: false });
+    mapElementRef.current?.setAttribute('data-bus-zoom', String(map.getZoom()));
+  }, [busData, busLayerEnabled, expanded, providerIndex, selectedBusRoute]);
+
+  const toggleBusLayer = () => {
+    if (busLayerEnabled) {
+      setSelectedBusRoute(null);
+    } else {
+      setSelectedPlace(null);
+      setClusterPlaces([]);
+    }
+    setBusLayerEnabled(!busLayerEnabled);
+  };
 
   const openExpandedMap = () => {
     setProviderIndex(0);
@@ -462,6 +902,46 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       <div ref={mapElementRef} className="h-full w-full" aria-label="旅行目的地地图" />
       <div className="absolute left-3 top-3 z-[1000] rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-sm backdrop-blur">
         滚轮缩放 · 放大后显示更细地点
+      </div>
+      <div className="absolute left-3 top-12 z-[1000] flex flex-col items-start gap-1.5">
+        {/* 旅行团和站点巴士是同一张地图上的两个可选图层，可以同时打开 */}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setTourLayerEnabled((current) => !current)}
+            aria-pressed={tourLayerEnabled}
+            className={tourLayerEnabled
+              ? 'inline-flex items-center gap-1.5 rounded-full border border-orange-300 bg-orange-500 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition'
+              : 'inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-sm backdrop-blur transition hover:border-orange-200 hover:text-orange-700'}
+          >
+            <MapPinned className="h-3.5 w-3.5" />
+            {tourLayerEnabled ? `旅行团 · ${visiblePlaces.length} 个点` : '显示旅行团'}
+          </button>
+          <button
+            type="button"
+            onClick={toggleBusLayer}
+            aria-pressed={busLayerEnabled}
+            className={busLayerEnabled
+              ? 'inline-flex items-center gap-1.5 rounded-full border border-sky-300 bg-sky-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition'
+              : 'inline-flex items-center gap-1.5 rounded-full border border-white/80 bg-white/90 px-3 py-1.5 text-xs font-medium text-stone-700 shadow-sm backdrop-blur transition hover:border-sky-200 hover:text-sky-700'}
+          >
+            <Bus className="h-3.5 w-3.5" />
+            {busLayerEnabled ? `站点巴士${busData ? ` · ${busData.routes.length} 条线路` : ''}` : '点亮巴士线路'}
+          </button>
+        </div>
+        {busLayerEnabled && (
+          <span className="rounded-full bg-white/85 px-2.5 py-1 text-[10px] leading-4 text-stone-500 shadow-sm backdrop-blur">
+            示意走向，非实际行驶路径 · 点连线看站点
+          </span>
+        )}
+        {busLayerEnabled && busLoading && !busData && (
+          <span className="rounded-full bg-white/85 px-2.5 py-1 text-[10px] text-stone-500 shadow-sm backdrop-blur">正在加载巴士线路…</span>
+        )}
+        {busLayerEnabled && busError && (
+          <button type="button" onClick={retryBusRoutes} className="inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-medium text-rose-600 shadow-sm backdrop-blur">
+            <RefreshCw className="h-3 w-3" /> 线路加载失败，重试
+          </button>
+        )}
       </div>
       {tileError && (
         <div className="absolute inset-0 z-[1002] flex items-center justify-center bg-[#f4f0e8]/95 p-6 text-center">
@@ -495,6 +975,20 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         hasMore={selectedPlaceHasMore}
         expanded={expanded}
       />
+      {busLayerEnabled && busData && (expanded || selectedBusRoute) && (
+        <BusRoutePanel
+          origins={busData.origins}
+          routes={busData.routes}
+          selectedRoute={selectedBusRoute}
+          onSelect={(route) => {
+            setSelectedPlace(null);
+            setClusterPlaces([]);
+            setSelectedBusRoute(route);
+          }}
+          onClose={() => setSelectedBusRoute(null)}
+          expanded={expanded}
+        />
+      )}
     </div>
   );
 
