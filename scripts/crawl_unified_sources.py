@@ -23,6 +23,9 @@ CRAWLERS = [
     ("saihuitong", "crawl_saihuitong_full"),
     ("gzl", "crawl_gzl_api"),
     ("outdoors", "crawl_outdoors_full"),
+    # 2026-11 新增两源：广州出发省内短线补给（见 docs/data-source-expansion-2026-11.md）。
+    ("tootour", "crawl_tootour_full"),
+    ("thyoo", "crawl_thyoo_full"),
 ]
 
 

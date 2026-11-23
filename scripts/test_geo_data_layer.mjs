@@ -471,9 +471,13 @@ assert(
 guangzhouDepartureTours.length > 0,
 "current data must include explicit Guangzhou departure examples",
 );
+// 例外：广州市内一日游（广州往返花都/从化/增城…）目的地本来就是广州，
+// classify_route 已把它标成 routeRegion="local"。这条护栏针对的是“广州出发”
+// 被误读成外地/境外目的地（如“广州直飞马德里”），市内短线不属此列。
 assert(
 guangzhouDepartureTours.every(
-(tour) => tour.geo.destination?.name !== "广州",
+(tour) =>
+tour.geo.destination?.name !== "广州" || tour.geo.routeRegion === "local",
 ),
 "Guangzhou departure context must not become the destination",
 );

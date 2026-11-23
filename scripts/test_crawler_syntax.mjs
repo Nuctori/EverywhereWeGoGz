@@ -8,6 +8,8 @@ const crawlerScripts = [
   'scripts/crawl_pintu_full.py',
   'scripts/crawl_gzl_api.py',
   'scripts/crawl_outdoors_full.py',
+  'scripts/crawl_tootour_full.py',
+  'scripts/crawl_thyoo_full.py',
   'scripts/full_crawl_v3.py',
   'scripts/merge_data.py',
 ];

@@ -130,7 +130,7 @@ function App() {
         <footer className="border-t border-stone-200/80 bg-white/75 px-4 py-8 backdrop-blur sm:px-6 lg:px-8">
           <div className="mx-auto flex max-w-7xl flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="text-xs leading-6 text-stone-400 md:text-right">
-              <p>覆盖：假日通 · 广州去旅行 · 康辉 · 暴走村 · 广之旅 · 广东中旅 · 品途 · 天涯户外</p>
+              <p>覆盖：假日通 · 广州去旅行 · 康辉 · 广州康辉 · 广之旅 · 广东中旅 · 天涯户外 · 上品旅行</p>
               <p>© {new Date().getFullYear()} 老广去边度 · 让线路信息更好读</p>
               <p>价格与班期仅供参考，预订前请向来源平台确认。</p>
               <a className="mt-1 inline-block text-orange-700 hover:underline" href="mailto:feedback@nuctori.github.io?subject=线路反馈">没找到合适的团？告诉我们</a>

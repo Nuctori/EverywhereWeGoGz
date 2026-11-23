@@ -31,6 +31,9 @@ SOURCE_COLORS = {
     '广东中旅': '#8338EC',
     '品途': '#3A86FF',
     '天涯户外': '#2A9D8F',
+    # 2026-11 新增：广州出发省内短线两块主要补给
+    '上品旅行': '#E76F51',
+    '广州康辉': '#C1121F',
 }
 
 PLACEHOLDER_LABEL = '老广精选线路'
@@ -54,6 +57,10 @@ RAW_FILE_PRIORITIES = {
     "raw_gzl_api.json": 10,
     "raw_gdcts_full.json": 10,
     "raw_outdoors_full.json": 10,
+    # 2026-11：广州本地短线补给。上品旅行＝广州市海外国旅服务端渲染站（全量 570 条），
+    # 广州康辉＝thyoo.com 分销站（详情页自带班期/上车点，游标增量累积）。
+    "raw_tootour_full.json": 10,
+    "raw_thyoo_full.json": 10,
 }
 JRT365_HOST_TOKEN = "jrt365.com"
 SCHEDULE_REQUIRED_SOURCES = {"假日通", "广之旅"}
@@ -1318,6 +1325,9 @@ def main():
         # 广东中旅独立爬虫 (crawl_gdcts_full.py) 与 CI 的 full_crawl_v3 聚合 (raw_http_full)
         # 双通道并存，按 source|title|price 去重兜底，与 jrt365 双文件模式一致。
         "raw_gdcts_full.json",
+        # 2026-11 新增两源：广州本地短线（省内 1-3 天）主要补给。
+        "raw_tootour_full.json",
+        "raw_thyoo_full.json",
     ]
     if not os.path.exists(os.path.join(data_dir, "raw_jrt365_full.json")):
         raw_files.insert(1, "raw_jrt365.json")

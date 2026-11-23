@@ -32,7 +32,12 @@ assert(source.includes('onTourClick={openTourDetail}'), 'place panel must use th
 assert(source.includes('z-[40]'), 'expanded map must remain below the tour detail modal layer');
 assert((detailModal.match(/z-\[80\]/g) || []).length >= 2, 'desktop and mobile tour detail layers must sit above the expanded map');
 assert(source.includes('embedded?: boolean'), 'MapView must support an embedded homepage placement');
-assert(source.includes('!expanded && embedded'), 'embedded MapView must render the homepage preview');
+// 内嵌预览与展开态占位现在合并进同一个 `embedded &&` 分支（展开时内嵌位置留占位撑住布局），
+// 旧断言的字面量 `!expanded && embedded` 在该重构后不再存在，故按现行结构断言两段语义。
+assert(
+  source.includes('{embedded && (') && source.includes('地图已放大，关闭后回到这里。'),
+  'embedded MapView must render the homepage preview and hold its slot while expanded',
+);
 assert(source.includes("'正在加载已定位地点…'"), 'homepage map must not label an in-flight location load as zero places');
 assert(source.includes('放大地图'), 'home map must provide an expand control');
 assert(source.includes('点地点，直接看对应旅行团'), 'expanded map must keep place-first interaction');
@@ -81,7 +86,13 @@ assert(tilePool.includes("id: 'osm-bjtu'"), 'tile pool must include the BJTU fal
 assert(tilePool.includes("id: 'osm-official'"), 'tile pool must include the official OSM fallback');
 assert(tilePool.includes("coordinateSystem: 'gcj02'"), 'tile pool must declare GCJ-02 coordinates');
 assert(tilePool.includes('export function wgs84ToGcj02'), 'tile pool must expose the coordinate conversion');
-assert(app.includes('<MapView embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} />'), 'MapView must be mounted in the Hero homepage panel');
-assert(app.includes('<Header onOpenMap={() => setMapExpanded(true)} />'), 'header must provide a compact map entry');
+// App 改成懒加载后再挂载（首屏不为地图付解析成本），挂载点由 MapView 变成 MapComponent，
+// 且带未加载时的占位分支；断言按现行结构走，同时守住 embedded/expanded/onExpandedChange 三个契约。
+assert(
+  app.includes('<MapComponent embedded expanded={mapExpanded} onExpandedChange={setMapExpanded} />') &&
+    app.includes('map={MapComponent ?'),
+  'MapView must be mounted in the Hero homepage panel',
+);
+assert(app.includes('<Header onOpenMap={openMap} />'), 'header must provide a compact map entry');
 
 console.log(JSON.stringify({ checked: 'MapView', tilePool: true, tileFallback: true, searchIntegration: true, headerIntegration: true }));

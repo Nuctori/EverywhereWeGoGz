@@ -994,6 +994,42 @@ def parse_rendered_detail(text: str) -> dict[str, Any]:
     return detail
 
 
+def _parse_tootour_detail(raw: dict[str, Any]) -> dict[str, Any]:
+    """上品旅行（gz.tootour.com）：服务端渲染详情页，行程与费用可静态解析。
+
+    解析实现与爬虫共用 crawl_tootour_full.parse_detail（同一份契约有单测守着），
+    这里只做 raw → detail 的字段搬运。网络异常一律降级为空详情，不阻断整轮合并。
+    """
+    url = str(raw.get("url") or "")
+    if not url:
+        return empty_detail()
+    try:
+        html, _ = _fetch_text(url)
+    except Exception:
+        return empty_detail()
+
+    from crawl_tootour_full import parse_detail as parse_tootour_detail
+
+    parsed = parse_tootour_detail(html, url)
+    detail = empty_detail()
+    detail["itinerary"] = parsed.get("itinerary") or []
+    detail["inclusions"] = parsed.get("inclusions") or []
+    detail["exclusions"] = parsed.get("exclusions") or []
+    return detail
+
+
+def _parse_thyoo_detail(raw: dict[str, Any]) -> dict[str, Any]:
+    """广州康辉（thyoo.com）：行程/费用在爬虫阶段已从详情页解析，直接复用。
+
+    该站对高频抓取会下发 JS 挑战页，合并阶段不再二次请求，避免把一轮数据刷新
+    变成对源站的连续扫描。
+    """
+    detail = empty_detail()
+    detail["itinerary"] = raw.get("itinerary") or []
+    detail["inclusions"] = raw.get("inclusions") or []
+    return detail
+
+
 def fetch_detail_data(raw: dict[str, Any]) -> dict[str, Any]:
     source = raw.get("source", "")
     try:
@@ -1020,6 +1056,10 @@ def fetch_detail_data(raw: dict[str, Any]) -> dict[str, Any]:
             return _parse_outdoors_detail(raw)
         if source == "假日通":
             return _parse_jrt365_detail(raw)
+        if source == "上品旅行":
+            return _parse_tootour_detail(raw)
+        if source == "广州康辉":
+            return _parse_thyoo_detail(raw)
     except Exception as exc:
         print(f"[detail parser] {source} {raw.get('url', '')} -> {exc}")
     return empty_detail()
