@@ -134,14 +134,13 @@ try {
 	assert(panelText.includes("具体线路"), "the panel must distinguish real lines from city-pair summaries");
 	assert(panelText.includes("灰虚线"), "the panel legend must explain the dashed cross-border style");
 
-	// 站点按缩放分级：省级视野一个都不画，放大了才出现（否则近 5000 个点会把地图拖卡）。
-	const stationDots = map.locator("path.bus-station-dot");
+	// 站点只跟着线路画：不允许出现"没有线路归属"的孤立点（每个点都要能顺着线找到班次）。
+	const orphanDots = await map.locator("path.bus-station-dot").count();
+	assert(orphanDots === 0, `no orphan station dots should be drawn, got ${orphanDots}`);
 	const currentZoom = Number(await map.getAttribute("data-map-zoom") ?? "0");
-	const stationDotCount = await stationDots.count();
+	const lineStops = await map.locator("path.bus-line-stop").count();
 	if (currentZoom >= 10) {
-		assert(stationDotCount > 0, "station dots must appear at high zoom");
-	} else {
-		assert(stationDotCount === 0, `station dots must stay hidden below z10, got ${stationDotCount} at z${currentZoom}`);
+		assert(lineStops > 0, "line stops must appear at high zoom");
 	}
 
 	// 选中后高亮这条线的两组站点：到达站数量与面板列表一致。

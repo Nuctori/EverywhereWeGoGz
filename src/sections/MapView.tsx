@@ -10,7 +10,7 @@ import { useTourDetail } from '@/hooks/use-tour-detail';
 import { TourDetailModal } from './TourDetailModal';
 import { MAP_TILE_PROVIDERS, wgs84ToGcj02, type MapTileProvider } from '@/lib/map-tile-pool';
 import { busPointForProvider, wgs84PointForProvider } from '@/lib/bus-route-geometry';
-import type { BusLine, BusLineStop, BusOriginCity, BusRoute, BusStation } from '@/types/bus';
+import type { BusLine, BusLineStop, BusOriginCity, BusRoute } from '@/types/bus';
 import type { TourSummary } from '@/types/tour';
 
 const DEFAULT_CENTER: L.LatLngExpression = [23.5, 113.5];
@@ -513,22 +513,6 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
   const [selectedBusRoute, setSelectedBusRoute] = useState<BusRoute | null>(null);
   const { data: busData, loading: busLoading, error: busError, retry: retryBusRoutes } = useBusRoutes(busLayerEnabled);
   const { data: busLineData } = useBusLines(busLayerEnabled);
-
-  // 全部站点按角色去重：同一个站点会在多条线路里重复出现（清远、佛山同时被广州和江门覆盖），
-  // 只画一次。既当上车点又当目的地的城市（广州/江门）按上车点算，避免同一点出现两种颜色。
-  // 注意：文件顶部的 Map 是 lucide 图标，这里用普通对象做索引，不能写 new Map()。
-  const busStationPoints = useMemo(() => {
-    const byId: Record<number, { station: BusStation; role: 'pickup' | 'dropoff' }> = {};
-    for (const origin of busData?.origins ?? []) {
-      for (const station of origin.stations) byId[station.id] = { station, role: 'pickup' };
-    }
-    for (const route of busData?.routes ?? []) {
-      for (const station of route.stations) {
-        if (!byId[station.id]) byId[station.id] = { station, role: 'dropoff' };
-      }
-    }
-    return Object.values(byId);
-  }, [busData]);
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -764,23 +748,9 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     const inView = (lat: number, lng: number) => viewport.contains([lat, lng]);
     const mapCenter = map.getCenter();
 
-    // 站点是这一层的主要信息：开关一开就能看到所有上下车点，放大后自然散开。
-    if (showDetailStops) {
-      busStationPoints.forEach(({ station, role }) => {
-        if (!inView(station.lat, station.lng)) return;
-        const dot = L.circleMarker(busPointForProvider(station, provider), {
-          radius: 2.8,
-          weight: 1,
-          color: '#ffffff',
-          fillColor: role === 'pickup' ? '#1dcc8c' : '#ff754b',
-          fillOpacity: dimOthers ? 0.12 : 0.9,
-          className: 'bus-station-dot',
-        });
-        dot.bindTooltip(`${role === 'pickup' ? '上车点' : '下车点'} · ${station.name}`, { direction: 'top', offset: [0, -4] });
-        dot.addTo(layer);
-        dot.getElement()?.setAttribute('data-station-role', role);
-      });
-    }
+    // 注意：滴滴的城市级站点不再单独画点。
+    // 那些点没有线路归属，地图上会出现"有点没车"；站点一律跟着它所属的线路画，
+    // 保证每个点都能顺着线找到是哪个班次停的。
 
     busData.origins.forEach((origin) => {
       const point = busPointForProvider(origin, provider);
@@ -980,7 +950,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           weight: approximate ? 1.8 : 1.5,
           color: '#ffffff',
           fillColor: stop.role === 'board' ? '#1dcc8c' : '#ff754b',
-          fillOpacity: approximate ? 0.35 : 1,
+          fillOpacity: approximate ? 0.35 : dimOthers && !isSelectedLine ? 0.15 : 1,
           className: 'bus-line-stop',
         });
         stopMarker.bindTooltip(
@@ -1010,7 +980,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     return () => {
       layer.remove();
     };
-  }, [busData, busLineData, busLayerEnabled, busStationPoints, expanded, mapZoom, providerIndex, selectedBusLine, selectedBusRoute]);
+  }, [busData, busLineData, busLayerEnabled, expanded, mapZoom, providerIndex, selectedBusLine, selectedBusRoute]);
 
   // 打开巴士图层时把视野对准全部线路。展开弹窗时容器尺寸会变，fitBounds 必须等
   // 布局稳定后再来一次，否则会停在比数据范围大一倍的低缩放上。
