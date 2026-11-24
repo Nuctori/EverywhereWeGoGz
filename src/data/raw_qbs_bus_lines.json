@@ -1,5 +1,5 @@
 {
- "pulled_at": "2026-11-23",
+ "pulled_at": "2026-11-24",
  "corp": "qbs",
  "geocoded": {
   "stations_total": 4354,
@@ -2218,20 +2218,20 @@
        "code": "913535",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 20.9885945,
-       "lng": 110.035854,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "沈塘车站",
        "code": "1577732",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 22.0514939,
-       "lng": 111.6045471,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "雷州樟树湾【城市便捷酒店门口】",
@@ -2702,10 +2702,10 @@
        "code": "3379031",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 22.3659263,
-       "lng": 113.5463848,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "雷高圩",
@@ -2772,10 +2772,10 @@
        "code": "3379033",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 20.765575,
-       "lng": 109.759985,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "北和镇",
@@ -2792,20 +2792,20 @@
        "code": "3379012",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 22.8283014,
-       "lng": 113.5077094,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "乌石车站",
        "code": "3379013",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 24.7973043,
-       "lng": 113.6046582,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "调风邮政大门口(即正对面绿源电动车店)",
@@ -2919,10 +2919,10 @@
        "code": "2446697",
        "adcode": "440823",
        "arrive_time": "",
-       "lat": 21.7852651,
-       "lng": 110.0204976,
+       "lat": 21.359310333333337,
+       "lng": 110.31119833333332,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "沈塘蜂皇酒店(汇利华批发部)",
@@ -3031,10 +3031,10 @@
        "code": "3847426",
        "adcode": "440606",
        "arrive_time": "09:40",
-       "lat": 23.3187956,
-       "lng": 113.1927772,
+       "lat": 22.945947,
+       "lng": 113.091962,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "陈山收费站(G15沈海高速入口)",
@@ -3373,10 +3373,10 @@
        "code": "911517",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 24.7973043,
-       "lng": 113.6046582,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "北和新邮政门口",
@@ -3902,10 +3902,10 @@
        "code": "3379031",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 22.3659263,
-       "lng": 113.5463848,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "雷高圩",
@@ -3972,10 +3972,10 @@
        "code": "3379033",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 20.765575,
-       "lng": 109.759985,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "北和镇",
@@ -3992,20 +3992,20 @@
        "code": "3379012",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 22.8283014,
-       "lng": 113.5077094,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "乌石车站",
        "code": "3379013",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 24.7973043,
-       "lng": 113.6046582,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "调风邮政大门口(即正对面绿源电动车店)",
@@ -4128,10 +4128,10 @@
        "code": "2446697",
        "adcode": "440823",
        "arrive_time": "",
-       "lat": 21.7852651,
-       "lng": 110.0204976,
+       "lat": 21.359310333333337,
+       "lng": 110.31119833333332,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "沈塘蜂皇酒店(汇利华批发部)",
@@ -4253,10 +4253,10 @@
        "code": "3847426",
        "adcode": "440606",
        "arrive_time": "09:40",
-       "lat": 23.3187956,
-       "lng": 113.1927772,
+       "lat": 22.945947,
+       "lng": 113.091962,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "陈山收费站(G15沈海高速入口)",
@@ -7662,6 +7662,12 @@
      "carrier": ""
     }
    ]
+  },
+  {
+   "file": "intervals_qbs_020_450400_2026-11-25_20261124-0211.json",
+   "corp": "qbs",
+   "date": "2026-11-25",
+   "lines": []
   },
   {
    "file": "intervals_qbs_0755_440800_2026-11-25_20261124-0109.json",
@@ -20449,10 +20455,10 @@
        "code": "643352",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 22.0514939,
-       "lng": 111.6045471,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "雷州【华侨假日大酒店】",
@@ -20489,10 +20495,10 @@
        "code": "643353",
        "adcode": "440882",
        "arrive_time": "",
-       "lat": 23.0228115,
-       "lng": 113.3099848,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "南兴车站",
@@ -23081,10 +23087,10 @@
        "code": "2447080",
        "adcode": "440882",
        "arrive_time": "06:50",
-       "lat": 24.7973043,
-       "lng": 113.6046582,
+       "lat": 20.558606,
+       "lng": 110.08651,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "北和镇(百家福超市)",
@@ -23420,10 +23426,10 @@
        "code": "3849773",
        "adcode": "440606",
        "arrive_time": "",
-       "lat": 23.3187956,
-       "lng": 113.1927772,
+       "lat": 22.945947,
+       "lng": 113.091962,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "佛山大桥(乐安)(公交站)",
@@ -26203,10 +26209,10 @@
        "code": "643235",
        "adcode": "440606",
        "arrive_time": "",
-       "lat": 23.3187956,
-       "lng": 113.1927772,
+       "lat": 22.945947,
+       "lng": 113.091962,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "佛山大桥乐安公交站",
@@ -26334,10 +26340,10 @@
        "code": "567198",
        "adcode": "440606",
        "arrive_time": "",
-       "lat": 23.3187956,
-       "lng": 113.1927772,
+       "lat": 22.945947,
+       "lng": 113.091962,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "佛山大桥(乐安)(公交站)",
@@ -26533,10 +26539,10 @@
        "code": "3390164",
        "adcode": "440606",
        "arrive_time": "",
-       "lat": 23.3187956,
-       "lng": 113.1927772,
+       "lat": 22.945947,
+       "lng": 113.091962,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "大沥收费站",
@@ -28499,10 +28505,10 @@
        "code": "1468541",
        "adcode": "440881",
        "arrive_time": "07:10",
-       "lat": 22.9136344,
-       "lng": 113.0218766,
+       "lat": 21.479035333333332,
+       "lng": 110.403348,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "石圭坡小学门 口",
@@ -44964,10 +44970,10 @@
        "code": "539801",
        "adcode": "440881",
        "arrive_time": "",
-       "lat": 22.870666,
-       "lng": 110.231947,
+       "lat": 21.479035333333332,
+       "lng": 110.403348,
        "status": 1,
-       "precision": "node"
+       "precision": "county"
       },
       {
        "name": "雅塘镇（镇村主干道可送达）",
@@ -51540,6 +51546,12 @@
      "carrier": ""
     }
    ]
+  },
+  {
+   "file": "intervals_qbs_450400_020_2026-11-25_20261124-0211.json",
+   "corp": "qbs",
+   "date": "2026-11-25",
+   "lines": []
   }
  ]
 }

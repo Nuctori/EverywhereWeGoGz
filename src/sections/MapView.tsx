@@ -962,7 +962,17 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         // 点站点的语义是"我在这儿能坐哪些车"：把这个站经过的所有线路汇总出来。
         stopMarker.on('click', () => {
           const matched = (busLineData?.routes ?? []).filter((candidate) => (
-            candidate.stops.some((entry) => entry.name === stop.name)
+            // 同一个物理站点在不同线路里名字常有细微差异，按"同名 或 250 米内"聚合。
+            // 但区县级定位的站点会被堆在同一个区县中心，这时候只按同名匹配，否则会把几十条不相干的线算进来。
+            candidate.stops.some((entry) => (
+              entry.name === stop.name
+              || (
+                (stop.precision ?? 'node') === 'node'
+                && (entry.precision ?? 'node') === 'node'
+                && Math.abs(entry.lat - stop.lat) <= 0.0025
+                && Math.abs(entry.lng - stop.lng) <= 0.0025
+              )
+            ))
           ));
           setSelectedPlace(null);
           setClusterPlaces([]);

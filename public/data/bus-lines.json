@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-23",
+ "generatedAt": "2026-11-24",
  "source": {
   "providers": [
    "乔巴士（ylxweb）",
@@ -4168,6 +4168,15 @@
      "adcode": "440881"
     },
     {
+     "name": "青平客运站正门路边",
+     "lat": 21.479035333333332,
+     "lng": 110.403348,
+     "role": "board",
+     "precision": "county",
+     "arriveTime": "07:10",
+     "adcode": "440881"
+    },
+    {
      "name": "石圭坡小学门 口",
      "lat": 21.479035333333332,
      "lng": 110.403348,
@@ -5375,6 +5384,15 @@
      "adcode": "440881"
     },
     {
+     "name": "亭子路口对面(中廉石化加油站)",
+     "lat": 21.479035333333332,
+     "lng": 110.403348,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440881"
+    },
+    {
      "name": "雅塘镇（镇村主干道可送达）",
      "lat": 21.479035333333332,
      "lng": 110.403348,
@@ -6468,6 +6486,15 @@
      "adcode": "440882"
     },
     {
+     "name": "唐家车站",
+     "lat": 20.558606,
+     "lng": 110.08651,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440882"
+    },
+    {
      "name": "雷高圩",
      "lat": 20.558606,
      "lng": 110.08651,
@@ -6522,7 +6549,7 @@
      "adcode": "440882"
     },
     {
-     "name": "调风邮政大门口(即正对面绿源电动车店)",
+     "name": "企水车站",
      "lat": 20.558606,
      "lng": 110.08651,
      "role": "alight",
@@ -6531,11 +6558,29 @@
      "adcode": "440882"
     },
     {
-     "name": "企水车站",
-     "lat": 20.765575,
-     "lng": 109.759985,
+     "name": "东里车站旁",
+     "lat": 20.558606,
+     "lng": 110.08651,
      "role": "alight",
-     "precision": "node",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440882"
+    },
+    {
+     "name": "乌石车站",
+     "lat": 20.558606,
+     "lng": 110.08651,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440882"
+    },
+    {
+     "name": "调风邮政大门口(即正对面绿源电动车店)",
+     "lat": 20.558606,
+     "lng": 110.08651,
+     "role": "alight",
+     "precision": "county",
      "arriveTime": "",
      "adcode": "440882"
     },
@@ -13327,6 +13372,15 @@
      "adcode": "440882"
     },
     {
+     "name": "龙山收费站",
+     "lat": 22.945947,
+     "lng": 113.091962,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440606"
+    },
+    {
      "name": "佛山大桥(乐安)(公交站)",
      "lat": 23.0607639,
      "lng": 113.0973321,
@@ -13361,15 +13415,6 @@
      "precision": "node",
      "arriveTime": "",
      "adcode": "440106"
-    },
-    {
-     "name": "龙山收费站",
-     "lat": 23.3187956,
-     "lng": 113.1927772,
-     "role": "alight",
-     "precision": "node",
-     "arriveTime": "",
-     "adcode": "440606"
     },
     {
      "name": "嘉禾望岗地铁站G出口",
@@ -13435,6 +13480,15 @@
      "adcode": "440825"
     },
     {
+     "name": "龙山收费站",
+     "lat": 22.945947,
+     "lng": 113.091962,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440606"
+    },
+    {
      "name": "佛山大桥(乐安)(公交站)",
      "lat": 23.0607639,
      "lng": 113.0973321,
@@ -13442,15 +13496,6 @@
      "precision": "node",
      "arriveTime": "",
      "adcode": "440605"
-    },
-    {
-     "name": "龙山收费站",
-     "lat": 23.3187956,
-     "lng": 113.1927772,
-     "role": "alight",
-     "precision": "node",
-     "arriveTime": "",
-     "adcode": "440606"
     }
    ]
   },
@@ -13824,15 +13869,6 @@
      "adcode": "440823"
     },
     {
-     "name": "陈家桥",
-     "lat": 20.9885945,
-     "lng": 110.035854,
-     "role": "alight",
-     "precision": "node",
-     "arriveTime": "",
-     "adcode": "440882"
-    },
-    {
      "name": "雷州樟树湾【城市便捷酒店门口】",
      "lat": 20.9387128,
      "lng": 110.0537317,
@@ -13843,6 +13879,24 @@
     },
     {
      "name": "客路车站",
+     "lat": 20.558606,
+     "lng": 110.08651,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440882"
+    },
+    {
+     "name": "陈家桥",
+     "lat": 20.558606,
+     "lng": 110.08651,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440882"
+    },
+    {
+     "name": "沈塘车站",
      "lat": 20.558606,
      "lng": 110.08651,
      "role": "alight",
@@ -13985,10 +14039,10 @@
     },
     {
      "name": "龙山收费站",
-     "lat": 23.3187956,
-     "lng": 113.1927772,
+     "lat": 22.945947,
+     "lng": 113.091962,
      "role": "board",
-     "precision": "node",
+     "precision": "county",
      "arriveTime": "09:40",
      "adcode": "440606"
     },
@@ -14432,6 +14486,15 @@
      "adcode": "440882"
     },
     {
+     "name": "沈塘车站",
+     "lat": 20.558606,
+     "lng": 110.08651,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440882"
+    },
+    {
      "name": "雷州207国道【新城加油站】",
      "lat": 20.558606,
      "lng": 110.08651,
@@ -14442,6 +14505,15 @@
     },
     {
      "name": "松竹客运站",
+     "lat": 20.558606,
+     "lng": 110.08651,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440882"
+    },
+    {
+     "name": "东园路口",
      "lat": 20.558606,
      "lng": 110.08651,
      "role": "alight",
@@ -14904,6 +14976,15 @@
      "adcode": "440882"
     },
     {
+     "name": "乌石车站",
+     "lat": 20.558606,
+     "lng": 110.08651,
+     "role": "board",
+     "precision": "county",
+     "arriveTime": "06:50",
+     "adcode": "440882"
+    },
+    {
      "name": "北和镇(百家福超市)",
      "lat": 20.558606,
      "lng": 110.08651,
@@ -15092,6 +15173,15 @@
      "adcode": "440825"
     },
     {
+     "name": "龙山收费站",
+     "lat": 22.945947,
+     "lng": 113.091962,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440606"
+    },
+    {
      "name": "佛山大桥乐安公交站",
      "lat": 23.110645829710556,
      "lng": 112.99659118630552,
@@ -15099,15 +15189,6 @@
      "precision": "county",
      "arriveTime": "",
      "adcode": "440605"
-    },
-    {
-     "name": "龙山收费站",
-     "lat": 23.3187956,
-     "lng": 113.1927772,
-     "role": "alight",
-     "precision": "node",
-     "arriveTime": "",
-     "adcode": "440606"
     }
    ]
   },
@@ -15360,10 +15441,10 @@
     },
     {
      "name": "城月收费站(G15沈海高速入口)",
-     "lat": 21.7852651,
-     "lng": 110.0204976,
+     "lat": 21.359310333333337,
+     "lng": 110.31119833333332,
      "role": "alight",
-     "precision": "node",
+     "precision": "county",
      "arriveTime": "",
      "adcode": "440823"
     },
@@ -40272,6 +40353,15 @@
      "adcode": "440784"
     },
     {
+     "name": "龙山收费站",
+     "lat": 22.945947,
+     "lng": 113.091962,
+     "role": "alight",
+     "precision": "county",
+     "arriveTime": "",
+     "adcode": "440606"
+    },
+    {
      "name": "大沥收费站",
      "lat": 23.110645829710556,
      "lng": 112.99659118630552,
@@ -40324,15 +40414,6 @@
      "precision": "county",
      "arriveTime": "",
      "adcode": "440111"
-    },
-    {
-     "name": "龙山收费站",
-     "lat": 23.3187956,
-     "lng": 113.1927772,
-     "role": "alight",
-     "precision": "node",
-     "arriveTime": "",
-     "adcode": "440606"
     }
    ]
   },
