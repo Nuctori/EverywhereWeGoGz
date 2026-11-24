@@ -194,6 +194,16 @@ try {
 	assert(/\d+ 条线路/.test(stopText), `the stop card must aggregate lines, got ${stopText.slice(0, 60)}`);
 	assert(/\d+ 个班次/.test(stopText), "the stop card must count departures");
 
+	// 滴滴城市对的站点必须真的画出来：稔山市场这类只有滴滴有的站，缺了就是"数据没接对"。
+	await searchBox.fill("惠州");
+	await page.waitForTimeout(900);
+	await panelAside.locator("button", { hasText: "惠州市" }).first().click();
+	await page.waitForTimeout(2500);
+	assert(
+		(await map.locator('path[data-stop-name="稔山市场"]').count()) >= 1,
+		"city-pair stations (e.g. 稔山市场) must be drawn with their line",
+	);
+
 	mkdirSync("tmp", { recursive: true });
 	await page.screenshot({ path: screenshotPath });
 	console.log(`[map-bus] screenshot: ${screenshotPath}`);

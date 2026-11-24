@@ -775,11 +775,47 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     busData.routes.forEach((route) => {
       const origin = originById[route.originCityId];
       if (!origin) return;
-      // 这一对城市已经有明细线路（乔巴士），汇总线就不画了。
+      const selected = selectedBusRoute?.id === route.id;
+
+      // 滴滴这一层虽然是"城市对"，但它带着该城市全部上下车点（稔山市场这类只有滴滴有的站）。
+      // 所以站点要在"有没有明细线路"之前就画，否则这些站永远不出现。
+      if (showDetailStops || selected) {
+        const drawPairStations = (stations: typeof origin.stations, kind: 'pickup' | 'dropoff') => {
+          stations.forEach((station) => {
+            if (!selected && !inView(station.lat, station.lng)) return;
+            const dot = L.circleMarker(busPointForProvider(station, provider), {
+              radius: 3.2,
+              weight: 1.2,
+              color: '#ffffff',
+              fillColor: kind === 'pickup' ? '#1dcc8c' : '#ff754b',
+              fillOpacity: dimOthers && !selected ? 0.15 : 0.95,
+              className: 'bus-pair-stop',
+            });
+            dot.bindTooltip(
+              `${kind === 'pickup' ? '上车点' : '下车点'} · ${station.name}`,
+              { direction: 'top', offset: [0, -5] },
+            );
+            dot.on('click', () => {
+              setSelectedPlace(null);
+              setClusterPlaces([]);
+              setSelectedBusLine(null);
+              setSelectedStop(null);
+              setSelectedBusRoute(route);
+            });
+            dot.addTo(layer);
+            dot.getElement()?.setAttribute('data-stop-name', station.name);
+            dot.getElement()?.setAttribute('data-stop-role', kind);
+          });
+        };
+        drawPairStations(origin.stations, 'pickup');
+        drawPairStations(route.stations, 'dropoff');
+      }
+
+      // 这一对城市已经有明细线路（乔巴士）：汇总线不画了，但上面的站点已经画过。
       if (detailedPairs.has(`${origin.name}→${route.destination.name}`)) return;
+
       const from = busPointForProvider(origin, provider);
       const to = busPointForProvider(route.destination, provider);
-      const selected = selectedBusRoute?.id === route.id;
       // 香港(81)/广西梧州(45) 是接口真实返回的跨境、跨省线路：保留，但用灰色虚线区分，
       // 免得和广东省内线路混在一起，看着像"广东巴士开出国"。
       const crossBorder = route.destination.provinceCode !== '44';
