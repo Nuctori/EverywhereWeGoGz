@@ -1,0 +1,82 @@
+[
+ {
+  "cityId": 2,
+  "name": "深圳市"
+ },
+ {
+  "cityId": 3,
+  "name": "广州市"
+ },
+ {
+  "cityId": 21,
+  "name": "东莞市"
+ },
+ {
+  "cityId": 36,
+  "name": "佛山市"
+ },
+ {
+  "cityId": 84,
+  "name": "珠海市"
+ },
+ {
+  "cityId": 132,
+  "name": "中山市"
+ },
+ {
+  "cityId": 133,
+  "name": "惠州市"
+ },
+ {
+  "cityId": 153,
+  "name": "江门市"
+ },
+ {
+  "cityId": 154,
+  "name": "揭阳市"
+ },
+ {
+  "cityId": 155,
+  "name": "茂名市"
+ },
+ {
+  "cityId": 156,
+  "name": "梅州市"
+ },
+ {
+  "cityId": 157,
+  "name": "清远市"
+ },
+ {
+  "cityId": 158,
+  "name": "汕头市"
+ },
+ {
+  "cityId": 159,
+  "name": "湛江市"
+ },
+ {
+  "cityId": 160,
+  "name": "肇庆市"
+ },
+ {
+  "cityId": 254,
+  "name": "河源市"
+ },
+ {
+  "cityId": 255,
+  "name": "汕尾市"
+ },
+ {
+  "cityId": 256,
+  "name": "阳江市"
+ },
+ {
+  "cityId": 259,
+  "name": "梧州市"
+ },
+ {
+  "cityId": 357,
+  "name": "香港"
+ }
+]

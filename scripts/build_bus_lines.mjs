@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const qbsPath = path.join(root, 'src/data/raw_qbs_bus_lines.json');
-const didiPath = path.join(root, 'src/data/raw_didi_route_lines.json');
+const didiPath = path.join(root, 'src/data/raw_didi_routes_full.json');
 const outputPath = path.join(root, 'public/data/bus-lines.json');
 
 const CHINA = { minLat: 18, maxLat: 54, minLng: 73, maxLng: 135 };
@@ -140,28 +140,64 @@ if (existsSync(qbsPath)) {
   }
 }
 
-// ---- 滴滴线路（route_id → 有序站点，带原生坐标）----
+// ---- 滴滴线路（pull_didi_full.py 全量导出：route_id → 有序站点 + 班次）----
+// 这段不经过 push()：push 里的"离城市锚点 0.8° 内"是为乔巴士的地理编码污染设计的，
+// 滴滴坐标是接口原生 GCJ-02，跨市线路（燕塘→黄埠横跨 1.6°）会被它整段误删。
+const shiftByRoute = new Map();
+const parseClock = (msg) => {
+  const m = String(msg ?? '').match(/(\d{1,2}:\d{2})/);
+  return m ? m[1].padStart(5, '0') : '';
+};
+const parseFen = (msg) => {
+  const m = String(msg ?? '').match(/(\d+(?:\.\d+)?)/);
+  const fen = m ? Math.round(Number(m[1]) * 100) : 0;
+  return fen > 0 ? fen : null;
+};
+
 if (existsSync(didiPath)) {
   const raw = JSON.parse(readFileSync(didiPath, 'utf8'));
   providers.push('滴滴站点巴士');
   raws.push(path.basename(didiPath));
-  for (const route of raw.routes ?? []) {
-    const stops = route.stations ?? [];
-    const board = stops.filter((station) => Number(station.type) === 1)
-      .map((station) => toStop(station, 'board')).filter(Boolean);
-    const alight = stops.filter((station) => Number(station.type) === 2)
-      .map((station) => toStop(station, 'alight')).filter(Boolean);
-    push({
-      id: `didi-${route.route_id}`,
-      name: String(route.name ?? '').trim() || `didi-${route.route_id}`,
+
+  for (const shift of raw.shifts ?? []) {
+    const key = String(shift.route_id ?? '');
+    if (!key) continue;
+    const entry = shiftByRoute.get(key) ?? { times: new Set(), prices: [], duration: '' };
+    const clock = parseClock(shift.time_msg);
+    if (clock) entry.times.add(clock);
+    const fen = parseFen(shift.fee_msg);
+    if (fen) entry.prices.push(fen);
+    if (shift.duration_text) entry.duration = shift.duration_text;
+    shiftByRoute.set(key, entry);
+  }
+
+  for (const [routeId, stations] of Object.entries(raw.routes ?? {})) {
+    const board = [];
+    const alight = [];
+    for (const station of stations ?? []) {
+      const stop = toStop(station, Number(station.type) === 1 ? 'board' : 'alight');
+      if (!stop) continue;
+      (stop.role === 'board' ? board : alight).push(stop);
+    }
+    if (board.length === 0 || alight.length === 0) { droppedLines += 1; continue; }
+
+    const shift = shiftByRoute.get(routeId) ?? { times: new Set(), prices: [], duration: '' };
+    const prices = shift.prices.filter((fen) => Number.isFinite(fen));
+    seen.add(`didi-${routeId}`);
+    routes.push({
+      id: `didi-${routeId}`,
+      name: `${board[0].name} → ${alight[alight.length - 1].name}`,
       coordinateSystem: 'gcj02',
-      date: String(raw.pulled_at ?? route.pulled_at ?? ''),
-      originCity: String(route.from_city ?? ''),
-      destinationCity: String(route.to_city ?? ''),
-      departTimes: [],
-      priceFen: null,
+      date: String(raw.pulled_at ?? ''),
+      originCity: '',
+      destinationCity: '',
+      departTimes: [...shift.times].sort(),
+      priceFen: prices.length ? Math.min(...prices) : null,
       carrier: '滴滴站点巴士',
-    }, board, alight, {});
+      durationText: shift.duration ?? '',
+      provinceCode: String(board[0].adcode ?? '').slice(0, 2) === '44' ? '44' : 'unknown',
+      stops: [...board, ...alight],
+    });
   }
 }
 

@@ -208,10 +208,15 @@ try {
 
 	await searchBox.fill("稔山市场");
 	const stationResult = panelAside.getByRole("button", { name: /稔山市场/ });
-	assert((await stationResult.count()) === 1, "稔山市场 must be discoverable by exact station name");
-	await stationResult.click();
+	assert((await stationResult.count()) >= 1, "稔山市场 must be discoverable by exact station name");
+	await stationResult.first().click();
 	await stopCard.getByRole("heading", { name: "稔山市场", exact: true }).waitFor({ state: "visible" });
-	await stopCard.getByText("暂无可核验班次", { exact: true }).waitFor({ state: "visible" });
+	// 抓包补全滴滴全量线路后，稔山市场应当挂着真实线路和班次，不再是"暂无可核验班次"。
+	const renshanText = await stopCard.innerText();
+	assert(/\d+ 条线路/.test(renshanText), `稔山市场 must list associated lines, got ${renshanText.slice(0, 80)}`);
+	assert(/可上车|可下车/.test(renshanText), "稔山市场 lines must state boarding/alighting role");
+	assert(!renshanText.includes("暂无可核验班次"), "稔山市场 now has verified shifts; the empty state is stale");
+	assert(/\d{1,2}:\d{2}/.test(renshanText), "稔山市场 lines must show departure times");
 	await map.locator('.bus-selected-stop[data-stop-name="稔山市场"]').waitFor({ state: "visible" });
 
 	mkdirSync("tmp", { recursive: true });

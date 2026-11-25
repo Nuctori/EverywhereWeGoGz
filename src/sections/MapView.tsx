@@ -1234,7 +1234,13 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
                 {stopAssociations.length > 0 && ` · ${stopAssociations.length} 条线路`}
               </p>
               <p className="mt-0.5 text-[11px] text-stone-500">
-                {busLinesLoading ? '正在加载线路明细…' : busLinesError ? '线路明细暂时无法加载' : '暂无可核验班次'}
+                {busLinesLoading
+                  ? '正在加载线路明细…'
+                  : busLinesError
+                    ? '线路明细暂时无法加载'
+                    : stopAssociations.length > 0
+                      ? `${stopAssociations.length} 条线路 · ${stopAssociations.reduce((sum, item) => sum + item.line.departTimes.length, 0)} 个班次`
+                      : '暂无可核验班次'}
                 {busLinesError && <button type="button" className="ml-2 text-sky-700 underline" onClick={retryBusLines}>重试</button>}
               </p>
               <p className="mt-0.5 text-[10px] text-stone-500">
