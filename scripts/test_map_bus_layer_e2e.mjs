@@ -182,27 +182,37 @@ try {
 	// 点一个被多条线路共用的站点：卡片要聚合"这个站有哪些车、几点走"。
 	await searchBox.fill("白云机场T2");
 	await page.waitForTimeout(900);
-	await panelAside.locator("button", { hasText: "白云机场" }).first().click();
+	await panelAside.getByRole("button", { name: /白云机场.*看线路/ }).first().click();
 	await page.waitForTimeout(2200);
-	const sharedStop = map.locator('path[data-stop-name="白云机场T2航站楼"]').first();
+	const sharedStop = map.locator('path.bus-line-stop[data-stop-name="白云机场T2航站楼"]').first();
 	assert((await sharedStop.count()) > 0, "the shared stop must be drawn on the map");
 	await sharedStop.dispatchEvent("click");
 	await page.waitForTimeout(1200);
-	const stopCard = page.locator("div", { hasText: "站点详情" }).last();
+	const stopCard = page.getByRole("region", { name: "站点详情", exact: true });
 	await stopCard.waitFor({ state: "visible", timeout: 6000 });
 	const stopText = await stopCard.innerText();
-	assert(/\d+ 条线路/.test(stopText), `the stop card must aggregate lines, got ${stopText.slice(0, 60)}`);
-	assert(/\d+ 个班次/.test(stopText), "the stop card must count departures");
+	assert(stopText.includes("7 条线路"), `the shared stop must list all seven associated lines, got ${stopText}`);
+	assert((await stopCard.getByRole("button", { name: /可下车/ }).count()) === 7, "all seven associations must be selectable and marked for alighting");
+	assert(/可上车|可下车/.test(stopText), "the stop card must identify each line's boarding or alighting role");
+	assert(stopText.includes("不是本站班次"), "line departure times must not be presented as stop-specific times");
 
 	// 滴滴城市对的站点必须真的画出来：稔山市场这类只有滴滴有的站，缺了就是"数据没接对"。
 	await searchBox.fill("惠州");
 	await page.waitForTimeout(900);
-	await panelAside.locator("button", { hasText: "惠州市" }).first().click();
+	await panelAside.getByRole("button", { name: /广州市 → 惠州市.*看站点/ }).click();
 	await page.waitForTimeout(2500);
 	assert(
 		(await map.locator('path[data-stop-name="稔山市场"]').count()) >= 1,
 		"city-pair stations (e.g. 稔山市场) must be drawn with their line",
 	);
+
+	await searchBox.fill("稔山市场");
+	const stationResult = panelAside.getByRole("button", { name: /稔山市场/ });
+	assert((await stationResult.count()) === 1, "稔山市场 must be discoverable by exact station name");
+	await stationResult.click();
+	await stopCard.getByRole("heading", { name: "稔山市场", exact: true }).waitFor({ state: "visible" });
+	await stopCard.getByText("暂无可核验班次", { exact: true }).waitFor({ state: "visible" });
+	await map.locator('.bus-selected-stop[data-stop-name="稔山市场"]').waitFor({ state: "visible" });
 
 	mkdirSync("tmp", { recursive: true });
 	await page.screenshot({ path: screenshotPath });

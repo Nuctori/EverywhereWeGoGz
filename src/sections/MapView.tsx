@@ -243,6 +243,16 @@ function PlaceClusterPanel({
   );
 }
 
+type BusStopSelection = {
+  name: string;
+  lat: number;
+  lng: number;
+  coordinateSystem: BusLine['coordinateSystem'];
+  precision?: BusLineStop['precision'];
+  adcode?: string;
+  catalog?: { county: string; role: BusLineStop['role'] };
+};
+
 function BusRoutePanel({
   origins,
   routes,
@@ -250,6 +260,7 @@ function BusRoutePanel({
   selectedRoute,
   onSelect,
   onSelectLine,
+  onSelectStop,
   onClose,
   expanded,
 }: {
@@ -259,6 +270,7 @@ function BusRoutePanel({
   selectedRoute: BusRoute | null;
   onSelect: (route: BusRoute | null) => void;
   onSelectLine: (line: BusLine) => void;
+  onSelectStop: (stop: BusStopSelection) => void;
   onClose: () => void;
   expanded: boolean;
 }) {
@@ -311,6 +323,20 @@ function BusRoutePanel({
       || line.stops.some((stop) => stop.name.includes(trimmedQuery))
     )).slice(0, 60);
   }, [trimmedQuery, detailLines]);
+
+  const stationMatches = useMemo(() => {
+    if (!trimmedQuery) return [];
+    const byId = new globalThis.Map<string, BusStopSelection>();
+    const add = (stops: BusRoute['stations'], role: BusLineStop['role']) => {
+      for (const stop of stops) {
+        if (!stop.name.includes(trimmedQuery) && !stop.county.includes(trimmedQuery)) continue;
+        byId.set(`${role}:${stop.id}`, { ...stop, coordinateSystem: 'gcj02', catalog: { county: stop.county, role } });
+      }
+    };
+    for (const origin of origins) add(origin.stations, 'board');
+    for (const route of routes) add(route.stations, 'alight');
+    return [...byId.entries()].sort(([, a], [, b]) => Number(b.name === trimmedQuery) - Number(a.name === trimmedQuery));
+  }, [origins, routes, trimmedQuery]);
 
   if (routes.length === 0) return null;
 
@@ -368,6 +394,18 @@ function BusRoutePanel({
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
         {trimmedQuery ? (
           <div className="space-y-3">
+            {stationMatches.length > 0 && (
+              <section aria-label="滴滴站点目录" className="space-y-1.5">
+                <p className="px-1 text-[11px] text-stone-500">滴滴站点目录 · {stationMatches.length} 个</p>
+                {stationMatches.map(([key, stop]) => (
+                  <button key={key} type="button" onClick={() => onSelectStop(stop)}
+                    className="block w-full rounded-xl border border-stone-200 bg-white px-3 py-2 text-left text-xs hover:border-sky-300">
+                    <span className="font-medium text-stone-800">{stop.name}</span>
+                    <span className="ml-2 text-stone-500">{stop.catalog?.county} · {stop.catalog?.role === 'board' ? '上车点' : '下车点'}</span>
+                  </button>
+                ))}
+              </section>
+            )}
             <section>
               <p className="px-1 text-[11px] font-medium text-stone-500">
                 城市对 · {cityPairMatches.length} 条
@@ -477,7 +515,7 @@ function BusRoutePanel({
       </div>
 
       <p className="shrink-0 border-t border-stone-100 px-3 py-2 text-[10px] leading-4 text-stone-400">
-        粗蓝线=具体线路（乔巴士，按上车站→下车站逐站串起来）；细蓝线=城市对汇总（滴滴）；灰虚线=跨境/跨省
+        粗蓝线=具体线路的站点连线示意（非车辆轨迹）；细蓝线=滴滴城市对汇总；灰虚线=跨境/跨省
         {crossBorderNames.length > 0 ? `（${crossBorderNames.join('、')}）` : ''}。
         地图上：<span className="text-[#1dcc8c]">绿点=上车点</span>、<span className="text-[#ff754b]">橙点=下车点</span>。
         站点坐标来自对应数据源，底图切换时已做坐标系换算。
@@ -508,11 +546,28 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
   const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
   const [selectedBusLine, setSelectedBusLine] = useState<BusLine | null>(null);
   // 点一个站点时，用户真正想知道的是"我在这儿能坐哪些车、几点走"，所以要按站点聚合线路。
-  const [selectedStop, setSelectedStop] = useState<{ name: string; lines: BusLine[] } | null>(null);
+  const [selectedStop, setSelectedStop] = useState<BusStopSelection | null>(null);
   const [busLayerEnabled, setBusLayerEnabled] = useState(false);
   const [selectedBusRoute, setSelectedBusRoute] = useState<BusRoute | null>(null);
   const { data: busData, loading: busLoading, error: busError, retry: retryBusRoutes } = useBusRoutes(busLayerEnabled);
-  const { data: busLineData } = useBusLines(busLayerEnabled);
+  const { data: busLineData, loading: busLinesLoading, error: busLinesError, retry: retryBusLines } = useBusLines(busLayerEnabled);
+  const stopAssociations = useMemo(() => {
+    if (!selectedStop) return [];
+    const provider = MAP_TILE_PROVIDERS[0];
+    const toPoint = (stop: BusStopSelection) => stop.coordinateSystem === 'gcj02'
+      ? busPointForProvider(stop, provider) : wgs84PointForProvider(stop, provider);
+    const selectedPoint = L.latLng(toPoint(selectedStop));
+    return (busLineData?.routes ?? []).flatMap((line) => {
+      const roles = new Set(line.stops.filter((stop) => {
+        if (stop.name.normalize('NFKC').trim() !== selectedStop.name.normalize('NFKC').trim()) return false;
+        if (selectedStop.adcode && stop.adcode && selectedStop.adcode !== stop.adcode) return false;
+        const approximate = (selectedStop.precision ?? 'node') !== 'node' || (stop.precision ?? 'node') !== 'node';
+        if (approximate && (!selectedStop.adcode || selectedStop.adcode !== stop.adcode)) return false;
+        return selectedPoint.distanceTo(toPoint({ ...stop, coordinateSystem: line.coordinateSystem })) <= (approximate ? 1 : 100);
+      }).map((stop) => stop.role));
+      return roles.size ? [{ line, roles }] : [];
+    });
+  }, [busLineData, selectedStop]);
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -799,8 +854,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
               setSelectedPlace(null);
               setClusterPlaces([]);
               setSelectedBusLine(null);
-              setSelectedStop(null);
-              setSelectedBusRoute(route);
+              setSelectedStop({ ...station, coordinateSystem: 'gcj02', catalog: { county: station.county, role: kind === 'pickup' ? 'board' : 'alight' } });
             });
             dot.addTo(layer);
             dot.getElement()?.setAttribute('data-stop-name', station.name);
@@ -844,6 +898,8 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       line.on('click', () => {
         setSelectedPlace(null);
         setClusterPlaces([]);
+        setSelectedStop(null);
+        setSelectedBusLine(null);
         setSelectedBusRoute(route);
       });
       line.addTo(layer);
@@ -864,6 +920,8 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       endpoint.on('click', () => {
         setSelectedPlace(null);
         setClusterPlaces([]);
+        setSelectedStop(null);
+        setSelectedBusLine(null);
         setSelectedBusRoute(route);
       });
       endpoint.addTo(layer);
@@ -968,6 +1026,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         setClusterPlaces([]);
         setSelectedBusRoute(null);
         setSelectedBusLine(line);
+        setSelectedStop(null);
         const bounds = L.latLngBounds(points);
         if (bounds.isValid()) map.fitBounds(bounds.pad(0.2), { maxZoom: 12, animate: false });
       };
@@ -997,24 +1056,12 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         );
         // 点站点的语义是"我在这儿能坐哪些车"：把这个站经过的所有线路汇总出来。
         stopMarker.on('click', () => {
-          const matched = (busLineData?.routes ?? []).filter((candidate) => (
-            // 同一个物理站点在不同线路里名字常有细微差异，按"同名 或 250 米内"聚合。
-            // 但区县级定位的站点会被堆在同一个区县中心，这时候只按同名匹配，否则会把几十条不相干的线算进来。
-            candidate.stops.some((entry) => (
-              entry.name === stop.name
-              || (
-                (stop.precision ?? 'node') === 'node'
-                && (entry.precision ?? 'node') === 'node'
-                && Math.abs(entry.lat - stop.lat) <= 0.0025
-                && Math.abs(entry.lng - stop.lng) <= 0.0025
-              )
-            ))
-          ));
+
           setSelectedPlace(null);
           setClusterPlaces([]);
           setSelectedBusRoute(null);
           setSelectedBusLine(null);
-          setSelectedStop({ name: stop.name, lines: matched });
+          setSelectedStop({ ...stop, coordinateSystem: line.coordinateSystem });
         });
         stopMarker.addTo(layer);
         stopMarker.getElement()?.setAttribute('data-line-role', stop.role);
@@ -1034,7 +1081,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     const map = mapRef.current;
     if (!map || !busLayerEnabled || !busData) return;
     // 选中线路时视野交给下面那个"收到单条线路"的 effect，避免两个 fit 互相打架。
-    if (selectedBusRoute) return;
+    if (selectedBusRoute || selectedStop || selectedBusLine) return;
 
     const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
     const bounds = L.latLngBounds([
@@ -1057,7 +1104,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     return () => {
       observer?.disconnect();
     };
-  }, [busData, busLayerEnabled, expanded, providerIndex, selectedBusRoute]);
+  }, [busData, busLayerEnabled, expanded, providerIndex, selectedBusLine, selectedBusRoute, selectedStop]);
 
   // 选中线路后把视野收到这条线：整个省的范围（湛江↔汕头约 6.5 度）在 1126px 宽里
   // 最多只能到 z7，海岸线是粗的；近看才能分清雷州半岛和北部湾，也才看得清上下车点。
@@ -1085,6 +1132,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     setClusterPlaces([]);
     setSelectedBusRoute(null);
     setSelectedBusLine(line);
+    setSelectedStop(null);
     const map = mapRef.current;
     if (!map) return;
     const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
@@ -1098,8 +1146,24 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     if (bounds.isValid()) map.fitBounds(bounds.pad(0.2), { maxZoom: 12, animate: false });
   };
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !busLayerEnabled || !selectedStop) return;
+    const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
+    const point = selectedStop.coordinateSystem === 'gcj02' ? busPointForProvider(selectedStop, provider) : wgs84PointForProvider(selectedStop, provider);
+    map.setView(point, Math.max(12, map.getZoom()), { animate: false });
+    const marker = L.circleMarker(point, {
+      radius: 8, color: '#0369a1', weight: 3, fillColor: '#fff', fillOpacity: 1,
+      className: 'bus-selected-stop',
+    }).addTo(map);
+    marker.getElement()?.setAttribute('data-stop-name', selectedStop.name);
+    return () => { marker.remove(); };
+  }, [busLayerEnabled, expanded, providerIndex, selectedStop]);
+
   const toggleBusLayer = () => {
     if (busLayerEnabled) {
+      setSelectedStop(null);
+      setSelectedBusLine(null);
       setSelectedBusRoute(null);
     } else {
       setSelectedPlace(null);
@@ -1160,14 +1224,21 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         )}
       </div>
       {selectedStop ? (
-        <div className="absolute bottom-3 left-3 z-[1002] w-[304px] max-h-[48%] overflow-y-auto rounded-2xl border border-emerald-200 bg-white/95 p-3 shadow-lg backdrop-blur">
+        <div role="region" aria-label="站点详情" className="absolute bottom-3 left-3 z-[1002] w-[304px] max-h-[48%] overflow-y-auto rounded-2xl border border-emerald-200 bg-white/95 p-3 shadow-lg backdrop-blur">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-emerald-600">站点详情</p>
               <h4 className="mt-0.5 text-sm font-semibold text-stone-900">{selectedStop.name}</h4>
               <p className="mt-0.5 text-[11px] text-stone-500">
-                {selectedStop.lines.length} 条线路
-                {` · ${selectedStop.lines.reduce((sum, line) => sum + line.departTimes.length, 0)} 个班次`}
+                {selectedStop.catalog && `滴滴站点目录 · ${selectedStop.catalog.role === 'board' ? '上车点' : '下车点'}${selectedStop.catalog.county ? ` · ${selectedStop.catalog.county}` : ''}`}
+                {stopAssociations.length > 0 && ` · ${stopAssociations.length} 条线路`}
+              </p>
+              <p className="mt-0.5 text-[11px] text-stone-500">
+                {busLinesLoading ? '正在加载线路明细…' : busLinesError ? '线路明细暂时无法加载' : '暂无可核验班次'}
+                {busLinesError && <button type="button" className="ml-2 text-sky-700 underline" onClick={retryBusLines}>重试</button>}
+              </p>
+              <p className="mt-0.5 text-[10px] text-stone-500">
+                {stopAssociations.length > 0 ? '下方时刻是线路发车参考，不是本站班次。' : '未收录明细不代表没有车。'}
               </p>
             </div>
             <button
@@ -1180,7 +1251,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             </button>
           </div>
           <div className="mt-2 space-y-1.5">
-            {selectedStop.lines.slice(0, 12).map((line) => (
+            {stopAssociations.map(({ line, roles }) => (
               <button
                 key={line.id}
                 type="button"
@@ -1189,8 +1260,10 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
               >
                 <span className="block truncate text-xs font-medium text-stone-800">{line.name}</span>
                 <span className="mt-0.5 block truncate text-[10px] text-stone-500">
-                  {line.departTimes.length > 0 ? line.departTimes.slice(0, 6).join(' / ') : '班次未提供'}
-                  {line.departTimes.length > 6 ? ` …共 ${line.departTimes.length} 班` : ''}
+                  {[roles.has('board') && '可上车', roles.has('alight') && '可下车'].filter(Boolean).join(' · ')}
+                </span>
+                <span className="mt-0.5 block text-[10px] text-stone-500">
+                  {line.departTimes.length > 0 ? `线路发车参考：${line.departTimes.join(' / ')}` : '发车时刻未提供'}
                 </span>
                 <span className="mt-0.5 block truncate text-[10px] text-stone-400">
                   {line.id.startsWith('qbs-') ? '乔巴士' : '滴滴站点巴士'}
@@ -1199,9 +1272,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
                 </span>
               </button>
             ))}
-            {selectedStop.lines.length > 12 && (
-              <p className="px-1 text-[10px] text-stone-400">还有 {selectedStop.lines.length - 12} 条线路未列出</p>
-            )}
+
           </div>
         </div>
       ) : selectedBusLine && (
@@ -1293,9 +1364,17 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             setSelectedPlace(null);
             setClusterPlaces([]);
             setSelectedBusLine(null);
+            setSelectedStop(null);
             setSelectedBusRoute(route);
           }}
           onSelectLine={focusBusLine}
+          onSelectStop={(stop) => {
+            setSelectedPlace(null);
+            setClusterPlaces([]);
+            setSelectedBusRoute(null);
+            setSelectedBusLine(null);
+            setSelectedStop(stop);
+          }}
           onClose={() => setSelectedBusRoute(null)}
           expanded={expanded}
         />
