@@ -17,6 +17,19 @@ mustInclude('- name: Verify deploy workflow contract', 'expected deploy workflow
 mustInclude('npm run audit:deploy-workflow', 'expected deploy workflow to run its self-check');
 mustInclude('uses: actions/upload-pages-artifact@v3', 'expected official Pages artifact upload action');
 mustInclude('uses: actions/deploy-pages@v4', 'expected official Pages deploy action');
+
+// Upload, readiness and deploy must target this run attempt, not a prior upload.
+const pagesSteps = workflow.match(/      - name: Upload Pages artifact\n([\s\S]*?)      - name: Wait for Pages artifact\n([\s\S]*?)      - name: Deploy to GitHub Pages\n([\s\S]*)$/);
+assert.ok(pagesSteps, 'expected a Pages artifact readiness check between upload and deploy');
+mustInclude('PAGES_ARTIFACT_NAME: github-pages-${{ github.run_attempt }}', 'expected a separate artifact name for each attempt');
+assert.ok(pagesSteps[1].includes('id: pages_upload'));
+assert.ok(pagesSteps[1].includes('name: ${{ env.PAGES_ARTIFACT_NAME }}'));
+assert.ok(pagesSteps[2].includes('uses: ./.github/actions/wait-for-pages-artifact'));
+assert.ok(pagesSteps[2].includes('timeout-minutes: 2'));
+assert.ok(pagesSteps[2].includes('artifact-name: ${{ env.PAGES_ARTIFACT_NAME }}'));
+assert.ok(pagesSteps[2].includes('artifact-id: ${{ steps.pages_upload.outputs.artifact_id }}'));
+assert.ok(!/continue-on-error:|if:/.test(pagesSteps[2] + pagesSteps[3]), 'readiness failure must block Pages deployment');
+assert.ok(pagesSteps[3].includes('artifact_name: ${{ env.PAGES_ARTIFACT_NAME }}'));
 mustInclude('git worktree add --detach', 'expected CDN artifact publishing to use the checked-out repository credentials');
 mustInclude('push --force origin HEAD:cdn-assets', 'expected CDN artifact branch push');
 mustInclude('cp -a dist/.', 'expected built dist directory to be published to CDN branch');

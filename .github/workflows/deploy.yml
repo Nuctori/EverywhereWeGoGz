@@ -14,6 +14,7 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  PAGES_ARTIFACT_NAME: github-pages-${{ github.run_attempt }}
 
 permissions:
   contents: write
@@ -138,12 +139,22 @@ jobs:
           echo "dist 体积: $(du -sh dist | cut -f1)"
 
       - name: Upload Pages artifact
+        id: pages_upload
         uses: actions/upload-pages-artifact@v3
         with:
+          name: ${{ env.PAGES_ARTIFACT_NAME }}
           path: ./dist
+
+      # Artifact Service can briefly return 0 results after upload finalizes (actions/deploy-pages#451).
+      - name: Wait for Pages artifact
+        uses: ./.github/actions/wait-for-pages-artifact
+        timeout-minutes: 2
+        with:
+          artifact-name: ${{ env.PAGES_ARTIFACT_NAME }}
+          artifact-id: ${{ steps.pages_upload.outputs.artifact_id }}
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
         with:
-          timeout: 1800000
+          artifact_name: ${{ env.PAGES_ARTIFACT_NAME }}

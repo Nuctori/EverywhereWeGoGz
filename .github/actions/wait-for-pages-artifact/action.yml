@@ -1,0 +1,12 @@
+name: Wait for Pages artifact
+description: Wait until the current run can list the exact uploaded artifact
+inputs:
+  artifact-name:
+    description: Name used by the upload and deploy actions
+    required: true
+  artifact-id:
+    description: Artifact ID returned by the upload action
+    required: true
+runs:
+  using: node24
+  main: index.mjs

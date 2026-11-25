@@ -37,7 +37,7 @@
     "data:rebuild-geo": "python scripts/rebuild_geo_data.py",
     "audit:geocode-destinations": "python scripts/test_geocode_destinations.py",
     "audit:geo-coverage": "node scripts/test_geo_coverage.mjs",
-    "audit:deploy-workflow": "node scripts/test_deploy_workflow.mjs",
+    "audit:deploy-workflow": "node scripts/test_deploy_workflow.mjs && node --test scripts/test_wait_for_pages_artifact.mjs",
     "test:static-asset-fallback": "node scripts/test_static_asset_fallback.mjs",
     "test:cdn-pool": "node scripts/test_cdn_pool.mjs",
     "audit:jrt365-crawl-guard": "node scripts/test_jrt365_crawl_guard.mjs",
@@ -162,6 +162,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@actions/artifact": "6.3.1",
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.62.1",
     "@types/leaflet": "^1.9.21",
