@@ -27,7 +27,7 @@ assert.ok(Array.isArray(payload.routes) && payload.routes.length > 0, '至少要
 const ids = new Set();
 let stopTotal = 0;
 for (const route of payload.routes) {
-  assert.ok(typeof route.id === 'string' && /^(qbs|didi)-/.test(route.id), `线路 id 非法：${route.id}`);
+  assert.ok(typeof route.id === 'string' && /^(qbs|didi|cx)-/.test(route.id), `线路 id 非法：${route.id}`);
   assert.ok(!ids.has(route.id), `线路 id 重复：${route.id}`);
   ids.add(route.id);
   assert.ok(route.name.length > 0, `${route.id} 缺少线路名`);
@@ -70,3 +70,36 @@ for (const route of payload.routes) {
 }
 
 console.log(`[bus-lines] ok：${payload.routes.length} 条线路 / ${stopTotal} 个站点`);
+
+// 创想巴士（车盈网白牌小程序）原始数据在库里时，成品必须真的带上了它的线路：
+// 只声明来源却不落线路，等于把一家渠道静默丢掉。
+const cxRawPath = path.join(root, 'src/data/raw_cx_lines.json');
+const cxOutputPath = path.join(root, 'public/data/bus-lines-cx.json');
+if (existsSync(cxRawPath)) {
+  const cxRaw = JSON.parse(readFileSync(cxRawPath, 'utf8'));
+  const cxRawLines = (cxRaw.routes ?? []).filter(
+    (route) => (route.board ?? []).length > 0 && (route.alight ?? []).length > 0,
+  );
+  assert.ok(cxRawLines.length > 0, 'raw_cx_lines.json 里没有任何可用线路，先重新采集');
+  assert.ok(existsSync(cxOutputPath), '缺少 bus-lines-cx.json，先跑 npm run data:bus-lines');
+  assert.ok(statSync(cxOutputPath).size < 2 * 1024 * 1024, 'bus-lines-cx.json 不应超过 2MB');
+
+  const cxPayload = JSON.parse(readFileSync(cxOutputPath, 'utf8'));
+  assert.ok(
+    cxPayload.source?.providers?.some((name) => name.includes('创想巴士')),
+    'bus-lines-cx.json 的 source.providers 没写创想巴士',
+  );
+  assert.equal(
+    cxPayload.routes.length,
+    cxRawLines.length,
+    `创想巴士线路数对不上：原始 ${cxRawLines.length} 条，成品 ${cxPayload.routes.length} 条`,
+  );
+  for (const route of cxPayload.routes) {
+    assert.ok(route.id.startsWith('cx-'), `创想巴士线路 id 前缀不对：${route.id}`);
+    // 这家渠道的坐标是接口原生 GCJ-02，混成 wgs84 会让整条线在底图上偏 500 米。
+    assert.equal(route.coordinateSystem, 'gcj02', `${route.id} 坐标系应为 gcj02`);
+  }
+  const overlapped = cxPayload.routes.filter((route) => ids.has(route.id));
+  assert.equal(overlapped.length, 0, `两个文件出现重复线路 id：${overlapped[0]?.id}`);
+  console.log(`[bus-lines] 创想巴士：${cxPayload.routes.length} 条线路已接入`);
+}

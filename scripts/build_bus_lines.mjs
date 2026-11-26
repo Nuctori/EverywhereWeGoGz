@@ -12,6 +12,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const qbsPath = path.join(root, 'src/data/raw_qbs_bus_lines.json');
 const didiPath = path.join(root, 'src/data/raw_didi_routes_full.json');
 const outputPath = path.join(root, 'public/data/bus-lines.json');
+const cxOutputPath = path.join(root, 'public/data/bus-lines-cx.json');
 
 const CHINA = { minLat: 18, maxLat: 54, minLng: 73, maxLng: 135 };
 const insideChina = (lat, lng) =>
@@ -28,6 +29,10 @@ const CITY_BY_PREFIX = {
   4453: '云浮市',
 };
 const cityOf = (adcode) => CITY_BY_PREFIX[String(adcode ?? '').slice(0, 4)] ?? '';
+/** 城市名 → adcode，给只带 cityName 的来源（创想巴士）补区划码。 */
+const CITY_ADCODE_BY_NAME = Object.fromEntries(
+  Object.entries(CITY_BY_PREFIX).map(([adcode, name]) => [name, adcode]),
+);
 
 const routes = [];
 const seen = new Set();
@@ -117,6 +122,8 @@ const toStop = (station, role) => {
     // 乔巴士站点带 adcode，滴滴站点带 county_id：都归一化成 6 位行政区划代码，
     // 否则滴滴线路的省份判不出来，会被整片误标成"跨境/跨省"灰线。
     adcode: String(station.adcode ?? station.county_id ?? ''),
+    // cityName 只在建库时用来补 adcode，不写进产物（每条线路几千个站点，白占体积）。
+    ...(station.cityName ? { cityName: String(station.cityName) } : {}),
   };
 };
 
@@ -213,22 +220,90 @@ if (existsSync(didiPath)) {
   }
 }
 
+// ---- 创想巴士（车盈网白牌小程序 wxb5f1e7327d7fbb6a）----
+// pull_cx_lines.mjs 的产物：按 lineId 归并好的线路，站点坐标是接口原生 GCJ-02，
+// 与滴滴同一坐标系，所以同样绕开 push() 的城市锚点过滤。
+const cxPath = path.join(root, 'src/data/raw_cx_lines.json');
+if (existsSync(cxPath)) {
+  const raw = JSON.parse(readFileSync(cxPath, 'utf8'));
+  providers.push('创想巴士');
+  raws.push(path.basename(cxPath));
+
+  const guangdongNames = new Set(Object.values(CITY_BY_PREFIX));
+
+  for (const line of raw.routes ?? []) {
+    const board = (line.board ?? []).map((station) => toStop(station, 'board')).filter(Boolean);
+    const alight = (line.alight ?? []).map((station) => toStop(station, 'alight')).filter(Boolean);
+    if (board.length === 0 || alight.length === 0) { droppedLines += 1; continue; }
+
+    for (const stop of [...board, ...alight]) {
+      const adcode = CITY_ADCODE_BY_NAME[String(stop.cityName ?? '')];
+      if (adcode) stop.adcode = adcode;
+      delete stop.cityName;
+    }
+
+    const originCity = String(line.board?.[0]?.cityName ?? '');
+    const destinationCity = String(line.alight?.[line.alight.length - 1]?.cityName ?? '');
+    const minutes = Number(line.alight?.[0]?.runTime ?? 0);
+    const priceFen = Number(line.priceYuan) > 0 ? Math.round(Number(line.priceYuan) * 100) : null;
+
+    seen.add(`cx-${line.lineId}`);
+    routes.push({
+      id: `cx-${line.lineId}`,
+      name: String(line.lineName ?? '').trim() || `${board[0].name} → ${alight[alight.length - 1].name}`,
+      coordinateSystem: 'gcj02',
+      date: String(raw.pulledAt ?? '').slice(0, 10),
+      originCity,
+      destinationCity,
+      departTimes: [...new Set(line.departTimes ?? [])].sort(),
+      priceFen,
+      carrier: '创想巴士',
+      durationText: minutes > 0 ? `${Math.floor(minutes / 60)}小时${minutes % 60}分` : '',
+      provinceCode: guangdongNames.has(originCity) && guangdongNames.has(destinationCity) ? '44' : 'unknown',
+      stops: [...board, ...alight],
+    });
+  }
+}
+
 if (routes.length === 0) {
   throw new Error('一条可用线路都没有（站点缺坐标？），拒绝写出空数据覆盖线上文件');
 }
-
 routes.sort((left, right) => left.id.localeCompare(right.id));
 
-mkdirSync(path.dirname(outputPath), { recursive: true });
-writeFileSync(outputPath, JSON.stringify({
-  generatedAt: new Date().toISOString().slice(0, 10),
-  source: { providers, raw: raws },
-  routes,
-}, null, 1));
+// 分两个文件写：单文件已经 3.8MB，前端一次性 parse + zod 校验会明显卡顿；
+// 创想巴士单独一份，前端并行取、合并使用，任一源失败也不拖垮另一边。
+const cxRoutes = routes.filter((route) => route.id.startsWith('cx-'));
+const baseRoutes = routes.filter((route) => !route.id.startsWith('cx-'));
+const cxProvider = providers.filter((name) => name.includes('创想巴士'));
+const baseProviders = providers.filter((name) => !name.includes('创想巴士'));
+const cxRaw = raws.filter((name) => name.includes('cx'));
+const baseRaw = raws.filter((name) => !name.includes('cx'));
+
+const writePayload = (target, payload) => {
+  mkdirSync(path.dirname(target), { recursive: true });
+  writeFileSync(target, JSON.stringify(payload, null, 1));
+  return statSync(target).size;
+};
+
+const generatedAt = new Date().toISOString().slice(0, 10);
+const baseSize = writePayload(outputPath, {
+  generatedAt,
+  source: { providers: baseProviders, raw: baseRaw },
+  routes: baseRoutes,
+});
+let cxSize = 0;
+if (cxRoutes.length > 0) {
+  cxSize = writePayload(cxOutputPath, {
+    generatedAt,
+    source: { providers: cxProvider, raw: cxRaw },
+    routes: cxRoutes,
+  });
+}
 
 const stopCount = routes.reduce((sum, route) => sum + route.stops.length, 0);
 console.log(
   `[bus-lines] ${routes.length} 条线路 / ${stopCount} 个站点 -> ${path.relative(root, outputPath)}`
   + (droppedLines ? `（跳过 ${droppedLines} 条缺坐标线路、${droppedStops} 个缺坐标站点）` : ''),
 );
-console.log(`[bus-lines] 文件大小 ${(statSync(outputPath).size / 1024).toFixed(0)}KB`);
+console.log(`[bus-lines] 文件大小 ${(baseSize / 1024).toFixed(0)}KB`
+  + (cxRoutes.length ? ` + 创想巴士 ${(cxSize / 1024).toFixed(0)}KB（${cxRoutes.length} 条）` : ''));
