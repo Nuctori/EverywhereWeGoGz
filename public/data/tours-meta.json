@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-11-24T15:41:59.259Z",
-  "latestUpdatedAt": "2026-11-24T15:41:01.478203",
-  "totalRecords": 6333,
-  "listRecords": 6333,
-  "detailFiles": 6333,
+  "generatedAt": "2026-11-26T14:46:50.846Z",
+  "latestUpdatedAt": "2026-11-26T14:46:39.969940",
+  "totalRecords": 6273,
+  "listRecords": 6273,
+  "detailFiles": 6273,
   "sourceStats": {
-    "假日通": 217,
+    "假日通": 157,
     "广东中旅": 1566,
     "康辉": 1870,
     "广州去旅行": 29,
@@ -15,30 +15,30 @@
     "广州康辉": 53
   },
   "destinationStats": {
-    "广东": 1635,
-    "广西": 48,
-    "其他": 1036,
+    "广东": 1614,
+    "广西": 46,
     "河南": 12,
+    "其他": 1015,
     "湖南": 25,
-    "张家界": 45,
+    "张家界": 44,
     "江西": 43,
-    "福建": 16,
-    "湖北": 62,
-    "重庆": 56,
-    "桂林": 75,
-    "云南": 231,
-    "山东": 46,
-    "北京": 151,
-    "华东": 128,
+    "云南": 230,
     "三亚": 127,
-    "四川": 112,
+    "福建": 15,
+    "华东": 126,
+    "山东": 44,
+    "四川": 111,
+    "重庆": 55,
     "西安": 110,
     "新疆": 164,
     "贵州": 51,
+    "北京": 149,
     "港澳": 86,
     "内蒙古": 64,
+    "湖北": 59,
     "厦门": 57,
     "西藏": 57,
+    "桂林": 73,
     "青甘": 57,
     "拉萨": 8,
     "云台山、焦作": 1,
@@ -697,32 +697,32 @@
   "files": {
     "raw": {
       "path": "data/tours.json",
-      "size": 108734297
+      "size": 106903791
     },
     "list": {
       "path": "data/tours-list.json",
-      "size": 32323555
+      "size": 31863114
     },
     "details": {
       "path": "data/tour-details/",
-      "size": 79255645
+      "size": 77869220
     },
     "geoPlaces": {
       "path": "data/geo-places.json",
-      "size": 207035
+      "size": 205808
     },
     "mapIndex": {
       "path": "data/tour-map-index.json",
-      "size": 592502
+      "size": 588182
     },
     "mapCards": {
       "path": "data/tour-map-cards.json",
-      "size": 2565297
+      "size": 2545795
     },
     "mapPlaceCards": {
       "path": "data/tour-map-place-cards/",
-      "files": 285,
-      "chunks": 404
+      "files": 283,
+      "chunks": 401
     }
   }
 }
