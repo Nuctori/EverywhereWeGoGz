@@ -114,7 +114,9 @@ const toStop = (station, role) => {
     // node=地名精确命中，county=退到区县中心，city=退到城市中心
     precision: String(station.precision ?? 'node'),
     arriveTime: String(station.arrive_time ?? station.arriveTime ?? ''),
-    adcode: String(station.adcode ?? ''),
+    // 乔巴士站点带 adcode，滴滴站点带 county_id：都归一化成 6 位行政区划代码，
+    // 否则滴滴线路的省份判不出来，会被整片误标成"跨境/跨省"灰线。
+    adcode: String(station.adcode ?? station.county_id ?? ''),
   };
 };
 
