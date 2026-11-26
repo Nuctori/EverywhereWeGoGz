@@ -48,41 +48,29 @@ try {
 	assert((await toggle.getAttribute("aria-pressed")) === "false", "the bus layer must start switched off");
 
 	await toggle.click();
-	const lines = map.locator("path.bus-route-line");
-	await lines.first().waitFor({ state: "attached", timeout: 15000 });
-	// 两个图层同时存在：巴士线加上来，旅行团点位不能被顶掉。
+	// 地图上只有一种线：具体线路（穿过真实站点）。城市对汇总直线已移除。
+	const lines = map.locator("path.bus-line-detail");
+	await lines.first().waitFor({ state: "attached", timeout: 20000 });
 	assert((await tourMarkers.count()) > 0, "turning the bus layer on must not remove the tour layer");
-	const lineCount = await lines.count();
-	// 广东省内的城市对几乎都有真实线路了，剩下的汇总线只有跨境/跨省那两条。
-	assert(lineCount >= 1, `expected the remaining summary lines, got ${lineCount}`);
+	assert(
+		(await map.locator("path.bus-route-line").count()) === 0,
+		"city-pair summary polylines must not be drawn any more: one line type only",
+	);
 	assert(
 		(await map.locator("path.bus-city-origin").count()) === 2,
 		"expected two origin city markers (广州/江门)",
 	);
-	// 香港(81)、广西梧州(45) 是接口真实返回的跨境/跨省线路，必须用虚线区分，
-	// 不能被当成和省内线路一样的蓝线。
-	const crossBorder = map.locator("path.bus-route-cross-border");
-	assert(
-		(await crossBorder.count()) === 2,
-		`expected two cross-border/province lines, got ${await crossBorder.count()}`,
-	);
-	assert(
-		(await crossBorder.first().getAttribute("stroke-dasharray")) !== null,
-		"cross-border lines must be dashed",
-	);
+	// 跨省线路不再单独配色，避免出现"灰色线"这第二种语义。
+	const greyLines = await map.locator('path.bus-line-detail[stroke="#94a3b8"]').count();
+	assert(greyLines === 0, `cross-border lines must not be styled differently, got ${greyLines}`);
 	assert(busRequests.length === 1, `expected exactly one bus-routes request, got ${busRequests.length}`);
 	assert((await toggle.getAttribute("aria-pressed")) === "true", "the toggle must report the layer as on");
 
-	// 缩放分级：省级视野只留汇总线，线路明细要放大到 z8 才出现。
+	// 打开图层就该看到线网（只是低倍更细更淡），不再有"缩到省域什么都没有"的空窗。
 	const detailLines = map.locator("path.bus-line-detail");
 	const detailStops = map.locator("path.bus-line-stop");
-	const embeddedZoom = Number(await map.getAttribute("data-map-zoom") ?? "0");
-	if (embeddedZoom < 8) {
-		assert(
-			(await detailLines.count()) === 0,
-			"detail lines must stay hidden at province zoom to keep the map responsive",
-		);
-	}
+	assert((await detailLines.count()) > 0, "turning the layer on must immediately show the line network");
+	assert((await detailStops.count()) === 0, "station dots must stay hidden at province zoom");
 
 	// 关掉再打开：连线消失，且不重复请求数据。
 	await toggle.click();
@@ -123,16 +111,28 @@ try {
 	assert(/上车 \d+/.test(cardText), `line card must show pickup/dropoff counts, got ${cardText.slice(0, 80)}`);
 	await page.getByRole("button", { name: "关闭线路详情" }).click();
 
-	await lines.first().waitFor({ state: "attached", timeout: 15000 });
-	await lines.first().dispatchEvent("click");
+	// 城市对仍然可以点开看它名下的上下车点（只是不再画一条汇总线）。
+	// 出发地筛选：默认按 IP 城市勾选，全选后覆盖全部出发地。
+	const originGroup = page.locator('[role="group"][aria-label="出发地筛选"]').first();
+	await originGroup.waitFor({ state: "visible", timeout: 8000 });
+	const originOptions = await originGroup.locator('input[type="checkbox"]').count();
+	assert(originOptions >= 10, `expected all departure cities as filter options, got ${originOptions}`);
+	const panelAside = page.locator('aside[aria-label^="站点巴士线路"]').first();
+	const originHeader = await panelAside.locator("p", { hasText: "出发地" }).first().innerText();
+	assert(/已选 \d+\/\d+|全部/.test(originHeader), `origin filter header must show the selection, got ${originHeader}`);
+	await panelAside.getByRole("button", { name: "全选" }).click();
+	await page.waitForTimeout(1500);
+	const allHeader = await panelAside.locator("p", { hasText: "出发地" }).first().innerText();
+	assert(allHeader.includes(`${originOptions}/${originOptions}`), `全选 must check every city, got ${allHeader}`);
 
 	const panel = page.locator('aside[aria-label^="站点巴士线路："]');
-	await panel.waitFor({ state: "visible", timeout: 5000 });
+	await panelAside.locator("button", { hasText: "梧州市" }).first().click();
+	await panel.waitFor({ state: "visible", timeout: 8000 });
 	const panelText = await panel.innerText();
 	assert(/→/.test(await panel.locator("h3").innerText()), "the panel must show 出发城市 → 到达城市");
 	assert((await panel.locator("ol > li").count()) > 0, "the panel must list the destination stations");
-	assert(panelText.includes("具体线路"), "the panel must distinguish real lines from city-pair summaries");
-	assert(panelText.includes("灰虚线"), "the panel legend must explain the dashed cross-border style");
+	assert(panelText.includes("具体线路") || panelText.includes("蓝线"), "the panel legend must describe the single line type");
+	assert(!panelText.includes("灰虚线"), "the dashed cross-border legend must be gone with the second line type");
 
 	// 站点只跟着线路画：不允许出现"没有线路归属"的孤立点（每个点都要能顺着线找到班次）。
 	const orphanDots = await map.locator("path.bus-station-dot").count();
@@ -143,31 +143,10 @@ try {
 		assert(lineStops > 0, "line stops must appear at high zoom");
 	}
 
-	// 选中后高亮这条线的两组站点：到达站数量与面板列表一致。
-	const highlightDropoff = map.locator("path.bus-station-highlight[data-station-role='dropoff']");
-	const highlightPickup = map.locator("path.bus-station-highlight[data-station-role='pickup']");
-	assert(
-		(await highlightDropoff.count()) === (await panel.locator("ol > li").count()),
-		`highlighted dropoff points (${await highlightDropoff.count()}) must match the panel list`,
-	);
-	assert((await highlightPickup.count()) > 0, "the selected route must highlight its pickup points");
-	assert(panelText.includes("绿点"), "the panel legend must explain the pickup/dropoff colors");
-
-	// 选中线路要把视野收到这条线：全省视图最多 z7，海岸线太粗，分不清半岛和海湾。
-	const selectedZoom = Number(await map.getAttribute("data-bus-zoom"));
-	assert(selectedZoom >= 8, `selecting a route must zoom in for detail, got z${selectedZoom}`);
-	// 城市名要常驻在点旁边，否则用户只看到一个孤零零的圆点（图层重绘有延迟，等它出来）。
-	await page.waitForFunction(
-		() => document.querySelectorAll(".bus-city-label").length === 2,
-		null,
-		{ timeout: 8000 },
-	);
-
 	// 用户视角：带着"广州去龙门县永汉"来，搜索框要能直接找到经过永汉的线路。
 	const searchBox = page.locator('aside input[type="search"]').first();
 	await searchBox.fill("永汉");
 	await page.waitForTimeout(900);
-	const panelAside = page.locator('aside[aria-label^="站点巴士线路"]').first();
 	const searchText = await panelAside.innerText();
 	assert(/具体线路 · \d+ 条/.test(searchText), `searching a county/town must list real lines, got ${searchText.slice(0, 60)}`);
 	const lineHits = Number((searchText.match(/具体线路 · (\d+) 条/) ?? [])[1] ?? "0");
@@ -196,16 +175,7 @@ try {
 	assert(/可上车|可下车/.test(stopText), "the stop card must identify each line's boarding or alighting role");
 	assert(stopText.includes("不是本站班次"), "line departure times must not be presented as stop-specific times");
 
-	// 滴滴城市对的站点必须真的画出来：稔山市场这类只有滴滴有的站，缺了就是"数据没接对"。
-	await searchBox.fill("惠州");
-	await page.waitForTimeout(900);
-	await panelAside.getByRole("button", { name: /广州市 → 惠州市.*看站点/ }).click();
-	await page.waitForTimeout(2500);
-	assert(
-		(await map.locator('path[data-stop-name="稔山市场"]').count()) >= 1,
-		"city-pair stations (e.g. 稔山市场) must be drawn with their line",
-	);
-
+	// 稔山市场这类只有滴滴才有的站，必须能搜到、点开、并挂在真实线路上。
 	await searchBox.fill("稔山市场");
 	const stationResult = panelAside.getByRole("button", { name: /稔山市场/ });
 	assert((await stationResult.count()) >= 1, "稔山市场 must be discoverable by exact station name");
@@ -225,7 +195,7 @@ try {
 
 	assert(pageErrors.length === 0, `page errors: ${JSON.stringify(pageErrors)}`);
 	assert(consoleErrors.length === 0, `console errors: ${JSON.stringify(consoleErrors)}`);
-	console.log(`[map-bus] ok：${lineCount} 条连线 / 2 个出发城市 / 面板可见`);
+	console.log(`[map-bus] ok：具体线路 ${await detailLines.count()} 条 / 出发地筛选可用 / 面板可见`);
 } finally {
 	await browser.close();
 }

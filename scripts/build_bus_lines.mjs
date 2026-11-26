@@ -173,12 +173,22 @@ if (existsSync(didiPath)) {
     shiftByRoute.set(key, entry);
   }
 
+  // 城市 id -> 名称：滴滴站点带 city_id，出发地筛选要靠它
+  const cityName = new Map();
+  const cityListPath = path.join(root, 'src/data/raw_didi_city_list.json');
+  if (existsSync(cityListPath)) {
+    for (const city of JSON.parse(readFileSync(cityListPath, 'utf8'))) {
+      cityName.set(String(city.cityId), city.name);
+    }
+  }
+
   for (const [routeId, stations] of Object.entries(raw.routes ?? {})) {
     const board = [];
     const alight = [];
     for (const station of stations ?? []) {
       const stop = toStop(station, Number(station.type) === 1 ? 'board' : 'alight');
       if (!stop) continue;
+      stop.cityId = String(station.city_id ?? '');
       (stop.role === 'board' ? board : alight).push(stop);
     }
     if (board.length === 0 || alight.length === 0) { droppedLines += 1; continue; }
@@ -191,8 +201,8 @@ if (existsSync(didiPath)) {
       name: `${board[0].name} → ${alight[alight.length - 1].name}`,
       coordinateSystem: 'gcj02',
       date: String(raw.pulled_at ?? ''),
-      originCity: '',
-      destinationCity: '',
+      originCity: cityName.get(board[0].cityId) ?? '',
+      destinationCity: cityName.get(alight[alight.length - 1].cityId) ?? '',
       departTimes: [...shift.times].sort(),
       priceFen: prices.length ? Math.min(...prices) : null,
       carrier: '滴滴站点巴士',

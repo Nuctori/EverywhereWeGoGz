@@ -6,6 +6,7 @@ import { ArrowUpRight, Bus, Map, MapPinned, RefreshCw, X } from 'lucide-react';
 import { useMapTours, type MapTourLocation } from '@/hooks/use-map-tours';
 import { useBusRoutes } from '@/hooks/use-bus-routes';
 import { useBusLines } from '@/hooks/use-bus-lines';
+import { useUserCity } from '@/hooks/use-user-city';
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { TourDetailModal } from './TourDetailModal';
 import { MAP_TILE_PROVIDERS, wgs84ToGcj02, type MapTileProvider } from '@/lib/map-tile-pool';
@@ -257,6 +258,12 @@ function BusRoutePanel({
   origins,
   routes,
   detailLines,
+  originCities,
+  selectedOrigins,
+  myCity,
+  onToggleOrigin,
+  onSelectAllOrigins,
+  onUseMyCity,
   selectedRoute,
   onSelect,
   onSelectLine,
@@ -267,6 +274,15 @@ function BusRoutePanel({
   origins: BusOriginCity[];
   routes: BusRoute[];
   detailLines: BusLine[];
+  /** 全部可选出发地（城市名，已去重排序） */
+  originCities: string[];
+  /** 当前勾选的出发地；空集表示不筛选 */
+  selectedOrigins: string[];
+  /** IP 定位到的城市（已匹配成数据里的 XX市）；null 表示没定位到 */
+  myCity: string | null;
+  onToggleOrigin: (city: string) => void;
+  onSelectAllOrigins: () => void;
+  onUseMyCity: () => void;
   selectedRoute: BusRoute | null;
   onSelect: (route: BusRoute | null) => void;
   onSelectLine: (line: BusLine) => void;
@@ -390,6 +406,59 @@ function BusRoutePanel({
           />
         </label>
       </div>
+
+      {originCities.length > 1 && (
+        <div className="shrink-0 px-3 pb-2">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] text-stone-500">
+              出发地 · {selectedOrigins.length === 0 ? '全部' : `已选 ${selectedOrigins.length}/${originCities.length}`}
+            </p>
+            <div className="flex shrink-0 items-center gap-2">
+              {myCity && (
+                <button
+                  type="button"
+                  onClick={onUseMyCity}
+                  className="text-[10px] text-sky-700 underline-offset-2 hover:underline"
+                >
+                  我的城市
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onSelectAllOrigins}
+                className="text-[10px] text-sky-700 underline-offset-2 hover:underline"
+              >
+                全选
+              </button>
+            </div>
+          </div>
+          <div role="group" aria-label="出发地筛选" className="mt-1 flex flex-wrap gap-1">
+            {originCities.map((city) => {
+              const checked = selectedOrigins.length === 0 || selectedOrigins.includes(city);
+              return (
+                <label
+                  key={city}
+                  className={[
+                    'inline-flex cursor-pointer items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] transition-colors',
+                    checked
+                      ? 'border-sky-300 bg-sky-50 text-sky-800'
+                      : 'border-stone-200 bg-white text-stone-500 hover:border-sky-200',
+                  ].join(' ')}
+                >
+                  <input
+                    type="checkbox"
+                    className="h-3 w-3 accent-sky-600"
+                    checked={selectedOrigins.includes(city)}
+                    onChange={() => onToggleOrigin(city)}
+                    aria-label={`出发地 ${city}`}
+                  />
+                  {city}
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3">
         {trimmedQuery ? (
@@ -515,10 +584,10 @@ function BusRoutePanel({
       </div>
 
       <p className="shrink-0 border-t border-stone-100 px-3 py-2 text-[10px] leading-4 text-stone-400">
-        粗蓝线=具体线路的站点连线示意（非车辆轨迹）；细蓝线=滴滴城市对汇总；灰虚线=跨境/跨省
+        蓝线=具体线路的站点连线示意（非车辆轨迹），点线看班次与票价；跨省/跨境线路在详情里标注
         {crossBorderNames.length > 0 ? `（${crossBorderNames.join('、')}）` : ''}。
-        地图上：<span className="text-[#1dcc8c]">绿点=上车点</span>、<span className="text-[#ff754b]">橙点=下车点</span>。
-        站点坐标来自对应数据源，底图切换时已做坐标系换算。
+        地图上：<span className="text-[#1dcc8c]">绿点=上车点</span>、<span className="text-[#ff754b]">橙点=下车点</span>；
+        出发地按 IP 城市默认勾选，可自行增减。
       </p>
     </aside>
   );
@@ -551,13 +620,49 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
   const [selectedBusRoute, setSelectedBusRoute] = useState<BusRoute | null>(null);
   const { data: busData, loading: busLoading, error: busError, retry: retryBusRoutes } = useBusRoutes(busLayerEnabled);
   const { data: busLineData, loading: busLinesLoading, error: busLinesError, retry: retryBusLines } = useBusLines(busLayerEnabled);
+
+  // ---- 出发地筛选：默认勾选 IP 定位到的城市，拿不到就退回"全部" ----
+  // override = null 表示"跟随默认"；用户勾选后写值，避免在 effect 里同步 setState。
+  const userCity = useUserCity();
+  const [originOverride, setOriginOverride] = useState<string[] | null>(null);
+  const originCities = useMemo(() => {
+    const set = new Set<string>();
+    for (const line of busLineData?.routes ?? []) {
+      if (line.originCity) set.add(line.originCity);
+    }
+    return [...set].sort((left, right) => left.localeCompare(right, 'zh-Hans-CN'));
+  }, [busLineData]);
+  // IP 城市 -> 数据里的"XX市"；匹配不到就没有默认勾选（等同全部）
+  const defaultOrigins = useMemo(() => {
+    if (!userCity) return [];
+    const matched = originCities.find((city) => (
+      city.startsWith(userCity) || userCity.startsWith(city.slice(0, -1))
+    ));
+    return matched ? [matched] : [];
+  }, [originCities, userCity]);
+  const selectedOrigins = originOverride ?? defaultOrigins;
+  const visibleBusLines = useMemo(() => {
+    const all = busLineData?.routes ?? [];
+    if (selectedOrigins.length === 0) return all;
+    return all.filter((line) => Boolean(line.originCity) && selectedOrigins.includes(line.originCity as string));
+  }, [busLineData, selectedOrigins]);
+
+  const toggleOrigin = (city: string) => {
+    const current = selectedOrigins;
+    setOriginOverride(current.includes(city)
+      ? current.filter((item) => item !== city)
+      : [...current, city]);
+  };
+  const resetOrigins = () => setOriginOverride(null);
+  const selectAllOrigins = () => setOriginOverride(originCities);
+
   const stopAssociations = useMemo(() => {
     if (!selectedStop) return [];
     const provider = MAP_TILE_PROVIDERS[0];
     const toPoint = (stop: BusStopSelection) => stop.coordinateSystem === 'gcj02'
       ? busPointForProvider(stop, provider) : wgs84PointForProvider(stop, provider);
     const selectedPoint = L.latLng(toPoint(selectedStop));
-    return (busLineData?.routes ?? []).flatMap((line) => {
+    return (visibleBusLines).flatMap((line) => {
       const roles = new Set(line.stops.filter((stop) => {
         if (stop.name.normalize('NFKC').trim() !== selectedStop.name.normalize('NFKC').trim()) return false;
         if (selectedStop.adcode && stop.adcode && selectedStop.adcode !== stop.adcode) return false;
@@ -567,7 +672,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       }).map((stop) => stop.role));
       return roles.size ? [{ line, roles }] : [];
     });
-  }, [busLineData, selectedStop]);
+  }, [selectedStop, visibleBusLines]);
   const mapElementRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
@@ -783,21 +888,19 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
 
     // 已经有明细线路的城市对，就不再画"城市对汇总线"，避免同一对城市出现两层线。
     const detailedPairs = new Set<string>();
-    for (const line of busLineData?.routes ?? []) {
+    for (const line of visibleBusLines) {
       if (line.originCity && line.destinationCity) {
         detailedPairs.add(`${line.originCity}→${line.destinationCity}`);
       }
     }
 
-    // 缩放分级：低倍只留城市级汇总，中倍出线路（限数量、淡一点），高倍才出站点点位。
-    // 285 条线路 × 近 4000 个站点一次性画满既卡又糊，看不清任何一条。
+    // 缩放分级：只保留「具体线路」一种线，靠粗细/透明度/条数分级，
+    // 这样一打开图层就在省级视野看到线网，放大后逐步变清晰，而不是"什么都没有"。
     const zoom = map.getZoom();
-    const showDetailLines = zoom >= 9;
     const showDetailStops = zoom >= 10;
-    // 中倍只看"线网"，压低视觉权重；高倍才按正常粗细画。
-    const detailWeight = zoom >= 11 ? 2.8 : 1.4;
-    const detailOpacity = zoom >= 11 ? 0.9 : 0.42;
-    const maxDetailLines = zoom >= 11 ? Number.POSITIVE_INFINITY : 80;
+    const detailWeight = zoom >= 11 ? 2.8 : zoom >= 8 ? 1.4 : 1;
+    const detailOpacity = zoom >= 11 ? 0.9 : zoom >= 8 ? 0.42 : 0.22;
+    const maxDetailLines = zoom >= 11 ? Number.POSITIVE_INFINITY : zoom >= 8 ? 80 : 60;
     const dimOthers = Boolean(selectedBusLine);
     const viewport = map.getBounds().pad(0.12);
     const inView = (lat: number, lng: number) => viewport.contains([lat, lng]);
@@ -827,148 +930,11 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       marker.getElement()?.setAttribute('data-bus-city', `${origin.name}（出发）`);
     });
 
-    busData.routes.forEach((route) => {
-      const origin = originById[route.originCityId];
-      if (!origin) return;
-      const selected = selectedBusRoute?.id === route.id;
-
-      // 滴滴这一层虽然是"城市对"，但它带着该城市全部上下车点（稔山市场这类只有滴滴有的站）。
-      // 所以站点要在"有没有明细线路"之前就画，否则这些站永远不出现。
-      if (showDetailStops || selected) {
-        const drawPairStations = (stations: typeof origin.stations, kind: 'pickup' | 'dropoff') => {
-          stations.forEach((station) => {
-            if (!selected && !inView(station.lat, station.lng)) return;
-            const dot = L.circleMarker(busPointForProvider(station, provider), {
-              radius: 3.2,
-              weight: 1.2,
-              color: '#ffffff',
-              fillColor: kind === 'pickup' ? '#1dcc8c' : '#ff754b',
-              fillOpacity: dimOthers && !selected ? 0.15 : 0.95,
-              className: 'bus-pair-stop',
-            });
-            dot.bindTooltip(
-              `${kind === 'pickup' ? '上车点' : '下车点'} · ${station.name}`,
-              { direction: 'top', offset: [0, -5] },
-            );
-            dot.on('click', () => {
-              setSelectedPlace(null);
-              setClusterPlaces([]);
-              setSelectedBusLine(null);
-              setSelectedStop({ ...station, coordinateSystem: 'gcj02', catalog: { county: station.county, role: kind === 'pickup' ? 'board' : 'alight' } });
-            });
-            dot.addTo(layer);
-            dot.getElement()?.setAttribute('data-stop-name', station.name);
-            dot.getElement()?.setAttribute('data-stop-role', kind);
-          });
-        };
-        drawPairStations(origin.stations, 'pickup');
-        drawPairStations(route.stations, 'dropoff');
-      }
-
-      // 这一对城市已经有明细线路（乔巴士）：汇总线不画了，但上面的站点已经画过。
-      if (detailedPairs.has(`${origin.name}→${route.destination.name}`)) return;
-
-      const from = busPointForProvider(origin, provider);
-      const to = busPointForProvider(route.destination, provider);
-      // 香港(81)/广西梧州(45) 是接口真实返回的跨境、跨省线路：保留，但用灰色虚线区分，
-      // 免得和广东省内线路混在一起，看着像"广东巴士开出国"。
-      const crossBorder = route.destination.provinceCode !== '44';
-      const accent = crossBorder
-        ? (selected ? '#475569' : '#94a3b8')
-        : (selected ? '#0369a1' : '#0ea5e9');
-      const restStyle: L.PolylineOptions = {
-        color: accent,
-        weight: crossBorder ? 1.3 : selected ? 3.2 : 1.6,
-        opacity: dimOthers && !selected ? 0.08 : selected ? 0.95 : crossBorder ? 0.75 : 0.5,
-        ...(crossBorder ? { dashArray: '6 6' } : {}),
-      };
-      // 目前只有「出发城市 → 目的城市」这一层数据，同一对城市其实有多条线路，
-      // 所以这里只画一段城市对之间的连线（不串站点，避免假装成某一条线路的走向）；
-      // 真实线路（route_id + 有序站点）要等线路级数据接进来再按线画。
-      const line = L.polyline([[from[0], from[1]], [to[0], to[1]]], {
-        ...restStyle,
-        className: `bus-route-line${crossBorder ? ' bus-route-cross-border' : ''}`,
-      });
-      line.bindTooltip(
-        `${origin.name} → ${route.destination.name} · ${route.destination.stationCount} 个上下车点${crossBorder ? ' · 跨境/跨省' : ''}`,
-        { sticky: true },
-      );
-      line.on('mouseover', () => line.setStyle({ weight: crossBorder ? 2.2 : 2.8, opacity: 0.95 }));
-      line.on('mouseout', () => line.setStyle(restStyle));
-      line.on('click', () => {
-        setSelectedPlace(null);
-        setClusterPlaces([]);
-        setSelectedStop(null);
-        setSelectedBusLine(null);
-        setSelectedBusRoute(route);
-      });
-      line.addTo(layer);
-      line.getElement()?.setAttribute('data-bus-route', `${origin.name}→${route.destination.name}`);
-
-      const endpoint = L.circleMarker(to, {
-        radius: selected ? 5.5 : 3.4,
-        weight: 1.5,
-        color: '#ffffff',
-        fillColor: accent,
-        fillOpacity: 1,
-        className: 'bus-city-endpoint',
-      });
-      endpoint.bindTooltip(
-        `${route.destination.name} · ${route.destination.stationCount} 个上下车点${crossBorder ? ' · 跨境/跨省' : ''}`,
-        { direction: 'top', offset: [0, -6] },
-      );
-      endpoint.on('click', () => {
-        setSelectedPlace(null);
-        setClusterPlaces([]);
-        setSelectedStop(null);
-        setSelectedBusLine(null);
-        setSelectedBusRoute(route);
-      });
-      endpoint.addTo(layer);
-      // 给端点和起点打上城市标记，测试和排查都能直接对上"这个点在画哪座城"。
-      endpoint.getElement()?.setAttribute('data-bus-city', route.destination.name);
-      endpoint.getElement()?.setAttribute('data-bus-province', route.destination.provinceCode);
-
-      if (!selected) return;
-
-      // 选中的线路把两组站点放大突出（底层已经画过全部站点，这里只是加一圈高亮）。
-      const highlightStations = (stations: typeof origin.stations, kind: 'pickup' | 'dropoff') => {
-        stations.forEach((station) => {
-          const highlight = L.circleMarker(busPointForProvider(station, provider), {
-            radius: 6,
-            weight: 2,
-            color: kind === 'pickup' ? '#1dcc8c' : '#ff754b',
-            fillColor: '#ffffff',
-            fillOpacity: 1,
-            className: 'bus-station-highlight',
-          });
-          highlight.bindTooltip(
-            `${kind === 'pickup' ? '上车点' : '下车点'} · ${station.name}`,
-            { direction: 'top', offset: [0, -8] },
-          );
-          highlight.addTo(layer);
-          highlight.getElement()?.setAttribute('data-station-role', kind);
-        });
-      };
-
-      highlightStations(origin.stations, 'pickup');
-      highlightStations(route.stations, 'dropoff');
-
-      // 城市名常驻在点旁边：低缩放下海岸线被栅格瓦片简化，只有一个圆点没人分得清是哪。
-      L.tooltip({ direction: 'right', offset: [8, 0], className: 'bus-city-label' })
-        .setLatLng(from)
-        .setContent(`${origin.name} · ${origin.stations.length} 个上车点`)
-        .addTo(layer);
-      L.tooltip({ direction: 'right', offset: [8, 0], className: 'bus-city-label' })
-        .setLatLng(to)
-        .setContent(`${route.destination.name} · ${route.destination.stationCount} 个上下车点`)
-        .addTo(layer);
-    });
 
     // 真实线路（乔巴士）：每条线路是一串有序站点，连线按"上车站 → 下车站"依次穿过它们。
     // 这与城市对汇总线不同——同一对城市会有好几条线，各自的站点并不相同。
     // 中倍只画离视野中心最近的若干条：285 条一起画就是一团糊线。
-    const detailCandidates = (busLineData?.routes ?? [])
+    const detailCandidates = (visibleBusLines)
       .map((line) => ({
         line,
         points: line.stops.map((stop) => (
@@ -978,8 +944,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         )),
       }))
       .filter(({ line, points }) => points.length >= 2 && (
-        selectedBusLine?.id === line.id
-        || (showDetailLines && line.stops.some((stop) => inView(stop.lat, stop.lng)))
+        selectedBusLine?.id === line.id || line.stops.some((stop) => inView(stop.lat, stop.lng))
       ))
       .sort((left, right) => {
         if (selectedBusLine?.id === left.line.id) return -1;
@@ -1010,10 +975,11 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         }).addTo(layer).getElement()?.setAttribute('data-bus-line', line.name);
       }
       const detailLine = L.polyline(points, {
-        color: isSelectedLine ? '#1d4ed8' : line.provinceCode === '44' ? '#0284c7' : '#94a3b8',
+        // 只保留一种线：跨省/跨境线路也用同一配色，免得"灰线"变成第二种语义；
+        // 跨境信息放在 tooltip 和面板里说明。
+        color: isSelectedLine ? '#1d4ed8' : '#0284c7',
         weight: isSelectedLine ? 5 : isBackground ? 1 : detailWeight,
         opacity: isSelectedLine ? 1 : isBackground ? 0.06 : detailOpacity,
-        ...(line.provinceCode === '44' ? {} : { dashArray: '6 6' }),
         className: 'bus-line-detail',
       });
       detailLine.bindTooltip(
@@ -1033,6 +999,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       detailLine.on('click', selectLine);
       detailLine.addTo(layer);
       detailLine.getElement()?.setAttribute('data-bus-line', line.name);
+      detailLine.getElement()?.setAttribute('data-bus-origin', line.originCity ?? '');
 
       line.stops.forEach((stop, index) => {
         // 站点在更高倍才画；选中的线路无论如何都画，否则点开了却看不到站。
@@ -1073,7 +1040,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     return () => {
       layer.remove();
     };
-  }, [busData, busLineData, busLayerEnabled, expanded, mapZoom, providerIndex, selectedBusLine, selectedBusRoute]);
+  }, [busData, busLayerEnabled, expanded, mapZoom, providerIndex, selectedBusLine, selectedBusRoute, visibleBusLines]);
 
   // 打开巴士图层时把视野对准全部线路。展开弹窗时容器尺寸会变，fitBounds 必须等
   // 布局稳定后再来一次，否则会停在比数据范围大一倍的低缩放上。
@@ -1364,7 +1331,13 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         <BusRoutePanel
           origins={busData.origins}
           routes={busData.routes}
-          detailLines={busLineData?.routes ?? []}
+          detailLines={visibleBusLines}
+          originCities={originCities}
+          selectedOrigins={selectedOrigins}
+          myCity={defaultOrigins[0] ?? null}
+          onToggleOrigin={toggleOrigin}
+          onSelectAllOrigins={selectAllOrigins}
+          onUseMyCity={resetOrigins}
           selectedRoute={selectedBusRoute}
           onSelect={(route) => {
             setSelectedPlace(null);
