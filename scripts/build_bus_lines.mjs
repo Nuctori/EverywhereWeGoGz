@@ -291,14 +291,13 @@ const baseSize = writePayload(outputPath, {
   source: { providers: baseProviders, raw: baseRaw },
   routes: baseRoutes,
 });
-let cxSize = 0;
-if (cxRoutes.length > 0) {
-  cxSize = writePayload(cxOutputPath, {
-    generatedAt,
-    source: { providers: cxProvider, raw: cxRaw },
-    routes: cxRoutes,
-  });
-}
+// 创想巴士那份**无条件覆盖写**：这次采集一条可用线路都没有时也要写成空文件，
+// 否则上一轮的旧文件会被前端当新数据取走（新主线 + 过期支线）。
+const cxSize = writePayload(cxOutputPath, {
+  generatedAt,
+  source: { providers: cxProvider.length ? cxProvider : ['创想巴士'], raw: cxRaw },
+  routes: cxRoutes,
+});
 
 const stopCount = routes.reduce((sum, route) => sum + route.stops.length, 0);
 console.log(
@@ -306,4 +305,4 @@ console.log(
   + (droppedLines ? `（跳过 ${droppedLines} 条缺坐标线路、${droppedStops} 个缺坐标站点）` : ''),
 );
 console.log(`[bus-lines] 文件大小 ${(baseSize / 1024).toFixed(0)}KB`
-  + (cxRoutes.length ? ` + 创想巴士 ${(cxSize / 1024).toFixed(0)}KB（${cxRoutes.length} 条）` : ''));
+  + ` + 创想巴士 ${(cxSize / 1024).toFixed(0)}KB（${cxRoutes.length} 条）`);

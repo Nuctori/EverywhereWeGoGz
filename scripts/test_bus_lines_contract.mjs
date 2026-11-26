@@ -77,8 +77,18 @@ const cxRawPath = path.join(root, 'src/data/raw_cx_lines.json');
 const cxOutputPath = path.join(root, 'public/data/bus-lines-cx.json');
 if (existsSync(cxRawPath)) {
   const cxRaw = JSON.parse(readFileSync(cxRawPath, 'utf8'));
+  // 与 build_bus_lines 同口径：建库会把坐标不可用的站点过掉（toStop 返回 null），
+  // 上下车点因此剩不全的线路会被整条丢弃，所以这里也必须先按坐标过滤再计数，
+  // 否则「原始数据里有缺坐标线路」会被误判成构建丢数据。
+  const usable = (station) => {
+    const lat = Number(station?.lat);
+    const lng = Number(station?.lng);
+    return Number.isFinite(lat) && Number.isFinite(lng)
+      && lat >= CHINA.minLat && lat <= CHINA.maxLat
+      && lng >= CHINA.minLng && lng <= CHINA.maxLng;
+  };
   const cxRawLines = (cxRaw.routes ?? []).filter(
-    (route) => (route.board ?? []).length > 0 && (route.alight ?? []).length > 0,
+    (route) => (route.board ?? []).some(usable) && (route.alight ?? []).some(usable),
   );
   assert.ok(cxRawLines.length > 0, 'raw_cx_lines.json 里没有任何可用线路，先重新采集');
   assert.ok(existsSync(cxOutputPath), '缺少 bus-lines-cx.json，先跑 npm run data:bus-lines');

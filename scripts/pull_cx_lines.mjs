@@ -64,11 +64,11 @@ const decodeExp = (jwt) => {
   }
 };
 
-const refreshIfNeeded = async (token) => {
-  const expSeconds = decodeExp(token.access_token);
-  const left = expSeconds - Math.floor(Date.now() / 1000);
-  if (left > 300) return token;
-  if (!token.refresh_token) throw new Error('access_token 已过期且没有 refresh_token');
+/** 无条件刷新：401 之后必须换一张新令牌再发，不能拿旧的硬重试。 */
+const refreshNow = async (token) => {
+  if (!token?.refresh_token) {
+    throw new Error('access_token 失效且没有 refresh_token：打开一次创想巴士小程序，重新抓 /connect/token');
+  }
   const body = new URLSearchParams({
     grant_type: 'refresh_token',
     client_id: 'WeChatMiniProgram',
@@ -80,10 +80,21 @@ const refreshIfNeeded = async (token) => {
     body,
   });
   if (!response.ok) throw new Error(`刷新令牌失败 HTTP ${response.status}`);
-  const next = await response.json();
-  const merged = { ...token, ...next };
+  const merged = { ...token, ...(await response.json()) };
   writeToken(merged);
   return merged;
+};
+
+const refreshIfNeeded = async (token) => {
+  const left = decodeExp(token.access_token) - Math.floor(Date.now() / 1000);
+  return left > 300 ? token : refreshNow(token);
+};
+
+// 主循环持有的最新凭据：401 时由 listPage 的 onUnauthorized 刷新后写回。
+let activeToken = null;
+const forceRefreshToken = async () => {
+  activeToken = await refreshNow(activeToken ?? readToken());
+  return activeToken;
 };
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -93,28 +104,43 @@ const retryDelayMs = (message, index) => {
   if (String(message).includes('429')) return 15000 * (index + 1);
   return 1200 * (index + 1);
 };
-const retryable = (message) => String(message).includes('401') || String(message).includes('429');
+const isRetryable = (message) => String(message).includes('401') || String(message).includes('429');
 
-const withRetry = async (fn, attempts = 4) => {
+/** 401 = 令牌链断了，再跑下去 420 个城市对只会拿到 420 个 401，必须中止本轮。 */
+export const isFatalAuthError = (error) => String(error?.message ?? '').includes('401');
+
+export const withRetry = async (fn, attempts = 4) => {
   let last;
   for (let index = 0; index < attempts; index += 1) {
     try {
       return await fn();
     } catch (error) {
       last = error;
-      if (!retryable(error.message)) throw error;
+      if (!isRetryable(error.message)) throw error;
       await sleep(retryDelayMs(error.message, index));
     }
   }
   throw last;
 };
 
-const listPage = async (token, pair, date, skipCount) => {
+/**
+ * 造一个 listPage。401 的处理在重试内部：先让调用方刷新令牌，再用新 bearer 重发，
+ * 否则拿同一个过期令牌重试 4 次只是在浪费时间。
+ * onUnauthorized 由调用方注入（真实实现走 refreshNow），测试里替换成假的。
+ */
+export const makeListPage = ({
+  apiUrl = API,
+  ua = UA,
+  fetchImpl = fetch,
+  size = pageSize,
+  onUnauthorized = null,
+  retries = 4,
+} = {}) => async (initialToken, pair, date, skipCount) => {
   const [from, to] = pair;
-  // 令牌对象和裸字符串都接受：refreshIfNeeded 交回整份凭据，调用方不必自己拆。
-  const bearer = typeof token === 'string' ? token : token?.access_token;
+  let current = initialToken;
   return withRetry(async () => {
-    const response = await fetch(API, {
+    const bearer = typeof current === 'string' ? current : current?.access_token;
+    const response = await fetchImpl(apiUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${bearer}`,
@@ -122,26 +148,30 @@ const listPage = async (token, pair, date, skipCount) => {
         platform: 'mp-weixin',
         xweb_xhr: '1',
         Referer: 'https://servicewechat.com/wxb5f1e7327d7fbb6a/1/page-frame.html',
-        'User-Agent': UA,
+        'User-Agent': ua,
       },
       body: JSON.stringify({
         skipCount,
-        maxResultCount: pageSize,
+        maxResultCount: size,
         classDate: date,
         start: { type: 'Region', value: { id: from, level: 1 } },
         end: { type: 'Region', value: { id: to, level: 1 } },
       }),
     });
     if (!response.ok) {
-      const detail = (await response.text()).slice(0, 200);
-      if (process.env.CX_DEBUG) {
-        process.stderr.write(`[cx:debug] ${response.status} tokenTail=${String(token).slice(-12)} pair=${from}->${to} skip=${skipCount}\n`);
+      const detail = String(await response.text()).slice(0, 200);
+      if (response.status === 401 && onUnauthorized) {
+        current = await onUnauthorized();
       }
       throw new Error(`HTTP ${response.status} ${detail}`);
     }
     return response.json();
-  });
+  }, retries);
 };
+
+const listPage = makeListPage({
+  onUnauthorized: () => forceRefreshToken(),
+});
 
 const pullPair = async (token, pair, date) => {
   const cacheFile = path.join(RAW_DIR, `${date}_${pair[0]}_${pair[1]}.json`);
@@ -172,6 +202,7 @@ const parseGeocoder = (geocoder) => {
 const main = async () => {
   const date = shanghaiDay(dayOffset);
   let token = await refreshIfNeeded(readToken());
+  activeToken = token;
 
   const cities = Object.keys(GD_CITIES);
   const pairs = pairsArg
@@ -181,11 +212,13 @@ const main = async () => {
   const lines = new Map();
   let requests = 0;
   let failures = 0;
+  let fatal = null;
 
   for (const pair of pairs) {
     requests += 1;
     try {
-      token = await refreshIfNeeded(token);
+      token = await refreshIfNeeded(activeToken ?? token);
+      activeToken = token;
       const record = await pullPair(token, pair, date);
       for (const item of record.items) {
         const key = String(item.lineId ?? '').toUpperCase();
@@ -235,6 +268,11 @@ const main = async () => {
     } catch (error) {
       failures += 1;
       process.stderr.write(`[cx] ${pair[0]}->${pair[1]} 失败：${error.message}\n`);
+      // 令牌链断了：后面的城市对只会拿到同样的 401，别再磨 420 次。
+      if (isFatalAuthError(error)) {
+        fatal = error;
+        break;
+      }
       await sleep(8000);
     }
     await sleep(350);
@@ -251,6 +289,7 @@ const main = async () => {
     shiftCount: entry.shifts.size,
   }));
   const withShifts = routes.filter((route) => route.board.length > 0 && route.alight.length > 0);
+  const partial = failures > 0 || Boolean(fatal);
   writeFileSync(OUT, JSON.stringify({
     pulledAt: new Date().toISOString(),
     date,
@@ -259,12 +298,23 @@ const main = async () => {
     pairs: pairs.length,
     requests,
     failures,
+    // 半份数据必须自带标记：下游能看出这不是一次完整采集。
+    partial,
+    abortedBy: fatal ? String(fatal.message).slice(0, 200) : null,
     routes: withShifts,
   }, null, 1));
   process.stdout.write(`[cx] ${withShifts.length} 条线路（${routes.length - withShifts.length} 条缺站点被跳过）/${requests} 个城市对 -> ${path.relative(root, OUT)}\n`);
+  if (fatal) {
+    process.stderr.write('[cx] 本轮中止：令牌失效，数据是半份（partial=true）。重新抓一次 /connect/token 再跑。\n');
+    process.exitCode = 1;
+  }
 };
 
-main().catch((error) => {
-  process.stderr.write(`[cx] 失败：${error.message}\n`);
-  process.exitCode = 1;
-});
+// 只有被直接执行时才跑采集：被测试 import 时不能顺手把 420 个城市对打一遍。
+const invokedDirectly = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (invokedDirectly) {
+  main().catch((error) => {
+    process.stderr.write(`[cx] 失败：${error.message}\n`);
+    process.exitCode = 1;
+  });
+}
