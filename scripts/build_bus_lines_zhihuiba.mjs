@@ -16,6 +16,7 @@ import { createInterface } from 'node:readline';
 import { createGunzip } from 'node:zlib';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { orderAndSegment } from './stop-order.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const inputPath = process.env.ZHD_RECORDS || path.join(root, 'tmp/busboss-recon/data/zhihuiba.jsonl.gz');
@@ -149,7 +150,9 @@ const mapRoutes = [];
 let departures = 0;
 
 for (const [sig, entry] of byLine) {
-  const stops = [...entry.boarding, ...entry.alighting];
+  // 智惠的下车站几乎都没有到站时间（1005/1010），必须按坐标最近邻排，否则线乱穿
+  const { stops: ordered, segments } = orderAndSegment({ boarding: entry.boarding, alighting: entry.alighting });
+  const stops = ordered;
   if (stops.length < 2 || entry.byDate.size === 0) continue;
   const digest = createHash('sha1').update(sig).digest('hex').slice(0, 10);
   const routeId = `zhd-${entry.supplier}-${digest}`;
@@ -179,6 +182,13 @@ for (const [sig, entry] of byLine) {
   const earliest = schedule[routeId][firstDate].slice(0, MAP_MAX_TIMES);
   if (!earliest.length) continue;
   const priceFen = earliest.reduce((min, r) => (r[1] > 0 && (min === null || r[1] < min) ? r[1] : min), null);
+  const feeder = Boolean(segments);
+  const boardCount = ordered.length - entry.alighting.length;
+  const mapStops = feeder
+    ? [ordered[Math.max(0, boardCount - 1)], ...ordered.slice(boardCount).slice(0, MAP_MAX_ALIGHT)]
+    : ordered.length <= MAP_MAX_BOARD + MAP_MAX_ALIGHT
+      ? ordered
+      : [...ordered.slice(0, MAP_MAX_BOARD), ...ordered.slice(-MAP_MAX_ALIGHT)];
   mapRoutes.push({
     id: routeId,
     name: entry.line,
@@ -192,7 +202,7 @@ for (const [sig, entry] of byLine) {
     supplier: entry.supplier,
     supplierLabel: entry.supplierLabel,
     provinceCode: '44',
-    stops: [...entry.boarding.slice(0, MAP_MAX_BOARD), ...entry.alighting.slice(0, MAP_MAX_ALIGHT)],
+    stops: mapStops,
   });
 }
 

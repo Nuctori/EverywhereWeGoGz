@@ -17,6 +17,7 @@ import { createInterface } from 'node:readline';
 import { createGunzip } from 'node:zlib';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { orderAndSegment } from './stop-order.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const inputPath = process.env.CYW_RECORDS
@@ -140,7 +141,9 @@ const mapRoutes = [];
 let departureTotal = 0;
 
 for (const [lineId, entry] of byLine) {
-  const stops = [...entry.boarding, ...entry.alighting];
+  // 上车站按时间、下车站缺时间时按最近邻；并联接驳线只连主干，避免一屏乱线
+  const { stops: ordered, segments } = orderAndSegment({ boarding: entry.boarding, alighting: entry.alighting });
+  const stops = ordered;
   if (stops.length < 2) continue;
   const digest = createHash('sha1').update(lineId).digest('hex').slice(0, 10);
   const routeId = `cyw-${digest}`;
@@ -167,6 +170,15 @@ for (const [lineId, entry] of byLine) {
 
   // 图层视图：只取最早可售那天，站点截断，保证 <2MB
   const earliest = schedule[routeId][earliestDate].slice(0, MAP_MAX_TIMES);
+  // 图层视图只画主干：并联接驳线取「最晚上车点 + 下车链」，普通线路取前后若干站
+  const feeder = Boolean(segments);
+  const boardCount = ordered.length - entry.alighting.length;
+  const mapStops = feeder
+    ? [ordered[Math.max(0, boardCount - 1)], ...ordered.slice(boardCount).slice(0, MAP_MAX_ALIGHT)]
+    : ordered.length <= MAP_MAX_BOARD + MAP_MAX_ALIGHT
+      ? ordered
+      : [...ordered.slice(0, MAP_MAX_BOARD), ...ordered.slice(-MAP_MAX_ALIGHT)];
+
   if (earliest.length === 0) continue;
   const priceFen = earliest.reduce((min, row) => (row[1] > 0 && (min === null || row[1] < min) ? row[1] : min), null);
   mapRoutes.push({
@@ -180,7 +192,7 @@ for (const [lineId, entry] of byLine) {
     priceFen,
     carrier: '车盈网',
     provinceCode: '44',
-    stops: [...entry.boarding.slice(0, MAP_MAX_BOARD), ...entry.alighting.slice(0, MAP_MAX_ALIGHT)],
+    stops: mapStops,
   });
 }
 
