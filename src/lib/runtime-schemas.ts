@@ -573,6 +573,8 @@ export const busLineDataSchema = z.object({
       carrier: z.string().optional().default(''),
       provinceCode: z.string().optional().default('unknown'),
       stops: z.array(busLineStopSchema).min(2),
+      // 班次分段：可选，老来源没有；有则优先按段画线。
+      segments: z.array(z.tuple([z.number().int(), z.number().int()])).optional(),
     }),
   ).min(1),
 });

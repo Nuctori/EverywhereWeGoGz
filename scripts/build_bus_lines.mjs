@@ -251,8 +251,14 @@ if (existsSync(cxPath)) {
     const originCity = modeCity(boardRaw);
     const destinationCity = modeCity(alightRaw);
 
-    const board = boardRaw.map((station) => toStop(station, 'board')).filter(Boolean);
-    const alight = alightRaw.map((station) => toStop(station, 'alight')).filter(Boolean);
+    const boardPairs = boardRaw
+      .map((station) => ({ nodeId: String(station.nodeId ?? ''), stop: toStop(station, 'board') }))
+      .filter((item) => item.stop);
+    const alightPairs = alightRaw
+      .map((station) => ({ nodeId: String(station.nodeId ?? ''), stop: toStop(station, 'alight') }))
+      .filter((item) => item.stop);
+    const board = boardPairs.map((item) => item.stop);
+    const alight = alightPairs.map((item) => item.stop);
     if (board.length === 0 || alight.length === 0) { droppedLines += 1; continue; }
 
     for (const stop of [...board, ...alight]) {
@@ -277,6 +283,33 @@ if (existsSync(cxPath)) {
     const orderedBoard = [...board].sort((left, right) => travelKey(left) - travelKey(right));
     const orderedAlight = [...alight].sort((left, right) => travelKey(left) - travelKey(right));
 
+    // 一条线路有几十个上下车点，串成一根折线就是蜘蛛网（同一班车被画成横穿两座城市）。
+    // 按班次切成「一上一下」的段：每个段就是一次真实行程。
+    const boardByNode = new Map(boardPairs.map((item) => [item.nodeId, item.stop]));
+    const alightByNode = new Map(alightPairs.map((item) => [item.nodeId, item.stop]));
+    const seenSegments = new Set();
+    const segments = [];
+    for (const trip of line.trips ?? []) {
+      const from = boardByNode.get(String(trip.fromNodeId ?? ''));
+      const to = alightByNode.get(String(trip.toNodeId ?? ''));
+      if (!from || !to) continue;
+      const key = `${from.name}|${to.name}`;
+      if (seenSegments.has(key)) continue;
+      seenSegments.add(key);
+      segments.push([from, to]);
+    }
+
+    const orderedStops = [...orderedBoard, ...orderedAlight];
+    const stopIndex = new Map(orderedStops.map((stop, index) => [stop, index]));
+    const segmentPairs = [];
+    for (const segment of segments) {
+      const [from, to] = segment;
+      const a = stopIndex.get(from);
+      const b = stopIndex.get(to);
+      if (a === undefined || b === undefined || a === b) continue;
+      segmentPairs.push([a, b]);
+    }
+
     const minutes = Number(line.alight?.[0]?.runTime ?? 0);
     const priceFen = Number(line.priceYuan) > 0 ? Math.round(Number(line.priceYuan) * 100) : null;
 
@@ -293,7 +326,10 @@ if (existsSync(cxPath)) {
       carrier: '创想巴士',
       durationText: minutes > 0 ? `${Math.floor(minutes / 60)}小时${minutes % 60}分` : '',
       provinceCode: guangdongNames.has(originCity) && guangdongNames.has(destinationCity) ? '44' : 'unknown',
-      stops: [...orderedBoard, ...orderedAlight],
+      stops: orderedStops,
+      // 班次分段写成「stops 下标对」：每对就是一次真实行程（一上一下）。
+      // 不这样写会整段复制站点对象，文件直接冲到 2.4MB。老渠道没有该字段，仍按 stops 画。
+      ...(segmentPairs.length > 0 ? { segments: segmentPairs } : {}),
     });
   }
 }

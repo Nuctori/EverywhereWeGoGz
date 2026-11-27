@@ -942,6 +942,16 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
             ? wgs84PointForProvider(stop, provider)
             : busPointForProvider(stop, provider)
         )),
+        paths: line.segments?.length
+          ? line.segments
+            .map(([from, to]) => [line.stops[from], line.stops[to]])
+            .filter((pair) => pair[0] && pair[1])
+            .map((pair) => pair.map((stop) => (
+              line.coordinateSystem === 'wgs84'
+                ? wgs84PointForProvider(stop, provider)
+                : busPointForProvider(stop, provider)
+            )))
+          : null,
       }))
       .filter(({ line, points }) => points.length >= 2 && (
         selectedBusLine?.id === line.id || line.stops.some((stop) => inView(stop.lat, stop.lng))
@@ -960,21 +970,23 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       ? detailCandidates
       : detailCandidates.slice(0, maxDetailLines);
 
-    for (const { line, points } of visibleDetailLines) {
+    for (const { line, points, paths } of visibleDetailLines) {
+      // 有班次分段就按段画（一条线路上车点几十个，串起来是蜘蛛网）；没有就走原来的折线。
+      const strokePath = paths && paths.length > 0 ? paths : points;
       const isSelectedLine = selectedBusLine?.id === line.id;
       // 选中一条线时，其它线全部压成背景（否则"高亮"淹没在同色线网里等于没有）。
       const isBackground = dimOthers && !isSelectedLine;
       const price = line.priceFen ? `¥${Math.round(line.priceFen / 100)}` : '票价未提供';
       if (isSelectedLine) {
         // 白色描边打底，保证选中线压在所有点位和线上面都看得清。
-        L.polyline(points, {
+        L.polyline(strokePath, {
           color: '#ffffff',
           weight: 9,
           opacity: 0.9,
           className: 'bus-line-casing',
         }).addTo(layer).getElement()?.setAttribute('data-bus-line', line.name);
       }
-      const detailLine = L.polyline(points, {
+      const detailLine = L.polyline(strokePath, {
         // 只保留一种线：跨省/跨境线路也用同一配色，免得"灰线"变成第二种语义；
         // 跨境信息放在 tooltip 和面板里说明。
         color: isSelectedLine ? '#1d4ed8' : '#0284c7',

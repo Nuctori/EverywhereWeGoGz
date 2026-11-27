@@ -28,6 +28,12 @@ export type BusLine = {
   carrier?: string;
   provinceCode?: string;
   stops: BusLineStop[];
+  /**
+   * 班次分段：每对是 stops 的下标 [上车站, 下车站]，一段就是一次真实行程。
+   * 创想巴士这类一条线路几十个上下车点的来源必须给这个——按 stops 串折线会把同一班车
+   * 画成横穿两座城市；没有该字段的老来源仍按 stops 画。
+   */
+  segments?: [number, number][];
 };
 
 export type BusLineData = {

@@ -11,7 +11,7 @@
 //   node scripts/pull_cx_lines.mjs                 # 今天，广东 21 城全量
 //   node scripts/pull_cx_lines.mjs --days 1        # 明天
 //   node scripts/pull_cx_lines.mjs --pairs 4401:4403,4401:4419
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -40,6 +40,8 @@ const argOf = (name, fallback) => {
 };
 
 const dayOffset = Number(argOf('days', '0'));
+// 只从 tmp/cx-pairs 的缓存重建（不碰网络、不用令牌）：改聚合口径时用这个。
+const fromCache = args.includes('--from-cache');
 const pairsArg = argOf('pairs', '');
 const pageSize = 50;
 
@@ -86,6 +88,7 @@ const refreshNow = async (token) => {
 };
 
 const refreshIfNeeded = async (token) => {
+  if (fromCache) return token;
   const left = decodeExp(token.access_token) - Math.floor(Date.now() / 1000);
   return left > 300 ? token : refreshNow(token);
 };
@@ -201,7 +204,7 @@ const parseGeocoder = (geocoder) => {
 
 const main = async () => {
   const date = shanghaiDay(dayOffset);
-  let token = await refreshIfNeeded(readToken());
+  let token = fromCache ? null : await refreshIfNeeded(readToken());
   activeToken = token;
 
   const cities = Object.keys(GD_CITIES);
@@ -209,17 +212,28 @@ const main = async () => {
     ? pairsArg.split(',').map((item) => item.split(':').map((id) => Number(id.trim())))
     : cities.flatMap((from) => cities.filter((to) => to !== from).map((to) => [from, to]));
 
+  // 缓存模式下按现有缓存文件跑（可能跨采集日），否则按本轮城市对跑。
+  const jobs = fromCache
+    ? readdirSync(RAW_DIR)
+      .filter((name) => name.endsWith('.json'))
+      .map((name) => {
+        const [date, from, to] = name.replace(/.json$/, '').split('_');
+        return { pair: [Number(from), Number(to)], date };
+      })
+    : pairs.map((pair) => ({ pair, date }));
+
   const lines = new Map();
   let requests = 0;
   let failures = 0;
   let fatal = null;
 
-  for (const pair of pairs) {
+  for (const job of jobs) {
+    const { pair } = job;
     requests += 1;
     try {
       token = await refreshIfNeeded(activeToken ?? token);
       activeToken = token;
-      const record = await pullPair(token, pair, date);
+      const record = await pullPair(token, job.pair, job.date);
       for (const item of record.items) {
         const key = String(item.lineId ?? '').toUpperCase();
         if (!key) continue;
@@ -228,6 +242,7 @@ const main = async () => {
           lineName: String(item.lineName ?? ''),
           dataSourceCode: String(item.dataSourceCode ?? ''),
           shifts: new Map(),
+          trips: new Map(),
           board: new Map(),
           alight: new Map(),
         };
@@ -238,10 +253,24 @@ const main = async () => {
           fromNodeId: item.startNodeList?.[0]?.nodeId ?? '',
           toNodeId: item.arrivalNodeList?.[0]?.nodeId ?? '',
         });
+        // 一个班次 = 一次真实行程：从某个上车点开到某个下车点。
+        // 地图要按班次画线（一条线路几十个上下车点，串成一根折线就是蜘蛛网），
+        // 所以这里必须把「哪个点到哪个点」留下来，而不是只留站点名单。
+        const fromNode = item.startNodeList?.[0];
+        const toNode = item.arrivalNodeList?.[0];
+        if (fromNode?.nodeId && toNode?.nodeId) {
+          entry.trips.set(`${fromNode.nodeId}->${toNode.nodeId}`, {
+            fromNodeId: String(fromNode.nodeId),
+            toNodeId: String(toNode.nodeId),
+            classTime: String(item.classTime ?? ''),
+            priceYuan: Number(item.lineClassDayPrice ?? 0) || null,
+          });
+        }
         for (const node of item.startNodeList ?? []) {
           const point = parseGeocoder(node.geocoder);
           if (!point) continue;
           entry.board.set(String(node.nodeId ?? node.nodeName), {
+            nodeId: String(node.nodeId ?? ''),
             name: String(node.nodeName ?? '').trim(),
             ...point,
             cityName: String(node.cityName ?? ''),
@@ -253,6 +282,7 @@ const main = async () => {
           const point = parseGeocoder(node.geocoder);
           if (!point) continue;
           entry.alight.set(String(node.nodeId ?? node.nodeName), {
+            nodeId: String(node.nodeId ?? ''),
             name: String(node.nodeName ?? '').trim(),
             ...point,
             cityName: String(node.cityName ?? ''),
@@ -287,6 +317,7 @@ const main = async () => {
     board: [...entry.board.values()],
     alight: [...entry.alight.values()],
     shiftCount: entry.shifts.size,
+    trips: [...entry.trips.values()],
   }));
   const withShifts = routes.filter((route) => route.board.length > 0 && route.alight.length > 0);
   const partial = failures > 0 || Boolean(fatal);

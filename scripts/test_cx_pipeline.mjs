@@ -168,6 +168,46 @@ await check('多上车点/多下车点的线路按行进方向排序，不许来
   });
 });
 
+// ---------- 5. 按班次画：一条线路几十个上下车点，不能串成一根折线 ----------
+await check('每条线路输出「班次分段」：每段只有一上一下，不跨站点串联', () => {
+  const line = {
+    lineId: 'L-SEG',
+    lineName: '深圳-茂名',
+    departTimes: ['09:00:00', '10:00:00'],
+    priceYuan: 80,
+    board: [
+      { name: '深圳A', lat: 22.53, lng: 113.93, cityName: '深圳市', nodeId: 'B-A' },
+      { name: '东莞B', lat: 23.02, lng: 113.75, cityName: '东莞市', nodeId: 'B-B' },
+    ],
+    alight: [
+      { name: '茂名C', lat: 21.66, lng: 110.92, cityName: '茂名市', nodeId: 'A-C' },
+      { name: '化州D', lat: 21.66, lng: 110.64, cityName: '茂名市', nodeId: 'A-D' },
+    ],
+    trips: [
+      { fromNodeId: 'B-A', toNodeId: 'A-C', classTime: '09:00:00', priceYuan: 80 },
+      { fromNodeId: 'B-B', toNodeId: 'A-D', classTime: '10:00:00', priceYuan: 80 },
+    ],
+  };
+  withRaw([line], () => {
+    runBuild();
+    const payload = JSON.parse(readFileSync(outPath, 'utf8'));
+    const route = payload.routes.find((item) => item.id === 'cx-L-SEG');
+    assert.ok(route, '没建出这条线路');
+    assert.ok(Array.isArray(route.segments) && route.segments.length === 2, `缺少班次分段：${route.segments?.length}`);
+    for (const segment of route.segments) {
+      assert.equal(segment.length, 2, '每段必须正好两个端点（stops 下标）');
+      const [from, to] = segment.map((index) => route.stops[index]);
+      assert.equal(from.role, 'board', '段起点必须是上车点');
+      assert.equal(to.role, 'alight', '段终点必须是下车点');
+    }
+    // 两条班次各自的上车站不同，不能被串成「深圳A→东莞B→茂名C」
+    const pairs = route.segments
+      .map(([from, to]) => `${route.stops[from].name}>${route.stops[to].name}`)
+      .sort();
+    assert.deepEqual(pairs, ['东莞B>化州D', '深圳A>茂名C']);
+  });
+});
+
 if (failures.length > 0) {
   console.error(`\n[cx-test] ${failures.length} 条失败`);
   for (const failure of failures) console.error(`  - ${failure.name}: ${failure.message}`);
