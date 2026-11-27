@@ -132,6 +132,42 @@ await check('契约计数与建库同口径（缺坐标线路不算构建失败�
   });
 });
 
+// ---------- 4. 连线必须是「沿行进方向排好序的走廊」，不是站点名单的连线 ----------
+await check('多上车点/多下车点的线路按行进方向排序，不许来回折返', () => {
+  // 真实形态：深圳、东莞一堆上车点 → 茂名、化州一堆下车点。接口给的是无序名单，
+  // 直接按数组顺序连线就是截图里那张蜘蛛网（同一班车被画成横穿两座城市）。
+  const line = {
+    lineId: 'L-SPIDER',
+    lineName: '深圳、东莞-茂名、化州',
+    departTimes: ['09:00:00'],
+    priceYuan: 80,
+    board: [
+      { name: '东莞上车点', lat: 23.02, lng: 113.75, cityName: '东莞市' },
+      { name: '深圳西上车点', lat: 22.53, lng: 113.93, cityName: '深圳市' },
+      { name: '深圳东上车点', lat: 22.60, lng: 114.13, cityName: '深圳市' },
+    ],
+    alight: [
+      { name: '化州下车点', lat: 21.66, lng: 110.64, cityName: '茂名市' },
+      { name: '茂名下车点', lat: 21.66, lng: 110.92, cityName: '茂名市' },
+    ],
+  };
+  withRaw([line], () => {
+    runBuild();
+    const payload = JSON.parse(readFileSync(outPath, 'utf8'));
+    const route = payload.routes.find((item) => item.id === 'cx-L-SPIDER');
+    assert.ok(route, '没建出这条线路');
+    const stops = route.stops;
+    assert.equal(stops[0].role, 'board', '第一个点必须在上车组里');
+    // 同一组内必须单调推进：这条走廊东西向（经度跨度远大于纬度），按经度自东向西检查。
+    const forward = stops.map((stop) => -stop.lng);
+    const inversions = forward.filter((value, index) => index > 0 && value < forward[index - 1] - 0.02);
+    assert.equal(inversions.length, 0, `连线上出现 ${inversions.length} 处折返（应按行进方向排序）`);
+    // 出发地/目的地按出现最多的城市判定，而不是数组里第一个站点
+    assert.equal(route.originCity, '深圳市', `出发城市判定错误：${route.originCity}`);
+    assert.equal(route.destinationCity, '茂名市', `目的地城市判定错误：${route.destinationCity}`);
+  });
+});
+
 if (failures.length > 0) {
   console.error(`\n[cx-test] ${failures.length} 条失败`);
   for (const failure of failures) console.error(`  - ${failure.name}: ${failure.message}`);

@@ -230,10 +230,29 @@ if (existsSync(cxPath)) {
   raws.push(path.basename(cxPath));
 
   const guangdongNames = new Set(Object.values(CITY_BY_PREFIX));
+  const modeCity = (stations) => {
+    const tally = new Map();
+    for (const station of stations) {
+      const city = String(station.cityName ?? '');
+      if (city) tally.set(city, (tally.get(city) ?? 0) + 1);
+    }
+    return [...tally.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ?? '';
+  };
+  const centroid = (stops) => ({
+    lat: stops.reduce((sum, stop) => sum + stop.lat, 0) / stops.length,
+    lng: stops.reduce((sum, stop) => sum + stop.lng, 0) / stops.length,
+  });
 
   for (const line of raw.routes ?? []) {
-    const board = (line.board ?? []).map((station) => toStop(station, 'board')).filter(Boolean);
-    const alight = (line.alight ?? []).map((station) => toStop(station, 'alight')).filter(Boolean);
+    const boardRaw = (line.board ?? []).map((station) => ({ ...station, role: 'board' }));
+    const alightRaw = (line.alight ?? []).map((station) => ({ ...station, role: 'alight' }));
+    // 出发/目的地按「出现最多的城市」判定：一条线路的上车点常横跨深圳+东莞，
+    // 取数组第一个会随机落到东莞或深圳，卡片上的城市就对不上了。
+    const originCity = modeCity(boardRaw);
+    const destinationCity = modeCity(alightRaw);
+
+    const board = boardRaw.map((station) => toStop(station, 'board')).filter(Boolean);
+    const alight = alightRaw.map((station) => toStop(station, 'alight')).filter(Boolean);
     if (board.length === 0 || alight.length === 0) { droppedLines += 1; continue; }
 
     for (const stop of [...board, ...alight]) {
@@ -242,15 +261,29 @@ if (existsSync(cxPath)) {
       delete stop.cityName;
     }
 
-    const originCity = String(line.board?.[0]?.cityName ?? '');
-    const destinationCity = String(line.alight?.[line.alight.length - 1]?.cityName ?? '');
+    // 接口给的上下车点是「这个线路经过的站点名单」，不是行车顺序。
+    // 直接用数组顺序连线，多上车点的线路会画成横穿两座城市的蜘蛛网
+    // （见「深圳、东莞-茂名、化州」64 个上车点）。按行进方向排序后再串：
+    // 取跨度更大的那根轴排序（广深往粤西这类东西向走廊按经度，南向的按纬度），
+    // 两根轴等权相乘排序会让「偏北一点但更东」的点插到中间，连线还是折返。
+    const from = centroid(board);
+    const to = centroid(alight);
+    const dirLat = to.lat - from.lat;
+    const dirLng = (to.lng - from.lng) * Math.cos((from.lat * Math.PI) / 180);
+    const useLongitude = Math.abs(dirLng) >= Math.abs(dirLat);
+    const travelKey = useLongitude
+      ? (stop) => stop.lng * Math.sign(dirLng)
+      : (stop) => stop.lat * Math.sign(dirLat);
+    const orderedBoard = [...board].sort((left, right) => travelKey(left) - travelKey(right));
+    const orderedAlight = [...alight].sort((left, right) => travelKey(left) - travelKey(right));
+
     const minutes = Number(line.alight?.[0]?.runTime ?? 0);
     const priceFen = Number(line.priceYuan) > 0 ? Math.round(Number(line.priceYuan) * 100) : null;
 
     seen.add(`cx-${line.lineId}`);
     routes.push({
       id: `cx-${line.lineId}`,
-      name: String(line.lineName ?? '').trim() || `${board[0].name} → ${alight[alight.length - 1].name}`,
+      name: String(line.lineName ?? '').trim() || `${orderedBoard[0].name} → ${orderedAlight[orderedAlight.length - 1].name}`,
       coordinateSystem: 'gcj02',
       date: String(raw.pulledAt ?? '').slice(0, 10),
       originCity,
@@ -260,7 +293,7 @@ if (existsSync(cxPath)) {
       carrier: '创想巴士',
       durationText: minutes > 0 ? `${Math.floor(minutes / 60)}小时${minutes % 60}分` : '',
       provinceCode: guangdongNames.has(originCity) && guangdongNames.has(destinationCity) ? '44' : 'unknown',
-      stops: [...board, ...alight],
+      stops: [...orderedBoard, ...orderedAlight],
     });
   }
 }
