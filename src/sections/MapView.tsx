@@ -338,6 +338,9 @@ function BusRoutePanel({
       line.name.includes(trimmedQuery)
       || (line.originCity ?? '').includes(trimmedQuery)
       || (line.destinationCity ?? '').includes(trimmedQuery)
+      // 供应商标签也可检索：搜"广之旅""机场"能直接捞出该供应商的线路
+      || (line.supplierLabel ?? '').includes(trimmedQuery)
+      || (line.supplier ?? '').includes(trimmedQuery)
       || line.stops.some((stop) => stop.name.includes(trimmedQuery))
     )).slice(0, 60);
   }, [trimmedQuery, detailLines]);
