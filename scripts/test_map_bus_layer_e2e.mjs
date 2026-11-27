@@ -1,7 +1,7 @@
-// 站点巴士图层的端到端验证：开关真的画出 24 条连线、只请求一次数据、
-// 点连线能打开线路面板，并且关掉开关后图层干净移除。
+// 端到端验证：城市概览 → 附近线路 → 聚焦线路，保留搜索和站点详情；
+// 检查开关移除图层，且不重复请求城市数据。
 // 用法: node scripts/test_map_bus_layer_e2e.mjs（默认打 http://localhost:3000/）
-import { mkdirSync } from "node:fs";
+import { existsSync, mkdirSync } from "node:fs";
 import { chromium } from "playwright";
 
 const url = process.env.MAP_E2E_URL?.trim() || "http://localhost:3000/";
@@ -14,6 +14,10 @@ page.setDefaultNavigationTimeout(60000);
 const pageErrors = [];
 const consoleErrors = [];
 const busRequests = [];
+// Optional source is absent in this fixture; Vite's HTML fallback otherwise returns 200.
+if (!existsSync(new URL('../public/data/bus-lines-zhd.json', import.meta.url))) {
+	await page.route('**/data/bus-lines-zhd.json*', (route) => route.fulfill({ status: 404, body: '' }));
+}
 
 page.on("request", (request) => {
 	if (request.url().includes("/data/bus-routes.json")) busRequests.push(request.url());
@@ -48,34 +52,27 @@ try {
 	assert((await toggle.getAttribute("aria-pressed")) === "false", "the bus layer must start switched off");
 
 	await toggle.click();
-	// 地图上只有一种线：具体线路（穿过真实站点）。城市对汇总直线已移除。
-	const lines = map.locator("path.bus-line-detail");
-	await lines.first().waitFor({ state: "attached", timeout: 20000 });
+	const lines = map.locator("path.bus-route-line");
+	const detailLines = map.locator("path.bus-line-detail");
+	const detailStops = map.locator("path.bus-line-stop");
+	await page.waitForFunction(() => document.querySelector('.bus-route-line, .bus-line-detail'));
+	await page.screenshot({ path: 'tmp/bus-layer-overview.png' });
+	assert((await lines.count()) > 0, "province zoom must show city-pair summaries");
+	const pairs = await lines.evaluateAll((paths) => paths.map((path) => path.dataset.busPair));
+	assert(pairs.every(Boolean) && new Set(pairs).size === pairs.length, "each city pair must be drawn once");
+	assert((await detailLines.count()) === 0, "province zoom must not draw individual lines");
 	assert((await tourMarkers.count()) > 0, "turning the bus layer on must not remove the tour layer");
-	assert(
-		(await map.locator("path.bus-route-line").count()) === 0,
-		"city-pair summary polylines must not be drawn any more: one line type only",
-	);
-	assert(
-		(await map.locator("path.bus-city-origin").count()) === 2,
-		"expected two origin city markers (广州/江门)",
-	);
-	// 跨省线路不再单独配色，避免出现"灰色线"这第二种语义。
-	const greyLines = await map.locator('path.bus-line-detail[stroke="#94a3b8"]').count();
-	assert(greyLines === 0, `cross-border lines must not be styled differently, got ${greyLines}`);
 	assert(busRequests.length === 1, `expected exactly one bus-routes request, got ${busRequests.length}`);
 	assert((await toggle.getAttribute("aria-pressed")) === "true", "the toggle must report the layer as on");
 
-	// 打开图层就该看到线网（只是低倍更细更淡），不再有"缩到省域什么都没有"的空窗。
-	const detailLines = map.locator("path.bus-line-detail");
-	const detailStops = map.locator("path.bus-line-stop");
-	assert((await detailLines.count()) > 0, "turning the layer on must immediately show the line network");
+	// 省域概览不画具体站点。
 	assert((await detailStops.count()) === 0, "station dots must stay hidden at province zoom");
 
 	// 关掉再打开：连线消失，且不重复请求数据。
 	await toggle.click();
 	await page.waitForTimeout(400);
-	assert((await lines.count()) === 0, "turning the layer off must remove the lines");
+	assert((await map.locator('path.bus-route-line, path.bus-line-detail, path.bus-line-casing, path.bus-line-stop').count()) === 0,
+		"turning the layer off must remove every bus path");
 
 	// 旅行团开关独立生效：关掉后点位消失，巴士线不受影响。
 	const tourToggle = page.getByRole("button", { name: /旅行团|显示旅行团/ }).first();
@@ -101,17 +98,47 @@ try {
 	const box = await map.boundingBox();
 	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 	await page.mouse.wheel(0, -260);
-	await page.waitForTimeout(1500);
-	assert((await detailLines.count()) > 0, "zooming in must reveal the individual lines");
+	await detailLines.first().waitFor({ state: "attached" });
+	assert((await lines.count()) === 0, "city summaries must not overlap individual lines");
+	assert((await detailLines.count()) <= 16, "local route count must have a hard cap");
+	assert((await detailStops.count()) <= 36, "local stop count must have a hard cap");
+	const lineNames = (paths) => JSON.stringify([...paths].map((path) => path.dataset.busLine).sort());
+	const beforePan = await detailLines.evaluateAll(lineNames);
+	assert(beforePan !== '[]', 'the initial viewport must have routes to restore');
+	await map.focus();
+	const pan = async (key) => {
+		const pane = map.locator('.leaflet-map-pane');
+		const before = await pane.evaluate((element) => element.style.transform);
+		await map.press(key);
+		await pane.evaluate((element, previousTransform) => new Promise((resolve, reject) => {
+			const deadline = performance.now() + 3000;
+			const check = () => {
+				if (element.style.transform !== previousTransform && !element.closest('.leaflet-pan-anim')) resolve();
+				else if (performance.now() >= deadline) reject(new Error('map pan did not finish'));
+				else requestAnimationFrame(check);
+			};
+			check();
+		}), before);
+	};
+	for (let i = 0; i < 6; i++) await pan('ArrowRight');
+	assert(await detailLines.evaluateAll(lineNames) !== beforePan, 'panning must update the viewport routes');
+	for (let i = 0; i < 6; i++) await pan('ArrowLeft');
+	await page.waitForFunction((expected) => {
+		const mapRoot = document.querySelector('[role="dialog"] [aria-label="旅行目的地地图"]');
+		const names = [...(mapRoot?.querySelectorAll('path.bus-line-detail') ?? [])].map((path) => path.dataset.busLine).sort();
+		return names.length > 0 && JSON.stringify(names) === expected;
+	}, beforePan);
 
 	await detailLines.first().dispatchEvent("click");
 	const lineCard = page.locator("div", { hasText: "线路详情" }).last();
 	await lineCard.waitFor({ state: "visible", timeout: 5000 });
 	const cardText = await lineCard.innerText();
 	assert(/上车 \d+/.test(cardText), `line card must show pickup/dropoff counts, got ${cardText.slice(0, 80)}`);
+	assert((await lines.count()) === 0 && (await detailLines.count()) === 1, "focus must hide every other line at any zoom");
+	assert((await detailStops.count()) > 0, "focused stations must be drawn without waiting for high zoom");
 	await page.getByRole("button", { name: "关闭线路详情" }).click();
 
-	// 城市对仍然可以点开看它名下的上下车点（只是不再画一条汇总线）。
+	// 城市对仍然可以从面板点开看它名下的上下车点。
 	// 出发地筛选：默认按 IP 城市勾选，全选后覆盖全部出发地。
 	const originGroup = page.locator('[role="group"][aria-label="出发地筛选"]').first();
 	await originGroup.waitFor({ state: "visible", timeout: 8000 });
@@ -131,8 +158,9 @@ try {
 	const panelText = await panel.innerText();
 	assert(/→/.test(await panel.locator("h3").innerText()), "the panel must show 出发城市 → 到达城市");
 	assert((await panel.locator("ol > li").count()) > 0, "the panel must list the destination stations");
-	assert(panelText.includes("具体线路") || panelText.includes("蓝线"), "the panel legend must describe the single line type");
+	assert(panelText.includes("城市间连接") && panelText.includes("具体线路"), "the panel legend must describe both zoom levels");
 	assert(!panelText.includes("灰虚线"), "the dashed cross-border legend must be gone with the second line type");
+	assert(!panelText.includes("车辆轨迹。（"), "cross-border names must not follow the geometry disclaimer without context");
 
 	// 站点只跟着线路画：不允许出现"没有线路归属"的孤立点（每个点都要能顺着线找到班次）。
 	const orphanDots = await map.locator("path.bus-station-dot").count();

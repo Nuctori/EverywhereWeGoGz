@@ -571,6 +571,9 @@ export const busLineDataSchema = z.object({
       departTimes: z.array(z.string()).default([]),
       priceFen: z.coerce.number().nullable().optional().default(null),
       carrier: z.string().optional().default(''),
+      // 智惠大巴是聚合平台，每条线路带独立供应商标签；主源线路为空。
+      supplier: z.string().optional(),
+      supplierLabel: z.string().optional(),
       provinceCode: z.string().optional().default('unknown'),
       stops: z.array(busLineStopSchema).min(2),
       // 班次分段：可选，老来源没有；有则优先按段画线。

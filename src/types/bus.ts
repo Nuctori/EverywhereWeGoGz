@@ -26,6 +26,9 @@ export type BusLine = {
   departTimes: string[];
   priceFen: number | null;
   carrier?: string;
+  /** 独立供应商标签（智惠大巴聚合多家：gzl/kgyx/dadui/tbs/ylx），主源线路为空 */
+  supplier?: string;
+  supplierLabel?: string;
   provinceCode?: string;
   stops: BusLineStop[];
   /**
