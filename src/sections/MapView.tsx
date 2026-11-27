@@ -10,8 +10,8 @@ import { useUserCity } from '@/hooks/use-user-city';
 import { useTourDetail } from '@/hooks/use-tour-detail';
 import { TourDetailModal } from './TourDetailModal';
 import { MAP_TILE_PROVIDERS, wgs84ToGcj02, type MapTileProvider } from '@/lib/map-tile-pool';
-import { buildBusRouteArc, busPointForProvider, wgs84PointForProvider } from '@/lib/bus-route-geometry';
-import { buildBusCityLinks, busMapLevel, isBusMapPoint, limitBusMapRoutes, limitBusMapStops } from '@/lib/bus-map-layer';
+import { busPointForProvider, wgs84PointForProvider } from '@/lib/bus-route-geometry';
+import { busMapLevel, isBusMapPoint, limitBusMapRoutes, limitBusMapStops } from '@/lib/bus-map-layer';
 import type { BusLine, BusLineStop, BusOriginCity, BusRoute } from '@/types/bus';
 import type { TourSummary } from '@/types/tour';
 
@@ -597,7 +597,7 @@ function BusRoutePanel({
       </div>
 
       <p className="shrink-0 border-t border-stone-100 px-3 py-2 text-[10px] leading-4 text-stone-400">
-        缩小时看城市间连接，放大后看附近的具体线路和站点。连线为示意，非车辆轨迹。
+        缩小时看线路分布，放大后看附近站点。连线为示意，非车辆轨迹。
         {crossBorderNames.length > 0 ? `跨省/跨境到达地：${crossBorderNames.join('、')}。` : ''}
         地图上：<span className="text-[#1dcc8c]">绿点=上车点</span>、<span className="text-[#ff754b]">橙点=下车点</span>；
         出发地按 IP 城市默认勾选，可自行增减。
@@ -898,26 +898,20 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     const provider = MAP_TILE_PROVIDERS[Math.min(providerIndex, MAP_TILE_PROVIDERS.length - 1)];
     const layer = L.layerGroup().addTo(map);
 
-    const cityLinks = buildBusCityLinks(busData, visibleBusLines, selectedOrigins);
     const render = () => {
       layer.clearLayers();
       const level = busMapLevel(map.getZoom(), Boolean(focusedBusLine));
-      if (level === 'overview') {
-        for (const { key, cities, start, end } of cityLinks) {
-          const [startLat, startLng] = busPointForProvider(start, provider);
-          const [endLat, endLng] = busPointForProvider(end, provider);
-          L.polyline(buildBusRouteArc({ lat: startLat, lng: startLng }, { lat: endLat, lng: endLng }), {
-            color: '#0369a1', weight: 1.8, opacity: 0.55, className: 'bus-route-line',
-          }).bindTooltip(`${cities.join(' ↔ ')} · 城市间连接示意`, { sticky: true })
-            .addTo(layer).getElement()?.setAttribute('data-bus-pair', key);
-        }
-        return;
-      }
-
       const size = map.getSize();
       const viewport = L.bounds(L.point(0, 0), size);
       const center = size.divideBy(2);
-      const candidates = (focusedBusLine ? [focusedBusLine] : visibleBusLines).flatMap((line) => {
+      // 选中站点时和选中线路一样要收干净：只画真的经过这个站点的线路。
+      // 否则点开一个站，满屏其它线路仍以低透明度留着（看着就是"没隐藏干净"）。
+      const stationLines = selectedStop ? stopAssociations.map(({ line }) => line) : null;
+      const focused = focusedBusLine
+        ? [focusedBusLine]
+        : stationLines && stationLines.length > 0 ? stationLines : null;
+      const viewLevel = focused ? 'focused' : level;
+      const candidates = (focused ?? visibleBusLines).flatMap((line) => {
         const points = line.stops.map((stop) => !isBusMapPoint(stop) ? null : (
           line.coordinateSystem === 'wgs84' ? wgs84PointForProvider(stop, provider) : busPointForProvider(stop, provider)
         ));
@@ -938,19 +932,19 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           }
           paths.push([start, end]);
         }
-        return paths.length || (level === 'focused' && points.some(Boolean)) ? [{ line, points, pixels, paths, distance }] : [];
+        return paths.length || (viewLevel === 'focused' && points.some(Boolean)) ? [{ line, points, pixels, paths, distance }] : [];
       });
-      const displayed = level === 'focused' ? candidates : limitBusMapRoutes(candidates, level);
+      const displayed = viewLevel === 'focused' ? candidates : limitBusMapRoutes(candidates, level === 'focused' ? 'stops' : level);
       const stopCandidates = displayed.flatMap((candidate) => candidate.line.stops.flatMap((stop, index) => {
         const pixel = candidate.pixels[index];
-        if (!pixel || (level !== 'focused' && !viewport.contains(pixel))) return [];
+        if (!pixel || (viewLevel !== 'focused' && !viewport.contains(pixel))) return [];
         return [{ ...candidate, index, x: pixel.x, y: pixel.y, exact: (stop.precision ?? 'node') === 'node' }];
       }));
-      const stops = new Set((level === 'focused' ? stopCandidates : level === 'stops' ? limitBusMapStops(stopCandidates) : [])
+      const stops = new Set((viewLevel === 'focused' ? stopCandidates : level === 'stops' ? limitBusMapStops(stopCandidates) : [])
         .map(({ line, index }) => `${line.id}:${index}`));
 
       for (const { line, points, paths } of displayed) {
-        const isSelectedLine = level === 'focused';
+        const isSelectedLine = viewLevel === 'focused';
         const price = line.priceFen ? `¥${Math.round(line.priceFen / 100)}` : '票价未提供';
         if (isSelectedLine && paths.length) {
           // 白色描边打底，保证选中线压在所有点位和线上面都看得清。
@@ -966,8 +960,8 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           // 只保留一种线：跨省/跨境线路也用同一配色，免得"灰线"变成第二种语义；
           // 跨境信息放在 tooltip 和面板里说明。
           color: isSelectedLine ? '#1d4ed8' : '#0284c7',
-          weight: isSelectedLine ? 5 : 1.8,
-          opacity: isSelectedLine ? 1 : 0.46,
+          weight: isSelectedLine ? 5 : level === 'overview' ? 1 : level === 'routes' ? 1.4 : 1.8,
+          opacity: isSelectedLine ? 1 : level === 'overview' ? 0.22 : level === 'routes' ? 0.42 : 0.46,
           className: 'bus-line-detail',
         });
         detailLine.bindTooltip(
@@ -1031,7 +1025,8 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
       map.off('moveend', render);
       layer.remove();
     };
-  }, [busData, busLayerEnabled, expanded, focusedBusLine, providerIndex, selectedOrigins, visibleBusLines]);
+    // 选中站点也要重画：只保留经过该站的线路。
+  }, [busData, busLayerEnabled, expanded, focusedBusLine, providerIndex, visibleBusLines, selectedStop, stopAssociations]);
 
   // 打开巴士图层时把视野对准全部线路。展开弹窗时容器尺寸会变，fitBounds 必须等
   // 布局稳定后再来一次，否则会停在比数据范围大一倍的低缩放上。
@@ -1169,7 +1164,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         </div>
         {busLayerEnabled && (
           <span className="rounded-full bg-white/85 px-2.5 py-1 text-[10px] leading-4 text-stone-500 shadow-sm backdrop-blur">
-            {focusedBusLine ? '已聚焦单条线路 · 关闭详情返回' : mapZoom < 8 ? '城市间连接示意 · 放大看具体线路' : mapZoom < 11 ? '附近线路 · 点线看详情，继续放大看站点' : '附近线路与站点 · 可缩放或到面板搜索'}
+            {focusedBusLine ? '已聚焦单条线路 · 关闭详情返回' : mapZoom < 11 ? '附近线路 · 点线看详情，继续放大看站点' : '附近线路与站点 · 可缩放或到面板搜索'}
           </span>
         )}
         {busLayerEnabled && busLoading && !busData && (
