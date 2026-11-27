@@ -23,19 +23,20 @@ const toMin = (t) => {
   return h * 60 + m;
 };
 
-/** 全部站点都有可用时间且严格递增时，按时间排；否则返回 null */
+/** 全部站点都有可用时间时按时间升序排（原数组顺序不可信，不乱序就丢弃太浪费）；否则返回 null */
 function byTime(stops) {
+  if (!stops.length) return null;
   const mins = stops.map((s) => toMin(s.arriveTime));
   if (mins.some((m) => m === null)) return null;
-  for (let i = 1; i < mins.length; i += 1) if (mins[i] < mins[i - 1]) return null;
-  return stops;
+  return [...stops].sort((a, b) => toMin(a.arriveTime) - toMin(b.arriveTime));
 }
 
-/** 从 from 出发的最近邻顺序 */
+/** 从 from 出发的最近邻顺序；from 为空时用首站兜底，避免 distanceKm 读到 null */
 function nearestChain(from, stops) {
+  if (!stops.length) return [];
   const left = [...stops];
   const out = [];
-  let cursor = from;
+  let cursor = from ?? stops[0];
   while (left.length) {
     let best = 0;
     let bestDist = Infinity;
@@ -75,21 +76,22 @@ function projectOrder(anchor, dir, stops) {
   return sorted;
 }
 
-/** 下车段排序：优先沿"上车站首→尾"方向投影，其次按上车站→下车站质心方向，最后最近邻 */
+/** 下车段排序：优先沿"上车站尾部 → 下车站质心"方向（代表车的真实去向），退化再用上车站首尾方向，最后最近邻 */
 function orderAlighting(board, alighting) {
   if (alighting.length < 2) return alighting;
   const tail = board[board.length - 1] ?? null;
-  if (!tail) return nearestChain(null, alighting);
+  // 没有上车站（数据异常）时用下车站自身的质心当锚点，不能传 null
+  if (!tail) return nearestChain(centroid(alighting), alighting);
 
+  const center = centroid(alighting);
+  if (center) {
+    const ordered = projectOrder(tail, { lat: center.lat - tail.lat, lng: center.lng - tail.lng }, alighting);
+    if (ordered) return ordered;
+  }
   if (board.length >= 2) {
     const head = board[0];
     const dir = { lat: tail.lat - head.lat, lng: tail.lng - head.lng };
     const ordered = projectOrder(tail, dir, alighting);
-    if (ordered) return ordered;
-  }
-  const center = centroid(alighting);
-  if (center) {
-    const ordered = projectOrder(tail, { lat: center.lat - tail.lat, lng: center.lng - tail.lng }, alighting);
     if (ordered) return ordered;
   }
   return nearestChain(tail, alighting);
@@ -107,14 +109,14 @@ export function pathLengthKm(stops) {
  * @returns {any[]} 排好序的站点（board 在前、alight 在后）
  */
 export function orderStops({ boarding, alighting }) {
-  const board = byTime(boarding) ?? nearestChain(null, boarding);
+  const board = byTime(boarding) ?? nearestChain(centroid(boarding) ?? boarding[0] ?? null, boarding);
   const tail = board[board.length - 1] ?? null;
 
   // 下车站：时间可用且整体晚于上车站末尾 → 用时间；否则按行进方向投影，最后退到最近邻
   let alight = null;
   const boardLastMin = board.length ? toMin(board[board.length - 1].arriveTime) : null;
   const timeOrdered = byTime(alighting);
-  if (timeOrdered) {
+  if (timeOrdered && timeOrdered.length) {
     const firstMin = toMin(timeOrdered[0].arriveTime);
     if (boardLastMin === null || firstMin === null || firstMin >= boardLastMin) alight = timeOrdered;
   }
