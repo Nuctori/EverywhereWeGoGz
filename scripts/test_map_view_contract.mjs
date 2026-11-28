@@ -52,6 +52,9 @@ assert(main.includes('navigator.serviceWorker.getRegistrations()'), 'local devel
 assert(main.includes("['localhost', '127.0.0.1', '::1']"), 'local service worker bypass must cover local hostnames');
 assert(source.includes('map.remove()'), 'MapView must clean up the Leaflet instance');
 assert(source.includes('wgs84ToGcj02'), 'MapView must convert coordinates for GCJ-02 tiles');
+const focusBusLine = source.match(/const focusBusLine = \(line: BusLine\) => \{([\s\S]*?)\n  \};/)?.[1] ?? '';
+assert(/\.filter\(\(point\) => point != null\);\s*if \(points\.length < 2\) return;\s*const bounds = L\.latLngBounds\(points\)/.test(focusBusLine),
+  'Bus focus must discard null converted points and require two usable points before fitting bounds');
 assert(source.includes('isWithinChinaCoverage'), 'MapView must keep the domestic provider at a usable China viewport');
 assert(source.includes('viewportPlaces'), 'MapView must adapt the viewport to provider coverage');
 assert(source.includes('map.getZoom() < 3'), 'MapView must avoid blank low-zoom domestic raster tiles');

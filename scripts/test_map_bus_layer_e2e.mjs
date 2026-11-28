@@ -35,6 +35,7 @@ const assert = (condition, message) => {
 };
 
 try {
+	await page.addInitScript(() => sessionStorage.setItem('ewg:user-city', '广州'));
 	await page.goto(url, { waitUntil: "domcontentloaded" });
 
 	const map = page.locator('[aria-label="旅行目的地地图"]').first();
@@ -57,10 +58,12 @@ try {
 	const detailStops = map.locator("path.bus-line-stop");
 	await page.waitForFunction(() => document.querySelector('.bus-route-line, .bus-line-detail'));
 	await page.screenshot({ path: 'tmp/bus-layer-overview.png' });
-	assert((await lines.count()) > 0, "province zoom must show city-pair summaries");
-	const pairs = await lines.evaluateAll((paths) => paths.map((path) => path.dataset.busPair));
-	assert(pairs.every(Boolean) && new Set(pairs).size === pairs.length, "each city pair must be drawn once");
-	assert((await detailLines.count()) === 0, "province zoom must not draw individual lines");
+	const overviewCount = await detailLines.count();
+	assert((await lines.count()) === 0 && overviewCount > 60, 'the Guangzhou filter must bypass the overview line budget');
+	assert(await detailLines.evaluateAll((paths) => paths.every((path) => path.getAttribute('stroke-opacity') === '0.22' && !path.hasAttribute('data-bus-group-size'))),
+		'province overview must keep pale individual lines without bundles');
+	assert(await detailLines.evaluateAll((paths) => paths.every((path) => path.dataset.busOrigin === '广州市')),
+		'province overview must only draw routes departing Guangzhou');
 	assert((await tourMarkers.count()) > 0, "turning the bus layer on must not remove the tour layer");
 	assert(busRequests.length === 1, `expected exactly one bus-routes request, got ${busRequests.length}`);
 	assert((await toggle.getAttribute("aria-pressed")) === "true", "the toggle must report the layer as on");
@@ -84,7 +87,7 @@ try {
 	assert((await tourMarkers.count()) > 0, "the tour layer must come back when re-enabled");
 
 	await toggle.click();
-	await lines.first().waitFor({ state: "attached", timeout: 15000 });
+	await detailLines.first().waitFor({ state: "attached", timeout: 15000 });
 	assert(
 		busRequests.length === 1,
 		`toggling the layer must not refetch data, got ${busRequests.length} requests`,
@@ -93,14 +96,57 @@ try {
 	// 放大到全屏地图（同一个实例），点开一条线路看站点。
 	await page.getByRole("button", { name: /放大/ }).first().click();
 	await page.locator('[role="dialog"]').waitFor({ state: "visible" });
+	await page.locator('aside summary').filter({ hasText: '目的地' }).click();
+	const destinationGroup = page.getByRole('group', { name: '目的地筛选' });
+	await destinationGroup.getByRole('checkbox', { name: '目的地 东莞市', exact: true }).check();
+	await destinationGroup.getByRole('checkbox', { name: '目的地 佛山市', exact: true }).check();
+	const selectedCount = await detailLines.count();
+	assert(selectedCount > 0 && selectedCount < overviewCount, 'destination multi-select must narrow Guangzhou routes');
+	assert(await detailLines.evaluateAll((paths) => paths.every((path) => path.dataset.busOrigin === '广州市'
+		&& ['东莞市', '佛山市'].includes(path.dataset.busDestination))), 'map must match both city filters');
+	await page.getByRole('button', { name: '清除目的地筛选' }).click();
+	assert((await destinationGroup.locator('input:checked').count()) === 0, 'clear must restore unrestricted destinations');
+	await page.locator('aside summary').filter({ hasText: '目的地' }).click();
 
-	// 缩放到 z8 以上：逐站线路出现；点一条线应该弹出线路详情（班次/票价/上下车点数）。
-	const box = await map.boundingBox();
-	await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-	await page.mouse.wheel(0, -260);
-	await detailLines.first().waitFor({ state: "attached" });
+	// 放大到近景再验证局部预算，避免误用还未刷新的低倍线网。
+	const readZoom = async () => Number(await map.getAttribute('data-map-zoom'));
+	const zoomButton = map.locator('.leaflet-control-zoom-in');
+	let zoom = await readZoom();
+	assert(zoom > 0 && zoom < 11, 'expanded map must start below close zoom');
+	while (zoom < 11) {
+		await zoomButton.click();
+		await page.waitForFunction((prior) => Number(document.querySelector('[role="dialog"] [aria-label="旅行目的地地图"]')?.getAttribute('data-map-zoom')) > prior, zoom);
+		const nextZoom = await readZoom();
+		assert(nextZoom > zoom, 'each zoom click must advance the actual map zoom');
+		zoom = nextZoom;
+	}
+	// Before focusing a line, station paths only exist after the close-zoom bus render.
+	await detailStops.first().waitFor({ state: "attached" });
+	assert(await readZoom() >= 11, 'route budget must be checked at close zoom');
 	assert((await lines.count()) === 0, "city summaries must not overlap individual lines");
-	assert((await detailLines.count()) <= 16, "local route count must have a hard cap");
+	const highZoomCount = await detailLines.count();
+	assert(highZoomCount === overviewCount, 'close zoom must retain all filtered routes');
+	const through = map.locator('[data-bus-through-pane]');
+	assert(await through.locator('path.bus-line-detail').count() > 0, 'through lines must be rendered in their own pane');
+	assert(Number(await through.evaluate((pane) => getComputedStyle(pane).opacity)) <= 0.25,
+		'overlapping through lines must remain faint as a group');
+	const routePanel = page.locator('aside[data-bus-panel]');
+	const listedRoutes = routePanel.getByRole('button', { name: /看线路/ });
+	const listedCount = await listedRoutes.count();
+	assert(listedCount >= highZoomCount, 'high zoom must list every matched route, including routes without drawable geometry');
+	assert((await routePanel.locator('h3').innerText()).includes(`${listedCount} 条`), 'high zoom heading must count the full route list');
+	const routeNames = await listedRoutes.allTextContents();
+	await routePanel.locator('summary').filter({ hasText: '目的地' }).click();
+	await destinationGroup.getByRole('checkbox', { name: '目的地 东莞市', exact: true }).check();
+	const filteredPaths = await detailLines.evaluateAll((paths) => paths.map((path) => path.dataset.busDestination));
+	assert(filteredPaths.length > 0 && filteredPaths.length < highZoomCount && filteredPaths.every((city) => city === '东莞市'),
+		'destination must still narrow the high-zoom map');
+	assert(JSON.stringify(await listedRoutes.allTextContents()) === JSON.stringify(routeNames),
+		'high-zoom list must keep all departure-city routes despite a destination filter');
+	await routePanel.getByRole('button', { name: '清除目的地筛选' }).click();
+	await routePanel.locator('summary').filter({ hasText: '目的地' }).click();
+	assert(await detailLines.evaluateAll((paths) => paths.every((path) => path.dataset.busOrigin === '广州市')),
+		'close zoom must honor the Guangzhou origin filter');
 	assert((await detailStops.count()) <= 36, "local stop count must have a hard cap");
 	const lineNames = (paths) => JSON.stringify([...paths].map((path) => path.dataset.busLine).sort());
 	const beforePan = await detailLines.evaluateAll(lineNames);
@@ -121,7 +167,7 @@ try {
 		}), before);
 	};
 	for (let i = 0; i < 6; i++) await pan('ArrowRight');
-	assert(await detailLines.evaluateAll(lineNames) !== beforePan, 'panning must update the viewport routes');
+	assert(await detailLines.evaluateAll(lineNames) === beforePan, 'panning must not remove routes selected by city');
 	for (let i = 0; i < 6; i++) await pan('ArrowLeft');
 	await page.waitForFunction((expected) => {
 		const mapRoot = document.querySelector('[role="dialog"] [aria-label="旅行目的地地图"]');
@@ -129,7 +175,7 @@ try {
 		return names.length > 0 && JSON.stringify(names) === expected;
 	}, beforePan);
 
-	await detailLines.first().dispatchEvent("click");
+	await detailLines.locator('xpath=self::*[@d and @d != "M0 0"]').first().dispatchEvent("click");
 	const lineCard = page.locator("div", { hasText: "线路详情" }).last();
 	await lineCard.waitFor({ state: "visible", timeout: 5000 });
 	const cardText = await lineCard.innerText();
@@ -158,7 +204,7 @@ try {
 	const panelText = await panel.innerText();
 	assert(/→/.test(await panel.locator("h3").innerText()), "the panel must show 出发城市 → 到达城市");
 	assert((await panel.locator("ol > li").count()) > 0, "the panel must list the destination stations");
-	assert(panelText.includes("城市间连接") && panelText.includes("具体线路"), "the panel legend must describe both zoom levels");
+	assert(panelText.includes("线路分布") && panelText.includes("附近站点"), "the panel legend must describe both zoom levels");
 	assert(!panelText.includes("灰虚线"), "the dashed cross-border legend must be gone with the second line type");
 	assert(!panelText.includes("车辆轨迹。（"), "cross-border names must not follow the geometry disclaimer without context");
 
@@ -223,7 +269,7 @@ try {
 
 	assert(pageErrors.length === 0, `page errors: ${JSON.stringify(pageErrors)}`);
 	assert(consoleErrors.length === 0, `console errors: ${JSON.stringify(consoleErrors)}`);
-	console.log(`[map-bus] ok：具体线路 ${await detailLines.count()} 条 / 出发地筛选可用 / 面板可见`);
+	console.log(`[map-bus] ok：省域 ${overviewCount} 条 / 高倍 ${highZoomCount} 条 / 筛选与面板可用`);
 } finally {
 	await browser.close();
 }
