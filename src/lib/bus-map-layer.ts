@@ -28,7 +28,7 @@ export function busLineWeight(level: ReturnType<typeof busMapLevel>, departures:
     const localWidth = departures >= 6 ? 1.5 : departures >= 2 ? 1.1 : 0.75;
     return hasLocalStop ? localWidth : localWidth * 0.45;
   }
-  return (level === 'overview' ? 0.7 : 1) * (departures >= 6 ? 2.2 : departures >= 2 ? 1.5 : 1);
+  return (level === 'overview' ? 0.7 : 1) * (departures >= 6 ? 2.2 : departures >= 2 ? 1.5 : 1) * 0.85;
 }
 
 type ScreenPoint = { x: number; y: number };

@@ -60,8 +60,11 @@ try {
 	await page.screenshot({ path: 'tmp/bus-layer-overview.png' });
 	const overviewCount = await detailLines.count();
 	assert((await lines.count()) === 0 && overviewCount > 60, 'the Guangzhou filter must bypass the overview line budget');
-	assert(await detailLines.evaluateAll((paths) => paths.every((path) => path.getAttribute('stroke-opacity') === '0.22' && !path.hasAttribute('data-bus-group-size'))),
-		'province overview must keep pale individual lines without bundles');
+	assert(await detailLines.evaluateAll((paths) => paths.length > 0 && paths.every((path) => {
+		const pane = path.closest('[data-bus-overview-pane]');
+		return pane && Number(getComputedStyle(pane).opacity) === 0.22
+			&& path.getAttribute('stroke-opacity') === '1' && !path.hasAttribute('data-bus-group-size');
+	})), 'province overview must cap composited opacity without bundling individual lines');
 	assert(await detailLines.evaluateAll((paths) => paths.every((path) => path.dataset.busOrigin === '广州市')),
 		'province overview must only draw routes departing Guangzhou');
 	assert((await tourMarkers.count()) > 0, "turning the bus layer on must not remove the tour layer");
@@ -119,6 +122,13 @@ try {
 		const nextZoom = await readZoom();
 		assert(nextZoom > zoom, 'each zoom click must advance the actual map zoom');
 		zoom = nextZoom;
+		if (zoom === 9) {
+			assert(await detailLines.evaluateAll((paths) => paths.length > 0 && paths.every((path) => {
+				const pane = path.closest('[data-bus-overview-pane]');
+				return pane && Number(getComputedStyle(pane).opacity) === 0.42;
+			})), 'mid zoom must cap the opacity of the whole line network');
+			await page.screenshot({ path: 'tmp/bus-layer-mid-zoom.png' });
+		}
 	}
 	// Before focusing a line, station paths only exist after the close-zoom bus render.
 	await detailStops.first().waitFor({ state: "attached" });

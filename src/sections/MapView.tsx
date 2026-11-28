@@ -980,11 +980,15 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
     const throughPane = map.getPane('busThrough') ?? map.createPane('busThrough');
     throughPane.dataset.busThroughPane = '';
     throughPane.style.zIndex = '390';
+    const overviewPane = map.getPane('busOverview') ?? map.createPane('busOverview');
+    overviewPane.dataset.busOverviewPane = '';
+    overviewPane.style.zIndex = '395';
     const render = () => {
       layer.clearLayers();
       const zoom = map.getZoom();
       throughPane.style.opacity = String(busThroughPaneOpacity(zoom));
       const level = busMapLevel(zoom, Boolean(focusedBusLine));
+      overviewPane.style.opacity = String(busLineOpacity(level === 'overview' ? 'overview' : 'routes', zoom, false));
       const size = map.getSize();
       const viewport = L.bounds(L.point(0, 0), size);
       const center = size.divideBy(2);
@@ -1040,6 +1044,7 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
         ...candidate,
         local: viewLevel === 'stops' && hasVisibleBusStop(candidate.pixels, screen, occlusion),
       })).sort((a, b) => Number(a.local) - Number(b.local));
+      const useOverviewPane = viewLevel === 'overview' || viewLevel === 'routes';
       for (const { line, points, paths, local } of styledLines) {
         const isSelectedLine = viewLevel === 'focused';
         const price = line.priceFen ? `¥${Math.round(line.priceFen / 100)}` : '票价未提供';
@@ -1058,8 +1063,9 @@ export function MapView({ expanded, onExpandedChange, embedded = false }: MapVie
           // 跨境信息放在 tooltip 和面板里说明。
           color: isSelectedLine ? '#1d4ed8' : '#0284c7',
           weight: busLineWeight(viewLevel, line.departTimes.length, local),
-          opacity: busLineOpacity(viewLevel, zoom, local),
-          pane: viewLevel === 'stops' && !local ? 'busThrough' : 'overlayPane',
+          // Apply low/mid opacity to the composite, not independently to every crossing line.
+          opacity: useOverviewPane ? 1 : busLineOpacity(viewLevel, zoom, local),
+          pane: useOverviewPane ? 'busOverview' : viewLevel === 'stops' && !local ? 'busThrough' : 'overlayPane',
           className: 'bus-line-detail',
         });
         detailLine.bindTooltip(

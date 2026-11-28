@@ -37,8 +37,11 @@ for (const level of ['overview', 'routes', 'stops'] as const) {
   assert(busLineWeight(level, 6) < busLineWeight('focused', 1));
 }
 assert(busLineWeight('overview', 6) < busLineWeight('routes', 6));
-assert.equal(busLineWeight('overview', 6), 0.7 * 2.2);
-assert.equal(busLineWeight('routes', 6), 2.2);
+for (const departures of [1, 2, 6]) {
+  const baseWidth = departures === 1 ? 1 : departures === 2 ? 1.5 : 2.2;
+  assert.equal(busLineWeight('overview', departures), 0.7 * baseWidth * 0.85);
+  assert.equal(busLineWeight('routes', departures), baseWidth * 0.85);
+}
 assert.equal(busLineWeight('focused', 6, false), 5);
 assert(busLineWeight('stops', 6) <= 1.5, 'dense high-zoom lines must be visibly thinner');
 assert(busLineWeight('stops', 6, false) < busLineWeight('stops', 1), 'through lines should recede even when frequent');
